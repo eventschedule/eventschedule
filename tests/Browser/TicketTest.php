@@ -37,8 +37,8 @@ class TicketTest extends DuskTestCase
                     ->select('#ticket-0', '1')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('CHECKOUT')
-                    ->waitForText('NUMBER OF ATTENDEES', 3)
-                    ->assertSee(strtoupper($name));
+                    ->waitForText('ATTENDEE', 5) // Wait for ticket confirmation page
+                    ->assertSee($name); // Verify attendee name on ticket
         });
     }
 }

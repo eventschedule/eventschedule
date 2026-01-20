@@ -89,9 +89,19 @@ trait AccountSetupTrait
                 ->click('a[data-section="section-tickets"]')
                 ->waitFor('#tickets_enabled', 5)
                 ->check('tickets_enabled')
+                ->pause(1000); // Wait for Vue to render the ticket tabs
+
+        // Use JavaScript to scroll the price input into view and ensure it's visible
+        $browser->script("
+            const priceInput = document.querySelector('input[name=\"tickets[0][price]\"]');
+            if (priceInput) {
+                priceInput.scrollIntoView({ block: 'center', behavior: 'instant' });
+            }
+        ");
+
+        $browser->pause(300)
                 ->type('tickets[0][price]', '10')
                 ->type('tickets[0][quantity]', '50')
-                ->type('tickets[0][description]', 'General admission ticket')                    
                 ->click('button[type="submit"]')
                 ->waitForLocation('/' . strtolower(str_replace(' ', '-', $talentName)) . '/schedule', 5)
                 ->assertSee($venueName);
