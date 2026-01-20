@@ -55,14 +55,14 @@ class CuratorEventTest extends DuskTestCase
 
             // Follow first curator
             $browser->visit('/curator1')
-                    ->waitForText('Add Event', 5)
-                    ->clickLink('Add Event')
+                    ->waitForText('Submit Event', 5)
+                    ->clickLink('Submit Event')
                     ->waitForLocation('/talent/add-event', 5);
             
             // Follow second curator
             $browser->visit('/curator2')
-                    ->waitForText('Add Event', 5)
-                    ->clickLink('Add Event')
+                    ->waitForText('Submit Event', 5)
+                    ->clickLink('Submit Event')
                     ->waitForLocation('/talent/add-event', 5);
 
             // Create an event that will be added to both curator roles
