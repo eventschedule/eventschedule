@@ -2,34 +2,37 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BlogPost;
+use App\Utils\GeminiUtils;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+
 class AppController extends Controller
 {
     public function update(UpdaterManager $updater)
     {
         if (config('app.hosted')) {
-            return redirect()->to(route('profile.edit') . '#section-app')->with('error', 'Not authorized');
+            return redirect()->to(route('profile.edit').'#section-app')->with('error', 'Not authorized');
         }
 
         try {
             if ($updater->source()->isNewVersionAvailable()) {
                 $versionAvailable = $updater->source()->getVersionAvailable();
-                
+
                 $release = $updater->source()->fetch($versionAvailable);
-                
-                $updater->source()->update($release);   
-                
+
+                $updater->source()->update($release);
+
                 Artisan::call('migrate', ['--force' => true]);
             } else {
-                return redirect()->to(route('profile.edit') . '#section-app')->with('error', __('messages.no_new_version_available'));
-            }                
+                return redirect()->to(route('profile.edit').'#section-app')->with('error', __('messages.no_new_version_available'));
+            }
         } catch (\Exception $e) {
-            return redirect()->to(route('profile.edit') . '#section-app')->with('error', $e->getMessage());
+            return redirect()->to(route('profile.edit').'#section-app')->with('error', $e->getMessage());
         }
 
-        return redirect()->to(route('profile.edit') . '#section-app')->with('message', __('messages.app_updated'));
+        return redirect()->to(route('profile.edit').'#section-app')->with('message', __('messages.app_updated'));
     }
 
     public function setup()
@@ -52,15 +55,17 @@ class AppController extends Controller
         $password = $request->input('password');
 
         try {
-            $connection = @mysqli_connect($host, $username, $password, $database, (int)$port);
-            if (!$connection) {
+            $connection = @mysqli_connect($host, $username, $password, $database, (int) $port);
+            if (! $connection) {
                 // Don't expose detailed MySQL errors - they can reveal server information
                 \Log::warning('Database connection test failed', ['host' => $host, 'error' => mysqli_connect_error()]);
+
                 return response()->json(['success' => false, 'error' => 'Unable to connect to database. Please check your credentials.']);
             }
             mysqli_close($connection);
         } catch (\Exception $e) {
             \Log::warning('Database connection test exception', ['host' => $host, 'error' => $e->getMessage()]);
+
             return response()->json(['success' => false, 'error' => 'Unable to connect to database. Please check your credentials.']);
         }
 
@@ -71,8 +76,8 @@ class AppController extends Controller
     {
         $requestSecret = request()->get('secret');
         $serverSecret = config('app.cron_secret');
-        
-        if (!$serverSecret || !$requestSecret || !hash_equals($serverSecret, $requestSecret)) {
+
+        if (! $serverSecret || ! $requestSecret || ! hash_equals($serverSecret, $requestSecret)) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
@@ -88,6 +93,55 @@ class AppController extends Controller
             \Artisan::call('app:import-curator-events');
         }
 
+        // Auto-generate daily blog post (once per day)
+        if (config('app.hosted')) {
+            $this->generateDailyBlogPost();
+        }
+
         return response()->json(['success' => true]);
+    }
+
+    private function generateDailyBlogPost()
+    {
+        // Check if we already created a post today
+        $todayStart = now()->startOfDay();
+        $existsToday = BlogPost::where('created_at', '>=', $todayStart)->exists();
+
+        if ($existsToday) {
+            return; // Already created today's post
+        }
+
+        // Get recent titles for context
+        $recentTitles = BlogPost::orderBy('created_at', 'desc')
+            ->limit(15)
+            ->pluck('title')
+            ->toArray();
+
+        // Generate topic based on recent posts
+        $topic = GeminiUtils::generateBlogTopic($recentTitles);
+
+        if (! $topic) {
+            return; // API error, will retry next cron run
+        }
+
+        // Generate full blog post
+        $postData = GeminiUtils::generateBlogPost($topic);
+
+        if (! $postData) {
+            return;
+        }
+
+        // Create the blog post
+        BlogPost::create([
+            'title' => $postData['title'],
+            'content' => $postData['content'],
+            'excerpt' => $postData['excerpt'] ?? null,
+            'tags' => $postData['tags'] ?? [],
+            'meta_title' => $postData['meta_title'] ?? null,
+            'meta_description' => $postData['meta_description'] ?? null,
+            'featured_image' => $postData['featured_image'] ?? null,
+            'is_published' => true,
+            'published_at' => now(),
+        ]);
     }
 }
