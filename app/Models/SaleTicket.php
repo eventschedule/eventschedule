@@ -13,6 +13,14 @@ class SaleTicket extends Model
         'ticket_id',
         'seats',
         'quantity',
+        'custom_value1',
+        'custom_value2',
+        'custom_value3',
+        'custom_value4',
+        'custom_value5',
+        'custom_value6',
+        'custom_value7',
+        'custom_value8',
     ];
 
     protected static function booted()

@@ -2,33 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Notification;
-use App\Notifications\EventRequestNotification;
-use App\Notifications\RequestDeclinedNotification;
-use App\Notifications\RequestAcceptedNotification;
-use App\Notifications\DeletedEventNotification;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\EventAccepted;
-use App\Mail\EventDeclined;
-use Illuminate\Support\Facades\Storage;
-use App\Utils\ColorUtils;
-use Illuminate\Http\Request;
-use App\Models\Event;
-use App\Models\Role;
-use App\Models\RoleUser;
-use App\Models\EventRole;
-use App\Models\User;
-use App\Models\Ticket;
-use App\Utils\UrlUtils;
-use App\Utils\GeminiUtils;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
-use App\Repos\EventRepo;
 use App\Http\Requests\EventCreateRequest;
 use App\Http\Requests\EventUpdateRequest;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
+use App\Mail\EventAccepted;
+use App\Mail\EventDeclined;
+use App\Models\Event;
+use App\Models\Role;
+use App\Models\Ticket;
+use App\Models\User;
+use App\Notifications\DeletedEventNotification;
+use App\Repos\EventRepo;
 use App\Rules\NoFakeEmail;
+use App\Utils\GeminiUtils;
+use App\Utils\UrlUtils;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class EventController extends Controller
 {
@@ -52,17 +46,17 @@ class EventController extends Controller
             if ($event->flyer_image_url) {
                 $path = $event->getAttributes()['flyer_image_url'];
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
 
                 $event->flyer_image_url = null;
                 $event->save();
-            }    
+            }
         }
 
         return redirect(route('event.edit', ['subdomain' => $subdomain, 'hash' => $request->hash]))
-                ->with('message', __('messages.deleted_image'));
+            ->with('message', __('messages.deleted_image'));
     }
 
     public function clearVideos(Request $request, $subdomain, $eventHash, $roleHash)
@@ -80,7 +74,7 @@ class EventController extends Controller
 
         // Clear YouTube videos for unclaimed roles in this event
         foreach ($event->roles as $role) {
-            if (!$role->isClaimed() && $role->youtube_links && $role->id == $role_id) {
+            if (! $role->isClaimed() && $role->youtube_links && $role->id == $role_id) {
                 $role->youtube_links = null;
                 $role->save();
             }
@@ -113,14 +107,13 @@ class EventController extends Controller
         */
 
         $data = [
-            'subdomain' => $subdomain, 
+            'subdomain' => $subdomain,
             'tab' => 'schedule',
         ];
 
         return redirect(route('role.view_admin', $data))
-                ->with('message', __('messages.event_deleted'));
+            ->with('message', __('messages.event_deleted'));
     }
-
 
     public function create(Request $request, $subdomain)
     {
@@ -130,7 +123,7 @@ class EventController extends Controller
 
         $user = $request->user();
         $role = Role::subdomain($subdomain)->firstOrFail();
-        
+
         $venue = $role->isVenue() ? $role : null;
         $schedule = $role->isTalent() ? $role : null;
         $curator = $role->isCurator() ? $role : null;
@@ -142,7 +135,7 @@ class EventController extends Controller
         $event = new Event;
         $event->user_id = $user->id;
         $selectedMembers = [];
-        
+
         // Check if we're cloning an event
         $clonedData = session('cloned_event');
         if ($clonedData) {
@@ -152,16 +145,17 @@ class EventController extends Controller
             }
             $event->user_id = $user->id;
             $event->creator_role_id = $role->id;
-            
+
             // Set cloned tickets
-            $event->tickets = array_map(function($ticketData) {
-                $ticket = new Ticket();
+            $event->tickets = array_map(function ($ticketData) {
+                $ticket = new Ticket;
                 foreach ($ticketData as $key => $value) {
                     $ticket->$key = $value;
                 }
+
                 return $ticket;
             }, $clonedData['tickets']);
-            
+
             // Set cloned venue
             if ($clonedData['venue_id']) {
                 $venueId = UrlUtils::decodeId($clonedData['venue_id']);
@@ -169,10 +163,10 @@ class EventController extends Controller
             } else {
                 $venue = null;
             }
-            
+
             // Set cloned members
             $selectedMembers = $clonedData['selected_members'] ?? [];
-            
+
             // Clear cloned data from session
             session()->forget('cloned_event');
         } else {
@@ -184,12 +178,14 @@ class EventController extends Controller
                 $event->payment_instructions = $defaultTickets['payment_instructions'] ?? null;
                 $event->expire_unpaid_tickets = $defaultTickets['expire_unpaid_tickets'] ?? false;
                 $event->ticket_notes = $defaultTickets['ticket_notes'] ?? null;
+                $event->terms_url = $defaultTickets['terms_url'] ?? null;
                 $event->total_tickets_mode = $defaultTickets['total_tickets_mode'] ?? 'individual';
-                $event->tickets = $defaultTickets['tickets'] ?? [new Ticket()];
+                $event->custom_fields = $defaultTickets['custom_fields'] ?? null;
+                $event->tickets = $defaultTickets['tickets'] ?? [new Ticket];
             } else {
                 $event->ticket_currency_code = 'USD';
                 $event->payment_method = 'cash';
-                $event->tickets = [new Ticket()];
+                $event->tickets = [new Ticket];
             }
 
             // Load the last event created by the user with a category set and set its category
@@ -215,8 +211,8 @@ class EventController extends Controller
         }
 
         $roles = $user->roles()->get();
-    
-        $venues = $roles->filter(function($item) {
+
+        $venues = $roles->filter(function ($item) {
             if ($item->pivot->level == 'follower' && ! $item->acceptEventRequests()) {
                 return false;
             }
@@ -225,8 +221,8 @@ class EventController extends Controller
         })->map(function ($item) {
             return $item->toData();
         });
-    
-        $members = $roles->filter(function($item) {
+
+        $members = $roles->filter(function ($item) {
             return $item->isTalent();
         })->map(function ($item) {
             return $item->toData();
@@ -234,7 +230,7 @@ class EventController extends Controller
 
         $venues = array_values($venues->sortBy('name')->toArray());
         $members = array_values($members->sortBy('name')->toArray());
-        
+
         $currencies = file_get_contents(base_path('storage/currencies.json'));
         $currencies = json_decode($currencies);
 
@@ -318,7 +314,7 @@ class EventController extends Controller
         $clonedEventData = [];
         $fillableFields = $event->getFillable();
         foreach ($fillableFields as $field) {
-            if (!in_array($field, ['id', 'slug'])) {
+            if (! in_array($field, ['id', 'slug'])) {
                 $clonedEventData[$field] = $event->$field;
             }
         }
@@ -338,7 +334,7 @@ class EventController extends Controller
             ];
         }
         if (empty($clonedTickets)) {
-            $clonedTickets = [new \App\Models\Ticket()];
+            $clonedTickets = [new \App\Models\Ticket];
         }
 
         // Prepare venue and members
@@ -371,7 +367,7 @@ class EventController extends Controller
                 'selected_members' => $selectedMembers,
                 'curators' => $curatorIds,
                 'curator_groups' => $curatorGroups,
-            ]
+            ],
         ]);
 
         return redirect(route('event.create', ['subdomain' => $subdomain]));
@@ -394,8 +390,8 @@ class EventController extends Controller
         if ($event->tickets->count() == 0) {
             $event->tickets = [
                 [
-                    new Ticket(),
-                ]
+                    new Ticket,
+                ],
             ];
         }
 
@@ -403,7 +399,7 @@ class EventController extends Controller
         $creatorRole = $event->creatorRole;
         $effectiveSubdomain = $creatorRole ? $creatorRole->subdomain : $subdomain;
         $effectiveRole = Role::subdomain($effectiveSubdomain)->firstOrFail();
-        
+
         $role = Role::subdomain($subdomain)->firstOrFail();
         $venue = $event->venue;
         $selectedMembers = [];
@@ -418,10 +414,10 @@ class EventController extends Controller
         }
 
         $title = __('messages.edit_event');
-        
+
         $roles = $user->roles()->get();
-    
-        $venues = $roles->filter(function($item) {            
+
+        $venues = $roles->filter(function ($item) {
             if ($item->pivot->level == 'follower' && ! $item->acceptEventRequests()) {
                 return false;
             }
@@ -430,8 +426,8 @@ class EventController extends Controller
         })->map(function ($item) {
             return $item->toData();
         });
-    
-        $members = $roles->filter(function($item) {
+
+        $members = $roles->filter(function ($item) {
             return $item->isTalent();
         })->map(function ($item) {
             return $item->toData();
@@ -439,12 +435,12 @@ class EventController extends Controller
 
         $venues = array_values($venues->sortBy('name')->toArray());
         $members = array_values($members->sortBy('name')->toArray());
-    
+
         $currencies = file_get_contents(base_path('storage/currencies.json'));
         $currencies = json_decode($currencies);
 
         $eventUrlData = $event->getGuestUrlData($subdomain, false);
-        $matchingEvent = $this->eventRepo->getEvent($eventUrlData['subdomain'], $eventUrlData['slug'], false);        
+        $matchingEvent = $this->eventRepo->getEvent($eventUrlData['subdomain'], $eventUrlData['slug'], false);
         $isUnique = ! $matchingEvent || $matchingEvent->id == $event->id ? true : false;
 
         return view('event/edit', [
@@ -469,7 +465,7 @@ class EventController extends Controller
     {
         if (! is_hosted_or_admin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
-        }   
+        }
 
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
@@ -479,7 +475,7 @@ class EventController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        
+
         $this->eventRepo->saveEvent($role, $request, $event);
 
         if ($request->has('save_default_tickets')) {
@@ -490,15 +486,18 @@ class EventController extends Controller
                 'payment_instructions' => $event->payment_instructions,
                 'expire_unpaid_tickets' => $event->expire_unpaid_tickets,
                 'ticket_notes' => $event->ticket_notes,
+                'terms_url' => $event->terms_url,
                 'total_tickets_mode' => $event->total_tickets_mode,
-                'tickets' => $event->tickets->map(function($ticket) {
+                'custom_fields' => $event->custom_fields,
+                'tickets' => $event->tickets->map(function ($ticket) {
                     return [
                         'type' => $ticket->type,
                         'quantity' => $ticket->quantity,
                         'price' => $ticket->price,
                         'description' => $ticket->description,
+                        'custom_fields' => $ticket->custom_fields,
                     ];
-                })->toArray()
+                })->toArray(),
             ];
             $role->default_tickets = json_encode($defaultTickets);
             $role->save();
@@ -510,21 +509,21 @@ class EventController extends Controller
             $date = Carbon::now();
         }
 
-        // A user may be using a different subdomain to edit an event 
+        // A user may be using a different subdomain to edit an event
         // if they clicked on the edit link from the guest view
         if (! auth()->user()->isMember($subdomain)) {
             return redirect(route('home'));
         }
 
         $data = [
-            'subdomain' => $subdomain, 
+            'subdomain' => $subdomain,
             'tab' => 'schedule',
             'month' => $date->month,
             'year' => $date->year,
         ];
 
         return redirect(route('role.view_admin', $data))
-                ->with('message', __('messages.event_updated'));
+            ->with('message', __('messages.event_updated'));
     }
 
     public function accept(Request $request, $subdomain, $hash)
@@ -552,8 +551,8 @@ class EventController extends Controller
             }
         }
 
-        return redirect('/' . $subdomain . '/requests')
-                    ->with('message', __('messages.request_accepted'));
+        return redirect('/'.$subdomain.'/requests')
+            ->with('message', __('messages.request_accepted'));
     }
 
     public function decline(Request $request, $subdomain, $hash)
@@ -582,10 +581,10 @@ class EventController extends Controller
         }
 
         if ($request->redirect_to == 'schedule') {
-            return redirect('/' . $subdomain . '/schedule')
+            return redirect('/'.$subdomain.'/schedule')
                 ->with('message', __('messages.request_declined'));
         } else {
-            return redirect('/' . $subdomain . '/requests')
+            return redirect('/'.$subdomain.'/requests')
                 ->with('message', __('messages.request_declined'));
         }
     }
@@ -627,8 +626,8 @@ class EventController extends Controller
         $role->last_notified_request_count = 0;
         $role->save();
 
-        return redirect('/' . $subdomain . '/requests')
-                    ->with('message', __('messages.all_requests_accepted', ['count' => $acceptedCount]));
+        return redirect('/'.$subdomain.'/requests')
+            ->with('message', __('messages.all_requests_accepted', ['count' => $acceptedCount]));
     }
 
     public function store(EventCreateRequest $request, $subdomain)
@@ -648,15 +647,18 @@ class EventController extends Controller
                 'payment_instructions' => $event->payment_instructions,
                 'expire_unpaid_tickets' => $event->expire_unpaid_tickets,
                 'ticket_notes' => $event->ticket_notes,
+                'terms_url' => $event->terms_url,
                 'total_tickets_mode' => $event->total_tickets_mode,
-                'tickets' => $event->tickets->map(function($ticket) {
+                'custom_fields' => $event->custom_fields,
+                'tickets' => $event->tickets->map(function ($ticket) {
                     return [
                         'type' => $ticket->type,
                         'quantity' => $ticket->quantity,
                         'price' => $ticket->price,
                         'description' => $ticket->description,
+                        'custom_fields' => $ticket->custom_fields,
                     ];
-                })->toArray()
+                })->toArray(),
             ];
             $role->default_tickets = json_encode($defaultTickets);
             $role->save();
@@ -671,14 +673,14 @@ class EventController extends Controller
         }
 
         $data = [
-            'subdomain' => $subdomain, 
+            'subdomain' => $subdomain,
             'tab' => 'schedule',
             'month' => $date->month,
             'year' => $date->year,
         ];
 
         return redirect(route('role.view_admin', $data))
-                ->with('message', __('messages.event_created'));
+            ->with('message', __('messages.event_created'));
     }
 
     public function curate(Request $request, $subdomain, $hash)
@@ -687,15 +689,16 @@ class EventController extends Controller
         $event = Event::findOrFail($event_id);
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        
+
         // Check if the user is authorized to curate events for this role
-        if ((!auth()->user() || !auth()->user()->isMember($subdomain)) && ! $role->acceptEventRequests()) {
+        if ((! auth()->user() || ! auth()->user()->isMember($subdomain)) && ! $role->acceptEventRequests()) {
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => __('messages.not_authorized')
+                    'message' => __('messages.not_authorized'),
                 ], 403);
             }
+
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -704,15 +707,16 @@ class EventController extends Controller
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => __('messages.event_already_curated')
+                    'message' => __('messages.event_already_curated'),
                 ], 400);
             }
+
             return redirect()->back()->with('error', __('messages.event_already_curated'));
         }
 
         // Add the event to the curator's schedule
         $role->events()->attach($event->id, ['is_accepted' => auth()->user() && auth()->user()->isMember($subdomain) ? true : null]);
-    
+
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
@@ -763,8 +767,8 @@ class EventController extends Controller
             } else {
                 // If invalid language code, redirect to the same URL without the lang parameter
                 return redirect(request()->url());
-            }        
-        } else if (session()->has('translate')) {
+            }
+        } elseif (session()->has('translate')) {
             app()->setLocale('en');
         } else {
             // Validate the language code from database before setting it
@@ -781,7 +785,6 @@ class EventController extends Controller
         $details = request()->input('event_details');
         $file = null;
 
-        
         // Handle image data if provided
         if ($request->hasFile('details_image')) {
             $file = $request->file('details_image');
@@ -791,6 +794,7 @@ class EventController extends Controller
 
         try {
             $parsed = GeminiUtils::parseEvent($role, $details, $file);
+
             return response()->json($parsed);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -811,6 +815,7 @@ class EventController extends Controller
 
         try {
             $parsed = GeminiUtils::parseEvent($role, $details, $file);
+
             return response()->json($parsed);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -819,16 +824,16 @@ class EventController extends Controller
 
     public function import(Request $request, $subdomain)
     {
-        //\Log::info($request->all());
-        //return redirect()->back();
-        
+        // \Log::info($request->all());
+        // return redirect()->back();
+
         $role = Role::subdomain($subdomain)->firstOrFail();
-                
+
         $event = $this->eventRepo->saveEvent($role, $request, null);
 
         if ($request->social_image) {
             $file = new \Illuminate\Http\UploadedFile($request->social_image, basename($request->social_image));
-            $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            $filename = strtolower('flyer_'.Str::random(32).'.'.$file->getClientOriginalExtension());
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $event->flyer_image_url = $filename;
@@ -840,7 +845,7 @@ class EventController extends Controller
             'event' => [
                 'view_url' => $event->getGuestUrl($subdomain),
                 'edit_url' => route('event.edit', ['subdomain' => $subdomain, 'hash' => UrlUtils::encodeId($event->id)]),
-            ]
+            ],
         ]);
     }
 
@@ -852,12 +857,12 @@ class EventController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-                
+
         $event = $this->eventRepo->saveEvent($role, $request, null);
 
         if ($request->social_image) {
             $file = new \Illuminate\Http\UploadedFile($request->social_image, basename($request->social_image));
-            $filename = strtolower('flyer_' . Str::random(32)) . '.' . $file->getClientOriginalExtension();
+            $filename = strtolower('flyer_'.Str::random(32)).'.'.$file->getClientOriginalExtension();
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $event->flyer_image_url = $filename;
@@ -872,7 +877,7 @@ class EventController extends Controller
             'event' => [
                 'view_url' => $event->getGuestUrl($subdomain),
                 'message' => __('messages.event_created_guest'),
-            ]
+            ],
         ]);
     }
 
@@ -914,21 +919,21 @@ class EventController extends Controller
     {
         $file = $request->file('image');
 
-        if (!$file) {
+        if (! $file) {
             return response()->json(['success' => false, 'error' => 'No file uploaded'], 400);
         }
 
         // Validate file extension (whitelist only safe image extensions)
         $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
         $extension = strtolower($file->getClientOriginalExtension());
-        if (!in_array($extension, $allowedExtensions)) {
+        if (! in_array($extension, $allowedExtensions)) {
             return response()->json(['success' => false, 'error' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp'], 400);
         }
 
         // Validate MIME type
         $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         $mimeType = $file->getMimeType();
-        if (!in_array($mimeType, $allowedMimeTypes)) {
+        if (! in_array($mimeType, $allowedMimeTypes)) {
             return response()->json(['success' => false, 'error' => 'Invalid file type'], 400);
         }
 
@@ -938,7 +943,7 @@ class EventController extends Controller
             return response()->json(['success' => false, 'error' => 'File is not a valid image'], 400);
         }
 
-        $filename = '/tmp/event_' . strtolower(Str::random(32)) . '.' . $extension;
+        $filename = '/tmp/event_'.strtolower(Str::random(32)).'.'.$extension;
         move_uploaded_file($file->getPathname(), $filename);
 
         return response()->json(['success' => true, 'filename' => $filename]);
@@ -948,21 +953,21 @@ class EventController extends Controller
     {
         $file = $request->file('image');
 
-        if (!$file) {
+        if (! $file) {
             return response()->json(['success' => false, 'error' => 'No file uploaded'], 400);
         }
 
         // Validate file extension (whitelist only safe image extensions)
         $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
         $extension = strtolower($file->getClientOriginalExtension());
-        if (!in_array($extension, $allowedExtensions)) {
+        if (! in_array($extension, $allowedExtensions)) {
             return response()->json(['success' => false, 'error' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp'], 400);
         }
 
         // Validate MIME type
         $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         $mimeType = $file->getMimeType();
-        if (!in_array($mimeType, $allowedMimeTypes)) {
+        if (! in_array($mimeType, $allowedMimeTypes)) {
             return response()->json(['success' => false, 'error' => 'Invalid file type'], 400);
         }
 
@@ -972,7 +977,7 @@ class EventController extends Controller
             return response()->json(['success' => false, 'error' => 'File is not a valid image'], 400);
         }
 
-        $filename = '/tmp/event_' . strtolower(Str::random(32)) . '.' . $extension;
+        $filename = '/tmp/event_'.strtolower(Str::random(32)).'.'.$extension;
         move_uploaded_file($file->getPathname(), $filename);
 
         return response()->json(['success' => true, 'filename' => $filename]);

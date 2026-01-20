@@ -305,6 +305,8 @@ return [
     'select_currency' => 'Seleccionar moneda',
     'add_type' => 'Agregar tipo',
     'ticket_notes' => 'Notas de la entrada',
+    'terms_url' => 'URL de términos',
+    'terms_url_help' => 'URL personalizada de términos y condiciones para entradas. Dejar en blanco para usar el predeterminado.',
     'price' => 'Precio',
     'quantity' => 'Cantidad',
     'unlimited' => 'Ilimitado',
@@ -479,7 +481,7 @@ return [
     'schedule_url' => 'URL del Horario',
     'back_to_schedule' => 'Volver al Horario',
     'all_schedules' => 'Todos los Horarios',
-    
+
     // Categories
     'parties_&_festivals' => 'Fiestas y Festivales',
     'concerts' => 'Conciertos',
@@ -592,7 +594,7 @@ return [
     'create_account_benefits' => 'Crea una cuenta para gestionar tu perfil y poder editar tus eventos',
     'create_account_link' => ':link para gestionar tu perfil y poder editar tus eventos',
     'create_an_account' => 'Crear una cuenta',
-    
+
     // Google Calendar Integration
     'google_calendar_integration' => 'Integración de Google Calendar',
     'connect_google_calendar_description' => 'Conecta tu Google Calendar para sincronizar automáticamente tus eventos.',
@@ -713,4 +715,23 @@ return [
     'text' => 'Texto',
     'download' => 'Descargar',
     'copy' => 'Copiar',
+    'add_custom_field' => 'Agregar Campo Personalizado',
+    'add_field' => 'Agregar Campo',
+    'custom_field' => 'Campo Personalizado',
+    'custom_fields' => 'Campos Personalizados',
+    'field_name' => 'Nombre del Campo',
+    'field_type' => 'Tipo',
+    'field_options' => 'Opciones',
+    'field_required' => 'Obligatorio',
+    'type_string' => 'Texto',
+    'type_multiline_string' => 'Texto Multilínea',
+    'type_switch' => 'Sí/No',
+    'type_date' => 'Fecha',
+    'type_dropdown' => 'Lista Desplegable',
+    'options_placeholder' => 'Ingrese opciones separadas por comas',
+    'per_order' => 'Por Pedido',
+    'per_ticket' => 'Por Entrada',
+    'yes' => 'Sí',
+    'no' => 'No',
+    'field_required_error' => 'Este campo es obligatorio',
 ];

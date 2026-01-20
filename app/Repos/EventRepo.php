@@ -2,19 +2,19 @@
 
 namespace App\Repos;
 
-use App\Models\Event;
-use App\Models\Role;
-use App\Models\User;
-use App\Utils\ColorUtils;
-use App\Utils\UrlUtils;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Mail;
 use App\Mail\ClaimRole;
 use App\Mail\ClaimVenue;
+use App\Models\Event;
+use App\Models\Role;
 use App\Models\Ticket;
+use App\Models\User;
+use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
+use App\Utils\UrlUtils;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class EventRepo
 {
@@ -56,25 +56,25 @@ class EventRepo
                 $venue->font_color = '#ffffff';
                 $venue->save();
                 $venue->refresh();
-                
+
                 $matchingUser = false;
-                
+
                 if ($venue->email && $matchingUser = User::whereEmail($venue->email)->first()) {
                     $venue->user_id = $matchingUser->id;
                     $venue->email_verified_at = $matchingUser->email_verified_at;
                     $venue->save();
-                    
+
                     $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
                 }
 
-                if (! $matchingUser || $matchingUser->id != $user->id) { 
+                if (! $matchingUser || $matchingUser->id != $user->id) {
                     $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
                 }
-            } else if ($venue && ! $venue->isClaimed()) {
+            } elseif ($venue && ! $venue->isClaimed()) {
                 if ($request->venue_email) {
                     $venue->email = $request->venue_email;
                 }
-                
+
                 $venue->name = $request->venue_name ?? null;
                 $venue->address1 = $request->venue_address1;
                 $venue->address2 = $request->venue_address2;
@@ -125,7 +125,7 @@ class EventRepo
                         $matchingUser->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
                     }
 
-                    if (! $matchingUser || $matchingUser->id != $user->id) { 
+                    if (! $matchingUser || $matchingUser->id != $user->id) {
                         $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
                     }
                 } else {
@@ -140,7 +140,7 @@ class EventRepo
                         if (! empty($member['email'])) {
                             $role->email = $member['email'];
                         }
-                        
+
                         $links = $role->youtube_links ? json_decode($role->youtube_links, true) : [];
 
                         if (! empty($member['youtube_url'])) {
@@ -170,7 +170,7 @@ class EventRepo
         $venueId = $venue ? $venue->id : null;
 
         if (! $event) {
-            $event = new Event;       
+            $event = new Event;
             $event->user_id = $user->id;
             $event->creator_role_id = $creatorRoleId;
 
@@ -194,11 +194,11 @@ class EventRepo
         }
 
         $event->fill($request->all());
-        
+
         $days_of_week = '';
         $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
         foreach ($days as $index => $day) {
-            $days_of_week .= request()->has('days_of_week_' . $index) ? '1' : '0';
+            $days_of_week .= request()->has('days_of_week_'.$index) ? '1' : '0';
         }
         $event->days_of_week = request()->schedule_type == 'recurring' ? $days_of_week : null;
 
@@ -206,19 +206,19 @@ class EventRepo
         if (request()->schedule_type == 'recurring') {
             $event->recurring_end_type = $request->input('recurring_end_type', 'never');
             $event->recurring_end_value = $request->input('recurring_end_value');
-            
+
             // Validate and clean up recurring_end_value based on type
             if ($event->recurring_end_type === 'never') {
                 $event->recurring_end_value = null;
             } elseif ($event->recurring_end_type === 'on_date') {
                 // Ensure it's a valid date format (YYYY-MM-DD)
-                if ($event->recurring_end_value && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $event->recurring_end_value)) {
+                if ($event->recurring_end_value && ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $event->recurring_end_value)) {
                     $event->recurring_end_value = null;
                 }
             } elseif ($event->recurring_end_type === 'after_events') {
                 // Ensure it's a positive integer
-                $event->recurring_end_value = $event->recurring_end_value && is_numeric($event->recurring_end_value) && (int)$event->recurring_end_value > 0 
-                    ? (string)(int)$event->recurring_end_value 
+                $event->recurring_end_value = $event->recurring_end_value && is_numeric($event->recurring_end_value) && (int) $event->recurring_end_value > 0
+                    ? (string) (int) $event->recurring_end_value
                     : null;
             }
         } else {
@@ -247,7 +247,7 @@ class EventRepo
         }
         */
 
-        $event->save();        
+        $event->save();
 
         if ($venue) {
             $roles[] = $venue;
@@ -255,7 +255,7 @@ class EventRepo
         }
 
         $selectedCurators = $request->input('curators', []);
-        $selectedCurators = array_map(function($id) {
+        $selectedCurators = array_map(function ($id) {
             return UrlUtils::decodeId($id);
         }, $selectedCurators);
 
@@ -263,13 +263,13 @@ class EventRepo
         if ($event && $event->exists) {
             $existingCurators = $event->roles()->where('roles.type', 'curator')->pluck('roles.id')->toArray();
             $userCurators = $user->curators()->pluck('roles.id')->toArray();
-            
+
             // Find curators that exist on the event but the user can't edit
             $preservedCurators = array_diff($existingCurators, $userCurators);
-            
+
             // Add preserved curators to the selected curators
             foreach ($preservedCurators as $curatorId) {
-                if (!in_array($curatorId, $selectedCurators)) {
+                if (! in_array($curatorId, $selectedCurators)) {
                     $selectedCurators[] = $curatorId;
                 }
             }
@@ -284,14 +284,14 @@ class EventRepo
         }
 
         $event->roles()->sync($roleIds);
-        
+
         $curatorGroups = $request->input('curator_groups', []);
-        
+
         foreach ($roles as $role) {
             if ((auth()->user() && $user->isMember($role->subdomain)) || ($role->accept_requests && ! $role->require_approval)) {
-                $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);            
+                $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
             }
-                        
+
             // If this is a curator and curator_groups is provided, add it to the pivot
             if ($role && $role->isCurator()) {
                 $curatorEncodedId = UrlUtils::encodeId($role->id);
@@ -300,25 +300,25 @@ class EventRepo
                     $event->roles()->updateExistingPivot($role->id, ['group_id' => $groupId]);
                 }
             }
-            
+
             // If this is the current role and current_role_group_id is provided, add it to the pivot
             if ($role && $role->id === $currentRole->id && $request->has('current_role_group_id') && $request->current_role_group_id) {
                 $groupId = UrlUtils::decodeId($request->current_role_group_id);
                 $event->roles()->updateExistingPivot($role->id, ['group_id' => $groupId]);
-            }            
+            }
         }
-        
+
         if ($request->hasFile('flyer_image')) {
             if ($event->flyer_image_url) {
                 $path = $event->getAttributes()['flyer_image_url'];
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
             }
 
             $file = $request->file('flyer_image');
-            $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            $filename = strtolower('flyer_'.Str::random(32).'.'.$file->getClientOriginalExtension());
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $event->flyer_image_url = $filename;
@@ -327,22 +327,22 @@ class EventRepo
 
         if (config('app.hosted')) {
             $sendEmailToMembers = $request->input('send_email_to_members', []);
-            
+
             foreach ($roles as $role) {
                 if ($event->wasRecentlyCreated && ! $role->isClaimed() && $role->is_subscribed && $role->email) {
                     $shouldSendEmail = false;
-                    
+
                     if ($role->isVenue()) {
                         // Check if send_email_to_venue checkbox is checked
                         // Checkbox values can be "1", "on", or true - all are truthy
-                        $shouldSendEmail = !empty($request->input('send_email_to_venue', false));
+                        $shouldSendEmail = ! empty($request->input('send_email_to_venue', false));
                     } elseif ($role->isTalent()) {
                         // Check if this role's email is in the send_email_to_members array
                         // The array uses email addresses as keys
                         // Checkbox values can be "1", "on", or true - all are truthy
-                        $shouldSendEmail = !empty($sendEmailToMembers[$role->email]);
+                        $shouldSendEmail = ! empty($sendEmailToMembers[$role->email]);
                     }
-                    
+
                     if ($shouldSendEmail) {
                         if ($role->isVenue()) {
                             Mail::to($role->email)->send(new ClaimVenue($event));
@@ -359,7 +359,7 @@ class EventRepo
             $ticketIds = [];
 
             foreach ($ticketData as $data) {
-                if (!empty($data['id'])) {
+                if (! empty($data['id'])) {
                     $ticket = Ticket::find($data['id']);
                     $ticketIds[] = $ticket->id;
                     if ($ticket && $ticket->event_id == $event->id) {
@@ -367,16 +367,18 @@ class EventRepo
                             'type' => $data['type'] ?? null,
                             'quantity' => $data['quantity'] ?? null,
                             'price' => $data['price'] ?? null,
-                            'description' => $data['description'] ?? null
+                            'description' => $data['description'] ?? null,
+                            'custom_fields' => isset($data['custom_fields']) ? json_decode($data['custom_fields'], true) : null,
                         ]);
                     }
                 } else {
                     $ticket = Ticket::create([
                         'event_id' => $event->id,
                         'type' => $data['type'] ?? null,
-                        'quantity' => $data['quantity'] ?? null, 
+                        'quantity' => $data['quantity'] ?? null,
                         'price' => $data['price'] ?? null,
-                        'description' => $data['description'] ?? null
+                        'description' => $data['description'] ?? null,
+                        'custom_fields' => isset($data['custom_fields']) ? json_decode($data['custom_fields'], true) : null,
                     ]);
                     $ticketIds[] = $ticket->id;
                 }
@@ -407,9 +409,9 @@ class EventRepo
     {
         $event = null;
         $eventDate = $date ? Carbon::parse($date) : null;
-        
+
         $subdomainRole = Role::where('subdomain', $subdomain)->first();
-        $slugRole = Role::where('subdomain', $slug)->first();        
+        $slugRole = Role::where('subdomain', $slug)->first();
         $eventId = UrlUtils::decodeId($slug);
 
         if ($subdomainRole && $eventId) {
@@ -421,7 +423,7 @@ class EventRepo
                 return $event;
             }
         }
-        
+
         if ($subdomainRole && $slugRole) {
             $venue = null;
             $role = null;
@@ -450,7 +452,7 @@ class EventRepo
                         ->where(function ($query) use ($eventDate) {
                             $query->whereBetween('starts_at', [
                                 $eventDate->copy()->startOfDay(),
-                                $eventDate->copy()->endOfDay(),                                                        
+                                $eventDate->copy()->endOfDay(),
                             ])
                                 ->orWhere(function ($query) use ($eventDate) {
                                     $query->whereNotNull('days_of_week')
@@ -472,11 +474,11 @@ class EventRepo
                         ->orderBy('starts_at')
                         ->first();
 
-                    if (!$event) {
+                    if (! $event) {
                         $event = Event::with('roles')
                             ->whereHas('roles', function ($query) use ($role) {
                                 $query->where('role_id', $role->id);
-                            })    
+                            })
                             ->whereHas('roles', function ($query) use ($venue) {
                                 $query->where('role_id', $venue->id);
                             })
@@ -494,48 +496,48 @@ class EventRepo
 
         if ($eventDate) {
             $event = Event::with('roles')
-                        ->where('slug', $slug)
-                        ->where(function ($query) use ($eventDate) {
-                            $startOfDay = $eventDate->copy()->startOfDay();
-                            $endOfDay = $eventDate->copy()->endOfDay();
+                ->where('slug', $slug)
+                ->where(function ($query) use ($eventDate) {
+                    $startOfDay = $eventDate->copy()->startOfDay();
+                    $endOfDay = $eventDate->copy()->endOfDay();
 
-                            $query->whereBetween('starts_at', [$startOfDay, $endOfDay])
-                                ->orWhere(function ($query) use ($eventDate) {
-                                    $query->whereNotNull('days_of_week')
-                                        ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
-                                        ->where('starts_at', '<=', $eventDate);
-                                });
-                        })
-                        ->where(function($query) use ($subdomain) {
-                            $query->whereHas('roles', function($q) use ($subdomain) {
-                                $q->where('subdomain', $subdomain);
-                            });
-                        })
-                        ->orderBy('starts_at')
-                        ->first();
+                    $query->whereBetween('starts_at', [$startOfDay, $endOfDay])
+                        ->orWhere(function ($query) use ($eventDate) {
+                            $query->whereNotNull('days_of_week')
+                                ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
+                                ->where('starts_at', '<=', $eventDate);
+                        });
+                })
+                ->where(function ($query) use ($subdomain) {
+                    $query->whereHas('roles', function ($q) use ($subdomain) {
+                        $q->where('subdomain', $subdomain);
+                    });
+                })
+                ->orderBy('starts_at')
+                ->first();
         } else {
             $event = Event::with('roles')
-                        ->where('slug', $slug)
-                        ->where('starts_at', '>=', now()->subDay())                    
-                        ->where(function($query) use ($subdomain) {
-                            $query->whereHas('roles', function($q) use ($subdomain) {
-                                $q->where('subdomain', $subdomain);
-                            });
-                        })
-                        ->orderBy('starts_at', 'desc')
-                        ->first();
-            
+                ->where('slug', $slug)
+                ->where('starts_at', '>=', now()->subDay())
+                ->where(function ($query) use ($subdomain) {
+                    $query->whereHas('roles', function ($q) use ($subdomain) {
+                        $q->where('subdomain', $subdomain);
+                    });
+                })
+                ->orderBy('starts_at', 'desc')
+                ->first();
+
             if (! $event) {
                 $event = Event::with('roles')
-                            ->where('slug', $slug)
-                            ->where('starts_at', '<', now())
-                            ->where(function($query) use ($subdomain) {
-                                $query->whereHas('roles', function($q) use ($subdomain) {
-                                    $q->where('subdomain', $subdomain);
-                                });
-                            })    
-                            ->orderBy('starts_at', 'desc')
-                            ->first();                    
+                    ->where('slug', $slug)
+                    ->where('starts_at', '<', now())
+                    ->where(function ($query) use ($subdomain) {
+                        $query->whereHas('roles', function ($q) use ($subdomain) {
+                            $q->where('subdomain', $subdomain);
+                        });
+                    })
+                    ->orderBy('starts_at', 'desc')
+                    ->first();
 
             }
         }
@@ -546,18 +548,18 @@ class EventRepo
 
         if ($eventDate) {
             $event = Event::with('roles')
-                        ->where(function ($query) use ($eventDate) {
-                            $startOfDay = $eventDate->copy()->startOfDay();
-                            $endOfDay = $eventDate->copy()->endOfDay();
-                            
-                            $query->whereBetween('starts_at', [$startOfDay, $endOfDay]);
-                        })
-                        ->where(function($query) use ($subdomain) {
-                            $query->whereHas('roles', function($q) use ($subdomain) {
-                                $q->where('subdomain', $subdomain);
-                            });
-                        })
-                        ->first();
+                ->where(function ($query) use ($eventDate) {
+                    $startOfDay = $eventDate->copy()->startOfDay();
+                    $endOfDay = $eventDate->copy()->endOfDay();
+
+                    $query->whereBetween('starts_at', [$startOfDay, $endOfDay]);
+                })
+                ->where(function ($query) use ($subdomain) {
+                    $query->whereHas('roles', function ($q) use ($subdomain) {
+                        $q->where('subdomain', $subdomain);
+                    });
+                })
+                ->first();
         }
 
         return $event;

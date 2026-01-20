@@ -2,24 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use App\Models\User;
+use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
-use App\Models\Event;
-use App\Models\SaleTicket;
-use App\Utils\UrlUtils;
-use Stripe\StripeClient;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
-use App\Utils\InvoiceNinja;
+use App\Models\User;
 use App\Rules\NoFakeEmail;
 use App\Services\EmailService;
-use Illuminate\Validation\Rules;
-use Illuminate\Support\Facades\Hash;
+use App\Utils\InvoiceNinja;
+use App\Utils\UrlUtils;
+use Carbon\Carbon;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Stripe\StripeClient;
 
 class TicketController extends Controller
 {
@@ -31,7 +29,7 @@ class TicketController extends Controller
             ->where('user_id', $user->id)
             ->where('is_deleted', false)
             ->where('event_date', '>=', now()->subDay()->startOfDay())
-            ->whereHas('event', function($query) {
+            ->whereHas('event', function ($query) {
                 $query->where('starts_at', '>=', now()->subDay()->startOfDay());
             })
             ->orderBy('event_date', 'ASC')
@@ -44,28 +42,28 @@ class TicketController extends Controller
     {
         $user = auth()->user();
         $filter = strtolower(request()->filter);
-        
+
         $query = Sale::with('event', 'saleTickets')
             ->where('is_deleted', false)
-            ->whereHas('event', function($query) use ($user) {
+            ->whereHas('event', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             });
-            
+
         if ($filter) {
-            $query->where(function($q) use ($filter) {
+            $query->where(function ($q) use ($filter) {
                 $q->where('status', 'LIKE', "%{$filter}%")
-                  ->orWhere('transaction_reference', 'LIKE', "%{$filter}%") 
-                  ->orWhere('email', 'LIKE', "%{$filter}%")
-                  ->orWhere('name', 'LIKE', "%{$filter}%")
-                  ->orWhereHas('event', function($q) use ($filter) {
-                      $q->where('name', 'LIKE', "%{$filter}%");
-                  });
+                    ->orWhere('transaction_reference', 'LIKE', "%{$filter}%")
+                    ->orWhere('email', 'LIKE', "%{$filter}%")
+                    ->orWhere('name', 'LIKE', "%{$filter}%")
+                    ->orWhereHas('event', function ($q) use ($filter) {
+                        $q->where('name', 'LIKE', "%{$filter}%");
+                    });
             });
         }
 
         $count = $query->count();
         $sales = $query->orderBy('created_at', 'DESC')
-                    ->paginate(50, ['*'], 'page');
+            ->paginate(50, ['*'], 'page');
 
         if (request()->ajax()) {
             return view('ticket.sales_table', compact('sales'));
@@ -100,7 +98,7 @@ class TicketController extends Controller
                 'name' => ['required', 'string', 'max:255'],
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class, new NoFakeEmail],
                 'password' => ['required', 'string', 'min:8'],
-            ]);    
+            ]);
 
             $user = User::create([
                 'name' => $request->name,
@@ -115,10 +113,10 @@ class TicketController extends Controller
         }
 
         // Check ticket availability
-        foreach($request->tickets as $ticketId => $quantity) {
+        foreach ($request->tickets as $ticketId => $quantity) {
             if ($quantity > 0) {
                 $ticketModel = $event->tickets()->findOrFail(UrlUtils::decodeId($ticketId));
-                
+
                 if (! $ticketModel) {
                     return back()->with('error', __('messages.ticket_not_found'));
                 }
@@ -126,14 +124,15 @@ class TicketController extends Controller
                 if ($ticketModel->quantity > 0) {
                     // Handle combined mode logic
                     if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
-                        $totalSold = $event->tickets->sum(function($ticket) use ($request) {
+                        $totalSold = $event->tickets->sum(function ($ticket) use ($request) {
                             $ticketSold = $ticket->sold ? json_decode($ticket->sold, true) : [];
+
                             return $ticketSold[$request->event_date] ?? 0;
                         });
                         // In combined mode, the total quantity is the same as individual quantity
                         $totalQuantity = $event->getSameTicketQuantity();
                         $remainingTickets = $totalQuantity - $totalSold;
-                        
+
                         // Check if the total requested quantity exceeds remaining tickets
                         $totalRequested = array_sum($request->tickets);
                         if ($totalRequested > $remainingTickets) {
@@ -152,7 +151,7 @@ class TicketController extends Controller
             }
         }
 
-        $sale = new Sale();
+        $sale = new Sale;
         $sale->fill($request->all());
         $sale->event_id = $event->id;
         $sale->user_id = $user ? $user->id : null;
@@ -163,16 +162,46 @@ class TicketController extends Controller
             $sale->event_date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
         }
 
+        // Store event-level custom field values
+        $eventCustomValues = $request->input('event_custom_values', []);
+        $eventCustomFields = $event->custom_fields ?? [];
+        $fieldIndex = 1;
+        foreach ($eventCustomFields as $fieldKey => $fieldConfig) {
+            if ($fieldIndex <= 8) {
+                $value = $eventCustomValues[$fieldKey] ?? null;
+                $sale->{"custom_value{$fieldIndex}"} = $value;
+                $fieldIndex++;
+            }
+        }
+
         $sale->save();
 
-        foreach($request->tickets as $ticketId => $quantity) {
+        // Store ticket-level custom field values
+        $ticketCustomValues = $request->input('ticket_custom_values', []);
+
+        foreach ($request->tickets as $ticketId => $quantity) {
             if ($quantity > 0) {
-                $sale->saleTickets()->create([
+                $ticketModel = $event->tickets()->findOrFail(UrlUtils::decodeId($ticketId));
+                $ticketCustomFields = $ticketModel->custom_fields ?? [];
+
+                $saleTicketData = [
                     'sale_id' => $sale->id,
                     'ticket_id' => UrlUtils::decodeId($ticketId),
                     'quantity' => $quantity,
                     'seats' => json_encode(array_fill(1, $quantity, null)),
-                ]);
+                ];
+
+                // Store ticket-level custom field values
+                $ticketFieldIndex = 1;
+                foreach ($ticketCustomFields as $fieldKey => $fieldConfig) {
+                    if ($ticketFieldIndex <= 8) {
+                        $value = $ticketCustomValues[$ticketId][$fieldKey] ?? null;
+                        $saleTicketData["custom_value{$ticketFieldIndex}"] = $value;
+                        $ticketFieldIndex++;
+                    }
+                }
+
+                $sale->saleTickets()->create($saleTicketData);
             }
         }
 
@@ -180,10 +209,10 @@ class TicketController extends Controller
 
         $sale->payment_amount = $total;
         $sale->save();
-        
+
         // Send email when sale is created
         $this->sendTicketPurchaseEmail($sale, $event);
-        
+
         if ($total == 0) {
             $sale->status = 'paid';
             $sale->save();
@@ -222,21 +251,21 @@ class TicketController extends Controller
 
         $stripe = new StripeClient(config('services.stripe.key'));
         $data = [
-            'sale_id' => UrlUtils::encodeId($sale->id), 
-            'subdomain' => $subdomain, 
+            'sale_id' => UrlUtils::encodeId($sale->id),
+            'subdomain' => $subdomain,
             'date' => $sale->event_date,
         ];
-        
+
         $session = $stripe->checkout->sessions->create(
             [
-                'line_items' => $lineItems,                
-                //'payment_intent_data' => ['application_fee_amount' => 123],
+                'line_items' => $lineItems,
+                // 'payment_intent_data' => ['application_fee_amount' => 123],
                 'mode' => 'payment',
                 'customer_email' => $sale->email,
                 'metadata' => [
                     'customer_name' => $sale->name,
                 ],
-                'success_url' => route('checkout.success', $data) . '?session_id={CHECKOUT_SESSION_ID}',
+                'success_url' => route('checkout.success', $data).'?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => route('checkout.cancel', $data),
             ],
             [
@@ -297,9 +326,9 @@ class TicketController extends Controller
         $sale->transaction_reference = $invoice['id'];
         $sale->payment_amount = $invoice['amount'];
         $sale->save();
-        
+
         if ($sendEmail) {
-            return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);    
+            return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
         } else {
             return redirect($invoice['invitations'][0]['link']);
         }
@@ -308,7 +337,7 @@ class TicketController extends Controller
     private function paymentUrlCheckout($subdomain, $sale, $event)
     {
         $user = $event->user;
-        
+
         return redirect($user->payment_url);
     }
 
@@ -327,8 +356,7 @@ class TicketController extends Controller
             'stripe_account' => $sale->event->user->stripe_account_id,
         ]);
 
-
-        if ($session->payment_status === 'paid') {            
+        if ($session->payment_status === 'paid') {
             $sale->status = 'paid';
         }
 
@@ -345,8 +373,8 @@ class TicketController extends Controller
         $sale->save();
 
         $event = $sale->event;
-        
-        return redirect($event->getGuestUrl($subdomain, $sale->event_date) . '&tickets=true');
+
+        return redirect($event->getGuestUrl($subdomain, $sale->event_date).'&tickets=true');
     }
 
     public function paymentUrlSuccess($sale_id)
@@ -376,8 +404,8 @@ class TicketController extends Controller
         $sale->save();
 
         $event = $sale->event;
-        
-        return redirect($event->getGuestUrl($sale->subdomain, $sale->event_date) . '&tickets=true');
+
+        return redirect($event->getGuestUrl($sale->subdomain, $sale->event_date).'&tickets=true');
     }
 
     public function scan()
@@ -395,8 +423,8 @@ class TicketController extends Controller
         }
 
         $sale = Sale::where('event_id', $event->id)
-                    ->where('secret', $secret)
-                    ->first();
+            ->where('secret', $secret)
+            ->first();
 
         if (! $sale) {
             return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
@@ -405,20 +433,20 @@ class TicketController extends Controller
         if (! $user->canEditEvent($event)) {
             return response()->json(['error' => __('messages.you_are_not_authorized_to_scan_this_ticket')], 200);
         }
-        
+
         if (Carbon::parse($sale->event_date)->format('Y-m-d') !== now()->format('Y-m-d')) {
             return response()->json(['error' => __('messages.this_ticket_is_not_valid_for_today')], 200);
         }
-        
+
         if ($sale->status == 'unpaid') {
             return response()->json(['error' => __('messages.this_ticket_is_not_paid')], 200);
-        } else if ($sale->status == 'cancelled') {
+        } elseif ($sale->status == 'cancelled') {
             return response()->json(['error' => __('messages.this_ticket_is_cancelled')], 200);
-        } else if ($sale->status == 'refunded') {
+        } elseif ($sale->status == 'refunded') {
             return response()->json(['error' => __('messages.this_ticket_is_refunded')], 200);
         }
 
-        $data = new \stdClass();
+        $data = new \stdClass;
         $data->attendee = $sale->name;
         $data->event = $event->name;
         $data->date = $event->localStartsAt(true, $sale->event_date);
@@ -444,7 +472,7 @@ class TicketController extends Controller
                 $saleTicket->save();
             }
         }
-        
+
         return response()->json($data);
     }
 
@@ -455,15 +483,15 @@ class TicketController extends Controller
 
         $url = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $secret]);
 
-        $qrCode = QrCode::create($url)            
+        $qrCode = QrCode::create($url)
             ->setSize(200)
             ->setMargin(10);
 
-        $writer = new PngWriter();
+        $writer = new PngWriter;
         $result = $writer->write($qrCode);
-        
-        header('Content-Type: ' . $result->getMimeType());
-            
+
+        header('Content-Type: '.$result->getMimeType());
+
         echo $result->getString();
 
         exit;
@@ -473,7 +501,7 @@ class TicketController extends Controller
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
         $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
-        $role = $event->role();        
+        $role = $event->role();
 
         return view('ticket.view', compact('event', 'sale', 'role'));
     }
@@ -482,7 +510,7 @@ class TicketController extends Controller
     {
         $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
         $user = auth()->user();
-        
+
         if ($user->id != $sale->event->user_id) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
@@ -495,14 +523,14 @@ class TicketController extends Controller
                     $sale->save();
                 }
                 break;
-            
+
             case 'refund':
                 if ($sale->status === 'paid') {
                     $sale->status = 'refunded';
                     $sale->save();
                 }
                 break;
-            
+
             case 'cancel':
                 if (in_array($sale->status, ['unpaid', 'paid'])) {
                     $sale->status = 'cancelled';
@@ -519,7 +547,7 @@ class TicketController extends Controller
         if ($request->ajax()) {
             return response()->json(['success' => true]);
         }
-        
+
         return back()->with('message', __('messages.action_completed'));
     }
 
@@ -527,8 +555,8 @@ class TicketController extends Controller
     {
         $requestSecret = request()->get('secret');
         $serverSecret = config('app.cron_secret');
-        
-        if (!$serverSecret || !$requestSecret || !hash_equals($serverSecret, $requestSecret)) {
+
+        if (! $serverSecret || ! $requestSecret || ! hash_equals($serverSecret, $requestSecret)) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
@@ -544,17 +572,17 @@ class TicketController extends Controller
     {
         try {
             // Load roles if not already loaded
-            if (!$event->relationLoaded('roles')) {
+            if (! $event->relationLoaded('roles')) {
                 $event->load('roles');
             }
-            
+
             // Get the venue role if available, otherwise get the first role
             $role = $event->venue ?: $event->roles->first();
-            $emailService = new EmailService();
+            $emailService = new EmailService;
             $emailService->sendTicketEmail($sale, $role);
         } catch (\Exception $e) {
             // Log error but don't fail the sale creation
-            \Log::error('Failed to send ticket purchase email: ' . $e->getMessage(), [
+            \Log::error('Failed to send ticket purchase email: '.$e->getMessage(), [
                 'sale_id' => $sale->id,
                 'event_id' => $event->id,
             ]);
@@ -568,25 +596,25 @@ class TicketController extends Controller
     {
         $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
         $user = auth()->user();
-        
+
         if ($user->id != $sale->event->user_id) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
         try {
             $event = $sale->event;
-            
+
             // Load roles if not already loaded
-            if (!$event->relationLoaded('roles')) {
+            if (! $event->relationLoaded('roles')) {
                 $event->load('roles');
             }
-            
+
             // Get the venue role if available, otherwise get the first role
             $role = $event->venue ?: $event->roles->first();
-            $emailService = new EmailService();
-            
+            $emailService = new EmailService;
+
             $success = $emailService->sendTicketEmail($sale, $role);
-            
+
             if ($success) {
                 return response()->json(['success' => true, 'message' => __('messages.email_sent_successfully')]);
             } else {

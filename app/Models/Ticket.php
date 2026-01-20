@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Utils\UrlUtils;
-use App\Utils\MarkdownUtils;
+use Illuminate\Database\Eloquent\Model;
+
 class Ticket extends Model
 {
     protected $fillable = [
@@ -14,7 +14,12 @@ class Ticket extends Model
         'sold',
         'price',
         'description',
-    ];    
+        'custom_fields',
+    ];
+
+    protected $casts = [
+        'custom_fields' => 'array',
+    ];
 
     public function sales()
     {
@@ -51,11 +56,12 @@ class Ticket extends Model
 
         $sold = $this->sold ? json_decode($this->sold, true) : [];
         $sold = $sold[$date] ?? 0;
-        
+
         // Handle combined mode logic
         if ($this->event && $this->event->total_tickets_mode === 'combined' && $this->event->hasSameTicketQuantities()) {
-            $totalSold = $this->event->tickets->sum(function($ticket) use ($date) {
+            $totalSold = $this->event->tickets->sum(function ($ticket) use ($date) {
                 $ticketSold = $ticket->sold ? json_decode($ticket->sold, true) : [];
+
                 return $ticketSold[$date] ?? 0;
             });
             // In combined mode, the total quantity is the same as individual quantity
@@ -68,4 +74,3 @@ class Ticket extends Model
         return $data;
     }
 }
-  

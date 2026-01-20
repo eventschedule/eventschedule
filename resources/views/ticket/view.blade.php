@@ -193,6 +193,39 @@
             <img class="w-[82px] h-[82px]" src="{{ route('ticket.qr_code', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" alt="QR Code" />
           </div>
         </div>
+
+        {{-- Event-level Custom Fields --}}
+        @if ($event->custom_fields && count($event->custom_fields) > 0)
+          <div class="mt-[16px] pt-[16px] border-t border-white/20">
+            @php $fieldIndex = 1; @endphp
+            @foreach ($event->custom_fields as $fieldKey => $fieldConfig)
+              @if ($fieldIndex <= 8 && $sale->{"custom_value{$fieldIndex}"})
+                <div class="flex gap-[8px] flex-row items-start mt-[8px]">
+                  <p class="text-[10px]"><span class="font-bold">{{ $fieldConfig['name'] }}:</span> {{ $sale->{"custom_value{$fieldIndex}"} }}</p>
+                </div>
+              @endif
+              @php $fieldIndex++; @endphp
+            @endforeach
+          </div>
+        @endif
+
+        {{-- Ticket-level Custom Fields --}}
+        @foreach ($sale->saleTickets as $saleTicket)
+          @if ($saleTicket->ticket->custom_fields && count($saleTicket->ticket->custom_fields) > 0)
+            <div class="mt-[8px]">
+              <p class="text-[10px] font-bold">{{ $saleTicket->ticket->type ?: __('messages.ticket') }}:</p>
+              @php $ticketFieldIndex = 1; @endphp
+              @foreach ($saleTicket->ticket->custom_fields as $fieldKey => $fieldConfig)
+                @if ($ticketFieldIndex <= 8 && $saleTicket->{"custom_value{$ticketFieldIndex}"})
+                  <div class="flex gap-[8px] flex-row items-start mt-[4px] ml-[12px]">
+                    <p class="text-[10px]"><span class="font-bold">{{ $fieldConfig['name'] }}:</span> {{ $saleTicket->{"custom_value{$ticketFieldIndex}"} }}</p>
+                  </div>
+                @endif
+                @php $ticketFieldIndex++; @endphp
+              @endforeach
+            </div>
+          @endif
+        @endforeach
       </div>
 
       <div
@@ -216,7 +249,17 @@
             <p class="mb-[8px] font-extrabold text-[#4E81FA]">
               {{ __('messages.terms_and_conditions') }}
             </p>
-            <p class="font-bold text-[#151B26]"><a href="https://www.eventschedule.com/' . (config('app.hosted') ? 'terms-of-service' : 'self-hosting-terms-of-service') . '" target="_blank">eventschedule.com/terms</a></p>
+            @php
+                $termsUrl = $event->terms_url ?: (config('app.hosted')
+                    ? 'https://www.eventschedule.com/terms-of-service'
+                    : 'https://www.eventschedule.com/self-hosting-terms-of-service');
+                $termsDisplay = $event->terms_url
+                    ? preg_replace('#^https?://(www\.)?#', '', $event->terms_url)
+                    : 'eventschedule.com/terms';
+            @endphp
+            <p class="font-bold text-[#151B26]">
+                <a href="{{ $termsUrl }}" target="_blank">{{ Str::limit($termsDisplay, 30) }}</a>
+            </p>
           </div>
           <div>
             <p class="mb-[8px] font-extrabold text-[#4E81FA]">
