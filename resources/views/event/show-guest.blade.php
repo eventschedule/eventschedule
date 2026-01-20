@@ -370,7 +370,7 @@
                 </h3>
                 @endif
               </div>
-              @if ($each->isClaimed() && config('app.hosted'))
+              @if ($each->isClaimed() && (config('app.hosted') || config('app.is_testing') || config('app.enable_community')))
               <a
                 href="{{ auth()->user() && auth()->user()->isMember($each->subdomain)
                   ? config('app.url') . route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => 'schedule'], false) 
