@@ -1,4 +1,4 @@
-<svg class="h-8 w-8" preserveAspectRatio="none" stroke="grey"
+<svg {{ $attributes->merge(['class' => 'h-8 w-8']) }} preserveAspectRatio="none"
     fill="none" viewBox="0 0 24 24" aria-hidden="true">
     <path fill="white"
     @if(strpos($slot, 'facebook.com') === 0)
