@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\AnalyticsService;
+use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 
 class AnalyticsController extends Controller
@@ -13,8 +14,8 @@ class AnalyticsController extends Controller
         $roleIds = $user->roles()->wherePivot('level', '!=', 'follower')->pluck('roles.id');
         $roles = $user->roles()->wherePivot('level', '!=', 'follower')->get();
 
-        // Get selected role for filtering
-        $selectedRoleId = $request->role_id ? (int) $request->role_id : null;
+        // Get selected role for filtering (decode from URL-safe format)
+        $selectedRoleId = $request->role_id ? UrlUtils::decodeId($request->role_id) : null;
 
         // Date range - default to last 30 days
         $period = $request->period ?? 'daily';
