@@ -6,8 +6,12 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-800">
                         <tr>
+                            <th scope="col" class="py-3.5 pl-4 pr-3 sm:pl-6 w-10">
+                                <input type="checkbox" id="select-all"
+                                    class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[#4E81FA] focus:ring-[#4E81FA]">
+                            </th>
                             <th scope="col"
-                                class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 sm:pl-6 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                                class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                                 data-sort="name">
                                 <div class="flex items-center gap-1">
                                     {{ __('messages.name') }}
@@ -104,7 +108,12 @@
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                         @foreach ($roles as $role)
                         <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                            <td class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:pl-6 max-w-xs">
+                            <td class="py-4 pl-4 pr-3 sm:pl-6 w-10">
+                                <input type="checkbox" class="row-checkbox h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[#4E81FA] focus:ring-[#4E81FA]"
+                                    value="{{ $role->subdomain }}"
+                                    data-has-email="{{ $role->email ? 'true' : 'false' }}">
+                            </td>
+                            <td class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-gray-100 max-w-xs">
                                 @if ($role->isClaimed())
                                 <a href="{{ $role->getGuestUrl() }}"
                                     target="_blank" class="hover:underline break-words">{{ $role->getDisplayName(false) }}

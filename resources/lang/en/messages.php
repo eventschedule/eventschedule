@@ -170,6 +170,7 @@ return [
     'try_event_schedule' => 'Create your free schedule at :link',
     'supported_by' => 'Supported by :link',
     'unfollowed_role' => 'Successfully unfollowed :name',
+    'unfollowed_roles_count' => 'Successfully unfollowed :count schedules',
     'unfollow' => 'Unfollow',
     'event_requested' => 'Successfully submitted request',
     'search' => 'Search',

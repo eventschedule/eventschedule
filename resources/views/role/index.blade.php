@@ -13,6 +13,16 @@
                     </button>
                 </div>
             </div>
+            <div>
+                <form id="bulk-action-form" method="POST" action="{{ route('following.bulk-unfollow') }}">
+                    @csrf
+                    <input type="hidden" name="subdomains" id="bulk-subdomains" value="">
+                    <button type="submit" id="bulk-action-btn" style="display: none;"
+                        class="inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        {{ __('messages.unfollow') }}
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -28,6 +38,13 @@ let currentSortBy = '{{ $sortBy }}';
 let currentSortDir = '{{ $sortDir }}';
 const filterInput = document.getElementById('filter');
 const clearButton = document.getElementById('clear-filter');
+const bulkActionBtn = document.getElementById('bulk-action-btn');
+const bulkSubdomainsInput = document.getElementById('bulk-subdomains');
+const bulkActionForm = document.getElementById('bulk-action-form');
+
+const unfollowLabel = '{{ __('messages.unfollow') }}';
+const deleteLabel = '{{ __('messages.delete') }}';
+const confirmMessage = '{{ __('messages.are_you_sure') }}';
 
 // Show clear button if filter has initial value
 if (filterInput.value) {
@@ -85,7 +102,99 @@ function updateResults() {
         const followingTable = document.getElementById('following-table');
         if (followingTable) {
             followingTable.innerHTML = html;
+            setupCheckboxListeners();
+            updateBulkActionButton();
         }
     });
 }
+
+function setupCheckboxListeners() {
+    const selectAllCheckbox = document.getElementById('select-all');
+    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            rowCheckboxes.forEach(cb => cb.checked = this.checked);
+            updateBulkActionButton();
+        });
+    }
+
+    rowCheckboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            updateSelectAllState();
+            updateBulkActionButton();
+        });
+
+        // Make entire row clickable to toggle checkbox
+        const row = cb.closest('tr');
+        if (row) {
+            row.style.cursor = 'pointer';
+            row.addEventListener('click', function(e) {
+                // Don't toggle if clicking on links, buttons, or the checkbox itself
+                if (e.target.closest('a') || e.target.closest('button') || e.target.type === 'checkbox') {
+                    return;
+                }
+                cb.checked = !cb.checked;
+                updateSelectAllState();
+                updateBulkActionButton();
+            });
+        }
+    });
+}
+
+function updateSelectAllState() {
+    const selectAllCheckbox = document.getElementById('select-all');
+    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+    if (selectAllCheckbox && rowCheckboxes.length > 0) {
+        const allChecked = Array.from(rowCheckboxes).every(cb => cb.checked);
+        const someChecked = Array.from(rowCheckboxes).some(cb => cb.checked);
+        selectAllCheckbox.checked = allChecked;
+        selectAllCheckbox.indeterminate = someChecked && !allChecked;
+    }
+}
+
+function updateBulkActionButton() {
+    const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+    const selectedSubdomains = Array.from(checkedBoxes).map(cb => cb.value);
+
+    let unfollowCount = 0;
+    let deleteCount = 0;
+
+    checkedBoxes.forEach(cb => {
+        if (cb.dataset.hasEmail === 'true') {
+            unfollowCount++;
+        } else {
+            deleteCount++;
+        }
+    });
+
+    bulkSubdomainsInput.value = JSON.stringify(selectedSubdomains);
+
+    if (selectedSubdomains.length === 0) {
+        bulkActionBtn.style.display = 'none';
+    } else {
+        bulkActionBtn.style.display = 'inline-flex';
+        let label = '';
+        if (unfollowCount > 0 && deleteCount > 0) {
+            label = `${unfollowLabel} (${unfollowCount}) | ${deleteLabel} (${deleteCount})`;
+        } else if (unfollowCount > 0) {
+            label = `${unfollowLabel} (${unfollowCount})`;
+        } else {
+            label = `${deleteLabel} (${deleteCount})`;
+        }
+        bulkActionBtn.textContent = label;
+    }
+}
+
+// Confirmation dialog on form submit
+bulkActionForm.addEventListener('submit', function(e) {
+    if (!confirm(confirmMessage)) {
+        e.preventDefault();
+    }
+});
+
+// Initialize checkbox listeners on page load
+document.addEventListener('DOMContentLoaded', function() {
+    setupCheckboxListeners();
+});
 </script>
