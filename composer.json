@@ -11,6 +11,7 @@
         "endroid/qr-code": "^5.0",
         "ezyang/htmlpurifier": "^4.17",
         "google/apiclient": "^2.18",
+        "laravel/cashier": "^15.7",
         "laravel/framework": "^11.9",
         "laravel/socialite": "^5.23",
         "laravel/tinker": "^2.9",
