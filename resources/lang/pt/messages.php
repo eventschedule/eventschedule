@@ -709,6 +709,7 @@ return [
     'monthly' => 'Mensal',
     'views' => 'Visualizações',
     'device_breakdown' => 'Distribuição por Dispositivo',
+    'top_associated_roles' => 'Principais Artistas e Locais Associados',
     'recent_views' => 'Visualizações Recentes',
     'schedule' => 'Calendário',
     'device' => 'Dispositivo',

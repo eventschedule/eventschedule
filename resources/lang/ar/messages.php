@@ -711,6 +711,7 @@ return [
     'monthly' => 'شهري',
     'views' => 'المشاهدات',
     'device_breakdown' => 'توزيع الأجهزة',
+    'top_associated_roles' => 'أفضل الفنانين والأماكن المرتبطة',
     'recent_views' => 'المشاهدات الأخيرة',
     'schedule' => 'الجدول',
     'device' => 'الجهاز',

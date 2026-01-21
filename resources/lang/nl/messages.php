@@ -708,6 +708,7 @@ return [
     'monthly' => 'Maandelijks',
     'views' => 'Weergaven',
     'device_breakdown' => 'Apparaatverdeling',
+    'top_associated_roles' => 'Top Geassocieerde Artiesten & Locaties',
     'recent_views' => 'Recente Weergaven',
     'schedule' => 'Agenda',
     'device' => 'Apparaat',

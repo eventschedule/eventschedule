@@ -703,6 +703,7 @@ return [
     'monthly' => 'חודשי',
     'views' => 'צפיות',
     'device_breakdown' => 'התפלגות מכשירים',
+    'top_associated_roles' => 'אמנים ומקומות מובילים משויכים',
     'recent_views' => 'צפיות אחרונות',
     'schedule' => 'לוח',
     'device' => 'מכשיר',
