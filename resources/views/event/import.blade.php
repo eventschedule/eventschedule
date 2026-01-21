@@ -319,7 +319,24 @@
                                     autocomplete="off" />
                         </div>
 
-                        <!-- Venue section with border -->
+                        <!-- Venue display for saved events -->
+                        <div v-if="savedEvents[idx]" class="border border-gray-300 dark:border-gray-600 rounded-md p-4">
+                            <x-input-label :value="__('messages.venue')" class="mb-2" />
+                            <div class="text-gray-900 dark:text-gray-100">
+                                <!-- Show selected existing venue -->
+                                <template v-if="eventSelectedVenues[idx]">
+                                    <p class="font-medium">@{{ eventSelectedVenues[idx].name || eventSelectedVenues[idx].address1 }}</p>
+                                </template>
+                                <!-- Show created venue info -->
+                                <template v-else>
+                                    <p v-if="preview.parsed[idx].venue_name" class="font-medium">@{{ preview.parsed[idx].venue_name }}</p>
+                                    <p v-if="preview.parsed[idx].event_address" class="text-sm text-gray-600 dark:text-gray-400">@{{ preview.parsed[idx].event_address }}</p>
+                                    <p v-if="preview.parsed[idx].event_city" class="text-sm text-gray-600 dark:text-gray-400">@{{ preview.parsed[idx].event_city }}</p>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Venue section with border (editable) -->
                         <div v-if="!savedEvents[idx]" class="border border-gray-300 dark:border-gray-600 rounded-md p-4">
                             <x-input-label :value="__('messages.venue')" class="mb-2" />
 
@@ -351,7 +368,7 @@
                                         :value="eventSelectedVenues[idx]?.id || ''">
                                     <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                     <option v-for="venue in venues" :key="venue.id" :value="venue.id">
-                                        @{{ venue.name || venue.address1 }}
+                                        @{{ venue.name || venue.address1 }}@{{ venue._matched ? ' (Matched)' : '' }}
                                     </option>
                                 </select>
                             </div>
@@ -962,21 +979,32 @@
 
                         this.preview.parsed.forEach((event, idx) => {
                             let matchedUserVenue = null;
-                            if (event.venue_id && this.venues.length > 0) {
+                            if (event.venue_id) {
+                                // Check if venue is already in the list (connected or previously added)
                                 matchedUserVenue = this.venues.find(v => v.id === event.venue_id);
                             }
 
-                            if (this.venues.length > 0) {
-                                // Authenticated user with venues
-                                if (matchedUserVenue) {
-                                    this.eventVenueTypes[idx] = 'use_existing';
-                                    this.eventSelectedVenues[idx] = matchedUserVenue;
-                                } else {
-                                    this.eventVenueTypes[idx] = 'create_new';
-                                    this.eventSelectedVenues[idx] = null;
-                                }
+                            // If venue matched but not in user's venues list, add it
+                            if (event.venue_id && !matchedUserVenue && event.matched_venue_name) {
+                                const matchedVenue = {
+                                    id: event.venue_id,
+                                    name: event.matched_venue_name,
+                                    subdomain: event.venue_subdomain,
+                                    _matched: true  // Flag to identify matched venues
+                                };
+                                this.venues.push(matchedVenue);
+                                matchedUserVenue = matchedVenue;
+                            }
+
+                            if (matchedUserVenue) {
+                                this.eventVenueTypes[idx] = 'use_existing';
+                                this.eventSelectedVenues[idx] = matchedUserVenue;
+                            } else if (this.venues.length > 0) {
+                                // Has connected venues but no match - default to create_new
+                                this.eventVenueTypes[idx] = 'create_new';
+                                this.eventSelectedVenues[idx] = null;
                             } else if (event.venue_id) {
-                                // Unauthenticated user but venue match exists - default to use_existing
+                                // Guest user with venue match (displayed as text, not dropdown)
                                 this.eventVenueTypes[idx] = 'use_existing';
                                 this.eventSelectedVenues[idx] = null;
                             } else {
@@ -1137,7 +1165,9 @@
                                 memberData.youtube_url = performer.selectedVideos[0].url; // Only send one video URL
                             }
                             
-                            members[`new_talent_${index}`] = memberData;
+                            // Use talent_id if available, otherwise use new_talent_${index}
+                            const memberId = performer.talent_id || `new_talent_${index}`;
+                            members[memberId] = memberData;
                         });
                     } else if (parsed.talent_id) {
                         members[parsed.talent_id] = {
