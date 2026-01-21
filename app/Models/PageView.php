@@ -165,17 +165,17 @@ class PageView
             AnalyticsEventsDaily::incrementView($event->id, $deviceType);
 
             // Track appearance views for associated talents/venues
-            // But only if the current schedule is actually a curator of this event
+            // If the current schedule is associated with this event (as curator, venue, or talent)
             $roles = $event->relationLoaded('roles') ? $event->roles : $event->roles()->get();
 
-            // Check if the current schedule is linked to this event as a curator
-            $scheduleIsCurator = $roles->contains(function ($eventRole) use ($role) {
-                return $eventRole->id === $role->id && $eventRole->isCurator();
+            // Check if the current schedule is linked to this event in any capacity
+            $scheduleIsAssociated = $roles->contains(function ($eventRole) use ($role) {
+                return $eventRole->id === $role->id;
             });
 
-            if ($scheduleIsCurator) {
+            if ($scheduleIsAssociated) {
                 foreach ($roles as $eventRole) {
-                    // Only track talents and venues, not the schedule itself
+                    // Track talents and venues (not curators), excluding the current schedule
                     if (($eventRole->isTalent() || $eventRole->isVenue()) && $eventRole->id !== $role->id) {
                         AnalyticsAppearancesDaily::incrementView($eventRole->id, $role->id, $deviceType);
                     }
