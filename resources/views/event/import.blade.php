@@ -319,10 +319,13 @@
                                     autocomplete="off" />
                         </div>
 
-                        <!-- Venue selection - show when venues available (auth) OR venue match exists (guest) -->
-                        <div v-if="(venues.length > 0 || preview.parsed[idx].venue_id) && !savedEvents[idx]">
-                            <x-input-label :value="__('messages.venue')" />
-                            <fieldset>
+                        <!-- Venue section with border -->
+                        <div v-if="!savedEvents[idx]" class="border border-gray-300 dark:border-gray-600 rounded-md p-4">
+                            <x-input-label :value="__('messages.venue')" class="mb-2" />
+
+                            <!-- Venue selection - show when venues available (auth) OR venue match exists (guest) -->
+                            <div v-if="venues.length > 0 || preview.parsed[idx].venue_id">
+                                <fieldset>
                                 <div class="mt-2 mb-4 space-y-4 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                     <div class="flex items-center">
                                         <input :id="'use_existing_venue_' + idx" :name="'venue_type_' + idx" type="radio" value="use_existing" v-model="eventVenueTypes[idx]" @change="onVenueTypeChange(idx)"
@@ -367,45 +370,46 @@
                                 </p>
                             </div>
                             @endguest
-                        </div>
-
-                        <!-- Venue fields (when "Create New" selected or no venues available) -->
-                        <div v-if="shouldShowVenueFields(idx) && !eventSelectedVenues[idx]">
-                            <!-- Venue Name -->
-                            <div>
-                                <x-input-label for="venue_name_@{{ idx }}" :value="__('messages.name')" />
-                                <x-text-input id="venue_name_@{{ idx }}"
-                                    name="venue_name_@{{ idx }}"
-                                    type="text"
-                                    class="mt-1 block w-full"
-                                    v-model="preview.parsed[idx].venue_name"
-                                    v-bind:readonly="savedEvents[idx]"
-                                    autocomplete="off" />
                             </div>
 
-                            <!-- Street Address -->
-                            <div class="mt-4">
-                                <x-input-label for="venue_address1_@{{ idx }}" :value="__('messages.street_address')" />
-                                <x-text-input id="venue_address1_@{{ idx }}"
-                                    name="venue_address1_@{{ idx }}"
-                                    type="text"
-                                    class="mt-1 block w-full"
-                                    v-model="preview.parsed[idx].event_address"
-                                    v-bind:readonly="savedEvents[idx]"
-                                    autocomplete="off" />
-                            </div>
+                            <!-- Venue fields (when "Create New" selected or no venues available) -->
+                            <div v-if="shouldShowVenueFields(idx) && !eventSelectedVenues[idx]" class="mt-4">
+                                <!-- Venue Name -->
+                                <div>
+                                    <x-input-label for="venue_name_@{{ idx }}" :value="__('messages.name')" />
+                                    <x-text-input id="venue_name_@{{ idx }}"
+                                        name="venue_name_@{{ idx }}"
+                                        type="text"
+                                        class="mt-1 block w-full"
+                                        v-model="preview.parsed[idx].venue_name"
+                                        v-bind:readonly="savedEvents[idx]"
+                                        autocomplete="off" />
+                                </div>
 
-                            <!-- City -->
-                            <div class="mt-4">
-                                <x-input-label for="venue_city_@{{ idx }}" :value="__('messages.city')" />
-                                <x-text-input id="venue_city_@{{ idx }}"
-                                    name="venue_city_@{{ idx }}"
-                                    type="text"
-                                    class="mt-1 block w-full"
-                                    v-model="preview.parsed[idx].event_city"
-                                    v-bind:readonly="savedEvents[idx]"
-                                    placeholder="{{ $role->isCurator() ? $role->city : '' }}"
-                                    autocomplete="off" />
+                                <!-- Street Address -->
+                                <div class="mt-4">
+                                    <x-input-label for="venue_address1_@{{ idx }}" :value="__('messages.street_address')" />
+                                    <x-text-input id="venue_address1_@{{ idx }}"
+                                        name="venue_address1_@{{ idx }}"
+                                        type="text"
+                                        class="mt-1 block w-full"
+                                        v-model="preview.parsed[idx].event_address"
+                                        v-bind:readonly="savedEvents[idx]"
+                                        autocomplete="off" />
+                                </div>
+
+                                <!-- City -->
+                                <div class="mt-4">
+                                    <x-input-label for="venue_city_@{{ idx }}" :value="__('messages.city')" />
+                                    <x-text-input id="venue_city_@{{ idx }}"
+                                        name="venue_city_@{{ idx }}"
+                                        type="text"
+                                        class="mt-1 block w-full"
+                                        v-model="preview.parsed[idx].event_city"
+                                        v-bind:readonly="savedEvents[idx]"
+                                        placeholder="{{ $role->isCurator() ? $role->city : '' }}"
+                                        autocomplete="off" />
+                                </div>
                             </div>
                         </div>
 
@@ -769,11 +773,13 @@
                     const hasName = event.event_name?.trim();
                     const hasDate = event.event_date_time;
                     
-                    // For address validation: if it's empty but there's a placeholder (city), consider it valid
-                    const hasAddress = event.event_address?.trim() || 
-                                     ({{ $role->isCurator() ? 'true' : 'false' }} && '{{ $role->city }}');
-                    
-                    return hasName && hasAddress && hasDate;
+                    // Any venue field (name, address, or city) is sufficient
+                    const hasVenueInfo = event.venue_name?.trim() ||
+                                         event.event_address?.trim() ||
+                                         event.event_city?.trim() ||
+                                         ({{ $role->isCurator() ? 'true' : 'false' }} && '{{ $role->city }}');
+
+                    return hasName && hasVenueInfo && hasDate;
                 }) || false;
                 
                 // If createAccount is checked, also validate user fields
