@@ -48,7 +48,8 @@ class EventRepo
                 $venue->city = $request->venue_city;
                 $venue->state = $request->venue_state;
                 $venue->postal_code = $request->venue_postal_code;
-                $venue->country_code = $request->venue_country_code ? $request->venue_country_code : $currentRole->country_code;
+                $countryCode = $request->venue_country_code ? $request->venue_country_code : $currentRole->country_code;
+                $venue->country_code = $countryCode ? strtolower($countryCode) : null;
                 $venue->language_code = $request->venue_language_code ? $request->venue_language_code : $currentRole->language_code;
                 $venue->timezone = $currentRole->timezone;
                 $venue->background_colors = ColorUtils::randomGradient();
@@ -81,7 +82,7 @@ class EventRepo
                 $venue->city = $request->venue_city;
                 $venue->state = $request->venue_state;
                 $venue->postal_code = $request->venue_postal_code;
-                $venue->country_code = $request->venue_country_code;
+                $venue->country_code = $request->venue_country_code ? strtolower($request->venue_country_code) : null;
                 $venue->save();
             }
         }
@@ -99,7 +100,8 @@ class EventRepo
                     $role->type = $request->role_type ? $request->role_type : 'talent';
                     $role->timezone = $currentRole->timezone;
                     $role->language_code = $request->language_code ? $request->language_code : $currentRole->language_code;
-                    $role->country_code = $request->country_code ? $request->country_code : $currentRole->country_code;
+                    $countryCode = $request->country_code ? $request->country_code : $currentRole->country_code;
+                    $role->country_code = $countryCode ? strtolower($countryCode) : null;
                     $role->background_colors = ColorUtils::randomGradient();
                     $role->background_rotation = rand(0, 359);
                     $role->font_color = '#ffffff';
@@ -196,7 +198,7 @@ class EventRepo
         // Decode event-level custom_fields from JSON string
         if ($request->has('custom_fields')) {
             $request->merge([
-                'custom_fields' => json_decode($request->input('custom_fields'), true)
+                'custom_fields' => json_decode($request->input('custom_fields'), true),
             ]);
         }
 
