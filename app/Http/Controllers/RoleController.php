@@ -375,6 +375,14 @@ class RoleController extends Controller
             }
         }
 
+        // Get translation data for curator events
+        if ($event && $role->isCurator()) {
+            $eventRole = $event->roles->where('id', $role->id)->first();
+            if ($eventRole && $eventRole->pivot && $eventRole->pivot->name_translated) {
+                $translation = $eventRole->pivot;
+            }
+        }
+
         if (! $month) {
             $month = now()->month;
         }
