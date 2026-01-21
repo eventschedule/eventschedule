@@ -34,7 +34,7 @@ return [
     'confirm_your_password' => 'Please confirm your password',
     'confirm' => 'Confirm',
     'password' => 'Password',
-    'email_password_reset_link' => 'Email Password Reset Link',
+    'email_password_reset_link' => 'Send Reset Link',
     'remember_me' => 'Remember me',
     'log_in' => 'Log in',
     'name' => 'Name',
