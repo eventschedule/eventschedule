@@ -12,10 +12,11 @@ use App\Utils\UrlUtils;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
 use App\Utils\GeminiUtils;
 use App\Utils\CssUtils;
+use App\Traits\RoleBillable;
 
 class Role extends Model implements MustVerifyEmail
 {
-    use Notifiable, MustVerifyEmailTrait;
+    use Notifiable, MustVerifyEmailTrait, RoleBillable;
 
     protected $fillable = [
         'type',
@@ -80,6 +81,7 @@ class Role extends Model implements MustVerifyEmail
      */
     protected $casts = [
         'google_webhook_expires_at' => 'datetime',
+        'trial_ends_at' => 'datetime',
     ];
 
     /**
@@ -649,11 +651,33 @@ class Role extends Model implements MustVerifyEmail
             return true;
         }
 
+        // Check if user has an active Stripe subscription
+        if ($this->hasActiveSubscription()) {
+            return true;
+        }
+
+        // Check if user is on a generic trial (first year free)
+        if ($this->onGenericTrial()) {
+            return true;
+        }
+
+        // Legacy: Check the plan_expires field
         return $this->plan_expires >= now()->format('Y-m-d') && $this->plan_type == 'pro';
     }
 
     public function isWhiteLabeled()
     {
+        // Check if user has an active Stripe subscription
+        if ($this->hasActiveSubscription()) {
+            return true;
+        }
+
+        // Check if user is on a generic trial (first year free)
+        if ($this->onGenericTrial()) {
+            return true;
+        }
+
+        // Legacy: Check the plan_expires field
         return $this->plan_expires >= now()->format('Y-m-d') && $this->plan_type == 'pro';
     }
 

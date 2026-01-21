@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use Laravel\Cashier\Cashier;
 use URL;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
         if (config('app.env') !== 'local') {
             URL::forceScheme('https');
         }
+
+        // Configure Cashier to use Role model for subscriptions
+        Cashier::useCustomerModel(\App\Models\Role::class);
 
         $this->app->singleton('userRoles', function () {
             if ($user = auth()->user()) {
