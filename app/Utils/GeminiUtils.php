@@ -418,37 +418,70 @@ class GeminiUtils
             if ($role->isVenue()) {
                 $data[$key]['venue_id'] = UrlUtils::encodeId($role->id);
                 $data[$key]['event_address'] = $role->address1;
-            } elseif (! empty($item['event_city']) && (! empty($item['venue_name']) || ! empty($item['event_address']))) {
-                $venue = Role::where('is_deleted', false)
-                    ->where('country_code', $role->country_code)
-                    ->where('city', $item['event_city'])
-                    ->where(function ($query) use ($item) {
-                        // Match by name OR by address
-                        $query->where(function ($q) use ($item) {
-                            $q->when(! empty($item['venue_name']), function ($q2) use ($item) {
-                                $q2->where('name', $item['venue_name']);
+            } elseif (! empty($item['venue_name']) || ! empty($item['venue_name_en']) || ! empty($item['event_address'])) {
+                $venue = null;
+
+                // First: Try stricter matching (requires city + country + name/address)
+                if (! empty($item['event_city'])) {
+                    $venue = Role::where('is_deleted', false)
+                        ->where('country_code', $role->country_code)
+                        ->where('city', $item['event_city'])
+                        ->where(function ($query) use ($item) {
+                            // Match by name OR by address
+                            $query->where(function ($q) use ($item) {
+                                $q->when(! empty($item['venue_name']), function ($q2) use ($item) {
+                                    $q2->where('name', $item['venue_name']);
+                                })
+                                    ->when(! empty($item['venue_name_en']), function ($q2) use ($item) {
+                                        $q2->orWhere('name_en', $item['venue_name_en']);
+                                    });
                             })
-                                ->when(! empty($item['venue_name_en']), function ($q2) use ($item) {
-                                    $q2->orWhere('name_en', $item['venue_name_en']);
+                                ->orWhere(function ($q) use ($item) {
+                                    $q->when(! empty($item['event_address']), function ($q2) use ($item) {
+                                        $q2->where('address1', $item['event_address']);
+                                    })
+                                        ->when(! empty($item['event_address_en']), function ($q2) use ($item) {
+                                            $q2->orWhere('address1_en', $item['event_address_en']);
+                                        });
                                 });
                         })
-                            ->orWhere(function ($q) use ($item) {
-                                $q->when(! empty($item['event_address']), function ($q2) use ($item) {
-                                    $q2->where('address1', $item['event_address']);
+                        ->where('type', 'venue')
+                        ->orderByRaw('CASE WHEN email IS NOT NULL THEN 0 ELSE 1 END')
+                        ->orderBy('id', 'desc')
+                        ->first();
+                }
+
+                // Fallback: Try connected venues (name match only)
+                if (! $venue && (! empty($item['venue_name']) || ! empty($item['venue_name_en']))) {
+                    $connectedVenueIds = \DB::table('event_role as er1')
+                        ->join('event_role as er2', 'er1.event_id', '=', 'er2.event_id')
+                        ->join('roles', 'er2.role_id', '=', 'roles.id')
+                        ->where('er1.role_id', $role->id)
+                        ->where('roles.type', 'venue')
+                        ->where('roles.is_deleted', false)
+                        ->distinct()
+                        ->pluck('roles.id');
+
+                    if ($connectedVenueIds->isNotEmpty()) {
+                        $venue = Role::whereIn('id', $connectedVenueIds)
+                            ->where(function ($query) use ($item) {
+                                $query->when(! empty($item['venue_name']), function ($q) use ($item) {
+                                    $q->where('name', $item['venue_name']);
                                 })
-                                    ->when(! empty($item['event_address_en']), function ($q2) use ($item) {
-                                        $q2->orWhere('address1_en', $item['event_address_en']);
+                                    ->when(! empty($item['venue_name_en']), function ($q) use ($item) {
+                                        $q->orWhere('name_en', $item['venue_name_en']);
                                     });
-                            });
-                    })
-                    ->where('type', 'venue')
-                    ->orderBy('id')
-                    ->first();
+                            })
+                            ->orderByRaw('CASE WHEN email IS NOT NULL THEN 0 ELSE 1 END')
+                            ->orderBy('id', 'desc')
+                            ->first();
+                    }
+                }
 
                 if ($venue) {
                     $data[$key]['venue_id'] = UrlUtils::encodeId($venue->id);
                     $data[$key]['venue_subdomain'] = $venue->subdomain;
-                    $data[$key]['venue_url'] = route('role.view_guest', ['subdomain' => $venue->subdomain]);
+                    $data[$key]['venue_url'] = $venue->getGuestUrl();
                     $data[$key]['matched_venue_name'] = $venue->name;
                     $user = auth()->user();
                     $data[$key]['venue_is_editable'] = ! $venue->isClaimed() ||
@@ -465,8 +498,20 @@ class GeminiUtils
             if ($role->isTalent()) {
                 $data[$key]['talent_id'] = UrlUtils::encodeId($role->id);
             } elseif (! empty($item['performers'])) {
+                // Get connected talent IDs once for all performers (needed for fallback)
+                $connectedTalentIds = \DB::table('event_role as er1')
+                    ->join('event_role as er2', 'er1.event_id', '=', 'er2.event_id')
+                    ->join('roles', 'er2.role_id', '=', 'roles.id')
+                    ->where('er1.role_id', $role->id)
+                    ->where('roles.type', 'talent')
+                    ->where('roles.is_deleted', false)
+                    ->distinct()
+                    ->pluck('roles.id');
 
                 foreach ($item['performers'] as $index => $performer) {
+                    $talent = null;
+
+                    // First: Try stricter matching (name + country, prefer with email)
                     $talent = Role::where('is_deleted', false)
                         ->where(function ($query) use ($performer) {
                             $query->where('name', $performer['name'])
@@ -477,7 +522,21 @@ class GeminiUtils
                         ->where('type', 'talent')
                         ->where('country_code', $role->country_code)
                         ->orderByRaw('CASE WHEN email IS NOT NULL THEN 0 ELSE 1 END')
+                        ->orderBy('id', 'desc')
                         ->first();
+
+                    // Fallback: Try connected talents (name match only)
+                    if (! $talent && $connectedTalentIds->isNotEmpty()) {
+                        $talent = Role::whereIn('id', $connectedTalentIds)
+                            ->where(function ($query) use ($performer) {
+                                $query->where('name', $performer['name'])
+                                    ->when(! empty($performer['name_en']), function ($q) use ($performer) {
+                                        $q->orWhere('name_en', $performer['name_en']);
+                                    });
+                            })
+                            ->orderBy('id', 'desc')
+                            ->first();
+                    }
 
                     if ($talent) {
                         $data[$key]['performers'][$index]['talent_id'] = UrlUtils::encodeId($talent->id);
