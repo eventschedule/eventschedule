@@ -32,9 +32,9 @@ class AnalyticsController extends Controller
         $momComparison = $analytics->getMonthOverMonthComparison($user, $selectedRoleId);
 
         // Get total views (all time)
-        $totalViews = $selectedRoleId
-            ? \App\Models\PageView::byRole($selectedRoleId)->count()
-            : \App\Models\PageView::forRoles($roleIds)->count();
+        $totalViews = $analytics->getTotalViewsForRoles(
+            $selectedRoleId ? collect([$selectedRoleId]) : $roleIds
+        );
 
         // Get top events
         $topEvents = $analytics->getTopEvents($user, 10, $start, $end);
@@ -48,9 +48,6 @@ class AnalyticsController extends Controller
         // Get views by schedule
         $viewsBySchedule = $analytics->getViewsBySchedule($user, $start, $end);
 
-        // Get recent views (paginated)
-        $recentViews = $analytics->getRecentViews($user, 25, $selectedRoleId);
-
         return view('analytics.index', compact(
             'roles',
             'selectedRoleId',
@@ -60,7 +57,6 @@ class AnalyticsController extends Controller
             'viewsByPeriod',
             'deviceBreakdown',
             'viewsBySchedule',
-            'recentViews',
             'period'
         ));
     }

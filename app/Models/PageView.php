@@ -2,56 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
-class PageView extends Model
+class PageView
 {
-    public $timestamps = false;
-
-    protected $fillable = [
-        'role_id',
-        'event_id',
-        'viewed_at',
-        'ip_hash',
-        'user_agent',
-        'device_type',
-    ];
-
-    protected $casts = [
-        'viewed_at' => 'datetime',
-    ];
-
-    public function role()
-    {
-        return $this->belongsTo(Role::class);
-    }
-
-    public function event()
-    {
-        return $this->belongsTo(Event::class);
-    }
-
-    public function scopeByRole($query, $roleId)
-    {
-        return $query->where('role_id', $roleId);
-    }
-
-    public function scopeByEvent($query, $eventId)
-    {
-        return $query->where('event_id', $eventId);
-    }
-
-    public function scopeInDateRange($query, $start, $end)
-    {
-        return $query->whereBetween('viewed_at', [$start, $end]);
-    }
-
-    public function scopeForRoles($query, $roleIds)
-    {
-        return $query->whereIn('role_id', $roleIds);
-    }
-
     /**
      * Detect device type from user agent string
      */
@@ -186,24 +140,27 @@ class PageView extends Model
     }
 
     /**
-     * Record a page view (returns null if bot detected)
+     * Record a page view (returns false if bot detected)
      */
-    public static function recordView(Role $role, ?Event $event, Request $request): ?self
+    public static function recordView(Role $role, ?Event $event, Request $request): bool
     {
         $userAgent = $request->userAgent();
 
         // Skip recording for bots/crawlers
         if (self::isBot($userAgent)) {
-            return null;
+            return false;
         }
 
-        return self::create([
-            'role_id' => $role->id,
-            'event_id' => $event?->id,
-            'viewed_at' => now(),
-            'ip_hash' => $request->ip() ? hash('sha256', $request->ip() . config('app.key')) : null,
-            'user_agent' => $userAgent ? substr($userAgent, 0, 500) : null,
-            'device_type' => self::detectDeviceType($userAgent),
-        ]);
+        $deviceType = self::detectDeviceType($userAgent);
+
+        // Increment schedule-level analytics
+        AnalyticsDaily::incrementView($role->id, $deviceType);
+
+        // Increment event-level analytics if event exists
+        if ($event) {
+            AnalyticsEventsDaily::incrementView($event->id, $deviceType);
+        }
+
+        return true;
     }
 }

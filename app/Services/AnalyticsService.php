@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\AnalyticsDaily;
+use App\Models\AnalyticsEventsDaily;
 use App\Models\PageView;
 use App\Models\Role;
 use App\Models\Event;
@@ -10,14 +12,13 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class AnalyticsService
 {
     /**
-     * Record a page view (returns null if bot detected)
+     * Record a page view (returns false if bot detected)
      */
-    public function recordView(Role $role, ?Event $event, Request $request): ?PageView
+    public function recordView(Role $role, ?Event $event, Request $request): bool
     {
         return PageView::recordView($role, $event, $request);
     }
@@ -33,8 +34,8 @@ class AnalyticsService
             return $this->emptyStats();
         }
 
-        $totalViews = PageView::forRoles($roleIds)->count();
-        $periodViews = PageView::forRoles($roleIds)->inDateRange($start, $end)->count();
+        $totalViews = $this->getTotalViewsForRoles($roleIds);
+        $periodViews = $this->getPeriodViewsForRoles($roleIds, $start, $end);
 
         return [
             'total_views' => $totalViews,
@@ -47,8 +48,8 @@ class AnalyticsService
      */
     public function getStatsForRole(Role $role, Carbon $start, Carbon $end): array
     {
-        $totalViews = PageView::byRole($role->id)->count();
-        $periodViews = PageView::byRole($role->id)->inDateRange($start, $end)->count();
+        $totalViews = $this->getTotalViewsForRoles(collect([$role->id]));
+        $periodViews = $this->getPeriodViewsForRoles(collect([$role->id]), $start, $end);
 
         return [
             'total_views' => $totalViews,
@@ -67,9 +68,21 @@ class AnalyticsService
             return collect();
         }
 
-        return PageView::select('event_id', DB::raw('COUNT(*) as view_count'))
-            ->forRoles($roleIds)
-            ->whereNotNull('event_id')
+        // Get event IDs that belong to user's roles (via pivot table)
+        $eventIds = DB::table('event_role')
+            ->whereIn('role_id', $roleIds)
+            ->pluck('event_id')
+            ->unique();
+
+        if ($eventIds->isEmpty()) {
+            return collect();
+        }
+
+        return AnalyticsEventsDaily::select(
+            'event_id',
+            DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as view_count')
+        )
+            ->forEvents($eventIds)
             ->inDateRange($start, $end)
             ->groupBy('event_id')
             ->orderByDesc('view_count')
@@ -79,7 +92,7 @@ class AnalyticsService
             ->filter(fn($item) => $item->event !== null)
             ->map(fn($item) => [
                 'event' => $item->event,
-                'view_count' => $item->view_count,
+                'view_count' => (int) $item->view_count,
             ]);
     }
 
@@ -101,16 +114,15 @@ class AnalyticsService
             default => '%Y-%m-%d',
         };
 
-        $query = PageView::select(
-            DB::raw("DATE_FORMAT(viewed_at, '{$dateFormat}') as period"),
-            DB::raw('COUNT(*) as view_count')
+        return AnalyticsDaily::select(
+            DB::raw("DATE_FORMAT(date, '{$dateFormat}') as period"),
+            DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as view_count')
         )
             ->forRoles($roleIds)
             ->inDateRange($start, $end)
             ->groupBy('period')
-            ->orderBy('period');
-
-        return $query->get();
+            ->orderBy('period')
+            ->get();
     }
 
     /**
@@ -133,13 +145,8 @@ class AnalyticsService
         $lastMonthStart = now()->subMonth()->startOfMonth();
         $lastMonthEnd = now()->subMonth()->endOfMonth();
 
-        $thisMonthViews = PageView::forRoles($roleIds)
-            ->inDateRange($thisMonthStart, $thisMonthEnd)
-            ->count();
-
-        $lastMonthViews = PageView::forRoles($roleIds)
-            ->inDateRange($lastMonthStart, $lastMonthEnd)
-            ->count();
+        $thisMonthViews = $this->getPeriodViewsForRoles($roleIds, $thisMonthStart, $thisMonthEnd);
+        $lastMonthViews = $this->getPeriodViewsForRoles($roleIds, $lastMonthStart, $lastMonthEnd);
 
         $percentageChange = $lastMonthViews > 0
             ? round((($thisMonthViews - $lastMonthViews) / $lastMonthViews) * 100, 1)
@@ -163,12 +170,26 @@ class AnalyticsService
             return collect();
         }
 
-        return PageView::select('device_type', DB::raw('COUNT(*) as count'))
+        $result = AnalyticsDaily::select(
+            DB::raw('SUM(desktop_views) as desktop'),
+            DB::raw('SUM(mobile_views) as mobile'),
+            DB::raw('SUM(tablet_views) as tablet'),
+            DB::raw('SUM(unknown_views) as unknown')
+        )
             ->forRoles($roleIds)
             ->inDateRange($start, $end)
-            ->groupBy('device_type')
-            ->get()
-            ->pluck('count', 'device_type');
+            ->first();
+
+        if (!$result) {
+            return collect();
+        }
+
+        return collect([
+            'desktop' => (int) $result->desktop,
+            'mobile' => (int) $result->mobile,
+            'tablet' => (int) $result->tablet,
+            'unknown' => (int) $result->unknown,
+        ])->filter(fn($count) => $count > 0);
     }
 
     /**
@@ -182,7 +203,10 @@ class AnalyticsService
             return collect();
         }
 
-        return PageView::select('role_id', DB::raw('COUNT(*) as view_count'))
+        return AnalyticsDaily::select(
+            'role_id',
+            DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as view_count')
+        )
             ->forRoles($roleIds)
             ->inDateRange($start, $end)
             ->groupBy('role_id')
@@ -191,25 +215,27 @@ class AnalyticsService
             ->filter(fn($item) => $item->role !== null)
             ->map(fn($item) => [
                 'role' => $item->role,
-                'view_count' => $item->view_count,
+                'view_count' => (int) $item->view_count,
             ]);
     }
 
     /**
-     * Get recent views with pagination
+     * Get total views for given roles (all time)
      */
-    public function getRecentViews(User $user, int $perPage = 25, ?int $roleId = null): LengthAwarePaginator
+    public function getTotalViewsForRoles(Collection $roleIds): int
     {
-        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+        return (int) AnalyticsDaily::forRoles($roleIds)
+            ->sum(DB::raw('desktop_views + mobile_views + tablet_views + unknown_views'));
+    }
 
-        if ($roleIds->isEmpty()) {
-            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, $perPage);
-        }
-
-        return PageView::forRoles($roleIds)
-            ->with(['role', 'event'])
-            ->orderByDesc('viewed_at')
-            ->paginate($perPage);
+    /**
+     * Get views for given roles in a date range
+     */
+    protected function getPeriodViewsForRoles(Collection $roleIds, Carbon $start, Carbon $end): int
+    {
+        return (int) AnalyticsDaily::forRoles($roleIds)
+            ->inDateRange($start, $end)
+            ->sum(DB::raw('desktop_views + mobile_views + tablet_views + unknown_views'));
     }
 
     /**
