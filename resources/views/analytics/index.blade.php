@@ -371,7 +371,7 @@
         new Chart(appearancesCtx, {
             type: 'bar',
             data: {
-                labels: {!! json_encode($topAppearances->pluck('role.name')->toArray()) !!},
+                labels: {!! json_encode($topAppearances->map(fn($item) => $item['role']->translatedName())->toArray()) !!},
                 datasets: [{
                     label: '{{ __("messages.views") }}',
                     data: {!! json_encode($topAppearances->pluck('view_count')->toArray()) !!},
