@@ -15,6 +15,7 @@ use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\GoogleCalendarWebhookController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 
 if (config('app.hosted')) {
@@ -161,6 +162,9 @@ Route::middleware(['auth', 'verified'])->group(function ()
 
     Route::patch('/api-settings', [ApiSettingsController::class, 'update'])->name('api-settings.update');
     Route::post('/api-settings/show-key', [ApiSettingsController::class, 'showApiKey'])->name('api-settings.show-key');
+
+    // Admin routes (only for admin users)
+    Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
     // Admin blog routes (only for admin users)
     Route::get('/admin/blog', [BlogController::class, 'adminIndex'])->name('blog.admin.index');

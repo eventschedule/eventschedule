@@ -3,7 +3,7 @@
     <div class="space-y-6">
         {{-- Schedule Selector, Date Range, and Period Toggle --}}
         <div class="flex flex-col sm:flex-row sm:justify-between gap-4">
-            <div class="flex gap-4 flex-wrap">
+            <div class="flex gap-2 flex-wrap items-center">
                 <div class="min-w-[200px]">
                     <select id="role-filter" onchange="filterByRole(this.value)"
                         class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base">
@@ -52,40 +52,107 @@
             if ($appearanceViews > 0) $statsColumns++; // Appearance Views
         @endphp
         <div class="grid grid-cols-2 lg:grid-cols-{{ $statsColumns }} gap-4">
+            {{-- Total Views --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.total_views') }}</div>
-                <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($totalViews) }}</div>
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.total_views') }}</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalViews) }}</p>
+                    </div>
+                </div>
             </div>
+            {{-- Views in Period --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.views_in_period') }}</div>
-                <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($periodComparison ? $periodComparison['current_period'] : $momComparison['this_month']) }}</div>
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.views_in_period') }}</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($periodComparison ? $periodComparison['current_period'] : $momComparison['this_month']) }}</p>
+                    </div>
+                </div>
             </div>
             @if ($periodComparison)
+            {{-- Previous Period --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.views_previous_period') }}</div>
-                <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($periodComparison['previous_period']) }}</div>
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-full">
+                            <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.views_previous_period') }}</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($periodComparison['previous_period']) }}</p>
+                    </div>
+                </div>
             </div>
+            {{-- Change Percentage --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.' . $periodComparison['comparison_label']) }}</div>
-                <div class="mt-2 text-3xl font-bold {{ $periodComparison['percentage_change'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                    {{ $periodComparison['percentage_change'] >= 0 ? '+' : '' }}{{ $periodComparison['percentage_change'] }}%
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 {{ $periodComparison['percentage_change'] >= 0 ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900' }} rounded-full">
+                            @if ($periodComparison['percentage_change'] >= 0)
+                            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                            @else
+                            <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                            </svg>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.' . $periodComparison['comparison_label']) }}</p>
+                        <p class="text-2xl font-bold {{ $periodComparison['percentage_change'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                            {{ $periodComparison['percentage_change'] >= 0 ? '+' : '' }}{{ $periodComparison['percentage_change'] }}%
+                        </p>
+                    </div>
                 </div>
             </div>
             @endif
             @if ($appearanceViews > 0)
+            {{-- Appearance Views --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                    {{ __('messages.appearance_views') }}
-                    <span class="relative group">
-                        <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                            {{ __('messages.views_from_other_schedules') }}
-                        </span>
-                    </span>
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-purple-100 dark:bg-purple-900 rounded-full">
+                            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                            {{ __('messages.appearance_views') }}
+                            <span class="relative group">
+                                <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                    {{ __('messages.views_from_other_schedules') }}
+                                </span>
+                            </span>
+                        </p>
+                        <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ number_format($appearanceViews) }}</p>
+                    </div>
                 </div>
-                <div class="mt-2 text-3xl font-bold text-purple-600 dark:text-purple-400">{{ number_format($appearanceViews) }}</div>
             </div>
             @endif
         </div>
@@ -93,37 +160,73 @@
         {{-- Conversion Stats Cards --}}
         @if ($conversionStats['total_sales'] > 0)
         <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            {{-- Total Revenue --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.total_revenue') }}</div>
-                <div class="mt-2 text-3xl font-bold text-green-600 dark:text-green-400">{{ number_format($conversionStats['total_revenue'], 2) }}</div>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                    {{ __('messages.conversion_rate') }}
-                    <span class="relative group">
-                        <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                            {{ __('messages.conversion_rate_tooltip') }}
-                        </span>
-                    </span>
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
+                            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.total_revenue') }}</p>
+                        <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ number_format($conversionStats['total_revenue'], 2) }}</p>
+                    </div>
                 </div>
-                <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $conversionStats['conversion_rate'] }}%</div>
             </div>
+            {{-- Conversion Rate --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                    {{ __('messages.revenue_per_view') }}
-                    <span class="relative group">
-                        <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                            {{ __('messages.revenue_per_view_tooltip') }}
-                        </span>
-                    </span>
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-purple-100 dark:bg-purple-900 rounded-full">
+                            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                            {{ __('messages.conversion_rate') }}
+                            <span class="relative group">
+                                <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                    {{ __('messages.conversion_rate_tooltip') }}
+                                </span>
+                            </span>
+                        </p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $conversionStats['conversion_rate'] }}%</p>
+                    </div>
                 </div>
-                <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($conversionStats['revenue_per_view'], 2) }}</div>
+            </div>
+            {{-- Revenue per View --}}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-full">
+                            <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                            {{ __('messages.revenue_per_view') }}
+                            <span class="relative group">
+                                <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                    {{ __('messages.revenue_per_view_tooltip') }}
+                                </span>
+                            </span>
+                        </p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($conversionStats['revenue_per_view'], 2) }}</p>
+                    </div>
+                </div>
             </div>
         </div>
         @endif
