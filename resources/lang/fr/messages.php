@@ -742,4 +742,9 @@ return [
     'venue_name' => 'Nom du Lieu',
     'matched_existing_venue' => 'Lieu existant trouvé',
     'matched_venue' => 'Lieu trouvé',
+    'sign_up_with_google' => 'S\'inscrire avec Google',
+    'log_in_with_google' => 'Se connecter avec Google',
+    'or_continue_with_email' => 'ou continuer avec l\'email',
+    'google_auth_failed' => 'L\'authentification Google a échoué. Veuillez réessayer.',
+    'google_account_already_linked' => 'Cet email est déjà lié à un autre compte Google.',
 ];

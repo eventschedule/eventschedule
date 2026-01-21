@@ -746,4 +746,9 @@ return [
     'venue_name' => 'Name des Veranstaltungsortes',
     'matched_existing_venue' => 'Bestehender Veranstaltungsort gefunden',
     'matched_venue' => 'Veranstaltungsort gefunden',
+    'sign_up_with_google' => 'Mit Google registrieren',
+    'log_in_with_google' => 'Mit Google anmelden',
+    'or_continue_with_email' => 'oder mit E-Mail fortfahren',
+    'google_auth_failed' => 'Google-Authentifizierung fehlgeschlagen. Bitte versuchen Sie es erneut.',
+    'google_account_already_linked' => 'Diese E-Mail ist bereits mit einem anderen Google-Konto verknüpft.',
 ];

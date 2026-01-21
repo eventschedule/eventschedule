@@ -743,4 +743,9 @@ return [
     'venue_name' => 'اسم المكان',
     'matched_existing_venue' => 'تم العثور على مكان موجود',
     'matched_venue' => 'مكان مطابق',
+    'sign_up_with_google' => 'التسجيل باستخدام Google',
+    'log_in_with_google' => 'تسجيل الدخول باستخدام Google',
+    'or_continue_with_email' => 'أو المتابعة بالبريد الإلكتروني',
+    'google_auth_failed' => 'فشلت مصادقة Google. يرجى المحاولة مرة أخرى.',
+    'google_account_already_linked' => 'هذا البريد الإلكتروني مرتبط بالفعل بحساب Google آخر.',
 ];

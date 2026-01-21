@@ -741,4 +741,9 @@ return [
     'venue_name' => 'Nome do Local',
     'matched_existing_venue' => 'Local existente encontrado',
     'matched_venue' => 'Local encontrado',
+    'sign_up_with_google' => 'Registrar com Google',
+    'log_in_with_google' => 'Entrar com Google',
+    'or_continue_with_email' => 'ou continue com email',
+    'google_auth_failed' => 'Falha na autenticação do Google. Por favor, tente novamente.',
+    'google_account_already_linked' => 'Este email já está vinculado a outra conta do Google.',
 ];
