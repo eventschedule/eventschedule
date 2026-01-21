@@ -1006,9 +1006,13 @@
 
                                 <div class="mb-6">
                                     <x-input-label for="background_rotation" :value="__('messages.rotation')" />
-                                    <x-text-input id="background_rotation" name="background_rotation" type="number"
-                                        class="mt-1 block w-32 max-w-32" oninput="updatePreview()"
-                                        :value="old('background_rotation', $role->background_rotation)" min="0" max="360" />
+                                    <div class="flex items-center gap-3 mt-1">
+                                        <input id="background_rotation" name="background_rotation" type="range"
+                                            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                                            oninput="updatePreview(); document.getElementById('rotation_value').textContent = this.value + '°'"
+                                            value="{{ old('background_rotation', $role->background_rotation ?? 0) }}" min="0" max="360" />
+                                        <span id="rotation_value" class="text-sm text-gray-600 dark:text-gray-400 w-12 text-right">{{ old('background_rotation', $role->background_rotation ?? 0) }}°</span>
+                                    </div>
                                     <x-input-error class="mt-2" :messages="$errors->get('background_rotation')" />
                                 </div>
                             </div>
