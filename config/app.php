@@ -30,11 +30,16 @@ return [
     'cron_secret' => env('APP_CRON_SECRET', ''),
     'sentry_js_dsn' => env('SENTRY_JS_DSN', 'https://js.sentry-cdn.com/e40010dda2802390fc7a031a3db09b63.min.js'),
     'custom_footer' => env('APP_CUSTOM_FOOTER', ''),
-    
-    'hosted' => (bool) env('APP_HOSTED', false),
+
+    'hosted' => (bool) env('IS_HOSTED', false),
     'report_errors' => (bool) env('REPORT_ERRORS', false),
     'is_testing' => (bool) env('APP_TESTING', false),
     'enable_community' => (bool) env('ENABLE_COMMUNITY', false),
+
+    'is_nexus' => (bool) env('IS_NEXUS', false),
+    'logo_dark' => env('APP_LOGO_DARK', '/images/dark_logo.png'),
+    'logo_light' => env('APP_LOGO_LIGHT', '/images/light_logo.png'),
+    'marketing_url' => env('APP_MARKETING_URL', 'https://eventschedule.com'),
 
     /*
     |--------------------------------------------------------------------------
