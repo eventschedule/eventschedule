@@ -2,34 +2,33 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Notification;
-use App\Notifications\AddedMemberNotification;
-use App\Http\Requests\RoleEmailVerificationRequest;
-use App\Notifications\DeletedRoleNotification;
-use Illuminate\Auth\Events\Verified;
-use Endroid\QrCode\QrCode;
-use App\Repos\EventRepo;
-use Endroid\QrCode\Writer\PngWriter;
-use App\Http\Requests\RoleCreateRequest;
-use App\Http\Requests\RoleUpdateRequest;
 use App\Http\Requests\MemberAddRequest;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use App\Models\Role;
+use App\Http\Requests\RoleCreateRequest;
+use App\Http\Requests\RoleEmailVerificationRequest;
+use App\Http\Requests\RoleUpdateRequest;
 use App\Models\Event;
-use App\Models\User;
-use App\Models\RoleUser;
-use App\Models\EventRole;
 use App\Models\PageView;
-use App\Utils\UrlUtils;
+use App\Models\Role;
+use App\Models\RoleUser;
+use App\Models\User;
+use App\Notifications\AddedMemberNotification;
+use App\Notifications\DeletedRoleNotification;
+use App\Repos\EventRepo;
+use App\Services\AnalyticsService;
+use App\Services\EmailService;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
-use App\Services\EmailService;
-use App\Services\AnalyticsService;
+use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class RoleController extends Controller
 {
@@ -52,29 +51,29 @@ class RoleController extends Controller
             if ($role->profile_image_url) {
                 $path = $role->getAttributes()['profile_image_url'];
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
 
                 $role->profile_image_url = null;
                 $role->save();
-            }    
-        } else if ($request->image_type == 'background') {
+            }
+        } elseif ($request->image_type == 'background') {
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
 
                 $role->background_image_url = null;
                 $role->save();
-            }    
-        } else if ($request->image_type == 'header') {
+            }
+        } elseif ($request->image_type == 'header') {
             if ($role->header_image_url) {
                 $path = $role->getAttributes()['header_image_url'];
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
 
@@ -84,7 +83,7 @@ class RoleController extends Controller
         }
 
         return redirect(route('role.edit', ['subdomain' => $subdomain]))
-                ->with('message', __('messages.deleted_image'));
+            ->with('message', __('messages.deleted_image'));
     }
 
     public function delete(Request $request, $subdomain)
@@ -100,7 +99,7 @@ class RoleController extends Controller
         if ($role->profile_image_url) {
             $path = $role->getAttributes()['profile_image_url'];
             if (config('filesystems.default') == 'local') {
-                $path = 'public/' . $path;
+                $path = 'public/'.$path;
             }
             Storage::delete($path);
         }
@@ -108,7 +107,7 @@ class RoleController extends Controller
         if ($role->header_image_url) {
             $path = $role->getAttributes()['header_image_url'];
             if (config('filesystems.default') == 'local') {
-                $path = 'public/' . $path;
+                $path = 'public/'.$path;
             }
             Storage::delete($path);
         }
@@ -116,7 +115,7 @@ class RoleController extends Controller
         if ($role->background_image_url) {
             $path = $role->getAttributes()['background_image_url'];
             if (config('filesystems.default') == 'local') {
-                $path = 'public/' . $path;
+                $path = 'public/'.$path;
             }
             Storage::delete($path);
         }
@@ -129,7 +128,7 @@ class RoleController extends Controller
                 $user = $role->users()->first();
                 if ($user && $user->google_token) {
                     $googleCalendarService = app(\App\Services\GoogleCalendarService::class);
-                    
+
                     // Ensure user has valid token before deleting webhook
                     if ($googleCalendarService->ensureValidToken($user)) {
                         $googleCalendarService->deleteWebhook($role->google_webhook_id, $role->google_webhook_resource_id);
@@ -158,11 +157,11 @@ class RoleController extends Controller
         PageView::where('role_id', $role->id)->delete();
 
         $role->delete();
-        
+
         Notification::route('mail', $emails)->notify(new DeletedRoleNotification($role, $user));
 
         return redirect(route('home'))
-                ->with('message', __('messages.deleted_schedule'));
+            ->with('message', __('messages.deleted_schedule'));
     }
 
     public function follow(Request $request, $subdomain)
@@ -174,7 +173,8 @@ class RoleController extends Controller
         if (! auth()->user()) {
             session(['pending_follow' => $subdomain]);
             $lang = session()->has('translate') ? 'en' : $role->language_code;
-            return redirect($mainDomain . route('sign_up', ['lang' => $lang], false));
+
+            return redirect($mainDomain.route('sign_up', ['lang' => $lang], false));
         }
 
         $user = $request->user();
@@ -185,21 +185,23 @@ class RoleController extends Controller
 
         session()->forget('pending_follow');
 
-        if ($subdomain = session('pending_request')) {            
+        if ($subdomain = session('pending_request')) {
             if ($user->talents()->count() == 0) {
-                $redirectUrl = $mainDomain . route('new', ['type' => 'talent'], false);
+                $redirectUrl = $mainDomain.route('new', ['type' => 'talent'], false);
+
                 return redirect($redirectUrl);
             }
 
             $role = $user->talents()->first();
-            $redirectUrl = $mainDomain . route('event.create', ['subdomain' => $role->subdomain], false);
-            return redirect($redirectUrl);            
+            $redirectUrl = $mainDomain.route('event.create', ['subdomain' => $role->subdomain], false);
+
+            return redirect($redirectUrl);
 
         } else {
-            $redirectUrl = $mainDomain . route('following', [], false);
-            
+            $redirectUrl = $mainDomain.route('following', [], false);
+
             return redirect($redirectUrl)
-                    ->with('message', str_replace(':name', $role->name, __('messages.followed_role')));
+                ->with('message', str_replace(':name', $role->name, __('messages.followed_role')));
         }
     }
 
@@ -218,7 +220,7 @@ class RoleController extends Controller
         }
 
         return redirect(route('following'))
-                ->with('message', str_replace(':name', $role->name, __('messages.unfollowed_role')));
+            ->with('message', str_replace(':name', $role->name, __('messages.unfollowed_role')));
     }
 
     public function viewGuest(Request $request, $subdomain, $slug = '')
@@ -234,7 +236,7 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->first();
 
         if (! $role || ! $role->isClaimed()) {
-            return redirect(config('app.url'), );
+            return redirect(config('app.url'));
         }
 
         if ($request->lang) {
@@ -246,13 +248,14 @@ class RoleController extends Controller
                     session()->put('translate', true);
                 } else {
                     session()->forget('translate');
+
                     return redirect(request()->url());
                 }
             } else {
                 // If invalid language code, redirect to the same URL without the lang parameter
                 return redirect(request()->url());
             }
-        } else if (session()->has('translate')) {
+        } elseif (session()->has('translate')) {
             app()->setLocale('en');
         } else {
             // Validate the language code from database before setting it
@@ -295,6 +298,7 @@ class RoleController extends Controller
                 // Handle direct registration redirect when URL has trailing slash
                 if ($request->attributes->get('has_trailing_slash')) {
                     app(AnalyticsService::class)->recordView($role, $event, $request);
+
                     return redirect($event->registration_url ?: $event->getGuestUrl($subdomain));
                 }
 
@@ -309,13 +313,13 @@ class RoleController extends Controller
                     }
                     $date = $nextDate->format('Y-m-d');
                 }
-            } else if (!$selectedGroup) {
+            } elseif (! $selectedGroup) {
                 return redirect($role->getGuestUrl());
             }
         }
 
         // Also check for schedule parameter in query string
-        if (!$selectedGroup && $request->has('schedule')) {
+        if (! $selectedGroup && $request->has('schedule')) {
             $scheduleSlug = $request->input('schedule');
             if ($role->groups) {
                 $group = $role->groups->where('slug', $scheduleSlug)->first();
@@ -344,7 +348,7 @@ class RoleController extends Controller
                 $startAtDate = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
                 $month = $startAtDate->month;
                 $year = $startAtDate->year;
-            }            
+            }
         }
 
         if (! $month) {
@@ -353,15 +357,15 @@ class RoleController extends Controller
 
         if (! $year) {
             $year = now()->year;
-        }    
+        }
 
         // Get timezone from user or role
         $timezone = $user->timezone ?? $role->timezone ?? 'UTC';
-        
+
         // Calculate month boundaries in user's/role's timezone, then convert to UTC for database query
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
         $endOfMonth = $startOfMonth->copy()->addMonths(3)->endOfMonth()->endOfDay();
-        
+
         // Convert to UTC for database query
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
         $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
@@ -392,12 +396,12 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     });
                 });
-                        
+
             $events = $events->orderBy('starts_at')->get();
         }
 
         // Track view for analytics (non-member visits only, skip embeds)
-        if (!request()->embed && (!$user || !$user->isMember($subdomain))) {
+        if (! request()->embed && (! $user || ! $user->isMember($subdomain))) {
             app(AnalyticsService::class)->recordView($role, $event, $request);
         }
 
@@ -406,7 +410,7 @@ class RoleController extends Controller
 
         if ($embed) {
             $view = 'role/show-guest-embed';
-        } else if ($event) {
+        } elseif ($event) {
             $view = 'event/show-guest';
         }
 
@@ -428,30 +432,29 @@ class RoleController extends Controller
 
         $response = response()
             ->view($view, compact(
-            'subdomain',
-            'events',
-            'role',
-            'otherRole',
-            'month', 
-            'year',
-            'startOfMonth',
-            'endOfMonth',
-            'user',
-            'event',
-            'embed',
-            'date',
-            'curatorRoles',
-            'fonts',
-            'translation',
-            'selectedGroup',
-        ));
-
+                'subdomain',
+                'events',
+                'role',
+                'otherRole',
+                'month',
+                'year',
+                'startOfMonth',
+                'endOfMonth',
+                'user',
+                'event',
+                'embed',
+                'date',
+                'curatorRoles',
+                'fonts',
+                'translation',
+                'selectedGroup',
+            ));
 
         // Allow embedding when embed parameter is present
         if ($embed && $role->isPro()) {
             $response->header('X-Frame-Options', 'ALLOW-FROM *');
         }
-        
+
         return $response;
     }
 
@@ -461,7 +464,7 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();        
+        $role = Role::subdomain($subdomain)->firstOrFail();
         $members = $role->members()->get();
         $followers = $role->followers()->get();
         $followersWithRoles = [];
@@ -476,20 +479,20 @@ class RoleController extends Controller
         $datesUnavailable = [];
 
         $requests = Event::with('roles')
-                        ->where(function ($query) use ($role) {
-                            $query->whereHas('roles', function ($query) use ($role) {
-                                $query->where('role_id', $role->id)
-                                    ->whereNull('is_accepted');
-                            });
-                        })
-                        ->orderBy('created_at', 'desc')
-                        ->get();
+            ->where(function ($query) use ($role) {
+                $query->whereHas('roles', function ($query) use ($role) {
+                    $query->where('role_id', $role->id)
+                        ->whereNull('is_accepted');
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         if ($tab == 'requests' && ! count($requests)) {
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
-        } else if ($tab == 'availability' && $role->isCurator()) {
+        } elseif ($tab == 'availability' && $role->isCurator()) {
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
-        } else if ($tab == 'videos' && ! $role->isCurator()) {
+        } elseif ($tab == 'videos' && ! $role->isCurator()) {
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
         }
 
@@ -504,11 +507,11 @@ class RoleController extends Controller
             // Get timezone from user or role
             $user = $request->user();
             $timezone = $user->timezone ?? $role->timezone ?? 'UTC';
-            
+
             // Calculate month boundaries in user's/role's timezone, then convert to UTC for database query
             $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
             $endOfMonth = $startOfMonth->copy()->endOfMonth()->endOfDay();
-            
+
             // Convert to UTC for database query
             $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
             $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
@@ -560,17 +563,17 @@ class RoleController extends Controller
                         }
                     }
                 }
-            } else if ($tab == 'availability') {                                       
+            } elseif ($tab == 'availability') {
                 $user = $request->user();
                 $roleUser = RoleUser::where('user_id', $user->id)
-                                ->where('role_id', $role->id)
-                                ->first();
+                    ->where('role_id', $role->id)
+                    ->first();
 
                 if ($roleUser && $roleUser->dates_unavailable) {
                     $datesUnavailable = json_decode($roleUser->dates_unavailable);
-                }     
-            }       
-        } else if ($tab == 'followers') {
+                }
+            }
+        } elseif ($tab == 'followers') {
             $followersWithRoles = $role->followers()
                 ->with(['roles' => function ($query) {
                     $query->wherePivotIn('level', ['owner', 'admin'])
@@ -601,7 +604,7 @@ class RoleController extends Controller
     }
 
     public function createMember(Request $request, $subdomain)
-    {        
+    {
         if (! auth()->user()->isMember($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
@@ -656,7 +659,7 @@ class RoleController extends Controller
             $roleUser = RoleUser::where('user_id', $user->id)
                 ->where('role_id', $role->id)
                 ->first();
-            
+
             $roleUser->level = 'admin';
             $roleUser->save();
 
@@ -667,7 +670,7 @@ class RoleController extends Controller
         Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
-                    ->with('message', __('messages.member_added'));
+            ->with('message', __('messages.member_added'));
     }
 
     public function removeMember(Request $request, $subdomain, $hash)
@@ -691,28 +694,54 @@ class RoleController extends Controller
         // If user removed themselves, redirect to dashboard instead of team page
         if ($userId == auth()->id()) {
             return redirect(route('dashboard'))
-                        ->with('message', __('messages.removed_member'));
+                ->with('message', __('messages.removed_member'));
         }
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
-                    ->with('message', __('messages.removed_member'));
+            ->with('message', __('messages.removed_member'));
     }
 
     public function following()
     {
         $user = auth()->user();
+        $filter = strtolower(request()->filter);
+        $sortBy = request()->get('sort_by', 'name');
+        $sortDir = request()->get('sort_dir', 'asc');
+
+        // Whitelist allowed sort columns
+        $allowedSortColumns = ['name', 'type', 'email', 'phone', 'website'];
+        if (! in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'name';
+        }
+        $sortDir = strtolower($sortDir) === 'desc' ? 'desc' : 'asc';
+
         $roleIds = $user->following()->pluck('roles.id');
-        $roles = Role::whereIn('id', $roleIds)
-                    ->orderBy('name', 'ASC')
-                    ->get();
+        $query = Role::whereIn('id', $roleIds);
+
+        if ($filter) {
+            $query->where(function ($q) use ($filter) {
+                $q->where('name', 'LIKE', "%{$filter}%")
+                    ->orWhere('type', 'LIKE', "%{$filter}%")
+                    ->orWhere('email', 'LIKE', "%{$filter}%")
+                    ->orWhere('phone', 'LIKE', "%{$filter}%")
+                    ->orWhere('website', 'LIKE', "%{$filter}%");
+            });
+        }
+
+        $roles = $query->orderBy($sortBy, $sortDir)->get();
 
         $data = [
             'roles' => $roles,
+            'sortBy' => $sortBy,
+            'sortDir' => $sortDir,
         ];
+
+        if (request()->ajax()) {
+            return view('role/following_table', $data);
+        }
 
         return view('role/index', $data);
     }
-
 
     public function create($type)
     {
@@ -772,8 +801,8 @@ class RoleController extends Controller
         $gradients = json_decode($gradients);
 
         $gradientOptions = [];
-        foreach ($gradients as $gradient) {            
-            $gradientOptions[join(', ', $gradient->colors)] = $gradient->name;
+        foreach ($gradients as $gradient) {
+            $gradientOptions[implode(', ', $gradient->colors)] = $gradient->name;
         }
 
         asort($gradientOptions);
@@ -804,7 +833,7 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $user = $request->user();        
+        $user = $request->user();
 
         $role = new Role;
         $role->fill($request->all());
@@ -820,18 +849,18 @@ class RoleController extends Controller
 
         if (! config('app.hosted')) {
             $role->email_verified_at = now();
-        } else if ($role->email == $user->email) {
+        } elseif ($role->email == $user->email) {
             $role->email_verified_at = $user->email_verified_at;
         }
 
         if (! $request->background_colors) {
-            $role->background_colors = $request->custom_color1 . ', ' . $request->custom_color2;
+            $role->background_colors = $request->custom_color1.', '.$request->custom_color2;
         }
 
         if ($request->has('import_urls') || $request->has('import_cities')) {
             $importConfig = [
                 'urls' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_urls', [])))),
-                'cities' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_cities', []))))
+                'cities' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_cities', [])))),
             ];
             $role->import_config = $importConfig;
         }
@@ -849,42 +878,42 @@ class RoleController extends Controller
         if ($request->has('groups')) {
             $groupsData = $request->input('groups', []);
             $groupNames = [];
-            
+
             // Collect all group names for translation if needed
             foreach ($groupsData as $groupData) {
-                if (!empty($groupData['name'])) {
+                if (! empty($groupData['name'])) {
                     $groupNames[] = $groupData['name'];
                 }
             }
-            
+
             // Translate names if role is not in English
             $translations = [];
-            if (!empty($groupNames) && $role->language_code !== 'en') {
+            if (! empty($groupNames) && $role->language_code !== 'en') {
                 try {
                     $translations = GeminiUtils::translateGroupNames($groupNames, $role->language_code);
                 } catch (\Exception $e) {
-                    \Log::error('Failed to translate group names: ' . $e->getMessage());
+                    \Log::error('Failed to translate group names: '.$e->getMessage());
                     // Continue without translations if API fails
                 }
             }
-            
+
             // Create groups with translations
             foreach ($groupsData as $groupData) {
-                if (!empty($groupData['name'])) {
+                if (! empty($groupData['name'])) {
                     $groupCreateData = [
                         'name' => $groupData['name'],
                         'slug' => Str::slug($groupData['name']),
                     ];
-                    
+
                     // Preserve manually entered English name or add automatic translation
                     if (isset($groupData['name_en'])) {
                         $groupCreateData['name_en'] = $groupData['name_en'];
                         $groupCreateData['slug'] = Str::slug($groupData['name_en']);
-                    } elseif (isset($translations[$groupData['name']])) {   
+                    } elseif (isset($translations[$groupData['name']])) {
                         $groupCreateData['name_en'] = $translations[$groupData['name']];
                         $groupCreateData['slug'] = Str::slug($translations[$groupData['name']]);
                     }
-                    
+
                     $role->groups()->create($groupCreateData);
                 }
             }
@@ -896,13 +925,13 @@ class RoleController extends Controller
             if ($role->profile_image_url) {
                 $path = $role->getAttributes()['profile_image_url'];
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
             }
 
             $file = $request->file('profile_image');
-            $filename = strtolower('profile_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            $filename = strtolower('profile_'.Str::random(32).'.'.$file->getClientOriginalExtension());
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->profile_image_url = $filename;
@@ -913,13 +942,13 @@ class RoleController extends Controller
             if ($role->header_image_url) {
                 $path = $role->getAttributes()['header_image_url'];
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
             }
 
             $file = $request->file('header_image');
-            $filename = strtolower('header_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            $filename = strtolower('header_'.Str::random(32).'.'.$file->getClientOriginalExtension());
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->header_image_url = $filename;
@@ -933,13 +962,13 @@ class RoleController extends Controller
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
             }
 
             $file = $request->file('background_image_url');
-            $filename = strtolower('background_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            $filename = strtolower('background_'.Str::random(32).'.'.$file->getClientOriginalExtension());
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->background_image_url = $filename;
@@ -954,7 +983,7 @@ class RoleController extends Controller
 
         if ($subdomain = session('pending_request')) {
             return redirect(route('event.create', ['subdomain' => $role->subdomain]))->with('message', $message);
-        } else {    
+        } else {
             return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))->with('message', $message);
         }
     }
@@ -981,7 +1010,6 @@ class RoleController extends Controller
         $headerOptions = [
             '' => __('messages.custom'),
         ] + $headerOptions;
-        
 
         // Background images
         $backgrounds = file_get_contents(base_path('storage/backgrounds.json'));
@@ -998,14 +1026,13 @@ class RoleController extends Controller
             '' => __('messages.custom'),
         ] + $backgroundOptions;
 
-
         // Background gradients
         $gradients = file_get_contents(base_path('storage/gradients.json'));
         $gradients = json_decode($gradients);
 
         $gradientOptions = [];
         foreach ($gradients as $gradient) {
-            $gradientOptions[join(', ', $gradient->colors)] = $gradient->name;
+            $gradientOptions[implode(', ', $gradient->colors)] = $gradient->name;
         }
 
         asort($gradientOptions);
@@ -1038,7 +1065,7 @@ class RoleController extends Controller
 
         if (! auth()->user()->isMember($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
-        }        
+        }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
         $existingSettings = $role->getEmailSettings();
@@ -1048,11 +1075,11 @@ class RoleController extends Controller
         $newSyncDirection = $request->input('sync_direction');
         $oldCalendarId = $role->google_calendar_id;
         $newCalendarId = $request->input('google_calendar_id');
-        
+
         $role->fill($request->all());
-        
+
         // If sync_direction or calendar changed, handle webhook management
-        if (($newSyncDirection && $oldSyncDirection !== $newSyncDirection) || 
+        if (($newSyncDirection && $oldSyncDirection !== $newSyncDirection) ||
             ($oldCalendarId !== $newCalendarId)) {
             $this->handleSyncAndCalendarChanges($role, $newSyncDirection, $oldSyncDirection, $newCalendarId, $oldCalendarId);
         }
@@ -1066,13 +1093,13 @@ class RoleController extends Controller
         }
 
         if (! $request->background_colors) {
-            $role->background_colors = $request->custom_color1 . ', ' . $request->custom_color2;
+            $role->background_colors = $request->custom_color1.', '.$request->custom_color2;
         }
 
         if ($request->has('import_urls') || $request->has('import_cities')) {
             $importConfig = [
                 'urls' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_urls', [])))),
-                'cities' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_cities', []))))
+                'cities' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_cities', [])))),
             ];
             $role->import_config = $importConfig;
         }
@@ -1080,7 +1107,7 @@ class RoleController extends Controller
         // Handle email settings
         if ($request->has('email_settings')) {
             $submittedSettings = $request->input('email_settings', []);
-            
+
             // If password is all bullets, use the old value
             if (isset($submittedSettings['password'])) {
                 $passwordValue = trim($submittedSettings['password']);
@@ -1106,22 +1133,22 @@ class RoleController extends Controller
         $existingGroupIds = $role->groups()->pluck('id')->toArray();
         $submittedGroups = $request->input('groups', []);
         $submittedIds = [];
-        
+
         // Collect new group names for translation
         $newGroupNames = [];
         foreach ($submittedGroups as $key => $groupData) {
-            if (isset($groupData['name']) && $groupData['name'] && !is_numeric($key) && empty($groupData['name_en'])) {
+            if (isset($groupData['name']) && $groupData['name'] && ! is_numeric($key) && empty($groupData['name_en'])) {
                 $newGroupNames[] = $groupData['name'];
             }
         }
-        
+
         // Translate new group names if role is not in English
         $translations = [];
-        if (!empty($newGroupNames) && $role->language_code !== 'en') {
+        if (! empty($newGroupNames) && $role->language_code !== 'en') {
             try {
                 $translations = GeminiUtils::translateGroupNames($newGroupNames, $role->language_code);
             } catch (\Exception $e) {
-                \Log::error('Failed to translate group names: ' . $e->getMessage());
+                \Log::error('Failed to translate group names: '.$e->getMessage());
                 // Continue without translations if API fails
             }
         }
@@ -1134,7 +1161,7 @@ class RoleController extends Controller
                         'name' => $groupData['name'],
                         'slug' => $groupData['slug'] ?? Str::slug($groupData['name']),
                     ];
-                    
+
                     // Preserve manually entered English name or add automatic translation
                     if (isset($groupData['name_en'])) {
                         $updateData['name_en'] = $groupData['name_en'];
@@ -1143,7 +1170,7 @@ class RoleController extends Controller
                         // Use English name for slug if translation is available
                         $updateData['slug'] = Str::slug($translations[$groupData['name']]);
                     }
-                    
+
                     $role->groups()->where('id', $key)->update($updateData);
                     $submittedIds[] = $key;
                 } else {
@@ -1152,7 +1179,7 @@ class RoleController extends Controller
                         'name' => $groupData['name'],
                         'slug' => Str::slug($groupData['name']),
                     ];
-                    
+
                     // Preserve manually entered English name or add automatic translation
                     if (isset($groupData['name_en'])) {
                         $createData['name_en'] = $groupData['name_en'];
@@ -1161,16 +1188,16 @@ class RoleController extends Controller
                         $createData['name_en'] = $translations[$groupData['name']];
                         $createData['slug'] = Str::slug($translations[$groupData['name']]);
                     }
-                    
+
                     $newGroup = $role->groups()->create($createData);
                     $submittedIds[] = $newGroup->id;
                 }
             }
         }
-        
+
         // Delete removed groups
         $toDelete = array_diff($existingGroupIds, $submittedIds);
-        if (!empty($toDelete)) {
+        if (! empty($toDelete)) {
             $role->groups()->whereIn('id', $toDelete)->delete();
         }
 
@@ -1178,13 +1205,13 @@ class RoleController extends Controller
             if ($role->profile_image_url) {
                 $path = $role->getAttributes()['profile_image_url'];
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
             }
-        
+
             $file = $request->file('profile_image');
-            $filename = strtolower('profile_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            $filename = strtolower('profile_'.Str::random(32).'.'.$file->getClientOriginalExtension());
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->profile_image_url = $filename;
@@ -1195,13 +1222,13 @@ class RoleController extends Controller
             if ($role->header_image_url) {
                 $path = $role->getAttributes()['header_image_url'];
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
             }
 
             $file = $request->file('header_image_url');
-            $filename = strtolower('header_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            $filename = strtolower('header_'.Str::random(32).'.'.$file->getClientOriginalExtension());
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->header_image_url = $filename;
@@ -1215,13 +1242,13 @@ class RoleController extends Controller
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
             }
 
             $file = $request->file('background_image_url');
-            $filename = strtolower('background_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            $filename = strtolower('background_'.Str::random(32).'.'.$file->getClientOriginalExtension());
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->background_image_url = $filename;
@@ -1229,7 +1256,7 @@ class RoleController extends Controller
         }
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))
-                    ->with('message', __('messages.updated_schedule'));
+            ->with('message', __('messages.updated_schedule'));
     }
 
     public function updateLinks(Request $request, $subdomain): RedirectResponse
@@ -1247,19 +1274,19 @@ class RoleController extends Controller
 
         if ($request->link_type == 'social_links') {
             $links = $role->social_links;
-        } else if ($request->link_type == 'payment_links') {
+        } elseif ($request->link_type == 'payment_links') {
             $links = $role->payment_links;
         } else {
             $links = $role->youtube_links;
         }
-        
+
         if (! $links) {
             $links = '[]';
         }
 
         $links = json_decode($links);
 
-        foreach(explode(',', $request->link) as $link) {
+        foreach (explode(',', $request->link) as $link) {
             $link = trim($link);
 
             if (! $link) {
@@ -1276,16 +1303,16 @@ class RoleController extends Controller
 
         if ($request->link_type == 'social_links') {
             $role->social_links = $links;
-        } else if ($request->link_type == 'payment_links') {
+        } elseif ($request->link_type == 'payment_links') {
             $role->payment_links = $links;
         } else {
             $role->youtube_links = $links;
         }
-        
+
         $role->save();
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'profile']))
-                    ->with('message', __('messages.added_link'));
+            ->with('message', __('messages.added_link'));
     }
 
     public function removeLinks(Request $request, $subdomain): RedirectResponse
@@ -1299,16 +1326,16 @@ class RoleController extends Controller
             'remove_link' => 'required|string|max:1000',
         ]);
 
-        $role = Role::subdomain($subdomain)->firstOrFail();        
+        $role = Role::subdomain($subdomain)->firstOrFail();
         if ($request->remove_link_type == 'social_links') {
             $links = $role->social_links;
-        } else if ($request->remove_link_type == 'payment_links') {
+        } elseif ($request->remove_link_type == 'payment_links') {
             $links = $role->payment_links;
         } else {
             $links = $role->youtube_links;
         }
 
-        if (!$links) {
+        if (! $links) {
             $links = '[]';
         }
 
@@ -1325,7 +1352,7 @@ class RoleController extends Controller
 
         if ($request->remove_link_type == 'social_links') {
             $role->social_links = $new_links;
-        } else if ($request->remove_link_type == 'payment_links') {
+        } elseif ($request->remove_link_type == 'payment_links') {
             $role->payment_links = $new_links;
         } else {
             $role->youtube_links = $new_links;
@@ -1334,24 +1361,24 @@ class RoleController extends Controller
         $role->save();
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'profile']))
-                    ->with('message', __('messages.removed_link'));
+            ->with('message', __('messages.removed_link'));
     }
 
     public function qrCode($subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
-        $url = $role->custom_domain ? 'https://' . $role->custom_domain : $role->getGuestUrl();
+        $url = $role->custom_domain ? 'https://'.$role->custom_domain : $role->getGuestUrl();
 
-        $qrCode = QrCode::create($url)            
+        $qrCode = QrCode::create($url)
             ->setSize(300)
             ->setMargin(10);
 
-        $writer = new PngWriter();
+        $writer = new PngWriter;
         $result = $writer->write($qrCode);
-        
-        header('Content-Type: ' . $result->getMimeType());
+
+        header('Content-Type: '.$result->getMimeType());
         header('Content-Disposition: attachment; filename="qr-code.png"');
-            
+
         echo $result->getString();
 
         exit;
@@ -1370,8 +1397,8 @@ class RoleController extends Controller
         }
 
         return redirect()
-                ->route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'])
-                ->with('message', __('messages.confirmed_email'));
+            ->route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'])
+            ->with('message', __('messages.confirmed_email'));
     }
 
     public function resendVerify(Request $request, $subdomain)
@@ -1394,15 +1421,16 @@ class RoleController extends Controller
         $role = Role::whereSubdomain($subdomain)->firstOrFail();
 
         session(['pending_request' => $subdomain]);
-            
+
         $mainDomain = config('app.url');
 
         if (! auth()->user()) {
             $lang = session()->has('translate') ? 'en' : $role->language_code;
-            $redirectUrl = $mainDomain . route('sign_up', ['lang' => $lang], false);
+            $redirectUrl = $mainDomain.route('sign_up', ['lang' => $lang], false);
+
             return redirect($redirectUrl);
         }
-        
+
         $user = auth()->user();
 
         if (! $user->isConnected($subdomain)) {
@@ -1410,31 +1438,33 @@ class RoleController extends Controller
         }
 
         if ($user->talents()->count() == 0) {
-            $redirectUrl = $mainDomain . route('new', ['type' => 'talent'], false);
+            $redirectUrl = $mainDomain.route('new', ['type' => 'talent'], false);
+
             return redirect($redirectUrl);
         }
 
         $role = $user->talents()->first();
-        $redirectUrl = $mainDomain . route('event.create', ['subdomain' => $role->subdomain], false);
+        $redirectUrl = $mainDomain.route('event.create', ['subdomain' => $role->subdomain], false);
+
         return redirect($redirectUrl);
     }
 
     public function validateAddress(Request $request)
     {
         $role = new Role;
-        $role->fill($request->all());        
-        
+        $role->fill($request->all());
+
         if ($address = $role->fullAddress()) {
             $urlAddress = urlencode($address);
-            
+
             // Validate Google API configuration
             $apiKey = config('services.google.backend');
-            if (!$apiKey) {
+            if (! $apiKey) {
                 return response()->json(['error' => 'Geocoding service not configured'], 500);
             }
-            
-            $url = "https://maps.googleapis.com/maps/api/geocode/json?key=" . $apiKey . "&address={$urlAddress}";
-            
+
+            $url = 'https://maps.googleapis.com/maps/api/geocode/json?key='.$apiKey."&address={$urlAddress}";
+
             // Use secure cURL instead of file_get_contents
             $ch = curl_init();
             curl_setopt_array($ch, [
@@ -1448,21 +1478,21 @@ class RoleController extends Controller
                 CURLOPT_PROTOCOLS => CURLPROTO_HTTPS, // Only HTTPS for Google API
                 CURLOPT_MAXFILESIZE => 1048576, // 1MB limit
             ]);
-            
+
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
-            
+
             if ($response === false || $httpCode !== 200) {
                 return response()->json(['error' => 'Failed to validate address'], 500);
             }
-            
+
             $responseData = json_decode($response, true);
 
-            if (!$responseData || $responseData['status'] !== 'OK') {
+            if (! $responseData || $responseData['status'] !== 'OK') {
                 return response()->json(['error' => 'Address validation failed'], 400);
             }
-            
+
             $result = $responseData['results'][0];
             $addressComponents = $result['address_components'];
 
@@ -1484,7 +1514,7 @@ class RoleController extends Controller
                 }
             }
 
-            $address1 = trim($addressParts['street_number'] . ' ' . $addressParts['route']);
+            $address1 = trim($addressParts['street_number'].' '.$addressParts['route']);
             $address2 = $addressParts['sublocality_level_1'];
             $city = $addressParts['locality'] ?: $addressParts['sublocality_level_1'];
             $state = $addressParts['administrative_area_level_1'];
@@ -1500,10 +1530,10 @@ class RoleController extends Controller
                     'state' => $state,
                     'postal_code' => $postal_code,
                     'country' => $country,
-                    'formatted_address' => $address1 . ' ' . $city . ' ' . $state . ' ' . $postal_code,
+                    'formatted_address' => $address1.' '.$city.' '.$state.' '.$postal_code,
                     'lat' => $result['geometry']['location']['lat'],
                     'lng' => $result['geometry']['location']['lng'],
-                ]
+                ],
             ]);
         }
 
@@ -1513,12 +1543,12 @@ class RoleController extends Controller
     public function availability(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
-        $user = $request->user();       
+        $user = $request->user();
 
         $roleUser = RoleUser::where('user_id', $user->id)
-                        ->where('role_id', $role->id)
-                        ->first();
-    
+            ->where('role_id', $role->id)
+            ->first();
+
         $dates = json_decode($roleUser->dates_unavailable);
         $available = json_decode($request->available_days);
         $unavailable = json_decode($request->unavailable_days);
@@ -1532,7 +1562,7 @@ class RoleController extends Controller
         foreach ($unavailable as $date) {
             $dates[] = $date;
         }
-        
+
         $dates = array_unique($dates);
         asort($dates);
         $dates = array_values($dates);
@@ -1541,7 +1571,7 @@ class RoleController extends Controller
         $roleUser->save();
 
         $data = [
-            'subdomain' => $subdomain, 
+            'subdomain' => $subdomain,
             'tab' => 'availability',
             'month' => $request->month,
             'year' => $request->year,
@@ -1550,9 +1580,9 @@ class RoleController extends Controller
         return redirect(route('role.view_admin', $data))
             ->with('message', __('messages.updated_availability'));
     }
- 
+
     public function showUnsubscribe(Request $request)
-    {        
+    {
         return view('role/unsubscribe');
     }
 
@@ -1571,12 +1601,12 @@ class RoleController extends Controller
     public function unsubscribeUser(Request $request)
     {
         $email = null;
-        
+
         if ($request->has('email')) {
             $email = base64_decode($request->email);
         }
-        
-        if (!$email) {
+
+        if (! $email) {
             return redirect()->route('role.show_unsubscribe')->with('error', 'Invalid unsubscribe link.');
         }
 
@@ -1607,13 +1637,13 @@ class RoleController extends Controller
         if (! auth()->user()->isMember($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
-    
+
         $role = Role::subdomain($subdomain)->firstOrFail();
         $userId = UrlUtils::decodeId($hash);
         $user = User::findOrFail($userId);
-    
+
         Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
-    
+
         return redirect()->back()->with('message', __('messages.invite_resent'));
     }
 
@@ -1623,20 +1653,20 @@ class RoleController extends Controller
         $search = $request->search;
 
         $roles = Role::whereIn('type', $type == 'venue' ? ['venue'] : ['talent'])
-            ->where(function($query) use ($search) {
+            ->where(function ($query) use ($search) {
                 $query->where('email', '=', $search);
-                  //->orWhere('phone', '=', $search)
-                  //->orWhere('name', 'like', "%{$search}%");
+                // ->orWhere('phone', '=', $search)
+                // ->orWhere('name', 'like', "%{$search}%");
             })
             ->get([
-                'id', 
+                'id',
                 'subdomain',
-                'name', 
-                'address1', 
-                'address2', 
-                'city', 
-                'state', 
-                'postal_code', 
+                'name',
+                'address1',
+                'address2',
+                'city',
+                'state',
+                'postal_code',
                 'email',
                 'user_id',
                 'profile_image_url',
@@ -1658,14 +1688,14 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $search = $request->get('q', '');
         $groupSlug = $request->get('group', '');
-        
+
         if (empty($search)) {
             return response()->json([]);
         }
 
         // Get the group ID if a group slug is provided
         $groupId = null;
-        if (!empty($groupSlug)) {
+        if (! empty($groupSlug)) {
             $group = $role->groups()->where('slug', $groupSlug)->first();
             $groupId = $group ? $group->id : null;
         }
@@ -1697,12 +1727,12 @@ class RoleController extends Controller
         } else {
             // For venues/talents
             $baseQuery = Event::with('roles');
-                
+
             $baseQuery->whereHas('roles', function ($query) use ($role) {
                 $query->where('role_id', $role->id)
-                        ->where('is_accepted', true);
+                    ->where('is_accepted', true);
             });
-            
+
             $events = $baseQuery
                 ->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
@@ -1723,6 +1753,7 @@ class RoleController extends Controller
         // Format events for frontend
         $eventsData = $events->map(function ($event) use ($subdomain, $role) {
             $groupId = $event->getGroupIdForSubdomain($role->subdomain);
+
             return [
                 'id' => $event->id,
                 'name' => $event->translatedName(),
@@ -1756,19 +1787,19 @@ class RoleController extends Controller
 
     public function testImport(Request $request, $subdomain)
     {
-        if (!auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
         $roleId = $role->id;
-        
-        if (!$roleId) {
+
+        if (! $roleId) {
             return response()->json(['success' => false, 'message' => __('messages.role_id_required')]);
         }
 
         // Ensure roleId is properly formatted
-        if (!is_numeric($roleId)) {
+        if (! is_numeric($roleId)) {
             $roleId = \App\Utils\UrlUtils::decodeId($roleId);
         }
 
@@ -1784,20 +1815,20 @@ class RoleController extends Controller
             if (empty($urls) && empty($cities)) {
                 return response()->json([
                     'success' => false,
-                    'message' => __('messages.please_enter_urls_or_cities')
+                    'message' => __('messages.please_enter_urls_or_cities'),
                 ]);
             }
 
             // Use shell_exec as a fallback if Artisan call fails
             try {
                 // Capture output using BufferedOutput
-                $output = new \Symfony\Component\Console\Output\BufferedOutput();
-                
+                $output = new \Symfony\Component\Console\Output\BufferedOutput;
+
                 $artisanParams = [
-                    '--role_id' => (string)$roleId,
-                    '--test' => null
+                    '--role_id' => (string) $roleId,
+                    '--test' => null,
                 ];
-                
+
                 // Add URLs and cities as command line arguments
                 foreach ($urls as $url) {
                     $artisanParams['--urls'][] = $url;
@@ -1805,64 +1836,64 @@ class RoleController extends Controller
                 foreach ($cities as $city) {
                     $artisanParams['--cities'][] = $city;
                 }
-                
+
                 $exitCode = \Artisan::call('app:import-curator-events', $artisanParams, $output);
-                
+
                 $outputText = $output->fetch();
             } catch (\Exception $e) {
                 // Fallback to shell_exec if Artisan call fails
                 $urlArgs = '';
                 $cityArgs = '';
-                
-                if (!empty($urls)) {
-                    $urlArgs = ' --urls=' . implode(' --urls=', array_map('escapeshellarg', $urls));
+
+                if (! empty($urls)) {
+                    $urlArgs = ' --urls='.implode(' --urls=', array_map('escapeshellarg', $urls));
                 }
-                if (!empty($cities)) {
-                    $cityArgs = ' --cities=' . implode(' --cities=', array_map('escapeshellarg', $cities));
+                if (! empty($cities)) {
+                    $cityArgs = ' --cities='.implode(' --cities=', array_map('escapeshellarg', $cities));
                 }
-                
+
                 $command = "php artisan app:import-curator-events --role_id={$roleId} --test{$urlArgs}{$cityArgs} 2>&1";
                 $outputText = shell_exec($command);
                 $exitCode = 0; // Assume success for shell_exec
             }
-                        
+
             // Check if the command was successful - look for completion message or successful processing
-            $isSuccessful = strpos($outputText, 'Import completed') !== false || 
+            $isSuccessful = strpos($outputText, 'Import completed') !== false ||
                            strpos($outputText, 'Import test successful') !== false ||
                            $exitCode === 0;
-            
+
             // If no events were processed but the command ran successfully, that's still a success
             if ($isSuccessful) {
                 return response()->json([
                     'success' => true,
                     'message' => __('messages.import_test_success'),
-                    'output' => $outputText
+                    'output' => $outputText,
                 ]);
             } else {
                 return response()->json([
                     'success' => false,
                     'message' => __('messages.import_test_error'),
-                    'output' => $outputText
+                    'output' => $outputText,
                 ]);
             }
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => __('messages.import_test_error') . ': ' . $e->getMessage()
+                'message' => __('messages.import_test_error').': '.$e->getMessage(),
             ]);
         }
     }
 
     public function getTalentRolesWithoutVideos(Request $request, $subdomain)
     {
-        if (!auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        
-        if (!$role->isCurator()) {
+
+        if (! $role->isCurator()) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
@@ -1880,19 +1911,19 @@ class RoleController extends Controller
 
         // Get talent roles from these events that don't have YouTube videos
         $talentRoles = collect();
-        
+
         foreach ($upcomingEvents as $event) {
             foreach ($event->roles as $eventRole) {
-                if ($eventRole->isTalent() && (! $eventRole->youtube_links && $eventRole->youtube_links != '[]')) {                    
+                if ($eventRole->isTalent() && (! $eventRole->youtube_links && $eventRole->youtube_links != '[]')) {
                     // Check if we already have this role
-                    if (!$talentRoles->contains('id', $eventRole->id)) {
+                    if (! $talentRoles->contains('id', $eventRole->id)) {
                         $talentRoles->push([
                             'id' => $eventRole->id,
                             'name' => $eventRole->name,
                             'description' => $eventRole->description,
                             'profile_image_url' => $eventRole->profile_image_url,
                             'event_name' => $event->name,
-                            'event_date' => $event->localStartsAt()
+                            'event_date' => $event->localStartsAt(),
                         ]);
                     }
                 }
@@ -1904,33 +1935,33 @@ class RoleController extends Controller
 
     public function searchYouTube(Request $request, $subdomain)
     {
-        if (!auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        
-        if (!$role->isCurator()) {
+
+        if (! $role->isCurator()) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
         $query = $request->get('q');
-        
+
         if (empty($query)) {
             return response()->json(['success' => false, 'message' => __('messages.query_required')]);
         }
 
         try {
             $videos = \App\Utils\GeminiUtils::searchYouTube($query);
-            
+
             return response()->json([
                 'success' => true,
-                'videos' => $videos
+                'videos' => $videos,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => __('messages.error_searching_videos') . ': ' . $e->getMessage()
+                'message' => __('messages.error_searching_videos').': '.$e->getMessage(),
             ]);
         }
     }
@@ -1939,139 +1970,139 @@ class RoleController extends Controller
     {
         // For guest users, we don't require authentication but we do validate the subdomain
         $role = Role::subdomain($subdomain)->firstOrFail();
-        
+
         $query = $request->get('q');
-        
+
         if (empty($query)) {
             return response()->json(['success' => false, 'message' => __('messages.query_required')]);
         }
 
         // Check if YouTube API key is configured
         $apiKey = config('services.google.backend');
-        if (!$apiKey) {
+        if (! $apiKey) {
             return response()->json([
-                'success' => false, 
-                'message' => 'YouTube API key not configured. Please contact the administrator.'
+                'success' => false,
+                'message' => 'YouTube API key not configured. Please contact the administrator.',
             ]);
         }
 
         try {
             $videos = \App\Utils\GeminiUtils::searchYouTube($query);
-            
+
             if (empty($videos)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No videos found for "' . $query . '". Please try a different search term.'
+                    'message' => 'No videos found for "'.$query.'". Please try a different search term.',
                 ]);
             }
-            
+
             return response()->json([
                 'success' => true,
-                'videos' => $videos
+                'videos' => $videos,
             ]);
         } catch (\Exception $e) {
-            
+
             return response()->json([
                 'success' => false,
-                'message' => __('messages.error_searching_videos') . ': ' . $e->getMessage()
+                'message' => __('messages.error_searching_videos').': '.$e->getMessage(),
             ]);
         }
     }
 
     public function saveVideo(Request $request, $subdomain)
     {
-        if (!auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        
-        if (!$role->isCurator()) {
+
+        if (! $role->isCurator()) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
         $request->validate([
             'role_id' => 'required|integer',
             'video_url' => 'required|url',
-            'video_title' => 'required|string'
+            'video_title' => 'required|string',
         ]);
 
         $talentRole = Role::find($request->role_id);
-        
-        if (!$talentRole || !$talentRole->isTalent()) {
+
+        if (! $talentRole || ! $talentRole->isTalent()) {
             return response()->json(['success' => false, 'message' => __('messages.talent_role_not_found')]);
         }
 
         // Add the video to the talent role's YouTube links
         $existingLinks = $talentRole->youtube_links ? json_decode($talentRole->youtube_links, true) : [];
-        
+
         $newLink = [
             'url' => $request->video_url,
             'title' => $request->video_title,
-            'type' => 'youtube'
+            'type' => 'youtube',
         ];
-        
+
         $existingLinks[] = $newLink;
-        
+
         $talentRole->youtube_links = json_encode($existingLinks);
         $talentRole->save();
 
         return response()->json([
             'success' => true,
-            'message' => __('messages.video_saved_successfully')
+            'message' => __('messages.video_saved_successfully'),
         ]);
     }
 
     public function saveVideos(Request $request, $subdomain)
     {
-        if (!auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        
-        if (!$role->isCurator()) {
+
+        if (! $role->isCurator()) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
         $request->validate([
             'role_id' => 'required|integer',
-            'videos' => 'array|max:2'
+            'videos' => 'array|max:2',
         ]);
 
         // Only validate video details if videos are provided
-        if (!empty($request->videos)) {
+        if (! empty($request->videos)) {
             $request->validate([
                 'videos.*.url' => 'required|url',
-                'videos.*.title' => 'required|string'
+                'videos.*.title' => 'required|string',
             ]);
         }
 
         $talentRole = Role::find($request->role_id);
-        
-        if (!$talentRole || !$talentRole->isTalent()) {
+
+        if (! $talentRole || ! $talentRole->isTalent()) {
             return response()->json(['success' => false, 'message' => __('messages.talent_role_not_found')]);
         }
 
         // Add the videos to the talent role's YouTube links
         $existingLinks = $talentRole->youtube_links ? json_decode($talentRole->youtube_links, true) : [];
-        
+
         foreach ($request->videos as $video) {
             $newLink = [
                 'url' => $video['url'],
                 'title' => $video['title'],
-                'type' => 'youtube'
+                'type' => 'youtube',
             ];
-            
+
             $existingLinks[] = $newLink;
         }
-        
+
         $talentRole->youtube_links = json_encode($existingLinks);
         $talentRole->save();
 
         return response()->json([
             'success' => true,
-            'message' => __('messages.videos_saved_successfully')
+            'message' => __('messages.videos_saved_successfully'),
         ]);
     }
 
@@ -2081,8 +2112,8 @@ class RoleController extends Controller
     private function handleSyncAndCalendarChanges($role, $newSyncDirection, $oldSyncDirection, $newCalendarId = null, $oldCalendarId = null)
     {
         $user = auth()->user();
-        
-        if (!$user->google_token) {
+
+        if (! $user->google_token) {
             return; // No Google Calendar connected, skip webhook management
         }
 
@@ -2090,8 +2121,8 @@ class RoleController extends Controller
             $googleCalendarService = app(\App\Services\GoogleCalendarService::class);
 
             // Check if we need to remove old webhook (calendar changed or sync direction changed)
-            $shouldRemoveOldWebhook = ($oldCalendarId !== $newCalendarId) || 
-                                    ($oldSyncDirection !== $newSyncDirection && 
+            $shouldRemoveOldWebhook = ($oldCalendarId !== $newCalendarId) ||
+                                    ($oldSyncDirection !== $newSyncDirection &&
                                      ($oldSyncDirection === 'from' || $oldSyncDirection === 'both'));
 
             if ($shouldRemoveOldWebhook && $role->google_webhook_id) {
@@ -2116,13 +2147,14 @@ class RoleController extends Controller
             // Handle webhook management based on sync direction
             if ($newSyncDirection === 'from' || $newSyncDirection === 'both') {
                 // Need webhook for syncing from Google
-                if (!$role->hasActiveWebhook()) {
+                if (! $role->hasActiveWebhook()) {
                     // Ensure user has valid token before creating webhook
-                    if (!$googleCalendarService->ensureValidToken($user)) {
+                    if (! $googleCalendarService->ensureValidToken($user)) {
                         \Log::warning('Google Calendar token invalid and refresh failed during sync direction change', [
                             'user_id' => $user->id,
                             'role_id' => $role->id,
                         ]);
+
                         return;
                     }
 
@@ -2163,14 +2195,14 @@ class RoleController extends Controller
      */
     private function calculateExpiresIn($expiresAt): int
     {
-        if (!$expiresAt) {
+        if (! $expiresAt) {
             return 3600; // Default to 1 hour
         }
-        
+
         if (is_string($expiresAt)) {
             $expiresAt = \Carbon\Carbon::parse($expiresAt);
         }
-        
+
         return $expiresAt->diffInSeconds(now());
     }
 
@@ -2179,68 +2211,69 @@ class RoleController extends Controller
      */
     public function testEmail(Request $request, $subdomain): JsonResponse
     {
-        if (!is_hosted_or_admin()) {
+        if (! is_hosted_or_admin()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
-        if (!auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        
+
         // Get email from request or from role's email settings
         $email = $request->input('email');
-        if (!$email) {
+        if (! $email) {
             $emailSettings = $role->getEmailSettings();
             $email = $emailSettings['from_address'] ?? null;
         }
-        
-        if (!$email) {
+
+        if (! $email) {
             return response()->json(['error' => __('messages.please_enter_from_address')], 400);
         }
 
         // Validate email format
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return response()->json(['error' => __('messages.invalid_email_address')], 400);
         }
 
-            // If email_settings are provided in the request (from form), temporarily apply them to the role
-            // This allows testing before saving the form
-            if ($request->has('email_settings')) {
-                $submittedSettings = $request->input('email_settings', []);
-                $existingSettings = $role->getEmailSettings();
-                
-                // Convert port to integer if provided
-                if (isset($submittedSettings['port']) && $submittedSettings['port'] !== '') {
-                    $submittedSettings['port'] = (int) $submittedSettings['port'];
-                }
-                
-                // If password is all bullets, use the old value
-                if (isset($submittedSettings['password'])) {
-                    $passwordValue = trim($submittedSettings['password']);
-                    if ($passwordValue === '••••••••••' || $passwordValue === str_repeat('•', 10)) {
-                        // Use existing password instead
-                        if (isset($existingSettings['password'])) {
-                            $submittedSettings['password'] = $existingSettings['password'];
-                        } else {
-                            // No existing password, remove it
-                            unset($submittedSettings['password']);
-                        }
-                    }
-                }
-                
-                // Merge with existing settings to preserve values not being updated
-                $emailSettings = array_merge($existingSettings, $submittedSettings);
-                
-                // Temporarily set email settings on the role for testing
-                $role->setEmailSettings($emailSettings);
+        // If email_settings are provided in the request (from form), temporarily apply them to the role
+        // This allows testing before saving the form
+        if ($request->has('email_settings')) {
+            $submittedSettings = $request->input('email_settings', []);
+            $existingSettings = $role->getEmailSettings();
+
+            // Convert port to integer if provided
+            if (isset($submittedSettings['port']) && $submittedSettings['port'] !== '') {
+                $submittedSettings['port'] = (int) $submittedSettings['port'];
             }
 
-        $emailService = new EmailService();
+            // If password is all bullets, use the old value
+            if (isset($submittedSettings['password'])) {
+                $passwordValue = trim($submittedSettings['password']);
+                if ($passwordValue === '••••••••••' || $passwordValue === str_repeat('•', 10)) {
+                    // Use existing password instead
+                    if (isset($existingSettings['password'])) {
+                        $submittedSettings['password'] = $existingSettings['password'];
+                    } else {
+                        // No existing password, remove it
+                        unset($submittedSettings['password']);
+                    }
+                }
+            }
+
+            // Merge with existing settings to preserve values not being updated
+            $emailSettings = array_merge($existingSettings, $submittedSettings);
+
+            // Temporarily set email settings on the role for testing
+            $role->setEmailSettings($emailSettings);
+        }
+
+        $emailService = new EmailService;
 
         try {
             $emailService->sendTestEmail($role, $email);
+
             return response()->json(['success' => true, 'message' => __('messages.test_email_sent')]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
