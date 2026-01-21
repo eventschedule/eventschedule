@@ -133,6 +133,14 @@ Add the following line to your crontab to ensure scheduled tasks run automatical
 
 You're all set! 🎉 Event Schedule should now be up and running.
 
+## Documentation
+
+For advanced configuration, see the following guides:
+
+- [SaaS Setup](docs/SAAS_SETUP.md) - Configure Event Schedule for multi-tenant SaaS deployment with subdomain routing
+- [Stripe Setup](docs/STRIPE_SETUP.md) - Set up Stripe Connect for ticket sales and Cashier for subscription billing
+- [Google Calendar Setup](docs/GOOGLE_CALENDAR_SETUP.md) - Enable bidirectional sync with Google Calendar
+
 ## Testing
 
 Event Schedule includes a comprehensive browser test suite powered by Laravel Dusk.

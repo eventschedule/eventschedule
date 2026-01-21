@@ -878,7 +878,7 @@ class RoleController extends Controller
 
         // TODO remove this
         if (config('app.hosted')) {
-            $role->plan_expires = now()->addYear()->format('Y-m-d');
+            $role->plan_expires = now()->addDays(config('app.trial_days'))->format('Y-m-d');
             $role->plan_type = 'pro';
             $role->plan_term = 'year';
         }
