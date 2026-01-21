@@ -63,8 +63,8 @@ composer audit
 ## Architecture
 
 ### Multi-Tenant Routing
-- **Hosted mode** (`APP_HOSTED=true`): Uses subdomains (`{subdomain}.eventschedule.com`)
-- **Self-hosted mode** (`APP_HOSTED=false`): Uses path-based routing (`/{subdomain}/...`)
+- **Hosted mode** (`IS_HOSTED=true`): Uses subdomains (`{subdomain}.eventschedule.com`)
+- **Self-hosted mode** (`IS_HOSTED=false`): Uses path-based routing (`/{subdomain}/...`)
 
 Routes are defined conditionally in `routes/web.php` based on `config('app.hosted')`.
 
@@ -105,7 +105,7 @@ Commands in `app/Console/Commands/`: CheckData, ExtendPlans, ReleaseTickets, Tra
 ## Environment Variables
 
 Key configuration in `.env`:
-- `APP_HOSTED` - `true` for SaaS, `false` for self-hosted
+- `IS_HOSTED` - `true` for SaaS, `false` for self-hosted
 - `APP_TESTING` - Set to `true` in test environment
 - `GEMINI_API_KEY` - For AI event parsing/translation
 - `REPORT_ERRORS` - Enable Sentry error reporting
