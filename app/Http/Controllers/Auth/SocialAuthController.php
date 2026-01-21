@@ -61,6 +61,9 @@ class SocialAuthController extends Controller
 
             // Link Google account to existing user
             $user->google_oauth_id = $googleId;
+            if (! $user->hasVerifiedEmail()) {
+                $user->email_verified_at = now();
+            }
             $user->save();
 
             Auth::login($user, true);
@@ -176,6 +179,9 @@ class SocialAuthController extends Controller
 
         // Link the Google account to this user
         $user->google_oauth_id = $googleId;
+        if (! $user->hasVerifiedEmail() && $user->email === $email) {
+            $user->email_verified_at = now();
+        }
         $user->save();
 
         return redirect()->to(route('profile.edit').'#section-google-calendar')
