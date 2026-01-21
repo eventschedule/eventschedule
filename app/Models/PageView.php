@@ -158,7 +158,7 @@ class PageView
 
         // Track referrer source
         $referrer = $request->header('referer');
-        AnalyticsReferrersDaily::incrementView($role->id, $referrer);
+        AnalyticsReferrersDaily::incrementView($role->id, $referrer, $role->custom_domain);
 
         // Increment event-level analytics if event exists
         if ($event) {
@@ -170,13 +170,13 @@ class PageView
 
             // Check if the current schedule is linked to this event in any capacity
             $scheduleIsAssociated = $roles->contains(function ($eventRole) use ($role) {
-                return $eventRole->id === $role->id;
+                return $eventRole->id == $role->id;
             });
 
             if ($scheduleIsAssociated) {
                 foreach ($roles as $eventRole) {
                     // Track talents and venues (not curators), excluding the current schedule
-                    if (($eventRole->isTalent() || $eventRole->isVenue()) && $eventRole->id !== $role->id) {
+                    if (($eventRole->isTalent() || $eventRole->isVenue()) && $eventRole->id != $role->id) {
                         AnalyticsAppearancesDaily::incrementView($eventRole->id, $role->id, $deviceType);
                     }
                 }
