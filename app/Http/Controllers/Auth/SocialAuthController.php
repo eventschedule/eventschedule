@@ -17,6 +17,7 @@ class SocialAuthController extends Controller
     {
         return Socialite::driver('google')
             ->scopes(['openid', 'email', 'profile'])
+            ->redirectUrl(route('auth.google.callback'))
             ->redirect();
     }
 
@@ -26,7 +27,9 @@ class SocialAuthController extends Controller
     public function handleGoogleCallback(): RedirectResponse
     {
         try {
-            $googleUser = Socialite::driver('google')->user();
+            $googleUser = Socialite::driver('google')
+                ->redirectUrl(route('auth.google.callback'))
+                ->user();
         } catch (\Exception $e) {
             return redirect()->route('login')
                 ->withErrors(['email' => __('messages.google_auth_failed')]);
