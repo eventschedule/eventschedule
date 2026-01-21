@@ -95,6 +95,18 @@
                 @endif
             </div>
 
+            {{-- Top Associated Talents/Venues Chart --}}
+            @if ($topAppearances->isNotEmpty())
+            <div class="grid grid-cols-1 gap-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_associated_roles') }}</h3>
+                    <div class="h-64">
+                        <canvas id="appearancesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            @endif
+
         @else
             {{-- No Data State --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
@@ -285,6 +297,51 @@
                     },
                     y: {
                         beginAtZero: true,
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor
+                        }
+                    }
+                }
+            }
+        });
+        @endif
+
+        @if ($topAppearances->isNotEmpty())
+        // Top Associated Roles Chart
+        const appearancesCtx = document.getElementById('appearancesChart').getContext('2d');
+        new Chart(appearancesCtx, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($topAppearances->pluck('role.name')->toArray()) !!},
+                datasets: [{
+                    label: '{{ __("messages.views") }}',
+                    data: {!! json_encode($topAppearances->pluck('view_count')->toArray()) !!},
+                    backgroundColor: '#8B5CF6'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor
+                        }
+                    },
+                    y: {
                         grid: {
                             color: gridColor
                         },

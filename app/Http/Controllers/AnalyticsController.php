@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Services\AnalyticsService;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class AnalyticsController extends Controller
 {
@@ -48,6 +47,15 @@ class AnalyticsController extends Controller
         // Get views by schedule
         $viewsBySchedule = $analytics->getViewsBySchedule($user, $start, $end);
 
+        // Get top associated talents/venues (appearance views)
+        $topAppearances = collect();
+        if ($selectedRoleId) {
+            $selectedRole = $roles->firstWhere('id', $selectedRoleId);
+            if ($selectedRole) {
+                $topAppearances = $analytics->getTopAppearancesForSchedule($selectedRole, 10, $start, $end);
+            }
+        }
+
         return view('analytics.index', compact(
             'roles',
             'selectedRoleId',
@@ -57,6 +65,7 @@ class AnalyticsController extends Controller
             'viewsByPeriod',
             'deviceBreakdown',
             'viewsBySchedule',
+            'topAppearances',
             'period'
         ));
     }

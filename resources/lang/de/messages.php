@@ -714,6 +714,7 @@ return [
     'monthly' => 'Monatlich',
     'views' => 'Aufrufe',
     'device_breakdown' => 'Geräteverteilung',
+    'top_associated_roles' => 'Top Assoziierte Künstler & Veranstaltungsorte',
     'recent_views' => 'Letzte Aufrufe',
     'schedule' => 'Kalender',
     'device' => 'Gerät',

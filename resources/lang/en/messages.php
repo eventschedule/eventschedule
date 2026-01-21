@@ -730,6 +730,7 @@ return [
     'monthly' => 'Monthly',
     'views' => 'Views',
     'device_breakdown' => 'Device Breakdown',
+    'top_associated_roles' => 'Top Associated Talents & Venues',
     'recent_views' => 'Recent Views',
     'schedule' => 'Schedule',
     'device' => 'Device',

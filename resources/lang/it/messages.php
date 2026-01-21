@@ -711,6 +711,7 @@ return [
     'monthly' => 'Mensile',
     'views' => 'Visualizzazioni',
     'device_breakdown' => 'Suddivisione Dispositivi',
+    'top_associated_roles' => 'Principali Artisti e Luoghi Associati',
     'recent_views' => 'Visualizzazioni Recenti',
     'schedule' => 'Calendario',
     'device' => 'Dispositivo',

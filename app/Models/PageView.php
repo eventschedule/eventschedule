@@ -11,7 +11,7 @@ class PageView
      */
     public static function detectDeviceType(?string $userAgent): string
     {
-        if (!$userAgent) {
+        if (! $userAgent) {
             return 'unknown';
         }
 
@@ -28,7 +28,7 @@ class PageView
         }
 
         // Check for Android without mobile (likely tablet)
-        if (preg_match('/android/i', $userAgent) && !preg_match('/mobile/i', $userAgent)) {
+        if (preg_match('/android/i', $userAgent) && ! preg_match('/mobile/i', $userAgent)) {
             return 'tablet';
         }
 
@@ -41,7 +41,7 @@ class PageView
      */
     public static function isBot(?string $userAgent): bool
     {
-        if (!$userAgent) {
+        if (! $userAgent) {
             return false;
         }
 
@@ -159,6 +159,15 @@ class PageView
         // Increment event-level analytics if event exists
         if ($event) {
             AnalyticsEventsDaily::incrementView($event->id, $deviceType);
+
+            // Track appearance views for associated talents/venues
+            $roles = $event->relationLoaded('roles') ? $event->roles : $event->roles()->get();
+            foreach ($roles as $eventRole) {
+                // Only track talents and venues, not the schedule itself
+                if (($eventRole->isTalent() || $eventRole->isVenue()) && $eventRole->id !== $role->id) {
+                    AnalyticsAppearancesDaily::incrementView($eventRole->id, $role->id, $deviceType);
+                }
+            }
         }
 
         return true;

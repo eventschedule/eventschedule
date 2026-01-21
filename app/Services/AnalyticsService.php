@@ -2,11 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
+use App\Models\Event;
 use App\Models\PageView;
 use App\Models\Role;
-use App\Models\Event;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -89,8 +90,8 @@ class AnalyticsService
             ->limit($limit)
             ->with('event')
             ->get()
-            ->filter(fn($item) => $item->event !== null)
-            ->map(fn($item) => [
+            ->filter(fn ($item) => $item->event !== null)
+            ->map(fn ($item) => [
                 'event' => $item->event,
                 'view_count' => (int) $item->view_count,
             ]);
@@ -180,7 +181,7 @@ class AnalyticsService
             ->inDateRange($start, $end)
             ->first();
 
-        if (!$result) {
+        if (! $result) {
             return collect();
         }
 
@@ -189,7 +190,7 @@ class AnalyticsService
             'mobile' => (int) $result->mobile,
             'tablet' => (int) $result->tablet,
             'unknown' => (int) $result->unknown,
-        ])->filter(fn($count) => $count > 0);
+        ])->filter(fn ($count) => $count > 0);
     }
 
     /**
@@ -212,8 +213,8 @@ class AnalyticsService
             ->groupBy('role_id')
             ->with('role')
             ->get()
-            ->filter(fn($item) => $item->role !== null)
-            ->map(fn($item) => [
+            ->filter(fn ($item) => $item->role !== null)
+            ->map(fn ($item) => [
                 'role' => $item->role,
                 'view_count' => (int) $item->view_count,
             ]);
@@ -257,5 +258,61 @@ class AnalyticsService
             'total_views' => 0,
             'period_views' => 0,
         ];
+    }
+
+    /**
+     * Get top talents/venues by appearance views on a specific schedule
+     */
+    public function getTopAppearancesForSchedule(Role $schedule, int $limit, Carbon $start, Carbon $end): Collection
+    {
+        return AnalyticsAppearancesDaily::select(
+            'role_id',
+            DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as view_count')
+        )
+            ->forSchedule($schedule->id)
+            ->inDateRange($start, $end)
+            ->groupBy('role_id')
+            ->orderByDesc('view_count')
+            ->limit($limit)
+            ->with('role')
+            ->get()
+            ->filter(fn ($item) => $item->role !== null)
+            ->map(fn ($item) => [
+                'role' => $item->role,
+                'view_count' => (int) $item->view_count,
+            ]);
+    }
+
+    /**
+     * Get total appearance views on a schedule
+     */
+    public function getTotalAppearanceViewsForSchedule(Role $schedule, Carbon $start, Carbon $end): int
+    {
+        return (int) AnalyticsAppearancesDaily::forSchedule($schedule->id)
+            ->inDateRange($start, $end)
+            ->sum(DB::raw('desktop_views + mobile_views + tablet_views + unknown_views'));
+    }
+
+    /**
+     * Get appearance views by period for a specific schedule
+     */
+    public function getAppearanceViewsByPeriod(Role $schedule, string $period, Carbon $start, Carbon $end): Collection
+    {
+        $dateFormat = match ($period) {
+            'daily' => '%Y-%m-%d',
+            'weekly' => '%x-%v',  // ISO year and week
+            'monthly' => '%Y-%m',
+            default => '%Y-%m-%d',
+        };
+
+        return AnalyticsAppearancesDaily::select(
+            DB::raw("DATE_FORMAT(date, '{$dateFormat}') as period"),
+            DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as view_count')
+        )
+            ->forSchedule($schedule->id)
+            ->inDateRange($start, $end)
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get();
     }
 }
