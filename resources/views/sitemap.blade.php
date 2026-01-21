@@ -6,7 +6,7 @@
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
     </url>
-    @if(config('app.hosted'))
+    @if(config('app.hosted') && $showMarketingLinks)
     <url>
         <loc>{{ url('/features') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
