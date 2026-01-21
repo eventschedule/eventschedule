@@ -73,4 +73,14 @@ Route::middleware('auth')->group(function () {
 
     Route::get('auth/google/set-password/callback', [SocialAuthController::class, 'handleGoogleCallbackForSetPassword'])
         ->name('auth.google.set_password.callback');
+
+    // Google account connection from settings (for existing users who want to link Google)
+    Route::get('auth/google/connect', [SocialAuthController::class, 'redirectToGoogleConnect'])
+        ->name('auth.google.connect');
+
+    Route::get('auth/google/connect/callback', [SocialAuthController::class, 'handleGoogleConnectCallback'])
+        ->name('auth.google.connect.callback');
+
+    Route::post('auth/google/disconnect', [SocialAuthController::class, 'disconnectGoogle'])
+        ->name('auth.google.disconnect');
 });
