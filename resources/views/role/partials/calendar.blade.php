@@ -1013,3 +1013,4 @@ const calendarApp = createApp({
 const calendarAppInstance = calendarApp.mount('#calendar-app');
 window.calendarVueApp = calendarAppInstance;
 </script>
+</div>

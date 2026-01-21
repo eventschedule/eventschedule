@@ -6,6 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Event Schedule is an open-source platform for sharing events, selling tickets, and bringing communities together. It supports both hosted (SaaS at eventschedule.com) and self-hosted deployments.
 
+## Important Rules
+
+- **Never run tests without asking first** - Tests will empty the database
+- **Never run `npm install` without asking first** - Confirm before installing dependencies
+
 ## Build & Development Commands
 
 ```bash
