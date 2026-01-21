@@ -742,8 +742,26 @@ class EventController extends Controller
     public function showImport(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
+        $venues = [];
 
-        return view('event.admin-import', ['role' => $role]);
+        if ($user = $request->user()) {
+            $roles = $user->roles()->get();
+            $venues = $roles->filter(function ($item) {
+                if ($item->pivot->level == 'follower' && ! $item->acceptEventRequests()) {
+                    return false;
+                }
+
+                return $item->isVenue();
+            })->map(function ($item) {
+                return $item->toData();
+            });
+            $venues = array_values($venues->sortBy('name')->toArray());
+        }
+
+        return view('event.admin-import', [
+            'role' => $role,
+            'venues' => $venues,
+        ]);
     }
 
     public function showGuestImport(Request $request, $subdomain)
@@ -777,7 +795,7 @@ class EventController extends Controller
             }
         }
 
-        return view('event.guest-import', ['role' => $role, 'isGuest' => true]);
+        return view('event.guest-import', ['role' => $role, 'isGuest' => true, 'venues' => []]);
     }
 
     public function parse(Request $request, $subdomain)
@@ -840,12 +858,20 @@ class EventController extends Controller
             $event->save();
         }
 
+        // Get venue data to return to client for future imports
+        $venueData = null;
+        $venue = $event->venue;
+        if ($venue) {
+            $venueData = $venue->toData();
+        }
+
         return response()->json([
             'success' => true,
             'event' => [
                 'view_url' => $event->getGuestUrl($subdomain),
                 'edit_url' => route('event.edit', ['subdomain' => $subdomain, 'hash' => UrlUtils::encodeId($event->id)]),
             ],
+            'venue' => $venueData,
         ]);
     }
 

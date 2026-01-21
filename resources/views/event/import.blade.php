@@ -296,74 +296,117 @@
                         
                         <div>
                             <x-input-label for="name_@{{ idx }}" :value="__('messages.event_name')" />
-                            <x-text-input id="name_@{{ idx }}" 
-                                name="name_@{{ idx }}" 
-                                type="text" 
-                                class="mt-1 block w-full" 
+                            <x-text-input id="name_@{{ idx }}"
+                                name="name_@{{ idx }}"
+                                type="text"
+                                class="mt-1 block w-full"
                                 v-model="preview.parsed[idx].event_name"
                                 v-bind:readonly="savedEvents[idx]"
                                 required />
-                        </div>
-
-                        <!-- Matched venue indicator -->
-                        <div v-if="preview.parsed[idx].venue_id" class="flex items-center text-sm">
-                            <div class="flex items-center text-green-600 dark:text-green-400">
-                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                </svg>
-                                <span>{{ __('messages.matched_venue') }}: <a :href="preview.parsed[idx].venue_url" target="_blank" class="underline hover:no-underline">@{{ preview.parsed[idx].venue_name }}</a></span>
-                            </div>
-                        </div>
-
-                        <!-- Venue Name -->
-                        <div>
-                            <x-input-label for="venue_name_@{{ idx }}" :value="__('messages.venue_name')" />
-                            <x-text-input id="venue_name_@{{ idx }}"
-                                name="venue_name_@{{ idx }}"
-                                type="text"
-                                class="mt-1 block w-full"
-                                v-model="preview.parsed[idx].venue_name"
-                                v-bind:readonly="(preview.parsed[idx].venue_id && !preview.parsed[idx].venue_is_editable) || savedEvents[idx]"
-                                autocomplete="off" />
-                        </div>
-
-                        <!-- Street Address -->
-                        <div>
-                            <x-input-label for="venue_address1_@{{ idx }}" :value="__('messages.street_address')" />
-                            <x-text-input id="venue_address1_@{{ idx }}"
-                                name="venue_address1_@{{ idx }}"
-                                type="text"
-                                class="mt-1 block w-full"
-                                v-model="preview.parsed[idx].event_address"
-                                v-bind:readonly="(preview.parsed[idx].venue_id && !preview.parsed[idx].venue_is_editable) || savedEvents[idx]"
-                                autocomplete="off" />
-                        </div>
-
-                        <!-- City -->
-                        <div>
-                            <x-input-label for="venue_city_@{{ idx }}" :value="__('messages.city')" />
-                            <x-text-input id="venue_city_@{{ idx }}"
-                                name="venue_city_@{{ idx }}"
-                                type="text"
-                                class="mt-1 block w-full"
-                                v-model="preview.parsed[idx].event_city"
-                                v-bind:readonly="(preview.parsed[idx].venue_id && !preview.parsed[idx].venue_is_editable) || savedEvents[idx]"
-                                placeholder="{{ $role->isCurator() ? $role->city : '' }}"
-                                autocomplete="off" />
                         </div>
 
                         <div>
                             <label for="starts_at_@{{ idx }}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">
                                 {{ __('messages.date_and_time') }}
                             </label>
-                            <input id="starts_at_@{{ idx }}" 
-                                    name="starts_at_@{{ idx }}" 
-                                    type="text" 
+                            <input id="starts_at_@{{ idx }}"
+                                    name="starts_at_@{{ idx }}"
+                                    type="text"
                                     :class="'mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm datepicker_' + idx"
                                     v-bind:readonly="savedEvents[idx]"
                                     v-model="preview.parsed[idx].event_date_time"
-                                    required 
+                                    required
                                     autocomplete="off" />
+                        </div>
+
+                        <!-- Venue selection - show when venues available (auth) OR venue match exists (guest) -->
+                        <div v-if="(venues.length > 0 || preview.parsed[idx].venue_id) && !savedEvents[idx]">
+                            <x-input-label :value="__('messages.venue')" />
+                            <fieldset>
+                                <div class="mt-2 mb-4 space-y-4 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                                    <div class="flex items-center">
+                                        <input :id="'use_existing_venue_' + idx" :name="'venue_type_' + idx" type="radio" value="use_existing" v-model="eventVenueTypes[idx]" @change="onVenueTypeChange(idx)"
+                                            class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                        <label :for="'use_existing_venue_' + idx"
+                                            class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input :id="'create_new_venue_' + idx" :name="'venue_type_' + idx" type="radio" value="create_new" v-model="eventVenueTypes[idx]" @change="onVenueTypeChange(idx)"
+                                            class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                        <label :for="'create_new_venue_' + idx"
+                                            class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.create_new') }}</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <!-- Venue dropdown - only for authenticated users -->
+                            @auth
+                            <div v-if="eventVenueTypes[idx] === 'use_existing' && venues.length > 0">
+                                <select :id="'selected_venue_' + idx"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                        @change="onVenueSelect(idx, $event.target.value ? venues.find(v => v.id === $event.target.value) : null)"
+                                        :value="eventSelectedVenues[idx]?.id || ''">
+                                    <option value="" disabled selected>{{ __('messages.please_select') }}</option>
+                                    <option v-for="venue in venues" :key="venue.id" :value="venue.id">
+                                        @{{ venue.name || venue.address1 }}
+                                    </option>
+                                </select>
+                            </div>
+                            @endauth
+
+                            <!-- Matched venue message - for unauthenticated users with matched venue -->
+                            @guest
+                            <div v-if="eventVenueTypes[idx] === 'use_existing' && preview.parsed[idx].venue_id" class="mt-1">
+                                <p class="text-sm text-green-600 dark:text-green-400">
+                                    {{ __('messages.matched_venue') }}:
+                                    <a v-bind:href="preview.parsed[idx].venue_url"
+                                       target="_blank"
+                                       class="underline hover:text-green-800 dark:hover:text-green-300">
+                                        @{{ preview.parsed[idx].matched_venue_name || preview.parsed[idx].venue_name }}
+                                    </a>
+                                </p>
+                            </div>
+                            @endguest
+                        </div>
+
+                        <!-- Venue fields (when "Create New" selected or no venues available) -->
+                        <div v-if="shouldShowVenueFields(idx) && !eventSelectedVenues[idx]">
+                            <!-- Venue Name -->
+                            <div>
+                                <x-input-label for="venue_name_@{{ idx }}" :value="__('messages.name')" />
+                                <x-text-input id="venue_name_@{{ idx }}"
+                                    name="venue_name_@{{ idx }}"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    v-model="preview.parsed[idx].venue_name"
+                                    v-bind:readonly="savedEvents[idx]"
+                                    autocomplete="off" />
+                            </div>
+
+                            <!-- Street Address -->
+                            <div class="mt-4">
+                                <x-input-label for="venue_address1_@{{ idx }}" :value="__('messages.street_address')" />
+                                <x-text-input id="venue_address1_@{{ idx }}"
+                                    name="venue_address1_@{{ idx }}"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    v-model="preview.parsed[idx].event_address"
+                                    v-bind:readonly="savedEvents[idx]"
+                                    autocomplete="off" />
+                            </div>
+
+                            <!-- City -->
+                            <div class="mt-4">
+                                <x-input-label for="venue_city_@{{ idx }}" :value="__('messages.city')" />
+                                <x-text-input id="venue_city_@{{ idx }}"
+                                    name="venue_city_@{{ idx }}"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    v-model="preview.parsed[idx].event_city"
+                                    v-bind:readonly="savedEvents[idx]"
+                                    placeholder="{{ $role->isCurator() ? $role->city : '' }}"
+                                    autocomplete="off" />
+                            </div>
                         </div>
 
                         <!-- Account creation checkbox for guest users -->
@@ -433,6 +476,9 @@
                                 </button>
                                 <button v-if="{{ auth()->check() ? 'true' : 'false' }}" @click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
                                     {{ __('messages.view') }}
+                                </button>
+                                <button @click="handleClearForNext" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                    {{ __('messages.clear') }}
                                 </button>
                             </template>
                             <template v-else>
@@ -698,6 +744,9 @@
                 userName: '',
                 userEmail: '',
                 userPassword: '',
+                venues: @json($venues ?? []),
+                eventVenueTypes: [],      // 'use_existing' | 'create_new' per event
+                eventSelectedVenues: [],  // selected venue object per event
             }
         },
 
@@ -900,7 +949,36 @@
                         this.savedEventData = new Array(this.preview.parsed.length).fill(null);
                         this.saveErrors = new Array(this.preview.parsed.length).fill(false);
                         this.savingEvents = new Array(this.preview.parsed.length).fill(false);
-                        
+
+                        // Initialize venue selection arrays
+                        this.eventVenueTypes = [];
+                        this.eventSelectedVenues = [];
+
+                        this.preview.parsed.forEach((event, idx) => {
+                            let matchedUserVenue = null;
+                            if (event.venue_id && this.venues.length > 0) {
+                                matchedUserVenue = this.venues.find(v => v.id === event.venue_id);
+                            }
+
+                            if (this.venues.length > 0) {
+                                // Authenticated user with venues
+                                if (matchedUserVenue) {
+                                    this.eventVenueTypes[idx] = 'use_existing';
+                                    this.eventSelectedVenues[idx] = matchedUserVenue;
+                                } else {
+                                    this.eventVenueTypes[idx] = 'create_new';
+                                    this.eventSelectedVenues[idx] = null;
+                                }
+                            } else if (event.venue_id) {
+                                // Unauthenticated user but venue match exists - default to use_existing
+                                this.eventVenueTypes[idx] = 'use_existing';
+                                this.eventSelectedVenues[idx] = null;
+                            } else {
+                                this.eventVenueTypes[idx] = 'create_new';
+                                this.eventSelectedVenues[idx] = null;
+                            }
+                        });
+
                     // Initialize video properties for performers and automatically search for videos
                     this.preview.parsed.forEach((event, eventIdx) => {
                         if (event.performers && Array.isArray(event.performers)) {
@@ -951,6 +1029,37 @@
                 // Update the model manually
                 this.eventDetails = pastedText;
                 // Don't auto-submit - user must click the submit button
+            },
+
+            shouldShowVenueFields(idx) {
+                // Hide fields if "use_existing" is selected (for auth users with venues or guest with matched venue)
+                if (this.eventVenueTypes[idx] === 'use_existing') {
+                    return false;
+                }
+                // Show fields if "create_new" selected or no venue selection available
+                return true;
+            },
+
+            onVenueTypeChange(idx) {
+                if (this.eventVenueTypes[idx] === 'create_new') {
+                    this.eventSelectedVenues[idx] = null;
+                }
+            },
+
+            onVenueSelect(idx, venue) {
+                this.eventSelectedVenues[idx] = venue;
+                if (venue) {
+                    this.preview.parsed[idx].venue_id = venue.id;
+                    this.preview.parsed[idx].venue_name = venue.name;
+                    this.preview.parsed[idx].event_address = venue.address1;
+                    this.preview.parsed[idx].event_city = venue.city;
+                }
+            },
+
+            clearSelectedVenue(idx) {
+                this.eventSelectedVenues[idx] = null;
+                this.eventVenueTypes[idx] = 'create_new';
+                this.preview.parsed[idx].venue_id = null;
             },
 
             handleEdit(idx) {
@@ -1034,12 +1143,23 @@
                         };
                     }
                     
-                    // Get venue address from VueJS model
-                    const venueAddress = parsed.event_address || "{{ $role->isCurator() ? $role->city : '' }}";
+                    // Determine venue_id based on selection
+                    let venueId = null;
+                    let venueName = parsed.venue_name;
+                    let venueAddress = parsed.event_address || "{{ $role->isCurator() ? $role->city : '' }}";
+                    let venueCity = parsed.event_city;
 
-                    // Get event name from VueJS model 
+                    if (this.eventVenueTypes[idx] === 'use_existing' && this.eventSelectedVenues[idx]) {
+                        // Use selected existing venue
+                        venueId = this.eventSelectedVenues[idx].id;
+                        venueName = this.eventSelectedVenues[idx].name;
+                        venueAddress = this.eventSelectedVenues[idx].address1;
+                        venueCity = this.eventSelectedVenues[idx].city;
+                    }
+
+                    // Get event name from VueJS model
                     const eventName = parsed.event_name;
-                    
+
                     // Send request to server
                     const response = await fetch('{{ isset($isGuest) && $isGuest ? route("event.guest_import", ["subdomain" => $role->subdomain]) : route("event.import", ["subdomain" => $role->subdomain]) }}', {
                         method: 'POST',
@@ -1048,17 +1168,17 @@
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
                         body: JSON.stringify({
-                            venue_name: parsed.venue_name,
+                            venue_name: venueName,
                             venue_name_en: parsed.venue_name_en,
                             venue_address1: venueAddress,
                             venue_address1_en: parsed.venue_address1_en,
-                            venue_city: parsed.event_city,
+                            venue_city: venueCity,
                             venue_city_en: parsed.event_city_en,
                             venue_state: parsed.event_state,
                             venue_state_en: parsed.event_state_en,
                             venue_postal_code: parsed.event_postal_code,
                             venue_country_code: parsed.event_country_code || '{{ $role->country_code }}',
-                            venue_id: parsed.venue_id,
+                            venue_id: venueId,
                             venue_language_code: '{{ $role->language_code }}',
                             members: members,
                             name: eventName,
@@ -1088,11 +1208,16 @@
                     }
                     
                     const data = await response.json();
-                    
+
                     // Store the response data in savedEventData array
                     this.savedEvents[idx] = true;
                     this.savedEventData[idx] = data.event; // Store the event object with view_url and edit_url
-                    
+
+                    // Add the venue to venues list if it's new (for future imports in same session)
+                    if (data.venue && !this.venues.find(v => v.id === data.venue.id)) {
+                        this.venues.push(data.venue);
+                    }
+
                     // For guest users, automatically redirect to view the event
                     if ({{ isset($isGuest) && $isGuest ? 'true' : 'false' }} && data.event.view_url) {
                         window.location.href = data.event.view_url;
@@ -1149,6 +1274,26 @@
                 this.userName = '';
                 this.userEmail = '';
                 this.userPassword = '';
+                this.$nextTick(() => {
+                    document.getElementById('event_details').focus();
+                });
+            },
+
+            handleClearForNext() {
+                // Clear the form state to import another event
+                this.preview = null;
+                this.eventDetails = '';
+                this.detailsImage = null;
+                this.detailsImageUrl = null;
+                this.savedEvents = [];
+                this.savedEventData = [];
+                this.saveErrors = [];
+                this.savingEvents = [];
+                this.eventVenueTypes = [];
+                this.eventSelectedVenues = [];
+                this.errorMessage = null;
+
+                // Focus on the textarea
                 this.$nextTick(() => {
                     document.getElementById('event_details').focus();
                 });

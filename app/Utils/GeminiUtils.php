@@ -449,6 +449,7 @@ class GeminiUtils
                     $data[$key]['venue_id'] = UrlUtils::encodeId($venue->id);
                     $data[$key]['venue_subdomain'] = $venue->subdomain;
                     $data[$key]['venue_url'] = route('role.view_guest', ['subdomain' => $venue->subdomain]);
+                    $data[$key]['matched_venue_name'] = $venue->name;
                     $user = auth()->user();
                     $data[$key]['venue_is_editable'] = ! $venue->isClaimed() ||
                         ($user && $venue->members()->where('user_id', $user->id)->exists());
