@@ -14,56 +14,63 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::get('sign_up', [RegisteredUserController::class, 'create'])
-                ->name('sign_up');
+        ->name('sign_up');
 
     Route::post('sign_up/send-code', [RegisteredUserController::class, 'sendVerificationCode'])
-                ->name('sign_up.send_code');
+        ->name('sign_up.send_code');
 
     Route::post('sign_up', [RegisteredUserController::class, 'store']);
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
-                ->name('login');
+        ->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
     Route::get('reset-password', [PasswordResetLinkController::class, 'create'])
-                ->name('password.request');
+        ->name('password.request');
 
     Route::post('reset-password', [PasswordResetLinkController::class, 'store'])
-                ->name('password.email');
+        ->name('password.email');
 
     Route::get('update-password/{token}', [NewPasswordController::class, 'create'])
-                ->name('password.reset');
+        ->name('password.reset');
 
     Route::post('update-password', [NewPasswordController::class, 'store'])
-                ->name('password.store');
+        ->name('password.store');
 
     Route::get('auth/google', [SocialAuthController::class, 'redirectToGoogle'])
-                ->name('auth.google');
+        ->name('auth.google');
 
     Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])
-                ->name('auth.google.callback');
+        ->name('auth.google.callback');
 });
 
 Route::middleware('auth')->group(function () {
     Route::get('verify-email', EmailVerificationPromptController::class)
-                ->name('verification.notice');
+        ->name('verification.notice');
 
     Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
-                ->middleware(['throttle:6,1'])
-                ->name('verification.verify');
+        ->middleware(['throttle:6,1'])
+        ->name('verification.verify');
 
     Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
-                ->middleware('throttle:6,1')
-                ->name('verification.send');
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
 
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
-                ->name('password.confirm');
+        ->name('password.confirm');
 
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
-                ->name('logout');
+        ->name('logout');
+
+    // Google re-authentication for setting password (for Google-only users)
+    Route::get('auth/google/set-password', [SocialAuthController::class, 'redirectToGoogleForSetPassword'])
+        ->name('auth.google.set_password');
+
+    Route::get('auth/google/set-password/callback', [SocialAuthController::class, 'handleGoogleCallbackForSetPassword'])
+        ->name('auth.google.set_password.callback');
 });

@@ -15,15 +15,32 @@ class PasswordController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
-        $validated = $request->validateWithBag('updatePassword', [
-            'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'string', 'min:8'],
-        ]);
+        $user = $request->user();
 
-        $request->user()->update([
+        // Build validation rules based on whether user has a password
+        $rules = [
+            'password' => ['required', 'string', 'min:8'],
+        ];
+
+        if ($user->hasPassword()) {
+            // User has existing password - require current password
+            $rules['current_password'] = ['required', 'current_password'];
+        } else {
+            // User doesn't have a password (Google-only) - require re-authentication
+            if (! session('can_set_password')) {
+                return redirect()->to(route('profile.edit').'#section-password')
+                    ->withErrors(['password' => __('messages.google_reauth_required')], 'updatePassword');
+            }
+            // Clear the session flag after use
+            session()->forget('can_set_password');
+        }
+
+        $validated = $request->validateWithBag('updatePassword', $rules);
+
+        $user->update([
             'password' => Hash::make($validated['password']),
         ]);
 
-        return redirect()->to(route('profile.edit') . '#section-password')->with('status', 'password-updated');
+        return redirect()->to(route('profile.edit').'#section-password')->with('status', 'password-updated');
     }
 }

@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Mail\SupportEmail;
+use App\Notifications\DeletedUserNotification;
+use App\Utils\InvoiceNinja;
+use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,12 +14,8 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
-use App\Mail\SupportEmail;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
-use App\Notifications\DeletedUserNotification;
-use App\Utils\InvoiceNinja;
-use Codedge\Updater\UpdaterManager;
 
 class ProfileController extends Controller
 {
@@ -38,8 +38,9 @@ class ProfileController extends Controller
 
                 $data['version_available'] = cache()->remember('version_available', 3600, function () use ($updater) {
                     \Log::info('Checking for new version');
+
                     return $updater->source()->getVersionAvailable();
-                });            
+                });
             } catch (\Exception $e) {
                 $data['version_available'] = 'Error: failed to check version';
             }
@@ -63,25 +64,24 @@ class ProfileController extends Controller
 
         if ($request->hasFile('profile_image')) {
             $user = $request->user();
-            
+
             if ($user->profile_image_url) {
                 $path = $user->getAttributes()['profile_image_url'];
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
             }
 
             $file = $request->file('profile_image');
-            $filename = strtolower('profile_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            $filename = strtolower('profile_'.Str::random(32).'.'.$file->getClientOriginalExtension());
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
-            
+
             $user->profile_image_url = $filename;
             $user->save();
         }
 
-
-        return Redirect::to(route('profile.edit') . '#section-profile')->with('status', 'profile-updated');
+        return Redirect::to(route('profile.edit').'#section-profile')->with('status', 'profile-updated');
     }
 
     /**
@@ -89,19 +89,25 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-            'feedback' => ['nullable', 'string', 'max:2000'],
-        ]);
-
         $user = $request->user();
+
+        // Only require password validation if user has a password set
+        $rules = [
+            'feedback' => ['nullable', 'string', 'max:2000'],
+        ];
+
+        if ($user->hasPassword()) {
+            $rules['password'] = ['required', 'current_password'];
+        }
+
+        $request->validateWithBag('userDeletion', $rules);
 
         // Send feedback email if provided (before logout so we have user data)
         if ($request->filled('feedback')) {
             Mail::to('contact@eventschedule.com')->send(new SupportEmail(
                 $user->name ?? $user->email,
                 $user->email,
-                'Account Deletion Feedback: ' . $request->feedback
+                'Account Deletion Feedback: '.$request->feedback
             ));
         }
 
@@ -110,7 +116,7 @@ class ProfileController extends Controller
         if ($user->profile_image_url) {
             $path = $user->getAttributes()['profile_image_url'];
             if (config('filesystems.default') == 'local') {
-                $path = 'public/' . $path;
+                $path = 'public/'.$path;
             }
             Storage::delete($path);
         }
@@ -123,7 +129,7 @@ class ProfileController extends Controller
                 try {
                     if ($user->google_token) {
                         $googleCalendarService = app(\App\Services\GoogleCalendarService::class);
-                        
+
                         // Ensure user has valid token before deleting webhook
                         if ($googleCalendarService->ensureValidToken($user)) {
                             $googleCalendarService->deleteWebhook($role->google_webhook_id, $role->google_webhook_resource_id);
@@ -142,26 +148,26 @@ class ProfileController extends Controller
             if ($role->profile_image_url) {
                 $path = $role->getAttributes()['profile_image_url'];
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
             }
-    
+
             if ($role->header_image_url) {
                 $path = $role->getAttributes()['header_image_url'];
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
             }
-    
+
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
-            }    
+            }
         }
 
         // Send notification to the deleted user
@@ -197,9 +203,9 @@ class ProfileController extends Controller
 
                 $invoiceNinja->createWebhook(route('invoiceninja.webhook', ['secret' => $user->invoiceninja_webhook_secret]));
 
-                return Redirect::to(route('profile.edit') . '#section-payment-methods')->with('message', __('messages.invoiceninja_connected'));
+                return Redirect::to(route('profile.edit').'#section-payment-methods')->with('message', __('messages.invoiceninja_connected'));
             } catch (\Exception $e) {
-                return Redirect::to(route('profile.edit') . '#section-payment-methods')->with('error', __('messages.error_invoiceninja_connection'));
+                return Redirect::to(route('profile.edit').'#section-payment-methods')->with('error', __('messages.error_invoiceninja_connection'));
             }
         }
 
@@ -208,10 +214,10 @@ class ProfileController extends Controller
             $user->payment_secret = strtolower(\Str::random(32));
             $user->save();
 
-            return Redirect::to(route('profile.edit') . '#section-payment-methods')->with('message', __('messages.payment_url_connected'));
+            return Redirect::to(route('profile.edit').'#section-payment-methods')->with('message', __('messages.payment_url_connected'));
         }
 
-        return Redirect::to(route('profile.edit') . '#section-payment-methods')->with('status', 'payments-updated');
+        return Redirect::to(route('profile.edit').'#section-payment-methods')->with('status', 'payments-updated');
     }
 
     public function unlinkPaymentUrl(Request $request): RedirectResponse
@@ -221,6 +227,6 @@ class ProfileController extends Controller
         $user->payment_secret = null;
         $user->save();
 
-        return Redirect::to(route('profile.edit') . '#section-payment-methods')->with('message', __('messages.payment_url_unlinked'));
+        return Redirect::to(route('profile.edit').'#section-payment-methods')->with('message', __('messages.payment_url_unlinked'));
     }
 }
