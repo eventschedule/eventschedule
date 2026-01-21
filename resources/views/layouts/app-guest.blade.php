@@ -270,7 +270,7 @@
     @endphp
 
     <div class="flex-grow">
-        @if (! request()->embed && $role->showBranding() && config('app.hosted'))
+        @if (! request()->embed && $role->showBranding() && config('app.is_nexus'))
             <header class="bg-[#f9fafb] dark:bg-gray-800">
                 <div
                 class="container mx-auto flex flex-row justify-between items-center py-7 px-5"
@@ -327,12 +327,18 @@
       <div
         class="container mx-auto flex flex-row justify-center items-center py-5 px-5"
       >
-        <p class="text-[#F5F9FE] text-base text-center">
+        <p class="text-[#F5F9FE] text-base text-center flex items-center justify-center gap-2">
             <!-- Per the AAL license, please do not remove the link to Event Schedule -->
-            {!! str_replace(':link', '<a href="https://www.eventschedule.com" target="_blank" class="text-white hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
-            @if (config('app.hosted'))
+            @if (config('app.is_nexus'))
+                {!! str_replace(':link', '<a href="' . marketing_url() . '" target="_blank" class="text-white hover:underline">' . marketing_domain() . '</a>',  __('messages.try_event_schedule')) !!}
                 •
                 {!! __('messages.supported_by', ['link' => '<a href="https://invoiceninja.com" target="_blank" class="text-white hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>']) !!}
+            @else
+                {!! str_replace(':link', '<a href="' . marketing_url() . '" target="_blank" class="text-white hover:underline">' . marketing_domain() . '</a>',  __('messages.try_event_schedule')) !!}
+                •
+                <a href="https://eventschedule.com" target="_blank" title="Powered by Event Schedule">
+                    <img src="{{ url('/images/favicon.png') }}" alt="Event Schedule" class="h-5 w-5 inline-block">
+                </a>
             @endif
         </p>
       </div>

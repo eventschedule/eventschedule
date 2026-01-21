@@ -1,6 +1,6 @@
 <?php
 
-if (!function_exists('csp_nonce')) {
+if (! function_exists('csp_nonce')) {
     /**
      * Get the CSP nonce for the current request
      */
@@ -10,7 +10,7 @@ if (!function_exists('csp_nonce')) {
     }
 }
 
-if (!function_exists('nonce_attr')) {
+if (! function_exists('nonce_attr')) {
     /**
      * Generate nonce attribute for script tags
      */
@@ -20,7 +20,7 @@ if (!function_exists('nonce_attr')) {
     }
 }
 
-if (!function_exists('get_translated_categories')) {
+if (! function_exists('get_translated_categories')) {
     /**
      * Get translated category names
      */
@@ -28,7 +28,7 @@ if (!function_exists('get_translated_categories')) {
     {
         $categories = config('app.event_categories', []);
         $translatedCategories = [];
-        
+
         foreach ($categories as $id => $englishName) {
             // Convert category name to translation key format
             // First replace " & " with "_&_", then replace remaining spaces with "_"
@@ -37,12 +37,12 @@ if (!function_exists('get_translated_categories')) {
             $key = str_replace(' ', '_', $key);
             $translatedCategories[$id] = __("messages.{$key}");
         }
-        
+
         return $translatedCategories;
     }
 }
 
-if (!function_exists('is_valid_language_code')) {
+if (! function_exists('is_valid_language_code')) {
     /**
      * Check if a language code is supported by the application
      */
@@ -51,19 +51,20 @@ if (!function_exists('is_valid_language_code')) {
         if (empty($languageCode)) {
             return false;
         }
-        
+
         $supportedLanguages = config('app.supported_languages', ['en']);
+
         return in_array($languageCode, $supportedLanguages, true);
     }
 }
 
-if (!function_exists('is_hosted_or_admin')) {
+if (! function_exists('is_hosted_or_admin')) {
     /**
-     * Check if the current user is hosted or an admin
+     * Check if the current instance is the nexus or user is an admin
      */
     function is_hosted_or_admin(): bool
     {
-        if (config('app.hosted') || config('app.is_testing')) {
+        if (config('app.is_nexus') || config('app.is_testing')) {
             return true;
         }
 
@@ -71,7 +72,7 @@ if (!function_exists('is_hosted_or_admin')) {
     }
 }
 
-if (!function_exists('is_mobile')) {
+if (! function_exists('is_mobile')) {
     /**
      * Check if the current user is on a mobile device
      */
@@ -81,7 +82,7 @@ if (!function_exists('is_mobile')) {
     }
 }
 
-if (!function_exists('is_rtl')) {
+if (! function_exists('is_rtl')) {
     /**
      * Check if the current user is on a rtl language
      */
@@ -97,15 +98,15 @@ if (!function_exists('is_rtl')) {
     }
 }
 
-if (!function_exists('rtl_class')) {
+if (! function_exists('rtl_class')) {
     /**
      * Return RTL or LTR class based on role's RTL setting
      * In admin context, uses the authenticated user's language instead
      *
-     * @param object|null $role The role object (or null)
-     * @param string $rtlClass The class to return for RTL
-     * @param string $ltrClass The class to return for LTR (default empty)
-     * @param bool $useAdminContext When true, use authenticated user's language instead of role's
+     * @param  object|null  $role  The role object (or null)
+     * @param  string  $rtlClass  The class to return for RTL
+     * @param  string  $ltrClass  The class to return for LTR (default empty)
+     * @param  bool  $useAdminContext  When true, use authenticated user's language instead of role's
      */
     function rtl_class(?object $role, string $rtlClass, string $ltrClass = '', bool $useAdminContext = false): string
     {
@@ -117,22 +118,37 @@ if (!function_exists('rtl_class')) {
         if ($role && method_exists($role, 'isRtl') && $role->isRtl()) {
             return $rtlClass;
         }
+
         return $ltrClass;
     }
 }
 
-if (!function_exists('marketing_url')) {
+if (! function_exists('marketing_url')) {
     /**
      * Generate a URL for marketing pages
-     * In hosted mode, returns eventschedule.com URLs
-     * In testing/self-hosted mode, returns local URLs
+     * Returns configured marketing URL for white-labeled instances
+     * Returns eventschedule.com for nexus, local URLs for testing
      */
     function marketing_url(string $path = '/'): string
     {
-        if (config('app.hosted') && !config('app.is_testing')) {
-            return 'https://eventschedule.com' . ($path === '/' ? '' : $path);
+        if (config('app.is_testing')) {
+            return url($path);
         }
 
-        return url($path);
+        $baseUrl = config('app.marketing_url', 'https://eventschedule.com');
+
+        return $baseUrl.($path === '/' ? '' : $path);
+    }
+}
+
+if (! function_exists('marketing_domain')) {
+    /**
+     * Get the marketing domain for display (without protocol)
+     */
+    function marketing_domain(): string
+    {
+        $url = config('app.marketing_url', 'https://eventschedule.com');
+
+        return preg_replace('#^https?://(www\.)?#', '', $url);
     }
 }

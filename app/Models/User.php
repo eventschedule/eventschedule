@@ -31,6 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'payment_url',
         'payment_secret',
         'is_subscribed',
+        'is_admin',
         'google_id',
         'google_oauth_id',
         'google_token',
@@ -105,6 +106,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'google_token_expires_at' => 'datetime',
             'facebook_token_expires_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
         ];
     }
 
@@ -256,12 +258,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isAdmin(): bool
     {
-        // Note: Debug mode should NOT grant admin access - that's a security risk
-        if (config('app.hosted')) {
-            return in_array($this->id, [1, 26]);
-        } else {
-            return $this->id == 1;
-        }
+        return (bool) $this->is_admin;
     }
 
     /**

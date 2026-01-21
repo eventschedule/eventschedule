@@ -1,23 +1,23 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\EventController;
-use App\Http\Controllers\GraphicController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\StripeController;
-use App\Http\Controllers\TicketController;
-use App\Http\Controllers\InvoiceNinjaController;
-use App\Http\Controllers\AppController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\Api\ApiSettingsController;
+use App\Http\Controllers\AppController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\GoogleCalendarWebhookController;
+use App\Http\Controllers\GraphicController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InvoiceNinjaController;
 use App\Http\Controllers\MarketingController;
-use App\Http\Controllers\AnalyticsController;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\StripeController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SubscriptionWebhookController;
+use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 
 if (config('app.hosted')) {
@@ -49,7 +49,7 @@ if (config('app.hosted')) {
     Route::post('/test_database', [AppController::class, 'testDatabase'])->name('app.test_database');
 }
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
 
 Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
 Route::get('/sitemap.xml.gz', [HomeController::class, 'sitemap'])->name('sitemap.gz');
@@ -72,8 +72,7 @@ Route::get('/translate_data', [AppController::class, 'translateData'])->name('tr
 Route::get('/ticket/qr_code/{event_id}/{secret}', [TicketController::class, 'qrCode'])->name('ticket.qr_code')->middleware('throttle:100,1');
 Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view'])->name('ticket.view')->middleware('throttle:100,1');
 
-Route::middleware(['auth', 'verified'])->group(function () 
-{
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/events', [HomeController::class, 'home'])->name('home');
     Route::post('/events/feedback', [HomeController::class, 'submitFeedback'])->name('home.feedback');
     Route::get('/new/{type}', [RoleController::class, 'create'])->name('new');
@@ -89,7 +88,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
     Route::post('/sales/resend-email/{sale_id}', [TicketController::class, 'resendEmail'])->name('sales.resend_email');
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
-    
+
     Route::get('/settings', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/settings', [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/settings/payments', [ProfileController::class, 'updatePayments'])->name('profile.update_payments');
@@ -100,7 +99,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/stripe/complete', [StripeController::class, 'complete'])->name('stripe.complete');
     Route::get('/invoiceninja/unlink', [InvoiceNinjaController::class, 'unlink'])->name('invoiceninja.unlink');
     Route::get('/payment_url/unlink', [ProfileController::class, 'unlinkPaymentUrl'])->name('profile.unlink_payment_url');
-    
+
     // Google Calendar routes
     Route::get('/google-calendar/redirect', [GoogleCalendarController::class, 'redirect'])->name('google.calendar.redirect');
     Route::get('/google-calendar/callback', [GoogleCalendarController::class, 'callback'])->name('google.calendar.callback');
@@ -110,7 +109,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::post('/google-calendar/sync/{subdomain}', [GoogleCalendarController::class, 'sync'])->name('google.calendar.sync');
     Route::post('/google-calendar/sync-event/{subdomain}/{eventId}', [GoogleCalendarController::class, 'syncEvent'])->name('google.calendar.sync_event');
     Route::delete('/google-calendar/unsync-event/{subdomain}/{eventId}', [GoogleCalendarController::class, 'unsyncEvent'])->name('google.calendar.unsync_event');
-    
+
     Route::get('/scan', [TicketController::class, 'scan'])->name('ticket.scan');
     Route::post('/ticket/view/{event_id}/{secret}', [TicketController::class, 'scanned'])->name('ticket.scanned');
 
@@ -130,9 +129,9 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/delete-image', [RoleController::class, 'deleteImage'])->name('role.delete_image');
     Route::get('/{subdomain}/add-event', [EventController::class, 'create'])->name('event.create');
     Route::get('/{subdomain}/verify/{hash}', [RoleController::class, 'verify'])->name('role.verification.verify');
-    Route::get('/{subdomain}/resend', [RoleController::class, 'resendVerify'])->name('role.verification.resend');    
+    Route::get('/{subdomain}/resend', [RoleController::class, 'resendVerify'])->name('role.verification.resend');
     Route::get('/{subdomain}/resend-invite/{hash}', [RoleController::class, 'resendInvite'])->name('role.resend_invite');
-    Route::post('/{subdomain}/store-event', [EventController::class, 'store'])->name('event.store');    
+    Route::post('/{subdomain}/store-event', [EventController::class, 'store'])->name('event.store');
     Route::get('/{subdomain}/edit-event/{hash}', [EventController::class, 'edit'])->name('event.edit');
     Route::get('/{subdomain}/clone-event/{hash}', [EventController::class, 'clone'])->name('event.clone');
     Route::get('/{subdomain}/delete-event/{hash}', [EventController::class, 'delete'])->name('event.delete');
@@ -153,8 +152,8 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/team/remove-member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
     Route::delete('/{subdomain}/uncurate-event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
     Route::get('/{subdomain}/import', [EventController::class, 'showImport'])->name('event.show_import');
-    Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');    
-    Route::post('/{subdomain}/import', [EventController::class, 'import'])->name('event.import');    
+    Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');
+    Route::post('/{subdomain}/import', [EventController::class, 'import'])->name('event.import');
     Route::post('/{subdomain}/test-import', [RoleController::class, 'testImport'])->name('role.test_import');
     Route::get('/{subdomain}/search-youtube', [RoleController::class, 'searchYouTube'])->name('role.search_youtube');
     Route::get('/{subdomain}/match-videos', [RoleController::class, 'getTalentRolesWithoutVideos'])->name('role.talent_roles_without_videos');
@@ -185,25 +184,25 @@ Route::middleware(['auth', 'verified'])->group(function ()
 });
 
 Route::get('/tmp/event-image/{filename?}', function ($filename = null) {
-    if (!$filename) {
-        abort(404);
-    }
-    
-    // Prevent path traversal attacks
-    $filename = basename($filename);
-    
-    // Only allow alphanumeric characters, hyphens, underscores, and dots
-    if (!preg_match('/^[a-zA-Z0-9._-]+$/', $filename)) {
-        abort(404);
-    }
-    
-    // Ensure filename starts with 'event_' prefix for security
-    if (!str_starts_with($filename, 'event_')) {
+    if (! $filename) {
         abort(404);
     }
 
-    $path = '/tmp/' . $filename;
-    
+    // Prevent path traversal attacks
+    $filename = basename($filename);
+
+    // Only allow alphanumeric characters, hyphens, underscores, and dots
+    if (! preg_match('/^[a-zA-Z0-9._-]+$/', $filename)) {
+        abort(404);
+    }
+
+    // Ensure filename starts with 'event_' prefix for security
+    if (! str_starts_with($filename, 'event_')) {
+        abort(404);
+    }
+
+    $path = '/tmp/'.$filename;
+
     if (file_exists($path)) {
         return response()->file($path);
     }
@@ -211,8 +210,8 @@ Route::get('/tmp/event-image/{filename?}', function ($filename = null) {
     abort(404);
 })->name('event.tmp_image');
 
-// Marketing pages
-if (config('app.hosted')) {
+// Marketing pages - only shown on the nexus (eventschedule.com)
+if (config('app.is_nexus')) {
     if (config('app.is_testing')) {
         Route::get('/', [MarketingController::class, 'index'])->name('marketing.index');
         Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
@@ -225,7 +224,7 @@ if (config('app.hosted')) {
         Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
         Route::get('/selfhost', [MarketingController::class, 'selfHost'])->name('marketing.selfhost');
     } else {
-        // Hosted mode: show marketing pages at root URLs on eventschedule.com
+        // Nexus mode: show marketing pages at root URLs on eventschedule.com
         Route::domain('eventschedule.com')->group(function () {
             Route::get('/', [MarketingController::class, 'index'])->name('marketing.index');
             Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
@@ -241,26 +240,27 @@ if (config('app.hosted')) {
 
         // Redirect www.eventschedule.com marketing pages to non-www
         Route::domain('www.eventschedule.com')->group(function () {
-            Route::get('/', fn() => redirect('https://eventschedule.com/', 301));
-            Route::get('/features', fn() => redirect('https://eventschedule.com/features', 301));
-            Route::get('/pricing', fn() => redirect('https://eventschedule.com/pricing', 301));
-            Route::get('/about', fn() => redirect('https://eventschedule.com/about', 301));
-            Route::get('/ticketing', fn() => redirect('https://eventschedule.com/ticketing', 301));
-            Route::get('/integrations', fn() => redirect('https://eventschedule.com/integrations', 301));
-            Route::get('/privacy', fn() => redirect('https://eventschedule.com/privacy', 301));
-            Route::get('/terms-of-service', fn() => redirect('https://eventschedule.com/terms-of-service', 301));
-            Route::get('/self-hosting-terms-of-service', fn() => redirect('https://eventschedule.com/self-hosting-terms-of-service', 301));
-            Route::get('/selfhost', fn() => redirect('https://eventschedule.com/selfhost', 301));
+            Route::get('/', fn () => redirect('https://eventschedule.com/', 301));
+            Route::get('/features', fn () => redirect('https://eventschedule.com/features', 301));
+            Route::get('/pricing', fn () => redirect('https://eventschedule.com/pricing', 301));
+            Route::get('/about', fn () => redirect('https://eventschedule.com/about', 301));
+            Route::get('/ticketing', fn () => redirect('https://eventschedule.com/ticketing', 301));
+            Route::get('/integrations', fn () => redirect('https://eventschedule.com/integrations', 301));
+            Route::get('/privacy', fn () => redirect('https://eventschedule.com/privacy', 301));
+            Route::get('/terms-of-service', fn () => redirect('https://eventschedule.com/terms-of-service', 301));
+            Route::get('/self-hosting-terms-of-service', fn () => redirect('https://eventschedule.com/self-hosting-terms-of-service', 301));
+            Route::get('/selfhost', fn () => redirect('https://eventschedule.com/selfhost', 301));
         });
     }
 } else {
-    // Self-hosted mode: redirect marketing URLs to login
-    Route::get('/features', fn() => redirect()->route('login'));
-    Route::get('/pricing', fn() => redirect()->route('login'));
-    Route::get('/about', fn() => redirect()->route('login'));
-    Route::get('/ticketing', fn() => redirect()->route('login'));
-    Route::get('/integrations', fn() => redirect()->route('login'));
-    Route::get('/selfhost', fn() => redirect()->route('login'));
+    // Non-nexus: redirect marketing URLs to home (/events) or login
+    Route::get('/', fn () => redirect()->route('login'));
+    Route::get('/features', fn () => redirect()->route('home'));
+    Route::get('/pricing', fn () => redirect()->route('home'));
+    Route::get('/about', fn () => redirect()->route('home'));
+    Route::get('/ticketing', fn () => redirect()->route('home'));
+    Route::get('/integrations', fn () => redirect()->route('home'));
+    Route::get('/selfhost', fn () => redirect()->route('home'));
 }
 
 if (config('app.hosted')) {

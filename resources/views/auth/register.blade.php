@@ -375,14 +375,14 @@
                 </div>
                 <div class="ml-3 text-sm leading-6">
                     <label for="terms" class="font-medium text-gray-900 dark:text-gray-300">
-                        @if (config('app.hosted'))                        
+                        @if (config('app.hosted'))
                             {!! str_replace([':terms', ':privacy'], [
-                                '<a href="https://www.eventschedule.com/terms-of-service" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>', 
-                                '<a href="https://www.eventschedule.com/privacy" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
+                                '<a href="' . marketing_url('/terms-of-service') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
+                                '<a href="' . marketing_url('/privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
                             ], __('messages.i_accept_the_terms_and_privacy')) !!}
                         @else
                             {!! str_replace([':terms'], [
-                                '<a href="https://www.eventschedule.com/self-hosting-terms-of-service" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>', 
+                                '<a href="' . marketing_url('/self-hosting-terms-of-service') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
                             ], __('messages.i_accept_the_terms')) !!}
                         @endif
                     </label>
