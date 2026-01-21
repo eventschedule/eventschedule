@@ -51,6 +51,7 @@ return [
     'cancel' => 'Cancel',
     'delete' => 'Delete',
     'venue' => 'Venue',
+    'matched_venue' => 'Matched venue',
     'type' => 'Type',
     'details' => 'Details',
     'date_and_time' => 'Date & Time',
