@@ -129,4 +129,81 @@ class SocialAuthController extends Controller
         return redirect()->to(route('profile.edit').'#section-password')
             ->with('status', 'google-verified');
     }
+
+    /**
+     * Redirect to Google OAuth to connect account from settings.
+     */
+    public function redirectToGoogleConnect(): RedirectResponse
+    {
+        return Socialite::driver('google')
+            ->scopes(['openid', 'email', 'profile'])
+            ->redirectUrl(route('auth.google.connect.callback'))
+            ->redirect();
+    }
+
+    /**
+     * Handle Google OAuth callback for connecting account from settings.
+     */
+    public function handleGoogleConnectCallback(): RedirectResponse
+    {
+        $user = Auth::user();
+
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        try {
+            $googleUser = Socialite::driver('google')
+                ->redirectUrl(route('auth.google.connect.callback'))
+                ->user();
+        } catch (\Exception $e) {
+            return redirect()->to(route('profile.edit').'#section-google-calendar')
+                ->withErrors(['google' => __('messages.google_auth_failed')]);
+        }
+
+        $googleId = $googleUser->getId();
+        $email = strtolower($googleUser->getEmail());
+
+        // Check if this Google account is already linked to another user
+        $existingUser = User::where('google_oauth_id', $googleId)
+            ->where('id', '!=', $user->id)
+            ->first();
+
+        if ($existingUser) {
+            return redirect()->to(route('profile.edit').'#section-google-calendar')
+                ->withErrors(['google' => __('messages.google_account_already_linked')]);
+        }
+
+        // Link the Google account to this user
+        $user->google_oauth_id = $googleId;
+        $user->save();
+
+        return redirect()->to(route('profile.edit').'#section-google-calendar')
+            ->with('status', __('messages.google_account_connected'));
+    }
+
+    /**
+     * Disconnect Google OAuth account.
+     */
+    public function disconnectGoogle(): RedirectResponse
+    {
+        $user = Auth::user();
+
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        // Check if user has a password - they cannot disconnect if they don't
+        if (! $user->hasPassword()) {
+            return redirect()->to(route('profile.edit').'#section-google-calendar')
+                ->withErrors(['google' => __('messages.cannot_disconnect_google_no_password')]);
+        }
+
+        // Clear the Google OAuth ID
+        $user->google_oauth_id = null;
+        $user->save();
+
+        return redirect()->to(route('profile.edit').'#section-google-calendar')
+            ->with('status', __('messages.google_account_disconnected'));
+    }
 }

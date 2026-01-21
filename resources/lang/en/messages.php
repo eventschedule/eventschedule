@@ -774,4 +774,13 @@ return [
     'google_account_mismatch' => 'The Google account does not match the one linked to your account.',
     'verify_with_google' => 'Verify with Google',
     'set_password' => 'Set Password',
+    'google_settings' => 'Google Settings',
+    'google_settings_description' => 'Manage your Google account and calendar connections.',
+    'google_account' => 'Google Account',
+    'google_account_description' => 'Connect your Google account to sign in with Google.',
+    'google_account_connected' => 'Google Account Connected',
+    'connect_google_account' => 'Connect Google Account',
+    'disconnect_google_account' => 'Disconnect Google Account',
+    'cannot_disconnect_google_no_password' => 'You cannot disconnect Google because you don\'t have a password set. Please set a password first.',
+    'google_account_disconnected' => 'Google account disconnected successfully.',
 ];
