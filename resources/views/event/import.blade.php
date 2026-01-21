@@ -379,11 +379,16 @@
                             <div v-if="eventVenueTypes[idx] === 'use_existing' && preview.parsed[idx].venue_id" class="mt-1">
                                 <p class="text-sm text-green-600 dark:text-green-400">
                                     {{ __('messages.matched_venue') }}:
-                                    <a v-bind:href="preview.parsed[idx].venue_url"
-                                       target="_blank"
-                                       class="underline hover:text-green-800 dark:hover:text-green-300">
+                                    <template v-if="preview.parsed[idx].venue_url">
+                                        <a v-bind:href="preview.parsed[idx].venue_url"
+                                           target="_blank"
+                                           class="underline hover:text-green-800 dark:hover:text-green-300">
+                                            @{{ preview.parsed[idx].matched_venue_name || preview.parsed[idx].venue_name }}
+                                        </a>
+                                    </template>
+                                    <template v-else>
                                         @{{ preview.parsed[idx].matched_venue_name || preview.parsed[idx].venue_name }}
-                                    </a>
+                                    </template>
                                 </p>
                             </div>
                             @endguest
