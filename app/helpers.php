@@ -100,9 +100,20 @@ if (!function_exists('is_rtl')) {
 if (!function_exists('rtl_class')) {
     /**
      * Return RTL or LTR class based on role's RTL setting
+     * In admin context, uses the authenticated user's language instead
+     *
+     * @param object|null $role The role object (or null)
+     * @param string $rtlClass The class to return for RTL
+     * @param string $ltrClass The class to return for LTR (default empty)
+     * @param bool $useAdminContext When true, use authenticated user's language instead of role's
      */
-    function rtl_class(?object $role, string $rtlClass, string $ltrClass = ''): string
+    function rtl_class(?object $role, string $rtlClass, string $ltrClass = '', bool $useAdminContext = false): string
     {
+        // In admin context, use ONLY the authenticated user's language preference
+        if ($useAdminContext && auth()->check()) {
+            return auth()->user()->isRtl() ? $rtlClass : $ltrClass;
+        }
+
         if ($role && method_exists($role, 'isRtl') && $role->isRtl()) {
             return $rtlClass;
         }
