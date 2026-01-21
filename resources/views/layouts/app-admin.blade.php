@@ -165,13 +165,13 @@
                 </div>
             </main>
 
-            <div class="mt-auto pb-8 px-8 text-sm text-gray-500 dark:text-gray-400">                
-                @if (config('app.hosted'))                
+            <div class="mt-auto pb-8 px-8 text-sm text-gray-500 dark:text-gray-400">
+                @if (config('app.is_nexus'))
                     {!! str_replace(':email', '<a href="mailto:contact@eventschedule.com?subject=Feedback" class="hover:underline">contact@eventschedule.com</a>', __('messages.questions_or_suggestions')) !!}
                 @else
                     <!-- Per the AAL license, please do not remove the link to Event Schedule -->
-                    {!! str_replace(':link', '<a href="https://www.eventschedule.com" class="text-blue-600 dark:text-blue-400 hover:underline" target="_blank">eventschedule.com</a>', __('messages.powered_by_eventschedule')) !!} 
-                    • 
+                    {!! str_replace(':link', '<a href="https://www.eventschedule.com" class="text-blue-600 dark:text-blue-400 hover:underline" target="_blank">eventschedule.com</a>', __('messages.powered_by_eventschedule')) !!}
+                    •
                     <x-link href="https://github.com/eventschedule/eventschedule/releases" target="_blank" hideIcon>{{ config('self-update.version_installed') }}</x-link>
                 @endif
             </div>

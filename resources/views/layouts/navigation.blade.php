@@ -1,4 +1,4 @@
-<a href="https://www.eventschedule.com">
+<a href="{{ marketing_url() }}">
     <div class="flex h-16 pt-2 shrink-0 items-center">
         <img class="h-10 w-auto" src="{{ url('images/light_logo.png') }}"
             alt="Event Schedule">

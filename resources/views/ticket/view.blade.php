@@ -334,11 +334,11 @@
               <h3 class="text-[11px] uppercase tracking-wider text-violet-400 print:text-violet-600 font-semibold mb-[6px]">{{ __('messages.terms_and_conditions') }}</h3>
               @php
                 $termsUrl = $event->terms_url ?: (config('app.hosted')
-                  ? 'https://www.eventschedule.com/terms-of-service'
-                  : 'https://www.eventschedule.com/self-hosting-terms-of-service');
+                  ? marketing_url('/terms-of-service')
+                  : marketing_url('/self-hosting-terms-of-service'));
                 $termsDisplay = $event->terms_url
                   ? preg_replace('#^https?://(www\.)?#', '', $event->terms_url)
-                  : 'eventschedule.com/terms';
+                  : marketing_domain() . '/terms';
               @endphp
               <a href="{{ $termsUrl }}" target="_blank" class="text-[11px] text-white/60 print-text-gray hover:text-white/80 transition-colors break-all">
                 {{ Str::limit($termsDisplay, 30) }}
