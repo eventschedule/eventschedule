@@ -53,12 +53,12 @@
             </div>
             @endif
 
-            <div class="mt-6 flex justify-end">
+            <div class="mt-6 flex justify-end" x-data="{ submitting: false }">
                 <x-secondary-button x-on:click="$dispatch('close')">
                     {{ __('messages.cancel') }}
                 </x-secondary-button>
 
-                <x-danger-button class="ms-3">
+                <x-danger-button class="ms-3" x-on:click="submitting = true" x-bind:disabled="submitting">
                     {{ __('messages.delete_account') }}
                 </x-danger-button>
             </div>

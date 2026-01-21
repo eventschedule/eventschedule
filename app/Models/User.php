@@ -293,4 +293,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->password !== null;
     }
+
+    /**
+     * Check if user's language is RTL (right-to-left)
+     */
+    public function isRtl(): bool
+    {
+        return in_array($this->language_code, ['ar', 'he']);
+    }
 }
