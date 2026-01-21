@@ -95,6 +95,7 @@ Routes are defined conditionally in `routes/web.php` based on `config('app.hoste
 - CSP nonces for inline scripts: use `{!! nonce_attr() !!}` or `nonce="{{ csp_nonce() }}"`
 - HTML Purifier for markdown content (XSS prevention)
 - Environment-aware security headers in `app/Http/Middleware/SecurityHeaders.php`
+- **Always encode IDs visible to users** - Use `UrlUtils::encodeId()` for IDs in URLs, and `UrlUtils::decodeId()` in controllers to decode them
 
 ### Scheduled Tasks
 Cron job required: `* * * * * php artisan schedule:run`

@@ -8,22 +8,22 @@
                     class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base">
                     <option value="">{{ __('messages.all_schedules') }}</option>
                     @foreach ($roles as $role)
-                        <option value="{{ $role->id }}" {{ $selectedRoleId == $role->id ? 'selected' : '' }}>
+                        <option value="{{ \App\Utils\UrlUtils::encodeId($role->id) }}" {{ $selectedRoleId == $role->id ? 'selected' : '' }}>
                             {{ $role->name }}
                         </option>
                     @endforeach
                 </select>
             </div>
             <div class="flex gap-2 items-center">
-                <a href="{{ route('analytics', ['role_id' => $selectedRoleId, 'period' => 'daily']) }}"
+                <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'daily']) }}"
                     class="px-5 py-3 rounded-md text-base font-semibold leading-none flex items-center {{ $period === 'daily' ? 'bg-[#4E81FA] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.daily') }}
                 </a>
-                <a href="{{ route('analytics', ['role_id' => $selectedRoleId, 'period' => 'weekly']) }}"
+                <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'weekly']) }}"
                     class="px-5 py-3 rounded-md text-base font-semibold leading-none flex items-center {{ $period === 'weekly' ? 'bg-[#4E81FA] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.weekly') }}
                 </a>
-                <a href="{{ route('analytics', ['role_id' => $selectedRoleId, 'period' => 'monthly']) }}"
+                <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'monthly']) }}"
                     class="px-5 py-3 rounded-md text-base font-semibold leading-none flex items-center {{ $period === 'monthly' ? 'bg-[#4E81FA] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.monthly') }}
                 </a>
