@@ -775,7 +775,7 @@
                     </h2>
 
                     <div class="flex flex-col xl:flex-row xl:gap-12">
-                        <div class="w-full xl:w-[40%]">
+                        <div class="w-full xl:w-1/2">
 
                     <!-- Sub-Tab Navigation -->
                     <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
@@ -1094,7 +1094,7 @@
                         </div>
 
                         <!-- Preview (always visible, right column on desktop) -->
-                        <div class="w-full xl:w-[60%] mt-6 xl:mt-0">
+                        <div class="w-full xl:w-1/2 mt-6 xl:mt-0">
                             <x-input-label :value="__('messages.preview')" />
                             <div id="preview" class="h-[180px] w-full"></div>
                         </div>
