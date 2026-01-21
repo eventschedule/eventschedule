@@ -197,9 +197,9 @@ class AnalyticsService
     /**
      * Get views by schedule (role)
      */
-    public function getViewsBySchedule(User $user, Carbon $start, Carbon $end): Collection
+    public function getViewsBySchedule(User $user, Carbon $start, Carbon $end, ?int $roleId = null): Collection
     {
-        $roleIds = $this->getUserRoleIds($user);
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
 
         if ($roleIds->isEmpty()) {
             return collect();

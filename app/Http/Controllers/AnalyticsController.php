@@ -45,7 +45,7 @@ class AnalyticsController extends Controller
         $deviceBreakdown = $analytics->getDeviceBreakdown($user, $start, $end, $selectedRoleId);
 
         // Get views by schedule
-        $viewsBySchedule = $analytics->getViewsBySchedule($user, $start, $end);
+        $viewsBySchedule = $analytics->getViewsBySchedule($user, $start, $end, $selectedRoleId);
 
         // Get top associated talents/venues (appearance views)
         $topAppearances = collect();
