@@ -740,4 +740,9 @@ return [
     'or_continue_with_email' => 'או המשך עם אימייל',
     'google_auth_failed' => 'האימות עם Google נכשל. אנא נסה שוב.',
     'google_account_already_linked' => 'אימייל זה כבר מקושר לחשבון Google אחר.',
+    'google_reauth_required' => 'אנא אמת עם Google לפני הגדרת סיסמה.',
+    'google_reauth_to_set_password' => 'החשבון שלך נוצר עם Google. כדי להוסיף סיסמה, אנא אמת תחילה את זהותך.',
+    'google_account_mismatch' => 'חשבון Google לא תואם לחשבון המקושר.',
+    'verify_with_google' => 'אימות עם Google',
+    'set_password' => 'הגדר סיסמה',
 ];

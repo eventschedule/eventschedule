@@ -78,4 +78,52 @@ class SocialAuthController extends Controller
 
         return redirect()->intended(route('home', absolute: false));
     }
+
+    /**
+     * Redirect to Google OAuth for re-authentication to set password.
+     * This is for users who signed up with Google and want to set a password.
+     */
+    public function redirectToGoogleForSetPassword(): RedirectResponse
+    {
+        return Socialite::driver('google')
+            ->scopes(['openid', 'email', 'profile'])
+            ->redirectUrl(route('auth.google.set_password.callback'))
+            ->redirect();
+    }
+
+    /**
+     * Handle Google OAuth callback for setting password.
+     * Verifies the user's identity and allows them to set a password.
+     */
+    public function handleGoogleCallbackForSetPassword(): RedirectResponse
+    {
+        $user = Auth::user();
+
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        try {
+            $googleUser = Socialite::driver('google')
+                ->redirectUrl(route('auth.google.set_password.callback'))
+                ->user();
+        } catch (\Exception $e) {
+            return redirect()->to(route('profile.edit').'#section-password')
+                ->withErrors(['password' => __('messages.google_auth_failed')], 'updatePassword');
+        }
+
+        $googleId = $googleUser->getId();
+
+        // Verify this is the same Google account linked to the user
+        if ($user->google_id !== $googleId) {
+            return redirect()->to(route('profile.edit').'#section-password')
+                ->withErrors(['password' => __('messages.google_account_mismatch')], 'updatePassword');
+        }
+
+        // Set session flag allowing password to be set (expires in 5 minutes)
+        session(['can_set_password' => true]);
+
+        return redirect()->to(route('profile.edit').'#section-password')
+            ->with('status', 'google-verified');
+    }
 }

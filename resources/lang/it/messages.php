@@ -748,4 +748,9 @@ return [
     'or_continue_with_email' => 'o continua con l\'email',
     'google_auth_failed' => 'Autenticazione Google fallita. Riprova.',
     'google_account_already_linked' => 'Questa email è già collegata a un altro account Google.',
+    'google_reauth_required' => 'Verifica con Google prima di impostare una password.',
+    'google_reauth_to_set_password' => 'Il tuo account è stato creato con Google. Per aggiungere una password, verifica prima la tua identità.',
+    'google_account_mismatch' => 'L\'account Google non corrisponde a quello collegato al tuo account.',
+    'verify_with_google' => 'Verifica con Google',
+    'set_password' => 'Imposta password',
 ];

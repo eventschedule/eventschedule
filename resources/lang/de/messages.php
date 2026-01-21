@@ -751,4 +751,9 @@ return [
     'or_continue_with_email' => 'oder mit E-Mail fortfahren',
     'google_auth_failed' => 'Google-Authentifizierung fehlgeschlagen. Bitte versuchen Sie es erneut.',
     'google_account_already_linked' => 'Diese E-Mail ist bereits mit einem anderen Google-Konto verknüpft.',
+    'google_reauth_required' => 'Bitte verifizieren Sie sich mit Google, bevor Sie ein Passwort festlegen.',
+    'google_reauth_to_set_password' => 'Ihr Konto wurde mit Google erstellt. Um ein Passwort hinzuzufügen, verifizieren Sie bitte zuerst Ihre Identität.',
+    'google_account_mismatch' => 'Das Google-Konto stimmt nicht mit dem verknüpften Konto überein.',
+    'verify_with_google' => 'Mit Google verifizieren',
+    'set_password' => 'Passwort festlegen',
 ];

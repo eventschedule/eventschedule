@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use App\Notifications\VerifyEmail as CustomVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
-use App\Notifications\VerifyEmail as CustomVerifyEmail;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -62,7 +62,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'facebook_token_expires_at',
     ];
 
-
     protected static function boot()
     {
         parent::boot();
@@ -78,7 +77,7 @@ class User extends Authenticatable implements MustVerifyEmail
             }
         });
     }
-    
+
     public function sendEmailVerificationNotification()
     {
         // Don't send if email is already verified
@@ -110,12 +109,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public function roles()
     {
         return $this->belongsToMany(Role::class)
-                    ->withTimestamps()
-                    ->withPivot('level')
-                    ->where('is_deleted', false)
-                    ->orderBy('name');
+            ->withTimestamps()
+            ->withPivot('level')
+            ->where('is_deleted', false)
+            ->orderBy('name');
     }
-    
+
     public function countRoles()
     {
         return count($this->roles()->get());
@@ -154,26 +153,26 @@ class User extends Authenticatable implements MustVerifyEmail
     public function allCurators()
     {
         return $this->roles()
-                    ->where('type', 'curator')
-                    ->where(function($query) {
-                        $query->whereIn('roles.id', function($subquery) {
+            ->where('type', 'curator')
+            ->where(function ($query) {
+                $query->whereIn('roles.id', function ($subquery) {
+                    $subquery->select('role_id')
+                        ->from('role_user')
+                        ->where('user_id', $this->id)
+                        ->whereIn('level', ['owner', 'admin']);
+                })
+                    ->orWhere(function ($q) {
+                        $q->whereIn('roles.id', function ($subquery) {
                             $subquery->select('role_id')
-                                    ->from('role_user')
-                                    ->where('user_id', $this->id)
-                                    ->whereIn('level', ['owner', 'admin']);
+                                ->from('role_user')
+                                ->where('user_id', $this->id)
+                                ->where('level', 'follower');
                         })
-                        ->orWhere(function($q) {
-                            $q->whereIn('roles.id', function($subquery) {
-                                $subquery->select('role_id')
-                                        ->from('role_user') 
-                                        ->where('user_id', $this->id)
-                                        ->where('level', 'follower');
-                            })
                             ->where('accept_requests', true);
-                        });
-                    })
-                    ->orderBy('name')
-                    ->get();
+                    });
+            })
+            ->orderBy('name')
+            ->get();
     }
 
     public function tickets()
@@ -245,9 +244,9 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $value;
-        } else if (config('filesystems.default') == 'local') {
-            return url('/storage/' . $value);
+            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$value;
+        } elseif (config('filesystems.default') == 'local') {
+            return url('/storage/'.$value);
         } else {
             return $value;
         }
@@ -265,26 +264,31 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get the user's first name
-     *
-     * @return string
      */
     public function firstName(): string
     {
-        if (!$this->name) {
+        if (! $this->name) {
             return 'there';
         }
-        
+
         $nameParts = explode(' ', trim($this->name));
+
         return $nameParts[0] ?: 'there';
     }
 
     /**
      * Check if user has Google Calendar connected
-     *
-     * @return bool
      */
     public function hasGoogleCalendarConnected(): bool
     {
-        return !is_null($this->google_token) && !is_null($this->google_refresh_token);
+        return ! is_null($this->google_token) && ! is_null($this->google_refresh_token);
+    }
+
+    /**
+     * Check if user has a password set (vs Google-only OAuth user)
+     */
+    public function hasPassword(): bool
+    {
+        return $this->password !== null;
     }
 }
