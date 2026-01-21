@@ -32,6 +32,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'payment_secret',
         'is_subscribed',
         'google_id',
+        'google_oauth_id',
         'google_token',
         'google_refresh_token',
         'google_token_expires_at',
