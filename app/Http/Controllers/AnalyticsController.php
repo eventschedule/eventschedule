@@ -17,19 +17,29 @@ class AnalyticsController extends Controller
         // Get selected role for filtering (decode from URL-safe format)
         $selectedRoleId = $request->role_id ? UrlUtils::decodeId($request->role_id) : null;
 
-        // Date range - default to last 30 days
-        $period = $request->period ?? 'daily';
-        $daysBack = match ($period) {
-            'daily' => 30,
-            'weekly' => 90,
-            'monthly' => 365,
-            default => 30,
+        // Date range filter
+        $range = $request->range ?? 'last_30_days';
+        [$start, $end] = match ($range) {
+            'last_7_days' => [now()->subDays(7)->startOfDay(), now()->endOfDay()],
+            'last_30_days' => [now()->subDays(30)->startOfDay(), now()->endOfDay()],
+            'last_90_days' => [now()->subDays(90)->startOfDay(), now()->endOfDay()],
+            'this_month' => [now()->startOfMonth(), now()->endOfDay()],
+            'last_month' => [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()],
+            'this_year' => [now()->startOfYear(), now()->endOfDay()],
+            'all_time' => [now()->subYears(10)->startOfDay(), now()->endOfDay()],
+            default => [now()->subDays(30)->startOfDay(), now()->endOfDay()],
         };
-        $start = now()->subDays($daysBack)->startOfDay();
-        $end = now()->endOfDay();
 
-        // Get month-over-month comparison
+        // Period determines chart grouping
+        $period = $request->period ?? 'daily';
+
+        // Get month-over-month comparison (for fixed stats cards)
         $momComparison = $analytics->getMonthOverMonthComparison($user, $selectedRoleId);
+
+        // Get period comparison based on selected range (for dynamic comparison card)
+        $periodComparison = $range !== 'all_time'
+            ? $analytics->getPeriodComparison($user, $range, $start, $end, $selectedRoleId)
+            : null;
 
         // Get total views (all time)
         $totalViews = $analytics->getTotalViewsForRoles(
@@ -85,6 +95,7 @@ class AnalyticsController extends Controller
             'selectedRoleId',
             'totalViews',
             'momComparison',
+            'periodComparison',
             'topEvents',
             'viewsByPeriod',
             'deviceBreakdown',
@@ -93,6 +104,7 @@ class AnalyticsController extends Controller
             'appearanceViews',
             'topSchedulesAppearedOn',
             'period',
+            'range',
             'conversionStats',
             'topEventsByRevenue',
             'trafficSources',

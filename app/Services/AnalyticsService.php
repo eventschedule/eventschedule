@@ -162,6 +162,76 @@ class AnalyticsService
     }
 
     /**
+     * Get period comparison based on date range
+     */
+    public function getPeriodComparison(User $user, string $range, Carbon $start, Carbon $end, ?int $roleId = null): array
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return [
+                'current_period' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'comparison_label' => '',
+            ];
+        }
+
+        // Calculate previous period based on range
+        [$previousStart, $previousEnd, $label] = match ($range) {
+            'last_7_days' => [
+                now()->subDays(14)->startOfDay(),
+                now()->subDays(8)->endOfDay(),
+                'vs_previous_7_days',
+            ],
+            'last_30_days' => [
+                now()->subDays(60)->startOfDay(),
+                now()->subDays(31)->endOfDay(),
+                'vs_previous_30_days',
+            ],
+            'last_90_days' => [
+                now()->subDays(180)->startOfDay(),
+                now()->subDays(91)->endOfDay(),
+                'vs_previous_90_days',
+            ],
+            'this_month' => [
+                now()->subMonth()->startOfMonth(),
+                now()->subMonth()->endOfMonth(),
+                'vs_last_month',
+            ],
+            'last_month' => [
+                now()->subMonths(2)->startOfMonth(),
+                now()->subMonths(2)->endOfMonth(),
+                'vs_previous_month',
+            ],
+            'this_year' => [
+                now()->subYear()->startOfYear(),
+                now()->subYear()->endOfYear(),
+                'vs_last_year',
+            ],
+            default => [
+                now()->subDays(60)->startOfDay(),
+                now()->subDays(31)->endOfDay(),
+                'vs_previous_30_days',
+            ],
+        };
+
+        $currentViews = $this->getPeriodViewsForRoles($roleIds, $start, $end);
+        $previousViews = $this->getPeriodViewsForRoles($roleIds, $previousStart, $previousEnd);
+
+        $percentageChange = $previousViews > 0
+            ? round((($currentViews - $previousViews) / $previousViews) * 100, 1)
+            : ($currentViews > 0 ? 100 : 0);
+
+        return [
+            'current_period' => $currentViews,
+            'previous_period' => $previousViews,
+            'percentage_change' => $percentageChange,
+            'comparison_label' => $label,
+        ];
+    }
+
+    /**
      * Get device breakdown
      */
     public function getDeviceBreakdown(User $user, Carbon $start, Carbon $end, ?int $roleId = null): Collection
@@ -401,7 +471,7 @@ class AnalyticsService
             'total_sales' => $totalSales,
             'conversion_rate' => $totalViews > 0 ? round(($totalSales / $totalViews) * 100, 2) : 0,
             'total_revenue' => $totalRevenue,
-            'revenue_per_view' => $totalViews > 0 ? round(($totalRevenue / $totalViews) * 100, 2) : 0,
+            'revenue_per_view' => $totalViews > 0 ? round($totalRevenue / $totalViews, 2) : 0,
         ];
     }
 
