@@ -58,7 +58,7 @@ class SubscriptionController extends Controller
 
             // If eligible for first year free
             if ($role->isEligibleForFreeYear()) {
-                $trialDays = 365;
+                $trialDays = config('app.trial_days');
             } elseif ($role->plan_expires) {
                 // If they have remaining days from legacy trial
                 $trialDays = $role->calculateRemainingTrialDays();
