@@ -118,10 +118,13 @@ class HomeController extends Controller
             ->orderBy('published_at', 'desc')
             ->get();
 
+        $hasQueryFilter = request()->has('events') || request()->has('roles');
+
         $sitemapView = view('sitemap', [
             'roles' => ! request()->has('events') ? $roles : [],
             'events' => ! request()->has('roles') ? $events : [],
-            'blogPosts' => request()->has('events') || request()->has('roles') ? [] : $blogPosts,
+            'blogPosts' => $hasQueryFilter ? [] : $blogPosts,
+            'showMarketingLinks' => ! $hasQueryFilter,
             'lastmod' => now()->toIso8601String()
         ]);
         
