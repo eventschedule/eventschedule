@@ -31,9 +31,9 @@ class AnalyticsReferrersDaily extends Model
     /**
      * Increment view count for a role/date/source/domain combination using upsert
      */
-    public static function incrementView(int $roleId, ?string $referrer): void
+    public static function incrementView(int $roleId, ?string $referrer, ?string $customDomain = null): void
     {
-        [$source, $domain] = self::categorizeReferrer($referrer);
+        [$source, $domain] = self::categorizeReferrer($referrer, $customDomain);
         $date = now()->toDateString();
 
         // Use empty string for null domain to make unique constraint work
@@ -50,7 +50,7 @@ class AnalyticsReferrersDaily extends Model
     /**
      * Categorize a referrer URL into source type and domain
      */
-    private static function categorizeReferrer(?string $referrer): array
+    private static function categorizeReferrer(?string $referrer, ?string $customDomain = null): array
     {
         if (! $referrer) {
             return ['direct', null];
@@ -64,6 +64,11 @@ class AnalyticsReferrersDaily extends Model
 
         // Remove www. prefix for cleaner domain names
         $host = preg_replace('/^www\./i', '', $host);
+
+        // Check if referrer is "self" (should be treated as direct)
+        if (self::isSelfReferrer($host, $customDomain)) {
+            return ['direct', null];
+        }
 
         // Search engines
         if (preg_match('/google\.|bing\.|yahoo\.|duckduckgo\.|baidu\.|yandex\./i', $host)) {
@@ -81,6 +86,41 @@ class AnalyticsReferrersDaily extends Model
         }
 
         return ['other', $host];
+    }
+
+    /**
+     * Check if the referrer host is a "self" domain (the app's own domain or the role's custom domain)
+     */
+    private static function isSelfReferrer(string $host, ?string $customDomain): bool
+    {
+        // Check custom domain
+        if ($customDomain) {
+            $customHost = parse_url($customDomain, PHP_URL_HOST) ?: $customDomain;
+            $customHost = preg_replace('/^www\./i', '', $customHost);
+            if (strcasecmp($host, $customHost) === 0) {
+                return true;
+            }
+        }
+
+        // Check app's own domain (from APP_URL)
+        $appUrl = config('app.url');
+        if ($appUrl) {
+            $appHost = parse_url($appUrl, PHP_URL_HOST);
+            if ($appHost) {
+                $appHost = preg_replace('/^www\./i', '', $appHost);
+                // Match exact domain or subdomains
+                if (strcasecmp($host, $appHost) === 0 || str_ends_with(strtolower($host), '.'.strtolower($appHost))) {
+                    return true;
+                }
+            }
+        }
+
+        // Hardcoded check for eventschedule.com (handles hosted mode)
+        if (strcasecmp($host, 'eventschedule.com') === 0 || str_ends_with(strtolower($host), '.eventschedule.com')) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
