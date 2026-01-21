@@ -48,12 +48,23 @@ class AnalyticsController extends Controller
         // Get views by schedule
         $viewsBySchedule = $analytics->getViewsBySchedule($user, $start, $end, $selectedRoleId);
 
-        // Get top associated talents/venues (appearance views)
+        // Get top associated talents/venues (appearance views on this schedule)
         $topAppearances = collect();
         if ($selectedRoleId) {
             $selectedRole = $roles->firstWhere('id', $selectedRoleId);
             if ($selectedRole) {
                 $topAppearances = $analytics->getTopAppearancesForSchedule($selectedRole, 10, $start, $end);
+            }
+        }
+
+        // Get appearance views for talents/venues (views from appearing on other schedules)
+        $appearanceViews = 0;
+        $topSchedulesAppearedOn = collect();
+        if ($selectedRoleId) {
+            $selectedRole = $roles->firstWhere('id', $selectedRoleId);
+            if ($selectedRole && ($selectedRole->isTalent() || $selectedRole->isVenue())) {
+                $appearanceViews = $analytics->getTotalAppearanceViewsForRole($selectedRoleId, $start, $end);
+                $topSchedulesAppearedOn = $analytics->getAppearancesByScheduleForRole($selectedRoleId, 10, $start, $end);
             }
         }
 
@@ -79,6 +90,8 @@ class AnalyticsController extends Controller
             'deviceBreakdown',
             'viewsBySchedule',
             'topAppearances',
+            'appearanceViews',
+            'topSchedulesAppearedOn',
             'period',
             'conversionStats',
             'topEventsByRevenue',

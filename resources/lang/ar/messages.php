@@ -767,4 +767,7 @@ return [
     'social' => 'اجتماعي',
     'other' => 'أخرى',
     'revenue' => 'الإيرادات',
+    'appearance_views' => 'مشاهدات الظهور',
+    'views_from_other_schedules' => 'المشاهدات من الظهور في جداول أخرى',
+    'top_schedules_appeared_on' => 'أهم الجداول التي ظهرت فيها',
 ];

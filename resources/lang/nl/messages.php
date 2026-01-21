@@ -764,4 +764,7 @@ return [
     'social' => 'Sociaal',
     'other' => 'Overig',
     'revenue' => 'Omzet',
+    'appearance_views' => 'Optredenweergaven',
+    'views_from_other_schedules' => 'Weergaven van optredens op andere schema\'s',
+    'top_schedules_appeared_on' => 'Top schema\'s waarop u verscheen',
 ];

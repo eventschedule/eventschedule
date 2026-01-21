@@ -318,6 +318,39 @@ class AnalyticsService
     }
 
     /**
+     * Get total appearance views for a talent/venue (views from appearing on other schedules)
+     */
+    public function getTotalAppearanceViewsForRole(int $roleId, Carbon $start, Carbon $end): int
+    {
+        return (int) AnalyticsAppearancesDaily::forRole($roleId)
+            ->inDateRange($start, $end)
+            ->sum(DB::raw('desktop_views + mobile_views + tablet_views + unknown_views'));
+    }
+
+    /**
+     * Get schedules where this talent/venue appeared and received views
+     */
+    public function getAppearancesByScheduleForRole(int $roleId, int $limit, Carbon $start, Carbon $end): Collection
+    {
+        return AnalyticsAppearancesDaily::select(
+            'schedule_role_id',
+            DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as view_count')
+        )
+            ->forRole($roleId)
+            ->inDateRange($start, $end)
+            ->groupBy('schedule_role_id')
+            ->orderByDesc('view_count')
+            ->limit($limit)
+            ->with('scheduleRole')
+            ->get()
+            ->filter(fn ($item) => $item->scheduleRole !== null)
+            ->map(fn ($item) => [
+                'role' => $item->scheduleRole,
+                'view_count' => (int) $item->view_count,
+            ]);
+    }
+
+    /**
      * Get conversion statistics (views to sales)
      */
     public function getConversionStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null): array
