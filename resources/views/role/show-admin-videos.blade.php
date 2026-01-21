@@ -221,16 +221,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!role.selectedVideos) {
                     role.selectedVideos = [];
                 }
-                
-                const index = role.selectedVideos.findIndex(v => v.id === video.id);
-                if (index > -1) {
-                    // Remove video if already selected
-                    role.selectedVideos.splice(index, 1);
+
+                const isSelected = role.selectedVideos.some(v => v.id === video.id);
+                if (isSelected) {
+                    // Deselect if clicking the already-selected video
+                    role.selectedVideos = [];
                 } else {
-                    // Add video if not already selected and under limit
-                    if (role.selectedVideos.length < 1) {
-                        role.selectedVideos.push(video);
-                    }
+                    // Select this video (replacing any previous selection)
+                    role.selectedVideos = [video];
                 }
             },
             
