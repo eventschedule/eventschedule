@@ -223,6 +223,30 @@ class RoleController extends Controller
             ->with('message', str_replace(':name', $role->name, __('messages.unfollowed_role')));
     }
 
+    public function bulkUnfollow(Request $request)
+    {
+        $subdomains = json_decode($request->input('subdomains', '[]'), true);
+        $user = $request->user();
+        $count = 0;
+
+        foreach ($subdomains as $subdomain) {
+            $role = Role::subdomain($subdomain)->first();
+            if ($role) {
+                if (! $role->email) {
+                    $role->is_deleted = true;
+                    $role->save();
+                }
+                if ($user->isConnected($role->subdomain)) {
+                    $user->roles()->detach($role->id);
+                }
+                $count++;
+            }
+        }
+
+        return redirect(route('following'))
+            ->with('message', str_replace(':count', $count, __('messages.unfollowed_roles_count')));
+    }
+
     public function viewGuest(Request $request, $subdomain, $slug = '')
     {
         if (config('app.hosted') && env('APP_REDIRECT_SUBDOMAIN') == $subdomain) {
