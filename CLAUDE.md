@@ -113,3 +113,10 @@ Key configuration in `.env`:
 ## Localization
 
 9 languages supported in `resources/lang/`: EN, ES, DE, FR, IT, PT, HE, NL, AR
+
+```bash
+# Check for missing translation keys across all languages
+php storage/check_translations.php
+```
+
+Run this periodically when adding new translation keys to ensure all language files are in sync.
