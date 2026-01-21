@@ -762,4 +762,9 @@ return [
     'venue_name' => 'Venue Name',
     'matched_existing_venue' => 'Matched existing venue',
     'matched_venue' => 'Matched venue',
+    'sign_up_with_google' => 'Sign up with Google',
+    'log_in_with_google' => 'Log in with Google',
+    'or_continue_with_email' => 'or continue with email',
+    'google_auth_failed' => 'Google authentication failed. Please try again.',
+    'google_account_already_linked' => 'This email is already linked to a different Google account.',
 ];

@@ -740,4 +740,9 @@ return [
     'venue_name' => 'Naam van de Locatie',
     'matched_existing_venue' => 'Bestaande locatie gevonden',
     'matched_venue' => 'Locatie gevonden',
+    'sign_up_with_google' => 'Registreren met Google',
+    'log_in_with_google' => 'Inloggen met Google',
+    'or_continue_with_email' => 'of ga verder met e-mail',
+    'google_auth_failed' => 'Google-authenticatie mislukt. Probeer het opnieuw.',
+    'google_account_already_linked' => 'Dit e-mailadres is al gekoppeld aan een ander Google-account.',
 ];

@@ -735,4 +735,9 @@ return [
     'venue_name' => 'שם המקום',
     'matched_existing_venue' => 'נמצא מקום קיים',
     'matched_venue' => 'מקום שנמצא',
+    'sign_up_with_google' => 'הרשמה עם Google',
+    'log_in_with_google' => 'התחברות עם Google',
+    'or_continue_with_email' => 'או המשך עם אימייל',
+    'google_auth_failed' => 'האימות עם Google נכשל. אנא נסה שוב.',
+    'google_account_already_linked' => 'אימייל זה כבר מקושר לחשבון Google אחר.',
 ];
