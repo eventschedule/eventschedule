@@ -162,4 +162,94 @@ class ImageUtils
             throw new \Exception('Invalid file format detected.');
         }
     }
+
+    /**
+     * Generate a thumbnail from a source image
+     *
+     * @param string $sourcePath Path to source image
+     * @param string $destPath Path to save thumbnail
+     * @param int $width Target width
+     * @param int $height Target height
+     * @param int $quality JPEG quality (0-100)
+     * @return bool True on success, false on failure
+     */
+    public static function generateThumbnail(string $sourcePath, string $destPath, int $width, int $height, int $quality = 80): bool
+    {
+        if (!file_exists($sourcePath)) {
+            return false;
+        }
+
+        // Get source image info
+        $imageInfo = getimagesize($sourcePath);
+        if ($imageInfo === false) {
+            return false;
+        }
+
+        $sourceWidth = $imageInfo[0];
+        $sourceHeight = $imageInfo[1];
+        $mimeType = $imageInfo['mime'];
+
+        // Create source image resource based on type
+        switch ($mimeType) {
+            case 'image/png':
+                $sourceImage = imagecreatefrompng($sourcePath);
+                break;
+            case 'image/jpeg':
+                $sourceImage = imagecreatefromjpeg($sourcePath);
+                break;
+            case 'image/gif':
+                $sourceImage = imagecreatefromgif($sourcePath);
+                break;
+            case 'image/webp':
+                $sourceImage = imagecreatefromwebp($sourcePath);
+                break;
+            default:
+                return false;
+        }
+
+        if ($sourceImage === false) {
+            return false;
+        }
+
+        // Create destination image
+        $destImage = imagecreatetruecolor($width, $height);
+        if ($destImage === false) {
+            imagedestroy($sourceImage);
+            return false;
+        }
+
+        // Preserve transparency for the resampling process
+        imagealphablending($destImage, false);
+        imagesavealpha($destImage, true);
+
+        // Resize/resample the image
+        $result = imagecopyresampled(
+            $destImage,
+            $sourceImage,
+            0, 0, 0, 0,
+            $width, $height,
+            $sourceWidth, $sourceHeight
+        );
+
+        if (!$result) {
+            imagedestroy($sourceImage);
+            imagedestroy($destImage);
+            return false;
+        }
+
+        // Ensure destination directory exists
+        $destDir = dirname($destPath);
+        if (!is_dir($destDir)) {
+            mkdir($destDir, 0755, true);
+        }
+
+        // Save as JPEG
+        $result = imagejpeg($destImage, $destPath, $quality);
+
+        // Clean up
+        imagedestroy($sourceImage);
+        imagedestroy($destImage);
+
+        return $result;
+    }
 } 
