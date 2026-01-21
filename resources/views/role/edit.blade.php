@@ -36,22 +36,13 @@
 
         #preview {
             border: 1px solid #dbdbdb;
-            border-radius: 4px;
-            height: 150px;
+            border-radius: 8px;
+            height: 180px;
             width: 100%;
-            text-align: center;
-            vertical-align: middle;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: auto;
-            font-size: 3rem;
-        }
-
-        .color-select-container {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            padding: 1rem;
         }
 
         .color-nav-button {
@@ -215,14 +206,16 @@
 
             $('#header_image').on('input', function() {
                 var headerImageUrl = $(this).find(':selected').val();
-                if (headerImageUrl) {
-                    headerImageUrl = "{{ asset('images/headers') }}" + '/' + headerImageUrl + '.png';
+                if (headerImageUrl && headerImageUrl !== 'none') {
+                    headerImageUrl = "{{ asset('images/headers/thumbs') }}" + '/' + headerImageUrl + '.jpg';
                     $('#header_image_preview').attr('src', headerImageUrl).show();
                     $('#delete_header_image').hide();
-                } else if ({{ $role->header_image_url ? 'true' : 'false' }}) {
+                } else if (headerImageUrl === '' && {{ $role->header_image_url ? 'true' : 'false' }}) {
+                    // Custom option selected and there's an existing custom image
                     $('#header_image_preview').attr('src', '{{ $role->header_image_url }}').show();
                     $('#delete_header_image').show();
                 } else {
+                    // 'none' selected or no image
                     $('#header_image_preview').hide();
                     $('#delete_header_image').hide();
                 }
@@ -283,21 +276,63 @@
             var backgroundRotation = $('#background_rotation').val();
             var fontColor = $('#font_color').val();
             var fontFamily = $('#font_family').find(':selected').val();
+            var accentColor = $('#accent_color').val() || '#4E81FA';
             var name = $('#name').val();
+            var headerImage = $('#header_image').val();
+            var profileImagePreview = $('#profile_image_preview').attr('src');
+            var existingProfileImage = '{{ $role->profile_image_url }}';
 
             if (! name) {
                 name = {!! json_encode(__('messages.preview'), JSON_UNESCAPED_UNICODE) !!};
-            } else if (name.length > 10) {
-                name = name.substring(0, 10) + '...';
+            } else if (name.length > 20) {
+                name = name.substring(0, 20) + '...';
             }
 
-            $('#preview')
-                .css('color', fontColor)
-                .css('font-family', fontFamily)
-                .css('background-size', 'cover')
-                .css('background-position', 'center')
-                .html('<div class="bg-[#F5F9FE] rounded-lg px-6 py-4 flex flex-col">' + name + '</div>');
+            // Build header image HTML
+            var headerHtml = '';
+            if (headerImage && headerImage !== 'none' && headerImage !== '') {
+                var headerUrl = "{{ asset('images/headers/thumbs') }}" + '/' + headerImage + '.jpg';
+                headerHtml = '<div class="w-full h-16 bg-cover bg-center rounded-t-lg" style="background-image: url(\'' + headerUrl + '\')"></div>';
+            } else if (headerImage === '' && {{ $role->header_image_url ? 'true' : 'false' }}) {
+                // Custom header image
+                var customHeaderUrl = $('#header_image_preview').attr('src') || '{{ $role->header_image_url }}';
+                if (customHeaderUrl) {
+                    headerHtml = '<div class="w-full h-16 bg-cover bg-center rounded-t-lg" style="background-image: url(\'' + customHeaderUrl + '\')"></div>';
+                }
+            }
 
+            // Build profile image HTML
+            var profileHtml = '';
+            var profileSrc = profileImagePreview && profileImagePreview !== '#' ? profileImagePreview : existingProfileImage;
+            if (profileSrc) {
+                var marginTop = headerHtml ? '-mt-6' : '-mt-8';
+                profileHtml = '<div class="' + marginTop + ' mb-2"><div class="w-12 h-12 rounded-lg bg-[#F5F9FE] p-0.5 shadow-sm"><img src="' + profileSrc + '" class="w-full h-full object-cover rounded-lg" /></div></div>';
+            }
+
+            // Build content HTML with accent color elements
+            var contentTopPadding = !profileSrc && !headerHtml ? 'pt-3' : '';
+            var contentHtml =
+                '<div class="bg-[#F5F9FE] rounded-lg flex flex-col ' + (profileSrc && !headerHtml ? 'mt-8' : '') + '">' +
+                    headerHtml +
+                    '<div class="px-3 pb-3 flex flex-col">' +
+                        profileHtml +
+                        '<div class="text-sm font-semibold text-[#151B26] mb-2 ' + contentTopPadding + '" style="color: ' + fontColor + '; font-family: ' + fontFamily + ';">' + name + '</div>' +
+                        '<div class="flex gap-1.5">' +
+                            '<div class="w-5 h-5 rounded-full flex items-center justify-center" style="background-color: ' + accentColor + '">' +
+                                '<svg class="w-3 h-3" fill="white" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>' +
+                            '</div>' +
+                            '<div class="w-5 h-5 rounded-full flex items-center justify-center" style="background-color: ' + accentColor + '">' +
+                                '<svg class="w-3 h-3" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93z"/></svg>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+
+            // Apply content to preview container
+            var $preview = $('#preview');
+            $preview.html(contentHtml);
+
+            // Apply background styles
             if (background == 'gradient') {
                 $('#custom_colors').toggle(backgroundColors == '');
                 if (backgroundColors == '') {
@@ -312,23 +347,23 @@
 
                 var gradient = 'linear-gradient(' + backgroundRotation + 'deg, ' + backgroundColors + ')';
 
-                $('#preview')
+                $preview
                     .css('background-color', '')
                     .css('background-image', gradient);
             } else if (background == 'image') {
 
                 var backgroundImageUrl = $('#background_image').find(':selected').val();
                 if (backgroundImageUrl) {
-                    backgroundImageUrl = "{{ asset('images/backgrounds') }}" + '/' + $('#background_image').find(':selected').val() + '.png';
+                    backgroundImageUrl = "{{ asset('images/backgrounds/thumbs') }}" + '/' + $('#background_image').find(':selected').val() + '.jpg';
                 } else {
                     backgroundImageUrl = $('#background_image_preview').attr('src') || "{{ $role->background_image_url }}";
                 }
 
-                $('#preview')
+                $preview
                     .css('background-color', '')
                     .css('background-image', 'url("' + backgroundImageUrl + '")');
             } else {
-                $('#preview').css('background-image', '')
+                $preview.css('background-image', '')
                     .css('background-color', backgroundColor);
             }
         }
@@ -464,6 +499,7 @@
         function toggleCustomHeaderInput() {
             const select = document.getElementById('header_image');
             const customInput = document.getElementById('custom_header_input');
+            // Show custom input only for 'Custom' option (empty value), not for 'none' or presets
             customInput.style.display = select.value === '' ? 'block' : 'none';
         }
 
@@ -738,15 +774,36 @@
                         {{ __('messages.schedule_style') }}
                     </h2>
 
+                    <div class="flex flex-col xl:flex-row xl:gap-12">
+                        <div class="w-full xl:w-[40%]">
+
+                    <!-- Sub-Tab Navigation -->
+                    <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+                        <nav class="-mb-px flex space-x-6">
+                            <button type="button" onclick="showStyleTab('images')" id="style-tab-images"
+                                class="style-tab-button whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-[#4E81FA] text-[#4E81FA]">
+                                {{ __('messages.images') }}
+                            </button>
+                            <button type="button" onclick="showStyleTab('background')" id="style-tab-background"
+                                class="style-tab-button whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
+                                {{ __('messages.background') }}
+                            </button>
+                            <button type="button" onclick="showStyleTab('settings')" id="style-tab-settings"
+                                class="style-tab-button whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
+                                {{ __('messages.settings') }}
+                            </button>
+                        </nav>
+                    </div>
+
                     <!--
                     <div class="mb-6">
                         <x-input-label :value="__('messages.layout')" />
                         <div class="mt-2 space-y-2">
                             @foreach(['calendar', 'list'] as $layout)
                             <div class="flex items-center">
-                                <input type="radio" 
-                                    id="event_layout_{{ $layout }}" 
-                                    name="event_layout" 
+                                <input type="radio"
+                                    id="event_layout_{{ $layout }}"
+                                    name="event_layout"
                                     value="{{ $layout }}"
                                     {{ $role->event_layout == $layout ? 'checked' : '' }}
                                     class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
@@ -760,8 +817,8 @@
                     </div>
                     -->
 
-                    <div class="flex flex-col xl:flex-row xl:gap-12">
-                        <div class="w-full lg:w-1/2">
+                    <!-- Images Tab Content -->
+                    <div id="style-content-images">
                             <!--
                             <div class="mb-6">
                                 <x-input-label for="font_family" :value="__('messages.font_family')" />
@@ -809,30 +866,30 @@
 
                             <div class="mb-6">
                                 <x-input-label for="header_image" :value="__('messages.header_image')" />
-                                <div class="color-select-container">
-                                    <select id="header_image" name="header_image"
-                                        class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
-                                        oninput="updatePreview(); updateHeaderNavButtons(); toggleCustomHeaderInput();">
-                                        @foreach($headers as $header => $name)
-                                        <option value="{{ $header }}"
-                                            {{ $role->header_image == $header ? 'SELECTED' : '' }}>
-                                            {{ $name }}</option>
-                                        @endforeach
-                                    </select>
-
-                                    <button type="button" 
-                                            id="prev_header" 
-                                            class="color-nav-button" 
+                                <select id="header_image" name="header_image"
+                                    class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                    oninput="updatePreview(); updateHeaderNavButtons(); toggleCustomHeaderInput();">
+                                    <option value="none" {{ $role->header_image == 'none' || (!$role->header_image && !$role->header_image_url) ? 'SELECTED' : '' }}>
+                                        {{ __('messages.none') }}</option>
+                                    @foreach($headers as $header => $name)
+                                    <option value="{{ $header }}"
+                                        {{ $role->header_image == $header ? 'SELECTED' : '' }}>
+                                        {{ $name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="flex gap-2 mt-2">
+                                    <button type="button"
+                                            id="prev_header"
+                                            class="color-nav-button"
                                             onclick="changeHeaderImage(-1)"
                                             title="{{ __('messages.previous') }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                                         </svg>
                                     </button>
-                                                                                    
-                                    <button type="button" 
-                                            id="next_header" 
-                                            class="color-nav-button" 
+                                    <button type="button"
+                                            id="next_header"
+                                            class="color-nav-button"
                                             onclick="changeHeaderImage(1)"
                                             title="{{ __('messages.next') }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -841,7 +898,7 @@
                                     </button>
                                 </div>
 
-                                <div id="custom_header_input" style="display:none" class="mt-2">
+                                <div id="custom_header_input" style="display:none" class="mt-4">
                                     <input id="header_image_url" name="header_image_url" type="file" 
                                         class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
                                         :value="old('header_image_url')" 
@@ -852,10 +909,10 @@
                                     </p>
                                 </div>
 
-                                <img id="header_image_preview" 
-                                    src="{{ $role->header_image ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}" 
-                                    alt="Header Image Preview" 
-                                    style="max-height:120px; {{ $role->header_image || $role->header_image_url ? '' : 'display:none;' }}" 
+                                <img id="header_image_preview"
+                                    src="{{ $role->header_image && $role->header_image !== 'none' ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}"
+                                    alt="Header Image Preview"
+                                    style="max-height:120px; {{ ($role->header_image && $role->header_image !== 'none') || $role->header_image_url ? '' : 'display:none;' }}"
                                     class="pt-3" />
 
                                 @if ($role->header_image_url)
@@ -867,9 +924,12 @@
                                 @endif
 
                             </div>
+                    </div>
 
+                    <!-- Background Tab Content -->
+                    <div id="style-content-background" style="display: none;">
                             <div class="mb-6">
-                                <x-input-label :value="__('messages.background')" />
+                                <x-input-label :value="__('messages.background_type')" />
                                 <div class="mt-2 space-y-2">
                                     @foreach(['gradient', 'solid', 'image'] as $background)
                                     <div class="flex items-center">
@@ -898,37 +958,34 @@
 
                             <div class="mb-6" id="style_background_image" style="display:none">
                                 <x-input-label for="image" :value="__('messages.image')" />
-                                <div class="color-select-container">
-                                    <select id="background_image" name="background_image"
-                                        class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm w-64 max-w-64"
-                                        oninput="onChangeBackground(); updatePreview(); updateImageNavButtons(); toggleCustomImageInput();">
-                                        @foreach($backgrounds as $background => $name)
-                                        <option value="{{ $background }}"
-                                            {{ $role->background_image == $background ? 'SELECTED' : '' }}>
-                                            {{ $name }}</option>
-                                        @endforeach
-                                    </select>
-
-                                    <button type="button" 
-                                            id="prev_image" 
-                                            class="color-nav-button" 
+                                <select id="background_image" name="background_image"
+                                    class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                    oninput="onChangeBackground(); updatePreview(); updateImageNavButtons(); toggleCustomImageInput();">
+                                    @foreach($backgrounds as $background => $name)
+                                    <option value="{{ $background }}"
+                                        {{ $role->background_image == $background ? 'SELECTED' : '' }}>
+                                        {{ $name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="flex gap-2 mt-2">
+                                    <button type="button"
+                                            id="prev_image"
+                                            class="color-nav-button"
                                             onclick="changeBackgroundImage(-1)"
                                             title="{{ __('messages.previous') }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                                         </svg>
                                     </button>
-                                                                                
-                                    <button type="button" 
-                                            id="next_image" 
-                                            class="color-nav-button" 
+                                    <button type="button"
+                                            id="next_image"
+                                            class="color-nav-button"
                                             onclick="changeBackgroundImage(1)"
                                             title="{{ __('messages.next') }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                         </svg>
                                     </button>
-        
                                 </div>
 
                                 <div id="custom_image_input" style="display:none">
@@ -957,29 +1014,27 @@
                             <div id="style_background_gradient" style="display:none">
                                 <div class="mb-6">
                                     <x-input-label for="background_colors" :value="__('messages.colors')" />
-                                    <div class="color-select-container">
-                                        <select id="background_colors" name="background_colors" oninput="updatePreview(); updateColorNavButtons()"
-                                            class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm w-64 max-w-64">
-                                            @foreach($gradients as $gradient => $name)
-                                            <option value="{{ $gradient }}"
-                                                {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
-                                                {{ $name }}</option>
-                                            @endforeach
-                                        </select>
-                                    
-                                        <button type="button" 
-                                                id="prev_color" 
-                                                class="color-nav-button" 
+                                    <select id="background_colors" name="background_colors" oninput="updatePreview(); updateColorNavButtons()"
+                                        class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        @foreach($gradients as $gradient => $name)
+                                        <option value="{{ $gradient }}"
+                                            {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
+                                            {{ $name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="flex gap-2 mt-2">
+                                        <button type="button"
+                                                id="prev_color"
+                                                class="color-nav-button"
                                                 onclick="changeBackgroundColor(-1)"
                                                 title="{{ __('messages.previous') }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                                             </svg>
                                         </button>
-                                                                                
-                                        <button type="button" 
-                                                id="next_color" 
-                                                class="color-nav-button" 
+                                        <button type="button"
+                                                id="next_color"
+                                                class="color-nav-button"
                                                 onclick="changeBackgroundColor(1)"
                                                 title="{{ __('messages.next') }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -1016,11 +1071,14 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('background_rotation')" />
                                 </div>
                             </div>
+                    </div>
 
+                    <!-- Settings Tab Content -->
+                    <div id="style-content-settings" style="display: none;">
                             <div class="mb-6">
                                 <x-input-label for="accent_color" :value="__('messages.accent_color')" />
                                 <x-text-input id="accent_color" name="accent_color" type="color" class="mt-1 block w-1/2"
-                                    :value="old('accent_color', $role->accent_color)" />
+                                    :value="old('accent_color', $role->accent_color)" oninput="updatePreview()" />
                                 <x-input-error class="mt-2" :messages="$errors->get('accent_color')" />
                             </div>
 
@@ -1031,16 +1089,18 @@
                                     rows="6">{{ old('custom_css', $role->custom_css) }}</textarea>
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_css')" />
                             </div>
+                    </div>
 
                         </div>
 
-                        <div class="w-full flex-grow">
+                        <!-- Preview (always visible, right column on desktop) -->
+                        <div class="w-full xl:w-[60%] mt-6 xl:mt-0">
                             <x-input-label :value="__('messages.preview')" />
-                            <div id="preview" class="h-full w-full flex-grow"></div>
+                            <div id="preview" class="h-[180px] w-full"></div>
                         </div>
                     </div>
-                </div>
 
+                    </div>
                 </div>
 
                 <div id="section-settings" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
@@ -1542,6 +1602,31 @@
 </x-app-admin-layout>
 
 <script {!! nonce_attr() !!}>
+// Style sub-tab navigation
+function showStyleTab(tabName) {
+    // Hide all style tab contents
+    const tabContents = ['images', 'background', 'settings'];
+    tabContents.forEach(function(tab) {
+        const content = document.getElementById('style-content-' + tab);
+        if (content) {
+            content.style.display = tab === tabName ? 'block' : 'none';
+        }
+    });
+
+    // Update tab button styles
+    const tabButtons = document.querySelectorAll('.style-tab-button');
+    tabButtons.forEach(function(button) {
+        const isActive = button.id === 'style-tab-' + tabName;
+        if (isActive) {
+            button.classList.add('border-[#4E81FA]', 'text-[#4E81FA]');
+            button.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+        } else {
+            button.classList.remove('border-[#4E81FA]', 'text-[#4E81FA]');
+            button.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+        }
+    });
+}
+
 function addGroupField() {
     const container = document.getElementById('group-items');
     const idx = container.children.length;
