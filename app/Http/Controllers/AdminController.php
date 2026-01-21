@@ -16,7 +16,7 @@ class AdminController extends Controller
      */
     public function dashboard(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -28,21 +28,38 @@ class AdminController extends Controller
         $previousStartDate = $dates['previous_start'];
         $previousEndDate = $dates['previous_end'];
 
-        // Key Metrics
-        $totalUsers = User::count();
-        $totalSchedules = Role::count();
+        // Key Metrics (only count confirmed users and claimed roles)
+        $totalUsers = User::whereNotNull('email_verified_at')->count();
+        $totalSchedules = Role::whereNotNull('user_id')
+            ->where(function ($query) {
+                $query->whereNotNull('email_verified_at')
+                    ->orWhereNotNull('phone_verified_at');
+            })
+            ->count();
         $totalEvents = Event::count();
 
-        // Users in current period
-        $usersInPeriod = User::whereBetween('created_at', [$startDate, $endDate])->count();
-        $usersInPreviousPeriod = User::whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
+        // Users in current period (only confirmed)
+        $usersInPeriod = User::whereNotNull('email_verified_at')
+            ->whereBetween('created_at', [$startDate, $endDate])->count();
+        $usersInPreviousPeriod = User::whereNotNull('email_verified_at')
+            ->whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
         $usersChangePercent = $usersInPreviousPeriod > 0
             ? round((($usersInPeriod - $usersInPreviousPeriod) / $usersInPreviousPeriod) * 100, 1)
             : ($usersInPeriod > 0 ? 100 : 0);
 
-        // Schedules in current period
-        $schedulesInPeriod = Role::whereBetween('created_at', [$startDate, $endDate])->count();
-        $schedulesInPreviousPeriod = Role::whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
+        // Schedules in current period (only claimed)
+        $schedulesInPeriod = Role::whereNotNull('user_id')
+            ->where(function ($query) {
+                $query->whereNotNull('email_verified_at')
+                    ->orWhereNotNull('phone_verified_at');
+            })
+            ->whereBetween('created_at', [$startDate, $endDate])->count();
+        $schedulesInPreviousPeriod = Role::whereNotNull('user_id')
+            ->where(function ($query) {
+                $query->whereNotNull('email_verified_at')
+                    ->orWhereNotNull('phone_verified_at');
+            })
+            ->whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
         $schedulesChangePercent = $schedulesInPreviousPeriod > 0
             ? round((($schedulesInPeriod - $schedulesInPreviousPeriod) / $schedulesInPreviousPeriod) * 100, 1)
             : ($schedulesInPeriod > 0 ? 100 : 0);
@@ -54,9 +71,11 @@ class AdminController extends Controller
             ? round((($eventsInPeriod - $eventsInPreviousPeriod) / $eventsInPreviousPeriod) * 100, 1)
             : ($eventsInPeriod > 0 ? 100 : 0);
 
-        // Active users (users who logged in within the period)
-        $activeUsers7Days = User::where('updated_at', '>=', now()->subDays(7))->count();
-        $activeUsers30Days = User::where('updated_at', '>=', now()->subDays(30))->count();
+        // Active users (confirmed users who logged in within the period)
+        $activeUsers7Days = User::whereNotNull('email_verified_at')
+            ->where('updated_at', '>=', now()->subDays(7))->count();
+        $activeUsers30Days = User::whereNotNull('email_verified_at')
+            ->where('updated_at', '>=', now()->subDays(30))->count();
 
         // Average events per schedule
         $avgEventsPerSchedule = $totalSchedules > 0 ? round($totalEvents / $totalSchedules, 1) : 0;
@@ -171,21 +190,27 @@ class AdminController extends Controller
             $labelFormat = 'M Y';
         }
 
-        // Users trend
+        // Users trend (only confirmed)
         $usersTrend = User::select(
             DB::raw("DATE_FORMAT(created_at, '$groupFormat') as period"),
             DB::raw('COUNT(*) as count')
         )
+            ->whereNotNull('email_verified_at')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->groupBy('period')
             ->orderBy('period')
             ->get();
 
-        // Schedules trend
+        // Schedules trend (only claimed)
         $schedulesTrend = Role::select(
             DB::raw("DATE_FORMAT(created_at, '$groupFormat') as period"),
             DB::raw('COUNT(*) as count')
         )
+            ->whereNotNull('user_id')
+            ->where(function ($query) {
+                $query->whereNotNull('email_verified_at')
+                    ->orWhereNotNull('phone_verified_at');
+            })
             ->whereBetween('created_at', [$startDate, $endDate])
             ->groupBy('period')
             ->orderBy('period')
@@ -215,7 +240,7 @@ class AdminController extends Controller
                 // Parse week format
                 $parts = explode('-', $period);
                 if (count($parts) === 2) {
-                    return 'Week ' . ltrim($parts[1], '0');
+                    return 'Week '.ltrim($parts[1], '0');
                 }
             }
             try {

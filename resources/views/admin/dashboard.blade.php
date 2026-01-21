@@ -141,9 +141,9 @@
                         <div class="px-6 py-4">
                             <div class="flex items-center justify-between">
                                 <div class="min-w-0 flex-1">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    <a href="{{ route('role.view_guest', ['subdomain' => $schedule->subdomain]) }}" target="_blank" class="text-sm font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 truncate block">
                                         {{ $schedule->name }}
-                                    </p>
+                                    </a>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">
                                         {{ ucfirst($schedule->type) }} &bull; {{ $schedule->subdomain }}
                                     </p>
@@ -174,9 +174,15 @@
                         <div class="px-6 py-4">
                             <div class="flex items-center justify-between">
                                 <div class="min-w-0 flex-1">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                        {{ $event->name }}
-                                    </p>
+                                    @if ($event->roles->isNotEmpty())
+                                        <a href="{{ $event->getGuestUrl($event->roles->first()->subdomain) }}" target="_blank" class="text-sm font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 truncate block">
+                                            {{ $event->name }}
+                                        </a>
+                                    @else
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                            {{ $event->name }}
+                                        </p>
+                                    @endif
                                     <p class="text-sm text-gray-500 dark:text-gray-400">
                                         @if ($event->roles->isNotEmpty())
                                             {{ $event->roles->first()->name }}
