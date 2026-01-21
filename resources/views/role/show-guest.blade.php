@@ -4,19 +4,23 @@
    $isRtl = is_rtl();
   @endphp
 
-  @if ($role->profile_image_url && ! $role->header_image && ! $role->header_image && $role->language_code == 'en')
+  @php
+    $hasHeaderImage = ($role->header_image && $role->header_image !== 'none') || $role->header_image_url;
+  @endphp
+
+  @if ($role->profile_image_url && !$hasHeaderImage && $role->language_code == 'en')
   <div class="pt-8"></div>
   @endif
 
   <main>
     <div>
       <div class="container mx-auto pt-7 pb-10 px-5">
-        <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-xl mb-6 {{ $role->header_image || $role->header_image_url ? 'overflow-hidden' : '' }} {{ !$role->header_image && !$role->header_image_url && $role->profile_image_url ? 'pt-16' : '' }}">
+        <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-xl mb-6 {{ $hasHeaderImage ? 'overflow-hidden' : '' }} {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }}">
           <div
             class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0"
           >
-            
-            @if ($role->header_image)
+
+            @if ($role->header_image && $role->header_image !== 'none')
             <img
               class="block max-h-72 w-full object-cover rounded-t-2xl"
               src="{{ asset('images/headers') }}/{{ $role->header_image }}.png"
@@ -28,9 +32,9 @@
             />
             @endif
           </div>
-          <div id="schedule-header" class="px-6 lg:px-16 pb-4 relative z-10">
+          <div id="schedule-header" class="px-6 lg:px-16 pb-4 relative z-10 {{ $isRtl ? 'rtl' : '' }}">
             @if ($role->profile_image_url)
-            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] -ml-2 mb-6 bg-[#F5F9FE] dark:bg-gray-800 flex items-center justify-center">
+            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] {{ $isRtl ? '-mr-2 sm:ml-auto sm:mr-0' : '-ml-2' }} mb-6 bg-[#F5F9FE] dark:bg-gray-800 flex items-center justify-center">
               <img
                 class="rounded-lg w-[120px] h-[120px] object-cover"
                 src="{{ $role->profile_image_url }}"
@@ -41,7 +45,7 @@
             <div style="height: 42px;"></div>
             @endif
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-6 mb-5">
-              <div class="text-center sm:text-left">
+              <div class="text-center {{ $isRtl ? 'sm:text-right' : 'sm:text-left' }}">
                 <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2">
                   {{ $role->translatedName() }}
                 </h3>
@@ -204,7 +208,7 @@
             </div>
             -->
             @if($role->phone)
-            <div class="flex flex-col sm:flex-row gap-4 pb-4 items-center">
+            <div class="flex flex-col sm:flex-row gap-4 pb-4 items-center {{ $isRtl ? 'sm:justify-end' : '' }}">
               <div
                 class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] dark:text-gray-300 fill-[#33383C] dark:fill-gray-300 hover:text-[#4E81FA] hover:fill-[#4E81FA]"
               >

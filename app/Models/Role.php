@@ -91,6 +91,15 @@ class Role extends Model implements MustVerifyEmail
         'email_settings',
     ];
 
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'header_image' => 'none',
+    ];
+
     protected static function boot()
     {
         parent::boot();
