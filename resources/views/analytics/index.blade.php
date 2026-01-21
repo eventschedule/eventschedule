@@ -1,29 +1,43 @@
 <x-app-admin-layout>
 
     <div class="space-y-6">
-        {{-- Schedule Selector and Period Toggle --}}
+        {{-- Schedule Selector, Date Range, and Period Toggle --}}
         <div class="flex flex-col sm:flex-row sm:justify-between gap-4">
-            <div class="flex-1 max-w-xs">
-                <select id="role-filter" onchange="filterByRole(this.value)"
-                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base">
-                    <option value="">{{ __('messages.all_schedules') }}</option>
-                    @foreach ($roles as $role)
-                        <option value="{{ \App\Utils\UrlUtils::encodeId($role->id) }}" {{ $selectedRoleId == $role->id ? 'selected' : '' }}>
-                            {{ $role->name }}
-                        </option>
-                    @endforeach
-                </select>
+            <div class="flex gap-4 flex-wrap">
+                <div class="min-w-[200px]">
+                    <select id="role-filter" onchange="filterByRole(this.value)"
+                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base">
+                        <option value="">{{ __('messages.all_schedules') }}</option>
+                        @foreach ($roles as $role)
+                            <option value="{{ \App\Utils\UrlUtils::encodeId($role->id) }}" {{ $selectedRoleId == $role->id ? 'selected' : '' }}>
+                                {{ $role->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="min-w-[180px]">
+                    <select id="date-range" onchange="filterByDateRange(this.value)"
+                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base">
+                        <option value="last_7_days" {{ $range === 'last_7_days' ? 'selected' : '' }}>{{ __('messages.last_7_days') }}</option>
+                        <option value="last_30_days" {{ $range === 'last_30_days' ? 'selected' : '' }}>{{ __('messages.last_30_days') }}</option>
+                        <option value="last_90_days" {{ $range === 'last_90_days' ? 'selected' : '' }}>{{ __('messages.last_90_days') }}</option>
+                        <option value="this_month" {{ $range === 'this_month' ? 'selected' : '' }}>{{ __('messages.this_month') }}</option>
+                        <option value="last_month" {{ $range === 'last_month' ? 'selected' : '' }}>{{ __('messages.last_month') }}</option>
+                        <option value="this_year" {{ $range === 'this_year' ? 'selected' : '' }}>{{ __('messages.this_year') }}</option>
+                        <option value="all_time" {{ $range === 'all_time' ? 'selected' : '' }}>{{ __('messages.all_time') }}</option>
+                    </select>
+                </div>
             </div>
             <div class="flex gap-2 items-center">
-                <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'daily']) }}"
+                <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'daily', 'range' => $range]) }}"
                     class="px-5 py-3 rounded-md text-base font-semibold leading-none flex items-center {{ $period === 'daily' ? 'bg-[#4E81FA] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.daily') }}
                 </a>
-                <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'weekly']) }}"
+                <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'weekly', 'range' => $range]) }}"
                     class="px-5 py-3 rounded-md text-base font-semibold leading-none flex items-center {{ $period === 'weekly' ? 'bg-[#4E81FA] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.weekly') }}
                 </a>
-                <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'monthly']) }}"
+                <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'monthly', 'range' => $range]) }}"
                     class="px-5 py-3 rounded-md text-base font-semibold leading-none flex items-center {{ $period === 'monthly' ? 'bg-[#4E81FA] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.monthly') }}
                 </a>
@@ -31,25 +45,33 @@
         </div>
 
         {{-- Stats Cards --}}
-        <div class="grid grid-cols-2 {{ $appearanceViews > 0 ? 'lg:grid-cols-5' : 'lg:grid-cols-4' }} gap-4">
+        @php
+            $statsColumns = 2; // Total Views + Current Period
+            if ($periodComparison) $statsColumns++; // Previous Period
+            if ($periodComparison) $statsColumns++; // Comparison %
+            if ($appearanceViews > 0) $statsColumns++; // Appearance Views
+        @endphp
+        <div class="grid grid-cols-2 lg:grid-cols-{{ $statsColumns }} gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.total_views') }}</div>
                 <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($totalViews) }}</div>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.views_this_month') }}</div>
-                <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($momComparison['this_month']) }}</div>
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.views_in_period') }}</div>
+                <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($periodComparison ? $periodComparison['current_period'] : $momComparison['this_month']) }}</div>
+            </div>
+            @if ($periodComparison)
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.views_previous_period') }}</div>
+                <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($periodComparison['previous_period']) }}</div>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.views_last_month') }}</div>
-                <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($momComparison['last_month']) }}</div>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.month_over_month') }}</div>
-                <div class="mt-2 text-3xl font-bold {{ $momComparison['percentage_change'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                    {{ $momComparison['percentage_change'] >= 0 ? '+' : '' }}{{ $momComparison['percentage_change'] }}%
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.' . $periodComparison['comparison_label']) }}</div>
+                <div class="mt-2 text-3xl font-bold {{ $periodComparison['percentage_change'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                    {{ $periodComparison['percentage_change'] >= 0 ? '+' : '' }}{{ $periodComparison['percentage_change'] }}%
                 </div>
             </div>
+            @endif
             @if ($appearanceViews > 0)
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
@@ -76,11 +98,31 @@
                 <div class="mt-2 text-3xl font-bold text-green-600 dark:text-green-400">{{ number_format($conversionStats['total_revenue'], 2) }}</div>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.conversion_rate') }}</div>
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                    {{ __('messages.conversion_rate') }}
+                    <span class="relative group">
+                        <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                            {{ __('messages.conversion_rate_tooltip') }}
+                        </span>
+                    </span>
+                </div>
                 <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $conversionStats['conversion_rate'] }}%</div>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.revenue_per_view') }}</div>
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                    {{ __('messages.revenue_per_view') }}
+                    <span class="relative group">
+                        <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                            {{ __('messages.revenue_per_view_tooltip') }}
+                        </span>
+                    </span>
+                </div>
                 <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($conversionStats['revenue_per_view'], 2) }}</div>
             </div>
         </div>
@@ -107,7 +149,7 @@
             </div>
 
             {{-- Bar Charts Grid --}}
-            @if ($topEvents->isNotEmpty() || ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1) || $topAppearances->isNotEmpty() || $topSchedulesAppearedOn->isNotEmpty() || $topEventsByRevenue->isNotEmpty())
+            @if ($topEvents->isNotEmpty() || ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1) || $topAppearances->isNotEmpty() || $topSchedulesAppearedOn->isNotEmpty() || $topEventsByRevenue->isNotEmpty() || $trafficSources->isNotEmpty())
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {{-- Top Events Chart --}}
                 @if ($topEvents->isNotEmpty())
@@ -119,12 +161,54 @@
                 </div>
                 @endif
 
+                {{-- Traffic Sources Chart --}}
+                @if ($trafficSources->isNotEmpty())
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.traffic_sources') }}</h3>
+                    <div class="h-64 flex items-center justify-center">
+                        <canvas id="trafficSourcesChart"></canvas>
+                    </div>
+                    <div class="mt-4 grid grid-cols-2 gap-2 text-xs text-gray-500 dark:text-gray-400">
+                        <div class="flex items-start gap-1">
+                            <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: #4E81FA;"></span>
+                            <span><strong>{{ __('messages.direct') }}:</strong> {{ __('messages.direct_description') }}</span>
+                        </div>
+                        <div class="flex items-start gap-1">
+                            <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: #10B981;"></span>
+                            <span><strong>{{ __('messages.search') }}:</strong> {{ __('messages.search_description') }}</span>
+                        </div>
+                        <div class="flex items-start gap-1">
+                            <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: #F59E0B;"></span>
+                            <span><strong>{{ __('messages.social') }}:</strong> {{ __('messages.social_description') }}</span>
+                        </div>
+                        <div class="flex items-start gap-1">
+                            <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: #EF4444;"></span>
+                            <span><strong>{{ __('messages.email_source') }}:</strong> {{ __('messages.email_description') }}</span>
+                        </div>
+                        <div class="flex items-start gap-1">
+                            <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: #6B7280;"></span>
+                            <span><strong>{{ __('messages.other') }}:</strong> {{ __('messages.other_description') }}</span>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 {{-- Views by Schedule Chart --}}
                 @if ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1)
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.schedule_views') }}</h3>
                     <div class="h-64">
                         <canvas id="scheduleChart"></canvas>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Top Referrers Chart --}}
+                @if ($topReferrers->isNotEmpty())
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_referrers') }}</h3>
+                    <div class="h-64">
+                        <canvas id="topReferrersChart"></canvas>
                     </div>
                 </div>
                 @endif
@@ -161,29 +245,6 @@
             </div>
             @endif
 
-            {{-- Traffic Sources Row --}}
-            @if ($trafficSources->isNotEmpty())
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {{-- Traffic Sources Chart --}}
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.traffic_sources') }}</h3>
-                    <div class="h-64 flex items-center justify-center">
-                        <canvas id="trafficSourcesChart"></canvas>
-                    </div>
-                </div>
-
-                {{-- Top Referrers Chart --}}
-                @if ($topReferrers->isNotEmpty())
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_referrers') }}</h3>
-                    <div class="h-64">
-                        <canvas id="topReferrersChart"></canvas>
-                    </div>
-                </div>
-                @endif
-            </div>
-            @endif
-
         @else
             {{-- No Data State --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
@@ -209,6 +270,12 @@
             } else {
                 url.searchParams.delete('role_id');
             }
+            window.location.href = url.toString();
+        }
+
+        function filterByDateRange(range) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('range', range);
             window.location.href = url.toString();
         }
 
@@ -275,10 +342,16 @@
         // Device Breakdown Chart
         const deviceCtx = document.getElementById('deviceChart').getContext('2d');
         const deviceData = {!! json_encode($deviceBreakdown->toArray()) !!};
+        const deviceLabels = {
+            'desktop': '{{ __("messages.desktop") ?? "Desktop" }}',
+            'mobile': '{{ __("messages.mobile") ?? "Mobile" }}',
+            'tablet': '{{ __("messages.tablet") ?? "Tablet" }}',
+            'unknown': '{{ __("messages.other") }}'
+        };
         new Chart(deviceCtx, {
             type: 'doughnut',
             data: {
-                labels: Object.keys(deviceData).map(k => k.charAt(0).toUpperCase() + k.slice(1)),
+                labels: Object.keys(deviceData).map(k => deviceLabels[k] || k.charAt(0).toUpperCase() + k.slice(1)),
                 datasets: [{
                     data: Object.values(deviceData),
                     backgroundColor: ['#4E81FA', '#10B981', '#8B5CF6', '#6B7280']
