@@ -31,7 +31,7 @@
         </div>
 
         {{-- Stats Cards --}}
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 {{ $appearanceViews > 0 ? 'lg:grid-cols-5' : 'lg:grid-cols-4' }} gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.total_views') }}</div>
                 <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($totalViews) }}</div>
@@ -50,6 +50,22 @@
                     {{ $momComparison['percentage_change'] >= 0 ? '+' : '' }}{{ $momComparison['percentage_change'] }}%
                 </div>
             </div>
+            @if ($appearanceViews > 0)
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                    {{ __('messages.appearance_views') }}
+                    <span class="relative group">
+                        <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                            {{ __('messages.views_from_other_schedules') }}
+                        </span>
+                    </span>
+                </div>
+                <div class="mt-2 text-3xl font-bold text-purple-600 dark:text-purple-400">{{ number_format($appearanceViews) }}</div>
+            </div>
+            @endif
         </div>
 
         {{-- Conversion Stats Cards --}}
@@ -70,7 +86,7 @@
         </div>
         @endif
 
-        @if ($totalViews > 0)
+        @if ($totalViews > 0 || $appearanceViews > 0)
             {{-- Charts Row --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {{-- Views Over Time Chart --}}
@@ -90,7 +106,8 @@
                 </div>
             </div>
 
-            {{-- Second Charts Row --}}
+            {{-- Bar Charts Grid --}}
+            @if ($topEvents->isNotEmpty() || ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1) || $topAppearances->isNotEmpty() || $topSchedulesAppearedOn->isNotEmpty() || $topEventsByRevenue->isNotEmpty())
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {{-- Top Events Chart --}}
                 @if ($topEvents->isNotEmpty())
@@ -111,17 +128,36 @@
                     </div>
                 </div>
                 @endif
-            </div>
 
-            {{-- Top Associated Talents/Venues Chart --}}
-            @if ($topAppearances->isNotEmpty())
-            <div class="grid grid-cols-1 gap-6">
+                {{-- Top Associated Talents/Venues Chart --}}
+                @if ($topAppearances->isNotEmpty())
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_associated_roles') }}</h3>
                     <div class="h-64">
                         <canvas id="appearancesChart"></canvas>
                     </div>
                 </div>
+                @endif
+
+                {{-- Top Schedules You Appeared On Chart (for talents/venues) --}}
+                @if ($topSchedulesAppearedOn->isNotEmpty())
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_schedules_appeared_on') }}</h3>
+                    <div class="h-64">
+                        <canvas id="schedulesAppearedOnChart"></canvas>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Top Events by Revenue Chart --}}
+                @if ($topEventsByRevenue->isNotEmpty())
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_events_by_revenue') }}</h3>
+                    <div class="h-64">
+                        <canvas id="topEventsByRevenueChart"></canvas>
+                    </div>
+                </div>
+                @endif
             </div>
             @endif
 
@@ -145,18 +181,6 @@
                     </div>
                 </div>
                 @endif
-            </div>
-            @endif
-
-            {{-- Top Events by Revenue Chart --}}
-            @if ($topEventsByRevenue->isNotEmpty())
-            <div class="grid grid-cols-1 gap-6">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_events_by_revenue') }}</h3>
-                    <div class="h-64">
-                        <canvas id="topEventsByRevenueChart"></canvas>
-                    </div>
-                </div>
             </div>
             @endif
 
@@ -188,7 +212,7 @@
             window.location.href = url.toString();
         }
 
-        @if ($totalViews > 0)
+        @if ($totalViews > 0 || $appearanceViews > 0)
         function initCharts() {
             if (typeof Chart === 'undefined') {
                 setTimeout(initCharts, 50);
@@ -376,6 +400,52 @@
                     label: '{{ __("messages.views") }}',
                     data: {!! json_encode($topAppearances->pluck('view_count')->toArray()) !!},
                     backgroundColor: '#8B5CF6'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor,
+                            precision: 0
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor
+                        }
+                    }
+                }
+            }
+        });
+        @endif
+
+        @if ($topSchedulesAppearedOn->isNotEmpty())
+        // Schedules Appeared On Chart
+        const schedulesAppearedOnCtx = document.getElementById('schedulesAppearedOnChart').getContext('2d');
+        new Chart(schedulesAppearedOnCtx, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($topSchedulesAppearedOn->map(fn($item) => $item['role']->name)->toArray()) !!},
+                datasets: [{
+                    label: '{{ __("messages.views") }}',
+                    data: {!! json_encode($topSchedulesAppearedOn->pluck('view_count')->toArray()) !!},
+                    backgroundColor: '#EC4899'
                 }]
             },
             options: {

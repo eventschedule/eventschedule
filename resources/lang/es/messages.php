@@ -766,4 +766,7 @@ return [
     'social' => 'Social',
     'other' => 'Otro',
     'revenue' => 'Ingresos',
+    'appearance_views' => 'Vistas de apariciones',
+    'views_from_other_schedules' => 'Vistas de apariciones en otros horarios',
+    'top_schedules_appeared_on' => 'Principales horarios en los que apareciste',
 ];

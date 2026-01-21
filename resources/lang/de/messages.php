@@ -770,4 +770,7 @@ return [
     'social' => 'Sozial',
     'other' => 'Andere',
     'revenue' => 'Umsatz',
+    'appearance_views' => 'Auftritte Ansichten',
+    'views_from_other_schedules' => 'Ansichten von Auftritten in anderen Zeitplänen',
+    'top_schedules_appeared_on' => 'Top-Zeitpläne, in denen Sie erschienen sind',
 ];

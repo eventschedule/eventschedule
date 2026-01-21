@@ -6,8 +6,10 @@ use App\Http\Requests\MemberAddRequest;
 use App\Http\Requests\RoleCreateRequest;
 use App\Http\Requests\RoleEmailVerificationRequest;
 use App\Http\Requests\RoleUpdateRequest;
+use App\Models\AnalyticsAppearancesDaily;
+use App\Models\AnalyticsDaily;
+use App\Models\AnalyticsReferrersDaily;
 use App\Models\Event;
-use App\Models\PageView;
 use App\Models\Role;
 use App\Models\RoleUser;
 use App\Models\User;
@@ -154,7 +156,9 @@ class RoleController extends Controller
         }
 
         // Delete analytics data
-        PageView::where('role_id', $role->id)->delete();
+        AnalyticsDaily::where('role_id', $role->id)->delete();
+        AnalyticsReferrersDaily::where('role_id', $role->id)->delete();
+        AnalyticsAppearancesDaily::where('role_id', $role->id)->delete();
 
         $role->delete();
 

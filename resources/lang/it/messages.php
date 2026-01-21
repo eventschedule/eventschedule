@@ -767,4 +767,7 @@ return [
     'social' => 'Social',
     'other' => 'Altro',
     'revenue' => 'Entrate',
+    'appearance_views' => 'Visualizzazioni delle apparizioni',
+    'views_from_other_schedules' => 'Visualizzazioni dalle apparizioni in altri calendari',
+    'top_schedules_appeared_on' => 'Principali calendari in cui sei apparso',
 ];

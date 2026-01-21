@@ -759,4 +759,7 @@ return [
     'social' => 'חברתי',
     'other' => 'אחר',
     'revenue' => 'הכנסות',
+    'appearance_views' => 'צפיות הופעות',
+    'views_from_other_schedules' => 'צפיות מהופעות בלוחות זמנים אחרים',
+    'top_schedules_appeared_on' => 'לוחות הזמנים המובילים בהם הופעת',
 ];

@@ -797,4 +797,7 @@ return [
     'social' => 'Social',
     'other' => 'Other',
     'revenue' => 'Revenue',
+    'appearance_views' => 'Appearance Views',
+    'views_from_other_schedules' => 'Views from appearing on other schedules',
+    'top_schedules_appeared_on' => 'Top Schedules You Appeared On',
 ];
