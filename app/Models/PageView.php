@@ -156,6 +156,10 @@ class PageView
         // Increment schedule-level analytics
         AnalyticsDaily::incrementView($role->id, $deviceType);
 
+        // Track referrer source
+        $referrer = $request->header('referer');
+        AnalyticsReferrersDaily::incrementView($role->id, $referrer);
+
         // Increment event-level analytics if event exists
         if ($event) {
             AnalyticsEventsDaily::incrementView($event->id, $deviceType);

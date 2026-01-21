@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
@@ -217,6 +218,9 @@ class TicketController extends Controller
             $sale->status = 'paid';
             $sale->save();
 
+            // Record free ticket sale in analytics (0 revenue)
+            AnalyticsEventsDaily::incrementSale($event->id, 0);
+
             return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
         } else {
             switch ($event->payment_method) {
@@ -358,6 +362,9 @@ class TicketController extends Controller
 
         if ($session->payment_status === 'paid') {
             $sale->status = 'paid';
+
+            // Record sale in analytics
+            AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
         }
 
         $sale->transaction_reference = $session->payment_intent;
@@ -393,6 +400,9 @@ class TicketController extends Controller
         $sale->status = 'paid';
         $sale->transaction_reference = __('messages.manual_payment');
         $sale->save();
+
+        // Record sale in analytics
+        AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
 
         return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
     }
@@ -521,6 +531,9 @@ class TicketController extends Controller
                     $sale->status = 'paid';
                     $sale->transaction_reference = __('messages.manual_payment');
                     $sale->save();
+
+                    // Record sale in analytics
+                    AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
                 }
                 break;
 

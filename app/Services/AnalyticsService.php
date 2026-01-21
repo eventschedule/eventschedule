@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
+use App\Models\AnalyticsReferrersDaily;
 use App\Models\Event;
 use App\Models\PageView;
 use App\Models\Role;
@@ -314,5 +315,162 @@ class AnalyticsService
             ->groupBy('period')
             ->orderBy('period')
             ->get();
+    }
+
+    /**
+     * Get conversion statistics (views to sales)
+     */
+    public function getConversionStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null): array
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return [
+                'total_views' => 0,
+                'total_sales' => 0,
+                'conversion_rate' => 0,
+                'total_revenue' => 0,
+                'revenue_per_view' => 0,
+            ];
+        }
+
+        // Get event IDs that belong to user's roles
+        $eventIds = DB::table('event_role')
+            ->whereIn('role_id', $roleIds)
+            ->pluck('event_id')
+            ->unique();
+
+        if ($eventIds->isEmpty()) {
+            return [
+                'total_views' => 0,
+                'total_sales' => 0,
+                'conversion_rate' => 0,
+                'total_revenue' => 0,
+                'revenue_per_view' => 0,
+            ];
+        }
+
+        $stats = AnalyticsEventsDaily::select(
+            DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as total_views'),
+            DB::raw('SUM(sales_count) as total_sales'),
+            DB::raw('SUM(revenue) as total_revenue')
+        )
+            ->forEvents($eventIds)
+            ->inDateRange($start, $end)
+            ->first();
+
+        $totalViews = (int) ($stats->total_views ?? 0);
+        $totalSales = (int) ($stats->total_sales ?? 0);
+        $totalRevenue = (float) ($stats->total_revenue ?? 0);
+
+        return [
+            'total_views' => $totalViews,
+            'total_sales' => $totalSales,
+            'conversion_rate' => $totalViews > 0 ? round(($totalSales / $totalViews) * 100, 2) : 0,
+            'total_revenue' => $totalRevenue,
+            'revenue_per_view' => $totalViews > 0 ? round(($totalRevenue / $totalViews) * 100, 2) : 0,
+        ];
+    }
+
+    /**
+     * Get top events by revenue
+     */
+    public function getTopEventsByRevenue(User $user, int $limit, Carbon $start, Carbon $end): Collection
+    {
+        $roleIds = $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return collect();
+        }
+
+        // Get event IDs that belong to user's roles
+        $eventIds = DB::table('event_role')
+            ->whereIn('role_id', $roleIds)
+            ->pluck('event_id')
+            ->unique();
+
+        if ($eventIds->isEmpty()) {
+            return collect();
+        }
+
+        return AnalyticsEventsDaily::select(
+            'event_id',
+            DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as view_count'),
+            DB::raw('SUM(sales_count) as sales_count'),
+            DB::raw('SUM(revenue) as revenue')
+        )
+            ->forEvents($eventIds)
+            ->inDateRange($start, $end)
+            ->groupBy('event_id')
+            ->having('revenue', '>', 0)
+            ->orderByDesc('revenue')
+            ->limit($limit)
+            ->with('event')
+            ->get()
+            ->filter(fn ($item) => $item->event !== null)
+            ->map(fn ($item) => [
+                'event' => $item->event,
+                'view_count' => (int) $item->view_count,
+                'sales_count' => (int) $item->sales_count,
+                'revenue' => (float) $item->revenue,
+                'conversion_rate' => $item->view_count > 0 ? round(($item->sales_count / $item->view_count) * 100, 2) : 0,
+            ]);
+    }
+
+    /**
+     * Get traffic sources breakdown
+     */
+    public function getTrafficSources(User $user, Carbon $start, Carbon $end, ?int $roleId = null): Collection
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return collect();
+        }
+
+        return AnalyticsReferrersDaily::select(
+            'source',
+            DB::raw('SUM(views) as view_count')
+        )
+            ->forRoles($roleIds)
+            ->inDateRange($start, $end)
+            ->groupBy('source')
+            ->orderByDesc('view_count')
+            ->get()
+            ->map(fn ($item) => [
+                'source' => $item->source,
+                'view_count' => (int) $item->view_count,
+            ]);
+    }
+
+    /**
+     * Get top referrer domains
+     */
+    public function getTopReferrerDomains(User $user, int $limit, Carbon $start, Carbon $end, ?int $roleId = null): Collection
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return collect();
+        }
+
+        return AnalyticsReferrersDaily::select(
+            'domain',
+            'source',
+            DB::raw('SUM(views) as view_count')
+        )
+            ->forRoles($roleIds)
+            ->inDateRange($start, $end)
+            ->whereNotNull('domain')
+            ->where('domain', '!=', '')
+            ->groupBy('domain', 'source')
+            ->orderByDesc('view_count')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($item) => [
+                'domain' => $item->domain,
+                'source' => $item->source,
+                'view_count' => (int) $item->view_count,
+            ]);
     }
 }
