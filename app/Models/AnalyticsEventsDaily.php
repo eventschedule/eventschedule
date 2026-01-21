@@ -18,6 +18,8 @@ class AnalyticsEventsDaily extends Model
         'mobile_views',
         'tablet_views',
         'unknown_views',
+        'sales_count',
+        'revenue',
     ];
 
     protected $casts = [
@@ -52,6 +54,21 @@ class AnalyticsEventsDaily extends Model
     }
 
     /**
+     * Increment sale count and revenue for an event/date combination using upsert
+     */
+    public static function incrementSale(int $eventId, float $amount): void
+    {
+        $date = now()->toDateString();
+
+        DB::statement(
+            'INSERT INTO analytics_events_daily (event_id, date, sales_count, revenue)
+             VALUES (?, ?, 1, ?)
+             ON DUPLICATE KEY UPDATE sales_count = sales_count + 1, revenue = revenue + ?',
+            [$eventId, $date, $amount, $amount]
+        );
+    }
+
+    /**
      * Scope to filter by event
      */
     public function scopeByEvent($query, int $eventId)
@@ -74,7 +91,7 @@ class AnalyticsEventsDaily extends Model
     {
         return $query->whereBetween('date', [
             $start->toDateString(),
-            $end->toDateString()
+            $end->toDateString(),
         ]);
     }
 

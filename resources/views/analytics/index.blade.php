@@ -52,6 +52,24 @@
             </div>
         </div>
 
+        {{-- Conversion Stats Cards --}}
+        @if ($conversionStats['total_sales'] > 0)
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.total_revenue') }}</div>
+                <div class="mt-2 text-3xl font-bold text-green-600 dark:text-green-400">{{ number_format($conversionStats['total_revenue'], 2) }}</div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.conversion_rate') }}</div>
+                <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $conversionStats['conversion_rate'] }}%</div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.revenue_per_view') }}</div>
+                <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($conversionStats['revenue_per_view'], 2) }}</div>
+            </div>
+        </div>
+        @endif
+
         @if ($totalViews > 0)
             {{-- Charts Row --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -102,6 +120,41 @@
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_associated_roles') }}</h3>
                     <div class="h-64">
                         <canvas id="appearancesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            {{-- Traffic Sources Row --}}
+            @if ($trafficSources->isNotEmpty())
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {{-- Traffic Sources Chart --}}
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.traffic_sources') }}</h3>
+                    <div class="h-64 flex items-center justify-center">
+                        <canvas id="trafficSourcesChart"></canvas>
+                    </div>
+                </div>
+
+                {{-- Top Referrers Chart --}}
+                @if ($topReferrers->isNotEmpty())
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_referrers') }}</h3>
+                    <div class="h-64">
+                        <canvas id="topReferrersChart"></canvas>
+                    </div>
+                </div>
+                @endif
+            </div>
+            @endif
+
+            {{-- Top Events by Revenue Chart --}}
+            @if ($topEventsByRevenue->isNotEmpty())
+            <div class="grid grid-cols-1 gap-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_events_by_revenue') }}</h3>
+                    <div class="h-64">
+                        <canvas id="topEventsByRevenueChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -187,7 +240,8 @@
                             color: gridColor
                         },
                         ticks: {
-                            color: textColor
+                            color: textColor,
+                            precision: 0
                         }
                     }
                 }
@@ -249,7 +303,8 @@
                             color: gridColor
                         },
                         ticks: {
-                            color: textColor
+                            color: textColor,
+                            precision: 0
                         }
                     },
                     y: {
@@ -301,7 +356,8 @@
                             color: gridColor
                         },
                         ticks: {
-                            color: textColor
+                            color: textColor,
+                            precision: 0
                         }
                     }
                 }
@@ -320,6 +376,133 @@
                     label: '{{ __("messages.views") }}',
                     data: {!! json_encode($topAppearances->pluck('view_count')->toArray()) !!},
                     backgroundColor: '#8B5CF6'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor,
+                            precision: 0
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor
+                        }
+                    }
+                }
+            }
+        });
+        @endif
+
+        @if ($trafficSources->isNotEmpty())
+        // Traffic Sources Chart
+        const trafficSourcesCtx = document.getElementById('trafficSourcesChart').getContext('2d');
+        const sourceLabels = {
+            'direct': '{{ __("messages.direct") }}',
+            'search': '{{ __("messages.search") }}',
+            'social': '{{ __("messages.social") }}',
+            'email': '{{ __("messages.email") }}',
+            'other': '{{ __("messages.other") }}'
+        };
+        const trafficData = {!! json_encode($trafficSources->toArray()) !!};
+        new Chart(trafficSourcesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: trafficData.map(item => sourceLabels[item.source] || item.source),
+                datasets: [{
+                    data: trafficData.map(item => item.view_count),
+                    backgroundColor: ['#4E81FA', '#10B981', '#F59E0B', '#EF4444', '#6B7280']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: textColor
+                        }
+                    }
+                }
+            }
+        });
+        @endif
+
+        @if ($topReferrers->isNotEmpty())
+        // Top Referrers Chart
+        const topReferrersCtx = document.getElementById('topReferrersChart').getContext('2d');
+        new Chart(topReferrersCtx, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($topReferrers->pluck('domain')->toArray()) !!},
+                datasets: [{
+                    label: '{{ __("messages.views") }}',
+                    data: {!! json_encode($topReferrers->pluck('view_count')->toArray()) !!},
+                    backgroundColor: '#F59E0B'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor,
+                            precision: 0
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor
+                        }
+                    }
+                }
+            }
+        });
+        @endif
+
+        @if ($topEventsByRevenue->isNotEmpty())
+        // Top Events by Revenue Chart
+        const topEventsByRevenueCtx = document.getElementById('topEventsByRevenueChart').getContext('2d');
+        new Chart(topEventsByRevenueCtx, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($topEventsByRevenue->pluck('event.name')->toArray()) !!},
+                datasets: [{
+                    label: '{{ __("messages.revenue") }}',
+                    data: {!! json_encode($topEventsByRevenue->pluck('revenue')->toArray()) !!},
+                    backgroundColor: '#10B981'
                 }]
             },
             options: {

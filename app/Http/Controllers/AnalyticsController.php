@@ -56,6 +56,18 @@ class AnalyticsController extends Controller
             }
         }
 
+        // Get conversion stats
+        $conversionStats = $analytics->getConversionStats($user, $start, $end, $selectedRoleId);
+
+        // Get top events by revenue
+        $topEventsByRevenue = $analytics->getTopEventsByRevenue($user, 10, $start, $end);
+
+        // Get traffic sources
+        $trafficSources = $analytics->getTrafficSources($user, $start, $end, $selectedRoleId);
+
+        // Get top referrer domains
+        $topReferrers = $analytics->getTopReferrerDomains($user, 10, $start, $end, $selectedRoleId);
+
         return view('analytics.index', compact(
             'roles',
             'selectedRoleId',
@@ -66,7 +78,11 @@ class AnalyticsController extends Controller
             'deviceBreakdown',
             'viewsBySchedule',
             'topAppearances',
-            'period'
+            'period',
+            'conversionStats',
+            'topEventsByRevenue',
+            'trafficSources',
+            'topReferrers'
         ));
     }
 }
