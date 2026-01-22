@@ -25,7 +25,7 @@
     <meta property="og:url" content="{{ str_replace('http://', 'https://', request()->url()) }}">
     <meta property="og:title" content="{{ $title ?? 'Event Schedule' }}">
     <meta property="og:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
-    <meta property="og:image" content="{{ config('app.url') }}/images/background.jpg">
+    <meta property="og:image" content="{{ config('app.url') }}/images/{{ $socialImage ?? 'background.jpg' }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:site_name" content="Event Schedule">
@@ -36,7 +36,7 @@
     <meta name="twitter:url" content="{{ str_replace('http://', 'https://', request()->url()) }}">
     <meta name="twitter:title" content="{{ $title ?? 'Event Schedule' }}">
     <meta name="twitter:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
-    <meta name="twitter:image" content="{{ config('app.url') }}/images/background.jpg">
+    <meta name="twitter:image" content="{{ config('app.url') }}/images/{{ $socialImage ?? 'background.jpg' }}">
     <meta name="twitter:image:alt" content="Event Schedule">
 
     <!-- Structured Data -->
