@@ -1,12 +1,12 @@
 <x-marketing-layout>
-    <x-slot name="title">Self-Hosting Terms of Service - Event Schedule</x-slot>
-    <x-slot name="description">Terms of Service for self-hosting Event Schedule - the rules and guidelines for running the open-source platform.</x-slot>
-    <x-slot name="keywords">event schedule self-hosting, self-hosted terms, open source terms, event platform self-host</x-slot>
+    <x-slot name="title">Selfhosting Terms of Service - Event Schedule</x-slot>
+    <x-slot name="description">Terms of Service for selfhosting Event Schedule - the rules and guidelines for running the open-source platform.</x-slot>
+    <x-slot name="keywords">event schedule selfhosting, selfhosted terms, open source terms, event platform selfhost</x-slot>
 
     <!-- Header -->
     <section class="py-16 bg-gray-50 dark:bg-gray-800/50">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Self-Hosting Terms of Service</h1>
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Selfhosting Terms of Service</h1>
             <p class="text-gray-600 dark:text-gray-400">Event Schedule LLC</p>
         </div>
     </section>
@@ -15,9 +15,9 @@
     <section class="py-16">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="prose prose-lg dark:prose-invert max-w-none">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Self-hosting Event Schedule</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Selfhosting Event Schedule</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    All features from the hosted app are included in the open-source code. By self-hosting Event Schedule, you accept the platform "as is" and "with all faults," assuming all risks associated with running and maintaining your own instance.
+                    All features from the hosted app are included in the open-source code. By selfhosting Event Schedule, you accept the platform "as is" and "with all faults," assuming all risks associated with running and maintaining your own instance.
                 </p>
 
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Reselling Restrictions</h2>
@@ -27,7 +27,7 @@
 
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Data Ownership</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-4">
-                    Self-hosters own their data and bear full responsibility for it. Event Schedule cannot access, modify, or remove self-hosted data.
+                    Selfhosters own their data and bear full responsibility for it. Event Schedule cannot access, modify, or remove selfhosted data.
                 </p>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
                     Users must handle any losses or damages affecting their clients independently.

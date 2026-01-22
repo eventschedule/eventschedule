@@ -175,7 +175,7 @@
                     Free and open source
                 </h2>
                 <p class="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-                    Event Schedule is AAL licensed. Self-host on your own server, contribute to the codebase, or just use it free forever.
+                    Event Schedule is AAL licensed. Selfhost on your own server, contribute to the codebase, or just use it free forever.
                 </p>
 
                 <div class="flex flex-wrap justify-center gap-4">
@@ -214,7 +214,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Free Forever</h3>
                     <p class="text-gray-600">
-                        Core features will always be free. No tricks, no bait-and-switch. If you can self-host, it's 100% free.
+                        Core features will always be free. No tricks, no bait-and-switch. If you can selfhost, it's 100% free.
                     </p>
                 </div>
 
@@ -226,7 +226,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Privacy First</h3>
                     <p class="text-gray-600">
-                        Your data is yours. We don't sell it, share it, or use it for advertising. Self-host for complete control.
+                        Your data is yours. We don't sell it, share it, or use it for advertising. Selfhost for complete control.
                     </p>
                 </div>
 
