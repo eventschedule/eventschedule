@@ -305,13 +305,13 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     Route::get('/{subdomain}/checkout/cancel/{sale_id}', [TicketController::class, 'cancel'])->name('checkout.cancel');
     Route::get('/{subdomain}/payment/success/{sale_id}', [TicketController::class, 'paymentUrlSuccess'])->name('payment_url.success');
     Route::get('/{subdomain}/payment/cancel/{sale_id}', [TicketController::class, 'paymentUrlCancel'])->name('payment_url.cancel');
-    Route::get('/{subdomain}', [RoleController::class, 'viewGuest'])->name('role.view_guest');
-    Route::get('/{subdomain}/{slug}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
+    Route::get('/{subdomain}', [RoleController::class, 'viewGuest'])->name('role.view_guest')->where('subdomain', '^(?!blog$).*');
+    Route::get('/{subdomain}/{slug}', [RoleController::class, 'viewGuest'])->name('event.view_guest')->where('subdomain', '^(?!blog$).*');
 }
 
-// Blog routes: use /blog path for local dev and selfhost users
+// Blog routes: use /blog path for local dev, testing, and selfhosted users
 // Hosted mode uses blog.eventschedule.com subdomain (defined above)
-if (config('app.env') == 'local' || ! config('app.hosted')) {
+if (config('app.is_testing') || config('app.env') == 'local' || ! config('app.hosted')) {
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 }

@@ -51,7 +51,7 @@
 - ⏳ **Ticket Reservations:** Allow attendees to reserve tickets with a configurable release time before purchase.
 - 📲 **QR Code Ticketing:** Generate and scan QR codes for easy and secure event check-ins.
 - 💻 **Online Events:** Use the platform to sell tickets to online events.
-- 💳 **Online Payments:** Accept secure online payments via [Invoice Ninja](https://www.invoiceninja.com) or payment links.
+- 💳 **Online Payments:** Accept secure online payments via [Stripe](https://stripe.com), [Invoice Ninja](https://www.invoiceninja.com), or payment links.
 
 ### Integrations
 - 📅 **Calendar Integration:** Enable attendees to add events directly to Google, Apple, or Microsoft calendars.
@@ -124,3 +124,12 @@ cp .env .env.dusk.local
 # Run all browser tests
 php artisan dusk
 ```
+
+## Contributing
+
+This project is developed using AI-assisted coding. Instead of traditional pull requests, we prefer contributions in the form of **AI prompts**—detailed descriptions of the changes you'd like to see.
+
+**How to contribute:**
+- Open a [GitHub Discussion](https://github.com/eventschedule/eventschedule/discussions) describing the feature or fix you'd like
+- We'll review and implement it using AI-assisted development
+- No coding experience required—just describe what you want in plain English

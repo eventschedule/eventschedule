@@ -176,7 +176,13 @@
                         Ticketing
                     </div>
                     <h3 class="text-2xl font-bold text-white mb-3">Sell tickets online</h3>
-                    <p class="text-gray-400 mb-6">Multiple ticket types, limits, reservations. Accept payments with Stripe. Zero platform fees.</p>
+                    <p class="text-gray-400 mb-4">Multiple ticket types, limits, reservations. Accept payments with Stripe. Zero platform fees.</p>
+                    <a href="{{ marketing_url('/ticketing') }}" class="inline-flex items-center text-fuchsia-300 hover:text-fuchsia-200 text-sm font-medium mb-4 transition-colors">
+                        Learn more
+                        <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
 
                     <div class="space-y-3 animate-float-delayed">
                         <div class="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/10">

@@ -152,3 +152,19 @@ if (! function_exists('marketing_domain')) {
         return preg_replace('#^https?://(www\.)?#', '', $url);
     }
 }
+
+if (! function_exists('blog_url')) {
+    /**
+     * Generate a URL for blog pages
+     * Returns /blog path for testing and selfhosted instances
+     * Returns blog.eventschedule.com for hosted production
+     */
+    function blog_url(string $path = ''): string
+    {
+        if (config('app.is_testing') || ! config('app.hosted')) {
+            return url('/blog'.$path);
+        }
+
+        return 'https://blog.eventschedule.com'.$path;
+    }
+}
