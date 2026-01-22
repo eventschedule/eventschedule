@@ -70,15 +70,28 @@
             background: white;
             border-radius: 50%;
         }
+
+        /* Parallax utility classes */
+        .parallax-blob {
+            will-change: transform;
+        }
+
+        /* Respect reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            .parallax-blob {
+                transform: none !important;
+                will-change: auto;
+            }
+        }
     </style>
 
     <!-- Hero Section -->
     <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->
         <div class="absolute inset-0">
-            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-fuchsia-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[150px]"></div>
+            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.5"></div>
+            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-fuchsia-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.5" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[150px] parallax-blob" data-parallax-speed="0.5"></div>
         </div>
 
         <!-- Grid -->
@@ -484,4 +497,35 @@
             </a>
         </div>
     </section>
+
+    <script {!! nonce_attr() !!}>
+    (function() {
+        // Respect reduced motion preference
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        const blobs = document.querySelectorAll('.parallax-blob');
+        let ticking = false;
+
+        function updateParallax() {
+            const scrollY = window.scrollY;
+
+            // Blobs move slower than scroll (creates depth - they appear further away)
+            blobs.forEach(el => {
+                const speed = parseFloat(el.dataset.parallaxSpeed) || 0.5;
+                el.style.transform = `translateY(${scrollY * speed}px)`;
+            });
+
+            ticking = false;
+        }
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(updateParallax);
+                ticking = true;
+            }
+        }, { passive: true });
+
+        updateParallax();
+    })();
+    </script>
 </x-marketing-layout>
