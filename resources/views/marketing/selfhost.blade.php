@@ -457,6 +457,111 @@
         </div>
     </section>
 
+    <!-- SaaS White-Label Section -->
+    <section class="bg-[#0a0a0f] py-24 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 via-violet-900/50 to-purple-900/50 border border-white/10 p-8 md:p-12">
+                <!-- Background decoration -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-violet-500/20 rounded-full blur-[100px]"></div>
+                <div class="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-[100px]"></div>
+
+                <div class="relative z-10 grid lg:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            Business Opportunity
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                            Build your own SaaS business
+                        </h2>
+                        <p class="text-xl text-gray-300 mb-6">
+                            Turn Event Schedule into your own white-label SaaS platform. Offer event scheduling as a service to your customers under your own brand.
+                        </p>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center gap-3 text-gray-300">
+                                <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Multi-tenant architecture built-in
+                            </li>
+                            <li class="flex items-center gap-3 text-gray-300">
+                                <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Stripe integration for subscriptions
+                            </li>
+                            <li class="flex items-center gap-3 text-gray-300">
+                                <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Full white-label customization
+                            </li>
+                            <li class="flex items-center gap-3 text-gray-300">
+                                <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Keep 100% of your revenue
+                            </li>
+                        </ul>
+                        <a href="{{ marketing_url('/saas') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 rounded-xl text-white font-medium transition-all shadow-lg shadow-violet-500/25">
+                            Learn about SaaS setup
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <!-- Visual mockup -->
+                    <div class="relative">
+                        <div class="bg-black/30 rounded-2xl border border-white/10 p-6">
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+                                    <span class="text-white font-bold text-sm">YB</span>
+                                </div>
+                                <div>
+                                    <div class="text-white font-semibold">Your Brand</div>
+                                    <div class="text-gray-400 text-sm">yourbrand.com</div>
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/5">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-gray-300 text-sm">Monthly subscribers</span>
+                                        <span class="text-emerald-400 text-sm">+12%</span>
+                                    </div>
+                                    <div class="text-2xl font-bold text-white">247</div>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/5">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-gray-300 text-sm">Monthly revenue</span>
+                                        <span class="text-emerald-400 text-sm">+8%</span>
+                                    </div>
+                                    <div class="text-2xl font-bold text-white">$4,940</div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div class="bg-violet-500/20 rounded-lg p-3 text-center">
+                                        <div class="text-white font-semibold">Free</div>
+                                        <div class="text-violet-300 text-xs">142 users</div>
+                                    </div>
+                                    <div class="bg-indigo-500/20 rounded-lg p-3 text-center">
+                                        <div class="text-white font-semibold">Pro</div>
+                                        <div class="text-indigo-300 text-xs">89 users</div>
+                                    </div>
+                                    <div class="bg-purple-500/20 rounded-lg p-3 text-center">
+                                        <div class="text-white font-semibold">Team</div>
+                                        <div class="text-purple-300 text-xs">16 users</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="relative bg-gradient-to-br from-emerald-600 to-teal-700 py-24 overflow-hidden">
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
