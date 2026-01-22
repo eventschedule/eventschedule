@@ -190,7 +190,7 @@
                       style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
                       class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
-                      {{ __('messages.subscribe') }}
+                      {{ __('messages.follow') }}
                     </button>
                   </a>
                   @endif
@@ -274,7 +274,7 @@
                     style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
                     class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                   >
-                    {{ __('messages.subscribe') }}
+                    {{ __('messages.follow') }}
                   </button>
                 </a>
                 @endif
