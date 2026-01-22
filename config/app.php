@@ -34,7 +34,6 @@ return [
     'hosted' => (bool) env('IS_HOSTED', false),
     'report_errors' => (bool) env('REPORT_ERRORS', false),
     'is_testing' => (bool) env('APP_TESTING', false),
-    'enable_community' => (bool) env('ENABLE_COMMUNITY', false),
 
     'is_nexus' => (bool) env('IS_NEXUS', false),
     'logo_dark' => env('APP_LOGO_DARK', '/images/dark_logo.png'),

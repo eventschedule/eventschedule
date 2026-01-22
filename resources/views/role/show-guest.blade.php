@@ -142,7 +142,7 @@
               </div>
               @endif
                     
-              @if (config('app.hosted') || config('app.is_testing') || config('app.enable_community'))
+              @if (config('app.hosted') || config('app.is_testing'))
               @if (auth()->user() && auth()->user()->isMember($role->subdomain))
               <a
                 href="{{ config('app.url') . route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false) }}"

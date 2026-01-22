@@ -324,25 +324,32 @@
 
     @if (! request()->embed && $role->showBranding())
     <footer class="bg-gray-800">
-      <div
-        class="container mx-auto flex flex-row justify-center items-center py-5 px-5"
-      >
-        <p class="text-[#F5F9FE] text-base text-center flex items-center justify-center gap-2">
-            <!-- Per the AAL license, please do not remove the link to Event Schedule -->
-            @if (config('app.is_nexus'))
+      <div class="container mx-auto relative flex flex-row justify-center items-center py-5 px-5">
+        <!-- Per the AAL license, please do not remove the link to Event Schedule -->
+        @if (config('app.is_nexus'))
+            <p class="text-[#F5F9FE] text-base text-center flex items-center justify-center gap-2 {{ $isRtl ? 'flex-row-reverse' : '' }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
+                <span>{!! str_replace(':link', '<a href="' . marketing_url() . '" target="_blank" class="text-white hover:underline">' . marketing_domain() . '</a>',  __('messages.try_event_schedule')) !!}</span>
+                <span>•</span>
+                <span>{!! __('messages.supported_by', ['link' => '<a href="https://invoiceninja.com" target="_blank" class="text-white hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>']) !!}</span>
+            </p>
+        @else
+            <p class="text-[#F5F9FE] text-base text-center" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
                 {!! str_replace(':link', '<a href="' . marketing_url() . '" target="_blank" class="text-white hover:underline">' . marketing_domain() . '</a>',  __('messages.try_event_schedule')) !!}
-                •
-                {!! __('messages.supported_by', ['link' => '<a href="https://invoiceninja.com" target="_blank" class="text-white hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>']) !!}
-            @else
-                {!! str_replace(':link', '<a href="' . marketing_url() . '" target="_blank" class="text-white hover:underline">' . marketing_domain() . '</a>',  __('messages.try_event_schedule')) !!}
-                •
-                <a href="https://eventschedule.com" target="_blank" title="Powered by Event Schedule">
-                    <img src="{{ url('/images/favicon.png') }}" alt="Event Schedule" class="h-5 w-5 inline-block">
-                </a>
-            @endif
-        </p>
+            </p>
+            <a href="https://eventschedule.com" target="_blank" title="Powered by Event Schedule" class="absolute {{ $isRtl ? 'left-5' : 'right-5' }} top-1/2 -translate-y-1/2">
+                <img src="{{ url('/images/favicon.png') }}" alt="Event Schedule" class="h-5 w-5">
+            </a>
+        @endif
       </div>
     </footer>
+    @endif
+
+    @if (! request()->embed && config('app.hosted') && ! config('app.is_nexus'))
+    <div class="flex justify-{{ $isRtl ? 'start' : 'end' }} p-4">
+        <a href="https://eventschedule.com" target="_blank" title="Powered by Event Schedule" class="block rounded-full bg-gray-400 p-[1px]">
+            <img src="{{ url('/images/favicon.png') }}" alt="Event Schedule" class="h-6 w-6 rounded-full">
+        </a>
+    </div>
     @endif
 
 </x-app-layout>
