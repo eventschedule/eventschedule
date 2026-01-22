@@ -576,9 +576,6 @@ stripe trigger customer.subscription.created</code></pre>
                                 <li><span class="font-semibold text-white">PCI Compliance:</span> Using Stripe Checkout and Elements keeps you out of PCI scope—card data never touches your server.</li>
                             </ol>
                         </section>
-
-                        <!-- Navigation -->
-                        @include('marketing.docs.partials.navigation', ['prevDoc' => $docs[1], 'nextDoc' => $docs[3]])
                     </div>
                 </div>
             </div>

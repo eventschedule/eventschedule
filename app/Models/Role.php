@@ -2,21 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Str;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
+use App\Notifications\VerifyEmail as CustomVerifyEmail;
+use App\Traits\RoleBillable;
+use App\Utils\CssUtils;
+use App\Utils\GeminiUtils;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
-use App\Notifications\VerifyEmail as CustomVerifyEmail;
-use App\Utils\GeminiUtils;
-use App\Utils\CssUtils;
-use App\Traits\RoleBillable;
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class Role extends Model implements MustVerifyEmail
 {
-    use Notifiable, MustVerifyEmailTrait, RoleBillable;
+    use MustVerifyEmailTrait, Notifiable, RoleBillable;
 
     protected $fillable = [
         'type',
@@ -72,6 +72,7 @@ class Role extends Model implements MustVerifyEmail
         'last_notified_request_count',
         'email_settings',
         'custom_css',
+        'graphic_settings',
     ];
 
     /**
@@ -113,11 +114,11 @@ class Role extends Model implements MustVerifyEmail
 
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
             $model->description_html_en = MarkdownUtils::convertToHtml($model->description_en);
-            
+
             if (isset($model->custom_css)) {
                 $model->custom_css = CssUtils::sanitizeCss($model->custom_css);
             }
-            
+
             if ($model->accent_color == '#ffffff') {
                 $model->accent_color = '#000000';
             }
@@ -126,20 +127,20 @@ class Role extends Model implements MustVerifyEmail
 
             if (config('services.google.backend') && $address && $address != $model->geo_address) {
                 $urlAddress = urlencode($address);
-                $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$urlAddress}&key=" . config('services.google.backend');
+                $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$urlAddress}&key=".config('services.google.backend');
                 $response = file_get_contents($url);
                 $responseData = json_decode($response, true);
 
                 if ($responseData['status'] == 'OK') {
                     $latitude = $responseData['results'][0]['geometry']['location']['lat'];
                     $longitude = $responseData['results'][0]['geometry']['location']['lng'];
-                            
+
                     $model->formatted_address = $responseData['results'][0]['formatted_address'];
                     $model->google_place_id = $responseData['results'][0]['place_id'];
                     $model->geo_address = $address;
                     $model->geo_lat = $latitude;
                     $model->geo_lon = $longitude;
-                }                
+                }
             }
         });
 
@@ -199,48 +200,49 @@ class Role extends Model implements MustVerifyEmail
     public function events()
     {
         return $this->belongsToMany(Event::class)
-                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id')
-                    ->using(EventRole::class);
+            ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id')
+            ->using(EventRole::class);
     }
 
     public function users()
     {
         return $this->belongsToMany(User::class)
-                    ->withTimestamps()
-                    ->withPivot('level', 'dates_unavailable')
-                    ->orderBy('name');
+            ->withTimestamps()
+            ->withPivot('level', 'dates_unavailable')
+            ->orderBy('name');
     }
+
     public function owner()
     {
         return $this->members()
-                    ->where('level', '=', 'owner')
-                    ->first();
+            ->where('level', '=', 'owner')
+            ->first();
     }
 
     public function members()
     {
-        return $this->belongsToMany(User::class)                    
-                    ->withTimestamps()
-                    ->withPivot('level', 'dates_unavailable')
-                    ->where('level', '!=', 'follower')
-                    ->orderBy('name');
-    }    
+        return $this->belongsToMany(User::class)
+            ->withTimestamps()
+            ->withPivot('level', 'dates_unavailable')
+            ->where('level', '!=', 'follower')
+            ->orderBy('name');
+    }
 
     public function followers()
     {
-        return $this->belongsToMany(User::class)                    
-                    ->withTimestamps()
-                    ->withPivot('level')
-                    ->where('level', 'follower')
-                    ->orderBy('pivot_created_at', 'desc');
-    }    
+        return $this->belongsToMany(User::class)
+            ->withTimestamps()
+            ->withPivot('level')
+            ->where('level', 'follower')
+            ->orderBy('pivot_created_at', 'desc');
+    }
 
     public function venueEvents()
     {
         return $this->belongsToMany(Event::class, 'event_role', 'role_id', 'event_id')
-                    ->where('roles.type', 'venue');
+            ->where('roles.type', 'venue');
     }
-    
+
     public function scopeType($query, $type)
     {
         return $query->where('roles.type', $type);
@@ -250,7 +252,7 @@ class Role extends Model implements MustVerifyEmail
     {
         return $query->where('subdomain', $subdomain);
     }
- 
+
     public function bestAddress()
     {
         if ($this->formatted_address) {
@@ -294,14 +296,15 @@ class Role extends Model implements MustVerifyEmail
         $address = $translate ? $this->translatedAddress1() : $this->address1;
 
         if ($name && $city) {
-            return $name . ' | ' . $city;
+            return $name.' | '.$city;
         }
         if ($name && $address) {
-            return $name . ' | ' . $address;
+            return $name.' | '.$address;
         }
         if ($address) {
             return $address;
         }
+
         return $city ?: '';
     }
 
@@ -310,23 +313,23 @@ class Role extends Model implements MustVerifyEmail
         $str = '';
 
         if ($this->translatedAddress1()) {
-            $str .= $this->translatedAddress1() . ', ';
+            $str .= $this->translatedAddress1().', ';
         }
 
         if ($this->translatedAddress2()) {
-            $str .= $this->translatedAddress2() . ', ';
+            $str .= $this->translatedAddress2().', ';
         }
 
         if ($this->translatedCity()) {
-            $str .= $this->translatedCity() . ', ';
+            $str .= $this->translatedCity().', ';
         }
 
         if ($this->translatedState()) {
-            $str .= $this->translatedState() . ', ';
+            $str .= $this->translatedState().', ';
         }
 
         if ($this->postal_code) {
-            $str .= $this->postal_code . ', ';
+            $str .= $this->postal_code.', ';
         }
 
         if ($str && $this->country_code) {
@@ -368,9 +371,9 @@ class Role extends Model implements MustVerifyEmail
         }
 
         if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $value;
-        } else if (config('filesystems.default') == 'local') {
-            return url('/storage/' . $value);
+            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$value;
+        } elseif (config('filesystems.default') == 'local') {
+            return url('/storage/'.$value);
         } else {
             return $value;
         }
@@ -383,9 +386,9 @@ class Role extends Model implements MustVerifyEmail
         }
 
         if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $value;
-        } else if (config('filesystems.default') == 'local') {
-            return url('/storage/' . $value);
+            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$value;
+        } elseif (config('filesystems.default') == 'local') {
+            return url('/storage/'.$value);
         } else {
             return $value;
         }
@@ -398,19 +401,19 @@ class Role extends Model implements MustVerifyEmail
         }
 
         if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $value;
-        } else if (config('filesystems.default') == 'local') {
-            return url('/storage/' . $value);
+            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$value;
+        } elseif (config('filesystems.default') == 'local') {
+            return url('/storage/'.$value);
         } else {
             return $value;
         }
     }
-    
+
     public static function cleanSubdomain($name)
     {
         $subdomain = Str::slug($name);
 
-        if (strlen($subdomain) <= 2) {            
+        if (strlen($subdomain) <= 2) {
             $translated = GeminiUtils::translate($name, 'auto', 'en');
 
             if ($translated && strlen($translated) > 2) {
@@ -475,7 +478,7 @@ class Role extends Model implements MustVerifyEmail
         return $subdomain;
     }
 
-    public static function generateSubdomain($name = "")
+    public static function generateSubdomain($name = '')
     {
         if (! $name) {
             $name = strtolower(\Str::random(8));
@@ -486,17 +489,17 @@ class Role extends Model implements MustVerifyEmail
         // Check variations of the subdomain
         $parts = explode('-', $subdomain);
         $variations = [];
-        
+
         // Build variations from left to right (live, live-music, live-music-shop)
         $current = '';
         foreach ($parts as $i => $part) {
-            $current = $current ? $current . '-' . $part : $part;
+            $current = $current ? $current.'-'.$part : $part;
             $variations[] = $current;
         }
 
         // Check each variation in order - use the first available one
         foreach ($variations as $variation) {
-            if (!self::where('subdomain', $variation)->exists()) {
+            if (! self::where('subdomain', $variation)->exists()) {
                 $subdomain = $variation;
                 break;
             }
@@ -507,7 +510,7 @@ class Role extends Model implements MustVerifyEmail
         $count = 1;
 
         while (self::where('subdomain', $subdomain)->exists()) {
-            $subdomain = $originalSubdomain . $count;
+            $subdomain = $originalSubdomain.$count;
             $count++;
         }
 
@@ -608,8 +611,8 @@ class Role extends Model implements MustVerifyEmail
     {
         $url = $this->getGuestUrl();
         $youtubeUrl = $this->getFirstVideoUrl();
-        
-        $data = $this->toArray();   
+
+        $data = $this->toArray();
         $data['id'] = UrlUtils::encodeId($data['id']);
         $data['user_id'] = UrlUtils::encodeId($data['user_id']);
         $data['url'] = $url;
@@ -641,13 +644,18 @@ class Role extends Model implements MustVerifyEmail
             $data->postal_code = $this->postal_code;
             $data->country_code = $this->country_code;
         }
-                
+
         return $data;
     }
 
     public function isPro()
     {
         if (! config('app.hosted')) {
+            return true;
+        }
+
+        // Admins get all features
+        if (auth()->check() && auth()->user()->isAdmin()) {
             return true;
         }
 
@@ -663,6 +671,22 @@ class Role extends Model implements MustVerifyEmail
 
         // Legacy: Check the plan_expires field
         return $this->plan_expires >= now()->format('Y-m-d') && $this->plan_type == 'pro';
+    }
+
+    public function isEnterprise()
+    {
+        // Selfhosted deployments get all features
+        if (! config('app.hosted')) {
+            return true;
+        }
+
+        // Admins get all features
+        if (auth()->check() && auth()->user()->isAdmin()) {
+            return true;
+        }
+
+        // Check the plan_type field
+        return $this->plan_expires >= now()->format('Y-m-d') && $this->plan_type === 'enterprise';
     }
 
     public function isWhiteLabeled()
@@ -728,7 +752,7 @@ class Role extends Model implements MustVerifyEmail
         }
 
         return $value;
-    }   
+    }
 
     public function translatedAddress1()
     {
@@ -739,7 +763,7 @@ class Role extends Model implements MustVerifyEmail
         }
 
         return $value;
-    }   
+    }
 
     public function translatedAddress2()
     {
@@ -762,7 +786,7 @@ class Role extends Model implements MustVerifyEmail
 
         return $value;
     }
-    
+
     public function translatedState()
     {
         $value = $this->state;
@@ -795,17 +819,18 @@ class Role extends Model implements MustVerifyEmail
      */
     public function getImportConfigAttribute($value)
     {
-        if (!$value) {
+        if (! $value) {
             return [
                 'urls' => [],
-                'cities' => []
+                'cities' => [],
             ];
         }
-        
+
         $config = json_decode($value, true);
+
         return $config ?: [
             'urls' => [],
-            'cities' => []
+            'cities' => [],
         ];
     }
 
@@ -826,12 +851,60 @@ class Role extends Model implements MustVerifyEmail
      */
     public function hasImportConfig()
     {
-        if (!$this->isCurator()) {
+        if (! $this->isCurator()) {
             return false;
         }
-        
+
         $config = $this->import_config;
-        return !empty($config['urls']) || !empty($config['cities']);
+
+        return ! empty($config['urls']) || ! empty($config['cities']);
+    }
+
+    /**
+     * Get the graphic settings as an array
+     */
+    public function getGraphicSettingsAttribute($value)
+    {
+        $defaults = [
+            'enabled' => false,
+            'frequency' => 'weekly',
+            'ai_prompt' => '',
+            'link_type' => 'schedule',
+            'layout' => 'grid',
+            'send_day' => 1,
+            'send_hour' => 9,
+            'last_sent_at' => null,
+        ];
+
+        if (! $value) {
+            return $defaults;
+        }
+
+        $config = json_decode($value, true);
+
+        return array_merge($defaults, $config ?: []);
+    }
+
+    /**
+     * Set the graphic settings from an array
+     */
+    public function setGraphicSettingsAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['graphic_settings'] = json_encode($value);
+        } else {
+            $this->attributes['graphic_settings'] = $value;
+        }
+    }
+
+    /**
+     * Check if graphic email is enabled and configured
+     */
+    public function hasGraphicEmailEnabled()
+    {
+        $settings = $this->graphic_settings;
+
+        return ! empty($settings['enabled']);
     }
 
     /**
@@ -848,7 +921,7 @@ class Role extends Model implements MustVerifyEmail
      */
     public function hasGoogleCalendarIntegration()
     {
-        return !is_null($this->google_calendar_id);
+        return ! is_null($this->google_calendar_id);
     }
 
     /**
@@ -880,7 +953,7 @@ class Role extends Model implements MustVerifyEmail
      */
     public function getSyncDirectionLabel()
     {
-        return match($this->sync_direction) {
+        return match ($this->sync_direction) {
             'to' => 'To Google Calendar',
             'from' => 'From Google Calendar',
             'both' => 'Bidirectional Sync',
@@ -893,8 +966,8 @@ class Role extends Model implements MustVerifyEmail
      */
     public function hasActiveWebhook()
     {
-        return $this->google_webhook_id && 
-               $this->google_webhook_expires_at && 
+        return $this->google_webhook_id &&
+               $this->google_webhook_expires_at &&
                $this->google_webhook_expires_at->isFuture();
     }
 
@@ -903,13 +976,14 @@ class Role extends Model implements MustVerifyEmail
      */
     public function getEmailSettingsAttribute($value)
     {
-        if (!$value) {
+        if (! $value) {
             return null;
         }
 
         try {
             $decrypted = \Illuminate\Support\Facades\Crypt::decryptString($value);
             $decoded = json_decode($decrypted, true);
+
             return is_array($decoded) ? $decoded : null;
         } catch (\Exception $e) {
             return null;
@@ -923,17 +997,19 @@ class Role extends Model implements MustVerifyEmail
     {
         if (is_null($value) || (is_array($value) && empty(array_filter($value)))) {
             $this->attributes['email_settings'] = null;
+
             return;
         }
 
         if (is_array($value)) {
             // Remove empty values
-            $value = array_filter($value, function($v) {
+            $value = array_filter($value, function ($v) {
                 return $v !== null && $v !== '';
             });
 
             if (empty($value)) {
                 $this->attributes['email_settings'] = null;
+
                 return;
             }
 
@@ -951,7 +1027,8 @@ class Role extends Model implements MustVerifyEmail
     public function hasEmailSettings(): bool
     {
         $settings = $this->getEmailSettings();
-        return !empty($settings) && !empty($settings['host']) && !empty($settings['username']);
+
+        return ! empty($settings) && ! empty($settings['host']) && ! empty($settings['username']);
     }
 
     /**
@@ -961,13 +1038,14 @@ class Role extends Model implements MustVerifyEmail
     public function getEmailSettings(): array
     {
         $rawValue = $this->attributes['email_settings'] ?? null;
-        if (!$rawValue) {
+        if (! $rawValue) {
             return [];
         }
 
         try {
             $decrypted = \Illuminate\Support\Facades\Crypt::decryptString($rawValue);
             $decoded = json_decode($decrypted, true);
+
             return is_array($decoded) ? $decoded : [];
         } catch (\Exception $e) {
             return [];

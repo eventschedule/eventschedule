@@ -5,7 +5,7 @@
         </h2>
 
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            <x-link href="{{ route('api.documentation') }}" target="_blank">
+            <x-link href="{{ route('marketing.docs.api') }}" target="_blank">
                 {{ __('messages.view_api_documentation') }}
             </x-link>
         </p>

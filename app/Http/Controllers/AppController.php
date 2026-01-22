@@ -111,6 +111,11 @@ class AppController extends Controller
             return; // Already created today's post
         }
 
+        // Only create posts ~70% of days for more natural posting pattern
+        if (rand(1, 100) > 70) {
+            return;
+        }
+
         // Get recent titles for context
         $recentTitles = BlogPost::orderBy('created_at', 'desc')
             ->limit(15)
@@ -131,7 +136,8 @@ class AppController extends Controller
             return;
         }
 
-        // Create the blog post
+        // Create the blog post with randomized timestamp (up to 6 hours earlier)
+        $randomSeconds = rand(0, 6 * 60 * 60);
         BlogPost::create([
             'title' => $postData['title'],
             'content' => $postData['content'],
@@ -141,7 +147,7 @@ class AppController extends Controller
             'meta_description' => $postData['meta_description'] ?? null,
             'featured_image' => $postData['featured_image'] ?? null,
             'is_published' => true,
-            'published_at' => now(),
+            'published_at' => now()->subSeconds($randomSeconds),
         ]);
     }
 }

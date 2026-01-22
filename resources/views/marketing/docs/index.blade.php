@@ -10,11 +10,36 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+        .text-gradient-api {
+            background: linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
         @keyframes pulse-slow {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes float-delayed {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        @keyframes code-scroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-50%); }
+        }
+        @keyframes cursor-blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
         .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-float-delayed { animation: float-delayed 5s ease-in-out infinite; animation-delay: 1s; }
+        .animate-cursor { animation: cursor-blink 1s infinite; }
         .doc-card {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -25,6 +50,21 @@
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
+        }
+        .api-banner {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .api-banner:hover {
+            transform: scale(1.01);
+        }
+        .api-banner:hover .api-arrow {
+            transform: translateX(8px);
+        }
+        .api-arrow {
+            transition: transform 0.3s ease;
+        }
+        .code-block {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
         }
     </style>
 
@@ -58,7 +98,7 @@
     </section>
 
     <!-- Documentation Cards -->
-    <section class="bg-[#0a0a0f] py-16 pb-32">
+    <section class="bg-[#0a0a0f] py-16">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-2 gap-6">
                 @foreach($docs as $doc)
@@ -115,7 +155,125 @@
                     </a>
                 @endforeach
             </div>
+        </div>
+    </section>
 
+    <!-- API Reference Banner -->
+    <section class="bg-[#0a0a0f] py-12 pb-24">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <a href="{{ route('marketing.docs.api') }}" class="api-banner group block relative overflow-hidden rounded-3xl">
+                <!-- Gradient background -->
+                <div class="absolute inset-0 bg-gradient-to-r from-emerald-900 via-teal-900 to-cyan-900"></div>
+
+                <!-- Animated glow effects -->
+                <div class="absolute inset-0 overflow-hidden">
+                    <div class="absolute -top-24 -left-24 w-96 h-96 bg-emerald-500/30 rounded-full blur-[100px] animate-pulse-slow"></div>
+                    <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-cyan-500/30 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-teal-500/20 rounded-full blur-[80px] animate-pulse-slow" style="animation-delay: 0.75s;"></div>
+                </div>
+
+                <!-- Grid pattern overlay -->
+                <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+
+                <!-- Border glow -->
+                <div class="absolute inset-0 rounded-3xl border border-emerald-400/20 group-hover:border-emerald-400/40 transition-colors duration-500"></div>
+
+                <!-- Content -->
+                <div class="relative z-10 p-8 md:p-12 flex flex-col lg:flex-row items-center gap-8">
+                    <!-- Left side: Text content -->
+                    <div class="flex-1 text-center lg:text-left">
+                        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/20 border border-emerald-400/30 mb-6">
+                            <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                            <span class="text-sm font-medium text-emerald-300">REST API</span>
+                        </div>
+
+                        <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+                            API <span class="text-gradient-api">Reference</span>
+                        </h2>
+
+                        <p class="text-lg text-gray-300 mb-6 max-w-xl">
+                            Build powerful integrations with our REST API. Create events, manage schedules, and automate your workflow programmatically.
+                        </p>
+
+                        <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-6">
+                            <div class="flex items-center gap-2 text-sm text-gray-400">
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                JSON responses
+                            </div>
+                            <div class="flex items-center gap-2 text-sm text-gray-400">
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                API key auth
+                            </div>
+                            <div class="flex items-center gap-2 text-sm text-gray-400">
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Full CRUD
+                            </div>
+                        </div>
+
+                        <div class="inline-flex items-center gap-3 text-emerald-400 font-semibold text-lg group-hover:text-emerald-300 transition-colors">
+                            Explore the API
+                            <svg class="w-6 h-6 api-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Right side: Code mockups -->
+                    <div class="flex-shrink-0 hidden md:block">
+                        <div class="relative">
+                            <!-- Main terminal window -->
+                            <div class="animate-float bg-black/60 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl shadow-emerald-500/10 overflow-hidden w-80">
+                                <!-- Terminal header -->
+                                <div class="flex items-center gap-2 px-4 py-3 bg-white/5 border-b border-white/10">
+                                    <div class="flex gap-1.5">
+                                        <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                                        <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                                        <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-500 ml-2 code-block">api-request.sh</span>
+                                </div>
+                                <!-- Terminal content -->
+                                <div class="p-4 code-block text-sm">
+                                    <div class="text-gray-500 mb-2"># Create an event</div>
+                                    <div class="mb-3">
+                                        <span class="text-emerald-400">POST</span>
+                                        <span class="text-gray-300"> /api/events/demo</span>
+                                    </div>
+                                    <div class="text-gray-500 mb-1"># Response</div>
+                                    <div class="text-gray-400">{</div>
+                                    <div class="text-gray-400 pl-4">"<span class="text-cyan-400">id</span>": <span class="text-amber-400">42</span>,</div>
+                                    <div class="text-gray-400 pl-4">"<span class="text-cyan-400">name</span>": "<span class="text-emerald-300">Jazz Night</span>",</div>
+                                    <div class="text-gray-400 pl-4">"<span class="text-cyan-400">status</span>": "<span class="text-emerald-300">created</span>"</div>
+                                    <div class="text-gray-400">}</div>
+                                    <div class="mt-2 flex items-center">
+                                        <span class="text-emerald-400">$</span>
+                                        <span class="w-2 h-4 bg-emerald-400 ml-1 animate-cursor"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Floating endpoint badges -->
+                            <div class="absolute -top-4 -right-4 animate-float-delayed">
+                                <div class="bg-emerald-500/20 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-emerald-400/30 shadow-lg">
+                                    <span class="code-block text-xs text-emerald-300">GET /schedules</span>
+                                </div>
+                            </div>
+
+                            <div class="absolute -bottom-2 -left-4 animate-float" style="animation-delay: 2s;">
+                                <div class="bg-cyan-500/20 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-cyan-400/30 shadow-lg">
+                                    <span class="code-block text-xs text-cyan-300">POST /sales</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
         </div>
     </section>
 

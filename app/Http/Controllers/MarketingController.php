@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 class MarketingController extends Controller
 {
     /**
@@ -53,6 +51,70 @@ class MarketingController extends Controller
         return view('marketing.ticketing', [
             'ticketFeatures' => $this->getTicketFeatures(),
         ]);
+    }
+
+    /**
+     * AI features page
+     */
+    public function ai()
+    {
+        return view('marketing.ai');
+    }
+
+    /**
+     * Calendar Sync page
+     */
+    public function calendarSync()
+    {
+        return view('marketing.calendar-sync');
+    }
+
+    /**
+     * Analytics page
+     */
+    public function analytics()
+    {
+        return view('marketing.analytics');
+    }
+
+    /**
+     * Custom Fields page
+     */
+    public function customFields()
+    {
+        return view('marketing.custom-fields');
+    }
+
+    /**
+     * Team Scheduling page
+     */
+    public function teamScheduling()
+    {
+        return view('marketing.team-scheduling');
+    }
+
+    /**
+     * Sub-schedules page
+     */
+    public function subSchedules()
+    {
+        return view('marketing.sub-schedules');
+    }
+
+    /**
+     * Online Events page
+     */
+    public function onlineEvents()
+    {
+        return view('marketing.online-events');
+    }
+
+    /**
+     * Open Source & API page
+     */
+    public function openSource()
+    {
+        return view('marketing.open-source');
     }
 
     /**
@@ -154,6 +216,17 @@ class MarketingController extends Controller
         return view('marketing.docs.installation', [
             'docs' => $this->getDocsList(),
             'currentDoc' => 'installation',
+        ]);
+    }
+
+    /**
+     * API documentation page
+     */
+    public function docsApi()
+    {
+        return view('marketing.docs.api', [
+            'docs' => $this->getDocsList(),
+            'currentDoc' => 'api',
         ]);
     }
 

@@ -43,6 +43,8 @@
 - 🔁 **Recurring Events:** Schedule recurring events which occur on a regular basis.
 - 📋 **Sub-schedules:** Organize events into multiple sub-schedules for better categorization and management.
 - 🔍 **Search:** Powerful search functionality to help users find specific events or content across your schedule.
+- 📥 **Guest Event Submissions:** Allow community members to propose events directly to your schedule for review.
+- 📋 **Event Cloning:** Duplicate events with all ticket configurations preserved.
 
 ### Ticketing & Payments
 - 🎟️ **Sell Tickets Online:** Offer ticket sales directly through the platform with a seamless checkout process.
@@ -57,6 +59,8 @@
 - 📅 **Calendar Integration:** Enable attendees to add events directly to Google, Apple, or Microsoft calendars.
 - 🔄 **Google Calendar Sync:** Automatically sync events between Event Schedule and Google Calendar, with real-time updates via webhooks.
 - 🔗 **Third-Party Event Import:** Automatically import events from third-party websites to expand your calendar offerings.
+- 🖥️ **Website Embedding:** Embed your schedule on any website using a simple iframe widget.
+- 🔐 **Social Login:** Sign in quickly using Google or Facebook accounts.
 
 ### AI-Powered
 - 🤖 **AI Event Parsing:** Automatically extract event details using AI to quickly create new events.
@@ -66,10 +70,14 @@
 - 👥 **Team Scheduling:** Collaborate with team members to manage availability and coordinate event schedules.
 - 🎨 **Event Graphics Generator:** Create beautiful graphics of your upcoming events with flyers, QR codes, and event details for social media and marketing.
 - 📊 **Built-in Analytics:** Track page views with an integrated analytics dashboard showing views over time, device breakdown, and top events—no external services required.
+- 👁️ **Follow Schedules:** Users can follow schedules to stay updated on new events.
+- 📧 **Email Notifications:** Automatic ticket confirmation emails sent to buyers.
 
 ### Customization
 - 📝 **Custom Fields:** Collect additional information from ticket buyers with customizable form fields at both event and ticket levels. Supports text, dropdown, date, and yes/no field types.
 - 🎨 **Custom CSS Styling:** Personalize your schedule's appearance with custom CSS to match your brand identity.
+- 🌐 **Multi-Language Interface:** App available in 9 languages (English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic).
+- 🎨 **Profile Themes:** Customize header images, background gradients, and fonts.
 
 ### Developer Tools
 - 🔌 **REST API:** Access and manage your events programmatically through a REST API.

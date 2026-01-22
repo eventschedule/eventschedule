@@ -379,9 +379,6 @@
                                 <li><span class="font-semibold text-white">Token Refresh:</span> Access tokens are automatically refreshed when needed</li>
                             </ol>
                         </section>
-
-                        <!-- Navigation -->
-                        @include('marketing.docs.partials.navigation', ['prevDoc' => $docs[2], 'nextDoc' => null])
                     </div>
                 </div>
             </div>
