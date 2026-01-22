@@ -4,11 +4,13 @@
             {{ __('API Settings') }}
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            <x-link href="{{ route('marketing.docs.api') }}" target="_blank">
-                {{ __('messages.view_api_documentation') }}
-            </x-link>
-        </p>
+        @if(Route::has('marketing.docs.api'))
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                <x-link href="{{ route('marketing.docs.api') }}" target="_blank">
+                    {{ __('messages.view_api_documentation') }}
+                </x-link>
+            </p>
+        @endif
     </header>
 
     <form method="post" action="{{ route('api-settings.update') }}" class="mt-6 space-y-6">
