@@ -727,9 +727,9 @@ class RoleController extends Controller
             ->first();
         $roleUser->delete();
 
-        // If user removed themselves, redirect to dashboard instead of team page
+        // If user removed themselves, redirect to home instead of team page
         if ($userId == auth()->id()) {
-            return redirect(route('dashboard'))
+            return redirect(route('home'))
                 ->with('message', __('messages.removed_member'));
         }
 
