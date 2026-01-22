@@ -20,7 +20,7 @@ use App\Http\Controllers\SubscriptionWebhookController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 
-if (config('app.hosted')) {
+if (config('app.hosted') && ! config('app.is_testing')) {
     if (config('app.env') != 'local') {
         Route::domain('blog.eventschedule.com')->group(function () {
             Route::get('/', [BlogController::class, 'index'])->name('blog.index');
@@ -267,7 +267,7 @@ if (config('app.is_nexus')) {
     Route::get('/saas', fn () => redirect()->route('home'));
 }
 
-if (config('app.hosted')) {
+if (config('app.hosted') && ! config('app.is_testing')) {
     Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     });
