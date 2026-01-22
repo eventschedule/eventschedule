@@ -20,11 +20,6 @@
                     All features from the hosted app are included in the open-source code. By selfhosting Event Schedule, you accept the platform "as is" and "with all faults," assuming all risks associated with running and maintaining your own instance.
                 </p>
 
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Reselling Restrictions</h2>
-                <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    The platform cannot be resold, integrated with third-party software for commercial purposes, white-labeled, or remarketed without a formal reseller agreement from Event Schedule LLC. For reseller inquiries, contact: <a href="mailto:contact@eventschedule.com" class="text-blue-600 dark:text-blue-400 hover:underline">contact@eventschedule.com</a>
-                </p>
-
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Data Ownership</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-4">
                     Selfhosters own their data and bear full responsibility for it. Event Schedule cannot access, modify, or remove selfhosted data.
