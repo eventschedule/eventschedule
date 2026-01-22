@@ -1,49 +1,135 @@
-<x-app-layout :title="'Blog | Event Schedule'">
-    <x-slot name="meta">
-        <meta name="description" content="Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.">
-        <meta property="og:title" content="Blog | Event Schedule">
-        <meta property="og:description" content="Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.">
-        <meta property="og:image" content="{{ config('app.url') }}/images/background.jpg">
-        <meta property="og:url" content="{{ url()->current() }}">
-        <meta property="og:site_name" content="Event Schedule">
-        <meta name="twitter:title" content="Blog | Event Schedule">
-        <meta name="twitter:description" content="Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.">
-        <meta name="twitter:image" content="{{ config('app.url') }}/images/background.jpg">
-        <meta name="twitter:card" content="summary_large_image">
-        <link rel="canonical" href="{{ url()->current() }}">
-    </x-slot>
+<x-marketing-layout>
+    <x-slot name="title">Blog | Event Schedule</x-slot>
+    <x-slot name="description">Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.</x-slot>
+    <x-slot name="keywords">event blog, event scheduling tips, ticketing news, event management insights, venue tips, performer advice</x-slot>
 
-    <div class="bg-gray-900 py-12">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="w-full flex flex-col sm:flex-row items-center gap-4 sm:gap-8 mb-4 text-center sm:text-left">
-                <a href="https://www.eventschedule.com" class="hover:opacity-80 transition-opacity flex-shrink-0 flex justify-center sm:block">
-                    <img class="h-12 w-auto sm:h-14 mb-4 sm:mb-0" src="{{ url('images/light_logo.png') }}" alt="EventSchedule Logo"/>
-                </a>
-                <div class="w-full h-px bg-gray-600 sm:w-px sm:h-14 sm:bg-gray-600"></div>
-                <div class="flex-1 min-w-0">
-                    <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mb-2">Blog</h1>
-                    <p class="text-base sm:text-xl text-gray-300">
-                        Latest news, tips, and insights about event scheduling and ticketing.
-                    </p>
+    <style>
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+
+    <!-- Blog ItemList Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Blog",
+        "name": "Event Schedule Blog",
+        "description": "Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.",
+        "url": "{{ route('blog.index') }}",
+        "publisher": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "{{ config('app.url') }}/images/light_logo.png"
+            }
+        }
+        @if($posts->count() > 0)
+        ,"blogPost": [
+            @foreach($posts as $index => $post)
+            {
+                "@type": "BlogPosting",
+                "headline": "{{ $post->title }}",
+                "description": "{{ $post->excerpt }}",
+                "url": "{{ route('blog.show', $post->slug) }}",
+                "datePublished": "{{ $post->published_at ? $post->published_at->toISOString() : '' }}",
+                "author": {
+                    "@type": "Person",
+                    "name": "{{ $post->author_name }}"
+                }
+            }@if(!$loop->last),@endif
+            @endforeach
+        ]
+        @endif
+    }
+    </script>
+
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden bg-[#0a0a0f]">
+        <!-- Animated gradient orbs - larger and more prominent -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-violet-600/30 via-indigo-600/20 to-transparent rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-gradient-to-r from-fuchsia-600/25 to-pink-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1s;"></div>
+            <div class="absolute -bottom-32 -right-32 w-[500px] h-[500px] bg-gradient-to-l from-blue-600/20 to-cyan-600/15 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s;"></div>
+        </div>
+
+        <!-- Grid pattern overlay -->
+        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
+
+        <div class="relative z-10 py-24 sm:py-32 lg:py-40">
+            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+                <!-- Badge -->
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8">
+                    <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    </svg>
+                    <span class="text-sm text-gray-300">News, tips & insights</span>
+                </div>
+
+                <!-- Main headline -->
+                <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
+                    <span class="text-white">The Event Schedule</span><br>
+                    <span class="text-gradient">Blog</span>
+                </h1>
+
+                <!-- Subheadline -->
+                <p class="text-xl sm:text-2xl text-gray-400 max-w-2xl mx-auto mb-10">
+                    Your guide to event scheduling, ticketing, and building thriving communities.
+                </p>
+
+                <!-- Stats or social proof -->
+                <div class="flex flex-wrap items-center justify-center gap-8 text-sm text-gray-500">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-violet-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+                        </svg>
+                        <span class="text-gray-400">{{ $posts->total() }} {{ Str::plural('article', $posts->total()) }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-fuchsia-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="text-gray-400">{{ $allTags->count() }} topics</span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="bg-blue-50 min-h-screen">
+        <!-- Bottom fade -->
+        <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-50 dark:from-gray-900 to-transparent"></div>
+    </section>
+
+    <div class="bg-gray-50 dark:bg-gray-900 min-h-screen">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
             <!-- Selected Tag Display -->
             @if(request('tag'))
-                <div class="mb-6 bg-white border border-blue-200 rounded-lg shadow-sm p-4">
+                <div class="mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <span class="text-sm text-gray-600">Filtered by:</span>
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Filtered by:</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-violet-100 dark:bg-violet-900/50 text-violet-800 dark:text-violet-300">
                                 #{{ request('tag') }}
                             </span>
                         </div>
-                        <a href="{{ route('blog.index') }}" 
-                           class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                        <a href="{{ route('blog.index') }}"
+                           class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
@@ -59,25 +145,25 @@
                     @if($posts->count() > 0)
                         @foreach($posts as $post)
                             <a href="{{ route('blog.show', $post->slug) }}" class="block group">
-                                <div class="bg-white border border-blue-100 rounded-lg shadow-sm p-6 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100/50 hover:-translate-y-1 hover:border-blue-200 cursor-pointer">
+                                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-6 transition-all duration-300 hover:shadow-lg hover:shadow-violet-100/50 dark:hover:shadow-violet-900/20 hover:-translate-y-1 hover:border-violet-200 dark:hover:border-violet-700 cursor-pointer">
                                     @if($post->featured_image_url)
-                                        <div class="mb-4 overflow-hidden rounded-lg">
+                                        <div class="mb-4 overflow-hidden rounded-xl">
                                             <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105">
                                         </div>
                                     @endif
                                     <div class="flex flex-col sm:flex-row sm:items-center gap-x-4 text-xs mb-3">
                                         <div class="flex items-center gap-x-4">
                                             @if($post->published_at)
-                                                <time datetime="{{ $post->published_at->toISOString() }}" class="text-gray-500">
+                                                <time datetime="{{ $post->published_at->toISOString() }}" class="text-gray-500 dark:text-gray-400">
                                                     {{ $post->formatted_published_at }}
                                                 </time>
                                             @endif
-                                            <span class="text-gray-500">{{ $post->reading_time }}</span>
+                                            <span class="text-gray-500 dark:text-gray-400">{{ $post->reading_time }}</span>
                                         </div>
                                         @if($post->tags)
                                             <div class="flex gap-2 mt-1 sm:mt-0">
                                                 @foreach(array_slice($post->tags, 0, 3) as $tag)
-                                                    <span class="text-blue-600 group-hover:text-blue-800 transition-colors duration-200">
+                                                    <span class="text-violet-600 dark:text-violet-400 group-hover:text-violet-800 dark:group-hover:text-violet-300 transition-colors duration-200">
                                                         #{{ $tag }}
                                                     </span>
                                                 @endforeach
@@ -85,10 +171,10 @@
                                         @endif
                                     </div>
                                     <div class="relative">
-                                        <h3 class="text-lg font-semibold leading-6 text-gray-900 group-hover:text-blue-600 transition-colors duration-200 mb-3">
+                                        <h3 class="text-lg font-semibold leading-6 text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors duration-200 mb-3">
                                             {{ $post->title }}
                                         </h3>
-                                        <p class="line-clamp-3 text-sm leading-6 text-gray-600 group-hover:text-gray-700 transition-colors duration-200">
+                                        <p class="line-clamp-3 text-sm leading-6 text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-200">
                                             {{ $post->excerpt }}
                                         </p>
                                     </div>
@@ -101,38 +187,38 @@
                         </div>
                     @else
                         <div class="text-center py-12">
-                            <h3 class="text-lg font-medium text-gray-900 mb-2">No posts found</h3>
-                            <p class="text-gray-600">Check back soon for new content!</p>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No posts found</h3>
+                            <p class="text-gray-600 dark:text-gray-400">Check back soon for new content!</p>
                         </div>
                     @endif
                 </div>
                 <!-- Sidebar -->
                 <div class="space-y-6">
                     @if($allTags->count() > 0)
-                        <div class="bg-white border border-blue-100 rounded-lg shadow-sm p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Tags</h3>
+                        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Tags</h3>
                             <div class="flex flex-wrap gap-2" id="tags-container">
                                 @foreach($allTags->take(20) as $tag)
-                                    <a href="{{ route('blog.index', ['tag' => $tag]) }}" 
-                                       class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-800 hover:bg-blue-100 transition-colors {{ request('tag') == $tag ? 'bg-blue-200 text-blue-900' : '' }}">
+                                    <a href="{{ route('blog.index', ['tag' => $tag]) }}"
+                                       class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-violet-100 dark:hover:bg-violet-900/50 hover:text-violet-800 dark:hover:text-violet-300 transition-colors {{ request('tag') == $tag ? 'bg-violet-200 dark:bg-violet-900 text-violet-900 dark:text-violet-200' : '' }}">
                                         #{{ $tag }}
                                     </a>
                                 @endforeach
                                 @if($allTags->count() > 20)
                                     <div id="hidden-tags" class="hidden flex flex-wrap gap-2">
                                         @foreach($allTags->slice(20) as $tag)
-                                            <a href="{{ route('blog.index', ['tag' => $tag]) }}" 
-                                               class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-800 hover:bg-blue-100 transition-colors {{ request('tag') == $tag ? 'bg-blue-200 text-blue-900' : '' }}">
+                                            <a href="{{ route('blog.index', ['tag' => $tag]) }}"
+                                               class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-violet-100 dark:hover:bg-violet-900/50 hover:text-violet-800 dark:hover:text-violet-300 transition-colors {{ request('tag') == $tag ? 'bg-violet-200 dark:bg-violet-900 text-violet-900 dark:text-violet-200' : '' }}">
                                                 #{{ $tag }}
                                             </a>
                                         @endforeach
                                     </div>
-                                    <button id="show-more-tags" 
-                                            class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors mt-2">
+                                    <button id="show-more-tags"
+                                            class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors mt-2">
                                         Show more tags
                                     </button>
-                                    <button id="show-less-tags" 
-                                            class="hidden inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors mt-2">
+                                    <button id="show-less-tags"
+                                            class="hidden inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors mt-2">
                                         Show less
                                     </button>
                                 @endif
@@ -140,10 +226,10 @@
                         </div>
                     @endif
                     <!-- About -->
-                    <div class="bg-blue-100 border border-blue-200 rounded-lg shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-blue-900 mb-2">About Our Blog</h3>
-                        <p class="text-sm text-blue-900">
-                            Stay updated with the latest tips, news, and insights about event scheduling and ticketing. 
+                    <div class="bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/50 dark:to-indigo-900/50 border border-violet-200 dark:border-violet-800 rounded-2xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-violet-900 dark:text-violet-100 mb-2">About Our Blog</h3>
+                        <p class="text-sm text-violet-800 dark:text-violet-200">
+                            Stay updated with the latest tips, news, and insights about event scheduling and ticketing.
                             Our team shares valuable information to help you make the most of your events.
                         </p>
                     </div>
@@ -152,21 +238,7 @@
         </div>
     </div>
 
-    <footer class="bg-[#151B26]">
-      <div
-        class="container mx-auto flex flex-row justify-center items-center py-8 px-5"
-      >
-        <p class="text-[#F5F9FE] text-base text-center">
-            <!-- Per the AAL license, please do not remove the link to Event Schedule -->
-            {!! str_replace(':link', '<a href="https://www.eventschedule.com" class="hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
-                •
-            {!! __('messages.supported_by', ['link' => '<a href="https://invoiceninja.com" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>']) !!}
-        </p>
-      </div>
-    </footer>
-
-
-    <script>
+    <script {!! nonce_attr() !!}>
         document.addEventListener('DOMContentLoaded', function() {
             const showMoreBtn = document.getElementById('show-more-tags');
             const showLessBtn = document.getElementById('show-less-tags');
@@ -187,4 +259,4 @@
             }
         });
     </script>
-</x-app-layout> 
+</x-marketing-layout>
