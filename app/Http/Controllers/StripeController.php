@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AnalyticsEventsDaily;
+use App\Models\Sale;
+use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
-use Stripe\Stripe;
 use Stripe\Account;
 use Stripe\AccountLink;
-use App\Models\Sale;
+use Stripe\Stripe;
 
 class StripeController extends Controller
 {
@@ -31,11 +33,11 @@ class StripeController extends Controller
         $link = AccountLink::create([
             'account' => $accountId,
             'return_url' => route('stripe.complete'),
-            'refresh_url' => route('profile.edit') . '#section-payment-methods',
+            'refresh_url' => route('profile.edit').'#section-payment-methods',
             'type' => 'account_onboarding',
         ]);
 
-        return redirect($link->url);                  
+        return redirect($link->url);
     }
 
     public function unlink()
@@ -45,65 +47,102 @@ class StripeController extends Controller
         $user->stripe_completed_at = null;
         $user->save();
 
-        return redirect()->to(route('profile.edit') . '#section-payment-methods')->with('message', __('messages.stripe_unlinked'));
+        return redirect()->to(route('profile.edit').'#section-payment-methods')->with('message', __('messages.stripe_unlinked'));
     }
 
     public function complete()
     {
         $user = auth()->user();
-        
+
         if ($user->stripe_account_id) {
             $account = Account::retrieve($user->stripe_account_id);
-            
+
             if ($account->charges_enabled) {
                 $user->stripe_company_name = $account->business_profile->name;
                 $user->stripe_completed_at = now();
                 $user->save();
-                
-                return redirect()->to(route('profile.edit') . '#section-payment-methods')->with('message', __('messages.stripe_connected'));
+
+                return redirect()->to(route('profile.edit').'#section-payment-methods')->with('message', __('messages.stripe_connected'));
             }
         }
 
-        return redirect()->to(route('profile.edit') . '#section-payment-methods')->with('error', __('messages.failed_to_connect_stripe'));
+        return redirect()->to(route('profile.edit').'#section-payment-methods')->with('error', __('messages.failed_to_connect_stripe'));
     }
 
     public function webhook(Request $request)
     {
-        $endpoint_secret = config('services.stripe.webhook_secret');
         $payload = $request->getContent();
         $sig_header = $request->header('stripe-signature');
+        $event = null;
 
-        try {
-            $event = \Stripe\Webhook::constructEvent(
-                $payload, $sig_header, $endpoint_secret
-            );
-        } catch(\UnexpectedValueException $e) {
-            return response()->json(['error' => 'Invalid payload'], 400);
-        } catch(\Stripe\Exception\SignatureVerificationException $e) {
-            return response()->json(['error' => 'Invalid signature'], 400);
+        // Try Connect webhook secret first (hosted mode)
+        $connectSecret = config('services.stripe.webhook_secret');
+        if ($connectSecret) {
+            try {
+                $event = \Stripe\Webhook::constructEvent(
+                    $payload, $sig_header, $connectSecret
+                );
+            } catch (\Stripe\Exception\SignatureVerificationException $e) {
+                // Connect secret didn't work, will try platform secret
+            } catch (\UnexpectedValueException $e) {
+                return response()->json(['error' => 'Invalid payload'], 400);
+            }
+        }
+
+        // Try platform webhook secret (self-hosted mode / direct payments)
+        if (! $event) {
+            $platformSecret = config('services.stripe_platform.webhook_secret');
+            if ($platformSecret) {
+                try {
+                    $event = \Stripe\Webhook::constructEvent(
+                        $payload, $sig_header, $platformSecret
+                    );
+                } catch (\Stripe\Exception\SignatureVerificationException $e) {
+                    return response()->json(['error' => 'Invalid signature'], 400);
+                } catch (\UnexpectedValueException $e) {
+                    return response()->json(['error' => 'Invalid payload'], 400);
+                }
+            } else {
+                return response()->json(['error' => 'Invalid signature'], 400);
+            }
         }
 
         switch ($event->type) {
             case 'payment_intent.succeeded':
+                // Stripe Connect payments (hosted mode)
                 $paymentIntent = $event->data->object;
                 $sale = Sale::where('payment_method', 'stripe')
                     ->where('transaction_reference', $paymentIntent->id)
-                    ->firstOrFail();
-                $sale->payment_amount = $paymentIntent->amount / 100;
-                $sale->status = 'paid';
-                $sale->save();
+                    ->first();
+                if ($sale) {
+                    $sale->payment_amount = $paymentIntent->amount / 100;
+                    $sale->status = 'paid';
+                    $sale->save();
+                }
                 break;
-            /*
-            case 'payment_method.attached':
-                $paymentMethod = $event->data->object;
-                // handlePaymentMethodAttached($paymentMethod);
+
+            case 'checkout.session.completed':
+                // Direct Stripe payments (self-hosted mode)
+                $session = $event->data->object;
+                if ($session->payment_status === 'paid' && isset($session->metadata->sale_id)) {
+                    $saleId = UrlUtils::decodeId($session->metadata->sale_id);
+                    $sale = Sale::find($saleId);
+                    if ($sale && $sale->status !== 'paid') {
+                        $sale->payment_amount = $session->amount_total / 100;
+                        $sale->status = 'paid';
+                        $sale->transaction_reference = $session->payment_intent;
+                        $sale->save();
+
+                        // Record sale in analytics
+                        AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+                    }
+                }
                 break;
-            */
+
             default:
-                \Log::warning('Received unknown event type: ' . $event->type);
+                \Log::info('Received Stripe event type: '.$event->type);
         }
 
         return response()->json(['status' => 'success']);
     }
-
 }

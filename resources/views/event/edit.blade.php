@@ -1126,7 +1126,7 @@
 
                                 <!-- Payment Tab -->
                                 <div v-show="activeTicketTab === 'payment'">
-                                @if ($user->stripe_completed_at || $user->invoiceninja_api_key || $user->payment_url)
+                                @if ($user->canAcceptStripePayments() || $user->invoiceninja_api_key || $user->payment_url)
                                 <div class="mb-6">
                                     <x-input-label for="payment_method" :value="__('messages.payment_method')"/>
                                     <select id="payment_method" name="payment_method" v-model="event.payment_method" :required="event.tickets_enabled"
@@ -1134,6 +1134,8 @@
                                         <option value="cash">Cash</option>
                                         @if ($user->stripe_completed_at)
                                         <option value="stripe">Stripe - {{ $user->stripe_company_name }}</option>
+                                        @elseif ($user->canAcceptStripePayments())
+                                        <option value="stripe">Stripe</option>
                                         @endif
                                         @if ($user->invoiceninja_api_key)
                                         <option value="invoiceninja">Invoice Ninja - {{ $user->invoiceninja_company_name }}</option>
@@ -1163,7 +1165,7 @@
                                         </option>
                                         @endforeach
                                     </select>
-                                    @if (! $user->stripe_completed_at && ! $user->invoiceninja_api_key && ! $user->payment_url)
+                                    @if (! $user->canAcceptStripePayments() && ! $user->invoiceninja_api_key && ! $user->payment_url)
                                     <div class="text-xs pt-1">
                                         <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">
                                             {{ __('messages.manage_payment_methods') }}

@@ -253,29 +253,51 @@ class TicketController extends Controller
             ];
         }
 
-        $stripe = new StripeClient(config('services.stripe.key'));
         $data = [
             'sale_id' => UrlUtils::encodeId($sale->id),
             'subdomain' => $subdomain,
             'date' => $sale->event_date,
         ];
 
-        $session = $stripe->checkout->sessions->create(
-            [
+        // Determine if using Stripe Connect (hosted mode) or direct payments (self-hosted)
+        $useConnect = config('app.hosted') && $event->user->stripe_account_id;
+
+        if ($useConnect) {
+            // Hosted mode: Use Stripe Connect with event creator's account
+            $stripe = new StripeClient(config('services.stripe.key'));
+
+            $session = $stripe->checkout->sessions->create(
+                [
+                    'line_items' => $lineItems,
+                    // 'payment_intent_data' => ['application_fee_amount' => 123],
+                    'mode' => 'payment',
+                    'customer_email' => $sale->email,
+                    'metadata' => [
+                        'customer_name' => $sale->name,
+                    ],
+                    'success_url' => route('checkout.success', $data).'?session_id={CHECKOUT_SESSION_ID}',
+                    'cancel_url' => route('checkout.cancel', $data),
+                ],
+                [
+                    'stripe_account' => $event->user->stripe_account_id,
+                ],
+            );
+        } else {
+            // Self-hosted mode: Use direct Stripe payments with platform keys
+            $stripe = new StripeClient(config('services.stripe_platform.secret'));
+
+            $session = $stripe->checkout->sessions->create([
                 'line_items' => $lineItems,
-                // 'payment_intent_data' => ['application_fee_amount' => 123],
                 'mode' => 'payment',
                 'customer_email' => $sale->email,
                 'metadata' => [
                     'customer_name' => $sale->name,
+                    'sale_id' => UrlUtils::encodeId($sale->id),
                 ],
-                'success_url' => route('checkout.success', $data).'?session_id={CHECKOUT_SESSION_ID}',
+                'success_url' => route('checkout.success', $data).'?session_id={CHECKOUT_SESSION_ID}&direct=1',
                 'cancel_url' => route('checkout.cancel', $data),
-            ],
-            [
-                'stripe_account' => $event->user->stripe_account_id,
-            ],
-        );
+            ]);
+        }
 
         return redirect($session->url);
     }
@@ -355,20 +377,37 @@ class TicketController extends Controller
         $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
         $event = $sale->event;
 
-        $stripe = new StripeClient(config('services.stripe.key'));
-        $session = $stripe->checkout->sessions->retrieve(request()->session_id, [], [
-            'stripe_account' => $sale->event->user->stripe_account_id,
-        ]);
-
-        if ($session->payment_status === 'paid') {
-            $sale->status = 'paid';
-
-            // Record sale in analytics
-            AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+        // Validate session_id parameter exists
+        if (! request()->has('session_id')) {
+            return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
         }
 
-        $sale->transaction_reference = $session->payment_intent;
-        $sale->save();
+        $isDirect = request()->query('direct') === '1';
+
+        try {
+            if ($isDirect) {
+                // Self-hosted mode: Use platform Stripe keys
+                $stripe = new StripeClient(config('services.stripe_platform.secret'));
+                $session = $stripe->checkout->sessions->retrieve(request()->session_id);
+            } else {
+                // Hosted mode: Use Stripe Connect
+                $stripe = new StripeClient(config('services.stripe.key'));
+                $session = $stripe->checkout->sessions->retrieve(request()->session_id, [], [
+                    'stripe_account' => $sale->event->user->stripe_account_id,
+                ]);
+            }
+
+            if ($session->payment_status === 'paid' && $sale->status !== 'paid') {
+                $sale->status = 'paid';
+                $sale->payment_amount = $session->amount_total / 100;
+                $sale->transaction_reference = $session->payment_intent;
+                AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+            }
+            $sale->save();
+        } catch (\Exception $e) {
+            // Log the error but don't fail - webhook will handle payment confirmation
+            \Log::warning('Stripe session retrieval failed in success(): '.$e->getMessage());
+        }
 
         return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
     }

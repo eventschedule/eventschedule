@@ -298,4 +298,18 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return in_array($this->language_code, ['ar', 'he']);
     }
+
+    /**
+     * Check if user can accept Stripe payments
+     * In hosted mode: requires Stripe Connect completed
+     * In self-hosted mode: requires platform Stripe keys configured
+     */
+    public function canAcceptStripePayments(): bool
+    {
+        if (config('app.hosted')) {
+            return (bool) $this->stripe_completed_at;
+        }
+
+        return (bool) config('services.stripe_platform.secret');
+    }
 }

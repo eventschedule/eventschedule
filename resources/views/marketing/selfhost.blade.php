@@ -420,8 +420,11 @@
                 <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
                     100% Open Source
                 </h2>
-                <p class="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+                <p class="text-xl text-gray-400 mb-6 max-w-2xl mx-auto">
                     Event Schedule is fully open source under the AAL license. Inspect the code, contribute improvements, or fork it for your own needs.
+                </p>
+                <p class="text-gray-400 mb-8 max-w-2xl mx-auto">
+                    <strong class="text-gray-300">No coding experience?</strong> No problem! This project is developed using AI-assisted coding. You can contribute by describing features or fixes in plain English via <a href="https://github.com/eventschedule/eventschedule/discussions" target="_blank" class="text-emerald-400 hover:text-emerald-300 underline">GitHub Discussions</a>—we'll handle the implementation.
                 </p>
 
                 <div class="grid sm:grid-cols-3 gap-6 mb-10">

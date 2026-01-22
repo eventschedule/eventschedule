@@ -89,11 +89,17 @@
                             </div>
                             <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Google Calendar</h3>
                             <p class="text-gray-400 text-lg mb-6">Two-way sync with Google Calendar. Import events automatically or push your schedule to Google. Changes sync in real-time.</p>
-                            <div class="flex flex-wrap gap-3">
+                            <div class="flex flex-wrap gap-3 mb-4">
                                 <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Two-way sync</span>
                                 <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Auto import</span>
                                 <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Real-time updates</span>
                             </div>
+                            <a href="https://calendar.google.com" target="_blank" rel="noopener" class="inline-flex items-center text-blue-300 hover:text-blue-200 text-sm font-medium transition-colors">
+                                Visit Google Calendar
+                                <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </a>
                         </div>
                         <div class="flex-shrink-0">
                             <div class="relative animate-float">
@@ -146,10 +152,12 @@
                         </div>
                     </div>
 
-                    <div class="flex flex-wrap justify-center gap-2">
-                        <span class="px-2 py-1 rounded bg-white/10 text-gray-300 text-xs">No platform fees</span>
-                        <span class="px-2 py-1 rounded bg-white/10 text-gray-300 text-xs">Instant payouts</span>
-                    </div>
+                    <a href="https://stripe.com" target="_blank" rel="noopener" class="inline-flex items-center text-violet-300 hover:text-violet-200 text-sm font-medium transition-colors">
+                        Visit Stripe
+                        <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                    </a>
                 </div>
 
                 <!-- Invoice Ninja -->
@@ -163,7 +171,7 @@
                     <h3 class="text-2xl font-bold text-white mb-3">Invoice Ninja</h3>
                     <p class="text-gray-400 mb-6">Generate professional invoices for ticket purchases. Perfect for corporate events and B2B sales.</p>
 
-                    <div class="bg-black/30 rounded-xl p-4 border border-white/10">
+                    <div class="bg-black/30 rounded-xl p-4 border border-white/10 mb-4">
                         <div class="flex items-center justify-between mb-3">
                             <span class="text-emerald-400 text-xs font-medium">INVOICE #1042</span>
                             <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-xs">Paid</span>
@@ -174,6 +182,13 @@
                             <span class="text-white font-bold">$750.00</span>
                         </div>
                     </div>
+
+                    <a href="https://invoiceninja.com" target="_blank" rel="noopener" class="inline-flex items-center text-emerald-300 hover:text-emerald-200 text-sm font-medium transition-colors">
+                        Visit Invoice Ninja
+                        <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                    </a>
                 </div>
 
                 <!-- SMTP Email (spans 2 cols) -->
