@@ -71,10 +71,10 @@
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="https://github.com/eventschedule/eventschedule/blob/main/docs/SAAS_SETUP.md" target="_blank" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
+                <a href="{{ route('marketing.docs.saas') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
                     View Setup Guide
                     <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                 </a>
                 <a href="https://github.com/eventschedule/eventschedule" target="_blank" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white glass border border-white/10 rounded-2xl hover:bg-white/10 transition-all">
@@ -258,7 +258,7 @@
                 </p>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
                 <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
                     <div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4">
                         <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -267,16 +267,6 @@
                     </div>
                     <h3 class="text-lg font-semibold text-white mb-2">AAL License</h3>
                     <p class="text-gray-400 text-sm">Follow the Attribution Assurance License requirements</p>
-                </div>
-
-                <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
-                    <div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Admin Attribution</h3>
-                    <p class="text-gray-400 text-sm">Attribution to users shown in admin portal</p>
                 </div>
 
                 <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
@@ -490,8 +480,11 @@
                 <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
                     Building together
                 </h2>
-                <p class="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+                <p class="text-xl text-gray-400 mb-6 max-w-2xl mx-auto">
                     We're all working toward the same goal: a better event management platform. Open source means everyone benefits from shared improvements.
+                </p>
+                <p class="text-gray-400 mb-8 max-w-2xl mx-auto">
+                    <strong class="text-gray-300">No coding experience?</strong> No problem! This project is developed using AI-assisted coding. You can contribute by describing features or fixes in plain English via <a href="https://github.com/eventschedule/eventschedule/discussions" target="_blank" class="text-blue-400 hover:text-blue-300 underline">GitHub Discussions</a>—we'll handle the implementation.
                 </p>
 
                 <div class="grid sm:grid-cols-3 gap-6 mb-10">
@@ -539,10 +532,10 @@
                 Get started with the setup guide. Everything you need to run your own white-label ticketing platform.
             </p>
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="https://github.com/eventschedule/eventschedule/blob/main/docs/SAAS_SETUP.md" target="_blank" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
+                <a href="{{ route('marketing.docs.saas') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                     Read Setup Guide
                     <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                 </a>
                 <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white border-2 border-white/30 rounded-2xl hover:bg-white/10 transition-all">
