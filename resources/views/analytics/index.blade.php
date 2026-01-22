@@ -1,6 +1,6 @@
 <x-app-admin-layout>
 
-    <div class="space-y-6">
+    <div class="space-y-4">
         {{-- Schedule Selector, Date Range, and Period Toggle --}}
         <div class="flex flex-col sm:flex-row sm:justify-between gap-4">
             <div class="flex gap-2 flex-wrap items-center">
@@ -233,7 +233,7 @@
 
         @if ($totalViews > 0 || $appearanceViews > 0)
             {{-- Charts Row --}}
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {{-- Views Over Time Chart --}}
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.views_over_time') }}</h3>
@@ -253,7 +253,7 @@
 
             {{-- Bar Charts Grid --}}
             @if ($topEvents->isNotEmpty() || ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1) || $topAppearances->isNotEmpty() || $topSchedulesAppearedOn->isNotEmpty() || $topEventsByRevenue->isNotEmpty() || $trafficSources->isNotEmpty())
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {{-- Top Events Chart --}}
                 @if ($topEvents->isNotEmpty())
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">

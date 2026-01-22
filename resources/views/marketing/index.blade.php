@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Schedule - The simple way to share your event schedule</x-slot>
-    <x-slot name="description">The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.</x-slot>
+    <x-slot name="title">Event Schedule - Plan, Promote & Share Event Calendars</x-slot>
+    <x-slot name="description">Event calendars, ticketing, and check-ins for venues, performers, and communities.</x-slot>
     <x-slot name="keywords">event schedule, event calendar, free event management, ticketing platform, QR check-in, venue calendar, performer schedule, sell tickets online, event organizer software</x-slot>
     <x-slot name="socialImage">social/home.png</x-slot>
 
@@ -280,6 +280,7 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Ticketing & QR Check-ins</h3>
                     <p class="text-gray-600 text-sm">Sell tickets online with multiple types (GA, VIP), set limits, and scan QR codes for fast check-ins.</p>
+                    <a href="{{ marketing_url('/ticketing') }}" class="inline-block mt-3 text-sm font-medium text-violet-600 hover:text-violet-700">Learn more &rarr;</a>
                 </div>
 
                 <!-- AI Features -->
@@ -291,6 +292,7 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">AI-Powered</h3>
                     <p class="text-gray-600 text-sm">Auto-extract event details with AI parsing. Translate your entire schedule instantly.</p>
+                    <a href="{{ marketing_url('/ai') }}" class="inline-block mt-3 text-sm font-medium text-fuchsia-600 hover:text-fuchsia-700">Learn more &rarr;</a>
                 </div>
 
                 <!-- Calendar Sync -->
@@ -302,28 +304,30 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Calendar Sync</h3>
                     <p class="text-gray-600 text-sm">Two-way sync with Google Calendar. Let attendees add events to Apple, Google, or Outlook calendars.</p>
+                    <a href="{{ marketing_url('/calendar-sync') }}" class="inline-block mt-3 text-sm font-medium text-blue-600 hover:text-blue-700">Learn more &rarr;</a>
                 </div>
 
-                <!-- Import Events -->
+                <!-- Built-in Analytics -->
                 <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100 mb-4">
                         <svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Import Events</h3>
-                    <p class="text-gray-600 text-sm">Pull events from external websites automatically. Set up recurring events that repeat on your schedule.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Built-in Analytics</h3>
+                    <p class="text-gray-600 text-sm">Track page views, device breakdown, top events, and traffic sources. No external services required.</p>
+                    <a href="{{ marketing_url('/analytics') }}" class="inline-block mt-3 text-sm font-medium text-emerald-600 hover:text-emerald-700">Learn more &rarr;</a>
                 </div>
 
-                <!-- Graphics Generator -->
+                <!-- Custom Fields -->
                 <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 mb-4">
                         <svg class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Event Graphics</h3>
-                    <p class="text-gray-600 text-sm">Generate flyers, QR codes, and social media graphics automatically for each event.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Custom Fields</h3>
+                    <p class="text-gray-600 text-sm">Collect additional info from ticket buyers with text, dropdown, date, and yes/no fields.</p>
                 </div>
 
                 <!-- Team & Permissions -->
