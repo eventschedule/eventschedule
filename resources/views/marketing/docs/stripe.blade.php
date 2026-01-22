@@ -1,7 +1,7 @@
 <x-marketing-layout>
     <x-slot name="title">Stripe Integration Documentation - Event Schedule</x-slot>
-    <x-slot name="description">Set up Stripe Connect for ticket sales and Laravel Cashier for subscription billing in Event Schedule.</x-slot>
-    <x-slot name="keywords">stripe integration, stripe connect, laravel cashier, payment processing, ticket sales, subscription billing</x-slot>
+    <x-slot name="description">Set up Stripe payments for Event Schedule based on your deployment type: selfhosted or SaaS operator.</x-slot>
+    <x-slot name="keywords">stripe integration, stripe connect, direct payments, laravel cashier, payment processing, ticket sales, subscription billing, selfhosted, invoice ninja</x-slot>
 
     @include('marketing.docs.partials.styles')
 
@@ -32,7 +32,7 @@
                 <h1 class="text-3xl md:text-4xl font-bold text-white">Stripe Integration Setup</h1>
             </div>
             <p class="text-lg text-gray-400 max-w-3xl">
-                Set up and configure Stripe for ticket sales via Stripe Connect and subscription billing via Laravel Cashier.
+                Choose the setup guide that matches how you're using Event Schedule.
             </p>
         </div>
     </section>
@@ -46,13 +46,12 @@
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
                         <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Overview</a>
-                        <a href="#prerequisites" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Prerequisites</a>
-                        <a href="#stripe-connect" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Stripe Connect Setup</a>
-                        <a href="#laravel-cashier" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Laravel Cashier Setup</a>
+                        <a href="#choose-setup" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Choose Your Setup</a>
+                        <a href="#selfhosted-users" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors pl-6">→ Selfhosted Users</a>
+                        <a href="#saas-operators" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors pl-6">→ SaaS Operators</a>
                         <a href="#testing" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Testing</a>
                         <a href="#troubleshooting" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Troubleshooting</a>
-                        <a href="#security" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Security Considerations</a>
-                        <a href="#architecture" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Architecture Notes</a>
+                        <a href="#security" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Security</a>
                     </nav>
                 </aside>
 
@@ -62,113 +61,206 @@
                         <!-- Overview -->
                         <section id="overview" class="doc-section">
                             <h2 class="doc-heading">Overview</h2>
-                            <p class="text-gray-300 mb-6">Event Schedule uses two separate Stripe integrations:</p>
+                            <p class="text-gray-300 mb-6">Event Schedule supports Stripe for payment processing, but the setup varies depending on how you're using the platform. This guide is organized by user type to help you find exactly what you need.</p>
+
+                            <div class="bg-green-500/10 border border-green-500/20 rounded-xl p-4 mb-6">
+                                <div class="flex items-start gap-3">
+                                    <svg class="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <p class="text-green-300 font-medium mb-1">Recommended: Use Invoice Ninja with Stripe</p>
+                                        <p class="text-gray-400 text-sm">For the best ticket selling experience, we recommend using <a href="https://invoiceninja.com" target="_blank" class="text-green-400 hover:text-green-300">Invoice Ninja</a> alongside Stripe. Invoice Ninja provides additional features like professional invoicing, payment reminders, and detailed financial reporting that complement Stripe's payment processing.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </section>
+
+                        <!-- Choose Your Setup -->
+                        <section id="choose-setup" class="doc-section">
+                            <h2 class="doc-heading">Choose Your Setup</h2>
+                            <p class="text-gray-300 mb-6">Find your setup type and follow the corresponding guide:</p>
 
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>
                                         <tr>
-                                            <th>Integration</th>
-                                            <th>Purpose</th>
-                                            <th>Money Flows To</th>
+                                            <th>You are...</th>
+                                            <th>Money flows to...</th>
+                                            <th>Follow this guide</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Stripe Connect</span></td>
-                                            <td>Enables event creators to sell tickets and receive payments directly</td>
-                                            <td>Event creator</td>
+                                            <td>Running your <strong class="text-white">own Event Schedule instance</strong> for your organization</td>
+                                            <td>Your single Stripe account</td>
+                                            <td><a href="#selfhosted-users" class="text-violet-400 hover:text-violet-300">Selfhosted Users</a></td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Laravel Cashier</span></td>
-                                            <td>Enables SaaS subscription billing for the Pro plan (hosted mode only)</td>
-                                            <td>Platform operator</td>
+                                            <td>Running a <strong class="text-white">white-label SaaS</strong> platform</td>
+                                            <td>Your customers' Stripe accounts + your account for subscriptions</td>
+                                            <td><a href="#saas-operators" class="text-violet-400 hover:text-violet-300">SaaS Operators</a></td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
 
-                            <p class="text-gray-300">These integrations use separate Stripe accounts/API keys and can be configured independently.</p>
+                            <div class="bg-white/5 rounded-xl p-6 border border-white/10 mb-6">
+                                <h3 class="text-lg font-semibold text-white mb-4">Decision Tree</h3>
+                                <div class="text-gray-300 space-y-3 text-sm">
+                                    <p><strong class="text-white">Q: Will multiple people create events and need their own payment accounts?</strong></p>
+                                    <p class="pl-4">→ Yes: <a href="#saas-operators" class="text-violet-400 hover:text-violet-300">SaaS Operators</a></p>
+                                    <p class="pl-4">→ No: <a href="#selfhosted-users" class="text-violet-400 hover:text-violet-300">Selfhosted Users</a></p>
+                                </div>
+                            </div>
                         </section>
 
-                        <!-- Prerequisites -->
-                        <section id="prerequisites" class="doc-section">
-                            <h2 class="doc-heading">Prerequisites</h2>
-                            <ol class="doc-list doc-list-numbered">
-                                <li>A Stripe account (<a href="https://stripe.com" target="_blank" class="text-violet-400 hover:text-violet-300">https://stripe.com</a>)</li>
-                                <li>For Stripe Connect: Event creators need their own Stripe accounts</li>
-                                <li>For Laravel Cashier: A Stripe account owned by the platform operator</li>
-                            </ol>
-                        </section>
+                        <!-- Selfhosted Users -->
+                        <section id="selfhosted-users" class="doc-section">
+                            <h2 class="doc-heading">For Selfhosted Users</h2>
+                            <p class="text-gray-300 mb-6">If you're running your own Event Schedule instance for your organization, venue, or community, all ticket payments go to a single Stripe account that you control.</p>
 
-                        <!-- Stripe Connect Setup -->
-                        <section id="stripe-connect" class="doc-section">
-                            <h2 class="doc-heading">Stripe Connect Setup (Ticket Sales)</h2>
-                            <p class="text-gray-300 mb-6">Stripe Connect allows event creators to accept payments for ticket sales. Payments go directly to the event creator's connected Stripe account.</p>
+                            <div class="bg-violet-500/10 border border-violet-500/20 rounded-xl p-4 mb-6">
+                                <div class="flex items-start gap-3">
+                                    <svg class="w-5 h-5 text-violet-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <p class="text-violet-300 font-medium mb-1">This guide is for you if...</p>
+                                        <p class="text-gray-400 text-sm">You want all ticket revenue from all events on your instance to go to one Stripe account. Event creators don't need their own Stripe accounts.</p>
+                                    </div>
+                                </div>
+                            </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">1. Stripe Dashboard Setup</h3>
+                            <h3 class="text-lg font-semibold text-white mb-4">1. Get Your Stripe API Keys</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Go to the <a href="https://dashboard.stripe.com/" target="_blank" class="text-violet-400 hover:text-violet-300">Stripe Dashboard</a></li>
-                                <li>Navigate to <strong class="text-white">Settings</strong> > <strong class="text-white">Connect</strong> > <strong class="text-white">Settings</strong></li>
-                                <li>Enable Connect for your platform</li>
-                                <li>Configure your branding and platform profile</li>
-                                <li>Note your platform's API keys from <strong class="text-white">Developers</strong> > <strong class="text-white">API keys</strong></li>
+                                <li>Navigate to <strong class="text-white">Developers</strong> → <strong class="text-white">API keys</strong></li>
+                                <li>Note your <strong class="text-white">Publishable key</strong> and <strong class="text-white">Secret key</strong></li>
                             </ol>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">2. Environment Configuration</h3>
-                            <p class="text-gray-300 mb-4">Add the following environment variables to your <code class="doc-inline-code">.env</code> file:</p>
+                            <h3 class="text-lg font-semibold text-white mb-4">2. Configure Environment Variables</h3>
+                            <p class="text-gray-300 mb-4">Add these to your <code class="doc-inline-code">.env</code> file:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>.env</span>
                                     <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
                                 </div>
-                                <pre><code><span class="code-comment"># Stripe Connect (for ticket sales)</span>
-<span class="code-variable">STRIPE_KEY</span>=<span class="code-string">sk_live_your_stripe_secret_key</span>
-<span class="code-variable">STRIPE_WEBHOOK_SECRET</span>=<span class="code-string">whsec_your_webhook_secret</span></code></pre>
+                                <pre><code><span class="code-comment"># Stripe Direct Payments (selfhosted)</span>
+<span class="code-variable">STRIPE_PLATFORM_KEY</span>=<span class="code-string">pk_live_your_publishable_key</span>
+<span class="code-variable">STRIPE_PLATFORM_SECRET</span>=<span class="code-string">sk_live_your_secret_key</span>
+<span class="code-variable">STRIPE_PLATFORM_WEBHOOK_SECRET</span>=<span class="code-string">whsec_your_webhook_secret</span></code></pre>
                             </div>
 
                             <ul class="doc-list mb-6">
-                                <li><code class="doc-inline-code">STRIPE_KEY</code>: Your platform's Stripe secret key (starts with <code class="doc-inline-code">sk_live_</code> or <code class="doc-inline-code">sk_test_</code>)</li>
-                                <li><code class="doc-inline-code">STRIPE_WEBHOOK_SECRET</code>: The webhook signing secret for verifying webhook events</li>
+                                <li><code class="doc-inline-code">STRIPE_PLATFORM_KEY</code>: Your publishable key (starts with <code class="doc-inline-code">pk_live_</code> or <code class="doc-inline-code">pk_test_</code>)</li>
+                                <li><code class="doc-inline-code">STRIPE_PLATFORM_SECRET</code>: Your secret key (starts with <code class="doc-inline-code">sk_live_</code> or <code class="doc-inline-code">sk_test_</code>)</li>
+                                <li><code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code>: Webhook signing secret (next step)</li>
                             </ul>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">3. Webhook Configuration</h3>
+                            <h3 class="text-lg font-semibold text-white mb-4">3. Set Up Webhooks</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to <strong class="text-white">Developers</strong> > <strong class="text-white">Webhooks</strong> in the Stripe Dashboard</li>
+                                <li>In Stripe Dashboard, go to <strong class="text-white">Developers</strong> → <strong class="text-white">Webhooks</strong></li>
                                 <li>Click <strong class="text-white">Add endpoint</strong></li>
-                                <li>Set the endpoint URL:
-                                    <ul class="doc-list mt-2 mb-2">
-                                        <li>Production: <code class="doc-inline-code">https://yourdomain.com/stripe/webhook</code></li>
-                                        <li>Development: Use <a href="https://stripe.com/docs/stripe-cli" target="_blank" class="text-violet-400 hover:text-violet-300">Stripe CLI</a> or ngrok</li>
-                                    </ul>
-                                </li>
-                                <li>Select events to listen to: <code class="doc-inline-code">payment_intent.succeeded</code></li>
-                                <li>Save the endpoint and copy the signing secret to <code class="doc-inline-code">STRIPE_WEBHOOK_SECRET</code></li>
+                                <li>Set URL to: <code class="doc-inline-code">https://yourdomain.com/stripe/webhook</code></li>
+                                <li>Select event: <code class="doc-inline-code">checkout.session.completed</code></li>
+                                <li>Save and copy the <strong class="text-white">Signing secret</strong> to <code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code></li>
                             </ol>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">4. User Onboarding Flow</h3>
-                            <p class="text-gray-300 mb-4">When event creators want to accept payments:</p>
+                            <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
+                                <div class="flex items-start gap-3">
+                                    <svg class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <div>
+                                        <p class="text-amber-300 font-medium mb-1">Important: Webhook Event</p>
+                                        <p class="text-gray-400 text-sm">Make sure to select <code class="doc-inline-code">checkout.session.completed</code>—this is different from SaaS setups which use <code class="doc-inline-code">payment_intent.succeeded</code>.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">4. Enable Stripe for Events</h3>
+                            <p class="text-gray-300 mb-6">Once configured, event creators can select "Stripe" as the payment method when creating events with tickets. All payments automatically use your platform Stripe account.</p>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">How Checkout Works</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>User navigates to their profile settings > Payment Methods</li>
-                                <li>User clicks "Connect Stripe Account"</li>
-                                <li>User is redirected to Stripe's onboarding flow</li>
-                                <li>After completing onboarding, user returns to Event Schedule</li>
-                                <li>Their <code class="doc-inline-code">stripe_account_id</code> and <code class="doc-inline-code">stripe_completed_at</code> are saved</li>
+                                <li>Customer selects tickets and fills out the checkout form</li>
+                                <li>Event Schedule creates a Stripe Checkout Session</li>
+                                <li>Customer completes payment on Stripe's hosted page</li>
+                                <li>Webhook confirms payment and marks the sale as paid</li>
+                                <li>Customer receives their tickets</li>
                             </ol>
+                        </section>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">5. Checkout Process Flow</h3>
-                            <p class="text-gray-300 mb-4">When a customer purchases tickets:</p>
+                        <!-- SaaS Operators -->
+                        <section id="saas-operators" class="doc-section">
+                            <h2 class="doc-heading">For SaaS Operators</h2>
+                            <p class="text-gray-300 mb-6">If you're running your own white-label SaaS platform (like eventschedule.com but with your own branding), you need two Stripe integrations:</p>
+
+                            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Stripe Connect</h4>
+                                    <p class="text-gray-400 text-sm">So your event creator customers can connect their Stripe accounts and receive ticket payments directly.</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Laravel Cashier</h4>
+                                    <p class="text-gray-400 text-sm">To charge your customers for Pro subscriptions (the money you make as the platform operator).</p>
+                                </div>
+                            </div>
+
+                            <!-- Part A: Stripe Connect -->
+                            <div class="bg-violet-500/5 border-l-4 border-violet-500 pl-4 mb-6">
+                                <h3 class="text-xl font-semibold text-white mb-2">Part A: Stripe Connect (Ticket Sales)</h3>
+                                <p class="text-gray-400 text-sm">Allow your event creators to receive payments for their ticket sales</p>
+                            </div>
+
+                            <h4 class="text-lg font-semibold text-white mb-4">1. Enable Stripe Connect</h4>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Customer selects tickets and fills out checkout form</li>
-                                <li>Event Schedule creates a Stripe Checkout Session on the connected account</li>
-                                <li>Customer is redirected to Stripe's hosted checkout page</li>
-                                <li>After payment, customer returns to the success URL</li>
-                                <li>Webhook confirms payment and updates the sale status</li>
+                                <li>Go to the <a href="https://dashboard.stripe.com/" target="_blank" class="text-violet-400 hover:text-violet-300">Stripe Dashboard</a></li>
+                                <li>Navigate to <strong class="text-white">Settings</strong> → <strong class="text-white">Connect</strong> → <strong class="text-white">Settings</strong></li>
+                                <li>Enable Connect for your platform</li>
+                                <li>Configure your branding and platform profile</li>
+                                <li>Get your API keys from <strong class="text-white">Developers</strong> → <strong class="text-white">API keys</strong></li>
                             </ol>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">API Endpoints</h3>
-                            <div class="overflow-x-auto mb-6">
+                            <h4 class="text-lg font-semibold text-white mb-4">2. Environment Configuration</h4>
+                            <div class="doc-code-block">
+                                <div class="doc-code-header">
+                                    <span>.env</span>
+                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code><span class="code-comment"># Stripe Connect (for event creators to receive ticket payments)</span>
+<span class="code-variable">STRIPE_KEY</span>=<span class="code-string">sk_live_your_stripe_secret_key</span>
+<span class="code-variable">STRIPE_WEBHOOK_SECRET</span>=<span class="code-string">whsec_your_connect_webhook_secret</span></code></pre>
+                            </div>
+
+                            <ul class="doc-list mb-6">
+                                <li><code class="doc-inline-code">STRIPE_KEY</code>: Your platform's Stripe secret key</li>
+                                <li><code class="doc-inline-code">STRIPE_WEBHOOK_SECRET</code>: Webhook secret for Connect events</li>
+                            </ul>
+
+                            <h4 class="text-lg font-semibold text-white mb-4">3. Webhook Configuration</h4>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Go to <strong class="text-white">Developers</strong> → <strong class="text-white">Webhooks</strong></li>
+                                <li>Click <strong class="text-white">Add endpoint</strong></li>
+                                <li>Set URL to: <code class="doc-inline-code">https://yourdomain.com/stripe/webhook</code></li>
+                                <li>Select event: <code class="doc-inline-code">payment_intent.succeeded</code></li>
+                                <li>Save and copy the signing secret to <code class="doc-inline-code">STRIPE_WEBHOOK_SECRET</code></li>
+                            </ol>
+
+                            <h4 class="text-lg font-semibold text-white mb-4">User Onboarding Flow</h4>
+                            <p class="text-gray-300 mb-4">Your event creators will:</p>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Go to <strong class="text-white">Profile</strong> → <strong class="text-white">Payment Methods</strong></li>
+                                <li>Click <strong class="text-white">"Connect Stripe Account"</strong></li>
+                                <li>Complete Stripe's onboarding</li>
+                                <li>Return to your platform ready to sell tickets</li>
+                            </ol>
+
+                            <h4 class="text-lg font-semibold text-white mb-4">Connect API Endpoints</h4>
+                            <div class="overflow-x-auto mb-8">
                                 <table class="doc-table">
                                     <thead>
                                         <tr>
@@ -191,42 +283,37 @@
                                         </tr>
                                         <tr>
                                             <td><code class="doc-inline-code">POST /stripe/webhook</code></td>
-                                            <td>Webhook handler for payment events</td>
+                                            <td>Handle <code class="doc-inline-code">payment_intent.succeeded</code></td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
-                        </section>
 
-                        <!-- Laravel Cashier Setup -->
-                        <section id="laravel-cashier" class="doc-section">
-                            <h2 class="doc-heading">Laravel Cashier Setup (SaaS Subscriptions)</h2>
-                            <p class="text-gray-300 mb-6">Laravel Cashier manages subscription billing for the Pro plan. This is separate from Stripe Connect and uses the platform's own Stripe account.</p>
+                            <!-- Part B: Laravel Cashier -->
+                            <div class="bg-purple-500/5 border-l-4 border-purple-500 pl-4 mb-6">
+                                <h3 class="text-xl font-semibold text-white mb-2">Part B: Laravel Cashier (Subscription Billing)</h3>
+                                <p class="text-gray-400 text-sm">Charge your customers for Pro plan subscriptions</p>
+                            </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">1. Stripe Dashboard Setup</h3>
+                            <h4 class="text-lg font-semibold text-white mb-4">1. Create Subscription Products</h4>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to the <a href="https://dashboard.stripe.com/" target="_blank" class="text-violet-400 hover:text-violet-300">Stripe Dashboard</a></li>
-                                <li>Navigate to <strong class="text-white">Products</strong> > <strong class="text-white">Add product</strong></li>
-                                <li>Create a product for your Pro plan:
+                                <li>In Stripe Dashboard, go to <strong class="text-white">Products</strong> → <strong class="text-white">Add product</strong></li>
+                                <li>Create a "Pro Plan" product with:
                                     <ul class="doc-list mt-2 mb-2">
-                                        <li>Name: "Pro Plan" (or your preferred name)</li>
-                                        <li>Add pricing: Monthly price (e.g., $9.99/month, recurring)</li>
-                                        <li>Add pricing: Yearly price (e.g., $99.99/year, recurring)</li>
+                                        <li>Monthly price (e.g., $9.99/month, recurring)</li>
+                                        <li>Yearly price (e.g., $99.99/year, recurring)</li>
                                     </ul>
                                 </li>
-                                <li>Note the <strong class="text-white">Price IDs</strong> for both pricing options (starts with <code class="doc-inline-code">price_</code>)</li>
-                                <li>Get your API keys from <strong class="text-white">Developers</strong> > <strong class="text-white">API keys</strong></li>
+                                <li>Note the <strong class="text-white">Price IDs</strong> (starts with <code class="doc-inline-code">price_</code>)</li>
                             </ol>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">2. Environment Configuration</h3>
-                            <p class="text-gray-300 mb-4">Add the following environment variables to your <code class="doc-inline-code">.env</code> file:</p>
-
+                            <h4 class="text-lg font-semibold text-white mb-4">2. Environment Configuration</h4>
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>.env</span>
                                     <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
                                 </div>
-                                <pre><code><span class="code-comment"># Stripe Platform (for subscription billing)</span>
+                                <pre><code><span class="code-comment"># Laravel Cashier (for subscription billing)</span>
 <span class="code-variable">STRIPE_PLATFORM_KEY</span>=<span class="code-string">pk_live_your_publishable_key</span>
 <span class="code-variable">STRIPE_PLATFORM_SECRET</span>=<span class="code-string">sk_live_your_secret_key</span>
 <span class="code-variable">STRIPE_PLATFORM_WEBHOOK_SECRET</span>=<span class="code-string">whsec_your_subscription_webhook_secret</span>
@@ -235,19 +322,19 @@
                             </div>
 
                             <ul class="doc-list mb-6">
-                                <li><code class="doc-inline-code">STRIPE_PLATFORM_KEY</code>: Your Stripe publishable key (starts with <code class="doc-inline-code">pk_live_</code> or <code class="doc-inline-code">pk_test_</code>)</li>
-                                <li><code class="doc-inline-code">STRIPE_PLATFORM_SECRET</code>: Your Stripe secret key (starts with <code class="doc-inline-code">sk_live_</code> or <code class="doc-inline-code">sk_test_</code>)</li>
-                                <li><code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code>: The webhook signing secret for subscription events</li>
-                                <li><code class="doc-inline-code">STRIPE_PRICE_MONTHLY</code>: The Price ID for monthly subscription</li>
-                                <li><code class="doc-inline-code">STRIPE_PRICE_YEARLY</code>: The Price ID for yearly subscription</li>
+                                <li><code class="doc-inline-code">STRIPE_PLATFORM_KEY</code>: Publishable key for your platform</li>
+                                <li><code class="doc-inline-code">STRIPE_PLATFORM_SECRET</code>: Secret key for your platform</li>
+                                <li><code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code>: Webhook secret for subscription events</li>
+                                <li><code class="doc-inline-code">STRIPE_PRICE_MONTHLY</code>: Price ID for monthly subscription</li>
+                                <li><code class="doc-inline-code">STRIPE_PRICE_YEARLY</code>: Price ID for yearly subscription</li>
                             </ul>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">3. Webhook Configuration</h3>
+                            <h4 class="text-lg font-semibold text-white mb-4">3. Subscription Webhook</h4>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to <strong class="text-white">Developers</strong> > <strong class="text-white">Webhooks</strong> in the Stripe Dashboard</li>
-                                <li>Click <strong class="text-white">Add endpoint</strong></li>
-                                <li>Set the endpoint URL: <code class="doc-inline-code">https://yourdomain.com/stripe/subscription-webhook</code></li>
-                                <li>Select events to listen to:
+                                <li>Go to <strong class="text-white">Developers</strong> → <strong class="text-white">Webhooks</strong></li>
+                                <li>Click <strong class="text-white">Add endpoint</strong> (this is a second webhook, separate from Connect)</li>
+                                <li>Set URL to: <code class="doc-inline-code">https://yourdomain.com/stripe/subscription-webhook</code></li>
+                                <li>Select events:
                                     <ul class="doc-list mt-2 mb-2">
                                         <li><code class="doc-inline-code">customer.subscription.created</code></li>
                                         <li><code class="doc-inline-code">customer.subscription.updated</code></li>
@@ -257,33 +344,23 @@
                                         <li><code class="doc-inline-code">invoice.payment_failed</code></li>
                                     </ul>
                                 </li>
-                                <li>Save the endpoint and copy the signing secret to <code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code></li>
+                                <li>Save and copy signing secret to <code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code></li>
                             </ol>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">4. Customer Portal Setup</h3>
+                            <h4 class="text-lg font-semibold text-white mb-4">4. Customer Portal Setup</h4>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to <strong class="text-white">Settings</strong> > <strong class="text-white">Billing</strong> > <strong class="text-white">Customer portal</strong> in Stripe Dashboard</li>
-                                <li>Configure the portal settings:
+                                <li>Go to <strong class="text-white">Settings</strong> → <strong class="text-white">Billing</strong> → <strong class="text-white">Customer portal</strong></li>
+                                <li>Enable subscription management features:
                                     <ul class="doc-list mt-2 mb-2">
-                                        <li>Enable subscription cancellation</li>
-                                        <li>Enable plan switching</li>
-                                        <li>Enable payment method updates</li>
-                                        <li>Customize branding to match your site</li>
+                                        <li>Subscription cancellation</li>
+                                        <li>Plan switching</li>
+                                        <li>Payment method updates</li>
                                     </ul>
                                 </li>
-                                <li>Save your settings</li>
+                                <li>Customize branding to match your platform</li>
                             </ol>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">5. Subscription Flow</h3>
-                            <ol class="doc-list doc-list-numbered mb-6">
-                                <li>User navigates to their schedule's admin page > Plan tab</li>
-                                <li>User clicks "Upgrade to Pro"</li>
-                                <li>User enters payment details using Stripe Elements</li>
-                                <li>Subscription is created with optional trial period</li>
-                                <li>User can manage subscription via Stripe Customer Portal</li>
-                            </ol>
-
-                            <h3 class="text-lg font-semibold text-white mb-4">API Endpoints</h3>
+                            <h4 class="text-lg font-semibold text-white mb-4">Subscription API Endpoints</h4>
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>
@@ -315,14 +392,26 @@
                                         </tr>
                                         <tr>
                                             <td><code class="doc-inline-code">POST /{subdomain}/subscription/swap</code></td>
-                                            <td>Switch between monthly/yearly plans</td>
+                                            <td>Switch between monthly/yearly</td>
                                         </tr>
                                         <tr>
                                             <td><code class="doc-inline-code">POST /stripe/subscription-webhook</code></td>
-                                            <td>Webhook handler for subscription events</td>
+                                            <td>Handle subscription events</td>
                                         </tr>
                                     </tbody>
                                 </table>
+                            </div>
+
+                            <div class="bg-violet-500/10 border border-violet-500/20 rounded-xl p-4 mb-6">
+                                <div class="flex items-start gap-3">
+                                    <svg class="w-5 h-5 text-violet-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <p class="text-violet-300 font-medium mb-1">Architecture Note</p>
+                                        <p class="text-gray-400 text-sm">Laravel Cashier uses the <code class="doc-inline-code">Role</code> model (schedule/calendar) as the billable entity, not <code class="doc-inline-code">User</code>. This means each schedule has its own subscription, and users can have multiple schedules with different plans.</p>
+                                    </div>
+                                </div>
                             </div>
                         </section>
 
@@ -330,23 +419,21 @@
                         <section id="testing" class="doc-section">
                             <h2 class="doc-heading">Testing</h2>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Test Mode Configuration</h3>
-                            <p class="text-gray-300 mb-4">For development and testing, use Stripe's test mode:</p>
+                            <h3 class="text-lg font-semibold text-white mb-4">Test Mode Setup</h3>
+                            <p class="text-gray-300 mb-4">For development and testing:</p>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Toggle to "Test mode" in the Stripe Dashboard</li>
+                                <li>Toggle to <strong class="text-white">"Test mode"</strong> in the Stripe Dashboard</li>
                                 <li>Use test API keys (starting with <code class="doc-inline-code">pk_test_</code> and <code class="doc-inline-code">sk_test_</code>)</li>
                                 <li>Create test webhook endpoints pointing to your development environment</li>
                             </ol>
 
                             <h3 class="text-lg font-semibold text-white mb-4">Test Card Numbers</h3>
-                            <p class="text-gray-300 mb-4">Use these test card numbers in test mode:</p>
-
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>
                                         <tr>
                                             <th>Card Number</th>
-                                            <th>Description</th>
+                                            <th>Result</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -356,7 +443,7 @@
                                         </tr>
                                         <tr>
                                             <td><code class="doc-inline-code">4000 0000 0000 3220</code></td>
-                                            <td>3D Secure authentication required</td>
+                                            <td>3D Secure required</td>
                                         </tr>
                                         <tr>
                                             <td><code class="doc-inline-code">4000 0000 0000 9995</code></td>
@@ -369,11 +456,10 @@
                                     </tbody>
                                 </table>
                             </div>
-
                             <p class="text-gray-400 text-sm mb-6">Use any future expiration date and any 3-digit CVC.</p>
 
                             <h3 class="text-lg font-semibold text-white mb-4">Testing Webhooks Locally</h3>
-                            <p class="text-gray-300 mb-4">Use the <a href="https://stripe.com/docs/stripe-cli" target="_blank" class="text-violet-400 hover:text-violet-300">Stripe CLI</a> to forward webhooks to your local environment:</p>
+                            <p class="text-gray-300 mb-4">Use the <a href="https://stripe.com/docs/stripe-cli" target="_blank" class="text-violet-400 hover:text-violet-300">Stripe CLI</a> to forward webhooks:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -386,14 +472,30 @@ brew install stripe/stripe-cli/stripe
 <span class="code-comment"># Login to your Stripe account</span>
 stripe login
 
-<span class="code-comment"># Forward Stripe Connect webhooks</span>
+<span class="code-comment"># Forward webhooks (selfhosted or Connect)</span>
 stripe listen --forward-to localhost:8000/stripe/webhook
 
-<span class="code-comment"># Forward subscription webhooks (in another terminal)</span>
+<span class="code-comment"># For SaaS: Forward subscription webhooks (separate terminal)</span>
 stripe listen --forward-to localhost:8000/stripe/subscription-webhook</code></pre>
                             </div>
 
-                            <p class="text-gray-300">The CLI will display a webhook signing secret to use in your <code class="doc-inline-code">.env</code> file.</p>
+                            <p class="text-gray-300 mb-4">The CLI displays a webhook signing secret to use in your <code class="doc-inline-code">.env</code> file.</p>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">Trigger Test Events</h3>
+                            <div class="doc-code-block">
+                                <div class="doc-code-header">
+                                    <span>bash</span>
+                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code><span class="code-comment"># Test checkout completion (selfhosted)</span>
+stripe trigger checkout.session.completed
+
+<span class="code-comment"># Test payment success (Connect)</span>
+stripe trigger payment_intent.succeeded
+
+<span class="code-comment"># Test subscription creation</span>
+stripe trigger customer.subscription.created</code></pre>
+                            </div>
                         </section>
 
                         <!-- Troubleshooting -->
@@ -405,6 +507,7 @@ stripe listen --forward-to localhost:8000/stripe/subscription-webhook</code></pr
                             <div class="space-y-4 mb-8">
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
                                     <h4 class="font-semibold text-white mb-2">"Stripe account not connected" error</h4>
+                                    <p class="text-gray-400 text-sm mb-2"><strong class="text-white">Applies to:</strong> SaaS operators (Connect)</p>
                                     <ul class="doc-list text-sm">
                                         <li>User needs to complete Stripe Connect onboarding</li>
                                         <li>Check if <code class="doc-inline-code">stripe_account_id</code> and <code class="doc-inline-code">stripe_completed_at</code> are set on the user</li>
@@ -413,12 +516,13 @@ stripe listen --forward-to localhost:8000/stripe/subscription-webhook</code></pr
 
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
                                     <h4 class="font-semibold text-white mb-2">"Invalid signature" webhook error</h4>
+                                    <p class="text-gray-400 text-sm mb-2"><strong class="text-white">Applies to:</strong> All setups</p>
                                     <ul class="doc-list text-sm">
                                         <li>Verify the webhook secret matches the one in Stripe Dashboard</li>
-                                        <li>Ensure you're using the correct secret for each endpoint:
+                                        <li>Make sure you're using the correct secret for each endpoint:
                                             <ul class="doc-list mt-2">
-                                                <li><code class="doc-inline-code">STRIPE_WEBHOOK_SECRET</code> for <code class="doc-inline-code">/stripe/webhook</code></li>
-                                                <li><code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code> for <code class="doc-inline-code">/stripe/subscription-webhook</code></li>
+                                                <li><code class="doc-inline-code">STRIPE_WEBHOOK_SECRET</code> for Connect webhooks</li>
+                                                <li><code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code> for selfhosted/subscription webhooks</li>
                                             </ul>
                                         </li>
                                     </ul>
@@ -426,124 +530,51 @@ stripe listen --forward-to localhost:8000/stripe/subscription-webhook</code></pr
 
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
                                     <h4 class="font-semibold text-white mb-2">Payments not being recorded</h4>
+                                    <p class="text-gray-400 text-sm mb-2"><strong class="text-white">Applies to:</strong> Selfhosted users, SaaS operators</p>
                                     <ul class="doc-list text-sm">
-                                        <li>Check that webhooks are being received (Stripe Dashboard > Webhooks > View logs)</li>
-                                        <li>Verify the webhook endpoint is accessible</li>
-                                        <li>Check application logs for errors</li>
+                                        <li>Check webhook logs in Stripe Dashboard → Webhooks → View logs</li>
+                                        <li>Verify the webhook endpoint is accessible (not blocked by firewall)</li>
+                                        <li>Check <code class="doc-inline-code">storage/logs/laravel.log</code> for errors</li>
                                     </ul>
                                 </div>
 
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
                                     <h4 class="font-semibold text-white mb-2">Subscription not updating after payment</h4>
+                                    <p class="text-gray-400 text-sm mb-2"><strong class="text-white">Applies to:</strong> SaaS operators</p>
                                     <ul class="doc-list text-sm">
                                         <li>Verify webhook events are being received</li>
-                                        <li>Check that the correct events are selected in Stripe Dashboard</li>
+                                        <li>Check that all required subscription events are selected in Stripe</li>
                                         <li>Review <code class="doc-inline-code">storage/logs/laravel.log</code> for errors</li>
                                     </ul>
                                 </div>
 
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
                                     <h4 class="font-semibold text-white mb-2">"No such price" error</h4>
+                                    <p class="text-gray-400 text-sm mb-2"><strong class="text-white">Applies to:</strong> SaaS operators</p>
                                     <ul class="doc-list text-sm">
                                         <li>Verify <code class="doc-inline-code">STRIPE_PRICE_MONTHLY</code> and <code class="doc-inline-code">STRIPE_PRICE_YEARLY</code> contain valid Price IDs</li>
-                                        <li>Ensure the prices exist in the same Stripe account (test vs live)</li>
+                                        <li>Ensure the prices exist in the same Stripe mode (test vs live)</li>
                                     </ul>
                                 </div>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Logs</h3>
-                            <p class="text-gray-300 mb-4">Check the following logs for debugging:</p>
+                            <h3 class="text-lg font-semibold text-white mb-4">Debugging Logs</h3>
                             <ul class="doc-list mb-6">
-                                <li>Application logs: <code class="doc-inline-code">storage/logs/laravel.log</code></li>
-                                <li>Stripe Dashboard: <strong class="text-white">Developers</strong> > <strong class="text-white">Logs</strong> (API requests)</li>
-                                <li>Stripe Dashboard: <strong class="text-white">Developers</strong> > <strong class="text-white">Webhooks</strong> > Select endpoint > View logs</li>
+                                <li><strong class="text-white">Application:</strong> <code class="doc-inline-code">storage/logs/laravel.log</code></li>
+                                <li><strong class="text-white">Stripe API:</strong> Dashboard → Developers → Logs</li>
+                                <li><strong class="text-white">Webhooks:</strong> Dashboard → Developers → Webhooks → Select endpoint → View logs</li>
                             </ul>
-
-                            <h3 class="text-lg font-semibold text-white mb-4">Verifying Configuration</h3>
-                            <p class="text-gray-300 mb-4">To verify your Stripe configuration is correct:</p>
-                            <ol class="doc-list doc-list-numbered mb-4">
-                                <li><strong class="text-white">Test Stripe Connect:</strong> Go to profile settings and try connecting a Stripe account</li>
-                                <li><strong class="text-white">Test Subscriptions:</strong> Try subscribing to the Pro plan with a test card</li>
-                                <li><strong class="text-white">Test Webhooks:</strong> Use Stripe CLI to trigger test events:</li>
-                            </ol>
-
-                            <div class="doc-code-block">
-                                <div class="doc-code-header">
-                                    <span>bash</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
-                                </div>
-                                <pre><code><span class="code-comment"># Trigger a test payment_intent.succeeded event</span>
-stripe trigger payment_intent.succeeded
-
-<span class="code-comment"># Trigger a test subscription event</span>
-stripe trigger customer.subscription.created</code></pre>
-                            </div>
                         </section>
 
-                        <!-- Security Considerations -->
+                        <!-- Security -->
                         <section id="security" class="doc-section">
-                            <h2 class="doc-heading">Security Considerations</h2>
+                            <h2 class="doc-heading">Security</h2>
                             <ol class="doc-list doc-list-numbered">
-                                <li><span class="font-semibold text-white">API Key Security:</span> Never expose secret keys in client-side code or version control</li>
-                                <li><span class="font-semibold text-white">Webhook Verification:</span> Always verify webhook signatures to prevent spoofed events</li>
-                                <li><span class="font-semibold text-white">HTTPS Required:</span> Stripe requires HTTPS for webhook endpoints in production</li>
-                                <li><span class="font-semibold text-white">PCI Compliance:</span> Using Stripe Checkout and Elements keeps you out of PCI scope</li>
+                                <li><span class="font-semibold text-white">API Key Security:</span> Never expose secret keys in client-side code or version control. Use environment variables.</li>
+                                <li><span class="font-semibold text-white">Webhook Verification:</span> Always verify webhook signatures—Event Schedule does this automatically.</li>
+                                <li><span class="font-semibold text-white">HTTPS Required:</span> Stripe requires HTTPS for webhook endpoints in production.</li>
+                                <li><span class="font-semibold text-white">PCI Compliance:</span> Using Stripe Checkout and Elements keeps you out of PCI scope—card data never touches your server.</li>
                             </ol>
-                        </section>
-
-                        <!-- Architecture Notes -->
-                        <section id="architecture" class="doc-section">
-                            <h2 class="doc-heading">Architecture Notes</h2>
-
-                            <h3 class="text-lg font-semibold text-white mb-4">Billable Model</h3>
-                            <p class="text-gray-300 mb-4">Laravel Cashier is configured to use the <code class="doc-inline-code">Role</code> model (representing a schedule/calendar) as the billable entity, not the <code class="doc-inline-code">User</code> model. This means:</p>
-                            <ul class="doc-list mb-6">
-                                <li>Each schedule has its own subscription status</li>
-                                <li>Users can have multiple schedules with different plans</li>
-                                <li>Subscription-related fields (<code class="doc-inline-code">stripe_id</code>, <code class="doc-inline-code">pm_type</code>, <code class="doc-inline-code">pm_last_four</code>, <code class="doc-inline-code">trial_ends_at</code>) are on the <code class="doc-inline-code">roles</code> table</li>
-                            </ul>
-
-                            <h3 class="text-lg font-semibold text-white mb-4">Separate Stripe Accounts</h3>
-                            <p class="text-gray-300 mb-4">The two integrations use completely separate Stripe configurations:</p>
-
-                            <div class="overflow-x-auto mb-6">
-                                <table class="doc-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Feature</th>
-                                            <th>Stripe Connect</th>
-                                            <th>Laravel Cashier</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Purpose</td>
-                                            <td>Ticket sales</td>
-                                            <td>Subscription billing</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Config key</td>
-                                            <td><code class="doc-inline-code">services.stripe.key</code></td>
-                                            <td><code class="doc-inline-code">cashier.secret</code></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Webhook endpoint</td>
-                                            <td><code class="doc-inline-code">/stripe/webhook</code></td>
-                                            <td><code class="doc-inline-code">/stripe/subscription-webhook</code></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Env prefix</td>
-                                            <td><code class="doc-inline-code">STRIPE_</code></td>
-                                            <td><code class="doc-inline-code">STRIPE_PLATFORM_</code></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Money flows to</td>
-                                            <td>Event creator</td>
-                                            <td>Platform operator</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
                         </section>
 
                         <!-- Navigation -->

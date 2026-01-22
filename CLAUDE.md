@@ -4,13 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Event Schedule is an open-source platform for sharing events, selling tickets, and bringing communities together. It supports both hosted (SaaS at eventschedule.com) and self-hosted deployments.
+Event Schedule is an open-source platform for sharing events, selling tickets, and bringing communities together. It supports both hosted (SaaS at eventschedule.com) and selfhosted deployments.
 
 ## Important Rules
 
 - **Never run tests without asking first** - Tests will empty the database
 - **Never run `npm install` without asking first** - Confirm before installing dependencies
 - **Never delete migration files** - They may have already been run on production
+- **Use "selfhost" not "self-host"** - Always write "selfhost" and "selfhosted" (no hyphen)
 
 ## Build & Development Commands
 
@@ -64,7 +65,7 @@ composer audit
 
 ### Multi-Tenant Routing
 - **Hosted mode** (`IS_HOSTED=true`): Uses subdomains (`{subdomain}.eventschedule.com`)
-- **Self-hosted mode** (`IS_HOSTED=false`): Uses path-based routing (`/{subdomain}/...`)
+- **Selfhosted mode** (`IS_HOSTED=false`): Uses path-based routing (`/{subdomain}/...`)
 
 Routes are defined conditionally in `routes/web.php` based on `config('app.hosted')`.
 
@@ -105,7 +106,7 @@ Commands in `app/Console/Commands/`: CheckData, ExtendPlans, ReleaseTickets, Tra
 ## Environment Variables
 
 Key configuration in `.env`:
-- `IS_HOSTED` - `true` for SaaS, `false` for self-hosted
+- `IS_HOSTED` - `true` for SaaS, `false` for selfhosted
 - `APP_TESTING` - Set to `true` in test environment
 - `GEMINI_API_KEY` - For AI event parsing/translation
 - `REPORT_ERRORS` - Enable Sentry error reporting
