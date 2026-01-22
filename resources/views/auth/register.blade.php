@@ -44,6 +44,9 @@
                 if (verificationCodeField) verificationCodeField.style.display = 'block';
                 if (termsField) termsField.style.display = 'block';
                 if (submitSection) submitSection.style.display = 'block';
+                // Hide the Google signup section
+                var googleSignupSection = document.getElementById('google-signup-section');
+                if (googleSignupSection) googleSignupSection.style.display = 'none';
                 // If email is readonly, lock it
                 if (emailInput.readOnly) {
                     lockedEmail = emailInput.value.toLowerCase();
@@ -110,6 +113,9 @@
                             if (verificationCodeField) verificationCodeField.style.display = 'block';
                             if (termsField) termsField.style.display = 'block';
                             if (submitSection) submitSection.style.display = 'block';
+                            // Hide the Google signup section
+                            var googleSignupSection = document.getElementById('google-signup-section');
+                            if (googleSignupSection) googleSignupSection.style.display = 'none';
                             // Focus on the name field
                             var nameInput = document.getElementById('name');
                             if (nameInput) {
@@ -416,7 +422,7 @@
     </form>
 
     @if (config('services.google.client_id') && config('app.hosted'))
-    <div class="w-full mt-2 mb-4">
+    <div id="google-signup-section" class="w-full mt-2 mb-4">
         <div class="relative mb-8">
             <div class="absolute inset-0 flex items-center">
                 <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>

@@ -99,8 +99,8 @@
                     <label for="plan_term" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Plan Term</label>
                     <select name="plan_term" id="plan_term" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">None</option>
-                        <option value="monthly" {{ $role->plan_term === 'monthly' ? 'selected' : '' }}>Monthly</option>
-                        <option value="yearly" {{ $role->plan_term === 'yearly' ? 'selected' : '' }}>Yearly</option>
+                        <option value="month" {{ $role->plan_term === 'month' ? 'selected' : '' }}>Monthly</option>
+                        <option value="year" {{ $role->plan_term === 'year' ? 'selected' : '' }}>Yearly</option>
                     </select>
                     @error('plan_term')
                         <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>

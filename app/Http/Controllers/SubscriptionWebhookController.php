@@ -109,7 +109,7 @@ class SubscriptionWebhookController extends WebhookController
             $currentPrice = $data['items']['data'][0]['price']['id'] ?? null;
 
             if ($currentPrice) {
-                $role->plan_term = ($currentPrice === $yearlyPriceId) ? 'yearly' : 'monthly';
+                $role->plan_term = ($currentPrice === $yearlyPriceId) ? 'year' : 'month';
                 $role->save();
             }
         }

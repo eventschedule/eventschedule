@@ -1,6 +1,6 @@
 @props(['disabled' => false])
 
-<div class="relative" x-data="{ show: false }">
+<div class="relative w-full" x-data="{ show: false }">
     <x-text-input
         {{ $attributes->merge(['type' => 'password']) }}
         x-bind:type="show ? 'text' : 'password'"

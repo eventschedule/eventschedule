@@ -4,37 +4,12 @@
         <!-- Get Started Panel -->
         @if($schedules->isEmpty() && $venues->isEmpty() && $curators->isEmpty() && auth()->user()->tickets()->count() === 0)
         <div class="mb-8">
-            <style>
-                .welcome-gradient-text {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    background-clip: text;
-                }
-                .welcome-card {
-                    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                }
-                .welcome-card:hover {
-                    transform: translateY(-6px);
-                }
-            </style>
-
-            <!-- Header Panel -->
-            <div class="relative rounded-2xl p-10 mb-8 overflow-hidden bg-[#0a0a0f]">
-                <!-- Gradient orbs -->
-                <div class="absolute inset-0 overflow-hidden">
-                    <div class="absolute top-0 left-1/4 w-[300px] h-[300px] bg-gradient-to-r from-violet-600/30 to-indigo-600/30 rounded-full blur-[80px]"></div>
-                    <div class="absolute bottom-0 right-1/4 w-[250px] h-[250px] bg-gradient-to-r from-fuchsia-600/20 to-pink-600/20 rounded-full blur-[80px]"></div>
-                </div>
-                <!-- Grid pattern -->
-                <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
-                <div class="relative text-center">
-                    <h2 class="text-4xl font-bold tracking-tight mb-4">
-                        <span class="text-white">Welcome {{ auth()->user()->firstName() }}, </span>
-                        <span class="welcome-gradient-text">let's get started</span>
-                    </h2>
-                    <p class="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">{{ __('messages.create_your_first_schedule') }}</p>
-                </div>
+            <!-- Header -->
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                    Welcome {{ auth()->user()->firstName() }}, let's get started
+                </h2>
+                <p class="text-gray-500 dark:text-gray-400">{{ __('messages.create_your_first_schedule') }}</p>
             </div>
 
             <!-- Schedule Types -->
