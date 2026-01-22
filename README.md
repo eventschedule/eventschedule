@@ -7,7 +7,7 @@
         An open-source platform to share events, sell tickets and bring communities together.
     </p>
     <p>
-        <a href="https://openmicnight.eventschedule.com">View Demo</a> · <a href="https://www.eventschedule.com">Hosted Version</a> · <a href="#installation-guide">Self-Host Guide</a>
+        <a href="https://openmicnight.eventschedule.com">View Demo</a> · <a href="https://www.eventschedule.com">Hosted Version</a> · <a href="https://eventschedule.com/docs/installation">Self-Host Guide</a>
     </p>
 </div>
 
@@ -17,7 +17,7 @@
 
 | | Hosted | Self-Hosted |
 |---|---|---|
-| **Setup** | [Up and running in under 5 minutes](https://www.eventschedule.com) | [Full control over your infrastructure](#installation-guide) |
+| **Setup** | [Up and running in under 5 minutes](https://www.eventschedule.com) | [Full control over your infrastructure](https://eventschedule.com/docs/installation) |
 | **Infrastructure** | We handle hosting and servers | You manage your own servers |
 | **Updates** | Automatic | One-click updates |
 
@@ -77,69 +77,20 @@
 
 ## Installation Guide
 
-Follow these steps to set up Event Schedule:
+For detailed installation instructions, see the [Installation Guide](https://eventschedule.com/docs/installation).
 
-### 1. Set Up the Database
-
-Run the following commands to create the MySQL database and user:
-
-```sql
-CREATE DATABASE eventschedule;
-CREATE USER 'eventschedule'@'localhost' IDENTIFIED BY 'change_me';
-GRANT ALL PRIVILEGES ON eventschedule.* TO 'eventschedule'@'localhost';
-```
-
----
-
-### 2. Download the Application
-
-Copy [eventschedule.zip](https://github.com/eventschedule/eventschedule/releases/latest) to your server and unzip it.
-
----
-
-### 3. Set File Permissions
-
-Ensure correct permissions for storage and cache directories:
-
-```bash
-cd /path/to/eventschedule
-chmod -R 755 storage
-sudo chown -R www-data:www-data storage bootstrap public
-```
-
----
-
-### 4. Configure Environment
-
-Copy the `.env.example` file to `.env` and then access the application at `https://your-domain.com`.
-
-```bash
-cp .env.example .env
-```
-
-<img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/setup.png?raw=true" width="100%" alt="Setup"/>
-
----
-
-### 5. Set Up the Cron Job
-
-Add the following line to your crontab to ensure scheduled tasks run automatically:
-
-```bash
-* * * * * php /path/to/eventschedule/artisan schedule:run
-```
-
----
-
-You're all set! 🎉 Event Schedule should now be up and running.
+Quick start options:
+- **[Softaculous](https://www.softaculous.com/apps/calendars/Event_Schedule)**: One-click automated installation
+- **[Docker](https://github.com/eventschedule/dockerfiles)**: Containerized deployment
+- **[Manual Installation](https://eventschedule.com/docs/installation)**: Step-by-step guide
 
 ## Documentation
 
 For advanced configuration, see the following guides:
 
-- [SaaS Setup](docs/SAAS_SETUP.md) - Configure Event Schedule for multi-tenant SaaS deployment with subdomain routing
-- [Stripe Setup](docs/STRIPE_SETUP.md) - Set up Stripe Connect for ticket sales and Cashier for subscription billing
-- [Google Calendar Setup](docs/GOOGLE_CALENDAR_SETUP.md) - Enable bidirectional sync with Google Calendar
+- [SaaS Setup](https://eventschedule.com/docs/saas) - Configure Event Schedule for multi-tenant SaaS deployment with subdomain routing
+- [Stripe Setup](https://eventschedule.com/docs/stripe) - Set up Stripe Connect for ticket sales and Cashier for subscription billing
+- [Google Calendar Setup](https://eventschedule.com/docs/google-calendar) - Enable bidirectional sync with Google Calendar
 
 ## Testing
 

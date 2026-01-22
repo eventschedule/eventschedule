@@ -224,6 +224,11 @@ if (config('app.is_nexus')) {
         Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
         Route::get('/selfhost', [MarketingController::class, 'selfHost'])->name('marketing.selfhost');
         Route::get('/saas', [MarketingController::class, 'saas'])->name('marketing.saas');
+        Route::get('/docs', [MarketingController::class, 'docsIndex'])->name('marketing.docs');
+        Route::get('/docs/saas', [MarketingController::class, 'docsSaas'])->name('marketing.docs.saas');
+        Route::get('/docs/stripe', [MarketingController::class, 'docsStripe'])->name('marketing.docs.stripe');
+        Route::get('/docs/google-calendar', [MarketingController::class, 'docsGoogleCalendar'])->name('marketing.docs.google_calendar');
+        Route::get('/docs/installation', [MarketingController::class, 'docsInstallation'])->name('marketing.docs.installation');
     } else {
         // Nexus mode: show marketing pages at root URLs on eventschedule.com
         Route::domain('eventschedule.com')->group(function () {
@@ -238,6 +243,11 @@ if (config('app.is_nexus')) {
             Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
             Route::get('/selfhost', [MarketingController::class, 'selfHost'])->name('marketing.selfhost');
             Route::get('/saas', [MarketingController::class, 'saas'])->name('marketing.saas');
+            Route::get('/docs', [MarketingController::class, 'docsIndex'])->name('marketing.docs');
+            Route::get('/docs/saas', [MarketingController::class, 'docsSaas'])->name('marketing.docs.saas');
+            Route::get('/docs/stripe', [MarketingController::class, 'docsStripe'])->name('marketing.docs.stripe');
+            Route::get('/docs/google-calendar', [MarketingController::class, 'docsGoogleCalendar'])->name('marketing.docs.google_calendar');
+            Route::get('/docs/installation', [MarketingController::class, 'docsInstallation'])->name('marketing.docs.installation');
         });
 
         // Redirect www.eventschedule.com marketing pages to non-www
@@ -253,6 +263,11 @@ if (config('app.is_nexus')) {
             Route::get('/self-hosting-terms-of-service', fn () => redirect('https://eventschedule.com/self-hosting-terms-of-service', 301));
             Route::get('/selfhost', fn () => redirect('https://eventschedule.com/selfhost', 301));
             Route::get('/saas', fn () => redirect('https://eventschedule.com/saas', 301));
+            Route::get('/docs', fn () => redirect('https://eventschedule.com/docs', 301));
+            Route::get('/docs/saas', fn () => redirect('https://eventschedule.com/docs/saas', 301));
+            Route::get('/docs/stripe', fn () => redirect('https://eventschedule.com/docs/stripe', 301));
+            Route::get('/docs/google-calendar', fn () => redirect('https://eventschedule.com/docs/google-calendar', 301));
+            Route::get('/docs/installation', fn () => redirect('https://eventschedule.com/docs/installation', 301));
         });
     }
 } else {
@@ -265,6 +280,11 @@ if (config('app.is_nexus')) {
     Route::get('/integrations', fn () => redirect()->route('home'));
     Route::get('/selfhost', fn () => redirect()->route('home'));
     Route::get('/saas', fn () => redirect()->route('home'));
+    Route::get('/docs', fn () => redirect()->route('home'));
+    Route::get('/docs/saas', fn () => redirect()->route('home'));
+    Route::get('/docs/stripe', fn () => redirect()->route('home'));
+    Route::get('/docs/google-calendar', fn () => redirect()->route('home'));
+    Route::get('/docs/installation', fn () => redirect()->route('home'));
 }
 
 if (config('app.hosted') && ! config('app.is_testing')) {
