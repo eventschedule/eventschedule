@@ -104,6 +104,101 @@ class MarketingController extends Controller
     }
 
     /**
+     * Documentation index page
+     */
+    public function docsIndex()
+    {
+        return view('marketing.docs.index', [
+            'docs' => $this->getDocsList(),
+        ]);
+    }
+
+    /**
+     * SaaS documentation page
+     */
+    public function docsSaas()
+    {
+        return view('marketing.docs.saas', [
+            'docs' => $this->getDocsList(),
+            'currentDoc' => 'saas',
+        ]);
+    }
+
+    /**
+     * Stripe documentation page
+     */
+    public function docsStripe()
+    {
+        return view('marketing.docs.stripe', [
+            'docs' => $this->getDocsList(),
+            'currentDoc' => 'stripe',
+        ]);
+    }
+
+    /**
+     * Google Calendar documentation page
+     */
+    public function docsGoogleCalendar()
+    {
+        return view('marketing.docs.google-calendar', [
+            'docs' => $this->getDocsList(),
+            'currentDoc' => 'google-calendar',
+        ]);
+    }
+
+    /**
+     * Installation documentation page
+     */
+    public function docsInstallation()
+    {
+        return view('marketing.docs.installation', [
+            'docs' => $this->getDocsList(),
+            'currentDoc' => 'installation',
+        ]);
+    }
+
+    /**
+     * Get documentation list
+     */
+    protected function getDocsList(): array
+    {
+        return [
+            [
+                'slug' => 'installation',
+                'title' => 'Installation Guide',
+                'description' => 'Set up Event Schedule on your own server with this step-by-step guide.',
+                'icon' => 'download',
+                'color' => 'cyan',
+                'route' => 'marketing.docs.installation',
+            ],
+            [
+                'slug' => 'saas',
+                'title' => 'SaaS Setup',
+                'description' => 'Configure Event Schedule for SaaS deployment with subdomain-based multi-tenant routing.',
+                'icon' => 'server',
+                'color' => 'blue',
+                'route' => 'marketing.docs.saas',
+            ],
+            [
+                'slug' => 'stripe',
+                'title' => 'Stripe Integration',
+                'description' => 'Set up Stripe Connect for ticket sales and Laravel Cashier for subscription billing.',
+                'icon' => 'credit-card',
+                'color' => 'indigo',
+                'route' => 'marketing.docs.stripe',
+            ],
+            [
+                'slug' => 'google-calendar',
+                'title' => 'Google Calendar',
+                'description' => 'Enable bidirectional sync between Event Schedule and Google Calendar.',
+                'icon' => 'calendar',
+                'color' => 'violet',
+                'route' => 'marketing.docs.google_calendar',
+            ],
+        ];
+    }
+
+    /**
      * Get user personas data
      */
     protected function getPersonas(): array
