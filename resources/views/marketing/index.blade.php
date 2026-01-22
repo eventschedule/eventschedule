@@ -183,8 +183,8 @@
                             </span>
                             <div class="absolute inset-0 animate-shimmer"></div>
                         </a>
-                        <a href="{{ marketing_url('/features') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white glass rounded-2xl hover:bg-white/10 transition-all">
-                            Explore features
+                        <a href="https://openmicnight.eventschedule.com" target="_blank" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white glass rounded-2xl hover:bg-white/10 transition-all">
+                            View demo
                         </a>
                     </div>
                 </div>
