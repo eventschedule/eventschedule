@@ -2,6 +2,7 @@
     <x-slot name="title">Integrations - Event Schedule</x-slot>
     <x-slot name="description">Connect Event Schedule with Google Calendar, Stripe, Invoice Ninja, and your own email server for a seamless event management experience.</x-slot>
     <x-slot name="keywords">event schedule integrations, Google Calendar sync, Stripe payments, Invoice Ninja, SMTP email, calendar integration, payment processing</x-slot>
+    <x-slot name="socialImage">social/integrations.jpg</x-slot>
 
     <style>
         .text-gradient {
