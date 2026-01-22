@@ -223,6 +223,7 @@ if (config('app.is_nexus')) {
         Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
         Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
         Route::get('/selfhost', [MarketingController::class, 'selfHost'])->name('marketing.selfhost');
+        Route::get('/saas', [MarketingController::class, 'saas'])->name('marketing.saas');
     } else {
         // Nexus mode: show marketing pages at root URLs on eventschedule.com
         Route::domain('eventschedule.com')->group(function () {
@@ -236,6 +237,7 @@ if (config('app.is_nexus')) {
             Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
             Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
             Route::get('/selfhost', [MarketingController::class, 'selfHost'])->name('marketing.selfhost');
+            Route::get('/saas', [MarketingController::class, 'saas'])->name('marketing.saas');
         });
 
         // Redirect www.eventschedule.com marketing pages to non-www
@@ -250,6 +252,7 @@ if (config('app.is_nexus')) {
             Route::get('/terms-of-service', fn () => redirect('https://eventschedule.com/terms-of-service', 301));
             Route::get('/self-hosting-terms-of-service', fn () => redirect('https://eventschedule.com/self-hosting-terms-of-service', 301));
             Route::get('/selfhost', fn () => redirect('https://eventschedule.com/selfhost', 301));
+            Route::get('/saas', fn () => redirect('https://eventschedule.com/saas', 301));
         });
     }
 } else {
@@ -261,6 +264,7 @@ if (config('app.is_nexus')) {
     Route::get('/ticketing', fn () => redirect()->route('home'));
     Route::get('/integrations', fn () => redirect()->route('home'));
     Route::get('/selfhost', fn () => redirect()->route('home'));
+    Route::get('/saas', fn () => redirect()->route('home'));
 }
 
 if (config('app.hosted')) {
