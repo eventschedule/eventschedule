@@ -25,7 +25,7 @@
         "@type": "BlogPosting",
         "headline": "{{ $post->title }}",
         "description": "{{ $post->meta_description }}",
-        "image": "{{ $post->featured_image_url ?: config('app.url') . '/images/background.jpg' }}",
+        "image": "{{ $post->featured_image_url ?: config('app.url') . '/images/social/home.png' }}",
         "author": {
             "@type": "Person",
             "name": "{{ $post->author_name }}"
