@@ -253,10 +253,6 @@ class RoleController extends Controller
 
     public function viewGuest(Request $request, $subdomain, $slug = '')
     {
-        if (config('app.hosted') && env('APP_REDIRECT_SUBDOMAIN') == $subdomain) {
-            return redirect(env('APP_REDIRECT_URL'), 302);
-        }
-
         $translation = null;
         $user = auth()->user();
         $curatorRoles = $user ? $user->curators() : collect();
