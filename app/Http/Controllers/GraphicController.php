@@ -191,8 +191,9 @@ class GraphicController extends Controller
         $eventText = $this->generateEventText($role, $events, $directRegistration);
 
         // Process text through AI if ai_prompt is set (Enterprise feature)
-        if ($role->isEnterprise() && ! empty($graphicSettings['ai_prompt']) && config('services.google.gemini_key')) {
-            $aiProcessedText = $this->processTextWithAI($eventText, $graphicSettings['ai_prompt']);
+        $aiPrompt = trim($graphicSettings['ai_prompt'] ?? '');
+        if ($role->isEnterprise() && ! empty($aiPrompt) && config('services.google.gemini_key')) {
+            $aiProcessedText = $this->processTextWithAI($eventText, $aiPrompt);
             if ($aiProcessedText) {
                 $eventText = $aiProcessedText;
             }
