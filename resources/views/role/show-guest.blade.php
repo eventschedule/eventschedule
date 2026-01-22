@@ -106,7 +106,7 @@
               </div>
 
               {{-- Mobile-only button row: social icons left, action buttons right --}}
-              <div class="flex sm:hidden flex-row justify-between items-center w-full {{ $isRtl ? 'flex-row-reverse' : '' }}">
+              <div class="flex sm:hidden flex-row justify-between items-center w-full">
                 {{-- Social icons (left on LTR, right on RTL) --}}
                 @if($hasEmail || $hasWebsite || $hasSocial)
                 <div class="flex flex-row gap-2 items-center">
