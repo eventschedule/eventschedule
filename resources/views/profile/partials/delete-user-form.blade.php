@@ -14,7 +14,8 @@
         x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
     >{{ __('messages.delete_account') }}</x-danger-button>
 
-    <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
+    <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable
+        x-on:open-modal.window="if ($event.detail === 'confirm-user-deletion') { $el.querySelector('form')?.reset(); }">
         <form method="post" action="{{ route('profile.destroy') }}" class="p-6" onkeydown="if(event.key === 'Enter') { event.preventDefault(); return false; }">
             @csrf
             @method('delete')
@@ -58,7 +59,7 @@
                     {{ __('messages.cancel') }}
                 </x-secondary-button>
 
-                <x-danger-button class="ms-3" x-on:click="submitting = true" x-bind:disabled="submitting">
+                <x-danger-button class="ms-3" x-on:click="submitting = true; $el.closest('form').submit()" x-bind:disabled="submitting">
                     {{ __('messages.delete_account') }}
                 </x-danger-button>
             </div>
