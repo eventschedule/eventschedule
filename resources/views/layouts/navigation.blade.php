@@ -66,7 +66,7 @@
                     </a>
                 </li>
 
-                @if (auth()->user()->isAdmin())
+                @if (auth()->user()->isAdmin() && (!config('app.hosted') || config('app.is_nexus')))
                 <li>
                     <a href="{{ route('blog.admin.index') }}"
                         class="group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('admin/blog*') ? 'bg-gray-800 text-white' : '' }}">
@@ -77,6 +77,8 @@
                         Blog
                     </a>
                 </li>
+                @endif
+                @if (auth()->user()->isAdmin())
                 <li>
                     <a href="{{ route('admin.dashboard') }}"
                         class="group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('admin') && !request()->is('admin/*') ? 'bg-gray-800 text-white' : '' }}">

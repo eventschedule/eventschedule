@@ -54,11 +54,13 @@
                             About
                         </a>
                     </li>
+                    @if (!config('app.hosted') || config('app.is_nexus'))
                     <li>
                         <a href="{{ blog_url() }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                             Blog
                         </a>
                     </li>
+                    @endif
                     <li>
                         <a href="https://invoiceninja.com" target="_blank" rel="noopener" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                             Invoice Ninja
