@@ -140,6 +140,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/events-graphic', [GraphicController::class, 'generateGraphic'])->name('event.generate_graphic');
     Route::get('/{subdomain}/events-graphic/data', [GraphicController::class, 'generateGraphicData'])->name('event.generate_graphic_data');
     Route::get('/{subdomain}/events-graphic/download', [GraphicController::class, 'downloadGraphic'])->name('event.download_graphic');
+    Route::get('/{subdomain}/events-graphic/settings', [GraphicController::class, 'getSettings'])->name('event.graphic_settings');
+    Route::post('/{subdomain}/events-graphic/settings', [GraphicController::class, 'saveSettings'])->name('event.save_graphic_settings');
+    Route::post('/{subdomain}/events-graphic/test-email', [GraphicController::class, 'sendTestEmail'])->name('event.graphic_test_email');
     Route::get('/{subdomain}/clear-videos/{event_hash}/{role_hash}', [EventController::class, 'clearVideos'])->name('event.clear_videos');
     Route::get('/{subdomain}/requests/accept-event/{hash}', [EventController::class, 'accept'])->name('event.accept');
     Route::get('/{subdomain}/requests/decline-event/{hash}', [EventController::class, 'decline'])->name('event.decline');
@@ -163,15 +166,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image');
 
-    Route::get('/api/documentation', function () {
-        return view('api.documentation');
-    })->name('api.documentation');
+    Route::get('/api/documentation', fn () => redirect()->route('marketing.docs.api'))->name('api.documentation');
 
     Route::patch('/api-settings', [ApiSettingsController::class, 'update'])->name('api-settings.update');
     Route::post('/api-settings/show-key', [ApiSettingsController::class, 'showApiKey'])->name('api-settings.show-key');
 
     // Admin routes (only for admin users)
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin/plans', [AdminController::class, 'plans'])->name('admin.plans');
+    Route::get('/admin/plans/{role}/edit', [AdminController::class, 'editPlan'])->name('admin.plans.edit');
+    Route::put('/admin/plans/{role}', [AdminController::class, 'updatePlan'])->name('admin.plans.update');
 
     // Admin blog routes (only for admin users)
     Route::get('/admin/blog', [BlogController::class, 'adminIndex'])->name('blog.admin.index');
@@ -218,7 +222,14 @@ if (config('app.is_nexus')) {
         Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
         Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
         Route::get('/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
+        Route::get('/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
+        Route::get('/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
         Route::get('/integrations', [MarketingController::class, 'integrations'])->name('marketing.integrations');
+        Route::get('/custom-fields', [MarketingController::class, 'customFields'])->name('marketing.custom_fields');
+        Route::get('/team-scheduling', [MarketingController::class, 'teamScheduling'])->name('marketing.team_scheduling');
+        Route::get('/sub-schedules', [MarketingController::class, 'subSchedules'])->name('marketing.sub_schedules');
+        Route::get('/online-events', [MarketingController::class, 'onlineEvents'])->name('marketing.online_events');
+        Route::get('/open-source', [MarketingController::class, 'openSource'])->name('marketing.open_source');
         Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
         Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
         Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
@@ -229,6 +240,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/stripe', [MarketingController::class, 'docsStripe'])->name('marketing.docs.stripe');
         Route::get('/docs/google-calendar', [MarketingController::class, 'docsGoogleCalendar'])->name('marketing.docs.google_calendar');
         Route::get('/docs/installation', [MarketingController::class, 'docsInstallation'])->name('marketing.docs.installation');
+        Route::get('/docs/api', [MarketingController::class, 'docsApi'])->name('marketing.docs.api');
     } else {
         // Nexus mode: show marketing pages at root URLs on eventschedule.com
         Route::domain('eventschedule.com')->group(function () {
@@ -237,7 +249,15 @@ if (config('app.is_nexus')) {
             Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
             Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
             Route::get('/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
+            Route::get('/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
+            Route::get('/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
+            Route::get('/analytics', [MarketingController::class, 'analytics'])->name('marketing.analytics');
             Route::get('/integrations', [MarketingController::class, 'integrations'])->name('marketing.integrations');
+            Route::get('/custom-fields', [MarketingController::class, 'customFields'])->name('marketing.custom_fields');
+            Route::get('/team-scheduling', [MarketingController::class, 'teamScheduling'])->name('marketing.team_scheduling');
+            Route::get('/sub-schedules', [MarketingController::class, 'subSchedules'])->name('marketing.sub_schedules');
+            Route::get('/online-events', [MarketingController::class, 'onlineEvents'])->name('marketing.online_events');
+            Route::get('/open-source', [MarketingController::class, 'openSource'])->name('marketing.open_source');
             Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
             Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
             Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
@@ -248,6 +268,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/stripe', [MarketingController::class, 'docsStripe'])->name('marketing.docs.stripe');
             Route::get('/docs/google-calendar', [MarketingController::class, 'docsGoogleCalendar'])->name('marketing.docs.google_calendar');
             Route::get('/docs/installation', [MarketingController::class, 'docsInstallation'])->name('marketing.docs.installation');
+            Route::get('/docs/api', [MarketingController::class, 'docsApi'])->name('marketing.docs.api');
         });
 
         // Redirect www.eventschedule.com marketing pages to non-www
@@ -257,7 +278,15 @@ if (config('app.is_nexus')) {
             Route::get('/pricing', fn () => redirect('https://eventschedule.com/pricing', 301));
             Route::get('/about', fn () => redirect('https://eventschedule.com/about', 301));
             Route::get('/ticketing', fn () => redirect('https://eventschedule.com/ticketing', 301));
+            Route::get('/ai', fn () => redirect('https://eventschedule.com/ai', 301));
+            Route::get('/calendar-sync', fn () => redirect('https://eventschedule.com/calendar-sync', 301));
+            Route::get('/analytics', fn () => redirect('https://eventschedule.com/analytics', 301));
             Route::get('/integrations', fn () => redirect('https://eventschedule.com/integrations', 301));
+            Route::get('/custom-fields', fn () => redirect('https://eventschedule.com/custom-fields', 301));
+            Route::get('/team-scheduling', fn () => redirect('https://eventschedule.com/team-scheduling', 301));
+            Route::get('/sub-schedules', fn () => redirect('https://eventschedule.com/sub-schedules', 301));
+            Route::get('/online-events', fn () => redirect('https://eventschedule.com/online-events', 301));
+            Route::get('/open-source', fn () => redirect('https://eventschedule.com/open-source', 301));
             Route::get('/privacy', fn () => redirect('https://eventschedule.com/privacy', 301));
             Route::get('/terms-of-service', fn () => redirect('https://eventschedule.com/terms-of-service', 301));
             Route::get('/self-hosting-terms-of-service', fn () => redirect('https://eventschedule.com/self-hosting-terms-of-service', 301));
@@ -268,6 +297,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/stripe', fn () => redirect('https://eventschedule.com/docs/stripe', 301));
             Route::get('/docs/google-calendar', fn () => redirect('https://eventschedule.com/docs/google-calendar', 301));
             Route::get('/docs/installation', fn () => redirect('https://eventschedule.com/docs/installation', 301));
+            Route::get('/docs/api', fn () => redirect('https://eventschedule.com/docs/api', 301));
         });
     }
 } else {
@@ -277,7 +307,14 @@ if (config('app.is_nexus')) {
     Route::get('/pricing', fn () => redirect()->route('home'));
     Route::get('/about', fn () => redirect()->route('home'));
     Route::get('/ticketing', fn () => redirect()->route('home'));
+    Route::get('/ai', fn () => redirect()->route('home'));
+    Route::get('/calendar-sync', fn () => redirect()->route('home'));
+    Route::get('/analytics', fn () => redirect()->route('home'));
     Route::get('/integrations', fn () => redirect()->route('home'));
+    Route::get('/custom-fields', fn () => redirect()->route('home'));
+    Route::get('/team-scheduling', fn () => redirect()->route('home'));
+    Route::get('/sub-schedules', fn () => redirect()->route('home'));
+    Route::get('/online-events', fn () => redirect()->route('home'));
     Route::get('/selfhost', fn () => redirect()->route('home'));
     Route::get('/saas', fn () => redirect()->route('home'));
     Route::get('/docs', fn () => redirect()->route('home'));
@@ -285,6 +322,7 @@ if (config('app.is_nexus')) {
     Route::get('/docs/stripe', fn () => redirect()->route('home'));
     Route::get('/docs/google-calendar', fn () => redirect()->route('home'));
     Route::get('/docs/installation', fn () => redirect()->route('home'));
+    Route::get('/docs/api', fn () => redirect()->route('home'));
 }
 
 // Blog routes: use /blog path for local dev, testing, and selfhosted users

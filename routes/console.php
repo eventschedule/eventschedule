@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
 Schedule::call(function () {
     Artisan::call('app:release-tickets');
@@ -24,3 +24,7 @@ Schedule::call(function () {
         Artisan::call('app:import-curator-events');
     }
 })->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
+    Artisan::call('app:send-graphic-emails');
+})->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));

@@ -147,6 +147,14 @@ class GeminiUtils
         return $data;
     }
 
+    /**
+     * Send a simple text prompt to Gemini and return the response
+     */
+    public static function sendPrompt($prompt)
+    {
+        return self::sendRequest($prompt);
+    }
+
     public static function parseEvent($role, $details, $file = null)
     {
         $imageData = null;

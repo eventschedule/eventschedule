@@ -5,6 +5,11 @@
     <x-slot name="socialImage">social/home.png</x-slot>
 
     <style>
+        /* Smooth scrolling for anchor links */
+        html {
+            scroll-behavior: smooth;
+        }
+
         /* Animations */
         @keyframes gradient-shift {
             0%, 100% { background-position: 0% 50%; }
@@ -256,7 +261,7 @@
     </section>
 
     <!-- Features Section -->
-    <section class="relative bg-gray-50 py-24">
+    <section id="features" class="relative bg-gray-50 py-24 scroll-mt-4">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Section header -->
             <div class="text-center mb-16">
@@ -328,6 +333,7 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Custom Fields</h3>
                     <p class="text-gray-600 text-sm">Collect additional info from ticket buyers with text, dropdown, date, and yes/no fields.</p>
+                    <a href="{{ marketing_url('/custom-fields') }}" class="inline-block mt-3 text-sm font-medium text-amber-600 hover:text-amber-700">Learn more &rarr;</a>
                 </div>
 
                 <!-- Team & Permissions -->
@@ -339,6 +345,7 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Team Scheduling</h3>
                     <p class="text-gray-600 text-sm">Invite team members, manage permissions, and coordinate schedules together.</p>
+                    <a href="{{ marketing_url('/team-scheduling') }}" class="inline-block mt-3 text-sm font-medium text-cyan-600 hover:text-cyan-700">Learn more &rarr;</a>
                 </div>
 
                 <!-- Sub-schedules -->
@@ -350,6 +357,7 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Sub-schedules</h3>
                     <p class="text-gray-600 text-sm">Organize events into categories. Perfect for venues with multiple rooms or event series.</p>
+                    <a href="{{ marketing_url('/sub-schedules') }}" class="inline-block mt-3 text-sm font-medium text-rose-600 hover:text-rose-700">Learn more &rarr;</a>
                 </div>
 
                 <!-- Online Events -->
@@ -361,6 +369,7 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Online Events</h3>
                     <p class="text-gray-600 text-sm">Sell tickets to virtual events. Share streaming links with ticket holders automatically.</p>
+                    <a href="{{ marketing_url('/online-events') }}" class="inline-block mt-3 text-sm font-medium text-indigo-600 hover:text-indigo-700">Learn more &rarr;</a>
                 </div>
 
                 <!-- API & Open Source -->
@@ -372,6 +381,7 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Open Source & API</h3>
                     <p class="text-gray-600 text-sm">Self-host on your own server. Full REST API for custom integrations. AAL licensed.</p>
+                    <a href="{{ marketing_url('/open-source') }}" class="inline-block mt-3 text-sm font-medium text-gray-600 hover:text-gray-700">Learn more &rarr;</a>
                 </div>
 
             </div>

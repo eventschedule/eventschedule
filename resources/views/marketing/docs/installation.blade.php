@@ -285,9 +285,6 @@
                                 <li>Customize your branding and appearance</li>
                             </ul>
                         </section>
-
-                        <!-- Navigation -->
-                        @include('marketing.docs.partials.navigation', ['prevDoc' => null, 'nextDoc' => $docs[1]])
                     </div>
                 </div>
             </div>

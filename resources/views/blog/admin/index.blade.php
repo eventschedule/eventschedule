@@ -56,6 +56,34 @@
         </script>
     </x-slot>
 
+    {{-- Admin Navigation Tabs --}}
+    <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+        <div class="flex justify-between items-center">
+            <nav class="-mb-px flex space-x-8">
+                <a href="{{ route('admin.dashboard') }}"
+                    class="whitespace-nowrap border-b-2 border-transparent px-1 pb-4 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300">
+                    Dashboard
+                </a>
+                @if (config('app.hosted') || config('app.is_nexus'))
+                <a href="{{ route('admin.plans') }}"
+                    class="whitespace-nowrap border-b-2 border-transparent px-1 pb-4 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300">
+                    Plans
+                </a>
+                @endif
+                <a href="{{ route('blog.admin.index') }}"
+                    class="whitespace-nowrap border-b-2 border-[#4E81FA] px-1 pb-4 text-base font-medium text-[#4E81FA]">
+                    Blog
+                </a>
+            </nav>
+            <button onclick="window.location.reload()" class="mb-4 inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh
+            </button>
+        </div>
+    </div>
+
     <div class="flow-root">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">

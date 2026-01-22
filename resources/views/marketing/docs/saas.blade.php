@@ -566,9 +566,6 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                                 <li><span class="font-semibold text-white">File Permissions:</span> Ensure proper file permissions on the server</li>
                             </ol>
                         </section>
-
-                        <!-- Navigation -->
-                        @include('marketing.docs.partials.navigation', ['prevDoc' => $docs[0], 'nextDoc' => $docs[2]])
                     </div>
                 </div>
             </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
+use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -260,5 +261,137 @@ class AdminController extends Controller
             'schedules' => $schedulesData,
             'events' => $eventsData,
         ];
+    }
+
+    /**
+     * Display the admin plans management page.
+     */
+    public function plans(Request $request)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // Plan statistics
+        $planCounts = Role::select('plan_type', DB::raw('COUNT(*) as count'))
+            ->whereNotNull('user_id')
+            ->where(function ($query) {
+                $query->whereNotNull('email_verified_at')
+                    ->orWhereNotNull('phone_verified_at');
+            })
+            ->groupBy('plan_type')
+            ->pluck('count', 'plan_type')
+            ->toArray();
+
+        $freeCount = $planCounts['free'] ?? 0;
+        $proCount = $planCounts['pro'] ?? 0;
+        $enterpriseCount = $planCounts['enterprise'] ?? 0;
+
+        // Active Stripe subscriptions
+        $activeSubscriptions = Role::whereHas('subscriptions', function ($query) {
+            $query->where('stripe_status', 'active');
+        })->count();
+
+        // Expiring in 30 days
+        $expiringSoon = Role::where('plan_type', '!=', 'free')
+            ->whereNotNull('plan_expires')
+            ->whereBetween('plan_expires', [now()->format('Y-m-d'), now()->addDays(30)->format('Y-m-d')])
+            ->count();
+
+        // Build query for role list
+        $query = Role::whereNotNull('user_id')
+            ->where(function ($q) {
+                $q->whereNotNull('email_verified_at')
+                    ->orWhereNotNull('phone_verified_at');
+            })
+            ->with('user');
+
+        // Search filter
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('subdomain', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Plan type filter
+        if ($planType = $request->input('plan_type')) {
+            $query->where('plan_type', $planType);
+        }
+
+        // Status filter
+        if ($status = $request->input('status')) {
+            if ($status === 'active') {
+                $query->where(function ($q) {
+                    $q->where('plan_expires', '>=', now()->format('Y-m-d'))
+                        ->orWhereHas('subscriptions', function ($sq) {
+                            $sq->where('stripe_status', 'active');
+                        });
+                });
+            } elseif ($status === 'expired') {
+                $query->where(function ($q) {
+                    $q->where('plan_expires', '<', now()->format('Y-m-d'))
+                        ->orWhereNull('plan_expires');
+                })->whereDoesntHave('subscriptions', function ($sq) {
+                    $sq->where('stripe_status', 'active');
+                });
+            } elseif ($status === 'trial') {
+                $query->whereNotNull('trial_ends_at')
+                    ->where('trial_ends_at', '>', now());
+            }
+        }
+
+        $roles = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
+
+        return view('admin.plans', compact(
+            'roles',
+            'freeCount',
+            'proCount',
+            'enterpriseCount',
+            'activeSubscriptions',
+            'expiringSoon'
+        ));
+    }
+
+    /**
+     * Show the edit form for a role's plan.
+     */
+    public function editPlan($roleId)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $decodedId = UrlUtils::decodeId($roleId);
+        $role = Role::with('user', 'subscriptions')->findOrFail($decodedId);
+
+        return view('admin.plans-edit', compact('role'));
+    }
+
+    /**
+     * Update a role's plan.
+     */
+    public function updatePlan(Request $request, $roleId)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $decodedId = UrlUtils::decodeId($roleId);
+        $role = Role::findOrFail($decodedId);
+
+        $validated = $request->validate([
+            'plan_type' => 'required|in:free,pro,enterprise',
+            'plan_term' => 'nullable|in:monthly,yearly',
+            'plan_expires' => 'nullable|date',
+        ]);
+
+        $role->plan_type = $validated['plan_type'];
+        $role->plan_term = $validated['plan_term'];
+        $role->plan_expires = $validated['plan_expires'];
+        $role->save();
+
+        return redirect()->route('admin.plans')->with('success', 'Plan updated successfully for '.$role->name);
     }
 }
