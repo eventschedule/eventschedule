@@ -2,7 +2,7 @@
     <x-slot name="title">About - Event Schedule</x-slot>
     <x-slot name="description">Learn about Event Schedule and how it helps performers, venues, and organizers share their events.</x-slot>
     <x-slot name="keywords">about event schedule, event management platform, open source event calendar, performer schedule app, venue calendar software, event curator tools</x-slot>
-    <x-slot name="socialImage">social/about.jpg</x-slot>
+    <x-slot name="socialImage">social/about.png</x-slot>
 
     <style>
         .text-gradient {

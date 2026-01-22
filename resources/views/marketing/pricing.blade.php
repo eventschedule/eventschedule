@@ -2,7 +2,7 @@
     <x-slot name="title">Pricing - Event Schedule</x-slot>
     <x-slot name="description">Simple, transparent pricing. Start free and upgrade when you need more features.</x-slot>
     <x-slot name="keywords">event schedule pricing, free event calendar, event management cost, ticketing fees, no platform fees, custom domain pricing</x-slot>
-    <x-slot name="socialImage">social/pricing.jpg</x-slot>
+    <x-slot name="socialImage">social/pricing.png</x-slot>
 
     <style>
         .text-gradient {
