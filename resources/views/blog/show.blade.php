@@ -1,123 +1,203 @@
-<x-app-layout :title="$post->meta_title . ' | Event Schedule'">
-    <x-slot name="meta">
-        <meta name="description" content="{{ $post->meta_description }}">
-        <meta property="og:title" content="{{ $post->meta_title }}">
-        <meta property="og:description" content="{{ $post->meta_description }}">
-        <meta property="og:image" content="{{ $post->featured_image_url ?: config('app.url') . '/images/background.jpg' }}">
-        <meta property="og:url" content="{{ url()->current() }}">
-        <meta property="og:site_name" content="Event Schedule">
-        <meta property="og:type" content="article">
-        @if($post->published_at)
-            <meta property="article:published_time" content="{{ $post->published_at->toISOString() }}">
-        @endif
-        <meta property="article:author" content="{{ $post->author_name }}">
-        @if($post->tags)
-            @foreach($post->tags as $tag)
-                <meta property="article:tag" content="{{ $tag }}">
-            @endforeach
-        @endif
-        <meta name="twitter:title" content="{{ $post->meta_title }}">
-        <meta name="twitter:description" content="{{ $post->meta_description }}">
-        <meta name="twitter:image" content="{{ $post->featured_image_url ?: config('app.url') . '/images/background.jpg' }}">
-        <meta name="twitter:card" content="summary_large_image">
-        <link rel="canonical" href="{{ url()->current() }}">
-        
-        <!-- Structured Data -->
-        <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "BlogPosting",
-            "headline": "{{ $post->title }}",
-            "description": "{{ $post->meta_description }}",
-            "image": "{{ $post->featured_image_url ?: config('app.url') . '/images/background.jpg' }}",
-            "author": {
-                "@type": "Person",
-                "name": "{{ $post->author_name }}"
-            },
-            "publisher": {
-                "@type": "Organization",
-                "name": "Event Schedule",
-                "logo": {
-                    "@type": "ImageObject",
-                    "url": "{{ config('app.url') }}/images/light_logo.png"
-                }
-            },
-            "datePublished": "{{ $post->published_at ? $post->published_at->toISOString() : '' }}",
-            "dateModified": "{{ $post->updated_at->toISOString() }}",
-            "mainEntityOfPage": {
-                "@type": "WebPage",
-                "@id": "{{ url()->current() }}"
+<x-marketing-layout>
+    <x-slot name="title">{{ $post->meta_title }} | Event Schedule</x-slot>
+    <x-slot name="description">{{ $post->meta_description }}</x-slot>
+    @if($post->tags)
+    <x-slot name="keywords">{{ implode(', ', $post->tags) }}, event scheduling, ticketing</x-slot>
+    @endif
+
+    <!-- Additional Meta Tags -->
+    <meta property="og:type" content="article">
+    @if($post->published_at)
+        <meta property="article:published_time" content="{{ $post->published_at->toISOString() }}">
+    @endif
+    <meta property="article:modified_time" content="{{ $post->updated_at->toISOString() }}">
+    <meta property="article:author" content="{{ $post->author_name }}">
+    @if($post->tags)
+        @foreach($post->tags as $tag)
+            <meta property="article:tag" content="{{ $tag }}">
+        @endforeach
+    @endif
+
+    <!-- BlogPosting Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "{{ $post->title }}",
+        "description": "{{ $post->meta_description }}",
+        "image": "{{ $post->featured_image_url ?: config('app.url') . '/images/background.jpg' }}",
+        "author": {
+            "@type": "Person",
+            "name": "{{ $post->author_name }}"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "{{ config('app.url') }}/images/light_logo.png"
             }
-            @if($post->tags)
-            ,"keywords": "{{ implode(', ', $post->tags) }}"
-            @endif
+        },
+        "datePublished": "{{ $post->published_at ? $post->published_at->toISOString() : '' }}",
+        "dateModified": "{{ $post->updated_at->toISOString() }}",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "{{ url()->current() }}"
         }
-        </script>
+        @if($post->tags)
+        ,"keywords": "{{ implode(', ', $post->tags) }}"
+        @endif
+    }
+    </script>
 
-        <style>
-            /* Override any existing hover styles that might conflict */
-            .prose a:hover,
-            .prose-lg a:hover {
-                text-decoration: underline !important;
+    <!-- BreadcrumbList Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "{{ config('app.url') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Blog",
+                "item": "{{ route('blog.index') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "{{ $post->title }}",
+                "item": "{{ url()->current() }}"
             }
-        </style>        
-    </x-slot>
+        ]
+    }
+    </script>
 
-    <div class="bg-blue-50 min-h-screen pb-12">
-        <article class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <!-- Header (inline, not partial) -->
-            <header class="mb-8 bg-gray-900 py-12 rounded-b-3xl">
-                <div class="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-                    <!-- Breadcrumb -->
-                    <nav class="mb-6" aria-label="Breadcrumb">
-                        <ol class="flex items-center space-x-2 text-sm text-gray-300">
-                            <li><a href="{{ route('blog.index') }}" class="hover:text-white">Blog</a></li>
-                            <li>
-                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+    <style>
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Override any existing hover styles that might conflict */
+        .prose a:hover,
+        .prose-lg a:hover {
+            text-decoration: underline !important;
+        }
+    </style>
+
+    <!-- Full-width Hero Header -->
+    <header class="relative overflow-hidden bg-[#0a0a0f]">
+        <!-- Animated gradient orbs - larger and more prominent -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-violet-600/30 via-indigo-600/20 to-transparent rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute -bottom-32 -left-32 w-[400px] h-[400px] bg-gradient-to-r from-fuchsia-600/25 to-pink-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1s;"></div>
+            <div class="absolute -bottom-32 -right-32 w-[400px] h-[400px] bg-gradient-to-l from-blue-600/20 to-cyan-600/15 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s;"></div>
+        </div>
+
+        <!-- Grid pattern overlay -->
+        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
+
+        <div class="relative z-10 py-16 sm:py-20 lg:py-24">
+            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+                <!-- Breadcrumb -->
+                <nav class="mb-8" aria-label="Breadcrumb">
+                    <ol class="flex items-center justify-center space-x-2 text-sm">
+                        <li>
+                            <a href="{{ route('blog.index') }}" class="inline-flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                                 </svg>
-                            </li>
-                            <li class="text-white">{{ $post->title }}</li>
-                        </ol>
-                    </nav>
-                    <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white mb-4">
-                        {{ $post->title }}
-                    </h1>
-                    <div class="flex items-center gap-x-4 text-sm text-gray-300 mb-6">
-                        @if($post->published_at)
+                                Blog
+                            </a>
+                        </li>
+                        <li>
+                            <svg class="h-4 w-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </li>
+                        <li class="text-gray-500 truncate max-w-xs">Article</li>
+                    </ol>
+                </nav>
+
+                <!-- Tags above title -->
+                @if($post->tags)
+                    <div class="flex flex-wrap gap-2 justify-center mb-6">
+                        @foreach($post->tags as $tag)
+                            <a href="{{ route('blog.index', ['tag' => $tag]) }}"
+                               class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-violet-500/20 text-violet-300 hover:bg-violet-500/30 transition-colors border border-violet-500/30">
+                                #{{ $tag }}
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+
+                <!-- Title -->
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-tight">
+                    {{ $post->title }}
+                </h1>
+
+                <!-- Meta info -->
+                <div class="flex items-center justify-center gap-4 text-sm text-gray-400 mb-8">
+                    @if($post->published_at)
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
                             <time datetime="{{ $post->published_at->toISOString() }}">
                                 {{ $post->formatted_published_at }}
                             </time>
-                        @endif
-                        <span>{{ $post->reading_time }}</span>
-                    </div>
-                    @if($post->excerpt)
-                        <p class="text-xl text-gray-300 leading-relaxed mb-6">
-                            {{ $post->excerpt }}
-                        </p>
-                    @endif
-                    @if($post->tags)
-                        <div class="flex flex-wrap gap-2 mb-6">
-                            @foreach($post->tags as $tag)
-                                <a href="{{ route('blog.index', ['tag' => $tag]) }}" 
-                                   class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors">
-                                    #{{ $tag }}
-                                </a>
-                            @endforeach
                         </div>
                     @endif
+                    <span class="text-gray-600">•</span>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-fuchsia-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{{ $post->reading_time }}</span>
+                    </div>
                 </div>
-            </header>
-            
+
+                <!-- Excerpt -->
+                @if($post->excerpt)
+                    <p class="text-lg sm:text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto">
+                        {{ $post->excerpt }}
+                    </p>
+                @endif
+            </div>
+        </div>
+
+        <!-- Bottom fade -->
+        <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 dark:from-gray-900 to-transparent"></div>
+    </header>
+
+    <div class="bg-gray-50 dark:bg-gray-900 min-h-screen pb-12">
+        <article class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 -mt-4">
+
             <!-- CTA Card -->
             <div class="mb-8">
-                <a href="https://www.eventschedule.com" class="block group">
-                    <div class="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 rounded-lg p-6 shadow-md transform transition-all duration-300 group-hover:shadow-lg" style="--tw-scale-x: 1; --tw-scale-y: 1;">
-                        <style>
-                            .group:hover .bg-gradient-to-r {
-                                transform: scale(1.03);
-                            }
-                        </style>
+                <a href="{{ marketing_url('/') }}" class="block group">
+                    <div class="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl p-6 shadow-md transition-all duration-300 group-hover:shadow-lg group-hover:shadow-violet-500/25 group-hover:scale-[1.02]">
                         <div class="text-center">
                             <p class="text-white text-lg font-medium">
                                 {!! str_replace(':link', '<span class="font-bold underline">eventschedule.com</span>',  __('messages.try_event_schedule')) !!}
@@ -126,19 +206,19 @@
                     </div>
                 </a>
             </div>
-            
+
             <!-- Featured Image -->
             @if($post->featured_image_url)
                 <div class="mb-8">
-                    <img src="{{ $post->featured_image_url }}" 
-                         alt="{{ $post->title }}" 
-                         class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-lg shadow-lg">
+                    <img src="{{ $post->featured_image_url }}"
+                         alt="{{ $post->title }}"
+                         class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-2xl shadow-lg">
                 </div>
             @endif
-            
-            <div class="bg-white border border-blue-100 rounded-lg shadow-sm p-8">
+
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-8">
                 <!-- Content -->
-                <div class="prose prose-lg max-w-none" style="font-size: 1.125rem;">
+                <div class="prose prose-lg dark:prose-invert max-w-none" style="font-size: 1.125rem;">
                     <style>
                         .prose-lg p { margin-bottom: 2rem !important; }
                         .prose-lg h1 { font-size: 2.5rem !important; font-weight: 800 !important; margin-top: 3rem !important; margin-bottom: 2rem !important; line-height: 1.1 !important; }
@@ -149,35 +229,39 @@
                         .prose-lg li { margin-bottom: 0.5rem !important; }
                         .prose-lg ul { list-style-type: disc !important; padding-left: 2rem !important; }
                         .prose-lg ul li { display: list-item !important; }
+                        .dark .prose-lg { color: #e5e7eb; }
+                        .dark .prose-lg h1, .dark .prose-lg h2, .dark .prose-lg h3, .dark .prose-lg h4 { color: #fff; }
+                        .dark .prose-lg a { color: #a78bfa; }
+                        .dark .prose-lg strong { color: #fff; }
                     </style>
                     {!! $post->content !!}
-                </div>                
+                </div>
                 <!-- Related Posts -->
                 @if($relatedPosts->count() > 0)
-                    <div class="mt-16 pt-8 border-t border-gray-200">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Related Posts</h2>
+                    <div class="mt-16 pt-8 border-t border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Related Posts</h2>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             @foreach($relatedPosts as $relatedPost)
                                 <article class="group">
                                     @if($relatedPost->featured_image_url)
                                         <div class="mb-4">
-                                            <img src="{{ $relatedPost->featured_image_url }}" 
-                                                 alt="{{ $relatedPost->title }}" 
-                                                 class="w-full h-32 object-cover rounded-lg">
+                                            <img src="{{ $relatedPost->featured_image_url }}"
+                                                 alt="{{ $relatedPost->title }}"
+                                                 class="w-full h-32 object-cover rounded-xl">
                                         </div>
                                     @endif
-                                    <h3 class="text-lg font-semibold text-gray-900 group-hover:text-gray-600 mb-2">
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors mb-2">
                                         <a href="{{ route('blog.show', $relatedPost->slug) }}">
                                             {{ $relatedPost->title }}
                                         </a>
                                     </h3>
-                                    <div class="flex items-center gap-x-4 text-xs text-gray-500 mb-2">
+                                    <div class="flex items-center gap-x-4 text-xs text-gray-500 dark:text-gray-400 mb-2">
                                         <time datetime="{{ $relatedPost->published_at->toISOString() }}">
                                             {{ $relatedPost->formatted_published_at }}
                                         </time>
                                         <span>{{ $relatedPost->reading_time }}</span>
                                     </div>
-                                    <p class="text-sm text-gray-600 line-clamp-2">
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
                                         {{ $relatedPost->excerpt }}
                                     </p>
                                 </article>
@@ -186,9 +270,9 @@
                     </div>
                 @endif
                 <!-- Back to Blog -->
-                <div class="mt-12 pt-8 border-t border-gray-200">
-                    <a href="{{ route('blog.index') }}" 
-                       class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+                    <a href="{{ route('blog.index') }}"
+                       class="inline-flex items-center text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
                         </svg>
@@ -197,19 +281,6 @@
                 </div>
             </div>
         </article>
-    </div>    
+    </div>
 
-    <footer class="bg-[#151B26]">
-      <div
-        class="container mx-auto flex flex-row justify-center items-center py-8 px-5"
-      >
-        <p class="text-[#F5F9FE] text-base text-center">
-            <!-- Per the AAL license, please do not remove the link to Event Schedule -->
-            {!! str_replace(':link', '<a href="https://www.eventschedule.com" class="hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
-                •
-            {!! __('messages.supported_by', ['link' => '<a href="https://invoiceninja.com" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>']) !!}
-        </p>
-      </div>
-    </footer>
-
-</x-app-layout> 
+</x-marketing-layout>
