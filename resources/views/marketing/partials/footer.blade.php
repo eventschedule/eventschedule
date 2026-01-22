@@ -1,6 +1,6 @@
 <footer class="bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-8">
             <!-- Product -->
             <div>
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Product</h3>
@@ -16,15 +16,17 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ marketing_url('/ticketing') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-                            Ticketing
-                        </a>
-                    </li>
-                    <li>
                         <a href="{{ marketing_url('/integrations') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                             Integrations
                         </a>
                     </li>
+                </ul>
+            </div>
+
+            <!-- Developer -->
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Developer</h3>
+                <ul class="space-y-3">
                     <li>
                         <a href="{{ marketing_url('/selfhost') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                             Selfhost
@@ -33,6 +35,11 @@
                     <li>
                         <a href="{{ marketing_url('/saas') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                             SaaS
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ marketing_url('/docs') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                            Documentation
                         </a>
                     </li>
                 </ul>
@@ -48,7 +55,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="https://blog.eventschedule.com" target="_blank" rel="noopener" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                        <a href="{{ blog_url() }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                             Blog
                         </a>
                     </li>
@@ -135,6 +142,11 @@
                     &copy; {{ date('Y') }} Event Schedule. All rights reserved.
                 </p>
             </div>
+            @if(config('app.hosted') && config('app.support_email'))
+                <p class="text-gray-500 dark:text-gray-400 text-sm mt-4 text-center">
+                    For suggestions or feedback, please send an email to <a href="mailto:{{ config('app.support_email') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors underline">{{ config('app.support_email') }}</a>
+                </p>
+            @endif
         </div>
     </div>
 </footer>
