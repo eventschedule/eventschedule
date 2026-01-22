@@ -96,6 +96,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * SaaS white-label page
+     */
+    public function saas()
+    {
+        return view('marketing.saas');
+    }
+
+    /**
      * Get user personas data
      */
     protected function getPersonas(): array
