@@ -66,7 +66,7 @@
                     $hasSocial = $role->social_links && $role->social_links != '[]';
                 @endphp
                 @if($hasEmail || $hasWebsite || $hasSocial)
-                <div class="hidden sm:flex flex-row gap-2 items-center justify-start mt-6">
+                <div class="hidden sm:flex flex-row gap-2 items-center {{ $isRtl ? 'justify-end' : 'justify-start' }} mt-6">
                     @if($hasEmail)
                     <a href="mailto:{{ $role->email }}"
                        class="w-8 h-8 rounded-full flex justify-center items-center shadow-sm hover:shadow-md hover:scale-110 transition-all duration-200"
