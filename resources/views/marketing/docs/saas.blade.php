@@ -210,6 +210,35 @@
                                 </ul>
                             </div>
 
+                            <h3 class="text-lg font-semibold text-white mb-4 mt-8">Support Configuration</h3>
+                            <div class="doc-code-block">
+                                <div class="doc-code-header">
+                                    <span>.env</span>
+                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code><span class="code-comment"># Email address for user feedback (displayed in footer)</span>
+<span class="code-variable">SUPPORT_EMAIL</span>=<span class="code-string">contact@eventschedule.com</span></code></pre>
+                            </div>
+
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Default</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">SUPPORT_EMAIL</code></td>
+                                            <td><code class="doc-inline-code">contact@eventschedule.com</code></td>
+                                            <td>Email address displayed in the footer for user suggestions and feedback</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
                             <h3 class="text-lg font-semibold text-white mb-4 mt-8">Pricing and Trial Configuration</h3>
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -401,6 +430,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
 <span class="code-comment"># Branding</span>
 <span class="code-variable">APP_LOGO_DARK</span>=<span class="code-string">/images/dark_logo.png</span>
 <span class="code-variable">APP_LOGO_LIGHT</span>=<span class="code-string">/images/light_logo.png</span>
+<span class="code-variable">SUPPORT_EMAIL</span>=<span class="code-string">support@myevents.com</span>
 
 <span class="code-comment"># Trial Configuration</span>
 <span class="code-variable">TRIAL_DAYS</span>=<span class="code-value">365</span>

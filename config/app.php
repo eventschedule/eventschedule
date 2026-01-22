@@ -39,6 +39,7 @@ return [
     'logo_dark' => env('APP_LOGO_DARK', '/images/dark_logo.png'),
     'logo_light' => env('APP_LOGO_LIGHT', '/images/light_logo.png'),
     'marketing_url' => env('APP_MARKETING_URL', 'https://eventschedule.com'),
+    'support_email' => env('SUPPORT_EMAIL', 'contact@eventschedule.com'),
     'trial_days' => (int) env('TRIAL_DAYS', 365),
 
     /*
