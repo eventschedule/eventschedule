@@ -83,6 +83,7 @@ class AppController extends Controller
 
         \Artisan::call('app:translate');
         \Artisan::call('google:refresh-webhooks');
+        \Artisan::call('app:send-graphic-emails');
 
         $currentHourUtc = (int) now('UTC')->format('H');
         if ($currentHourUtc === 12) {

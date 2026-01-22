@@ -224,6 +224,7 @@ if (config('app.is_nexus')) {
         Route::get('/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
         Route::get('/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
         Route::get('/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
+        Route::get('/analytics', [MarketingController::class, 'analytics'])->name('marketing.analytics');
         Route::get('/integrations', [MarketingController::class, 'integrations'])->name('marketing.integrations');
         Route::get('/custom-fields', [MarketingController::class, 'customFields'])->name('marketing.custom_fields');
         Route::get('/team-scheduling', [MarketingController::class, 'teamScheduling'])->name('marketing.team_scheduling');
@@ -309,7 +310,6 @@ if (config('app.is_nexus')) {
     Route::get('/ticketing', fn () => redirect()->route('home'));
     Route::get('/ai', fn () => redirect()->route('home'));
     Route::get('/calendar-sync', fn () => redirect()->route('home'));
-    Route::get('/analytics', fn () => redirect()->route('home'));
     Route::get('/integrations', fn () => redirect()->route('home'));
     Route::get('/custom-fields', fn () => redirect()->route('home'));
     Route::get('/team-scheduling', fn () => redirect()->route('home'));

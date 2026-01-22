@@ -388,12 +388,12 @@ class AdminController extends Controller
 
         $validated = $request->validate([
             'plan_type' => 'required|in:free,pro,enterprise',
-            'plan_term' => 'nullable|in:monthly,yearly',
+            'plan_term' => 'nullable|in:month,year',
             'plan_expires' => 'nullable|date',
         ]);
 
         $role->plan_type = $validated['plan_type'];
-        $role->plan_term = $validated['plan_term'] ?? 'yearly';
+        $role->plan_term = $validated['plan_term'] ?? 'year';
         $role->plan_expires = $validated['plan_expires'];
         $role->save();
 
