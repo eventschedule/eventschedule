@@ -87,8 +87,13 @@ class AdminController extends Controller
             ->limit(10)
             ->get();
 
-        // Recent schedules
-        $recentSchedules = Role::orderBy('created_at', 'desc')
+        // Recent schedules (only claimed)
+        $recentSchedules = Role::whereNotNull('user_id')
+            ->where(function ($query) {
+                $query->whereNotNull('email_verified_at')
+                    ->orWhereNotNull('phone_verified_at');
+            })
+            ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
 
@@ -388,7 +393,7 @@ class AdminController extends Controller
         ]);
 
         $role->plan_type = $validated['plan_type'];
-        $role->plan_term = $validated['plan_term'];
+        $role->plan_term = $validated['plan_term'] ?? 'yearly';
         $role->plan_expires = $validated['plan_expires'];
         $role->save();
 
