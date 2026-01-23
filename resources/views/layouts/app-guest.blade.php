@@ -270,36 +270,7 @@
     @endphp
 
     <div class="flex-grow">
-        @if (! request()->embed && $role->showBranding() && config('app.is_nexus'))
-            <header class="bg-[#f9fafb] dark:bg-gray-800">
-                <div
-                class="container mx-auto flex flex-row justify-between items-center py-7 px-5"
-                >
-                    <a href="https://www.eventschedule.com" target="_blank">
-                        <x-application-logo />
-                    </a>
-                    <div class="flex flex-row items-center gap-x-3 md:gap-x-12">
-                        @if ($role->language_code != 'en')
-                            <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-800 p-1 text-sm {{ $isRtl ? 'flex-row-reverse' : '' }}" translate="no">
-                                @if(session()->has('translate'))
-                                    <span class="bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm px-3 py-1.5 rounded-full font-medium">EN</span>
-                                    <a href="{{ request()->url() }}?lang={{ $role->language_code }}"
-                                       class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 px-3 py-1.5 rounded-full font-medium transition-all duration-200">
-                                        {{ strtoupper($role->language_code) }}
-                                    </a>
-                                @else
-                                    <a href="{{ request()->url() }}?lang=en"
-                                       class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 px-3 py-1.5 rounded-full font-medium transition-all duration-200">
-                                        EN
-                                    </a>
-                                    <span class="bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm px-3 py-1.5 rounded-full font-medium">{{ strtoupper($role->language_code) }}</span>
-                                @endif
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </header>
-        @elseif (! request()->embed && $role->language_code != 'en' && ! ($event && $event->exists))
+        @if (! request()->embed && $role->language_code != 'en' && ! ($event && $event->exists))
             <div class="container mx-auto flex {{ $isRtl ? 'justify-start pl-5' : 'justify-end pr-5' }} pt-4">
                 <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-800 p-1 text-sm shadow-md z-50 {{ $isRtl ? 'flex-row-reverse' : '' }}" translate="no">
                     @if(session()->has('translate') || request()->lang == 'en')
@@ -322,7 +293,7 @@
         {{ $slot }}
     </div>
 
-    @if (! request()->embed && $role->showBranding())
+    @if (! request()->embed && config('app.hosted') && $role->showBranding())
     <footer class="bg-gray-800">
       <div class="container mx-auto relative flex flex-row justify-center items-center py-5 px-5">
         <!-- Per the AAL license, please do not remove the link to Event Schedule -->
@@ -336,15 +307,12 @@
             <p class="text-[#F5F9FE] text-base text-center" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
                 {!! str_replace(':link', '<a href="' . marketing_url() . '" target="_blank" class="text-white hover:underline">' . marketing_domain() . '</a>',  __('messages.try_event_schedule')) !!}
             </p>
-            <a href="https://eventschedule.com" target="_blank" title="Powered by Event Schedule" class="absolute {{ $isRtl ? 'left-5' : 'right-5' }} top-1/2 -translate-y-1/2">
-                <img src="{{ url('/images/favicon.png') }}" alt="Event Schedule" class="h-5 w-5">
-            </a>
         @endif
       </div>
     </footer>
     @endif
 
-    @if (! request()->embed && config('app.hosted') && ! config('app.is_nexus'))
+    @if (! request()->embed && ((config('app.hosted') && ! config('app.is_nexus')) || (! config('app.hosted') && $role->showBranding())))
     <div class="flex justify-{{ $isRtl ? 'start' : 'end' }} p-4">
         <a href="https://eventschedule.com" target="_blank" title="Powered by Event Schedule" class="block rounded-full bg-gray-400 p-[1px]">
             <img src="{{ url('/images/favicon.png') }}" alt="Event Schedule" class="h-6 w-6 rounded-full">

@@ -166,7 +166,7 @@
             </main>
 
             <div class="mt-auto pb-8 px-8 text-sm text-gray-500 dark:text-gray-400">
-                @if (config('app.is_nexus'))
+                @if (config('app.hosted'))
                     {!! str_replace(':email', '<a href="mailto:contact@eventschedule.com?subject=Feedback" class="hover:underline">contact@eventschedule.com</a>', __('messages.questions_or_suggestions')) !!}
                 @else
                     <!-- Per the AAL license, please do not remove the link to Event Schedule -->
