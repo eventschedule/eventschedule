@@ -5,6 +5,7 @@
             let currentSettings = @json($graphicSettings);
             const isPro = {{ $isPro ? 'true' : 'false' }};
             const isEnterprise = {{ $isEnterprise ? 'true' : 'false' }};
+            const currentUserEmail = '{{ auth()->user()->email }}';
 
             function copyToClipboard(text, buttonId) {
                 navigator.clipboard.writeText(text).then(function() {
@@ -148,6 +149,11 @@
                 if (useScreenCapture) {
                     useScreenCapture.checked = currentSettings.use_screen_capture || false;
                 }
+
+                const recipientEmails = document.getElementById('recipient_emails');
+                if (recipientEmails) {
+                    recipientEmails.value = currentSettings.recipient_emails || '';
+                }
             }
 
             function toggleScreenCapture() {
@@ -178,13 +184,23 @@
             function toggleEmailOptions() {
                 const enabledCheckbox = document.getElementById('email_enabled');
                 const optionsContainer = document.getElementById('email_options_container');
+                const recipientEmails = document.getElementById('recipient_emails');
 
                 if (!enabledCheckbox || !optionsContainer) return;
 
                 if (enabledCheckbox.checked) {
                     optionsContainer.classList.remove('hidden');
+                    if (recipientEmails) {
+                        recipientEmails.required = true;
+                        if (!recipientEmails.value.trim()) {
+                            recipientEmails.value = currentUserEmail;
+                        }
+                    }
                 } else {
                     optionsContainer.classList.add('hidden');
+                    if (recipientEmails) {
+                        recipientEmails.required = false;
+                    }
                 }
             }
 
@@ -206,6 +222,16 @@
                 const sendHour = document.getElementById('send_hour');
                 const aiPrompt = document.getElementById('ai_prompt');
                 const useScreenCapture = document.getElementById('use_screen_capture');
+                const recipientEmails = document.getElementById('recipient_emails');
+
+                // Validate recipient emails is required when email scheduling is enabled
+                if (emailEnabled && emailEnabled.checked && recipientEmails && !recipientEmails.value.trim()) {
+                    showNotification('{{ __("messages.recipient_emails_required") }}', 'error');
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalText;
+                    recipientEmails.focus();
+                    return;
+                }
 
                 const settings = {
                     enabled: emailEnabled ? emailEnabled.checked : false,
@@ -215,7 +241,8 @@
                     ai_prompt: aiPrompt ? aiPrompt.value : '',
                     link_type: document.querySelector('input[name="link_type"]:checked').value,
                     layout: '{{ $layout }}',
-                    use_screen_capture: useScreenCapture ? useScreenCapture.checked : false
+                    use_screen_capture: useScreenCapture ? useScreenCapture.checked : false,
+                    recipient_emails: recipientEmails ? recipientEmails.value : ''
                 };
 
                 fetch('{{ route("event.save_graphic_settings", ["subdomain" => $role->subdomain]) }}', {
@@ -443,6 +470,16 @@
                                 @endfor
                             </select>
                         </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="recipient_emails" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                            {{ __('messages.recipient_emails') }}
+                        </label>
+                        <input type="text" id="recipient_emails"
+                            class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm"
+                            placeholder="{{ __('messages.recipient_emails_placeholder') }}">
+                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.recipient_emails_help') }}</p>
                     </div>
 
                     <button id="testEmailBtn" onclick="sendTestEmail()" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">

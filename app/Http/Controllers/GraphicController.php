@@ -52,6 +52,7 @@ class GraphicController extends Controller
             'send_day' => 'integer|min:0|max:31',
             'send_hour' => 'integer|min:0|max:23',
             'use_screen_capture' => 'boolean',
+            'recipient_emails' => 'nullable|string|max:1000',
         ]);
 
         // Merge with existing settings to preserve defaults

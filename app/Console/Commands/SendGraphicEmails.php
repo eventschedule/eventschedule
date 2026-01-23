@@ -54,27 +54,46 @@ class SendGraphicEmails extends Command
                     continue;
                 }
 
-                // Get the owner's email
-                $owner = $role->owner();
-                if (! $owner || empty($owner->email)) {
-                    \Log::info('Skipping graphic email - no owner email for role: '.$role->subdomain);
+                // Get and validate recipient emails
+                $settings = $role->graphic_settings;
+                $recipientEmails = $settings['recipient_emails'] ?? '';
+
+                if (empty($recipientEmails)) {
+                    \Log::info('Skipping graphic email - no recipient emails configured for role: '.$role->subdomain);
                     $skippedCount++;
 
                     continue;
                 }
 
-                // Send the email
-                $service = new GraphicEmailService;
-                $result = $service->sendGraphicEmail($role, $owner->email);
+                // Parse comma-separated emails and validate
+                $emailList = array_map('trim', explode(',', $recipientEmails));
+                $emailList = array_filter($emailList, fn ($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
 
-                if ($result) {
+                if (empty($emailList)) {
+                    \Log::info('Skipping graphic email - no valid recipient emails for role: '.$role->subdomain);
+                    $skippedCount++;
+
+                    continue;
+                }
+
+                // Send to each recipient
+                $service = new GraphicEmailService;
+                $allSent = true;
+                foreach ($emailList as $email) {
+                    $result = $service->sendGraphicEmail($role, $email);
+                    if (! $result) {
+                        $allSent = false;
+                    }
+                }
+
+                if ($allSent) {
                     // Update last_sent_at
                     $settings['last_sent_at'] = now()->toIso8601String();
                     $role->graphic_settings = $settings;
                     $role->save();
 
                     $sentCount++;
-                    \Log::info('Sent graphic email for role: '.$role->subdomain);
+                    \Log::info('Sent graphic email for role: '.$role->subdomain.' to '.count($emailList).' recipients');
                 }
             } catch (\Exception $e) {
                 \Log::error('Failed to send graphic email for role '.$role->subdomain.': '.$e->getMessage());
@@ -96,8 +115,8 @@ class SendGraphicEmails extends Command
             return false;
         }
 
-        // Check if recipient email is set
-        if (empty($settings['recipient_email'])) {
+        // Check if recipient emails are set
+        if (empty($settings['recipient_emails'])) {
             return false;
         }
 
