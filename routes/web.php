@@ -333,6 +333,11 @@ if (config('app.is_testing') || config('app.env') == 'local' || ! config('app.ho
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 }
 
+// Signed URL route for deleting blog posts via email link (no auth required, signed URL provides security)
+Route::get('/blog/delete-signed/{blogPost}', [BlogController::class, 'destroySigned'])
+    ->name('blog.destroy.signed')
+    ->middleware('signed');
+
 if (config('app.hosted') && ! config('app.is_testing')) {
     Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\BlogPostReview;
 use App\Models\BlogPost;
 use App\Utils\GeminiUtils;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Mail;
 
 class AppController extends Controller
 {
@@ -139,7 +141,7 @@ class AppController extends Controller
 
         // Create the blog post with randomized timestamp (up to 6 hours earlier)
         $randomSeconds = rand(0, 6 * 60 * 60);
-        BlogPost::create([
+        $blogPost = BlogPost::create([
             'title' => $postData['title'],
             'content' => $postData['content'],
             'excerpt' => $postData['excerpt'] ?? null,
@@ -150,5 +152,15 @@ class AppController extends Controller
             'is_published' => true,
             'published_at' => now()->subSeconds($randomSeconds),
         ]);
+
+        // Send email notification to admin for review
+        try {
+            $supportEmail = config('app.support_email');
+            if ($supportEmail) {
+                Mail::to($supportEmail)->send(new BlogPostReview($blogPost));
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Failed to send blog post review email: '.$e->getMessage());
+        }
     }
 }

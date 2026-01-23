@@ -4,10 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
 use App\Utils\GeminiUtils;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class BlogController extends Controller
 {
@@ -43,16 +42,17 @@ class BlogController extends Controller
         // Get monthly archives
         $archives = BlogPost::published()
             ->get()
-            ->groupBy(function($post) {
+            ->groupBy(function ($post) {
                 return $post->published_at->format('Y-m');
             })
-            ->map(function($posts, $yearMonth) {
+            ->map(function ($posts, $yearMonth) {
                 $parts = explode('-', $yearMonth);
+
                 return (object) [
                     'year' => $parts[0],
                     'month' => $parts[1],
                     'count' => $posts->count(),
-                    'month_name' => Carbon::createFromDate($parts[0], $parts[1], 1)->format('F')
+                    'month_name' => Carbon::createFromDate($parts[0], $parts[1], 1)->format('F'),
                 ];
             })
             ->sortByDesc('year')
@@ -67,7 +67,7 @@ class BlogController extends Controller
      */
     public function create()
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -79,7 +79,7 @@ class BlogController extends Controller
      */
     public function store(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -91,13 +91,13 @@ class BlogController extends Controller
             'published_at' => 'nullable|date',
             'meta_title' => 'nullable|string|max:60',
             'meta_description' => 'nullable|string|max:255',
-            'featured_image' => 'nullable|string|in:' . implode(',', array_keys(BlogPost::getAvailableHeaderImages())),
+            'featured_image' => 'nullable|string|in:'.implode(',', array_keys(BlogPost::getAvailableHeaderImages())),
             'author_name' => 'nullable|string|max:255',
             'is_published' => 'boolean',
         ]);
 
         $data = $request->all();
-        
+
         // Handle tags
         if ($request->has('tags')) {
             $tags = array_map('trim', explode(',', $request->tags));
@@ -106,7 +106,7 @@ class BlogController extends Controller
         }
 
         // Set published_at if not provided but is_published is true
-        if ($request->is_published && !$request->published_at) {
+        if ($request->is_published && ! $request->published_at) {
             $data['published_at'] = now()->addSeconds(rand(-60 * 60 * 60, 0));
         }
 
@@ -145,6 +145,7 @@ class BlogController extends Controller
             ->orderBy('published_at', 'desc')
             ->limit(3)
             ->get();
+
         return view('blog.show', compact('post', 'relatedPosts'));
     }
 
@@ -153,7 +154,7 @@ class BlogController extends Controller
      */
     public function edit(BlogPost $blogPost)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -165,7 +166,7 @@ class BlogController extends Controller
      */
     public function update(Request $request, BlogPost $blogPost)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -177,7 +178,7 @@ class BlogController extends Controller
             'published_at' => 'nullable|date',
             'meta_title' => 'nullable|string|max:60',
             'meta_description' => 'nullable|string|max:255',
-            'featured_image' => 'nullable|string|in:' . implode(',', array_keys(BlogPost::getAvailableHeaderImages())),
+            'featured_image' => 'nullable|string|in:'.implode(',', array_keys(BlogPost::getAvailableHeaderImages())),
             'author_name' => 'nullable|string|max:255',
             'is_published' => 'boolean',
         ]);
@@ -192,7 +193,7 @@ class BlogController extends Controller
         }
 
         // Set published_at if not provided but is_published is true
-        if ($request->is_published && !$request->published_at && !$blogPost->published_at) {
+        if ($request->is_published && ! $request->published_at && ! $blogPost->published_at) {
             $data['published_at'] = now();
         }
 
@@ -206,7 +207,7 @@ class BlogController extends Controller
      */
     public function destroy(BlogPost $blogPost)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -216,11 +217,22 @@ class BlogController extends Controller
     }
 
     /**
+     * Remove a blog post via signed URL (from email notification).
+     */
+    public function destroySigned(BlogPost $blogPost)
+    {
+        $title = $blogPost->title;
+        $blogPost->delete();
+
+        return view('blog.deleted-confirmation', compact('title'));
+    }
+
+    /**
      * Admin index - show all posts (published and unpublished)
      */
     public function adminIndex()
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -234,7 +246,7 @@ class BlogController extends Controller
      */
     public function generateContent(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return response()->json(['error' => 'Not authorized'], 403);
         }
 
@@ -249,7 +261,7 @@ class BlogController extends Controller
 
             return response()->json($generatedContent);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to generate content: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Failed to generate content: '.$e->getMessage()], 500);
         }
     }
 }
