@@ -863,4 +863,5 @@ return [
     'feature_team_members' => 'Add team members to manage your schedule',
     'feature_api_access' => 'API access for integrations',
     'upgrade_to_pro_plan' => 'Upgrade to Pro',
+    'screen_capture_help' => 'يستخدم العرض المستند إلى المتصفح لدعم أفضل للغات من اليمين إلى اليسار',
 ];
