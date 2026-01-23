@@ -2,21 +2,21 @@
 
 namespace Tests\Browser;
 
-use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
-use Tests\Browser\Traits\AccountSetupTrait;
 use Tests\DuskTestCase;
+use Tests\Browser\Traits\AccountSetupTrait;
+use App\Models\User;
 
 class ApiTest extends DuskTestCase
 {
-    use AccountSetupTrait;
     use DatabaseTruncation;
+    use AccountSetupTrait;
 
     /**
      * Test API functionality with cURL requests
      */
-    public function test_api_functionality(): void
+    public function testApiFunctionality(): void
     {
         $name = 'John Doe';
         $email = 'test@gmail.com';
@@ -25,15 +25,15 @@ class ApiTest extends DuskTestCase
         $this->browse(function (Browser $browser) use ($name, $email, $password) {
             // Set up account using the trait
             $this->setupTestAccount($browser, $name, $email, $password);
-
+            
             // Create test data
             $this->createTestVenue($browser);
             $this->createTestTalent($browser);
             $this->createTestEventWithTickets($browser);
-
+            
             // Enable API and get the API key
             $apiKey = $this->enableApi($browser);
-
+            
             // Test API endpoints using cURL
             $this->testApiEndpoints($apiKey);
         });
@@ -45,16 +45,16 @@ class ApiTest extends DuskTestCase
     private function testApiEndpoints(string $apiKey): void
     {
         $baseUrl = config('app.url');
-
+        
         // Test 1: Get schedules (should return user's schedules)
         $this->testGetSchedules($baseUrl, $apiKey);
-
+        
         // Test 2: Get events (should return user's events)
         $this->testGetEvents($baseUrl, $apiKey);
-
+        
         // Test 3: Create a new event via API
         $this->testCreateEvent($baseUrl, $apiKey);
-
+        
         // Test 4: Test authentication failure
         $this->testAuthenticationFailure($baseUrl);
     }
@@ -66,14 +66,14 @@ class ApiTest extends DuskTestCase
     {
         $ch = curl_init();
         curl_setopt_array($ch, [
-            CURLOPT_URL => $baseUrl.'/api/schedules',
+            CURLOPT_URL => $baseUrl . '/api/schedules',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => [
-                'X-API-Key: '.$apiKey,
+                'X-API-Key: ' . $apiKey,
                 'Accept: application/json',
-                'Content-Type: application/json',
+                'Content-Type: application/json'
             ],
-            CURLOPT_TIMEOUT => 30,
+            CURLOPT_TIMEOUT => 30
         ]);
 
         $response = curl_exec($ch);
@@ -81,12 +81,12 @@ class ApiTest extends DuskTestCase
         curl_close($ch);
 
         $this->assertEquals(200, $httpCode, 'GET /api/schedules should return 200');
-
+        
         $data = json_decode($response, true);
         $this->assertIsArray($data, 'Response should be JSON array');
         $this->assertArrayHasKey('data', $data, 'Response should have data key');
         $this->assertArrayHasKey('meta', $data, 'Response should have meta key');
-
+        
         // Should have at least 2 schedules (venue and talent)
         $this->assertGreaterThanOrEqual(2, count($data['data']), 'Should have at least 2 schedules');
     }
@@ -98,14 +98,14 @@ class ApiTest extends DuskTestCase
     {
         $ch = curl_init();
         curl_setopt_array($ch, [
-            CURLOPT_URL => $baseUrl.'/api/events',
+            CURLOPT_URL => $baseUrl . '/api/events',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => [
-                'X-API-Key: '.$apiKey,
+                'X-API-Key: ' . $apiKey,
                 'Accept: application/json',
-                'Content-Type: application/json',
+                'Content-Type: application/json'
             ],
-            CURLOPT_TIMEOUT => 30,
+            CURLOPT_TIMEOUT => 30
         ]);
 
         $response = curl_exec($ch);
@@ -113,12 +113,12 @@ class ApiTest extends DuskTestCase
         curl_close($ch);
 
         $this->assertEquals(200, $httpCode, 'GET /api/events should return 200');
-
+        
         $data = json_decode($response, true);
         $this->assertIsArray($data, 'Response should be JSON array');
         $this->assertArrayHasKey('data', $data, 'Response should have data key');
         $this->assertArrayHasKey('meta', $data, 'Response should have meta key');
-
+        
         // Should have at least 1 event
         $this->assertGreaterThanOrEqual(1, count($data['data']), 'Should have at least 1 event');
     }
@@ -132,21 +132,21 @@ class ApiTest extends DuskTestCase
             'name' => 'API Created Event',
             'starts_at' => date('Y-m-d H:i:s', strtotime('+5 days')),
             'venue_address1' => '456 API Street',
-            'venue_name' => 'API Venue',
+            'venue_name' => 'API Venue'
         ];
 
         $ch = curl_init();
         curl_setopt_array($ch, [
-            CURLOPT_URL => $baseUrl.'/api/events/talent',
+            CURLOPT_URL => $baseUrl . '/api/events/talent',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($eventData),
             CURLOPT_HTTPHEADER => [
-                'X-API-Key: '.$apiKey,
+                'X-API-Key: ' . $apiKey,
                 'Accept: application/json',
-                'Content-Type: application/json',
+                'Content-Type: application/json'
             ],
-            CURLOPT_TIMEOUT => 30,
+            CURLOPT_TIMEOUT => 30
         ]);
 
         $response = curl_exec($ch);
@@ -157,7 +157,7 @@ class ApiTest extends DuskTestCase
             fwrite(STDERR, "POST /api/events response: $response\n");
         }
         $this->assertEquals(201, $httpCode, 'POST /api/events should return 201');
-
+        
         $data = json_decode($response, true);
         $this->assertIsArray($data, 'Response should be JSON array');
         $this->assertArrayHasKey('data', $data, 'Response should have data key');
@@ -172,14 +172,14 @@ class ApiTest extends DuskTestCase
     {
         $ch = curl_init();
         curl_setopt_array($ch, [
-            CURLOPT_URL => $baseUrl.'/api/schedules',
+            CURLOPT_URL => $baseUrl . '/api/schedules',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => [
                 'X-API-Key: invalid_key',
                 'Accept: application/json',
-                'Content-Type: application/json',
+                'Content-Type: application/json'
             ],
-            CURLOPT_TIMEOUT => 30,
+            CURLOPT_TIMEOUT => 30
         ]);
 
         $response = curl_exec($ch);
@@ -187,7 +187,7 @@ class ApiTest extends DuskTestCase
         curl_close($ch);
 
         $this->assertEquals(401, $httpCode, 'Invalid API key should return 401');
-
+        
         $data = json_decode($response, true);
         $this->assertIsArray($data, 'Response should be JSON array');
         $this->assertArrayHasKey('error', $data, 'Response should have error key');
@@ -201,13 +201,13 @@ class ApiTest extends DuskTestCase
     {
         $ch = curl_init();
         curl_setopt_array($ch, [
-            CURLOPT_URL => $baseUrl.'/api/schedules',
+            CURLOPT_URL => $baseUrl . '/api/schedules',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => [
                 'Accept: application/json',
-                'Content-Type: application/json',
+                'Content-Type: application/json'
             ],
-            CURLOPT_TIMEOUT => 30,
+            CURLOPT_TIMEOUT => 30
         ]);
 
         $response = curl_exec($ch);
@@ -215,10 +215,10 @@ class ApiTest extends DuskTestCase
         curl_close($ch);
 
         $this->assertEquals(401, $httpCode, 'Missing API key should return 401');
-
+        
         $data = json_decode($response, true);
         $this->assertIsArray($data, 'Response should be JSON array');
         $this->assertArrayHasKey('error', $data, 'Response should have error key');
         $this->assertEquals('API key is required', $data['error'], 'Error message should match');
     }
-}
+} 
