@@ -916,5 +916,5 @@ return [
     'enterprise_feature_email_scheduling' => 'Email scheduling is an Enterprise feature.',
     'screen_capture_rendering' => 'Screen Capture Rendering',
     'enable_screen_capture' => 'Use screen capture for graphic generation',
-    'screen_capture_help' => 'Uses browser-based rendering for better RTL language support (Hebrew, Arabic).',
+    'screen_capture_help' => 'Uses browser-based rendering for better RTL language support',
 ];
