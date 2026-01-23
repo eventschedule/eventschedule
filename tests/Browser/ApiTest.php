@@ -42,7 +42,7 @@ class ApiTest extends DuskTestCase
     /**
      * Test various API endpoints using cURL
      */
-    private function test_api_endpoints(string $apiKey): void
+    private function testApiEndpoints(string $apiKey): void
     {
         $baseUrl = config('app.url');
 
@@ -62,7 +62,7 @@ class ApiTest extends DuskTestCase
     /**
      * Test GET /api/schedules endpoint
      */
-    private function test_get_schedules(string $baseUrl, string $apiKey): void
+    private function testGetSchedules(string $baseUrl, string $apiKey): void
     {
         $ch = curl_init();
         curl_setopt_array($ch, [
@@ -94,7 +94,7 @@ class ApiTest extends DuskTestCase
     /**
      * Test GET /api/events endpoint
      */
-    private function test_get_events(string $baseUrl, string $apiKey): void
+    private function testGetEvents(string $baseUrl, string $apiKey): void
     {
         $ch = curl_init();
         curl_setopt_array($ch, [
@@ -126,7 +126,7 @@ class ApiTest extends DuskTestCase
     /**
      * Test POST /api/events/{subdomain} endpoint
      */
-    private function test_create_event(string $baseUrl, string $apiKey): void
+    private function testCreateEvent(string $baseUrl, string $apiKey): void
     {
         $eventData = [
             'name' => 'API Created Event',
@@ -168,7 +168,7 @@ class ApiTest extends DuskTestCase
     /**
      * Test authentication failure
      */
-    private function test_authentication_failure(string $baseUrl): void
+    private function testAuthenticationFailure(string $baseUrl): void
     {
         $ch = curl_init();
         curl_setopt_array($ch, [
@@ -197,7 +197,7 @@ class ApiTest extends DuskTestCase
     /**
      * Test missing API key
      */
-    private function test_missing_api_key(string $baseUrl): void
+    private function testMissingApiKey(string $baseUrl): void
     {
         $ch = curl_init();
         curl_setopt_array($ch, [
