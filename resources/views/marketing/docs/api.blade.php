@@ -2,6 +2,7 @@
     <x-slot name="title">API Reference - Event Schedule</x-slot>
     <x-slot name="description">Programmatically manage schedules and events with the Event Schedule REST API. Learn about authentication, endpoints, and response formats.</x-slot>
     <x-slot name="keywords">event schedule api, rest api, api documentation, api reference, schedule api, events api</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
 
     @include('marketing.docs.partials.styles')
 

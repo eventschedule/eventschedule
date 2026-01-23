@@ -5,11 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Sale;
-use App\Models\SaleTicket;
 use App\Utils\UrlUtils;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
 
 class ApiSaleController extends Controller
 {
@@ -50,7 +49,7 @@ class ApiSaleController extends Controller
         $ticketIds = [];
         foreach ($request->tickets as $ticketIdentifier => $quantity) {
             $ticket = null;
-            
+
             // Try to decode as ticket ID first
             try {
                 $decodedTicketId = UrlUtils::decodeId($ticketIdentifier);
@@ -58,13 +57,13 @@ class ApiSaleController extends Controller
             } catch (\Exception $e) {
                 // Not a valid encoded ID, treat as ticket type
             }
-            
+
             // If not found by ID, try to find by type
             if (! $ticket) {
                 $ticket = $event->tickets()->where('type', $ticketIdentifier)->where('is_deleted', false)->first();
-                
+
                 if (! $ticket) {
-                    return response()->json(['error' => 'Ticket not found: ' . $ticketIdentifier . ' (tried as ID and type)'], 422);
+                    return response()->json(['error' => 'Ticket not found: '.$ticketIdentifier.' (tried as ID and type)'], 422);
                 }
             }
 
@@ -74,7 +73,7 @@ class ApiSaleController extends Controller
         // Determine event_date
         $eventDate = $request->event_date;
         if (! $eventDate) {
-            $eventDate = $event->starts_at 
+            $eventDate = $event->starts_at
                 ? Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d')
                 : Carbon::now()->format('Y-m-d');
         }
@@ -82,20 +81,21 @@ class ApiSaleController extends Controller
         // Check ticket availability
         foreach ($ticketIds as $ticketId => $quantity) {
             $ticket = $event->tickets()->find($ticketId);
-            
+
             if ($ticket->quantity > 0) {
                 // Handle combined mode logic
                 if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
-                    $totalSold = $event->tickets->sum(function($t) use ($eventDate) {
+                    $totalSold = $event->tickets->sum(function ($t) use ($eventDate) {
                         $ticketSold = $t->sold ? json_decode($t->sold, true) : [];
+
                         return $ticketSold[$eventDate] ?? 0;
                     });
                     $totalQuantity = $event->getSameTicketQuantity();
                     $remainingTickets = $totalQuantity - $totalSold;
-                    
+
                     $totalRequested = array_sum($ticketIds);
                     if ($totalRequested > $remainingTickets) {
-                        return response()->json(['error' => 'Tickets not available. Remaining: ' . $remainingTickets], 422);
+                        return response()->json(['error' => 'Tickets not available. Remaining: '.$remainingTickets], 422);
                     }
                 } else {
                     $sold = json_decode($ticket->sold, true) ?? [];
@@ -103,7 +103,7 @@ class ApiSaleController extends Controller
                     $remainingTickets = $ticket->quantity - $soldCount;
 
                     if ($quantity > $remainingTickets) {
-                        return response()->json(['error' => 'Tickets not available for ticket ' . UrlUtils::encodeId($ticketId) . '. Remaining: ' . $remainingTickets], 422);
+                        return response()->json(['error' => 'Tickets not available for ticket '.UrlUtils::encodeId($ticketId).'. Remaining: '.$remainingTickets], 422);
                     }
                 }
             }
@@ -124,7 +124,7 @@ class ApiSaleController extends Controller
         }
 
         // Create sale
-        $sale = new Sale();
+        $sale = new Sale;
         $sale->event_id = $event->id;
         $sale->user_id = auth()->id();
         $sale->name = $request->name;
@@ -163,9 +163,8 @@ class ApiSaleController extends Controller
         return response()->json([
             'data' => $sale->toApiData(),
             'meta' => [
-                'message' => 'Sale created successfully'
-            ]
+                'message' => 'Sale created successfully',
+            ],
         ], 201, [], JSON_PRETTY_PRINT);
     }
 }
-

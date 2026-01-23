@@ -2,6 +2,7 @@
     <x-slot name="title">Installation Guide - Event Schedule</x-slot>
     <x-slot name="description">Set up Event Schedule on your own server with this step-by-step installation guide. Learn how to configure the database, environment, and cron jobs.</x-slot>
     <x-slot name="keywords">event schedule installation, selfhosted setup, laravel installation, event calendar setup, manual installation guide</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
 
     @include('marketing.docs.partials.styles')
 

@@ -60,7 +60,7 @@ class UrlUtils
         $parsedUrl = parse_url($url);
 
         if (isset($parsedUrl['host']) && (strpos($parsedUrl['host'], 'youtube.com') !== false || strpos($parsedUrl['host'], 'youtu.be') !== false)) {
-            
+
             if ($parsedUrl['host'] == 'youtu.be') {
                 $videoId = ltrim($parsedUrl['path'], '/');
             } else {
@@ -68,7 +68,7 @@ class UrlUtils
                 if (isset($parsedUrl['path'])) {
                     $path = ltrim($parsedUrl['path'], '/');
                     $pathParts = explode('/', $path);
-                    
+
                     // Handle /watch/VIDEO_ID or /v/VIDEO_ID format
                     if (count($pathParts) >= 2 && ($pathParts[0] === 'watch' || $pathParts[0] === 'v')) {
                         $videoId = $pathParts[1];
@@ -85,12 +85,12 @@ class UrlUtils
                     $videoId = null;
                 }
             }
-    
+
             if (isset($videoId) && $videoId) {
-                return 'https://www.youtube.com/embed/' . $videoId;
+                return 'https://www.youtube.com/embed/'.$videoId;
             }
         }
-    
+
         return false;
     }
 
@@ -113,10 +113,10 @@ class UrlUtils
         if (! self::isUrlSafe($url)) {
             return null;
         }
-        
+
         $title = '';
         $thumbnail_url = '';
-        $lookup_url = 'https://noembed.com/embed?dataType=json&url=' . urlencode($url);
+        $lookup_url = 'https://noembed.com/embed?dataType=json&url='.urlencode($url);
 
         // Use cURL instead of file_get_contents for better security control
         $ch = curl_init();
@@ -133,7 +133,7 @@ class UrlUtils
             CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
             CURLOPT_FOLLOWLOCATION => true,
         ]);
-        
+
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
@@ -149,7 +149,7 @@ class UrlUtils
                 $thumbnail_url = $json->thumbnail_url;
             }
         }
-                    
+
         $obj = new \stdClass;
         $obj->name = $title;
         $obj->url = rtrim($url, '/');
@@ -165,31 +165,31 @@ class UrlUtils
     {
         // Parse URL
         $parsedUrl = parse_url($url);
-        
-        if (!$parsedUrl || !isset($parsedUrl['scheme']) || !isset($parsedUrl['host'])) {
+
+        if (! $parsedUrl || ! isset($parsedUrl['scheme']) || ! isset($parsedUrl['host'])) {
             return false;
         }
 
         // Only allow HTTP and HTTPS
-        if (!in_array($parsedUrl['scheme'], ['http', 'https'])) {
+        if (! in_array($parsedUrl['scheme'], ['http', 'https'])) {
             return false;
         }
 
         $host = $parsedUrl['host'];
-        
+
         // Block private IP ranges and localhost
         if (filter_var($host, FILTER_VALIDATE_IP)) {
-            return !filter_var($host, FILTER_VALIDATE_IP, 
+            return ! filter_var($host, FILTER_VALIDATE_IP,
                 FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
         }
-        
+
         // Block common internal hostnames
         $blockedHosts = [
             'localhost', '127.0.0.1', '::1',
             'metadata.google.internal',
-            'instance-data', 'metadata.aws.amazon.com'
+            'instance-data', 'metadata.aws.amazon.com',
         ];
-        
+
         if (in_array(strtolower($host), $blockedHosts)) {
             return false;
         }
@@ -204,10 +204,10 @@ class UrlUtils
         // Group 2: Matches URLs (to be converted)
         $pattern = '/(<a[^>]*>.*?<\/a>)|(?<![=\'"])\b(https?|ftp):\/\/([^\s<]+)/i';
 
-        return preg_replace_callback($pattern, function($matches) {
+        return preg_replace_callback($pattern, function ($matches) {
             // If the first group is matched, it means we found an <a> tag.
             // Return it as-is without changes.
-            if (!empty($matches[1])) {
+            if (! empty($matches[1])) {
                 return $matches[1];
             }
 
@@ -222,7 +222,8 @@ class UrlUtils
 
             // Escape URL for safe HTML attribute and display
             $escapedUrl = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
-            return '<a href="' . $escapedUrl . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . $escapedUrl . '</a>';
+
+            return '<a href="'.$escapedUrl.'" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">'.$escapedUrl.'</a>';
         }, $text);
     }
 
@@ -230,11 +231,11 @@ class UrlUtils
     {
         $result = [
             'redirect_url' => $url,
-            'image_path' => null
+            'image_path' => null,
         ];
 
         // Validate URL for security
-        if (!self::isUrlSafe($url)) {
+        if (! self::isUrlSafe($url)) {
             return $result;
         }
 
@@ -261,17 +262,18 @@ class UrlUtils
             ]);
 
             $response = curl_exec($ch);
-            
+
             if ($response === false) {
                 curl_close($ch);
+
                 return $result;
             }
-            
+
             // Process redirect URL
             $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
             $headers = substr($response, 0, $headerSize);
             $html = substr($response, $headerSize);
-            
+
             $redirectUrls = [];
             foreach (explode("\n", $headers) as $header) {
                 if (stripos($header, 'Location:') === 0) {
@@ -285,22 +287,22 @@ class UrlUtils
 
             $finalUrl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            
+
             curl_close($ch);
 
             // Determine redirect URL
-            if (!empty($redirectUrls)) {
+            if (! empty($redirectUrls)) {
                 $result['redirect_url'] = end($redirectUrls);
             } elseif ($httpCode >= 200 && $httpCode < 400 && self::isUrlSafe($finalUrl)) {
                 $result['redirect_url'] = $finalUrl;
             }
 
             // Process social image
-            if ($httpCode >= 200 && $httpCode < 400 && !empty($html)) {
+            if ($httpCode >= 200 && $httpCode < 400 && ! empty($html)) {
                 // Look for Open Graph image meta tag
                 if (preg_match('/<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']*)["\']/', $html, $matches) ||
                     preg_match('/<meta[^>]*content=["\']([^"\']*)["\'][^>]*property=["\']og:image["\']/', $html, $matches)) {
-                    
+
                     if ($imageUrl = $matches[1]) {
                         // Validate image URL
                         if (self::isUrlSafe($imageUrl)) {
@@ -311,8 +313,8 @@ class UrlUtils
                                 // Validate extension
                                 $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
                                 if (in_array(strtolower($extension), $allowedExtensions)) {
-                                    $filename = '/tmp/event_' . strtolower(\Str::random(32)) . '.' . $extension;
-                                    
+                                    $filename = '/tmp/event_'.strtolower(\Str::random(32)).'.'.$extension;
+
                                     if (file_put_contents($filename, $imageContents) !== false) {
                                         $result['image_path'] = $filename;
                                     }
@@ -324,7 +326,7 @@ class UrlUtils
             }
         } catch (\Exception $e) {
             // Log error but don't expose it
-            \Log::warning('URL metadata fetch failed: ' . $e->getMessage());
+            \Log::warning('URL metadata fetch failed: '.$e->getMessage());
         }
 
         return $result;
@@ -361,7 +363,7 @@ class UrlUtils
 
         // Validate content type
         $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        if (!in_array($contentType, $allowedTypes)) {
+        if (! in_array($contentType, $allowedTypes)) {
             return false;
         }
 

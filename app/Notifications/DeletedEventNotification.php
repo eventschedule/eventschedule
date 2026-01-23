@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -12,6 +11,7 @@ class DeletedEventNotification extends Notification
     use Queueable;
 
     protected $event;
+
     protected $user;
 
     /**
@@ -42,13 +42,13 @@ class DeletedEventNotification extends Notification
         $user = $this->user;
 
         return (new MailMessage)
-                    ->replyTo($user->email, $user->name)
-                    ->subject(__('messages.event_has_been_deleted'))
-                    ->line(str_replace(
-                        [':name', ':venue', ':user'],
-                        [$role->name, $event->getVenueDisplayName(), $user->name],
-                        __('messages.event_has_been_deleted_details'))
-                    );
+            ->replyTo($user->email, $user->name)
+            ->subject(__('messages.event_has_been_deleted'))
+            ->line(str_replace(
+                [':name', ':venue', ':user'],
+                [$role->name, $event->getVenueDisplayName(), $user->name],
+                __('messages.event_has_been_deleted_details'))
+            );
     }
 
     /**
@@ -69,8 +69,9 @@ class DeletedEventNotification extends Notification
     public function toMailHeaders(): array
     {
         $role = $this->event->role();
+
         return [
-            'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $role->subdomain]) . '>',
+            'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $role->subdomain]).'>',
             'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
         ];
     }

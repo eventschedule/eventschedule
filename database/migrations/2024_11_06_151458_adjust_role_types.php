@@ -18,11 +18,10 @@ return new class extends Migration
         DB::table('roles')
             ->whereIn('type', ['talent', 'vendor'])
             ->update(['type' => 'schedule']);
-        
+
         if (config('database.default') !== 'sqlite') {
             DB::statement("ALTER TABLE `roles` MODIFY `type` ENUM('venue', 'curator', 'schedule') NOT NULL");
         }
-
 
         Schema::table('roles', function (Blueprint $table) {
             $table->boolean('accept_requests')->default(false);
@@ -30,7 +29,7 @@ return new class extends Migration
             $table->string('header_image_url')->nullable();
 
             $table->dropColumn('accept_vendor_requests');
-            $table->dropColumn('accept_talent_requests');            
+            $table->dropColumn('accept_talent_requests');
         });
     }
 
@@ -41,7 +40,7 @@ return new class extends Migration
     {
         Schema::table('roles', function (Blueprint $table) {
             $table->boolean('accept_talent_requests')->default(true);
-            $table->boolean('accept_vendor_requests')->default(false);        
+            $table->boolean('accept_vendor_requests')->default(false);
 
             $table->dropColumn('accept_requests');
             $table->dropColumn('is_deleted');

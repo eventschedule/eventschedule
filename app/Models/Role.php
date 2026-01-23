@@ -73,6 +73,10 @@ class Role extends Model implements MustVerifyEmail
         'email_settings',
         'custom_css',
         'graphic_settings',
+        'caldav_settings',
+        'caldav_sync_direction',
+        'caldav_sync_token',
+        'caldav_last_sync_at',
     ];
 
     /**
@@ -83,6 +87,7 @@ class Role extends Model implements MustVerifyEmail
     protected $casts = [
         'google_webhook_expires_at' => 'datetime',
         'trial_ends_at' => 'datetime',
+        'caldav_last_sync_at' => 'datetime',
     ];
 
     /**
@@ -92,6 +97,7 @@ class Role extends Model implements MustVerifyEmail
      */
     protected $hidden = [
         'email_settings',
+        'caldav_settings',
     ];
 
     /**
@@ -200,7 +206,7 @@ class Role extends Model implements MustVerifyEmail
     public function events()
     {
         return $this->belongsToMany(Event::class)
-            ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id')
+            ->withPivot('id', 'name_translated', 'description_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id', 'caldav_event_uid', 'caldav_event_etag')
             ->using(EventRole::class);
     }
 
@@ -1071,5 +1077,130 @@ class Role extends Model implements MustVerifyEmail
     public function setEmailSettings(array $settings): void
     {
         $this->email_settings = $settings;
+    }
+
+    /**
+     * Get the CalDAV settings attribute (decrypted and decoded)
+     */
+    public function getCalDAVSettingsAttribute($value)
+    {
+        $settings = $this->decryptCalDAVSettings($value);
+
+        return $settings ?: null;
+    }
+
+    /**
+     * Set the CalDAV settings attribute (encrypted and encoded)
+     */
+    public function setCalDAVSettingsAttribute($value)
+    {
+        if (is_null($value) || (is_array($value) && empty(array_filter($value)))) {
+            $this->attributes['caldav_settings'] = null;
+
+            return;
+        }
+
+        if (is_array($value)) {
+            // Remove empty values
+            $value = array_filter($value, function ($v) {
+                return $v !== null && $v !== '';
+            });
+
+            if (empty($value)) {
+                $this->attributes['caldav_settings'] = null;
+
+                return;
+            }
+
+            $json = json_encode($value);
+            $this->attributes['caldav_settings'] = \Illuminate\Support\Facades\Crypt::encryptString($json);
+        } else {
+            // If it's already a string, assume it's already encrypted JSON
+            $this->attributes['caldav_settings'] = $value;
+        }
+    }
+
+    /**
+     * Check if role has CalDAV settings configured
+     */
+    public function hasCalDAVSettings(): bool
+    {
+        $settings = $this->getCalDAVSettings();
+
+        return ! empty($settings) && ! empty($settings['server_url']) && ! empty($settings['username']);
+    }
+
+    /**
+     * Get decrypted CalDAV settings as array
+     * Uses raw attribute to avoid infinite recursion
+     */
+    public function getCalDAVSettings(): array
+    {
+        $rawValue = $this->attributes['caldav_settings'] ?? null;
+
+        return $this->decryptCalDAVSettings($rawValue);
+    }
+
+    /**
+     * Decrypt CalDAV settings from encrypted string
+     * Consolidates decryption logic used by both attribute accessor and method
+     */
+    protected function decryptCalDAVSettings(?string $encryptedValue): array
+    {
+        if (! $encryptedValue) {
+            return [];
+        }
+
+        try {
+            $decrypted = \Illuminate\Support\Facades\Crypt::decryptString($encryptedValue);
+            $decoded = json_decode($decrypted, true);
+
+            return is_array($decoded) ? $decoded : [];
+        } catch (\Exception $e) {
+            \Log::warning('Failed to decrypt CalDAV settings for role', [
+                'role_id' => $this->id ?? null,
+                'subdomain' => $this->subdomain ?? null,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [];
+        }
+    }
+
+    /**
+     * Set encrypted CalDAV settings from array
+     */
+    public function setCalDAVSettings(array $settings): void
+    {
+        $this->caldav_settings = $settings;
+    }
+
+    /**
+     * Check if this role syncs to CalDAV
+     */
+    public function syncsToCalDAV(): bool
+    {
+        return in_array($this->caldav_sync_direction, ['to', 'both']);
+    }
+
+    /**
+     * Check if this role syncs from CalDAV
+     */
+    public function syncsFromCalDAV(): bool
+    {
+        return in_array($this->caldav_sync_direction, ['from', 'both']);
+    }
+
+    /**
+     * Get the CalDAV sync direction as a human-readable string
+     */
+    public function getCalDAVSyncDirectionLabel()
+    {
+        return match ($this->caldav_sync_direction) {
+            'to' => 'To CalDAV',
+            'from' => 'From CalDAV',
+            'both' => 'Bidirectional Sync',
+            default => 'No Sync'
+        };
     }
 }

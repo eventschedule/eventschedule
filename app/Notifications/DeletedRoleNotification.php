@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -12,6 +11,7 @@ class DeletedRoleNotification extends Notification
     use Queueable;
 
     protected $role;
+
     protected $user;
 
     /**
@@ -42,17 +42,17 @@ class DeletedRoleNotification extends Notification
         $user = $this->user;
 
         return (new MailMessage)
-                ->replyTo($user->email, $user->name)
-                ->subject(str_replace(
-                    ':type', 
-                    __('messages.' . $role->type), 
-                    __('messages.role_has_been_deleted'))
-                )
-                ->line(str_replace(
-                    [':name', ':type', ':user'],
-                    [$role->name, $role->type, $user->name],
-                    __('messages.role_has_been_deleted_details'))
-                );
+            ->replyTo($user->email, $user->name)
+            ->subject(str_replace(
+                ':type',
+                __('messages.'.$role->type),
+                __('messages.role_has_been_deleted'))
+            )
+            ->line(str_replace(
+                [':name', ':type', ':user'],
+                [$role->name, $role->type, $user->name],
+                __('messages.role_has_been_deleted_details'))
+            );
     }
 
     /**
@@ -73,7 +73,7 @@ class DeletedRoleNotification extends Notification
     public function toMailHeaders(): array
     {
         return [
-            'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $this->role->subdomain]) . '>',
+            'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $this->role->subdomain]).'>',
             'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
         ];
     }

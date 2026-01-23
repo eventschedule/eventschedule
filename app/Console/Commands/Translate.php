@@ -2,12 +2,12 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\Role;
 use App\Models\Event;
 use App\Models\EventRole;
+use App\Models\Role;
 use App\Utils\GeminiUtils;
 use App\Utils\UrlUtils;
+use Illuminate\Console\Command;
 
 class Translate extends Command
 {
@@ -29,6 +29,7 @@ class Translate extends Command
     {
         if (! config('services.google.gemini_key')) {
             $this->info('No Gemini API key found, skipping...');
+
             return;
         }
 
@@ -42,24 +43,25 @@ class Translate extends Command
         }
 
         // Decode IDs if they are encoded strings
-        if ($roleId && !is_numeric($roleId)) {
+        if ($roleId && ! is_numeric($roleId)) {
             $roleId = UrlUtils::decodeId($roleId);
             $this->info("Decoded role ID: $roleId");
         }
 
-        if ($eventId && !is_numeric($eventId)) {
+        if ($eventId && ! is_numeric($eventId)) {
             $eventId = UrlUtils::decodeId($eventId);
             $this->info("Decoded event ID: $eventId");
         }
 
         // Resolve event_slug to event_id if provided
-        if ($eventSlug && !$eventId) {
+        if ($eventSlug && ! $eventId) {
             $event = Event::where('slug', $eventSlug)->first();
             if ($event) {
                 $eventId = $event->id;
                 $this->info("Resolved event slug '$eventSlug' to event ID: $eventId");
             } else {
                 $this->error("No event found with slug: $eventSlug");
+
                 return;
             }
         }
@@ -67,7 +69,7 @@ class Translate extends Command
         if ($roleId) {
             $this->translateRoles($roleId);
             $this->translateCuratorEvents(null, $roleId);
-        } else if ($eventId) {
+        } elseif ($eventId) {
             $this->translateEvents($eventId);
             $this->translateCuratorEvents($eventId);
         } else {
@@ -85,50 +87,50 @@ class Translate extends Command
         // Get all roles that don't have English translations
         // Exclude English roles upfront to avoid processing them
         $query = Role::where('language_code', '!=', 'en')
-            ->where(function($query) {
-                $query->where(function($q) {
-                        $q->whereNotNull('name')
-                          ->where('name', '!=', '')
-                          ->whereNull('name_en');
-                    })
-                    ->orWhere(function($q) {
+            ->where(function ($query) {
+                $query->where(function ($q) {
+                    $q->whereNotNull('name')
+                        ->where('name', '!=', '')
+                        ->whereNull('name_en');
+                })
+                    ->orWhere(function ($q) {
                         $q->whereNotNull('description')
-                          ->where('description', '!=', '')
-                          ->whereNull('description_en');
+                            ->where('description', '!=', '')
+                            ->whereNull('description_en');
                     })
-                    ->orWhere(function($q) {
+                    ->orWhere(function ($q) {
                         $q->whereNotNull('address1')
-                          ->where('address1', '!=', '')
-                          ->whereNull('address1_en');
+                            ->where('address1', '!=', '')
+                            ->whereNull('address1_en');
                     })
-                    ->orWhere(function($q) {
+                    ->orWhere(function ($q) {
                         $q->whereNotNull('city')
-                          ->where('city', '!=', '')
-                          ->whereNull('city_en');
+                            ->where('city', '!=', '')
+                            ->whereNull('city_en');
                     })
-                    ->orWhere(function($q) {
+                    ->orWhere(function ($q) {
                         $q->whereNotNull('state')
-                          ->where('state', '!=', '')
-                          ->whereNull('state_en');
+                            ->where('state', '!=', '')
+                            ->whereNull('state_en');
                     })
-                    ->orWhere(function($q) {
+                    ->orWhere(function ($q) {
                         $q->whereNotNull('request_terms')
-                          ->where('request_terms', '!=', '')
-                          ->whereNull('request_terms_en');
+                            ->where('request_terms', '!=', '')
+                            ->whereNull('request_terms_en');
                     });
             });
-        
+
         if ($roleId) {
             $query->where('id', $roleId);
             $this->info("Filtering for role ID: $roleId");
         }
-        
+
         $roles = $query->orderBy('id', 'asc')->get();
 
         if ($debug) {
-            $this->info("Found " . count($roles) . " roles needing translation");
-            $this->info("SQL Query: " . $query->toSql());
-            $this->info("Query Bindings: " . json_encode($query->getBindings()));
+            $this->info('Found '.count($roles).' roles needing translation');
+            $this->info('SQL Query: '.$query->toSql());
+            $this->info('Query Bindings: '.json_encode($query->getBindings()));
         }
 
         $bar = $this->output->createProgressBar(count($roles));
@@ -138,7 +140,7 @@ class Translate extends Command
             if ($debug) {
                 $this->info("\nProcessing role ID: {$role->id}, Name: {$role->name}, Language: {$role->language_code}");
             }
-            
+
             /*
             if ($role->language_code == 'en') {
                 $role->name_en = '';
@@ -157,49 +159,49 @@ class Translate extends Command
             }
             */
 
-            if ($role->name && !$role->name_en) {
+            if ($role->name && ! $role->name_en) {
                 $role->name_en = GeminiUtils::translate($role->name, $role->language_code, 'en');
                 if ($debug) {
                     $this->info("Translated name from {$role->language_code} to en: '{$role->name}' → '{$role->name_en}'");
                 }
             }
 
-            if ($role->description && !$role->description_en) {
+            if ($role->description && ! $role->description_en) {
                 $role->description_en = GeminiUtils::translate($role->description, $role->language_code, 'en');
                 if ($debug) {
                     $this->info("Translated description from {$role->language_code} to en: '{$role->description}' → '{$role->description_en}'");
                 }
             }
 
-            if ($role->address1 && !$role->address1_en) {
+            if ($role->address1 && ! $role->address1_en) {
                 $role->address1_en = GeminiUtils::translate($role->address1, $role->language_code, 'en');
                 if ($debug) {
                     $this->info("Translated address1 from {$role->language_code} to en: '{$role->address1}' → '{$role->address1_en}'");
                 }
             }
 
-            if ($role->address2 && !$role->address2_en) {
+            if ($role->address2 && ! $role->address2_en) {
                 $role->address2_en = GeminiUtils::translate($role->address2, $role->language_code, 'en');
                 if ($debug) {
                     $this->info("Translated address2 from {$role->language_code} to en: '{$role->address2}' → '{$role->address2_en}'");
                 }
             }
 
-            if ($role->city && !$role->city_en) {
+            if ($role->city && ! $role->city_en) {
                 $role->city_en = GeminiUtils::translate($role->city, $role->language_code, 'en');
                 if ($debug) {
                     $this->info("Translated city from {$role->language_code} to en: '{$role->city}' → '{$role->city_en}'");
                 }
             }
 
-            if ($role->state && !$role->state_en) {
+            if ($role->state && ! $role->state_en) {
                 $role->state_en = GeminiUtils::translate($role->state, $role->language_code, 'en');
                 if ($debug) {
                     $this->info("Translated state from {$role->language_code} to en: '{$role->state}' → '{$role->state_en}'");
                 }
             }
 
-            if ($role->request_terms && !$role->request_terms_en) {
+            if ($role->request_terms && ! $role->request_terms_en) {
                 $role->request_terms_en = GeminiUtils::translate($role->request_terms, $role->language_code, 'en');
                 if ($debug) {
                     $this->info("Translated request terms from {$role->language_code} to en: '{$role->request_terms}' → '{$role->request_terms_en}'");
@@ -210,7 +212,7 @@ class Translate extends Command
             if ($debug) {
                 $this->info("Saved translations for role ID: {$role->id}");
             }
-            
+
             $bar->advance();
 
             sleep(rand(12, 18));
@@ -227,30 +229,30 @@ class Translate extends Command
 
         // Get all events that don't have English translations
         $query = Event::with('roles')
-            ->where(function($query) {
-                $query->where(function($q) {
-                        $q->whereNotNull('name')
-                          ->where('name', '!=', '')
-                          ->whereNull('name_en');
-                    })
-                    ->orWhere(function($q) {
+            ->where(function ($query) {
+                $query->where(function ($q) {
+                    $q->whereNotNull('name')
+                        ->where('name', '!=', '')
+                        ->whereNull('name_en');
+                })
+                    ->orWhere(function ($q) {
                         $q->whereNotNull('description')
-                          ->where('description', '!=', '')
-                          ->whereNull('description_en');
+                            ->where('description', '!=', '')
+                            ->whereNull('description_en');
                     });
             });
-        
+
         if ($eventId) {
             $query->where('id', $eventId);
             $this->info("Filtering for event ID: $eventId");
         }
-        
+
         $events = $query->orderBy('id', 'asc')->get();
 
         if ($debug) {
-            $this->info("Found " . count($events) . " events needing translation");
-            $this->info("SQL Query: " . $query->toSql());
-            $this->info("Query Bindings: " . json_encode($query->getBindings()));
+            $this->info('Found '.count($events).' events needing translation');
+            $this->info('SQL Query: '.$query->toSql());
+            $this->info('Query Bindings: '.json_encode($query->getBindings()));
         }
 
         $bar = $this->output->createProgressBar(count($events));
@@ -262,7 +264,7 @@ class Translate extends Command
             } else {
                 $this->info("\nTranslating event {$event->id}...");
             }
-            
+
             if ($event->getLanguageCode() == 'en') {
                 $event->name_en = '';
                 $event->description_en = '';
@@ -271,22 +273,23 @@ class Translate extends Command
                 if ($debug) {
                     $this->info("Skipping translation for English event ID: {$event->id}");
                 }
+
                 continue;
             }
 
-            if ($event->name && !$event->name_en) {
+            if ($event->name && ! $event->name_en) {
                 $event->name_en = GeminiUtils::translate($event->name, $event->getLanguageCode(), 'en');
                 if ($debug) {
                     $this->info("Translated name from {$event->getLanguageCode()} to en: '{$event->name}' → '{$event->name_en}'");
                 }
             }
 
-            if ($event->description && !$event->description_en) {
+            if ($event->description && ! $event->description_en) {
                 $event->description_en = GeminiUtils::translate($event->description, $event->getLanguageCode(), 'en');
                 if ($debug) {
                     $this->info("Translated description from {$event->getLanguageCode()} to en: '{$event->description}' → '{$event->description_en}'");
                 }
-            }                
+            }
 
             $event->save();
             $bar->advance();
@@ -304,43 +307,43 @@ class Translate extends Command
         $debug = $this->option('debug');
 
         $query = EventRole::with('role', 'event')
-                    ->whereHas('role', function($query) {
-                        $query->where('type', 'curator');
-                    })
-                    ->where(function($query) {
-                        $query->whereNull('name_translated')
-                              ->orWhereNull('description_translated');
-                    });
-        
+            ->whereHas('role', function ($query) {
+                $query->where('type', 'curator');
+            })
+            ->where(function ($query) {
+                $query->whereNull('name_translated')
+                    ->orWhereNull('description_translated');
+            });
+
         if ($eventId) {
-            $query->whereHas('event', function($query) use ($eventId) {
+            $query->whereHas('event', function ($query) use ($eventId) {
                 $query->where('id', $eventId);
             });
             $this->info("Filtering for event ID: $eventId");
         }
-        
+
         if ($roleId) {
             $query->where('role_id', $roleId);
             $this->info("Filtering for role ID: $roleId");
         }
-        
+
         $eventRoles = $query->orderBy('id', 'asc')->get();
 
         if ($debug) {
-            $this->info("Found " . count($eventRoles) . " curator events needing translation");
-            $this->info("SQL Query: " . $query->toSql());
-            $this->info("Query Bindings: " . json_encode($query->getBindings()));
+            $this->info('Found '.count($eventRoles).' curator events needing translation');
+            $this->info('SQL Query: '.$query->toSql());
+            $this->info('Query Bindings: '.json_encode($query->getBindings()));
         }
 
         $bar = $this->output->createProgressBar(count($eventRoles));
-        $bar->start();  
+        $bar->start();
 
-        foreach ($eventRoles as $eventRole) {        
+        foreach ($eventRoles as $eventRole) {
             if ($debug) {
                 $this->info("\nProcessing event role ID: {$eventRole->id}, Event ID: {$eventRole->event_id}, Role ID: {$eventRole->role_id}");
                 $this->info("Event language: {$eventRole->event->getLanguageCode()}, Role language: {$eventRole->role->language_code}");
             }
-            
+
             if ($eventRole->event->getLanguageCode() == $eventRole->role->language_code) {
                 $eventRole->name_translated = '';
                 $eventRole->description_translated = '';
@@ -349,8 +352,9 @@ class Translate extends Command
                 if ($debug) {
                     $this->info("Skipping translation as languages match: {$eventRole->event->getLanguageCode()}");
                 }
+
                 continue;
-            } 
+            }
 
             if (! $eventRole->name_translated) {
                 $fromLang = $eventRole->event->getLanguageCode();
@@ -378,5 +382,5 @@ class Translate extends Command
 
         $bar->finish();
         $this->info("\nTranslation completed!\n");
-    }   
+    }
 }

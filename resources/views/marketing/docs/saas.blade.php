@@ -2,6 +2,7 @@
     <x-slot name="title">SaaS Setup Documentation - Event Schedule</x-slot>
     <x-slot name="description">Learn how to configure Event Schedule for SaaS deployment with subdomain-based multi-tenant routing, custom branding, and Stripe subscriptions.</x-slot>
     <x-slot name="keywords">saas setup, multi-tenant, subdomain routing, white-label, event schedule deployment</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
 
     @include('marketing.docs.partials.styles')
 

@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Sale;
+use Illuminate\Console\Command;
 
 class ReleaseTickets extends Command
 {
@@ -27,12 +27,12 @@ class ReleaseTickets extends Command
     public function handle()
     {
         \Log::info('Release expired unpaid tickets...');
-        
+
         $connection = config('database.default');
         $driver = config("database.connections.{$connection}.driver");
-        
+
         $expiredSales = Sale::where('status', 'unpaid')
-            ->whereHas('event', function($query) use ($driver) {
+            ->whereHas('event', function ($query) use ($driver) {
                 $query->where('events.expire_unpaid_tickets', '>', 0);
                 if ($driver === 'sqlite') {
                     $query->whereRaw("(strftime('%s', 'now') - strftime('%s', sales.created_at))/3600 >= events.expire_unpaid_tickets");
@@ -41,8 +41,8 @@ class ReleaseTickets extends Command
                 }
             })
             ->get();
-        
-        \Log::info('Found ' . $expiredSales->count() . ' expired sales to process');
+
+        \Log::info('Found '.$expiredSales->count().' expired sales to process');
 
         foreach ($expiredSales as $sale) {
             $sale->status = 'expired';

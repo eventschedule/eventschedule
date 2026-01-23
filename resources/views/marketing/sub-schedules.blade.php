@@ -1,7 +1,8 @@
 <x-marketing-layout>
-    <x-slot name="title">Sub-schedules - Event Schedule</x-slot>
+    <x-slot name="title">Event Categories & Sub-Schedules | Multi-Room Venues - Event Schedule</x-slot>
     <x-slot name="description">Organize events into categories with unlimited sub-schedules. Perfect for venues with multiple rooms, stages, or event series.</x-slot>
     <x-slot name="keywords">sub-schedules, event categories, venue rooms, event series, calendar organization, event filtering, multi-room venues</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
 
     <style>
         .text-gradient {

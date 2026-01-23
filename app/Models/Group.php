@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Utils\UrlUtils;
+use Illuminate\Database\Eloquent\Model;
 
 class Group extends Model
 {
     protected $fillable = [
-        'name', 
-        'name_en', 
-        'slug', 
+        'name',
+        'name_en',
+        'slug',
     ];
 
     public function role()

@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Role;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class EventUpdateRequest extends FormRequest
 {
@@ -14,7 +12,7 @@ class EventUpdateRequest extends FormRequest
      * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
      */
     public function rules(): array
-    {        
+    {
         return [
             'flyer_image_url' => ['image', 'max:2500'],
         ];

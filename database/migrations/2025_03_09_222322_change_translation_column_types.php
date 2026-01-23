@@ -35,7 +35,7 @@ return new class extends Migration
         });
 
         Schema::table('events', function (Blueprint $table) {
-            $table->text('description_en')->nullable();   
+            $table->text('description_en')->nullable();
             $table->text('description_html_en')->nullable();
         });
 

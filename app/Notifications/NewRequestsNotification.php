@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -12,9 +11,11 @@ class NewRequestsNotification extends Notification
     use Queueable;
 
     protected $role;
+
     protected $requestCount;
+
     protected $ccEmails;
-    
+
     /**
      * Create a new notification instance.
      */
@@ -45,14 +46,14 @@ class NewRequestsNotification extends Notification
         $unsubscribeUrl = route('role.unsubscribe', ['subdomain' => $this->role->subdomain]);
 
         return (new MailMessage)
-                    ->subject($subject)
-                    ->cc($this->ccEmails)
-                    ->view('emails.new_requests', [
-                        'role' => $this->role,
-                        'requestCount' => $this->requestCount,
-                        'actionUrl' => $actionUrl,
-                        'unsubscribeUrl' => $unsubscribeUrl,
-                    ]);
+            ->subject($subject)
+            ->cc($this->ccEmails)
+            ->view('emails.new_requests', [
+                'role' => $this->role,
+                'requestCount' => $this->requestCount,
+                'actionUrl' => $actionUrl,
+                'unsubscribeUrl' => $unsubscribeUrl,
+            ]);
     }
 
     /**
@@ -73,9 +74,8 @@ class NewRequestsNotification extends Notification
     public function toMailHeaders(): array
     {
         return [
-            'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $this->role->subdomain]) . '>',
+            'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $this->role->subdomain]).'>',
             'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
         ];
     }
 }
-

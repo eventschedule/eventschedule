@@ -37,10 +37,10 @@ return new class extends Migration
 
         Schema::table('roles', function (Blueprint $table) {
             $table->dropColumn([
-                'google_calendar_id', 
-                'google_webhook_id', 
-                'google_webhook_resource_id', 
-                'google_webhook_expires_at', 
+                'google_calendar_id',
+                'google_webhook_id',
+                'google_webhook_resource_id',
+                'google_webhook_expires_at',
                 'sync_direction',
                 'google_calendar_id',
                 'request_terms',

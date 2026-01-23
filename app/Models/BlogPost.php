@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
 
 class BlogPost extends Model
 {
@@ -87,7 +86,7 @@ class BlogPost extends Model
         $count = 1;
 
         while (static::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $count;
+            $slug = $originalSlug.'-'.$count;
             $count++;
         }
 
@@ -97,7 +96,7 @@ class BlogPost extends Model
     public function scopePublished($query)
     {
         return $query->where('is_published', true)
-                    ->where('published_at', '<=', now());
+            ->where('published_at', '<=', now());
     }
 
     public function scopeByTag($query, $tag)
@@ -108,7 +107,7 @@ class BlogPost extends Model
     public function scopeByMonth($query, $year, $month)
     {
         return $query->whereYear('published_at', $year)
-                    ->whereMonth('published_at', $month);
+            ->whereMonth('published_at', $month);
     }
 
     public function getFormattedPublishedAtAttribute()
@@ -121,8 +120,8 @@ class BlogPost extends Model
         $wordsPerMinute = 200;
         $wordCount = str_word_count(strip_tags($this->content));
         $readingTime = ceil($wordCount / $wordsPerMinute);
-        
-        return $readingTime . ' min read';
+
+        return $readingTime.' min read';
     }
 
     public function getExcerptAttribute($value)
@@ -133,6 +132,7 @@ class BlogPost extends Model
 
         // Generate excerpt from content if not provided
         $content = strip_tags($this->content);
+
         return Str::limit($content, 160);
     }
 
@@ -153,17 +153,17 @@ class BlogPost extends Model
 
     public function getFeaturedImageUrlAttribute()
     {
-        if (!$this->featured_image) {
+        if (! $this->featured_image) {
             return null;
         }
 
         // Return the URL to the header image
-        return url('/images/headers/' . $this->featured_image);
+        return url('/images/headers/'.$this->featured_image);
     }
 
     public function getUrlAttribute()
     {
-        return url('/blog/' . $this->slug);
+        return url('/blog/'.$this->slug);
     }
 
     public static function getAvailableHeaderImages($filter = true)

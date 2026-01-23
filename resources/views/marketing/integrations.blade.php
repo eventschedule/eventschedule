@@ -1,7 +1,7 @@
 <x-marketing-layout>
-    <x-slot name="title">Integrations - Event Schedule</x-slot>
-    <x-slot name="description">Connect Event Schedule with Google Calendar, Stripe, Invoice Ninja, and your own email server for a seamless event management experience.</x-slot>
-    <x-slot name="keywords">event schedule integrations, Google Calendar sync, Stripe payments, Invoice Ninja, SMTP email, calendar integration, payment processing</x-slot>
+    <x-slot name="title">Integrations | Google Calendar, Stripe & More - Event Schedule</x-slot>
+    <x-slot name="description">Connect Event Schedule with Google Calendar, CalDAV, Stripe, and Invoice Ninja for a seamless event management experience.</x-slot>
+    <x-slot name="keywords">event schedule integrations, Google Calendar sync, CalDAV sync, Stripe payments, Invoice Ninja, calendar integration, payment processing</x-slot>
     <x-slot name="socialImage">social/integrations.png</x-slot>
 
     <style>
@@ -59,7 +59,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
-                Connect with the tools you already use. Sync calendars, accept payments, and send emails seamlessly.
+                Connect with the tools you already use. Sync calendars and accept payments seamlessly.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
@@ -73,71 +73,155 @@
         </div>
     </section>
 
-    <!-- Bento Grid Integrations -->
+    <!-- Calendar Integrations Section -->
     <section class="bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Section Header -->
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-6">
+                    <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span class="text-sm text-gray-300">Calendar Integrations</span>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Keep your events in sync</h2>
+                <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-4">Sync across all your calendars automatically</p>
+                <a href="{{ marketing_url('/calendar-sync') }}" class="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
+                    Learn about all calendar options
+                    <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
 
-                <!-- Google Calendar (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-white/10 p-8 lg:p-10">
-                    <div class="flex flex-col lg:flex-row gap-8 items-center">
-                        <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium mb-4">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                Calendar Sync
-                            </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Google Calendar</h3>
-                            <p class="text-gray-400 text-lg mb-6">Two-way sync with Google Calendar. Import events automatically or push your schedule to Google. Changes sync in real-time.</p>
-                            <div class="flex flex-wrap gap-3 mb-4">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Two-way sync</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Auto import</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Real-time updates</span>
-                            </div>
-                            <a href="https://calendar.google.com" target="_blank" rel="noopener" class="inline-flex items-center text-blue-300 hover:text-blue-200 text-sm font-medium transition-colors">
-                                Visit Google Calendar
-                                <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                </svg>
-                            </a>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <div class="relative animate-float">
-                                <div class="w-56 h-48 bg-gradient-to-br from-white/10 to-white/5 rounded-2xl border border-white/20 p-4 shadow-2xl">
-                                    <div class="flex items-center gap-2 mb-4">
-                                        <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                                            <svg class="w-5 h-5" viewBox="0 0 24 24">
-                                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                                            </svg>
-                                        </div>
-                                        <span class="text-white font-medium text-sm">Google Calendar</span>
+            <!-- Calendar Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Google Calendar -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-white/10 p-8 h-full flex flex-col">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Calendar Sync
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Google Calendar</h3>
+
+                    <div class="flex-grow">
+                        <p class="text-gray-400 mb-6">Two-way sync with Google Calendar. Import events automatically or push your schedule to Google. Changes sync in real-time.</p>
+
+                        <div class="relative animate-float mb-6">
+                            <div class="w-full h-40 bg-gradient-to-br from-white/10 to-white/5 rounded-2xl border border-white/20 p-4 shadow-2xl">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                        </svg>
                                     </div>
-                                    <div class="space-y-2">
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-400/30">
-                                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
-                                            <span class="text-blue-200 text-xs">Jazz Night - 8pm</span>
-                                        </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/20 border border-emerald-400/30">
-                                            <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
-                                            <span class="text-emerald-200 text-xs">Open Mic - 7pm</span>
-                                        </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-violet-500/20 border border-violet-400/30">
-                                            <div class="w-2 h-2 rounded-full bg-violet-400"></div>
-                                            <span class="text-violet-200 text-xs">DJ Set - 10pm</span>
-                                        </div>
+                                    <span class="text-white font-medium text-sm">Google Calendar</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-400/30">
+                                        <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                                        <span class="text-blue-200 text-xs">Jazz Night - 8pm</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/20 border border-emerald-400/30">
+                                        <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+                                        <span class="text-emerald-200 text-xs">Open Mic - 7pm</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <div class="mt-auto">
+                        <div class="flex flex-wrap gap-3 mb-4 min-h-[40px]">
+                            <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Two-way sync</span>
+                            <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Auto import</span>
+                            <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Real-time updates</span>
+                        </div>
+                        <a href="{{ marketing_url('/google-calendar') }}" class="inline-flex items-center text-blue-300 hover:text-blue-200 text-sm font-medium transition-colors">
+                            Learn more
+                            <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </a>
+                    </div>
                 </div>
 
+                <!-- CalDAV -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900/50 to-cyan-900/50 border border-white/10 p-8 h-full flex flex-col">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Calendar Sync
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">CalDAV</h3>
+
+                    <div class="flex-grow">
+                        <p class="text-gray-400 mb-6">Sync with any CalDAV server—Nextcloud, Radicale, Fastmail, and more. Two-way sync keeps events in harmony.</p>
+
+                        <div class="bg-black/30 rounded-xl p-4 border border-white/10 mb-6">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" />
+                                    </svg>
+                                </div>
+                                <div class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <div class="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m7-7l-7 7 7 7" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="text-center text-teal-300 text-xs font-medium">Two-way sync</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto">
+                        <div class="flex flex-wrap gap-2 mb-4 min-h-[40px]">
+                            <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Two-way sync</span>
+                            <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Selfhosted friendly</span>
+                        </div>
+                        <a href="{{ marketing_url('/caldav') }}" class="inline-flex items-center text-teal-300 hover:text-teal-200 text-sm font-medium transition-colors">
+                            Learn more
+                            <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Payment Integrations Section -->
+    <section class="bg-[#0a0a0f] py-24 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Section Header -->
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-6">
+                    <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                    <span class="text-sm text-gray-300">Payment Integrations</span>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Accept payments and manage invoices</h2>
+                <p class="text-xl text-gray-400 max-w-2xl mx-auto">Get paid directly with secure payment processing</p>
+            </div>
+
+            <!-- Payment Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Stripe -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border border-white/10 p-8 h-full flex flex-col">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -145,24 +229,34 @@
                         Payments
                     </div>
                     <h3 class="text-2xl font-bold text-white mb-3">Stripe</h3>
-                    <p class="text-gray-400 mb-6">Accept credit cards, Apple Pay, and Google Pay. Payments go directly to your Stripe account.</p>
 
-                    <div class="flex justify-center mb-4">
-                        <div class="bg-white rounded-2xl px-5 py-3 shadow-lg">
-                            <span class="text-2xl font-bold" style="color: #635BFF;">stripe</span>
+                    <div class="flex-grow">
+                        <p class="text-gray-400 mb-6">Accept credit cards, Apple Pay, and Google Pay. Payments go directly to your Stripe account.</p>
+
+                        <div class="flex justify-center mb-6">
+                            <div class="bg-white rounded-2xl px-5 py-3 shadow-lg">
+                                <span class="text-2xl font-bold" style="color: #635BFF;">stripe</span>
+                            </div>
                         </div>
                     </div>
 
-                    <a href="https://stripe.com" target="_blank" rel="noopener" class="inline-flex items-center text-violet-300 hover:text-violet-200 text-sm font-medium transition-colors">
-                        Visit Stripe
-                        <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                    </a>
+                    <div class="mt-auto">
+                        <div class="flex flex-wrap gap-3 mb-4 min-h-[40px]">
+                            <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Credit cards</span>
+                            <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Apple Pay</span>
+                            <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Google Pay</span>
+                        </div>
+                        <a href="{{ marketing_url('/stripe') }}" class="inline-flex items-center text-violet-300 hover:text-violet-200 text-sm font-medium transition-colors">
+                            Learn more
+                            <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Invoice Ninja -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-white/10 p-8 h-full flex flex-col">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -170,82 +264,33 @@
                         Invoicing
                     </div>
                     <h3 class="text-2xl font-bold text-white mb-3">Invoice Ninja</h3>
-                    <p class="text-gray-400 mb-6">Generate professional invoices for ticket purchases. Perfect for corporate events and B2B sales.</p>
 
-                    <div class="bg-black/30 rounded-xl p-4 border border-white/10 mb-4">
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-emerald-400 text-xs font-medium">INVOICE #1042</span>
-                            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-xs">Paid</span>
-                        </div>
-                        <div class="text-white font-semibold mb-1">Corporate Event Package</div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-400 text-sm">10 VIP Tickets</span>
-                            <span class="text-white font-bold">$750.00</span>
-                        </div>
-                    </div>
+                    <div class="flex-grow">
+                        <p class="text-gray-400 mb-6">Generate professional invoices for ticket purchases. Perfect for corporate events and B2B sales.</p>
 
-                    <a href="https://invoiceninja.com" target="_blank" rel="noopener" class="inline-flex items-center text-emerald-300 hover:text-emerald-200 text-sm font-medium transition-colors">
-                        Visit Invoice Ninja
-                        <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                    </a>
-                </div>
-
-                <!-- SMTP Email (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-white/10 p-8 lg:p-10">
-                    <div class="grid md:grid-cols-2 gap-8 items-center">
-                        <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                                Email
+                        <div class="bg-black/30 rounded-xl p-4 border border-white/10 mb-6">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-emerald-400 text-xs font-medium">INVOICE #1042</span>
+                                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-xs">Paid</span>
                             </div>
-                            <h3 class="text-3xl font-bold text-white mb-4">Custom SMTP</h3>
-                            <p class="text-gray-400 text-lg mb-6">Use your own email server for ticket confirmations and notifications. Full control over your email deliverability.</p>
-                            <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Custom domain</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Full branding</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Better deliverability</span>
-                            </div>
-                        </div>
-                        <div class="bg-black/30 rounded-2xl p-6 border border-white/10">
-                            <div class="flex items-center gap-3 mb-4">
-                                <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <div class="text-white font-medium">Ticket Confirmation</div>
-                                    <div class="text-gray-400 text-sm">tickets@yourvenue.com</div>
-                                </div>
-                            </div>
-                            <div class="space-y-2 text-sm">
-                                <div class="flex items-center gap-2 text-gray-400">
-                                    <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    <span>DKIM authenticated</span>
-                                </div>
-                                <div class="flex items-center gap-2 text-gray-400">
-                                    <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    <span>SPF verified</span>
-                                </div>
-                                <div class="flex items-center gap-2 text-gray-400">
-                                    <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    <span>TLS encrypted</span>
-                                </div>
+                            <div class="text-white font-semibold mb-1">Corporate Event Package</div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400 text-sm">10 VIP Tickets</span>
+                                <span class="text-white font-bold">$750.00</span>
                             </div>
                         </div>
                     </div>
-                </div>
 
+                    <div class="mt-auto">
+                        <div class="min-h-[40px] mb-4"></div>
+                        <a href="{{ marketing_url('/invoiceninja') }}" class="inline-flex items-center text-emerald-300 hover:text-emerald-200 text-sm font-medium transition-colors">
+                            Learn more
+                            <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

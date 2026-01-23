@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Role;
-use Illuminate\Support\Carbon;
 use Laravel\Cashier\Http\Controllers\WebhookController;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -12,7 +11,6 @@ class SubscriptionWebhookController extends WebhookController
     /**
      * Handle customer subscription deleted.
      *
-     * @param  array  $payload
      * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function handleCustomerSubscriptionDeleted(array $payload)
@@ -37,7 +35,6 @@ class SubscriptionWebhookController extends WebhookController
      * Handle customer subscription trial will end.
      * This is sent 3 days before the trial ends.
      *
-     * @param  array  $payload
      * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function handleCustomerSubscriptionTrialWillEnd(array $payload)
@@ -55,7 +52,6 @@ class SubscriptionWebhookController extends WebhookController
     /**
      * Handle invoice payment succeeded.
      *
-     * @param  array  $payload
      * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function handleInvoicePaymentSucceeded(array $payload)
@@ -74,7 +70,6 @@ class SubscriptionWebhookController extends WebhookController
     /**
      * Handle invoice payment failed.
      *
-     * @param  array  $payload
      * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function handleInvoicePaymentFailed(array $payload)
@@ -92,7 +87,6 @@ class SubscriptionWebhookController extends WebhookController
     /**
      * Handle customer subscription updated.
      *
-     * @param  array  $payload
      * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function handleCustomerSubscriptionUpdated(array $payload)

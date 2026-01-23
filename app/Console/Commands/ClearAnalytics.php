@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
+use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
-use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsReferrersDaily;
+use Illuminate\Console\Command;
 
 class ClearAnalytics extends Command
 {
@@ -32,6 +32,7 @@ class ClearAnalytics extends Command
         if (! $this->option('force')) {
             if (! $this->confirm('This will permanently delete all analytics data. Are you sure?')) {
                 $this->info('Operation cancelled.');
+
                 return 0;
             }
         }

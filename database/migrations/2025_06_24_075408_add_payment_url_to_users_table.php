@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -24,7 +24,7 @@ return new class extends Migration
             DB::statement('UPDATE events SET payment_method_new = payment_method');
             DB::statement('ALTER TABLE events DROP COLUMN payment_method');
             DB::statement('ALTER TABLE events RENAME COLUMN payment_method_new TO payment_method');
-            
+
             DB::statement('ALTER TABLE sales ADD COLUMN payment_method_new varchar check ("payment_method_new" in ("cash", "stripe", "invoiceninja", "payment_url")) not null default "cash"');
             DB::statement('UPDATE sales SET payment_method_new = payment_method');
             DB::statement('ALTER TABLE sales DROP COLUMN payment_method');
@@ -51,7 +51,7 @@ return new class extends Migration
             DB::statement('UPDATE events SET payment_method_old = CASE WHEN payment_method = "payment_url" THEN "cash" ELSE payment_method END');
             DB::statement('ALTER TABLE events DROP COLUMN payment_method');
             DB::statement('ALTER TABLE events RENAME COLUMN payment_method_old TO payment_method');
-            
+
             // Revert sales table
             DB::statement('ALTER TABLE sales ADD COLUMN payment_method_old varchar check ("payment_method_old" in ("cash", "stripe", "invoiceninja")) not null default "cash"');
             DB::statement('UPDATE sales SET payment_method_old = CASE WHEN payment_method = "payment_url" THEN "cash" ELSE payment_method END');

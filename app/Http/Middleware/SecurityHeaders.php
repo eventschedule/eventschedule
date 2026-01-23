@@ -11,8 +11,6 @@ class SecurityHeaders
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next)
@@ -41,19 +39,19 @@ class SecurityHeaders
         } else {
             $response->headers->set('X-Frame-Options', 'DENY');
         }
-        
+
         $response->headers->set('X-XSS-Protection', '1; mode=block');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(), payment=()');
-        
+
         // Add HSTS header for HTTPS
         if ($request->isSecure()) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
         }
-        
+
         $isLocal = app()->environment('local');
         $host = $request->getHost();
-        
+
         // Build CSP based on environment
         if ($isLocal) {
             // More permissive CSP for development
@@ -81,22 +79,22 @@ class SecurityHeaders
                 "frame-src 'self' *.eventschedule.com *.stripe.com *.youtube.com *.googletagmanager.com",
                 "object-src 'none'",
                 "base-uri 'self'",
-                "upgrade-insecure-requests"
+                'upgrade-insecure-requests',
             ];
         }
-        
+
         // Allow frame-ancestors only on validated embeddable routes
         if ($isEmbeddable) {
-            $csp[] = "frame-ancestors *";
+            $csp[] = 'frame-ancestors *';
         } else {
             $csp[] = "frame-ancestors 'none'";
         }
-        
+
         // Don't set CSP for debug toolbar
-        if (!$request->is('_debugbar/*')) {
+        if (! $request->is('_debugbar/*')) {
             $response->headers->set('Content-Security-Policy', implode('; ', $csp));
         }
 
         return $response;
     }
-} 
+}

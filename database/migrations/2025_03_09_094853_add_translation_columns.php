@@ -18,13 +18,13 @@ return new class extends Migration
             $table->string('address1_en')->nullable();
             $table->string('address2_en')->nullable();
             $table->string('city_en')->nullable();
-            $table->string('state_en')->nullable();            
+            $table->string('state_en')->nullable();
         });
 
         Schema::table('events', function (Blueprint $table) {
             $table->string('name_en')->nullable();
             $table->string('description_en')->nullable();
-            $table->string('description_html_en')->nullable();            
+            $table->string('description_html_en')->nullable();
         });
 
         Schema::table('event_role', function (Blueprint $table) {

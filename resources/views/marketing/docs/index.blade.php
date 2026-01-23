@@ -2,6 +2,7 @@
     <x-slot name="title">Developer Documentation - Event Schedule</x-slot>
     <x-slot name="description">Technical documentation for setting up and configuring Event Schedule. Learn how to deploy as SaaS, integrate Stripe payments, and sync with Google Calendar.</x-slot>
     <x-slot name="keywords">event schedule documentation, saas setup, stripe integration, google calendar sync, api documentation</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
 
     <style>
         .text-gradient {

@@ -1,7 +1,8 @@
 <x-marketing-layout>
-    <x-slot name="title">Ticketing - Event Schedule</x-slot>
+    <x-slot name="title">Event Ticketing with No Platform Fees | QR Check-in - Event Schedule</x-slot>
     <x-slot name="description">Sell tickets directly through your event schedule with QR codes, multiple ticket types, and secure payment processing.</x-slot>
     <x-slot name="keywords">event ticketing, sell tickets online, QR code tickets, Stripe ticketing, no platform fees tickets, event check-in, ticket reservations, multiple ticket types</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
 
     <style>
         .text-gradient {
@@ -160,7 +161,7 @@
                     </div>
                 </div>
 
-                <!-- Stripe Integration -->
+                <!-- Payment Integration -->
                 <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-blue-900/50 border border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -168,15 +169,19 @@
                         </svg>
                         Payments
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Powered by Stripe</h3>
-                    <p class="text-gray-400 mb-6">Accept credit cards, Apple Pay, Google Pay. Secure checkout built in.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">Flexible payments</h3>
+                    <p class="text-gray-400 mb-6">Choose Stripe for instant checkout or Invoice Ninja for B2B invoicing.</p>
 
-                    <div class="flex justify-center">
-                        <div class="bg-white rounded-2xl p-6 shadow-lg">
-                            <svg class="w-20 h-8" viewBox="0 0 60 25" fill="none">
-                                <path fill="#635BFF" d="M59.64 14.28h-8.06c.19 1.93 1.6 2.55 3.2 2.55 1.64 0 2.96-.27 4.08-.94v2.86a10.1 10.1 0 01-4.43.91c-4.07 0-6.53-2.03-6.53-6.34 0-3.85 2.4-6.49 6.08-6.49 3.65 0 5.74 2.65 5.74 6.41 0 .38-.04.76-.08 1.04zm-5.65-4.76c-1.13 0-2.04.9-2.18 2.32h4.32c-.05-1.37-.84-2.32-2.14-2.32zM41.52 7.15c1.56 0 2.78.37 3.6 1l-.8 2.72a6.7 6.7 0 00-2.7-.62c-1.69 0-2.54.73-2.54 1.63 0 1.14 1.02 1.58 2.54 2.2 2.2.86 3.35 1.93 3.35 4.1 0 2.86-2.14 4.66-5.82 4.66-1.84 0-3.5-.45-4.55-1.17l.85-2.86c1.13.62 2.49 1.02 3.85 1.02 1.53 0 2.43-.6 2.43-1.65 0-1.02-.74-1.53-2.32-2.14-2.36-.9-3.56-2.07-3.56-4.18 0-2.5 1.97-4.71 5.67-4.71zM28.47 4.98c1.18 0 2.13.16 2.93.49v3.03a5.9 5.9 0 00-2.47-.54c-1.2 0-1.88.49-1.88 1.28 0 .76.53 1.15 1.77 1.65 2.15.86 3.14 2.03 3.14 3.97 0 2.8-2 4.48-5.33 4.48-1.54 0-2.96-.3-3.93-.82v-3.1c1.08.6 2.45.97 3.68.97 1.24 0 1.96-.46 1.96-1.3 0-.8-.53-1.2-1.89-1.75-2.04-.8-3.02-1.88-3.02-3.92 0-2.55 1.88-4.44 5.04-4.44zM13.47 7.15c2.15 0 3.62.95 4.53 2.32l-2.4 1.84c-.55-.82-1.23-1.22-2.13-1.22-1.55 0-2.67 1.27-2.67 3.19 0 1.92 1.12 3.2 2.67 3.2.9 0 1.63-.46 2.18-1.29l2.4 1.84c-.9 1.42-2.38 2.34-4.58 2.34-3.65 0-6.25-2.58-6.25-6.09s2.6-6.13 6.25-6.13zM3.68 7.37h3.68v12h-3.68v-12zm1.84-5.9c1.18 0 2.13.95 2.13 2.13a2.13 2.13 0 01-4.26 0c0-1.18.95-2.13 2.13-2.13z"/>
+                    <div class="flex justify-center gap-4">
+                        <a href="{{ marketing_url('/stripe') }}" class="bg-white rounded-xl px-4 py-3 shadow-lg hover:scale-105 transition-transform">
+                            <span class="text-lg font-bold" style="color: #635BFF;">stripe</span>
+                        </a>
+                        <a href="{{ marketing_url('/invoiceninja') }}" class="bg-emerald-500/20 border border-emerald-400/30 rounded-xl px-4 py-3 hover:scale-105 transition-transform flex items-center gap-2">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                        </div>
+                            <span class="text-emerald-300 font-medium text-sm">Invoicing</span>
+                        </a>
                     </div>
                 </div>
 
@@ -236,9 +241,9 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-fuchsia-500 to-violet-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-fuchsia-500/25">
                         1
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Connect Stripe</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Connect Payments</h3>
                     <p class="text-gray-600 text-sm">
-                        Link your Stripe account to receive payments directly.
+                        Link Stripe or Invoice Ninja to receive payments directly.
                     </p>
                 </div>
 
@@ -290,25 +295,37 @@
                 </p>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-                    <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
+                    <a href="{{ marketing_url('/stripe') }}" class="bg-white/5 rounded-2xl p-6 border border-white/10 hover:bg-white/10 hover:border-violet-500/30 transition-all group">
                         <div class="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center mx-auto mb-4">
                             <svg class="w-6 h-6 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                             </svg>
                         </div>
-                        <h3 class="text-white font-semibold mb-2">Stripe</h3>
-                        <p class="text-gray-400 text-sm">Credit cards, Apple Pay, Google Pay</p>
-                    </div>
+                        <h3 class="text-white font-semibold mb-2 group-hover:text-violet-300 transition-colors">Stripe</h3>
+                        <p class="text-gray-400 text-sm mb-3">Credit cards, Apple Pay, Google Pay</p>
+                        <span class="inline-flex items-center text-violet-400 text-xs font-medium">
+                            Learn more
+                            <svg class="ml-1 w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </span>
+                    </a>
 
-                    <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
+                    <a href="{{ marketing_url('/invoiceninja') }}" class="bg-white/5 rounded-2xl p-6 border border-white/10 hover:bg-white/10 hover:border-emerald-500/30 transition-all group">
                         <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
                             <svg class="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </div>
-                        <h3 class="text-white font-semibold mb-2">Invoice Ninja</h3>
-                        <p class="text-gray-400 text-sm">Professional invoicing</p>
-                    </div>
+                        <h3 class="text-white font-semibold mb-2 group-hover:text-emerald-300 transition-colors">Invoice Ninja</h3>
+                        <p class="text-gray-400 text-sm mb-3">Professional invoicing for B2B</p>
+                        <span class="inline-flex items-center text-emerald-400 text-xs font-medium">
+                            Learn more
+                            <svg class="ml-1 w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </span>
+                    </a>
 
                     <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
                         <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mx-auto mb-4">

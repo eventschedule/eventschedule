@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Utils\InvoiceNinja;
-use App\Models\User;
 use App\Models\Sale;
+use App\Models\User;
+use App\Utils\InvoiceNinja;
 use Illuminate\Http\Request;
 
 class InvoiceNinjaController extends Controller
@@ -15,7 +15,7 @@ class InvoiceNinjaController extends Controller
 
         $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
         $company = $invoiceNinja->getCompany();
-        
+
         foreach ($company['webhooks'] as $webhook) {
             if ($webhook['target_url'] == route('invoiceninja.webhook', ['secret' => $user->invoiceninja_webhook_secret])) {
                 $invoiceNinja->deleteWebhook($webhook['id']);
@@ -41,7 +41,7 @@ class InvoiceNinjaController extends Controller
             $secret = $headerSecret;
         }
 
-        if (!$secret) {
+        if (! $secret) {
             return response()->json(['status' => 'error', 'message' => 'Missing webhook secret'], 400);
         }
 
@@ -50,30 +50,30 @@ class InvoiceNinjaController extends Controller
         if (! $user) {
             return response()->json(['status' => 'error', 'message' => 'Invalid webhook secret'], 400);
         }
-    
-        $payload = json_decode($request->getContent(), true);    
+
+        $payload = json_decode($request->getContent(), true);
 
         if (empty($payload['paymentables']) || count($payload['paymentables']) == 0) {
             return response()->json(['status' => 'error', 'message' => 'No paymentables found'], 400);
         }
 
         $invoiceId = $payload['paymentables'][0]['invoice_id'];
-        
+
         if (! $invoiceId) {
             return response()->json(['status' => 'error', 'message' => 'No invoice_id found'], 400);
         }
 
         $sale = Sale::where('payment_method', 'invoiceninja')
             ->where('transaction_reference', $invoiceId)
-            ->whereHas('event', function($query) use ($user) {
+            ->whereHas('event', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
             ->first();
-        
+
         if (! $sale) {
             return response()->json(['status' => 'error', 'message' => 'Sale not found'], 400);
         }
-        
+
         $sale->payment_amount = $payload['paymentables'][0]['amount'];
         $sale->status = 'paid';
         $sale->save();

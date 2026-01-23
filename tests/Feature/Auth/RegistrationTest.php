@@ -41,8 +41,7 @@ class RegistrationTest extends TestCase
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect(route('home', absolute: false))
-        ;
+            ->assertRedirect(route('home', absolute: false));
 
         $this->assertAuthenticated();
         $this->assertDatabaseCount('users', 1);

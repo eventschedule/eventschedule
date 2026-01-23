@@ -411,6 +411,15 @@ class EventRepo
             }
         }
 
+        // Sync to CalDAV for the current role
+        if ($currentRole && $currentRole->syncsToCalDAV()) {
+            if ($event->wasRecentlyCreated) {
+                $event->syncToCalDAV('create');
+            } else {
+                $event->syncToCalDAV('update');
+            }
+        }
+
         return $event;
     }
 

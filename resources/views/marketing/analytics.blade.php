@@ -1,7 +1,8 @@
 <x-marketing-layout>
-    <x-slot name="title">Built-in Analytics - Event Schedule</x-slot>
+    <x-slot name="title">Privacy-First Event Analytics | Track Views & Conversions - Event Schedule</x-slot>
     <x-slot name="description">Track page views, device breakdown, traffic sources, and conversion rates. Privacy-first analytics with no external services required.</x-slot>
     <x-slot name="keywords">event analytics, page views tracking, traffic sources, conversion tracking, privacy analytics, event metrics, audience insights</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
 
     <style>
         .text-gradient {

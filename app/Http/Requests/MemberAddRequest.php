@@ -18,7 +18,7 @@ class MemberAddRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
-            //'subdomain' => ['required', 'string', 'max:255', Rule::unique(Role::class)],
+            // 'subdomain' => ['required', 'string', 'max:255', Rule::unique(Role::class)],
         ];
     }
 }

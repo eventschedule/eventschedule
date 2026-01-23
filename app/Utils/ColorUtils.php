@@ -10,12 +10,12 @@ class ColorUtils
         $gradients = json_decode($gradients);
 
         $gradientOptions = [];
-        foreach ($gradients as $gradient) {            
-            $gradientOptions[] = join(', ', $gradient->colors);
+        foreach ($gradients as $gradient) {
+            $gradientOptions[] = implode(', ', $gradient->colors);
         }
 
         $random = rand(0, count($gradientOptions) - 1);
-        
+
         return $gradientOptions[$random];
     }
 
@@ -25,7 +25,7 @@ class ColorUtils
         $backgrounds = json_decode($backgrounds);
 
         $random = rand(0, count($backgrounds) - 1);
-        
+
         return $backgrounds[$random]->name;
     }
 }

@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">White-Label SaaS Platform - Run Your Own Ticketing Business</x-slot>
-    <x-slot name="description">Launch your own white-label ticketing SaaS platform at zero cost. Set your own prices, keep 100% of revenue, and let your customers sell tickets through your branded platform.</x-slot>
+    <x-slot name="description">Launch your own white-label ticketing SaaS platform at zero cost. Set your own prices, keep 100% of revenue through your branded platform.</x-slot>
     <x-slot name="keywords">white label ticketing, saas reseller, ticketing platform, event management saas, white label events, reseller program</x-slot>
     <x-slot name="socialImage">social/saas.png</x-slot>
 

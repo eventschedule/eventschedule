@@ -38,7 +38,7 @@ return new class extends Migration
         Schema::dropIfExists('event_role');
 
         Schema::table('events', function (Blueprint $table) {
-            $table->dropColumn('flyer_image_url');        
-        });        
+            $table->dropColumn('flyer_image_url');
+        });
     }
 };

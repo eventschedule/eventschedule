@@ -3,11 +3,10 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Notification;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Notifications\Notification;
 use Illuminate\Queue\SerializesModels;
 
 class SignupVerificationCode extends Notification
@@ -15,7 +14,7 @@ class SignupVerificationCode extends Notification
     use Queueable;
 
     protected $code;
-    
+
     /**
      * Create a new notification instance.
      */
@@ -41,7 +40,7 @@ class SignupVerificationCode extends Notification
     {
         // Get email from notifiable (handles both User objects and AnonymousNotifiable from route)
         $email = null;
-        
+
         if (method_exists($notifiable, 'getEmailForVerification')) {
             $email = $notifiable->getEmailForVerification();
         } elseif (method_exists($notifiable, 'routeNotificationFor')) {
@@ -49,19 +48,20 @@ class SignupVerificationCode extends Notification
         } elseif (isset($notifiable->email)) {
             $email = $notifiable->email;
         }
-        
+
         return new class($this->code, $email) extends Mailable
         {
             use SerializesModels;
-            
+
             protected $code;
+
             protected $email;
 
             public function __construct($code, $email)
             {
                 $this->code = $code;
                 $this->email = $email;
-                
+
                 // Set the recipient
                 if ($this->email) {
                     $this->to($this->email);
@@ -99,4 +99,3 @@ class SignupVerificationCode extends Notification
         ];
     }
 }
-

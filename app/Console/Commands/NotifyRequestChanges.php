@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\Role;
 use App\Models\Event;
+use App\Models\Role;
 use App\Notifications\NewRequestsNotification;
+use Illuminate\Console\Command;
 
 class NotifyRequestChanges extends Command
 {
@@ -55,18 +55,18 @@ class NotifyRequestChanges extends Command
 
             // Only notify if current count is greater than last notified count
             if ($currentRequestCount != $lastNotifiedCount) {
-                                
+
                 // Get all team members (users with level != 'follower')
                 $teamMembers = $role->members()->get();
 
                 if ($teamMembers->count() > 0) {
                     $owner = $role->user;
-                    $ccEmails = $teamMembers->map(function($member) use ($owner) {
+                    $ccEmails = $teamMembers->map(function ($member) use ($owner) {
                         return $member->id !== $owner->id ? $member->email : null;
                     })->filter()->values()->toArray();
 
                     $owner->notify(new NewRequestsNotification($role, $currentRequestCount, $ccEmails));
-                    
+
                     $role->last_notified_request_count = $currentRequestCount;
                     $role->save();
 
@@ -80,4 +80,3 @@ class NotifyRequestChanges extends Command
         $this->info("Notified {$notifiedCount} roles with new requests.");
     }
 }
-

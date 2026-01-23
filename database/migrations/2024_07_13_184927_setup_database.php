@@ -26,7 +26,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('subdomain')->unique();
             $table->enum('type', ['venue', 'talent', 'vendor'])->index();
-            $table->enum('background', ['gradient', 'image',])->default('gradient');
+            $table->enum('background', ['gradient', 'image'])->default('gradient');
             $table->string('accent_color')->default('#007bff');
             $table->string('background_colors')->nullable();
             $table->integer('background_rotation')->default(150);
@@ -42,7 +42,7 @@ return new class extends Migration
             $table->string('city')->nullable();
             $table->string('state')->nullable();
             $table->string('postal_code')->nullable();
-            $table->string('country_code')->nullable();            
+            $table->string('country_code')->nullable();
             $table->string('formatted_address')->nullable();
             $table->string('google_place_id')->nullable();
             $table->string('geo_address')->nullable();

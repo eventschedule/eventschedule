@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 class ApiScheduleController extends Controller
 {
     protected const MAX_PER_PAGE = 1000;
+
     protected const DEFAULT_PER_PAGE = 100;
 
     public function index(Request $request)
@@ -19,9 +20,9 @@ class ApiScheduleController extends Controller
         );
 
         $schedules = Role::where('user_id', auth()->id());
-        
+
         if ($request->has('name')) {
-            $schedules->where('name', 'like', '%' . $request->name . '%');
+            $schedules->where('name', 'like', '%'.$request->name.'%');
         }
 
         if ($request->has('type')) {
@@ -31,7 +32,7 @@ class ApiScheduleController extends Controller
         $schedules = $schedules->paginate($perPage);
 
         return response()->json([
-            'data' => collect($schedules->items())->map(function($schedule) {
+            'data' => collect($schedules->items())->map(function ($schedule) {
                 return $schedule->toApiData();
             })->values(),
             'meta' => [
@@ -42,7 +43,7 @@ class ApiScheduleController extends Controller
                 'to' => $schedules->lastItem(),
                 'total' => $schedules->total(),
                 'path' => $request->url(),
-            ]
+            ],
         ], 200, [], JSON_PRETTY_PRINT);
-    }    
-} 
+    }
+}

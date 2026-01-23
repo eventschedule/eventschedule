@@ -11,13 +11,14 @@ class SecurityHelper
     {
         return request()->attributes->get('csp_nonce', '');
     }
-    
+
     /**
      * Generate nonce attribute for script tags
      */
     public static function nonceAttr(): string
     {
         $nonce = self::cspNonce();
+
         return $nonce ? "nonce=\"{$nonce}\"" : '';
     }
-} 
+}

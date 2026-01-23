@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Selfhost Event Schedule - Run on Your Own Server</x-slot>
-    <x-slot name="description">Self-host Event Schedule on your own server. 100% open source, one-click installation with Softaculous or Docker, automatic updates, and exclusive features like auto-importing and AI-powered blogging.</x-slot>
+    <x-slot name="description">Self-host Event Schedule on your own server. 100% open source with one-click Docker installation, automatic updates, and exclusive AI-powered features.</x-slot>
     <x-slot name="keywords">selfhosted event management, open source calendar, selfhost events, docker event schedule, softaculous calendar, auto import events, AI blog SEO</x-slot>
     <x-slot name="socialImage">social/selfhost.png</x-slot>
 

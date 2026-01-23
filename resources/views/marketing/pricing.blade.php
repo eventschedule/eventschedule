@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Pricing - Event Schedule</x-slot>
-    <x-slot name="description">Simple, transparent pricing. Start free and upgrade when you need more features.</x-slot>
+    <x-slot name="title">Free Event Calendar & Ticketing Pricing Plans - Event Schedule</x-slot>
+    <x-slot name="description">Start free with unlimited events and basic ticketing. Upgrade to Pro for custom domains, white-label branding, and priority support. No hidden fees.</x-slot>
     <x-slot name="keywords">event schedule pricing, free event calendar, event management cost, ticketing fees, no platform fees, custom domain pricing</x-slot>
     <x-slot name="socialImage">social/pricing.png</x-slot>
 

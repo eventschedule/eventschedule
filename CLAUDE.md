@@ -10,6 +10,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 
 - **Never run tests without asking first** - Tests will empty the database
 - **Never run `npm install` without asking first** - Confirm before installing dependencies
+- **Never run `composer install` without asking first** - Confirm before installing dependencies
 - **Never delete migration files** - They may have already been run on production
 - **Use "selfhost" not "self-host"** - Always write "selfhost" and "selfhosted" (no hyphen)
 

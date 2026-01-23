@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Utils\ImageUtils;
+use Illuminate\Console\Command;
 
 class GenerateThumbnails extends Command
 {
@@ -60,13 +60,14 @@ class GenerateThumbnails extends Command
         $sourceDir = public_path("images/{$type}");
         $thumbDir = public_path("images/{$type}/thumbs");
 
-        if (!is_dir($sourceDir)) {
+        if (! is_dir($sourceDir)) {
             $this->warn("Source directory not found: {$sourceDir}");
+
             return;
         }
 
         // Create thumbs directory if it doesn't exist
-        if (!is_dir($thumbDir)) {
+        if (! is_dir($thumbDir)) {
             mkdir($thumbDir, 0755, true);
             $this->info("Created directory: {$thumbDir}");
         }
@@ -82,8 +83,9 @@ class GenerateThumbnails extends Command
             $thumbPath = "{$thumbDir}/{$filename}.jpg";
 
             // Skip if thumbnail exists and force is not set
-            if (file_exists($thumbPath) && !$force) {
+            if (file_exists($thumbPath) && ! $force) {
                 $skipped++;
+
                 continue;
             }
 
