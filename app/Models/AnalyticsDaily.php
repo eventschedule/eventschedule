@@ -74,7 +74,7 @@ class AnalyticsDaily extends Model
     {
         return $query->whereBetween('date', [
             $start->toDateString(),
-            $end->toDateString()
+            $end->toDateString(),
         ]);
     }
 

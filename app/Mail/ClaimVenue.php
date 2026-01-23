@@ -3,13 +3,12 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Headers;
-use Illuminate\Mail\Mailables\Address;
+use Illuminate\Queue\SerializesModels;
 
 class ClaimVenue extends Mailable
 {
@@ -40,16 +39,16 @@ class ClaimVenue extends Mailable
             $subject = __('messages.claim_your_venue_curated');
         } else {
             $subject = __('messages.claim_your_venue');
-        }        
+        }
 
         return new Envelope(
             subject: str_replace(
-                        [':role', ':venue', ':event', ':curator'], 
-                        [$role->name, $venue->name, $event->name, $curator ? $curator->name : ''],
-                        $subject),
+                [':role', ':venue', ':event', ':curator'],
+                [$role->name, $venue->name, $event->name, $curator ? $curator->name : ''],
+                $subject),
             replyTo: [
                 new Address($user->email, $user->name),
-            ],                        
+            ],
         );
     }
 
@@ -68,7 +67,7 @@ class ClaimVenue extends Mailable
             $subject = __('messages.claim_your_venue_curated');
         } else {
             $subject = __('messages.claim_your_venue');
-        }        
+        }
 
         return new Content(
             view: 'mail.venue.claim',
@@ -78,9 +77,9 @@ class ClaimVenue extends Mailable
                 'venue' => $venue,
                 'user' => $user,
                 'subject' => str_replace(
-                        [':role', ':venue', ':event', ':curator'], 
-                        [$role->name, $venue->name, $event->name, $curator ? $curator->name : ''],
-                        $subject),
+                    [':role', ':venue', ':event', ':curator'],
+                    [$role->name, $venue->name, $event->name, $curator ? $curator->name : ''],
+                    $subject),
                 'unsubscribe_url' => route('role.unsubscribe', ['subdomain' => $venue->subdomain]),
             ]
         );
@@ -102,7 +101,7 @@ class ClaimVenue extends Mailable
 
         return new Headers(
             text: [
-                'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $role->subdomain]) . '>',
+                'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $role->subdomain]).'>',
                 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
             ],
         );

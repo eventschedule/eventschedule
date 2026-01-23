@@ -2,6 +2,7 @@
     <x-slot name="title">Google Calendar Integration Documentation - Event Schedule</x-slot>
     <x-slot name="description">Set up bidirectional Google Calendar sync with Event Schedule. Automatically sync events between both platforms.</x-slot>
     <x-slot name="keywords">google calendar integration, calendar sync, oauth setup, bidirectional sync, event synchronization</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
 
     @include('marketing.docs.partials.styles')
 

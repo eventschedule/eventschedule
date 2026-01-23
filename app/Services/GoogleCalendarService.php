@@ -5,23 +5,25 @@ namespace App\Services;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
+use App\Repos\EventRepo;
 use Carbon\Carbon;
 use Google\Client;
 use Google\Service\Calendar;
 use Google\Service\Calendar\Event as GoogleEvent;
 use Google\Service\Calendar\EventDateTime;
 use Illuminate\Support\Facades\Log;
-use App\Repos\EventRepo;
 
 class GoogleCalendarService
 {
     protected $client;
+
     protected $calendarService;
+
     protected $eventRepo;
 
     public function __construct(EventRepo $eventRepo)
     {
-        $this->client = new Client();
+        $this->client = new Client;
         $this->client->setClientId(config('services.google.client_id'));
         $this->client->setClientSecret(config('services.google.client_secret'));
         $this->client->setRedirectUri(config('services.google.redirect'));
@@ -55,6 +57,7 @@ class GoogleCalendarService
     {
         $this->client->setApprovalPrompt('force');
         $this->client->setPrompt('consent');
+
         return $this->client->createAuthUrl();
     }
 
@@ -80,26 +83,27 @@ class GoogleCalendarService
      */
     public function refreshTokenIfNeeded(User $user): bool
     {
-        if (!$user->google_token || !$user->google_refresh_token) {
+        if (! $user->google_token || ! $user->google_refresh_token) {
             Log::warning('User missing Google tokens', [
                 'user_id' => $user->id,
-                'has_access_token' => !is_null($user->google_token),
-                'has_refresh_token' => !is_null($user->google_refresh_token),
+                'has_access_token' => ! is_null($user->google_token),
+                'has_refresh_token' => ! is_null($user->google_refresh_token),
             ]);
+
             return false;
         }
 
         // Handle google_token_expires_at as string or Carbon instance
         $expiresAt = $user->google_token_expires_at;
-        
+
         if ($expiresAt) {
             if (is_string($expiresAt)) {
                 $expiresAt = \Carbon\Carbon::parse($expiresAt);
             }
-            
+
             // Only refresh if token expires in the next 1 minute (reduced from 5 minutes)
             $minutesUntilExpiry = $expiresAt->diffInMinutes(now());
-            
+
             if ($minutesUntilExpiry > 1) {
                 // Token is still valid for more than 1 minute, no need to refresh
                 $this->setAccessToken([
@@ -107,10 +111,11 @@ class GoogleCalendarService
                     'refresh_token' => $user->google_refresh_token,
                     'expires_in' => $expiresAt->diffInSeconds(now()),
                 ]);
+
                 return true;
             }
         }
-        
+
         Log::info('Refreshing Google Calendar token', [
             'user_id' => $user->id,
             'expires_at' => $expiresAt,
@@ -121,15 +126,15 @@ class GoogleCalendarService
         if ($refreshToken) {
             try {
                 $newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
-                
-                if (!isset($newToken['error'])) {
+
+                if (! isset($newToken['error'])) {
                     $user->update([
                         'google_token' => $newToken['access_token'],
                         'google_token_expires_at' => now()->addSeconds($newToken['expires_in']),
                     ]);
-                    
+
                     $this->setAccessToken($newToken);
-                                        
+
                     return true;
                 } else {
                     Log::error('Failed to refresh Google Calendar token', [
@@ -149,6 +154,7 @@ class GoogleCalendarService
                 'user_id' => $user->id,
             ]);
         }
+
         return false;
     }
 
@@ -166,7 +172,7 @@ class GoogleCalendarService
     public function createEvent(Event $event, Role $role): ?GoogleEvent
     {
         try {
-            if (!$this->calendarService) {
+            if (! $this->calendarService) {
                 throw new \Exception('Calendar service not initialized');
             }
 
@@ -183,17 +189,17 @@ class GoogleCalendarService
                 $calendarId = 'primary';
             }
 
-            $googleEvent = new GoogleEvent();
+            $googleEvent = new GoogleEvent;
             $googleEvent->setSummary($event->name);
             $googleEvent->setDescription($event->description);
 
             // Set start and end times
-            $startDateTime = new EventDateTime();
+            $startDateTime = new EventDateTime;
             $startDateTime->setDateTime($event->getStartDateTime()->toRfc3339String());
             $startDateTime->setTimeZone($role->timezone ?? 'UTC');
             $googleEvent->setStart($startDateTime);
 
-            $endDateTime = new EventDateTime();
+            $endDateTime = new EventDateTime;
             $endTime = $event->getStartDateTime()->copy()->addHours($event->duration ?: 2);
             $endDateTime->setDateTime($endTime->toRfc3339String());
             $endDateTime->setTimeZone($role->timezone ?? 'UTC');
@@ -217,6 +223,7 @@ class GoogleCalendarService
                 'event_id' => $event->id,
                 'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -227,7 +234,7 @@ class GoogleCalendarService
     public function updateEvent(Event $event, string $googleEventId, Role $role): ?GoogleEvent
     {
         try {
-            if (!$this->calendarService) {
+            if (! $this->calendarService) {
                 throw new \Exception('Calendar service not initialized');
             }
 
@@ -245,7 +252,7 @@ class GoogleCalendarService
             }
 
             $googleEvent = $this->calendarService->events->get($calendarId, $googleEventId);
-            
+
             $googleEvent->setSummary($event->name);
 
             if (! empty($event->description)) {
@@ -253,12 +260,12 @@ class GoogleCalendarService
             }
 
             // Set start and end times
-            $startDateTime = new EventDateTime();
+            $startDateTime = new EventDateTime;
             $startDateTime->setDateTime($event->getStartDateTime()->toRfc3339String());
             $startDateTime->setTimeZone($role->timezone ?? 'UTC');
             $googleEvent->setStart($startDateTime);
 
-            $endDateTime = new EventDateTime();
+            $endDateTime = new EventDateTime;
             $endTime = $event->getStartDateTime()->copy()->addHours($event->duration ?: 2);
             $endDateTime->setDateTime($endTime->toRfc3339String());
             $endDateTime->setTimeZone($role->timezone ?? 'UTC');
@@ -271,7 +278,7 @@ class GoogleCalendarService
 
             // Update the event
             $updatedEvent = $this->calendarService->events->update($calendarId, $googleEventId, $googleEvent);
-            
+
             return $updatedEvent;
 
         } catch (\Exception $e) {
@@ -280,6 +287,7 @@ class GoogleCalendarService
                 'google_event_id' => $googleEventId,
                 'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -290,12 +298,12 @@ class GoogleCalendarService
     public function deleteEvent(string $googleEventId, string $calendarId = 'primary'): bool
     {
         try {
-            if (!$this->calendarService) {
+            if (! $this->calendarService) {
                 throw new \Exception('Calendar service not initialized');
             }
 
             $this->calendarService->events->delete($calendarId, $googleEventId);
-            
+
             return true;
 
         } catch (\Exception $e) {
@@ -303,6 +311,7 @@ class GoogleCalendarService
                 'google_event_id' => $googleEventId,
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -313,7 +322,7 @@ class GoogleCalendarService
     public function getCalendars(): array
     {
         try {
-            if (!$this->calendarService) {
+            if (! $this->calendarService) {
                 throw new \Exception('Calendar service not initialized');
             }
 
@@ -334,6 +343,7 @@ class GoogleCalendarService
             Log::error('Failed to get Google Calendars', [
                 'error' => $e->getMessage(),
             ]);
+
             return [];
         }
     }
@@ -349,8 +359,9 @@ class GoogleCalendarService
             'errors' => 0,
         ];
 
-        if (!$this->refreshTokenIfNeeded($user)) {
+        if (! $this->refreshTokenIfNeeded($user)) {
             $results['errors']++;
+
             return $results;
         }
 
@@ -362,7 +373,7 @@ class GoogleCalendarService
         foreach ($events as $event) {
             try {
                 $googleEventId = $event->getGoogleEventIdForRole($role->id);
-                
+
                 if ($googleEventId) {
                     // Skip events that already exist in Google Calendar
                     // Updates should only happen when the specific event is changed in the app
@@ -401,14 +412,15 @@ class GoogleCalendarService
             'errors' => 0,
         ];
 
-        if (!$this->refreshTokenIfNeeded($user)) {
+        if (! $this->refreshTokenIfNeeded($user)) {
             $results['errors']++;
+
             return $results;
         }
 
         // Get all roles for this user
         $roles = $user->roles;
-        
+
         if ($roles->isEmpty()) {
             return $results;
         }
@@ -433,7 +445,7 @@ class GoogleCalendarService
     public function getEvents(string $calendarId, ?\DateTime $timeMin = null, ?\DateTime $timeMax = null): array
     {
         try {
-            if (!$this->calendarService) {
+            if (! $this->calendarService) {
                 throw new \Exception('Calendar service not initialized');
             }
 
@@ -451,7 +463,7 @@ class GoogleCalendarService
             }
 
             $events = $this->calendarService->events->listEvents($calendarId, $optParams);
-            
+
             $result = [];
             foreach ($events->getItems() as $event) {
                 $result[] = [
@@ -474,6 +486,7 @@ class GoogleCalendarService
                 'calendar_id' => $calendarId,
                 'error' => $e->getMessage(),
             ]);
+
             return [];
         }
     }
@@ -484,12 +497,12 @@ class GoogleCalendarService
     public function getEvent(string $calendarId, string $eventId): ?array
     {
         try {
-            if (!$this->calendarService) {
+            if (! $this->calendarService) {
                 throw new \Exception('Calendar service not initialized');
             }
 
             $event = $this->calendarService->events->get($calendarId, $eventId);
-            
+
             return [
                 'id' => $event->getId(),
                 'summary' => $event->getSummary(),
@@ -508,6 +521,7 @@ class GoogleCalendarService
                 'event_id' => $eventId,
                 'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -524,27 +538,28 @@ class GoogleCalendarService
         ];
 
         try {
-            if (!$this->refreshTokenIfNeeded($user)) {
+            if (! $this->refreshTokenIfNeeded($user)) {
                 $results['errors']++;
+
                 return $results;
             }
 
             // Get events from the last 30 days to the next 365 days
             $timeMin = now()->subDays(30);
             $timeMax = now()->addDays(365);
-            
+
             $googleEvents = $this->getEvents($calendarId, $timeMin, $timeMax);
 
             foreach ($googleEvents as $googleEvent) {
                 try {
                     // Check if this event already exists by looking for the google_event_id in event_role table
-                    $existingEvent = Event::whereHas('roles', function($query) use ($googleEvent, $role) {
+                    $existingEvent = Event::whereHas('roles', function ($query) use ($googleEvent, $role) {
                         $query->where('role_id', $role->id)
-                              ->where('google_event_id', $googleEvent['id']);
+                            ->where('google_event_id', $googleEvent['id']);
                     })->first();
 
                     // Also check for events with the same name and start time to prevent duplicates
-                    if (!$existingEvent && isset($googleEvent['start'])) {
+                    if (! $existingEvent && isset($googleEvent['start'])) {
                         $startTime = null;
                         if ($googleEvent['start']->getDateTime()) {
                             $startTime = \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->utc();
@@ -554,11 +569,11 @@ class GoogleCalendarService
 
                         if ($startTime) {
                             $existingEvent = Event::where('name', $googleEvent['summary'] ?: __('messages.untitled_event'))
-                                                ->where('starts_at', $startTime->format('Y-m-d H:i:s'))
-                                                ->whereHas('roles', function($query) use ($role) {
-                                                    $query->where('role_id', $role->id);
-                                                })
-                                                ->first();
+                                ->where('starts_at', $startTime->format('Y-m-d H:i:s'))
+                                ->whereHas('roles', function ($query) use ($role) {
+                                    $query->where('role_id', $role->id);
+                                })
+                                ->first();
                         }
                     }
 
@@ -598,7 +613,7 @@ class GoogleCalendarService
      */
     private function createEventFromGoogle(array $googleEvent, Role $role, string $calendarId): Event
     {
-        $event = new Event();
+        $event = new Event;
         $event->user_id = $role->user_id;
         $event->creator_role_id = $role->id;
         $event->name = $googleEvent['summary'] ?: __('messages.untitled_event');
@@ -688,18 +703,18 @@ class GoogleCalendarService
     public function createWebhook(string $calendarId, string $webhookUrl): array
     {
         try {
-            if (!$this->calendarService) {
+            if (! $this->calendarService) {
                 throw new \Exception('Calendar service not initialized');
             }
 
-            $webhook = new \Google\Service\Calendar\Channel();
+            $webhook = new \Google\Service\Calendar\Channel;
             $webhook->setId($this->generateValidChannelId());
             $webhook->setType('web_hook');
             $webhook->setAddress($webhookUrl);
             $webhook->setToken(config('services.google.webhook_secret'));
 
             $result = $this->calendarService->events->watch($calendarId, $webhook);
-            
+
             return [
                 'id' => $result->getId(),
                 'resourceId' => $result->getResourceId(),
@@ -721,16 +736,16 @@ class GoogleCalendarService
     public function deleteWebhook(string $webhookId, string $resourceId): bool
     {
         try {
-            if (!$this->calendarService) {
+            if (! $this->calendarService) {
                 throw new \Exception('Calendar service not initialized');
             }
 
-            $channel = new \Google\Service\Calendar\Channel();
+            $channel = new \Google\Service\Calendar\Channel;
             $channel->setId($webhookId);
             $channel->setResourceId($resourceId);
-            
+
             $this->calendarService->channels->stop($channel);
-            
+
             return true;
 
         } catch (\Exception $e) {
@@ -739,6 +754,7 @@ class GoogleCalendarService
                 'resource_id' => $resourceId,
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -753,13 +769,13 @@ class GoogleCalendarService
         $prefix = 'webhook_';
         $timestamp = time();
         $random = bin2hex(random_bytes(8)); // 16 character hex string
-        
+
         // Combine and ensure only valid characters
-        $channelId = $prefix . $timestamp . '_' . $random;
-        
+        $channelId = $prefix.$timestamp.'_'.$random;
+
         // Replace any potentially invalid characters (though our generation should be safe)
         $channelId = preg_replace('/[^A-Za-z0-9\\-_\\+\\/=]/', '', $channelId);
-        
+
         return $channelId;
     }
 
@@ -773,25 +789,25 @@ class GoogleCalendarService
 
         // Get IDs of venues where the role's user is a follower
         $followedVenueIds = Role::where('type', 'venue')
-            ->whereHas('members', function($query) use ($role) {
+            ->whereHas('members', function ($query) use ($role) {
                 $query->where('user_id', $role->user_id)
-                      ->where('level', 'follower');
+                    ->where('level', 'follower');
             })
             ->where('is_deleted', false)
             ->pluck('id')
             ->toArray();
 
         $venue = Role::where('type', 'venue')
-                    ->where('address1', $location)
-                    ->whereIn('id', $followedVenueIds)
-                    ->where('is_deleted', false)
-                    ->first();
+            ->where('address1', $location)
+            ->whereIn('id', $followedVenueIds)
+            ->where('is_deleted', false)
+            ->first();
 
         if ($venue) {
             return $venue;
         }
 
-        $venue = new Role();
+        $venue = new Role;
         $venue->type = 'venue';
         $venue->address1 = $location;
         $venue->country_code = $role->country_code;

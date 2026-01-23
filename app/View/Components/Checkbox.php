@@ -7,7 +7,9 @@ use Illuminate\View\Component;
 class Checkbox extends Component
 {
     public $name;
+
     public $label;
+
     public $checked;
 
     /**

@@ -3,11 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Models\Role;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use App\Utils\UrlUtils;
 use App\Rules\NoFakeEmail;
 use App\Rules\SquareImage;
+use Illuminate\Foundation\Http\FormRequest;
 
 class RoleUpdateRequest extends FormRequest
 {

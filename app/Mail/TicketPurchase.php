@@ -2,32 +2,33 @@
 
 namespace App\Mail;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Mail\Mailables\Address;
-use Illuminate\Queue\SerializesModels;
-use App\Models\Sale;
 use App\Models\Event;
 use App\Models\Role;
+use App\Models\Sale;
 use App\Utils\UrlUtils;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
 
 class TicketPurchase extends Mailable
 {
     use Queueable, SerializesModels;
 
     protected $sale;
+
     protected $event;
+
     protected $role;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Sale $sale, Event $event, Role $role = null)
+    public function __construct(Sale $sale, Event $event, ?Role $role = null)
     {
         $this->sale = $sale;
         $this->event = $event;
@@ -45,20 +46,20 @@ class TicketPurchase extends Mailable
         // If role has email settings, use those for from address
         if ($this->role && $this->role->hasEmailSettings()) {
             $emailSettings = $this->role->getEmailSettings();
-            if (!empty($emailSettings['from_address'])) {
+            if (! empty($emailSettings['from_address'])) {
                 $fromAddress = $emailSettings['from_address'];
             }
-            if (!empty($emailSettings['from_name'])) {
+            if (! empty($emailSettings['from_name'])) {
                 $fromName = $emailSettings['from_name'];
             }
         }
 
-        $subjectKey = $this->sale->calculateTotal() == 0 
-            ? 'messages.ticket_reservation_confirmation' 
+        $subjectKey = $this->sale->calculateTotal() == 0
+            ? 'messages.ticket_reservation_confirmation'
             : 'messages.ticket_purchase_confirmation';
 
         return new Envelope(
-            subject: __($subjectKey) . ' - ' . $this->event->name,
+            subject: __($subjectKey).' - '.$this->event->name,
             from: new Address($fromAddress, $fromName),
         );
     }
@@ -70,7 +71,7 @@ class TicketPurchase extends Mailable
     {
         $ticketUrl = route('ticket.view', [
             'event_id' => UrlUtils::encodeId($this->event->id),
-            'secret' => $this->sale->secret
+            'secret' => $this->sale->secret,
         ]);
 
         // Generate QR code
@@ -78,7 +79,7 @@ class TicketPurchase extends Mailable
             ->setSize(200)
             ->setMargin(10);
 
-        $writer = new PngWriter();
+        $writer = new PngWriter;
         $result = $writer->write($qrCode);
         $qrCodeData = $result->getString();
 
@@ -104,4 +105,3 @@ class TicketPurchase extends Mailable
         return [];
     }
 }
-

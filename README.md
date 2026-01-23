@@ -58,6 +58,7 @@
 ### Integrations
 - 📅 **Calendar Integration:** Enable attendees to add events directly to Google, Apple, or Microsoft calendars.
 - 🔄 **Google Calendar Sync:** Automatically sync events between Event Schedule and Google Calendar, with real-time updates via webhooks.
+- 📅 **CalDAV Sync:** Sync events with any CalDAV-compatible calendar server including Nextcloud, Radicale, and Fastmail.
 - 🔗 **Third-Party Event Import:** Automatically import events from third-party websites to expand your calendar offerings.
 - 🖥️ **Website Embedding:** Embed your schedule on any website using a simple iframe widget.
 - 🔐 **Social Login:** Sign in quickly using Google or Facebook accounts.

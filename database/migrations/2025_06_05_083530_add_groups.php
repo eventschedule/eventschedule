@@ -35,7 +35,7 @@ return new class extends Migration
         Schema::table('events', function (Blueprint $table) {
             $table->dropForeign(['group_id']);
             $table->dropColumn('group_id');
-            $table->dropColumn('category_id');        
+            $table->dropColumn('category_id');
         });
 
         Schema::dropIfExists('groups');

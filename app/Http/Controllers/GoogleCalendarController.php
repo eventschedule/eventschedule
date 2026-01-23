@@ -4,11 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Services\GoogleCalendarService;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Laravel\Socialite\Facades\Socialite;
 
 class GoogleCalendarController extends Controller
 {
@@ -24,14 +23,14 @@ class GoogleCalendarController extends Controller
      */
     private function calculateExpiresIn($expiresAt): int
     {
-        if (!$expiresAt) {
+        if (! $expiresAt) {
             return 3600; // Default to 1 hour
         }
-        
+
         if (is_string($expiresAt)) {
             $expiresAt = \Carbon\Carbon::parse($expiresAt);
         }
-        
+
         return $expiresAt->diffInSeconds(now());
     }
 
@@ -41,9 +40,9 @@ class GoogleCalendarController extends Controller
     public function redirect(): RedirectResponse
     {
         $user = Auth::user();
-        
+
         // If user has tokens but no refresh token, force re-authorization
-        if ($user->google_token && !$user->google_refresh_token) {
+        if ($user->google_token && ! $user->google_refresh_token) {
             Log::info('User has access token but no refresh token, forcing re-authorization', [
                 'user_id' => $user->id,
             ]);
@@ -51,7 +50,7 @@ class GoogleCalendarController extends Controller
         } else {
             $authUrl = $this->googleCalendarService->getAuthUrl();
         }
-        
+
         return redirect($authUrl);
     }
 
@@ -62,18 +61,19 @@ class GoogleCalendarController extends Controller
     {
         try {
             $code = $request->get('code');
-            
-            if (!$code) {
-                return redirect()->to(route('profile.edit') . '#section-google-calendar')
+
+            if (! $code) {
+                return redirect()->to(route('profile.edit').'#section-google-calendar')
                     ->with('error', 'Google authorization failed. Please try again.');
             }
 
             $token = $this->googleCalendarService->getAccessToken($code);
-                        
+
             if (isset($token['error'])) {
                 Log::error('Google OAuth error', ['error' => $token['error']]);
-                return redirect()->to(route('profile.edit') . '#section-google-calendar')
-                    ->with('error', 'Google authorization failed: ' . $token['error_description']);
+
+                return redirect()->to(route('profile.edit').'#section-google-calendar')
+                    ->with('error', 'Google authorization failed: '.$token['error_description']);
             }
 
             // Store tokens in user record
@@ -84,8 +84,8 @@ class GoogleCalendarController extends Controller
                 'google_refresh_token' => $token['refresh_token'] ?? null,
                 'google_token_expires_at' => now()->addSeconds($token['expires_in']),
             ]);
-            
-            return redirect()->to(route('profile.edit') . '#section-google-calendar')
+
+            return redirect()->to(route('profile.edit').'#section-google-calendar')
                 ->with('message', 'Google Calendar connected successfully!');
 
         } catch (\Exception $e) {
@@ -94,7 +94,7 @@ class GoogleCalendarController extends Controller
                 'user_id' => Auth::id(),
             ]);
 
-            return redirect()->to(route('profile.edit') . '#section-google-calendar')
+            return redirect()->to(route('profile.edit').'#section-google-calendar')
                 ->with('error', 'Failed to connect Google Calendar. Please try again.');
         }
     }
@@ -105,14 +105,15 @@ class GoogleCalendarController extends Controller
     public function reauthorize(): RedirectResponse
     {
         $user = Auth::user();
-        
-        if (!$user->google_token) {
-            return redirect()->to(route('profile.edit') . '#section-google-calendar')
+
+        if (! $user->google_token) {
+            return redirect()->to(route('profile.edit').'#section-google-calendar')
                 ->with('error', 'Google Calendar not connected. Please connect first.');
         }
-        
+
         // Force re-authorization to get refresh token
         $authUrl = $this->googleCalendarService->getAuthUrlWithForce();
+
         return redirect($authUrl);
     }
 
@@ -122,18 +123,18 @@ class GoogleCalendarController extends Controller
     public function disconnect(): RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Clean up any active webhooks before disconnecting
         try {
             $roles = $user->roles()->whereNotNull('google_webhook_id')->get();
-            
+
             foreach ($roles as $role) {
                 if ($role->google_webhook_id && $role->google_webhook_resource_id) {
                     // Ensure user has valid token before deleting webhook
                     if ($this->googleCalendarService->ensureValidToken($user)) {
                         $this->googleCalendarService->deleteWebhook($role->google_webhook_id, $role->google_webhook_resource_id);
                     }
-                    
+
                     // Clear webhook data from role
                     $role->update([
                         'google_webhook_id' => null,
@@ -148,7 +149,7 @@ class GoogleCalendarController extends Controller
                 'error' => $e->getMessage(),
             ]);
         }
-        
+
         $user->update([
             'google_id' => null,
             'google_token' => null,
@@ -156,7 +157,7 @@ class GoogleCalendarController extends Controller
             'google_token_expires_at' => null,
         ]);
 
-        return redirect()->to(route('profile.edit') . '#section-google-calendar')
+        return redirect()->to(route('profile.edit').'#section-google-calendar')
             ->with('message', 'Google Calendar disconnected successfully.');
     }
 
@@ -166,19 +167,19 @@ class GoogleCalendarController extends Controller
     public function getCalendars(Request $request)
     {
         $user = Auth::user();
-        
-        if (!$user->google_token) {
+
+        if (! $user->google_token) {
             return response()->json(['error' => 'Google Calendar not connected'], 400);
         }
 
         try {
             // Ensure user has valid token before getting calendars
-            if (!$this->googleCalendarService->ensureValidToken($user)) {
+            if (! $this->googleCalendarService->ensureValidToken($user)) {
                 return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
             }
 
             $calendars = $this->googleCalendarService->getCalendars();
-            
+
             return response()->json(['calendars' => $calendars]);
 
         } catch (\Exception $e) {
@@ -191,45 +192,42 @@ class GoogleCalendarController extends Controller
         }
     }
 
-
-
-
     /**
      * Sync a specific event to Google Calendar
      */
     public function syncEvent(Request $request, $subdomain, $eventId)
     {
         $user = Auth::user();
-        
-        if (!$user->google_token) {
+
+        if (! $user->google_token) {
             return response()->json(['error' => 'Google Calendar not connected'], 400);
         }
 
         try {
             $event = \App\Models\Event::findOrFail($eventId);
-            
+
             // Check if user has permission to sync this event
-            if (!$event->roles->contains(function ($role) use ($user) {
+            if (! $event->roles->contains(function ($role) use ($user) {
                 return $role->users->contains($user);
             })) {
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
 
             // Ensure user has valid token before syncing
-            if (!$this->googleCalendarService->ensureValidToken($user)) {
+            if (! $this->googleCalendarService->ensureValidToken($user)) {
                 return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
             }
 
             // Get the role from the subdomain in the request
             $subdomain = request()->subdomain;
             $role = \App\Models\Role::subdomain($subdomain)->first();
-            
-            if (!$role) {
+
+            if (! $role) {
                 return response()->json(['error' => 'Role not found'], 404);
             }
 
             $googleEventId = $event->getGoogleEventIdForRole($role->id);
-            
+
             if ($googleEventId) {
                 $googleEvent = $this->googleCalendarService->updateEvent($event, $googleEventId, $role);
             } else {
@@ -265,16 +263,16 @@ class GoogleCalendarController extends Controller
     public function unsyncEvent(Request $request, $subdomain, $eventId)
     {
         $user = Auth::user();
-        
-        if (!$user->google_token) {
+
+        if (! $user->google_token) {
             return response()->json(['error' => 'Google Calendar not connected'], 400);
         }
 
         try {
             $event = \App\Models\Event::findOrFail($eventId);
-            
+
             // Check if user has permission to unsync this event
-            if (!$event->roles->contains(function ($role) use ($user) {
+            if (! $event->roles->contains(function ($role) use ($user) {
                 return $role->users->contains($user);
             })) {
                 return response()->json(['error' => 'Unauthorized'], 403);
@@ -283,16 +281,16 @@ class GoogleCalendarController extends Controller
             // Get the role from the subdomain in the request
             $subdomain = request()->subdomain;
             $role = \App\Models\Role::subdomain($subdomain)->first();
-            
-            if (!$role) {
+
+            if (! $role) {
                 return response()->json(['error' => 'Role not found'], 404);
             }
 
             $googleEventId = $event->getGoogleEventIdForRole($role->id);
-            
+
             if ($googleEventId) {
                 // Ensure user has valid token before deleting
-                if (!$this->googleCalendarService->ensureValidToken($user)) {
+                if (! $this->googleCalendarService->ensureValidToken($user)) {
                     return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
                 }
 
@@ -313,32 +311,30 @@ class GoogleCalendarController extends Controller
         }
     }
 
-
-
     /**
      * Unified sync method that handles 'to', 'from', and 'both' directions
      */
     public function sync(Request $request, $subdomain)
     {
         $user = Auth::user();
-        
-        if (!$user->google_token) {
+
+        if (! $user->google_token) {
             return response()->json(['error' => 'Google Calendar not connected'], 400);
         }
 
         try {
             $role = \App\Models\Role::subdomain($subdomain)->firstOrFail();
-            
+
             // Check if user has permission to sync this role
-            if (!$role->users->contains($user)) {
+            if (! $role->users->contains($user)) {
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
 
             // Get sync direction from request, default to role's current setting
             $syncDirection = $request->input('sync_direction', $role->sync_direction);
-            
+
             // Validate sync direction
-            if (!in_array($syncDirection, ['to', 'from', 'both'])) {
+            if (! in_array($syncDirection, ['to', 'from', 'both'])) {
                 return response()->json(['error' => 'Invalid sync direction. Must be "to", "from", or "both"'], 400);
             }
 
@@ -348,27 +344,27 @@ class GoogleCalendarController extends Controller
             }
 
             // Ensure user has valid token before syncing
-            if (!$this->googleCalendarService->ensureValidToken($user)) {
+            if (! $this->googleCalendarService->ensureValidToken($user)) {
                 return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
             }
 
             $results = [];
-            
+
             // Handle different sync directions
             switch ($syncDirection) {
                 case 'to':
                     $results['to'] = $this->googleCalendarService->syncUserEvents($user, $role);
                     break;
-                    
+
                 case 'from':
                     $calendarId = $role->getGoogleCalendarId();
                     $results['from'] = $this->googleCalendarService->syncFromGoogleCalendar($user, $role, $calendarId);
                     break;
-                    
+
                 case 'both':
                     // Sync to Google Calendar first
                     $results['to'] = $this->googleCalendarService->syncUserEvents($user, $role);
-                    
+
                     // Then sync from Google Calendar
                     $calendarId = $role->getGoogleCalendarId();
                     $results['from'] = $this->googleCalendarService->syncFromGoogleCalendar($user, $role, $calendarId);
@@ -400,9 +396,9 @@ class GoogleCalendarController extends Controller
     {
         try {
             // If no specific role provided, get the first role for this user
-            if (!$role) {
+            if (! $role) {
                 $role = $user->roles()->first();
-                if (!$role) {
+                if (! $role) {
                     return;
                 }
             }
@@ -415,13 +411,14 @@ class GoogleCalendarController extends Controller
             // Handle webhook management based on sync direction
             if ($syncDirection === 'from' || $syncDirection === 'both') {
                 // Need webhook for syncing from Google
-                if (!$role->hasActiveWebhook()) {
+                if (! $role->hasActiveWebhook()) {
                     // Ensure user has valid token before creating webhook
-                    if (!$this->googleCalendarService->ensureValidToken($user)) {
+                    if (! $this->googleCalendarService->ensureValidToken($user)) {
                         Log::warning('Google Calendar token invalid and refresh failed during sync direction update', [
                             'user_id' => $user->id,
                             'role_id' => $role->id,
                         ]);
+
                         return;
                     }
 
@@ -475,6 +472,7 @@ class GoogleCalendarController extends Controller
             }
 
             $payload = json_decode(base64_decode($parts[1]), true);
+
             return $payload['sub'] ?? null;
         } catch (\Exception $e) {
             return null;

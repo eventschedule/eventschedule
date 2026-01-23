@@ -3,9 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Models\User;
+use App\Rules\NoFakeEmail;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Rules\NoFakeEmail;
 
 class ProfileUpdateRequest extends FormRequest
 {
@@ -21,9 +21,9 @@ class ProfileUpdateRequest extends FormRequest
             'email' => array_merge(
                 ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
                 config('app.hosted') ? [new NoFakeEmail] : []
-            ),            
+            ),
             'timezone' => ['required', 'string', 'max:255'],
-            'language_code' => ['required', 'string', 'in:' . implode(',', config('app.supported_languages', ['en']))],
+            'language_code' => ['required', 'string', 'in:'.implode(',', config('app.supported_languages', ['en']))],
             'profile_image' => ['image', 'max:2500'],
         ];
     }

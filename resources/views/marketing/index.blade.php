@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule - Plan, Promote & Share Event Calendars</x-slot>
-    <x-slot name="description">Event calendars, ticketing, and check-ins for venues, performers, and communities.</x-slot>
+    <x-slot name="description">Create beautiful event calendars, sell tickets with no platform fees, and check in attendees with QR codes. Free for venues, performers, and communities.</x-slot>
     <x-slot name="keywords">event schedule, event calendar, free event management, ticketing platform, QR check-in, venue calendar, performer schedule, sell tickets online, event organizer software</x-slot>
     <x-slot name="socialImage">social/home.png</x-slot>
 

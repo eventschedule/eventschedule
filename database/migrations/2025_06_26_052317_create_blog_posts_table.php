@@ -26,7 +26,7 @@ return new class extends Migration
             $table->boolean('is_published')->default(false);
             $table->integer('view_count')->default(0);
             $table->timestamps();
-            
+
             // Indexes for SEO and performance
             $table->index(['published_at', 'is_published']);
             $table->index('slug');

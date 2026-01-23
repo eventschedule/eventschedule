@@ -2,9 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use Codedge\Updater\UpdaterManager;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+
 class UpdateApp extends Command
 {
     /**
@@ -31,12 +32,11 @@ class UpdateApp extends Command
             exit;
         }
 
-
         $this->info('Updating app, this can take a few minutes...');
 
         $versionAvailable = $updater->source()->getVersionAvailable();
         $installedVersion = $updater->source()->getVersionInstalled();
-        
+
         cache()->put('version_available', $versionAvailable, 3600);
 
         if ($versionAvailable == $installedVersion) {
@@ -45,11 +45,11 @@ class UpdateApp extends Command
         }
 
         $release = $updater->source()->fetch($versionAvailable);
-        
-        $updater->source()->update($release);    
-        
+
+        $updater->source()->update($release);
+
         Artisan::call('migrate', ['--force' => true]);
 
-        $this->info('App updated successfully! ' . $versionAvailable);
+        $this->info('App updated successfully! '.$versionAvailable);
     }
 }

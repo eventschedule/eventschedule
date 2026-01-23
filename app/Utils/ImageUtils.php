@@ -11,27 +11,27 @@ class ImageUtils
     {
         // First try to detect from image data using magic bytes
         $magicBytes = substr($imageData, 0, 4);
-        
+
         if (substr($magicBytes, 0, 2) === "\xFF\xD8") {
             return 'jpeg';
         }
-        
+
         if (substr($magicBytes, 0, 4) === "\x89PNG") {
             return 'png';
         }
-        
-        if (substr($magicBytes, 0, 4) === "GIF8") {
+
+        if (substr($magicBytes, 0, 4) === 'GIF8') {
             return 'gif';
         }
-        
-        if (substr($magicBytes, 0, 4) === "RIFF" && substr($imageData, 8, 4) === "WEBP") {
+
+        if (substr($magicBytes, 0, 4) === 'RIFF' && substr($imageData, 8, 4) === 'WEBP') {
             return 'webp';
         }
-        
-        if (substr($magicBytes, 0, 2) === "BM") {
+
+        if (substr($magicBytes, 0, 2) === 'BM') {
             return 'bmp';
         }
-        
+
         // If magic bytes don't work, try to detect from URL extension
         $urlParts = parse_url($imageUrl);
         if (isset($urlParts['path'])) {
@@ -40,7 +40,7 @@ class ImageUtils
                 return $extension === 'jpg' ? 'jpeg' : $extension;
             }
         }
-        
+
         // Default to JPEG if we can't determine
         return 'jpeg';
     }
@@ -58,7 +58,7 @@ class ImageUtils
             'webp' => 'webp',
             'bmp' => 'bmp',
         ];
-        
+
         return $extensions[$format] ?? 'jpg';
     }
 
@@ -75,7 +75,7 @@ class ImageUtils
             'webp' => 'image/webp',
             'bmp' => 'image/bmp',
         ];
-        
+
         return $mimeTypes[$format] ?? 'image/jpeg';
     }
 
@@ -87,38 +87,38 @@ class ImageUtils
         // Create a temporary file with the image data
         $tempFile = tempnam(sys_get_temp_dir(), $tempPrefix);
         file_put_contents($tempFile, $imageData);
-        
+
         // Detect format and determine file properties
         $format = self::detectImageFormat($imageData, $imageUrl);
         $extension = self::getImageExtension($format);
         $mimeType = self::getImageMimeType($format);
-        $filename = 'event_image.' . $extension;
-        
+        $filename = 'event_image.'.$extension;
+
         // Create UploadedFile object
         return new \Illuminate\Http\UploadedFile(
-            $tempFile, 
-            $filename, 
-            $mimeType, 
-            null, 
+            $tempFile,
+            $filename,
+            $mimeType,
+            null,
             false // Not in test mode so getRealPath() works
         );
     }
 
-        /**
+    /**
      * Save image data to storage with proper format
      */
     public static function saveImageData(string $imageData, string $imageUrl, string $filenamePrefix = 'flyer_'): string
     {
         // Create a temporary file with the image data
-        $tempFile = tempnam(sys_get_temp_dir(), 'event_' . uniqid() . '_');
+        $tempFile = tempnam(sys_get_temp_dir(), 'event_'.uniqid().'_');
         file_put_contents($tempFile, $imageData);
-        
+
         // Determine file extension based on detected format
         $format = self::detectImageFormat($imageData, $imageUrl);
         $extension = self::getImageExtension($format);
-        $filename = strtolower($filenamePrefix . \Illuminate\Support\Str::random(32) . '.' . $extension);
-        
-        $file = new \Illuminate\Http\UploadedFile($tempFile, $filenamePrefix . '.' . $extension);
+        $filename = strtolower($filenamePrefix.\Illuminate\Support\Str::random(32).'.'.$extension);
+
+        $file = new \Illuminate\Http\UploadedFile($tempFile, $filenamePrefix.'.'.$extension);
         $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
         return $filename;
@@ -130,35 +130,35 @@ class ImageUtils
     public static function validateUploadedFile($file): void
     {
         // Check if file upload was successful
-        if (!$file->isValid()) {
+        if (! $file->isValid()) {
             throw new \Exception('File upload failed');
         }
-        
+
         // Check file size (5MB limit)
         if ($file->getSize() > 5242880) {
             throw new \Exception('File too large. Maximum size is 5MB.');
         }
-        
+
         // Use ImageUtils to validate MIME type and format
         $allowedMimes = [
             'image/jpeg',
-            'image/jpg', 
+            'image/jpg',
             'image/png',
             'image/gif',
-            'image/webp'
+            'image/webp',
         ];
-        
-        if (!in_array($file->getMimeType(), $allowedMimes)) {
+
+        if (! in_array($file->getMimeType(), $allowedMimes)) {
             throw new \Exception('Invalid file type. Only images are allowed.');
         }
-        
+
         // Additional security check using ImageUtils format detection
         $imageData = file_get_contents($file->getRealPath());
         $imageUrl = $file->getClientOriginalName();
         $detectedFormat = self::detectImageFormat($imageData, $imageUrl);
-        
+
         $allowedFormats = ['jpeg', 'jpg', 'png', 'gif', 'webp'];
-        if (!in_array($detectedFormat, $allowedFormats)) {
+        if (! in_array($detectedFormat, $allowedFormats)) {
             throw new \Exception('Invalid file format detected.');
         }
     }
@@ -166,16 +166,16 @@ class ImageUtils
     /**
      * Generate a thumbnail from a source image
      *
-     * @param string $sourcePath Path to source image
-     * @param string $destPath Path to save thumbnail
-     * @param int $width Target width
-     * @param int $height Target height
-     * @param int $quality JPEG quality (0-100)
+     * @param  string  $sourcePath  Path to source image
+     * @param  string  $destPath  Path to save thumbnail
+     * @param  int  $width  Target width
+     * @param  int  $height  Target height
+     * @param  int  $quality  JPEG quality (0-100)
      * @return bool True on success, false on failure
      */
     public static function generateThumbnail(string $sourcePath, string $destPath, int $width, int $height, int $quality = 80): bool
     {
-        if (!file_exists($sourcePath)) {
+        if (! file_exists($sourcePath)) {
             return false;
         }
 
@@ -215,6 +215,7 @@ class ImageUtils
         $destImage = imagecreatetruecolor($width, $height);
         if ($destImage === false) {
             imagedestroy($sourceImage);
+
             return false;
         }
 
@@ -231,15 +232,16 @@ class ImageUtils
             $sourceWidth, $sourceHeight
         );
 
-        if (!$result) {
+        if (! $result) {
             imagedestroy($sourceImage);
             imagedestroy($destImage);
+
             return false;
         }
 
         // Ensure destination directory exists
         $destDir = dirname($destPath);
-        if (!is_dir($destDir)) {
+        if (! is_dir($destDir)) {
             mkdir($destDir, 0755, true);
         }
 
@@ -252,4 +254,4 @@ class ImageUtils
 
         return $result;
     }
-} 
+}

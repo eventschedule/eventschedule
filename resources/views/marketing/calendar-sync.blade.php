@@ -1,7 +1,8 @@
 <x-marketing-layout>
-    <x-slot name="title">Calendar Sync - Event Schedule</x-slot>
-    <x-slot name="description">Two-way sync with Google Calendar. Real-time webhook updates. Let attendees add events to Apple, Google, or Outlook calendars instantly.</x-slot>
-    <x-slot name="keywords">Google Calendar sync, calendar integration, two-way sync, Apple Calendar, Outlook calendar, event sync, calendar webhook, automatic sync</x-slot>
+    <x-slot name="title">Google Calendar Sync | Two-Way Event Synchronization - Event Schedule</x-slot>
+    <x-slot name="description">Two-way sync with Google Calendar and CalDAV. Real-time webhook updates. Let attendees add events to Apple, Google, or Outlook calendars instantly.</x-slot>
+    <x-slot name="keywords">Google Calendar sync, CalDAV sync, calendar integration, two-way sync, Apple Calendar, Outlook calendar, event sync, calendar webhook, automatic sync</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
 
     <style>
         .text-gradient {
@@ -63,7 +64,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
-                Sync with Google Calendar automatically. Let attendees add events to their favorite calendar app.
+                Sync with Google Calendar or any CalDAV server. Let attendees add events to their favorite calendar app.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
@@ -77,26 +78,118 @@
         </div>
     </section>
 
-    <!-- Bento Grid Features -->
+    <!-- Choose Your Integration -->
     <section class="bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                    Choose your integration
+                </h2>
+                <p class="text-xl text-gray-400">
+                    Two powerful options for syncing your events.
+                </p>
+            </div>
 
-                <!-- Bidirectional Sync (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-white/10 p-8 lg:p-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Google Calendar Card -->
+                <a href="{{ marketing_url('/google-calendar') }}" class="group block">
+                    <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-white/10 p-8 lg:p-10 h-full">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                                <svg class="w-7 h-7" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-white group-hover:text-blue-300 transition-colors">Google Calendar</h3>
+                                <p class="text-gray-500 text-sm">Real-time sync with webhooks</p>
+                            </div>
+                        </div>
+
+                        <p class="text-gray-400 mb-6">Connect with OAuth for instant, real-time synchronization. Changes in Google Calendar appear immediately via webhook notifications.</p>
+
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <span class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm">OAuth 2.0</span>
+                            <span class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm">Webhooks</span>
+                            <span class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm">Instant sync</span>
+                        </div>
+
+                        <div class="flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            Learn more
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- CalDAV Card -->
+                <a href="{{ marketing_url('/caldav') }}" class="group block">
+                    <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900/50 to-cyan-900/50 border border-white/10 p-8 lg:p-10 h-full">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-white group-hover:text-teal-300 transition-colors">CalDAV</h3>
+                                <p class="text-gray-500 text-sm">Open standard, any server</p>
+                            </div>
+                        </div>
+
+                        <p class="text-gray-400 mb-6">Sync with any CalDAV-compatible server—Nextcloud, Radicale, Fastmail, iCloud, and more. Perfect for selfhosted setups.</p>
+
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <span class="px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm">Open standard</span>
+                            <span class="px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm">Selfhosted</span>
+                            <span class="px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm">Any server</span>
+                        </div>
+
+                        <div class="flex items-center text-teal-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            Learn more
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Shared Features Bento Grid -->
+    <section class="bg-[#0a0a0f] py-24 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                    Powerful sync features
+                </h2>
+                <p class="text-xl text-gray-400">
+                    Available with both Google Calendar and CalDAV.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Bidirectional Sync (full width) -->
+                <div class="bento-card md:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                 </svg>
                                 Bidirectional
                             </div>
                             <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">True two-way sync</h3>
-                            <p class="text-gray-400 text-lg mb-6">Push events to Google Calendar, pull events from Google Calendar, or sync both ways. Choose the direction that works for your workflow.</p>
+                            <p class="text-gray-400 text-lg mb-6">Push events to your calendar, pull events from your calendar, or sync both ways. Choose the direction that works for your workflow.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Push to Google</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Pull from Google</span>
+                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Push only</span>
+                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Pull only</span>
                                 <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Both directions</span>
                             </div>
                         </div>
@@ -114,20 +207,20 @@
                                     </div>
                                     <!-- Sync arrows -->
                                     <div class="flex flex-col items-center gap-1">
-                                        <svg class="w-6 h-6 text-blue-400 animate-sync" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg class="w-6 h-6 text-violet-400 animate-sync" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                         </svg>
-                                        <svg class="w-6 h-6 text-blue-400 animate-sync" style="animation-delay: 0.5s;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg class="w-6 h-6 text-violet-400 animate-sync" style="animation-delay: 0.5s;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                         </svg>
                                     </div>
-                                    <!-- Google Calendar side -->
+                                    <!-- Calendar side -->
                                     <div class="bg-white/10 rounded-2xl border border-white/20 p-4 w-32">
-                                        <div class="text-xs text-gray-300 mb-2 text-center">Google Calendar</div>
+                                        <div class="text-xs text-gray-300 mb-2 text-center">Your Calendar</div>
                                         <div class="space-y-2">
                                             <div class="h-2 bg-blue-400/40 rounded"></div>
-                                            <div class="h-2 bg-green-400/40 rounded w-3/4"></div>
-                                            <div class="h-2 bg-yellow-400/40 rounded w-1/2"></div>
+                                            <div class="h-2 bg-teal-400/40 rounded w-3/4"></div>
+                                            <div class="h-2 bg-violet-400/40 rounded w-1/2"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -136,35 +229,9 @@
                     </div>
                 </div>
 
-                <!-- Real-time Webhooks -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        Real-time
-                    </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Instant updates</h3>
-                    <p class="text-gray-400 mb-6">Webhook-powered sync means changes in Google Calendar appear in your schedule immediately. No manual refresh needed.</p>
-
-                    <div class="bg-black/30 rounded-xl p-4 border border-white/10">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center animate-sync">
-                                <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="text-white text-sm font-medium">Event synced</div>
-                                <div class="text-emerald-400 text-xs">Just now</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Attendee Calendar Integration -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-purple-900/50 border border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-900/50 to-pink-900/50 border border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
@@ -195,34 +262,74 @@
                     </div>
                 </div>
 
-                <!-- Multi-Calendar Support (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-blue-900/50 border border-white/10 p-8 lg:p-10">
-                    <div class="grid md:grid-cols-2 gap-8 items-center">
-                        <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-medium mb-4">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                </svg>
-                                Multiple Calendars
-                            </div>
-                            <h3 class="text-3xl font-bold text-white mb-4">Choose your calendar</h3>
-                            <p class="text-gray-400 text-lg">Select which Google Calendar to sync with for each schedule. Perfect if you manage multiple calendars for different purposes.</p>
+                <!-- Multi-Calendar Support -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-blue-900/50 border border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        Flexible
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Choose your calendar</h3>
+                    <p class="text-gray-400 mb-4">Select which calendar to sync with for each schedule. Different schedules can use different calendars.</p>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-cyan-500/20 border border-cyan-400/30">
+                            <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+                            <span class="text-cyan-200 text-sm">Work Events</span>
+                            <svg class="w-4 h-4 text-cyan-400 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
                         </div>
-                        <div class="space-y-3">
-                            <div class="flex items-center gap-3 p-3 rounded-xl bg-cyan-500/20 border border-cyan-400/30">
-                                <div class="w-3 h-3 rounded-full bg-cyan-400"></div>
-                                <div class="text-white font-medium flex-1">Work Events</div>
-                                <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/10">
+                            <div class="w-2 h-2 rounded-full bg-violet-400"></div>
+                            <span class="text-gray-300 text-sm">Personal</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Automatic Sync (full width) -->
+                <div class="bento-card md:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-white/10 p-8 lg:p-10">
+                    <div class="flex flex-col md:flex-row gap-8 items-center">
+                        <div class="flex-1">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
+                                Automatic
                             </div>
-                            <div class="flex items-center gap-3 p-3 rounded-xl bg-white/10 border border-white/10">
-                                <div class="w-3 h-3 rounded-full bg-violet-400"></div>
-                                <div class="text-gray-300 font-medium flex-1">Personal</div>
-                            </div>
-                            <div class="flex items-center gap-3 p-3 rounded-xl bg-white/10 border border-white/10">
-                                <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
-                                <div class="text-gray-300 font-medium flex-1">Band Schedule</div>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3">Set it and forget it</h3>
+                            <p class="text-gray-400 text-lg">Events sync automatically when created, updated, or deleted. No manual work required.</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-black/30 rounded-xl p-4 border border-white/10 space-y-2">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center animate-sync">
+                                        <svg class="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <div class="text-emerald-300 text-sm">Event created</div>
+                                    <div class="text-gray-500 text-xs">synced</div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center animate-sync" style="animation-delay: 0.3s;">
+                                        <svg class="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <div class="text-emerald-300 text-sm">Event updated</div>
+                                    <div class="text-gray-500 text-xs">synced</div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center animate-sync" style="animation-delay: 0.6s;">
+                                        <svg class="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <div class="text-emerald-300 text-sm">Event deleted</div>
+                                    <div class="text-gray-500 text-xs">synced</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -249,9 +356,9 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/25">
                         1
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Connect Google</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Connect your calendar</h3>
                     <p class="text-gray-600 text-sm">
-                        Link your Google account with one click. OAuth keeps your credentials secure.
+                        Choose Google Calendar (OAuth) or any CalDAV server (username/password).
                     </p>
                 </div>
 
@@ -259,9 +366,9 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/25">
                         2
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Choose Direction</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Choose direction</h3>
                     <p class="text-gray-600 text-sm">
-                        Push to Google, pull from Google, or sync both ways. You decide.
+                        Push events out, pull events in, or sync both ways. You decide.
                     </p>
                 </div>
 
@@ -269,9 +376,9 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/25">
                         3
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Select Calendar</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Select calendar</h3>
                     <p class="text-gray-600 text-sm">
-                        Pick which Google Calendar to use. Different schedules can use different calendars.
+                        Pick which calendar to use. Different schedules can use different calendars.
                     </p>
                 </div>
 
@@ -279,7 +386,7 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/25">
                         4
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Auto-Sync</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Auto-sync</h3>
                     <p class="text-gray-600 text-sm">
                         Events sync automatically when created, updated, or deleted. No manual work.
                     </p>
@@ -288,51 +395,91 @@
         </div>
     </section>
 
-    <!-- Sync Directions Section -->
+    <!-- Comparison Section -->
     <section class="bg-[#0a0a0f] py-24">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
+            <div class="text-center mb-12">
                 <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
-                    Three sync modes
+                    Which should I choose?
                 </h2>
                 <p class="text-xl text-gray-400">
-                    Choose the direction that fits your workflow.
+                    Both options offer two-way sync. Here's how they differ.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Push Only -->
-                <div class="bg-white/5 rounded-2xl p-6 border border-white/10 text-center">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-500/20 mb-4">
-                        <svg class="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Push Only</h3>
-                    <p class="text-gray-400 text-sm">Events you create appear in Google Calendar. Google Calendar changes don't sync back.</p>
-                </div>
-
-                <!-- Pull Only -->
-                <div class="bg-white/5 rounded-2xl p-6 border border-white/10 text-center">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-500/20 mb-4">
-                        <svg class="w-8 h-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Pull Only</h3>
-                    <p class="text-gray-400 text-sm">Import events from Google Calendar. Your schedule stays read-only on Google's side.</p>
-                </div>
-
-                <!-- Both Ways -->
-                <div class="bg-gradient-to-br from-violet-500/20 to-indigo-500/20 rounded-2xl p-6 border border-violet-400/30 text-center">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-violet-500/20 mb-4">
-                        <svg class="w-8 h-8 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Both Ways</h3>
-                    <p class="text-gray-400 text-sm">Full two-way sync. Changes flow in both directions automatically.</p>
-                </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-white/10">
+                            <th class="text-left py-4 px-4 text-gray-400 font-medium">Feature</th>
+                            <th class="text-center py-4 px-4">
+                                <div class="flex items-center justify-center gap-2 text-blue-300 font-semibold">
+                                    <svg class="w-5 h-5" viewBox="0 0 24 24">
+                                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                    </svg>
+                                    Google Calendar
+                                </div>
+                            </th>
+                            <th class="text-center py-4 px-4">
+                                <div class="flex items-center justify-center gap-2 text-teal-300 font-semibold">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    CalDAV
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                        <tr class="border-b border-white/5">
+                            <td class="py-4 px-4 text-gray-300">Authentication</td>
+                            <td class="py-4 px-4 text-center text-gray-400">OAuth 2.0 (one-click)</td>
+                            <td class="py-4 px-4 text-center text-gray-400">Username/password</td>
+                        </tr>
+                        <tr class="border-b border-white/5">
+                            <td class="py-4 px-4 text-gray-300">Sync speed</td>
+                            <td class="py-4 px-4 text-center text-gray-400">Real-time (webhooks)</td>
+                            <td class="py-4 px-4 text-center text-gray-400">Every 15 minutes</td>
+                        </tr>
+                        <tr class="border-b border-white/5">
+                            <td class="py-4 px-4 text-gray-300">Server options</td>
+                            <td class="py-4 px-4 text-center text-gray-400">Google only</td>
+                            <td class="py-4 px-4 text-center text-gray-400">Any CalDAV server</td>
+                        </tr>
+                        <tr class="border-b border-white/5">
+                            <td class="py-4 px-4 text-gray-300">Selfhosted friendly</td>
+                            <td class="py-4 px-4 text-center">
+                                <span class="text-gray-500">Requires Google API setup</span>
+                            </td>
+                            <td class="py-4 px-4 text-center">
+                                <svg class="w-5 h-5 text-teal-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-white/5">
+                            <td class="py-4 px-4 text-gray-300">Two-way sync</td>
+                            <td class="py-4 px-4 text-center">
+                                <svg class="w-5 h-5 text-blue-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </td>
+                            <td class="py-4 px-4 text-center">
+                                <svg class="w-5 h-5 text-teal-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 px-4 text-gray-300">Best for</td>
+                            <td class="py-4 px-4 text-center text-gray-400">Google users who want instant sync</td>
+                            <td class="py-4 px-4 text-center text-gray-400">Selfhosted or privacy-focused users</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </section>
@@ -400,7 +547,7 @@
                 Keep your calendars in sync
             </h2>
             <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                Connect Google Calendar in seconds. Your events stay synchronized automatically.
+                Connect Google Calendar or any CalDAV server. Your events stay synchronized automatically.
             </p>
             <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                 Get Started Free

@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Role;
-use App\Models\Event;
 use App\Services\designs\GridDesign;
 use App\Services\designs\ListDesign;
 use Illuminate\Support\Collection;
@@ -11,9 +10,13 @@ use Illuminate\Support\Collection;
 class EventGraphicGenerator
 {
     protected Role $role;
+
     protected Collection $events;
+
     protected string $layout;
+
     protected bool $directRegistration;
+
     protected AbstractEventDesign $design;
 
     public function __construct(Role $role, Collection $events, string $layout = 'grid', bool $directRegistration = false)
@@ -37,87 +40,93 @@ class EventGraphicGenerator
                 return new GridDesign($this->role, $this->events, $this->directRegistration);
         }
     }
-    
+
     public function generate(): string
     {
         return $this->design->generate();
     }
-    
+
     public function getWidth(): int
     {
         return $this->design->getWidth();
     }
-    
+
     public function getHeight(): int
     {
         return $this->design->getHeight();
     }
-    
+
     public function getEventCount(): int
     {
         return $this->design->getEventCount();
     }
-    
+
     public function getLayout(): string
     {
         return $this->layout;
     }
-    
+
     public function getDesign(): AbstractEventDesign
     {
         return $this->design;
     }
-    
+
     // Grid-specific methods (delegated to GridDesign if available)
     public function getGridInfo(): ?array
     {
         if ($this->design instanceof GridDesign) {
             return $this->design->getGridInfo();
         }
+
         return null;
     }
-    
+
     public function getCurrentGridLayout(): ?array
     {
         if ($this->design instanceof GridDesign) {
             return $this->design->getCurrentGridLayout();
         }
+
         return null;
     }
-    
+
     public function getQRCodePositionForFlyer(int $row, int $col): ?array
     {
         if ($this->design instanceof GridDesign) {
             return $this->design->getQRCodePositionForFlyer($row, $col);
         }
+
         return null;
     }
-    
+
     public function getDetailedQRCodeInfo(): ?array
     {
         if ($this->design instanceof GridDesign) {
             return $this->design->getDetailedQRCodeInfo();
         }
+
         return null;
     }
-    
+
     // List-specific methods (delegated to ListDesign if available)
     public function getListInfo(): ?array
     {
         if ($this->design instanceof ListDesign) {
             return $this->design->getListInfo();
         }
+
         return null;
     }
-    
+
     public function getCurrentListLayout(): ?array
     {
         if ($this->design instanceof ListDesign) {
             return $this->design->getCurrentListLayout();
         }
+
         return null;
     }
-    
+
     // General design information
     public function getDesignInfo(): array
     {
@@ -128,17 +137,17 @@ class EventGraphicGenerator
             'total_height' => $this->getHeight(),
             'design_class' => get_class($this->design),
         ];
-        
+
         // Add layout-specific information
         if ($this->design instanceof GridDesign) {
             $info['grid_info'] = $this->design->getGridInfo();
         } elseif ($this->design instanceof ListDesign) {
             $info['list_info'] = $this->design->getListInfo();
         }
-        
+
         return $info;
     }
-    
+
     /**
      * Check if the current design supports a specific feature
      */
@@ -157,7 +166,7 @@ class EventGraphicGenerator
                 return false;
         }
     }
-    
+
     /**
      * Get available layouts
      */
@@ -167,16 +176,16 @@ class EventGraphicGenerator
             'grid' => [
                 'name' => 'Grid Layout',
                 'description' => 'Display events in a grid format with flyer images',
-                'features' => ['flyer_images', 'qr_codes', 'rounded_corners', 'dynamic_grid']
+                'features' => ['flyer_images', 'qr_codes', 'rounded_corners', 'dynamic_grid'],
             ],
             'list' => [
                 'name' => 'List Layout',
                 'description' => 'Display events in a list format with details and flyer images',
-                'features' => ['flyer_images', 'event_details', 'qr_codes', 'rounded_corners', 'separator_lines']
-            ]
+                'features' => ['flyer_images', 'event_details', 'qr_codes', 'rounded_corners', 'separator_lines'],
+            ],
         ];
     }
-    
+
     /**
      * Create a new instance with a different layout
      */
@@ -184,7 +193,7 @@ class EventGraphicGenerator
     {
         return new self($this->role, $this->events, $layout, $this->directRegistration);
     }
-    
+
     /**
      * Get the underlying design object for advanced operations
      */
@@ -192,7 +201,7 @@ class EventGraphicGenerator
     {
         return $this->design;
     }
-    
+
     /**
      * Get font debugging information for troubleshooting
      */

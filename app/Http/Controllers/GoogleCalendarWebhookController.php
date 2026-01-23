@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Services\GoogleCalendarService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
 class GoogleCalendarWebhookController extends Controller
@@ -22,14 +21,14 @@ class GoogleCalendarWebhookController extends Controller
      */
     private function calculateExpiresIn($expiresAt): int
     {
-        if (!$expiresAt) {
+        if (! $expiresAt) {
             return 3600; // Default to 1 hour
         }
-        
+
         if (is_string($expiresAt)) {
             $expiresAt = \Carbon\Carbon::parse($expiresAt);
         }
-        
+
         return $expiresAt->diffInSeconds(now());
     }
 
@@ -47,6 +46,7 @@ class GoogleCalendarWebhookController extends Controller
                     'token' => $token,
                     'ip' => $request->ip(),
                 ]);
+
                 return response('Unauthorized', 401);
             }
 
@@ -56,41 +56,45 @@ class GoogleCalendarWebhookController extends Controller
 
             // Find the role with this webhook
             $role = Role::where('google_webhook_id', $channelId)
-                       ->where('google_webhook_resource_id', $resourceId)
-                       ->first();
+                ->where('google_webhook_resource_id', $resourceId)
+                ->first();
 
-            if (!$role) {
+            if (! $role) {
                 Log::warning('No role found for webhook', [
                     'channel_id' => $channelId,
                     'resource_id' => $resourceId,
                 ]);
+
                 return response('Role not found', 404);
             }
 
             // Check if sync from Google is enabled
-            if (!$role->syncsFromGoogle()) {
+            if (! $role->syncsFromGoogle()) {
                 Log::info('Sync from Google not enabled for role', [
                     'role_id' => $role->id,
                     'sync_direction' => $role->sync_direction,
                 ]);
+
                 return response('Sync from Google not enabled', 200);
             }
 
             // Get the user for this role
             $user = $role->users()->first();
-            if (!$user || !$user->google_token) {
+            if (! $user || ! $user->google_token) {
                 Log::warning('No user with Google token found for role', [
                     'role_id' => $role->id,
                 ]);
+
                 return response('User not found or not connected', 404);
             }
 
             // Ensure user has valid Google token (with automatic refresh)
-            if (!$this->googleCalendarService->ensureValidToken($user)) {
+            if (! $this->googleCalendarService->ensureValidToken($user)) {
                 Log::error('Failed to refresh Google token for webhook', [
                     'role_id' => $role->id,
                     'user_id' => $user->id,
                 ]);
+
                 return response('User token invalid and refresh failed', 401);
             }
 
@@ -116,11 +120,12 @@ class GoogleCalendarWebhookController extends Controller
     {
         try {
             // Ensure token is valid before proceeding
-            if (!$this->googleCalendarService->ensureValidToken($user)) {
+            if (! $this->googleCalendarService->ensureValidToken($user)) {
                 Log::error('Token validation failed during webhook sync', [
                     'role_id' => $role->id,
                     'user_id' => $user->id,
                 ]);
+
                 return;
             }
 
@@ -155,7 +160,7 @@ class GoogleCalendarWebhookController extends Controller
     public function verify(Request $request)
     {
         $challenge = $request->get('challenge');
-        
+
         if ($challenge) {
             return response($challenge, 200);
         }

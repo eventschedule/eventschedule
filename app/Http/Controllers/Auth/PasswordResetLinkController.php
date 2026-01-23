@@ -7,8 +7,8 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
-use Illuminate\View\View;
 use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 
 class PasswordResetLinkController extends Controller
 {
@@ -28,8 +28,8 @@ class PasswordResetLinkController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $user = User::where('email', $request->email)->first();
-        
-        if ($user && !$user->email_verified_at) {
+
+        if ($user && ! $user->email_verified_at) {
             throw ValidationException::withMessages([
                 'email' => __('messages.email_not_verified'),
             ]);
@@ -52,6 +52,6 @@ class PasswordResetLinkController extends Controller
         return $status == Password::RESET_LINK_SENT
                     ? back()->with('status', __($status))
                     : back()->withInput($request->only('email'))
-                            ->withErrors(['email' => __($status)]);
+                        ->withErrors(['email' => __($status)]);
     }
 }

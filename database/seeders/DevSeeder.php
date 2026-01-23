@@ -2,10 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
 
 class DevSeeder extends Seeder
 {
@@ -60,7 +58,7 @@ class DevSeeder extends Seeder
                 'timezone' => 'Asia/Jerusalem',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
 
         \DB::table('role_user')->insert([

@@ -41,35 +41,35 @@ return [
 
     'repository_types' => [
         'github' => [
-            'type'                 => 'github',
-            'repository_vendor'    => env('SELF_UPDATER_REPO_VENDOR', 'eventschedule'),
-            'repository_name'      => env('SELF_UPDATER_REPO_NAME', 'eventschedule'),
-            'repository_url'       => 'https://github.com/eventschedule/eventschedule',
-            'download_path'        => env('SELF_UPDATER_DOWNLOAD_PATH', '/tmp'),
+            'type' => 'github',
+            'repository_vendor' => env('SELF_UPDATER_REPO_VENDOR', 'eventschedule'),
+            'repository_name' => env('SELF_UPDATER_REPO_NAME', 'eventschedule'),
+            'repository_url' => 'https://github.com/eventschedule/eventschedule',
+            'download_path' => env('SELF_UPDATER_DOWNLOAD_PATH', '/tmp'),
             'private_access_token' => env('SELF_UPDATER_GITHUB_PRIVATE_ACCESS_TOKEN', ''),
-            'use_branch'           => env('SELF_UPDATER_USE_BRANCH', ''),
-            'package_file_name'    => env('SELF_UPDATER_PACKAGE_FILE_NAME', 'eventschedule.zip'),
+            'use_branch' => env('SELF_UPDATER_USE_BRANCH', ''),
+            'package_file_name' => env('SELF_UPDATER_PACKAGE_FILE_NAME', 'eventschedule.zip'),
         ],
         'gitlab' => [
-            'base_url'             => '',
-            'type'                 => 'gitlab',
-            'repository_id'        => env('SELF_UPDATER_REPO_URL', ''),
-            'download_path'        => env('SELF_UPDATER_DOWNLOAD_PATH', '/tmp'),
+            'base_url' => '',
+            'type' => 'gitlab',
+            'repository_id' => env('SELF_UPDATER_REPO_URL', ''),
+            'download_path' => env('SELF_UPDATER_DOWNLOAD_PATH', '/tmp'),
             'private_access_token' => env('SELF_UPDATER_GITLAB_PRIVATE_ACCESS_TOKEN', ''),
         ],
         'http' => [
-            'type'                 => 'http',
-            'repository_url'       => env('SELF_UPDATER_REPO_URL', ''),
-            'pkg_filename_format'  => env('SELF_UPDATER_PKG_FILENAME_FORMAT', 'v_VERSION_'),
-            'download_path'        => env('SELF_UPDATER_DOWNLOAD_PATH', '/tmp'),
+            'type' => 'http',
+            'repository_url' => env('SELF_UPDATER_REPO_URL', ''),
+            'pkg_filename_format' => env('SELF_UPDATER_PKG_FILENAME_FORMAT', 'v_VERSION_'),
+            'download_path' => env('SELF_UPDATER_DOWNLOAD_PATH', '/tmp'),
             'private_access_token' => env('SELF_UPDATER_HTTP_PRIVATE_ACCESS_TOKEN', ''),
         ],
         'gitea' => [
-            'type'                 => 'gitea',
-            'repository_vendor'    => env('SELF_UPDATER_REPO_VENDOR', ''),
-            'gitea_url'            => env('SELF_UPDATER_GITEA_URL', ''),
-            'repository_name'      => env('SELF_UPDATER_REPO_NAME', ''),
-            'download_path'        => env('SELF_UPDATER_DOWNLOAD_PATH', '/tmp'),
+            'type' => 'gitea',
+            'repository_vendor' => env('SELF_UPDATER_REPO_VENDOR', ''),
+            'gitea_url' => env('SELF_UPDATER_GITEA_URL', ''),
+            'repository_name' => env('SELF_UPDATER_REPO_NAME', ''),
+            'download_path' => env('SELF_UPDATER_DOWNLOAD_PATH', '/tmp'),
             'private_access_token' => env('SELF_UPDATER_GITEA_PRIVATE_ACCESS_TOKEN', ''),
         ],
     ],
@@ -95,7 +95,7 @@ return [
         'storage/framework',
         'storage/logs',
         'storage/self-update',
-        //'vendor',
+        // 'vendor',
     ],
 
     /*
@@ -162,10 +162,10 @@ return [
 
     'artisan_commands' => [
         'pre_update' => [
-            //'command:signature' => [
+            // 'command:signature' => [
             //    'class' => Command class
             //    'params' => []
-            //]
+            // ]
         ],
         'post_update' => [
 

@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Utils\UrlUtils;
 use App\Models\Role;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Http\FormRequest;
@@ -18,7 +17,7 @@ class RoleEmailVerificationRequest extends FormRequest
     public function authorize()
     {
         $role = Role::whereSubdomain($this->route('subdomain'))->firstOrFail();
-        
+
         if (! hash_equals(sha1($role->getEmailForVerification()), (string) $this->route('hash'))) {
             return false;
         }
@@ -57,7 +56,6 @@ class RoleEmailVerificationRequest extends FormRequest
     /**
      * Configure the validator instance.
      *
-     * @param  \Illuminate\Validation\Validator  $validator
      * @return \Illuminate\Validation\Validator
      */
     public function withValidator(Validator $validator)

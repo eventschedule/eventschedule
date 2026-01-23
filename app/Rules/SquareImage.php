@@ -3,7 +3,6 @@
 namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
-use Illuminate\Support\Facades\Log;
 
 class SquareImage implements Rule
 {
@@ -16,13 +15,13 @@ class SquareImage implements Rule
      */
     public function passes($attribute, $value)
     {
-        if (!$value->isValid()) {
+        if (! $value->isValid()) {
             return false;
         }
 
         // Get image dimensions
         $image = getimagesize($value->getRealPath());
-        if (!$image) {
+        if (! $image) {
             return false;
         }
 

@@ -37,9 +37,10 @@ class InvoiceNinja
         ]);
     }
 
-    public function createClient($name, $email, $currencyCode) {
+    public function createClient($name, $email, $currencyCode)
+    {
         $parts = explode(' ', $name);
-        $lastName = array_pop($parts); 
+        $lastName = array_pop($parts);
         $firstName = implode(' ', $parts);
 
         $client = $this->sendRequest('clients', 'POST', [
@@ -56,9 +57,10 @@ class InvoiceNinja
         return $client;
     }
 
-    public function findClient($email, $currencyCode) {
-        $clients = $this->sendRequest('clients?is_deleted=false&email=' . $email, 'GET');
-        
+    public function findClient($email, $currencyCode)
+    {
+        $clients = $this->sendRequest('clients?is_deleted=false&email='.$email, 'GET');
+
         if (count($clients) > 0) {
             foreach ($clients as $client) {
                 if ($client['settings']['currency_id'] == InvoiceNinja::convertCodeToId($currencyCode)) {
@@ -70,7 +72,8 @@ class InvoiceNinja
         return null;
     }
 
-    public function createInvoice($clientId, $lineItems, $qrCodeUrl, $sendEmail = false) {
+    public function createInvoice($clientId, $lineItems, $qrCodeUrl, $sendEmail = false)
+    {
         $url = 'invoices';
 
         if ($sendEmail) {
@@ -79,9 +82,9 @@ class InvoiceNinja
             $url .= '?mark_sent=true';
         }
 
-        $invoice = $this->sendRequest($url, 'POST', [            
+        $invoice = $this->sendRequest($url, 'POST', [
             'client_id' => $clientId,
-            'public_notes' => __('messages.qr_code_is_your_ticket') . '<br><br><img src="' . $qrCodeUrl . '" />',
+            'public_notes' => __('messages.qr_code_is_your_ticket').'<br><br><img src="'.$qrCodeUrl.'" />',
             'line_items' => $lineItems,
         ]);
 
@@ -92,16 +95,16 @@ class InvoiceNinja
     {
         $url = $this->apiUrl;
 
-        if ( ! $this->apiKey ) {
+        if (! $this->apiKey) {
             return null;
         }
 
-        if ( empty( $url ) ) {
+        if (empty($url)) {
             $url = 'https://invoicing.co/api/v1/';
         } else {
-            $url = rtrim( $url, '/' );
-            $url = rtrim( $url, 'api/v1' );
-            $url = rtrim( $url, '/' );
+            $url = rtrim($url, '/');
+            $url = rtrim($url, 'api/v1');
+            $url = rtrim($url, '/');
             $url .= '/api/v1/';
         }
 
@@ -119,8 +122,8 @@ class InvoiceNinja
             'method' => $method,
         );
         */
-        
-        $response = curl_init();        
+
+        $response = curl_init();
         curl_setopt($response, CURLOPT_URL, $url);
         curl_setopt($response, CURLOPT_RETURNTRANSFER, 1);
 
@@ -130,21 +133,21 @@ class InvoiceNinja
         }
 
         curl_setopt($response, CURLOPT_HTTPHEADER, [
-            'X-API-TOKEN: ' . $this->apiKey,
-            'X-CLIENT-PLATFORM: ' . 'Event Schedule', 
+            'X-API-TOKEN: '.$this->apiKey,
+            'X-CLIENT-PLATFORM: '.'Event Schedule',
             'Content-Type: application/json',
         ]);
 
         $result = curl_exec($response);
 
         curl_close($response);
-        
+
         $result = json_decode($result, true);
 
         if (! isset($result['data'])) {
             $message = 'Invoice Ninja API request failed';
             if (isset($result['message'])) {
-                $message .= ': ' . $result['message'];
+                $message .= ': '.$result['message'];
             }
             throw new \Exception($message);
         }
@@ -152,7 +155,8 @@ class InvoiceNinja
         return $result['data'];
     }
 
-    public static function convertCodeToId($currencyCode) {
+    public static function convertCodeToId($currencyCode)
+    {
         $currencies = [
             'USD' => 1,
             'GBP' => 2,
@@ -262,5 +266,4 @@ class InvoiceNinja
 
         return $currencies[$currencyCode] ?? null;
     }
-
 }

@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -24,29 +24,29 @@ return new class extends Migration
             if (config('database.default') === 'sqlite') {
                 // For SQLite, we need to recreate the table without the group_id column
                 // First, get all columns except group_id
-                $columns = DB::select("PRAGMA table_info(events)");
+                $columns = DB::select('PRAGMA table_info(events)');
                 $columnNames = [];
                 $columnDefinitions = [];
-                
+
                 foreach ($columns as $column) {
                     if ($column->name !== 'group_id') {
                         $columnNames[] = $column->name;
                         $columnDefinitions[] = $this->getColumnDefinition($column);
                     }
                 }
-                
+
                 // Create new table without group_id
-                $createTableSQL = "CREATE TABLE events_new (" . implode(', ', $columnDefinitions) . ")";
+                $createTableSQL = 'CREATE TABLE events_new ('.implode(', ', $columnDefinitions).')';
                 DB::statement($createTableSQL);
-                
+
                 // Copy data to new table
                 $columnList = implode(', ', $columnNames);
                 DB::statement("INSERT INTO events_new ($columnList) SELECT $columnList FROM events");
-                
+
                 // Drop old table and rename new one
-                DB::statement("DROP TABLE events");
-                DB::statement("ALTER TABLE events_new RENAME TO events");
-                
+                DB::statement('DROP TABLE events');
+                DB::statement('ALTER TABLE events_new RENAME TO events');
+
                 // Recreate indexes
                 $this->recreateIndexes();
             } else {
@@ -64,7 +64,7 @@ return new class extends Migration
     public function down(): void
     {
         // Add group_id column back to events table if not exists
-        if (!Schema::hasColumn('events', 'group_id')) {
+        if (! Schema::hasColumn('events', 'group_id')) {
             Schema::table('events', function (Blueprint $table) {
                 $table->foreignId('group_id')->nullable()->constrained()->onDelete('set null');
             });
@@ -83,23 +83,23 @@ return new class extends Migration
      */
     private function getColumnDefinition($column): string
     {
-        $definition = $column->name . ' ' . $column->type;
-        
+        $definition = $column->name.' '.$column->type;
+
         if ($column->notnull) {
             $definition .= ' NOT NULL';
         }
-        
+
         if ($column->pk) {
             $definition .= ' PRIMARY KEY';
             if ($column->type === 'INTEGER') {
                 $definition .= ' AUTOINCREMENT';
             }
         }
-        
+
         if ($column->dflt_value !== null) {
-            $definition .= ' DEFAULT ' . $column->dflt_value;
+            $definition .= ' DEFAULT '.$column->dflt_value;
         }
-        
+
         return $definition;
     }
 
@@ -109,17 +109,17 @@ return new class extends Migration
     private function recreateIndexes(): void
     {
         // Get existing indexes
-        $indexes = DB::select("PRAGMA index_list(events)");
-        
+        $indexes = DB::select('PRAGMA index_list(events)');
+
         foreach ($indexes as $index) {
             if ($index->name !== 'sqlite_autoindex_events_1') { // Skip primary key index
-                $indexInfo = DB::select("PRAGMA index_info(" . $index->name . ")");
+                $indexInfo = DB::select('PRAGMA index_info('.$index->name.')');
                 $columns = [];
                 foreach ($indexInfo as $info) {
                     $columns[] = $info->name;
                 }
-                
-                if (!empty($columns)) {
+
+                if (! empty($columns)) {
                     $unique = $index->unique ? 'UNIQUE ' : '';
                     $columnList = implode(', ', $columns);
                     DB::statement("CREATE {$unique}INDEX {$index->name} ON events ($columnList)");
@@ -127,4 +127,4 @@ return new class extends Migration
             }
         }
     }
-}; 
+};

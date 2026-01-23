@@ -11,7 +11,7 @@ class NoFakeEmail implements Rule
         if (strpos($value, '@example.com') !== false) {
             return false;
         }
-    
+
         // List of common disposable email domains
         $fakeDomains = [
             'padvn.com',
@@ -3647,13 +3647,13 @@ class NoFakeEmail implements Rule
             'zzrgg.com',
             'zzz.com',
         ];
-        
+
         foreach ($fakeDomains as $domain) {
             if (strpos($value, "@$domain") !== false) {
                 return false;
             }
         }
-        
+
         return true;
     }
 

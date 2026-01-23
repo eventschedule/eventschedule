@@ -1,7 +1,8 @@
 <x-marketing-layout>
-    <x-slot name="title">Custom Fields - Event Schedule</x-slot>
+    <x-slot name="title">Custom Ticket Forms | Collect Attendee Information - Event Schedule</x-slot>
     <x-slot name="description">Collect additional information from ticket buyers with flexible form fields including text, dropdown, date, and yes/no options.</x-slot>
     <x-slot name="keywords">custom fields, ticket forms, event registration, attendee information, form builder, dropdown fields, date picker, event data collection</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
 
     <style>
         .text-gradient {

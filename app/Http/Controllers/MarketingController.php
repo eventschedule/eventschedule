@@ -70,6 +70,38 @@ class MarketingController extends Controller
     }
 
     /**
+     * Google Calendar page
+     */
+    public function googleCalendar()
+    {
+        return view('marketing.google-calendar');
+    }
+
+    /**
+     * CalDAV page
+     */
+    public function caldav()
+    {
+        return view('marketing.caldav');
+    }
+
+    /**
+     * Stripe page
+     */
+    public function stripe()
+    {
+        return view('marketing.stripe');
+    }
+
+    /**
+     * Invoice Ninja page
+     */
+    public function invoiceninja()
+    {
+        return view('marketing.invoiceninja');
+    }
+
+    /**
      * Analytics page
      */
     public function analytics()

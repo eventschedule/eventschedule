@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Auth\Events\Verified;
 use App\Http\Requests\UserEmailVerificationRequest;
-use Illuminate\Http\RedirectResponse;
 use App\Models\Role;
 use App\Models\Sale;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Http\RedirectResponse;
 
 class VerifyEmailController extends Controller
 {
@@ -25,8 +25,8 @@ class VerifyEmailController extends Controller
 
         if ($user->markEmailAsVerified()) {
             $roles = Role::whereEmail($user->email)
-                            ->whereNull('user_id')
-                            ->get();
+                ->whereNull('user_id')
+                ->get();
 
             foreach ($roles as $role) {
                 $role->user_id = $user->id;
@@ -34,14 +34,14 @@ class VerifyEmailController extends Controller
 
                 if ($role->markEmailAsVerified()) {
                     event(new Verified($role));
-                }    
+                }
 
                 $user->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
             }
 
             $tickets = Sale::whereEmail($user->email)
-                            ->whereNull('user_id')
-                            ->get();
+                ->whereNull('user_id')
+                ->get();
 
             foreach ($tickets as $ticket) {
                 $ticket->user_id = $user->id;
@@ -50,8 +50,8 @@ class VerifyEmailController extends Controller
 
             event(new Verified($request->user()));
         }
-        
+
         return redirect(route('home'))
-                ->with('message', __('messages.confirmed_email'));
+            ->with('message', __('messages.confirmed_email'));
     }
 }

@@ -2,29 +2,29 @@
 
 namespace App\Notifications;
 
-use App\Utils\UrlUtils;
-use Illuminate\Auth\Notifications\VerifyEmail as BaseVerifyEmail;
-use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Support\Facades\URL;
 use Carbon\Carbon;
 use Config;
+use Illuminate\Auth\Notifications\VerifyEmail as BaseVerifyEmail;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Headers;
+use Illuminate\Support\Facades\URL;
 
 class VerifyEmail extends BaseVerifyEmail
 {
     protected $type;
+
     protected $subdomain;
+
     protected $notifiable;
 
     public function __construct($type = 'user', $subdomain = '')
-    {        
+    {
         $this->type = $type;
         $this->subdomain = $subdomain;
     }
-    
+
     public function toMail($notifiable)
     {
         $this->notifiable = $notifiable;
@@ -33,7 +33,9 @@ class VerifyEmail extends BaseVerifyEmail
         return new class($verificationUrl, $this->toMailHeaders(), $notifiable) extends Mailable
         {
             protected $verificationUrl;
+
             protected $headers;
+
             protected $notifiable;
 
             public function __construct($verificationUrl, $headers, $notifiable)
@@ -41,7 +43,7 @@ class VerifyEmail extends BaseVerifyEmail
                 $this->verificationUrl = $verificationUrl;
                 $this->headers = $headers;
                 $this->notifiable = $notifiable;
-                
+
                 // Set the recipient
                 $this->to($notifiable->getEmailForVerification());
             }
@@ -84,10 +86,10 @@ class VerifyEmail extends BaseVerifyEmail
         return URL::temporarySignedRoute(
             $this->type == 'user' ? 'verification.verify' : 'role.verification.verify',
             Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60)),
-            $this->type == 'user' 
+            $this->type == 'user'
                 ? ['id' => $notifiable->getKey(), 'hash' => sha1($notifiable->getEmailForVerification())]
                 : ['subdomain' => $this->subdomain, 'hash' => sha1($notifiable->getEmailForVerification())]
-        );        
+        );
     }
 
     /**
@@ -97,18 +99,18 @@ class VerifyEmail extends BaseVerifyEmail
     {
         if ($this->type == 'role' && $this->subdomain) {
             return [
-                'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $this->subdomain]) . '>',
+                'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $this->subdomain]).'>',
                 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
             ];
         }
-        
+
         if ($this->type == 'user' && $this->notifiable) {
             return [
-                'List-Unsubscribe' => '<' . route('user.unsubscribe', ['email' => base64_encode($this->notifiable->email)]) . '>',
+                'List-Unsubscribe' => '<'.route('user.unsubscribe', ['email' => base64_encode($this->notifiable->email)]).'>',
                 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
             ];
         }
-        
+
         return [];
     }
 }

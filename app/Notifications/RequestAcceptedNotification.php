@@ -3,10 +3,8 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Utils\UrlUtils;
 
 class RequestAcceptedNotification extends Notification
 {
@@ -41,11 +39,11 @@ class RequestAcceptedNotification extends Notification
         $role = $this->event->role();
 
         return (new MailMessage)
-                    ->replyTo($this->venue->user->email, $this->venue->user->name)
-                    ->subject(str_replace(':venue', $venue->name, __('messages.' . $role->type . '_request_accepted')))
-                    ->line(str_replace(':venue', $venue->name, __('messages.' . $role->type . '_request_accepted')))
-                    ->action(__('messages.view_event'), $this->event->getGuestUrl())
-                    ->line(__('messages.thank_you_for_using'));
+            ->replyTo($this->venue->user->email, $this->venue->user->name)
+            ->subject(str_replace(':venue', $venue->name, __('messages.'.$role->type.'_request_accepted')))
+            ->line(str_replace(':venue', $venue->name, __('messages.'.$role->type.'_request_accepted')))
+            ->action(__('messages.view_event'), $this->event->getGuestUrl())
+            ->line(__('messages.thank_you_for_using'));
     }
 
     /**
@@ -66,8 +64,9 @@ class RequestAcceptedNotification extends Notification
     public function toMailHeaders(): array
     {
         $venue = $this->event->venue;
+
         return [
-            'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $venue->subdomain]) . '>',
+            'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $venue->subdomain]).'>',
             'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
         ];
     }

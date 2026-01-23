@@ -3,13 +3,11 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Headers;
-
 use Illuminate\Queue\SerializesModels;
 
 class SupportEmail extends Mailable
@@ -17,7 +15,9 @@ class SupportEmail extends Mailable
     use Queueable, SerializesModels;
 
     protected $name;
+
     protected $email;
+
     protected $message;
 
     /**
@@ -36,7 +36,7 @@ class SupportEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Support Email - ' . date('F j Y, g:i A'),
+            subject: 'Support Email - '.date('F j Y, g:i A'),
             replyTo: [
                 new Address($this->email, $this->name),
             ],
@@ -75,7 +75,7 @@ class SupportEmail extends Mailable
     {
         return new Headers(
             text: [
-                'List-Unsubscribe' => '<' . route('role.unsubscribe') . '>',
+                'List-Unsubscribe' => '<'.route('role.unsubscribe').'>',
                 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
             ],
         );

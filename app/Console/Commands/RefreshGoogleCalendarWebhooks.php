@@ -45,11 +45,11 @@ class RefreshGoogleCalendarWebhooks extends Command
 
         // Get roles that need webhook refresh
         $query = Role::whereNotNull('google_webhook_id')
-                    ->whereNotNull('google_webhook_resource_id')
-                    ->whereNotNull('google_webhook_expires_at');
+            ->whereNotNull('google_webhook_resource_id')
+            ->whereNotNull('google_webhook_expires_at');
 
         // If not forcing, only get webhooks that expire within the next 3 days
-        if (!$force) {
+        if (! $force) {
             $query->where('google_webhook_expires_at', '<=', now()->addDays(3));
         }
 
@@ -66,6 +66,7 @@ class RefreshGoogleCalendarWebhooks extends Command
 
         if ($roles->isEmpty()) {
             $this->info('No webhooks need refreshing.');
+
             return 0;
         }
 
@@ -80,24 +81,26 @@ class RefreshGoogleCalendarWebhooks extends Command
             try {
                 // Get the user for this role
                 $user = $role->users()->first();
-                
-                if (!$user || !$user->google_token) {
+
+                if (! $user || ! $user->google_token) {
                     $this->warn("  - No user with Google token found for role {$role->subdomain}");
                     $errors++;
+
                     continue;
                 }
 
                 // Ensure user has valid token
-                if (!$this->googleCalendarService->ensureValidToken($user)) {
+                if (! $this->googleCalendarService->ensureValidToken($user)) {
                     $this->warn("  - Failed to refresh Google token for role {$role->subdomain}");
                     $errors++;
+
                     continue;
                 }
 
                 // Delete the old webhook
                 $this->info("  - Deleting old webhook: {$role->google_webhook_id}");
                 $this->googleCalendarService->deleteWebhook(
-                    $role->google_webhook_id, 
+                    $role->google_webhook_id,
                     $role->google_webhook_resource_id
                 );
 

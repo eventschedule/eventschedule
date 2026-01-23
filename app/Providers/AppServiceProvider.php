@@ -3,8 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 use Laravel\Cashier\Cashier;
 use URL;
 
@@ -38,9 +38,10 @@ class AppServiceProvider extends ServiceProvider
             if ($user = auth()->user()) {
                 return $user->roles()->get();
             }
+
             return collect();
         });
-    
+
         View::composer(['layouts.navigation', 'home'], function ($view) {
             $allRoles = app('userRoles');
             $view->with([
@@ -55,6 +56,6 @@ class AppServiceProvider extends ServiceProvider
                     ->whereIn('pivot.level', ['owner', 'admin']),
             ]);
         });
-        
+
     }
 }

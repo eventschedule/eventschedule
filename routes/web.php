@@ -5,6 +5,7 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\Api\ApiSettingsController;
 use App\Http\Controllers\AppController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CalDAVController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\GoogleCalendarWebhookController;
@@ -109,6 +110,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/google-calendar/sync/{subdomain}', [GoogleCalendarController::class, 'sync'])->name('google.calendar.sync');
     Route::post('/google-calendar/sync-event/{subdomain}/{eventId}', [GoogleCalendarController::class, 'syncEvent'])->name('google.calendar.sync_event');
     Route::delete('/google-calendar/unsync-event/{subdomain}/{eventId}', [GoogleCalendarController::class, 'unsyncEvent'])->name('google.calendar.unsync_event');
+
+    // CalDAV routes
+    Route::post('/caldav/test-connection', [CalDAVController::class, 'testConnection'])->name('caldav.test_connection')->middleware('throttle:10,1');
+    Route::post('/caldav/discover-calendars', [CalDAVController::class, 'discoverCalendars'])->name('caldav.discover_calendars')->middleware('throttle:10,1');
+    Route::post('/caldav/settings/{subdomain}', [CalDAVController::class, 'saveSettings'])->name('caldav.save_settings')->middleware('throttle:10,1');
+    Route::delete('/caldav/disconnect/{subdomain}', [CalDAVController::class, 'disconnect'])->name('caldav.disconnect')->middleware('throttle:10,1');
+    Route::post('/caldav/sync/{subdomain}', [CalDAVController::class, 'sync'])->name('caldav.sync')->middleware('throttle:5,1');
+    Route::patch('/caldav/sync-direction/{subdomain}', [CalDAVController::class, 'updateSyncDirection'])->name('caldav.update_sync_direction')->middleware('throttle:30,1');
 
     Route::get('/scan', [TicketController::class, 'scan'])->name('ticket.scan');
     Route::post('/ticket/view/{event_id}/{secret}', [TicketController::class, 'scanned'])->name('ticket.scanned');
@@ -225,6 +234,10 @@ if (config('app.is_nexus')) {
         Route::get('/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
         Route::get('/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
         Route::get('/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
+        Route::get('/google-calendar', [MarketingController::class, 'googleCalendar'])->name('marketing.google_calendar');
+        Route::get('/caldav', [MarketingController::class, 'caldav'])->name('marketing.caldav');
+        Route::get('/stripe', [MarketingController::class, 'stripe'])->name('marketing.stripe');
+        Route::get('/invoiceninja', [MarketingController::class, 'invoiceninja'])->name('marketing.invoiceninja');
         // Marketing analytics route hidden in test mode to avoid conflict with authenticated /analytics route
         Route::get('/integrations', [MarketingController::class, 'integrations'])->name('marketing.integrations');
         Route::get('/custom-fields', [MarketingController::class, 'customFields'])->name('marketing.custom_fields');
@@ -253,6 +266,10 @@ if (config('app.is_nexus')) {
             Route::get('/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
             Route::get('/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
             Route::get('/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
+            Route::get('/google-calendar', [MarketingController::class, 'googleCalendar'])->name('marketing.google_calendar');
+            Route::get('/caldav', [MarketingController::class, 'caldav'])->name('marketing.caldav');
+            Route::get('/stripe', [MarketingController::class, 'stripe'])->name('marketing.stripe');
+            Route::get('/invoiceninja', [MarketingController::class, 'invoiceninja'])->name('marketing.invoiceninja');
             Route::get('/analytics', [MarketingController::class, 'analytics'])->name('marketing.analytics');
             Route::get('/integrations', [MarketingController::class, 'integrations'])->name('marketing.integrations');
             Route::get('/custom-fields', [MarketingController::class, 'customFields'])->name('marketing.custom_fields');
@@ -282,6 +299,10 @@ if (config('app.is_nexus')) {
             Route::get('/ticketing', fn () => redirect('https://eventschedule.com/ticketing', 301));
             Route::get('/ai', fn () => redirect('https://eventschedule.com/ai', 301));
             Route::get('/calendar-sync', fn () => redirect('https://eventschedule.com/calendar-sync', 301));
+            Route::get('/google-calendar', fn () => redirect('https://eventschedule.com/google-calendar', 301));
+            Route::get('/caldav', fn () => redirect('https://eventschedule.com/caldav', 301));
+            Route::get('/stripe', fn () => redirect('https://eventschedule.com/stripe', 301));
+            Route::get('/invoiceninja', fn () => redirect('https://eventschedule.com/invoiceninja', 301));
             Route::get('/analytics', fn () => redirect('https://eventschedule.com/analytics', 301));
             Route::get('/integrations', fn () => redirect('https://eventschedule.com/integrations', 301));
             Route::get('/custom-fields', fn () => redirect('https://eventschedule.com/custom-fields', 301));
@@ -311,6 +332,10 @@ if (config('app.is_nexus')) {
     Route::get('/ticketing', fn () => redirect()->route('home'));
     Route::get('/ai', fn () => redirect()->route('home'));
     Route::get('/calendar-sync', fn () => redirect()->route('home'));
+    Route::get('/google-calendar', fn () => redirect()->route('home'));
+    Route::get('/caldav', fn () => redirect()->route('home'));
+    Route::get('/stripe', fn () => redirect()->route('home'));
+    Route::get('/invoiceninja', fn () => redirect()->route('home'));
     Route::get('/integrations', fn () => redirect()->route('home'));
     Route::get('/custom-fields', fn () => redirect()->route('home'));
     Route::get('/team-scheduling', fn () => redirect()->route('home'));

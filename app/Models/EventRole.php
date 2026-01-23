@@ -16,6 +16,8 @@ class EventRole extends Pivot
         'is_accepted',
         'group_id',
         'google_event_id',
+        'caldav_event_uid',
+        'caldav_event_etag',
     ];
 
     public function role()

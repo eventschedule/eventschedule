@@ -17,7 +17,7 @@ return new class extends Migration
         });
 
         Schema::table('events', function (Blueprint $table) {
-            $table->boolean('tickets_enabled')->default(false);            
+            $table->boolean('tickets_enabled')->default(false);
             $table->string('ticket_currency_code')->nullable();
             $table->text('ticket_notes')->nullable();
         });
@@ -58,7 +58,7 @@ return new class extends Migration
         Schema::table('roles', function (Blueprint $table) {
             $table->dropColumn('header_image');
             $table->dropColumn('default_tickets');
-        });        
+        });
 
         Schema::dropIfExists('sales');
         Schema::dropIfExists('tickets');
@@ -67,6 +67,6 @@ return new class extends Migration
             $table->dropColumn('tickets_enabled');
             $table->dropColumn('ticket_currency_code');
             $table->dropColumn('ticket_notes');
-        });        
+        });
     }
 };

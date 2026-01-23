@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Mail\SupportEmail;
+use App\Models\BlogPost;
 use App\Models\Event;
 use App\Models\Role;
-use App\Models\BlogPost;
 use Carbon\Carbon;
-use App\Mail\SupportEmail;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
 class HomeController extends Controller
@@ -24,14 +24,14 @@ class HomeController extends Controller
     public function home(Request $request)
     {
         $subdomain = session('pending_follow');
-        
+
         if (! $subdomain) {
             $subdomain = session('pending_request');
         }
 
         if ($subdomain) {
             $role = Role::whereSubdomain($subdomain)->firstOrFail();
-            
+
             $user = auth()->user();
             $user->language_code = $role->language_code;
             $user->save();
@@ -54,25 +54,25 @@ class HomeController extends Controller
 
         $user = $request->user();
         $timezone = $user->timezone ?? 'UTC';
-        
+
         // Calculate month boundaries in user's timezone, then convert to UTC for database query
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
         $endOfMonth = $startOfMonth->copy()->endOfMonth()->endOfDay();
-        
+
         // Convert to UTC for database query
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
         $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
-        
+
         $roleIds = $user->roles()->pluck('roles.id');
-        
+
         $events = Event::with('roles')
             ->where(function ($query) use ($roleIds, $user) {
                 $query->where(function ($query) use ($roleIds) {
                     $query->whereIn('id', function ($query) use ($roleIds) {
-                            $query->select('event_id')
-                                ->from('event_role')
-                                ->whereIn('role_id', $roleIds)
-                                ->where('is_accepted', true);
+                        $query->select('event_id')
+                            ->from('event_role')
+                            ->whereIn('role_id', $roleIds)
+                            ->where('is_accepted', true);
                     });
                 })->orWhere(function ($query) use ($user) {
                     $query->where('user_id', $user->id);
@@ -97,18 +97,18 @@ class HomeController extends Controller
     public function sitemap()
     {
         $roles = Role::with('groups')
-                ->where(function($query) {
-                    $query->where(function($q) {
-                        $q->whereNotNull('email')
-                          ->whereNotNull('email_verified_at');
-                    })->orWhere(function($q) {
-                        $q->whereNotNull('phone')
-                          ->whereNotNull('phone_verified_at'); 
-                    });
-                })
-                ->where('is_deleted', false)
-                ->orderBy(request()->has('roles') ? 'id' : 'subdomain', request()->has('roles') ? 'desc' : 'asc')
-                ->get();
+            ->where(function ($query) {
+                $query->where(function ($q) {
+                    $q->whereNotNull('email')
+                        ->whereNotNull('email_verified_at');
+                })->orWhere(function ($q) {
+                    $q->whereNotNull('phone')
+                        ->whereNotNull('phone_verified_at');
+                });
+            })
+            ->where('is_deleted', false)
+            ->orderBy(request()->has('roles') ? 'id' : 'subdomain', request()->has('roles') ? 'desc' : 'asc')
+            ->get();
 
         $events = Event::with(['roles'])
             ->orderBy(request()->has('events') ? 'id' : 'starts_at', 'desc')
@@ -125,20 +125,21 @@ class HomeController extends Controller
             'events' => ! request()->has('roles') ? $events : [],
             'blogPosts' => $hasQueryFilter ? [] : $blogPosts,
             'showMarketingLinks' => ! $hasQueryFilter,
-            'lastmod' => now()->toIso8601String()
+            'lastmod' => now()->toIso8601String(),
         ]);
-        
+
         // Check if the request is for the gzipped version
         $isGzipped = str_ends_with(request()->path(), '.gz');
-        
+
         if ($isGzipped) {
             $content = $sitemapView->render();
             $gzipped = gzencode($content, 9);
+
             return response($gzipped)
                 ->header('Content-Type', 'application/xml')
                 ->header('Content-Encoding', 'gzip');
         }
-        
+
         return response($sitemapView)
             ->header('Content-Type', 'application/xml');
     }
@@ -161,12 +162,12 @@ class HomeController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => __('messages.feedback_submitted')
+                'message' => __('messages.feedback_submitted'),
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => __('messages.feedback_failed')
+                'message' => __('messages.feedback_failed'),
             ], 500);
         }
     }

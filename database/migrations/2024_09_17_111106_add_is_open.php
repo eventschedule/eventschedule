@@ -19,7 +19,7 @@ return new class extends Migration
         Schema::table('roles', function (Blueprint $table) {
             $table->string('name')->nullable()->change();
             $table->string('email')->nullable()->change();
-            $table->boolean('is_open')->default(false);            
+            $table->boolean('is_open')->default(false);
         });
     }
 

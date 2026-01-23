@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">About - Event Schedule</x-slot>
-    <x-slot name="description">Learn about Event Schedule and how it helps performers, venues, and organizers share their events.</x-slot>
+    <x-slot name="title">About Event Schedule | Open Source Event Management Platform</x-slot>
+    <x-slot name="description">Event Schedule helps performers, venues, and organizers share events and sell tickets. Open source, privacy-focused, and community-driven.</x-slot>
     <x-slot name="keywords">about event schedule, event management platform, open source event calendar, performer schedule app, venue calendar software, event curator tools</x-slot>
     <x-slot name="socialImage">social/about.png</x-slot>
 

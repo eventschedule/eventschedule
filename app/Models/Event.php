@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Jobs\SyncEventToCalDAV;
 use App\Jobs\SyncEventToGoogleCalendar;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
@@ -123,13 +124,17 @@ class Event extends Model
                     ->delete();
             }
 
-            // Sync deletion to Google Calendar for all roles that have sync enabled
+            // Sync deletion to Google Calendar and CalDAV for all roles that have sync enabled
             foreach ($event->roles as $role) {
                 if ($role->syncsToGoogle()) {
                     $user = $role->user;
                     if ($user && $user->google_token) {
                         SyncEventToGoogleCalendar::dispatchSync($event, $role, 'delete');
                     }
+                }
+
+                if ($role->syncsToCalDAV()) {
+                    SyncEventToCalDAV::dispatchSync($event, $role, 'delete');
                 }
             }
         });
@@ -150,7 +155,7 @@ class Event extends Model
         // Load venue from event_role table where the role is a venue
         return $this->belongsToMany(Role::class, 'event_role', 'event_id', 'role_id')
             ->where('roles.type', 'venue')
-            ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id')
+            ->withPivot('id', 'name_translated', 'description_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id', 'caldav_event_uid', 'caldav_event_etag')
             ->using(EventRole::class);
     }
 
@@ -200,7 +205,7 @@ class Event extends Model
     public function roles()
     {
         return $this->belongsToMany(Role::class)
-            ->withPivot('id', 'name_translated', 'description_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id')
+            ->withPivot('id', 'name_translated', 'description_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id', 'caldav_event_uid', 'caldav_event_etag')
             ->using(EventRole::class);
     }
 
@@ -783,10 +788,26 @@ class Event extends Model
 
     /**
      * Set Google event ID for a specific role
+     *
+     * @return bool True if the pivot was updated, false if not found
      */
     public function setGoogleEventIdForRole($roleId, $googleEventId)
     {
+        // Check if the pivot exists before updating
+        $exists = $this->roles()->where('roles.id', $roleId)->exists();
+        if (! $exists) {
+            \Log::warning('Cannot set Google event ID: pivot record does not exist', [
+                'event_id' => $this->id,
+                'role_id' => $roleId,
+                'google_event_id' => $googleEventId,
+            ]);
+
+            return false;
+        }
+
         $this->roles()->updateExistingPivot($roleId, ['google_event_id' => $googleEventId]);
+
+        return true;
     }
 
     /**
@@ -1176,5 +1197,112 @@ class Event extends Model
         $endAt = $this->getEndDateTime($date, true);
 
         return $endAt->toIso8601String();
+    }
+
+    /**
+     * Get CalDAV event UID for a specific role
+     */
+    public function getCalDAVEventUidForRole($roleId)
+    {
+        $eventRole = $this->roles->first(function ($role) use ($roleId) {
+            return $role->id == $roleId;
+        });
+
+        return $eventRole ? $eventRole->pivot->caldav_event_uid : null;
+    }
+
+    /**
+     * Set CalDAV event UID for a specific role
+     *
+     * @return bool True if the pivot was updated, false if not found
+     */
+    public function setCalDAVEventUidForRole($roleId, $uid, $etag = null)
+    {
+        $pivotData = ['caldav_event_uid' => $uid];
+        if ($etag !== null) {
+            $pivotData['caldav_event_etag'] = $etag;
+        }
+
+        // Check if the pivot exists before updating
+        $exists = $this->roles()->where('roles.id', $roleId)->exists();
+        if (! $exists) {
+            \Log::warning('Cannot set CalDAV UID: pivot record does not exist', [
+                'event_id' => $this->id,
+                'role_id' => $roleId,
+                'uid' => $uid,
+            ]);
+
+            return false;
+        }
+
+        $this->roles()->updateExistingPivot($roleId, $pivotData);
+
+        return true;
+    }
+
+    /**
+     * Get CalDAV event UID for the role defined by subdomain
+     */
+    public function getCalDAVEventUidForSubdomain($subdomain)
+    {
+        $role = $this->roles->first(function ($role) use ($subdomain) {
+            return $role->subdomain == $subdomain;
+        });
+
+        return $role ? $this->getCalDAVEventUidForRole($role->id) : null;
+    }
+
+    /**
+     * Set CalDAV event UID for the role defined by subdomain
+     */
+    public function setCalDAVEventUidForSubdomain($subdomain, $uid, $etag = null)
+    {
+        $role = $this->roles->first(function ($role) use ($subdomain) {
+            return $role->subdomain == $subdomain;
+        });
+
+        if ($role) {
+            $this->setCalDAVEventUidForRole($role->id, $uid, $etag);
+        }
+    }
+
+    /**
+     * Sync this event to CalDAV for all connected roles
+     */
+    public function syncToCalDAV($action = 'create')
+    {
+        foreach ($this->roles as $role) {
+            if ($role->syncsToCalDAV()) {
+                SyncEventToCalDAV::dispatchSync($this, $role, $action);
+            }
+        }
+    }
+
+    /**
+     * Check if this event is synced to CalDAV for a specific role
+     */
+    public function isSyncedToCalDAVForRole($roleId)
+    {
+        return ! is_null($this->getCalDAVEventUidForRole($roleId));
+    }
+
+    /**
+     * Check if this event is synced to CalDAV for the role defined by subdomain
+     */
+    public function isSyncedToCalDAVForSubdomain($subdomain)
+    {
+        return ! is_null($this->getCalDAVEventUidForSubdomain($subdomain));
+    }
+
+    /**
+     * Check if this event can be synced to CalDAV for the role defined by subdomain
+     */
+    public function canBeSyncedToCalDAVForSubdomain($subdomain)
+    {
+        $role = $this->roles->first(function ($role) use ($subdomain) {
+            return $role->subdomain == $subdomain;
+        });
+
+        return $role && $role->hasCalDAVSettings() && $role->syncsToCalDAV();
     }
 }

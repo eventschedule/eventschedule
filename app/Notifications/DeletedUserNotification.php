@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -39,13 +38,13 @@ class DeletedUserNotification extends Notification
         $user = $this->user;
 
         return (new MailMessage)
-                ->replyTo($user->email, $user->name)
-                ->subject(__('messages.user_has_been_deleted'))
-                ->line(str_replace(
-                    ':user',
-                    $user->name,
-                    __('messages.user_has_been_deleted_details'))
-                );
+            ->replyTo($user->email, $user->name)
+            ->subject(__('messages.user_has_been_deleted'))
+            ->line(str_replace(
+                ':user',
+                $user->name,
+                __('messages.user_has_been_deleted_details'))
+            );
     }
 
     /**
@@ -60,4 +59,3 @@ class DeletedUserNotification extends Notification
         ];
     }
 }
-

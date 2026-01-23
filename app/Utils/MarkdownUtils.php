@@ -2,9 +2,9 @@
 
 namespace App\Utils;
 
-use League\CommonMark\CommonMarkConverter;
 use HTMLPurifier;
 use HTMLPurifier_Config;
+use League\CommonMark\CommonMarkConverter;
 
 class MarkdownUtils
 {
@@ -18,14 +18,14 @@ class MarkdownUtils
 
         $converter = new CommonMarkConverter([
             'renderer' => [
-                'soft_break' => '<br>'
-            ]
+                'soft_break' => '<br>',
+            ],
         ]);
         $html = $converter->convertToHtml($markdown);
-        
+
         $config = HTMLPurifier_Config::createDefault();
         $purifier = new HTMLPurifier($config);
-        
+
         return $purifier->purify($html);
     }
 }

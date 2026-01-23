@@ -1,14 +1,14 @@
 <?php
 
-use Illuminate\Foundation\Application;
-use Illuminate\Foundation\Configuration\Exceptions;
-use Illuminate\Foundation\Configuration\Middleware;
-use App\Http\Middleware\SetUserLanguage;
+use App\Http\Middleware\DetectTrailingSlash;
 use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\HandleBotTraffic;
 use App\Http\Middleware\SanitizeUserAgent;
 use App\Http\Middleware\SecurityHeaders;
-use App\Http\Middleware\DetectTrailingSlash;
+use App\Http\Middleware\SetUserLanguage;
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
 use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -24,7 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'stripe/webhook',
             'invoiceninja/webhook/*',
         ]);
-        
+
         // Sanitize user agent before session middleware processes it
         $middleware->prepend(SanitizeUserAgent::class);
 
@@ -32,7 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prepend(DetectTrailingSlash::class);
 
         $middleware->append(SecurityHeaders::class);
-        
+
         $middleware->web(append: [
             SetUserLanguage::class,
             EnsureEmailIsVerified::class,

@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -12,8 +11,9 @@ class EventRequestNotification extends Notification
     use Queueable;
 
     protected $venue;
+
     protected $role;
-    
+
     /**
      * Create a new notification instance.
      */
@@ -39,11 +39,11 @@ class EventRequestNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->replyTo($this->role->user->email, $this->role->user->name)
-                    ->subject(str_replace(':name', $this->role->name, __('messages.new_request')))
-                    ->line(str_replace(':name', $this->role->name, __('messages.new_request')))
-                    ->action(__('messages.view_details'), route('role.view_admin', ['subdomain' => $this->venue->subdomain, 'tab' => 'requests']))
-                    ->line(__('messages.thank_you_for_using'));
+            ->replyTo($this->role->user->email, $this->role->user->name)
+            ->subject(str_replace(':name', $this->role->name, __('messages.new_request')))
+            ->line(str_replace(':name', $this->role->name, __('messages.new_request')))
+            ->action(__('messages.view_details'), route('role.view_admin', ['subdomain' => $this->venue->subdomain, 'tab' => 'requests']))
+            ->line(__('messages.thank_you_for_using'));
     }
 
     /**
@@ -64,7 +64,7 @@ class EventRequestNotification extends Notification
     public function toMailHeaders(): array
     {
         return [
-            'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $this->venue->subdomain]) . '>',
+            'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $this->venue->subdomain]).'>',
             'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
         ];
     }

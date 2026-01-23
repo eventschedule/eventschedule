@@ -3,9 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Models\Role;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 class ExtendYearlyPlans extends Command
 {
@@ -39,13 +39,14 @@ class ExtendYearlyPlans extends Command
         // - plan_expires is >= today (not expired)
         // - plan_expires is <= today + 1 year (expires within a year)
         $roles = Role::where('plan_term', 'year')
-                    ->whereNotNull('plan_expires')
-                    ->where('plan_expires', '>=', $now->format('Y-m-d'))
-                    ->where('plan_expires', '<=', $oneYearFromNow->format('Y-m-d'))
-                    ->get();
+            ->whereNotNull('plan_expires')
+            ->where('plan_expires', '>=', $now->format('Y-m-d'))
+            ->where('plan_expires', '<=', $oneYearFromNow->format('Y-m-d'))
+            ->get();
 
         if ($roles->isEmpty()) {
             $this->info('No roles found that need plan extension.');
+
             return 0;
         }
 
@@ -92,7 +93,3 @@ class ExtendYearlyPlans extends Command
         return 0;
     }
 }
-
-
-
-

@@ -7,14 +7,15 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\RoleUser;
 use App\Repos\EventRepo;
-use Illuminate\Http\Request;
 use App\Utils\UrlUtils;
-use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ApiEventController extends Controller
 {
     protected const MAX_PER_PAGE = 1000;
+
     protected const DEFAULT_PER_PAGE = 100;
 
     protected $eventRepo;
@@ -28,7 +29,7 @@ class ApiEventController extends Controller
     {
         /*
         $schedule = Role::findOrFail($scheduleId);
-        
+
         if ($schedule->user_id !== auth()->id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
@@ -40,8 +41,8 @@ class ApiEventController extends Controller
         );
 
         $events = Event::with('roles')
-                    ->where('user_id', auth()->id())
-                    ->paginate($perPage);
+            ->where('user_id', auth()->id())
+            ->paginate($perPage);
 
         /*
         $events = Event::whereHas('roles', function($query) use ($scheduleId) {
@@ -50,7 +51,7 @@ class ApiEventController extends Controller
         */
 
         return response()->json([
-            'data' => $events->map(function($event) {
+            'data' => $events->map(function ($event) {
                 return $event->toApiData();
             })->values(),
             'meta' => [
@@ -61,7 +62,7 @@ class ApiEventController extends Controller
                 'to' => $events->lastItem(),
                 'total' => $events->total(),
                 'path' => $request->url(),
-            ]
+            ],
         ], 200, [], JSON_PRETTY_PRINT);
     }
 
@@ -69,12 +70,12 @@ class ApiEventController extends Controller
     {
         $role = Role::with('groups')->subdomain($subdomain)->firstOrFail();
         $encodedRoleId = UrlUtils::encodeId($role->id);
-        
+
         if ($role->isVenue()) {
             $request->merge(['venue_id' => $encodedRoleId]);
-        } else if ($role->isTalent()) {
+        } elseif ($role->isTalent()) {
             $request->merge(['members' => [$encodedRoleId => ['name' => $role->name]]]);
-        }   
+        }
 
         if (! $role->isPro()) {
             return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
@@ -103,37 +104,37 @@ class ApiEventController extends Controller
             if ($group) {
                 $request->merge(['current_role_group_id' => UrlUtils::encodeId($group->id)]);
             } else {
-                return response()->json(['error' => 'Schedule not found: ' . $request->schedule], 422);
+                return response()->json(['error' => 'Schedule not found: '.$request->schedule], 422);
             }
         }
 
         // Handle category name to category_id conversion
-        if ($request->has('category_name') && !$request->has('category_id')) {
+        if ($request->has('category_name') && ! $request->has('category_id')) {
             $categorySlug = Str::slug($request->category_name);
             $categories = config('app.event_categories', []);
             $categoryId = null;
-            
+
             foreach ($categories as $id => $name) {
                 if (Str::slug($name) === $categorySlug) {
                     $categoryId = $id;
                     break;
                 }
             }
-            
+
             if ($categoryId) {
                 $request->merge(['category_id' => $categoryId]);
             } else {
-                return response()->json(['error' => 'Category not found: ' . $request->category_name], 422);
+                return response()->json(['error' => 'Category not found: '.$request->category_name], 422);
             }
         }
 
         $roleIds = RoleUser::where('user_id', auth()->user()->id)
-                        ->whereIn('level', ['owner', 'follower'])
-                        ->orderBy('id')->pluck('role_id')->toArray();
+            ->whereIn('level', ['owner', 'follower'])
+            ->orderBy('id')->pluck('role_id')->toArray();
 
         if ($role->isVenue()) {
             $request->merge(['venue_id' => $encodedRoleId]);
-        } else if ($request->has('venue_address1') && $request->has('venue_name')) {
+        } elseif ($request->has('venue_address1') && $request->has('venue_name')) {
             $venue = Role::where('name', $request->venue_name)
                 ->where('address1', $request->venue_address1)
                 ->where('type', 'venue')
@@ -143,24 +144,24 @@ class ApiEventController extends Controller
                 ->first();
 
             if ($venue) {
-                $request->merge(['venue_id' => UrlUtils::encodeId($venue->id)]);    
+                $request->merge(['venue_id' => UrlUtils::encodeId($venue->id)]);
             }
         }
 
         if ($role->isTalent()) {
             $request->merge(['members' => [$encodedRoleId => ['name' => $role->name]]]);
-        } else if ($request->has('members')) {
+        } elseif ($request->has('members')) {
 
             $processedMembers = [];
             foreach ($request->members as $memberId => $memberData) {
 
                 $talent = Role::where('is_deleted', false)
-                    ->where(function($query) use ($memberData) {
-                        $query->when(isset($memberData['name']), function($q) use ($memberData) {
-                                $q->where('name', $memberData['name']);
-                            })
-                            ->when(isset($memberData['email']), function($q) use ($memberData) {
-                                $q->orWhere('email', $memberData['email']); 
+                    ->where(function ($query) use ($memberData) {
+                        $query->when(isset($memberData['name']), function ($q) use ($memberData) {
+                            $q->where('name', $memberData['name']);
+                        })
+                            ->when(isset($memberData['email']), function ($q) use ($memberData) {
+                                $q->orWhere('email', $memberData['email']);
                             });
                     })
                     ->where('type', 'talent')
@@ -183,12 +184,12 @@ class ApiEventController extends Controller
         }
 
         $event = $this->eventRepo->saveEvent($role, $request, null);
-                
+
         return response()->json([
             'data' => $event->toApiData(),
             'meta' => [
-                'message' => 'Event created successfully'
-            ]
+                'message' => 'Event created successfully',
+            ],
         ], 201, [], JSON_PRETTY_PRINT);
     }
 
@@ -208,24 +209,24 @@ class ApiEventController extends Controller
             if ($event->flyer_image_url) {
                 $path = $event->getAttributes()['flyer_image_url'];
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
             }
 
             $file = $request->file('flyer_image');
-            $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            $filename = strtolower('flyer_'.Str::random(32).'.'.$file->getClientOriginalExtension());
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $event->flyer_image_url = $filename;
             $event->save();
-        }        
-        
+        }
+
         return response()->json([
             'data' => $event->toApiData(),
             'meta' => [
-                'message' => 'Flyer uploaded successfully'
-            ]
+                'message' => 'Flyer uploaded successfully',
+            ],
         ], 200, [], JSON_PRETTY_PRINT);
     }
 }

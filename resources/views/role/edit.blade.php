@@ -576,11 +576,11 @@
                             </a>
                             @endif
                             @if (! $role->exists || $role->user_id == auth()->user()->id)
-                            <a href="#section-google-calendar" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-google-calendar">
+                            <a href="#section-integrations" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-integrations">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                                 </svg>
-                                Google Calendar
+                                {{ __('messages.integrations') }}
                             </a>
                             @endif
                             @if (config('app.hosted'))
@@ -1389,111 +1389,286 @@
                 @endif
 
                 @if (! $role->exists || $role->user_id == auth()->user()->id)
-                <div id="section-google-calendar" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-integrations" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                             </svg>
-                            Google Calendar
+                            {{ __('messages.integrations') }}
                         </h2>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                            {{ __('messages.sync_events_between_schedules') }}
-                        </p>
-                        
-                        @if (auth()->user()->google_token)
-                        <div class="space-y-6">
-                            <!-- Calendar Selection -->
-                            <div>
-                                <x-input-label for="google-calendar-select" :value="__('messages.select_google_calendar')" />
-                                <select id="google-calendar-select" name="google_calendar_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                    <option value="">{{ __('messages.loading_calendars') }}</option>
-                                </select>
-                            </div>
 
-                            <!-- Sync Direction Selection -->
-                            <div>
-                                <x-input-label :value="__('messages.sync_direction')" />
-                                <div class="mt-2 space-y-2">
-                                    <label class="flex items-center">
-                                        <input type="radio" 
-                                               name="sync_direction" 
-                                               value="to" 
-                                               {{ $role->sync_direction === 'to' ? 'checked' : '' }}
-                                               class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                        <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            <div class="font-medium">{{ __('messages.to_google_calendar') }}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.to_google_calendar_description') }}</div>
-                                        </div>
-                                    </label>
-                                    <label class="flex items-center">
-                                        <input type="radio" 
-                                               name="sync_direction" 
-                                               value="from" 
-                                               {{ $role->sync_direction === 'from' ? 'checked' : '' }}
-                                               class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                        <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            <div class="font-medium">{{ __('messages.from_google_calendar') }}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.from_google_calendar_description') }}</div>
-                                        </div>
-                                    </label>
-                                    <label class="flex items-center">
-                                        <input type="radio" 
-                                               name="sync_direction" 
-                                               value="both" 
-                                               {{ $role->sync_direction === 'both' ? 'checked' : '' }}
-                                               class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                        <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            <div class="font-medium">{{ __('messages.bidirectional_sync') }}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.bidirectional_sync_description') }}</div>
-                                        </div>
-                                    </label>
-                                    <label class="flex items-center">
-                                        <input type="radio" 
-                                               name="sync_direction" 
-                                               value="" 
-                                               {{ !$role->sync_direction ? 'checked' : '' }}
-                                               class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                        <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            <div class="font-medium">{{ __('messages.no_sync') }}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.no_sync_description') }}</div>
-                                        </div>
-                                    </label>
+                        <!-- Tab Navigation -->
+                        <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                            <nav class="flex space-x-4" aria-label="Tabs">
+                                <button type="button" class="integration-tab px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="google">
+                                    Google Calendar
+                                </button>
+                                <button type="button" class="integration-tab px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="caldav">
+                                    {{ __('messages.caldav_calendar') }}
+                                </button>
+                            </nav>
+                        </div>
+
+                        <!-- Tab Content: Google Calendar -->
+                        <div id="integration-tab-google" class="integration-tab-content">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                {{ __('messages.sync_events_between_schedules') }}
+                            </p>
+
+                            @if (auth()->user()->google_token)
+                            <div class="space-y-6">
+                                <!-- Calendar Selection -->
+                                <div>
+                                    <x-input-label for="google-calendar-select" :value="__('messages.select_google_calendar')" />
+                                    <select id="google-calendar-select" name="google_calendar_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        <option value="">{{ __('messages.loading_calendars') }}</option>
+                                    </select>
                                 </div>
-                            </div>
 
-                            @if (false)
-                            <div>
-                                <x-secondary-button type="button" onclick="syncEvents()" id="sync-events-button">
-                                    {{ __('messages.sync_events') }}
-                                </x-secondary-button>
-                            </div>
-
-                            <div id="sync-status" class="hidden">
-                                <div class="flex items-center text-blue-600 dark:text-blue-400">
-                                    <svg class="animate-spin -ml-1 mr-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    <span class="text-sm">{{ __('messages.syncing') }}</span>
-                                </div>
-                            </div>
-
-                            <div id="sync-results" class="hidden">
-                                <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                                    <div class="text-sm text-green-800 dark:text-green-200">
-                                        <div id="sync-message"></div>
+                                <!-- Sync Direction Selection -->
+                                <div>
+                                    <x-input-label :value="__('messages.sync_direction')" />
+                                    <div class="mt-2 space-y-2">
+                                        <label class="flex items-center">
+                                            <input type="radio"
+                                                   name="sync_direction"
+                                                   value="to"
+                                                   {{ $role->sync_direction === 'to' ? 'checked' : '' }}
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                                <div class="font-medium">{{ __('messages.to_google_calendar') }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.to_google_calendar_description') }}</div>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio"
+                                                   name="sync_direction"
+                                                   value="from"
+                                                   {{ $role->sync_direction === 'from' ? 'checked' : '' }}
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                                <div class="font-medium">{{ __('messages.from_google_calendar') }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.from_google_calendar_description') }}</div>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio"
+                                                   name="sync_direction"
+                                                   value="both"
+                                                   {{ $role->sync_direction === 'both' ? 'checked' : '' }}
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                                <div class="font-medium">{{ __('messages.bidirectional_sync') }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.bidirectional_sync_description') }}</div>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio"
+                                                   name="sync_direction"
+                                                   value=""
+                                                   {{ !$role->sync_direction ? 'checked' : '' }}
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                                <div class="font-medium">{{ __('messages.no_sync') }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.no_sync_description') }}</div>
+                                            </div>
+                                        </label>
                                     </div>
+                                </div>
+
+                                @if (false)
+                                <div>
+                                    <x-secondary-button type="button" onclick="syncEvents()" id="sync-events-button">
+                                        {{ __('messages.sync_events') }}
+                                    </x-secondary-button>
+                                </div>
+
+                                <div id="sync-status" class="hidden">
+                                    <div class="flex items-center text-blue-600 dark:text-blue-400">
+                                        <svg class="animate-spin -ml-1 mr-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <span class="text-sm">{{ __('messages.syncing') }}</span>
+                                    </div>
+                                </div>
+
+                                <div id="sync-results" class="hidden">
+                                    <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                                        <div class="text-sm text-green-800 dark:text-green-200">
+                                            <div id="sync-message"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+                            </div>
+                            @else
+                            <x-link href="{{ route('profile.edit') }}#section-google-calendar" target="_blank">
+                                {{ __('messages.connect_google_calendar') }}
+                            </x-link>
+                            @endif
+                        </div>
+
+                        <!-- Tab Content: CalDAV -->
+                        <div id="integration-tab-caldav" class="integration-tab-content hidden">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                {{ __('messages.caldav_description') }}
+                            </p>
+
+                            @php
+                                $caldavSettings = $role->getCalDAVSettings();
+                            @endphp
+
+                            @if ($role->hasCalDAVSettings())
+                            <div class="space-y-6">
+                                <!-- Connected Server Info -->
+                                <div class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                                    <div class="flex items-center gap-2 text-green-800 dark:text-green-200">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span class="font-medium">{{ __('messages.connected') }}</span>
+                                    </div>
+                                    <p class="mt-2 text-sm text-green-700 dark:text-green-300">
+                                        {{ parse_url($caldavSettings['server_url'] ?? '', PHP_URL_HOST) }}
+                                    </p>
+                                </div>
+
+                                <!-- Sync Direction Selection -->
+                                <div>
+                                    <x-input-label :value="__('messages.sync_direction')" />
+                                    <div class="mt-2 space-y-2">
+                                        <label class="flex items-center">
+                                            <input type="radio"
+                                                   name="caldav_sync_direction"
+                                                   value="to"
+                                                   {{ $role->caldav_sync_direction === 'to' ? 'checked' : '' }}
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                                <div class="font-medium">{{ __('messages.to_caldav') }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.to_caldav_description') }}</div>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio"
+                                                   name="caldav_sync_direction"
+                                                   value="from"
+                                                   {{ $role->caldav_sync_direction === 'from' ? 'checked' : '' }}
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                                <div class="font-medium">{{ __('messages.from_caldav') }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.from_caldav_description') }}</div>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio"
+                                                   name="caldav_sync_direction"
+                                                   value="both"
+                                                   {{ $role->caldav_sync_direction === 'both' ? 'checked' : '' }}
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                                <div class="font-medium">{{ __('messages.bidirectional_sync') }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.bidirectional_sync_description') }}</div>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio"
+                                                   name="caldav_sync_direction"
+                                                   value=""
+                                                   {{ !$role->caldav_sync_direction ? 'checked' : '' }}
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                                <div class="font-medium">{{ __('messages.no_sync') }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.no_sync_description') }}</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Disconnect Button -->
+                                <div>
+                                    <x-danger-button type="button" id="caldav-disconnect-btn">
+                                        {{ __('messages.disconnect') }}
+                                    </x-danger-button>
+                                </div>
+                            </div>
+                            @else
+                            <!-- Connection Form -->
+                            <div class="space-y-6" id="caldav-connection-form">
+                                <div>
+                                    <x-input-label for="caldav_server_url" :value="__('messages.caldav_server_url')" />
+                                    <x-text-input id="caldav_server_url" type="url" class="mt-1 block w-full" placeholder="https://caldav.example.com" />
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        {{ __('messages.caldav_server_url_help') }}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <x-input-label for="caldav_username" :value="__('messages.caldav_username')" />
+                                    <x-text-input id="caldav_username" type="text" class="mt-1 block w-full" autocomplete="off" />
+                                </div>
+
+                                <div>
+                                    <x-input-label for="caldav_password" :value="__('messages.caldav_password')" />
+                                    <x-password-input id="caldav_password" class="mt-1 block w-full" autocomplete="new-password" />
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        {{ __('messages.caldav_password_help') }}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <x-secondary-button type="button" id="caldav-test-btn">
+                                        {{ __('messages.test_connection') }}
+                                    </x-secondary-button>
+                                </div>
+
+                                <div id="caldav-test-result" class="hidden"></div>
+
+                                <div id="caldav-calendar-select-container" class="hidden">
+                                    <x-input-label for="caldav_calendar_url" :value="__('messages.select_calendar')" />
+                                    <select id="caldav_calendar_url" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        <option value="">{{ __('messages.select_a_calendar') }}</option>
+                                    </select>
+                                </div>
+
+                                <div id="caldav-sync-direction-container" class="hidden">
+                                    <x-input-label :value="__('messages.sync_direction')" />
+                                    <div class="mt-2 space-y-2">
+                                        <label class="flex items-center">
+                                            <input type="radio" name="caldav_sync_direction_new" value="to" checked
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                                <div class="font-medium">{{ __('messages.to_caldav') }}</div>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio" name="caldav_sync_direction_new" value="from"
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                                <div class="font-medium">{{ __('messages.from_caldav') }}</div>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio" name="caldav_sync_direction_new" value="both"
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                                <div class="font-medium">{{ __('messages.bidirectional_sync') }}</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div id="caldav-connect-container" class="hidden">
+                                    <x-primary-button type="button" id="caldav-connect-btn">
+                                        {{ __('messages.connect') }}
+                                    </x-primary-button>
                                 </div>
                             </div>
                             @endif
                         </div>
-                        @else
-                        <x-link href="{{ route('profile.edit') }}#section-google-calendar" target="_blank">
-                            {{ __('messages.connect_google_calendar') }}
-                        </x-link>
-                        @endif
+
                     </div>
                 </div>
                 @endif
@@ -2348,6 +2523,303 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         });
+    }
+});
+
+// Integration tabs switching
+document.addEventListener('DOMContentLoaded', function() {
+    const integrationTabs = document.querySelectorAll('.integration-tab');
+    const integrationTabContents = document.querySelectorAll('.integration-tab-content');
+
+    // Restore active tab from localStorage
+    const savedTab = localStorage.getItem('integrationActiveTab');
+    if (savedTab) {
+        switchIntegrationTab(savedTab);
+    }
+
+    integrationTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabName = this.dataset.tab;
+            switchIntegrationTab(tabName);
+            localStorage.setItem('integrationActiveTab', tabName);
+        });
+    });
+
+    function switchIntegrationTab(tabName) {
+        // Update tab buttons
+        integrationTabs.forEach(tab => {
+            if (tab.dataset.tab === tabName) {
+                tab.classList.add('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
+            } else {
+                tab.classList.remove('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
+            }
+        });
+
+        // Update tab contents
+        integrationTabContents.forEach(content => {
+            const contentId = content.id.replace('integration-tab-', '');
+            if (contentId === tabName) {
+                content.classList.remove('hidden');
+            } else {
+                content.classList.add('hidden');
+            }
+        });
+    }
+});
+
+// CalDAV integration functions
+document.addEventListener('DOMContentLoaded', function() {
+    const caldavTestBtn = document.getElementById('caldav-test-btn');
+    const caldavConnectBtn = document.getElementById('caldav-connect-btn');
+    const caldavDisconnectBtn = document.getElementById('caldav-disconnect-btn');
+    const caldavTestResult = document.getElementById('caldav-test-result');
+    const caldavCalendarContainer = document.getElementById('caldav-calendar-select-container');
+    const caldavSyncDirectionContainer = document.getElementById('caldav-sync-direction-container');
+    const caldavConnectContainer = document.getElementById('caldav-connect-container');
+    const caldavCalendarSelect = document.getElementById('caldav_calendar_url');
+
+    @if ($role->exists && $role->subdomain)
+    const caldavSubdomain = '{{ $role->subdomain }}';
+    @else
+    const caldavSubdomain = null;
+    @endif
+
+    // Test Connection
+    if (caldavTestBtn) {
+        caldavTestBtn.addEventListener('click', function() {
+            const serverUrl = document.getElementById('caldav_server_url').value.trim();
+            const username = document.getElementById('caldav_username').value.trim();
+            const password = document.getElementById('caldav_password').value.trim();
+
+            if (!serverUrl || !username || !password) {
+                showCaldavResult({!! json_encode(__('messages.fill_all_fields'), JSON_UNESCAPED_UNICODE) !!}, 'error');
+                return;
+            }
+
+            if (!serverUrl.startsWith('https://')) {
+                showCaldavResult({!! json_encode(__('messages.caldav_https_required'), JSON_UNESCAPED_UNICODE) !!}, 'error');
+                return;
+            }
+
+            caldavTestBtn.disabled = true;
+            caldavTestBtn.textContent = {!! json_encode(__('messages.testing'), JSON_UNESCAPED_UNICODE) !!};
+
+            fetch('/caldav/test-connection', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    server_url: serverUrl,
+                    username: username,
+                    password: password
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                caldavTestBtn.disabled = false;
+                caldavTestBtn.textContent = {!! json_encode(__('messages.test_connection'), JSON_UNESCAPED_UNICODE) !!};
+
+                if (data.success) {
+                    showCaldavResult({!! json_encode(__('messages.connection_successful'), JSON_UNESCAPED_UNICODE) !!}, 'success');
+                    // Discover calendars
+                    discoverCaldavCalendars(serverUrl, username, password);
+                } else {
+                    showCaldavResult(data.message || {!! json_encode(__('messages.connection_failed'), JSON_UNESCAPED_UNICODE) !!}, 'error');
+                }
+            })
+            .catch(error => {
+                caldavTestBtn.disabled = false;
+                caldavTestBtn.textContent = {!! json_encode(__('messages.test_connection'), JSON_UNESCAPED_UNICODE) !!};
+                showCaldavResult({!! json_encode(__('messages.connection_failed'), JSON_UNESCAPED_UNICODE) !!} + ': ' + error.message, 'error');
+            });
+        });
+    }
+
+    // Discover Calendars
+    function discoverCaldavCalendars(serverUrl, username, password) {
+        fetch('/caldav/discover-calendars', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                server_url: serverUrl,
+                username: username,
+                password: password
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.calendars && data.calendars.length > 0) {
+                // Populate calendar select
+                caldavCalendarSelect.innerHTML = '<option value="">' + {!! json_encode(__('messages.select_a_calendar'), JSON_UNESCAPED_UNICODE) !!} + '</option>';
+                data.calendars.forEach(calendar => {
+                    const option = document.createElement('option');
+                    option.value = calendar.url;
+                    option.textContent = calendar.name;
+                    caldavCalendarSelect.appendChild(option);
+                });
+
+                // Show calendar selection and sync direction
+                caldavCalendarContainer.classList.remove('hidden');
+                caldavSyncDirectionContainer.classList.remove('hidden');
+                caldavConnectContainer.classList.remove('hidden');
+            } else {
+                showCaldavResult({!! json_encode(__('messages.no_calendars_found'), JSON_UNESCAPED_UNICODE) !!}, 'error');
+            }
+        })
+        .catch(error => {
+            showCaldavResult({!! json_encode(__('messages.error_discovering_calendars'), JSON_UNESCAPED_UNICODE) !!} + ': ' + error.message, 'error');
+        });
+    }
+
+    // Connect
+    if (caldavConnectBtn) {
+        caldavConnectBtn.addEventListener('click', function() {
+            if (!caldavSubdomain) {
+                showCaldavResult({!! json_encode(__('messages.save_schedule_first'), JSON_UNESCAPED_UNICODE) !!}, 'error');
+                return;
+            }
+
+            const serverUrl = document.getElementById('caldav_server_url').value.trim();
+            const username = document.getElementById('caldav_username').value.trim();
+            const password = document.getElementById('caldav_password').value.trim();
+            const calendarUrl = caldavCalendarSelect.value;
+            const syncDirection = document.querySelector('input[name="caldav_sync_direction_new"]:checked')?.value || 'to';
+
+            if (!calendarUrl) {
+                showCaldavResult({!! json_encode(__('messages.select_a_calendar'), JSON_UNESCAPED_UNICODE) !!}, 'error');
+                return;
+            }
+
+            caldavConnectBtn.disabled = true;
+            caldavConnectBtn.textContent = {!! json_encode(__('messages.connecting'), JSON_UNESCAPED_UNICODE) !!};
+
+            fetch('/caldav/settings/' + caldavSubdomain, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    server_url: serverUrl,
+                    username: username,
+                    password: password,
+                    calendar_url: calendarUrl,
+                    sync_direction: syncDirection
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                caldavConnectBtn.disabled = false;
+                caldavConnectBtn.textContent = {!! json_encode(__('messages.connect'), JSON_UNESCAPED_UNICODE) !!};
+
+                if (data.success) {
+                    showCaldavResult(data.message || {!! json_encode(__('messages.caldav_settings_saved'), JSON_UNESCAPED_UNICODE) !!}, 'success');
+                    // Reload page to show connected state
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showCaldavResult(data.message || {!! json_encode(__('messages.failed_to_save_settings'), JSON_UNESCAPED_UNICODE) !!}, 'error');
+                }
+            })
+            .catch(error => {
+                caldavConnectBtn.disabled = false;
+                caldavConnectBtn.textContent = {!! json_encode(__('messages.connect'), JSON_UNESCAPED_UNICODE) !!};
+                showCaldavResult({!! json_encode(__('messages.failed_to_save_settings'), JSON_UNESCAPED_UNICODE) !!} + ': ' + error.message, 'error');
+            });
+        });
+    }
+
+    // Handle sync direction changes when already connected
+    const caldavSyncDirectionRadios = document.querySelectorAll('input[name="caldav_sync_direction"]');
+    if (caldavSyncDirectionRadios.length > 0 && caldavSubdomain) {
+        caldavSyncDirectionRadios.forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                const syncDirection = this.value;
+
+                fetch('/caldav/sync-direction/' + caldavSubdomain, {
+                    method: 'PATCH',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sync_direction: syncDirection
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show brief success feedback
+                        showCaldavResult(data.message || {!! json_encode(__('messages.sync_direction_updated'), JSON_UNESCAPED_UNICODE) !!}, 'success');
+                        setTimeout(() => {
+                            if (caldavTestResult) {
+                                caldavTestResult.classList.add('hidden');
+                            }
+                        }, 2000);
+                    } else {
+                        showCaldavResult(data.message || {!! json_encode(__('messages.failed_to_save_settings'), JSON_UNESCAPED_UNICODE) !!}, 'error');
+                    }
+                })
+                .catch(error => {
+                    showCaldavResult({!! json_encode(__('messages.failed_to_save_settings'), JSON_UNESCAPED_UNICODE) !!} + ': ' + error.message, 'error');
+                });
+            });
+        });
+    }
+
+    // Disconnect
+    if (caldavDisconnectBtn) {
+        caldavDisconnectBtn.addEventListener('click', function() {
+            if (!caldavSubdomain) return;
+
+            if (!confirm({!! json_encode(__('messages.confirm_disconnect_caldav'), JSON_UNESCAPED_UNICODE) !!})) {
+                return;
+            }
+
+            caldavDisconnectBtn.disabled = true;
+            caldavDisconnectBtn.textContent = {!! json_encode(__('messages.disconnecting'), JSON_UNESCAPED_UNICODE) !!};
+
+            fetch('/caldav/disconnect/' + caldavSubdomain, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reload page to show disconnected state
+                    window.location.reload();
+                } else {
+                    caldavDisconnectBtn.disabled = false;
+                    caldavDisconnectBtn.textContent = {!! json_encode(__('messages.disconnect'), JSON_UNESCAPED_UNICODE) !!};
+                    alert(data.message || {!! json_encode(__('messages.failed_to_disconnect'), JSON_UNESCAPED_UNICODE) !!});
+                }
+            })
+            .catch(error => {
+                caldavDisconnectBtn.disabled = false;
+                caldavDisconnectBtn.textContent = {!! json_encode(__('messages.disconnect'), JSON_UNESCAPED_UNICODE) !!};
+                alert({!! json_encode(__('messages.failed_to_disconnect'), JSON_UNESCAPED_UNICODE) !!} + ': ' + error.message);
+            });
+        });
+    }
+
+    function showCaldavResult(message, type = 'success') {
+        if (!caldavTestResult) return;
+
+        if (type === 'error') {
+            caldavTestResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
+        } else {
+            caldavTestResult.className = 'mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-800 dark:text-green-200';
+        }
+        caldavTestResult.textContent = message;
+        caldavTestResult.classList.remove('hidden');
     }
 });
 </script>

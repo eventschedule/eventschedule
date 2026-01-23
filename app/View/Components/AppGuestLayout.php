@@ -2,10 +2,10 @@
 
 namespace App\View\Components;
 
+use App\Models\Event;
+use App\Models\Role;
 use Illuminate\View\Component;
 use Illuminate\View\View;
-use App\Models\Role;
-use App\Models\Event;
 
 class AppGuestLayout extends Component
 {

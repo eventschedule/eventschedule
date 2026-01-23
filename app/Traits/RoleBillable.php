@@ -107,6 +107,7 @@ trait RoleBillable
             if ($this->onGenericTrial()) {
                 return 'trial';
             }
+
             return 'none';
         }
 
