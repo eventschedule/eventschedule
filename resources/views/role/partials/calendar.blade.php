@@ -111,7 +111,7 @@
             <div class="flex flex-row gap-2 w-full md:w-auto">
                 {{-- Schedule Select --}}
                 @if(isset($role) && $role->groups && $role->groups->count() > 1)
-                    <select v-model="selectedGroup" style="color: rgb(107 114 128) !important; font-size: 1rem !important; font-weight: 700 !important; line-height: 1.5 !important; padding-top: 0.75rem !important; padding-bottom: 0.75rem !important;" class="border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 dark:text-gray-300 px-3 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                    <select v-model="selectedGroup" class="border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
                         <option value="">{{ __('messages.all_schedules') }}</option>
                         @foreach($role->groups as $group)
                             <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
@@ -121,7 +121,7 @@
 
                 {{-- Category Select --}}
                 @if(count($uniqueCategoryIds ?? []) > 1)
-                    <select v-model="selectedCategory" style="color: rgb(107 114 128) !important; font-size: 1rem !important; font-weight: 700 !important; line-height: 1.5 !important; padding-top: 0.75rem !important; padding-bottom: 0.75rem !important;" class="border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 dark:text-gray-300 px-3 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                    <select v-model="selectedCategory" class="border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
                         <option value="">{{ __('messages.all_categories') }}</option>
                         <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
                     </select>

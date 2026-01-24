@@ -1416,7 +1416,7 @@
                         </div>
                         @endif
 
-                        <div class="{{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+                        <div>
 
                         <!-- Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
@@ -1437,7 +1437,7 @@
                             </p>
 
                             @if (auth()->user()->google_token)
-                            <div class="space-y-6">
+                            <div class="space-y-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
                                 <!-- Calendar Selection -->
                                 <div>
                                     <x-input-label for="google-calendar-select" :value="__('messages.select_google_calendar')" />
@@ -1531,7 +1531,7 @@
                         </div>
 
                         <!-- Tab Content: CalDAV -->
-                        <div id="integration-tab-caldav" class="integration-tab-content hidden">
+                        <div id="integration-tab-caldav" class="integration-tab-content hidden {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
                             <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
                                 {{ __('messages.caldav_description') }}
                             </p>
