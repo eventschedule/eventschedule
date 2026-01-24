@@ -4,6 +4,7 @@ use App\Http\Middleware\DemoAutoLogin;
 use App\Http\Middleware\DetectTrailingSlash;
 use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\HandleBotTraffic;
+use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\SanitizeUserAgent;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetUserLanguage;
@@ -39,6 +40,10 @@ return Application::configure(basePath: dirname(__DIR__))
             EnsureEmailIsVerified::class,
             HandleBotTraffic::class,
             DemoAutoLogin::class,
+        ]);
+
+        $middleware->alias([
+            'guest' => RedirectIfAuthenticated::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Notifications\SignupVerificationCode;
 use App\Rules\NoFakeEmail;
-use App\Services\DemoService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
@@ -27,13 +26,6 @@ class RegisteredUserController extends Controller
      */
     public function create()
     {
-        // Log out demo user so they can create their own account
-        if (Auth::check() && DemoService::isDemoUser(Auth::user())) {
-            Auth::guard('web')->logout();
-            request()->session()->invalidate();
-            request()->session()->regenerateToken();
-        }
-
         if (! config('app.hosted') && config('app.url') && ! config('app.is_testing')) {
             return redirect()->route('login');
         }
