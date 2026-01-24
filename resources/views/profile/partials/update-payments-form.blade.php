@@ -9,18 +9,31 @@
         </p>
     </header>
 
-    <form method="post" action="{{ route('profile.update_payments') }}" enctype="multipart/form-data" class="mt-6">
-        @csrf
-        @method('patch')
-        
-        @if (config('app.hosted'))
-            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                <x-link href="https://stripe.com" target="_blank">
-                    Stripe Connect
-                </x-link>
-            </h2>
+    @if (is_demo_mode())
+    <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
+        {{ __('messages.demo_mode_settings_disabled') }}
+    </div>
+    @endif
 
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+    <!-- Tab Navigation -->
+    <div class="border-b border-gray-200 dark:border-gray-700 mb-6 mt-6">
+        <nav class="flex space-x-4" aria-label="Tabs">
+            <button type="button" class="payment-tab px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="stripe">
+                Stripe
+            </button>
+            <button type="button" class="payment-tab px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="invoiceninja">
+                Invoice Ninja
+            </button>
+            <button type="button" class="payment-tab px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="payment-url">
+                {{ __('messages.payment_url') }}
+            </button>
+        </nav>
+    </div>
+
+    <!-- Tab Content: Stripe -->
+    <div id="payment-tab-stripe" class="payment-tab-content">
+        @if (config('app.hosted'))
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 {{ __('messages.stripe_help') }}
             </p>
 
@@ -44,13 +57,7 @@
                 </div>
             @endif
         @else
-            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                <x-link href="https://stripe.com" target="_blank">
-                    Stripe
-                </x-link>
-            </h2>
-
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 {{ __('messages.stripe_selfhosted_help') }}
             </p>
 
@@ -78,73 +85,71 @@
                 @endif
             </div>
         @endif
+    </div>
 
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mt-8">
-            <x-link href="https://invoiceninja.com" target="_blank">
-                Invoice Ninja
-            </x-link>
-        </h2>
-
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+    <!-- Tab Content: Invoice Ninja -->
+    <div id="payment-tab-invoiceninja" class="payment-tab-content hidden">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
             {{ __('messages.invoiceninja_help') }}
         </p>
-        
+
         @if ($user->invoiceninja_api_key)
-            <div style="margin-top: 16px;">
+            <div class="mt-4">
                 <x-text-input type="text" class="mt-1 block w-full" :value="$user->invoiceninja_company_name" readonly/>
                 <div class="text-xs pt-1">
                     <a href="#" onclick="return confirm('{{ __('messages.are_you_sure') }}') ? window.location.href='{{ route('invoiceninja.unlink') }}' : false" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</a>
                 </div>
-            </div>        
+            </div>
         @else
-
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <p class="text-sm text-gray-600 dark:text-gray-400">
                 <x-link href="https://invoiceninja.com/partner-perks/event-schedule/" target="_blank">
                     {{ __('messages.invoiceninja_offer') }}
-                </x-link>  
+                </x-link>
             </p>
 
-            <div class="pt-4">
-                <x-input-label for="invoiceninja_api_key" :value="__('messages.api_token') . ' *'" />
-                <x-text-input id="invoiceninja_api_key" name="invoiceninja_api_key" type="text" class="mt-1 block w-full" 
-                    :value="old('invoiceninja_api_key', $user->invoiceninja_api_key)" autocomplete="off" required />
-                <x-input-error class="mt-2" :messages="$errors->get('invoiceninja_api_key')" />
-            </div>
+            <form method="post" action="{{ route('profile.update_payments') }}" enctype="multipart/form-data" class="mt-4">
+                @csrf
+                @method('patch')
 
-            <div class="pt-4">
-                <x-input-label for="invoiceninja_api_url" :value="__('messages.api_url')" />
-                <x-text-input id="invoiceninja_api_url" name="invoiceninja_api_url" type="url" class="mt-1 block w-full" 
-                    :value="old('invoiceninja_api_url', $user->invoiceninja_api_url)" />
-                <x-input-error class="mt-2" :messages="$errors->get('invoiceninja_api_url')" />
-            </div>
+                <div class="pt-4">
+                    <x-input-label for="invoiceninja_api_key" :value="__('messages.api_token') . ' *'" />
+                    <x-text-input id="invoiceninja_api_key" name="invoiceninja_api_key" type="text" class="mt-1 block w-full"
+                        :value="old('invoiceninja_api_key', $user->invoiceninja_api_key)" autocomplete="off" required :disabled="is_demo_mode()" />
+                    <x-input-error class="mt-2" :messages="$errors->get('invoiceninja_api_key')" />
+                </div>
 
-            <div class="flex items-center gap-4 pt-8">
-                <x-primary-button>{{ __('messages.save') }}</x-primary-button>
+                <div class="pt-4">
+                    <x-input-label for="invoiceninja_api_url" :value="__('messages.api_url')" />
+                    <x-text-input id="invoiceninja_api_url" name="invoiceninja_api_url" type="url" class="mt-1 block w-full"
+                        :value="old('invoiceninja_api_url', $user->invoiceninja_api_url)" :disabled="is_demo_mode()" />
+                    <x-input-error class="mt-2" :messages="$errors->get('invoiceninja_api_url')" />
+                </div>
 
-                @if (session('status') === 'payments-updated')
-                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.saved') }}</p>
-                @endif
-            </div>
+                <div class="flex items-center gap-4 pt-8">
+                    @if (is_demo_mode())
+                        <button type="button"
+                            onclick="alert('{{ __('messages.saving_disabled_demo_mode') }}')"
+                            class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
+                            {{ __('messages.save') }}
+                        </button>
+                    @else
+                        <x-primary-button>{{ __('messages.save') }}</x-primary-button>
+                    @endif
+
+                    @if (session('status') === 'payments-updated')
+                    <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
+                        class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.saved') }}</p>
+                    @endif
+                </div>
+            </form>
         @endif
+    </div>
 
-    </form>
-</section>
-
-<section class="mt-8">
-
-    <form method="post" action="{{ route('profile.update_payments') }}" enctype="multipart/form-data" class="mt-6">
-        @csrf
-        @method('patch')
-
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 pt-4">
-            {{ __('messages.payment_url') }}
-        </h2>
-
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+    <!-- Tab Content: Payment URL -->
+    <div id="payment-tab-payment-url" class="payment-tab-content hidden">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
             {{ __('messages.payment_url_help') }}
         </p>
-
 
         @if ($user->payment_url)
             <div class="mt-4">
@@ -154,21 +159,75 @@
                 </div>
             </div>
         @else
-            <div class="mt-4">
-                <x-text-input id="payment_url" name="payment_url" type="url" class="mt-1 block w-full" 
-                    :value="old('payment_url', $user->payment_url)" autocomplete="off" required />
-                <x-input-error class="mt-2" :messages="$errors->get('payment_url')" />
-            </div>
+            <form method="post" action="{{ route('profile.update_payments') }}" enctype="multipart/form-data" class="mt-4">
+                @csrf
+                @method('patch')
 
-            <div class="flex items-center gap-4 pt-8">
-                <x-primary-button>{{ __('messages.save') }}</x-primary-button>
+                <div class="mt-4">
+                    <x-text-input id="payment_url" name="payment_url" type="url" class="mt-1 block w-full"
+                        :value="old('payment_url', $user->payment_url)" autocomplete="off" required :disabled="is_demo_mode()" />
+                    <x-input-error class="mt-2" :messages="$errors->get('payment_url')" />
+                </div>
 
-                @if (session('status') === 'payments-updated')
-                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.saved') }}</p>
-                @endif
-            </div>
+                <div class="flex items-center gap-4 pt-8">
+                    @if (is_demo_mode())
+                        <button type="button"
+                            onclick="alert('{{ __('messages.saving_disabled_demo_mode') }}')"
+                            class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
+                            {{ __('messages.save') }}
+                        </button>
+                    @else
+                        <x-primary-button>{{ __('messages.save') }}</x-primary-button>
+                    @endif
+
+                    @if (session('status') === 'payments-updated')
+                    <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
+                        class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.saved') }}</p>
+                    @endif
+                </div>
+            </form>
         @endif
+    </div>
 
-    </form>
 </section>
+
+<script {!! nonce_attr() !!}>
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentTabs = document.querySelectorAll('.payment-tab');
+    const paymentTabContents = document.querySelectorAll('.payment-tab-content');
+
+    const savedTab = localStorage.getItem('paymentActiveTab');
+    if (savedTab) {
+        switchPaymentTab(savedTab);
+    }
+
+    paymentTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabName = this.dataset.tab;
+            switchPaymentTab(tabName);
+            localStorage.setItem('paymentActiveTab', tabName);
+        });
+    });
+
+    function switchPaymentTab(tabName) {
+        paymentTabs.forEach(tab => {
+            if (tab.dataset.tab === tabName) {
+                tab.classList.add('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
+            } else {
+                tab.classList.remove('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
+            }
+        });
+
+        paymentTabContents.forEach(content => {
+            const contentId = content.id.replace('payment-tab-', '');
+            if (contentId === tabName) {
+                content.classList.remove('hidden');
+            } else {
+                content.classList.add('hidden');
+            }
+        });
+    }
+});
+</script>

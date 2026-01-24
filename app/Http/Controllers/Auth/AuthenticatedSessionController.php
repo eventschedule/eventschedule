@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Services\DemoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,13 @@ class AuthenticatedSessionController extends Controller
      */
     public function create()
     {
+        // Log out demo user so they can login with real credentials
+        if (Auth::check() && DemoService::isDemoUser(Auth::user())) {
+            Auth::guard('web')->logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+        }
+
         if (! config('app.hosted') && ! config('app.url')) {
             return redirect()->route('sign_up');
         }
