@@ -486,18 +486,18 @@
                 var tooltipText = $(this).attr('data-tooltip');
                 var tooltip = $('#tooltip');
                 tooltip.html(tooltipText).css({
-                    top: e.pageY + 10 + 'px',
-                    left: e.pageX + 10 + 'px'
+                    top: e.clientY + 10 + 'px',
+                    left: e.clientX + 10 + 'px'
                 }).fadeIn(0);
 
                 // Calculate if the tooltip will go off the right edge of the screen
                 var tooltipWidth = tooltip.outerWidth();
                 var screenWidth = $(window).width();
-                var tooltipRightEdge = e.pageX + 10 + tooltipWidth;
+                var tooltipRightEdge = e.clientX + 10 + tooltipWidth;
 
                 if (tooltipRightEdge > screenWidth) {
                     tooltip.css({
-                        left: e.pageX - tooltipWidth - 10 + 'px'
+                        left: e.clientX - tooltipWidth - 10 + 'px'
                     });
                 }
             }, function() {
@@ -508,17 +508,17 @@
                 var tooltip = $('#tooltip');
                 var tooltipWidth = tooltip.outerWidth();
                 var screenWidth = $(window).width();
-                var tooltipRightEdge = e.pageX + 10 + tooltipWidth;
+                var tooltipRightEdge = e.clientX + 10 + tooltipWidth;
 
                 if (tooltipRightEdge > screenWidth) {
                     tooltip.css({
-                        top: e.pageY + 10 + 'px',
-                        left: e.pageX - tooltipWidth - 10 + 'px'
+                        top: e.clientY + 10 + 'px',
+                        left: e.clientX - tooltipWidth - 10 + 'px'
                     });
                 } else {
                     tooltip.css({
-                        top: e.pageY + 10 + 'px',
-                        left: e.pageX + 10 + 'px'
+                        top: e.clientY + 10 + 'px',
+                        left: e.clientX + 10 + 'px'
                     });
                 }
             });
