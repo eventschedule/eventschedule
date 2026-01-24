@@ -23,6 +23,13 @@ class EmailService
             return false;
         }
 
+        // Skip sending for demo role
+        if (is_demo_role($role)) {
+            Log::info('Skipping email for demo role');
+
+            return false;
+        }
+
         try {
             $event = $sale->event;
 
@@ -69,6 +76,11 @@ class EmailService
      */
     public function sendTestEmail(Role $role, string $toEmail): bool
     {
+        // Block test emails from demo account
+        if (is_demo_role($role)) {
+            throw new \Exception('Cannot send test emails from demo account');
+        }
+
         try {
             if (config('app.hosted')) {
                 // For hosted, use role's SMTP settings

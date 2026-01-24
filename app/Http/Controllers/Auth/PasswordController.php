@@ -15,6 +15,12 @@ class PasswordController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
+        // Demo mode: prevent password changes
+        if (is_demo_mode()) {
+            return redirect()->to(route('profile.edit').'#section-password')
+                ->with('error', __('messages.demo_mode_restriction'));
+        }
+
         $user = $request->user();
 
         // Build validation rules based on whether user has a password

@@ -293,7 +293,7 @@
                                     {{ __('messages.embed_schedule') }}
                                 </div>
                             </a>
-                            @if ($role->exists && $role->user_id == auth()->user()->id)
+                            @if ($role->exists && $role->user_id == auth()->user()->id && !is_demo_role($role))
                             <div class="py-2" role="none">
                                 <div class="border-t border-gray-100 dark:border-gray-700"></div>
                             </div>

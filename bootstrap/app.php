@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\DemoAutoLogin;
 use App\Http\Middleware\DetectTrailingSlash;
 use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\HandleBotTraffic;
@@ -37,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
             SetUserLanguage::class,
             EnsureEmailIsVerified::class,
             HandleBotTraffic::class,
+            DemoAutoLogin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

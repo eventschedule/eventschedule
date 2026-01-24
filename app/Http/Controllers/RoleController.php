@@ -94,6 +94,10 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $type = $role->type;
 
+        if (is_demo_role($role)) {
+            return redirect()->back()->with('error', __('messages.demo_mode_settings_disabled'));
+        }
+
         if ($user->id != $role->user_id) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
@@ -1102,6 +1106,23 @@ class RoleController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        // Demo mode restrictions - prevent changes to sensitive settings
+        if (is_demo_mode()) {
+            // Remove sensitive fields from the request
+            $request->merge([
+                'language_code' => $role->language_code,
+                'timezone' => $role->timezone,
+                'new_subdomain' => $role->subdomain,
+                'custom_domain' => $role->custom_domain,
+                'custom_css' => $role->custom_css,
+                'google_calendar_id' => $role->google_calendar_id,
+                'sync_direction' => $role->sync_direction,
+                'caldav_sync_direction' => $role->caldav_sync_direction,
+                'email_settings' => null,
+            ]);
+        }
+
         $existingSettings = $role->getEmailSettings();
 
         // Handle sync_direction and calendar changes and webhook management

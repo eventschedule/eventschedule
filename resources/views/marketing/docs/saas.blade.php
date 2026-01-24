@@ -47,6 +47,7 @@
                         <a href="#stripe" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Stripe Subscription Setup</a>
                         <a href="#example" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Complete Example</a>
                         <a href="#verification" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Verification Steps</a>
+                        <a href="#demo" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Demo Mode</a>
                         <a href="#troubleshooting" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Troubleshooting</a>
                         <a href="#security" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Security Considerations</a>
                     </nav>
@@ -494,6 +495,70 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                                 <li>Complete checkout with a test card (<code class="doc-inline-code">4242 4242 4242 4242</code>)</li>
                                 <li>Verify Pro features are enabled</li>
                             </ol>
+                        </section>
+
+                        <!-- Demo Mode -->
+                        <section id="demo" class="doc-section">
+                            <h2 class="doc-heading">Demo Mode (Optional)</h2>
+                            <p class="text-gray-300 mb-6">Demo mode lets potential customers try your platform without signing up. Visitors to <code class="doc-inline-code">demo.yourdomain.com</code> are automatically logged in to a demo account with sample data.</p>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">How It Works</h3>
+                            <ul class="doc-list mb-6">
+                                <li>A special subdomain (<code class="doc-inline-code">demo.yourdomain.com</code>) triggers auto-login</li>
+                                <li>Visitors are redirected to a pre-populated schedule with sample events, tickets, groups, and sales</li>
+                                <li>The demo schedule has Pro features enabled</li>
+                                <li>Demo data can be reset periodically to stay fresh</li>
+                            </ul>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">Setting Up Demo Mode</h3>
+                            <p class="text-gray-300 mb-4">Run the setup command to create the demo account and sample data:</p>
+
+                            <div class="doc-code-block">
+                                <div class="doc-code-header">
+                                    <span>bash</span>
+                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>php artisan app:setup-demo</code></pre>
+                            </div>
+
+                            <p class="text-gray-300 mb-6 mt-4">This creates a demo user, a schedule called <code class="doc-inline-code">thenightowls</code>, and populates it with sample events, tickets, groups, and sales data.</p>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">Resetting Demo Data</h3>
+                            <p class="text-gray-300 mb-4">To reset the demo data back to its initial state:</p>
+
+                            <div class="doc-code-block">
+                                <div class="doc-code-header">
+                                    <span>bash</span>
+                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>php artisan app:reset-demo</code></pre>
+                            </div>
+
+                            <p class="text-gray-300 mb-6 mt-4">You can also combine setup and reset in one command:</p>
+
+                            <div class="doc-code-block">
+                                <div class="doc-code-header">
+                                    <span>bash</span>
+                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>php artisan app:setup-demo --reset</code></pre>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-white mb-4 mt-8">Scheduling Automatic Resets (Optional)</h3>
+                            <p class="text-gray-300 mb-4">To keep demo data fresh, you can schedule hourly resets by adding this to your cron:</p>
+
+                            <div class="doc-code-block">
+                                <div class="doc-code-header">
+                                    <span>crontab</span>
+                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>0 * * * * cd /path/to/eventschedule && php artisan app:reset-demo >> /dev/null 2>&1</code></pre>
+                            </div>
+
+                            <div class="doc-callout doc-callout-info mt-6">
+                                <div class="doc-callout-title">Note</div>
+                                <p>Demo mode only works in hosted mode (<code class="doc-inline-code">IS_HOSTED=true</code>) since it relies on subdomain routing.</p>
+                            </div>
                         </section>
 
                         <!-- Troubleshooting -->

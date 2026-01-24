@@ -54,6 +54,12 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
+        // Demo mode: prevent all profile changes
+        if (is_demo_mode()) {
+            return Redirect::to(route('profile.edit').'#section-profile')
+                ->with('error', __('messages.demo_mode_restriction'));
+        }
+
         $request->user()->fill($request->validated());
 
         if ($request->user()->isDirty('email')) {
@@ -89,6 +95,12 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        // Demo mode: prevent account deletion
+        if (is_demo_mode()) {
+            return Redirect::to(route('profile.edit').'#section-delete-account')
+                ->with('error', __('messages.demo_mode_restriction'));
+        }
+
         $user = $request->user();
 
         // Only require password validation if user has a password set
@@ -103,7 +115,8 @@ class ProfileController extends Controller
         $request->validateWithBag('userDeletion', $rules);
 
         // Send feedback email if provided (before logout so we have user data)
-        if ($request->filled('feedback')) {
+        // Skip for demo mode to prevent spam
+        if ($request->filled('feedback') && ! is_demo_mode()) {
             Mail::to('contact@eventschedule.com')->send(new SupportEmail(
                 $user->name ?? $user->email,
                 $user->email,
@@ -183,6 +196,12 @@ class ProfileController extends Controller
 
     public function updatePayments(Request $request): RedirectResponse
     {
+        // Demo mode: prevent payment settings changes
+        if (is_demo_mode()) {
+            return Redirect::to(route('profile.edit').'#section-payment-methods')
+                ->with('error', __('messages.demo_mode_restriction'));
+        }
+
         $user = $request->user();
         $apiKey = $request->invoiceninja_api_key;
         $apiUrl = $request->invoiceninja_api_url;
@@ -222,6 +241,12 @@ class ProfileController extends Controller
 
     public function unlinkPaymentUrl(Request $request): RedirectResponse
     {
+        // Demo mode: prevent payment settings changes
+        if (is_demo_mode()) {
+            return Redirect::to(route('profile.edit').'#section-payment-methods')
+                ->with('error', __('messages.demo_mode_restriction'));
+        }
+
         $user = $request->user();
         $user->payment_url = null;
         $user->payment_secret = null;

@@ -899,4 +899,9 @@ return [
     'test_connection' => 'Test Connessione',
     'connect' => 'Connetti',
     'connected' => 'Connesso',
+
+    // Demo mode
+    'demo_mode_settings_disabled' => 'Alcune impostazioni sono disabilitate in modalità demo.',
+    'demo_mode_restriction' => 'Questa azione non è disponibile in modalità demo.',
+    'saving_disabled_demo_mode' => 'Il salvataggio è disabilitato in modalità demo.',
 ];

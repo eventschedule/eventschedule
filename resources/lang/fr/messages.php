@@ -898,4 +898,9 @@ return [
     'test_connection' => 'Tester la connexion',
     'connect' => 'Connecter',
     'connected' => 'Connecté',
+
+    // Demo mode
+    'demo_mode_settings_disabled' => 'Certains paramètres sont désactivés en mode démo.',
+    'demo_mode_restriction' => 'Cette action n\'est pas disponible en mode démo.',
+    'saving_disabled_demo_mode' => 'L\'enregistrement est désactivé en mode démo.',
 ];

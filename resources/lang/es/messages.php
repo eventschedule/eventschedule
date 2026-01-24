@@ -898,4 +898,9 @@ return [
     'test_connection' => 'Probar Conexión',
     'connect' => 'Conectar',
     'connected' => 'Conectado',
+
+    // Demo mode
+    'demo_mode_settings_disabled' => 'Algunas configuraciones están deshabilitadas en el modo de demostración.',
+    'demo_mode_restriction' => 'Esta acción no está disponible en el modo de demostración.',
+    'saving_disabled_demo_mode' => 'Guardar está deshabilitado en el modo de demostración.',
 ];

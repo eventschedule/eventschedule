@@ -391,6 +391,11 @@ class Role extends Model implements MustVerifyEmail
             return '';
         }
 
+        // Handle demo images in public/images/demo/
+        if (str_starts_with($value, 'demo_')) {
+            return url('/images/demo/'.$value);
+        }
+
         if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
             return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$value;
         } elseif (config('filesystems.default') == 'local') {
@@ -404,6 +409,11 @@ class Role extends Model implements MustVerifyEmail
     {
         if (! $value) {
             return '';
+        }
+
+        // Handle demo images in public/images/demo/
+        if (str_starts_with($value, 'demo_')) {
+            return url('/images/demo/'.$value);
         }
 
         if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
@@ -460,6 +470,7 @@ class Role extends Model implements MustVerifyEmail
             'api',
             'faq',
             'demo',
+            'thenightowls',
             'marketing',
             'features',
             'pricing',

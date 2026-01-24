@@ -902,4 +902,9 @@ return [
     'test_connection' => 'Verbindung testen',
     'connect' => 'Verbinden',
     'connected' => 'Verbunden',
+
+    // Demo mode
+    'demo_mode_settings_disabled' => 'Einige Einstellungen sind im Demo-Modus deaktiviert.',
+    'demo_mode_restriction' => 'Diese Aktion ist im Demo-Modus nicht verfügbar.',
+    'saving_disabled_demo_mode' => 'Speichern ist im Demo-Modus deaktiviert.',
 ];

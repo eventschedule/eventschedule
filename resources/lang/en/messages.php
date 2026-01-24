@@ -954,4 +954,9 @@ return [
     'test_connection' => 'Test Connection',
     'connect' => 'Connect',
     'connected' => 'Connected',
+
+    // Demo mode
+    'demo_mode_settings_disabled' => 'Some settings are disabled in demo mode.',
+    'demo_mode_restriction' => 'This action is not available in demo mode.',
+    'saving_disabled_demo_mode' => 'Saving is disabled in demo mode.',
 ];

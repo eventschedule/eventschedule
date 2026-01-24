@@ -1082,12 +1082,15 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('accent_color')" />
                             </div>
 
-                            <div class="mb-6">
+                            <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
                                 <x-input-label for="custom_css" :value="__('messages.custom_css')" />
-                                <textarea id="custom_css" name="custom_css"
+                                <textarea id="custom_css" name="custom_css" {{ is_demo_mode() ? 'disabled' : '' }}
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm font-mono text-sm"
                                     rows="6">{{ old('custom_css', $role->custom_css) }}</textarea>
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_css')" />
+                                @if (is_demo_mode())
+                                <p class="mt-1 text-sm text-yellow-600 dark:text-yellow-400">{{ __('messages.demo_mode_settings_disabled') }}</p>
+                                @endif
                             </div>
                     </div>
 
@@ -1113,6 +1116,12 @@
                             </svg>
                             {{ __('messages.schedule_settings') }}
                         </h2>
+
+                        @if (is_demo_mode())
+                        <div class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
+                            {{ __('messages.demo_mode_settings_disabled') }}
+                        </div>
+                        @endif
                         
                         @if ($role->exists)
                         <div class="mb-6" id="url-display">
@@ -1133,6 +1142,7 @@
                                 </button>
                             </p>
                         </div>
+                        @if (!is_demo_mode())
                         <div class="hidden" id="subdomain-edit">
                             <div class="mb-6">
                                 <x-input-label for="new_subdomain" :value="__('messages.subdomain')" />
@@ -1150,10 +1160,11 @@
                             </div>
                         </div>
                         @endif
+                        @endif
 
-                        <div class="mb-6">
+                        <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
                             <x-input-label for="language_code" :value="__('messages.language') " />
-                            <select name="language_code" id="language_code" required
+                            <select name="language_code" id="language_code" required {{ is_demo_mode() ? 'disabled' : '' }}
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                 @foreach([
                                 'ar' => 'arabic',
@@ -1174,9 +1185,9 @@
                             <x-input-error class="mt-2" :messages="$errors->get('language_code')" />
                         </div>
 
-                        <div class="mb-6">
+                        <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
                             <x-input-label for="timezone" :value="__('messages.timezone')" />
-                            <select name="timezone" id="timezone" required
+                            <select name="timezone" id="timezone" required {{ is_demo_mode() ? 'disabled' : '' }}
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                 @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
                                 <option value="{{ $timezone }}" {{ $role->timezone == $timezone ? 'SELECTED' : '' }}>
@@ -1398,6 +1409,14 @@
                             </svg>
                             {{ __('messages.integrations') }}
                         </h2>
+
+                        @if (is_demo_mode())
+                        <div class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
+                            {{ __('messages.demo_mode_settings_disabled') }}
+                        </div>
+                        @endif
+
+                        <div class="{{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
 
                         <!-- Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
@@ -1669,6 +1688,7 @@
                             @endif
                         </div>
 
+                        </div>
                     </div>
                 </div>
                 @endif
@@ -1682,6 +1702,14 @@
                     </svg>
                     {{ __('messages.email_settings') }}
                 </h2>
+
+                @if (is_demo_mode())
+                <div class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
+                    {{ __('messages.demo_mode_settings_disabled') }}
+                </div>
+                @endif
+
+                <div class="{{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
 
                 @php
                     $emailSettings = $role->getEmailSettings();
@@ -1748,6 +1776,8 @@
                     <div id="test-email-result" class="mt-2 hidden"></div>
                 </div>
                 @endif
+
+                </div>
                     </div>
                 </div>
                 @endif
