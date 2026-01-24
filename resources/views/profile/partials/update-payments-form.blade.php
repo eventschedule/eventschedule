@@ -51,9 +51,17 @@
 
             @if (! $user->stripe_completed_at)
                 <div class="mt-4">
-                    <x-primary-button type="button" onclick="window.location.href='{{ route('stripe.link') }}'">
-                        {{ __('messages.connect_stripe') }}
-                    </x-primary-button>
+                    @if (is_demo_mode())
+                        <button type="button"
+                            onclick="alert('{{ __('messages.saving_disabled_demo_mode') }}')"
+                            class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
+                            {{ __('messages.connect_stripe') }}
+                        </button>
+                    @else
+                        <x-primary-button type="button" onclick="window.location.href='{{ route('stripe.link') }}'">
+                            {{ __('messages.connect_stripe') }}
+                        </x-primary-button>
+                    @endif
                 </div>
             @endif
         @else
@@ -196,16 +204,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const paymentTabs = document.querySelectorAll('.payment-tab');
     const paymentTabContents = document.querySelectorAll('.payment-tab-content');
 
-    const savedTab = localStorage.getItem('paymentActiveTab');
-    if (savedTab) {
-        switchPaymentTab(savedTab);
-    }
-
     paymentTabs.forEach(tab => {
         tab.addEventListener('click', function() {
             const tabName = this.dataset.tab;
             switchPaymentTab(tabName);
-            localStorage.setItem('paymentActiveTab', tabName);
         });
     });
 
