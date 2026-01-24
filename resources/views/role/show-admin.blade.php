@@ -9,10 +9,28 @@
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: linear-gradient(45deg, transparent 45%, #888 45%, #888 55%, transparent 55%),
-                            linear-gradient(-45deg, transparent 45%, #888 45%, #888 55%, transparent 55%);
-                opacity: 0.6;
+                background-color: rgba(239, 68, 68, 0.1);
                 pointer-events: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .day-x::after {
+                content: 'Unavailable';
+                font-size: 0.65rem;
+                color: rgba(185, 28, 28, 0.8);
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.025em;
+            }
+
+            .dark .day-x {
+                background-color: rgba(239, 68, 68, 0.15);
+            }
+
+            .dark .day-x::after {
+                color: rgba(252, 165, 165, 0.9);
             }
         </style>
         <script {!! nonce_attr() !!}>
