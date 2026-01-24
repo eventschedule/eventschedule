@@ -900,4 +900,9 @@ return [
     'test_connection' => 'اختبار الاتصال',
     'connect' => 'اتصال',
     'connected' => 'متصل',
+
+    // Demo mode
+    'demo_mode_settings_disabled' => 'بعض الإعدادات معطلة في الوضع التجريبي.',
+    'demo_mode_restriction' => 'هذا الإجراء غير متاح في الوضع التجريبي.',
+    'saving_disabled_demo_mode' => 'الحفظ معطل في الوضع التجريبي.',
 ];

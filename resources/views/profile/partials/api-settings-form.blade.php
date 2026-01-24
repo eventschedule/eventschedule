@@ -13,7 +13,13 @@
         @endif
     </header>
 
-    <form method="post" action="{{ route('api-settings.update') }}" class="mt-6 space-y-6">
+    @if (is_demo_mode())
+    <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
+        {{ __('messages.demo_mode_settings_disabled') }}
+    </div>
+    @endif
+
+    <form method="post" action="{{ route('api-settings.update') }}" class="mt-6 space-y-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
         @csrf
         @method('patch')
 

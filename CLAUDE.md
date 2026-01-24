@@ -14,6 +14,12 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Never delete migration files** - They may have already been run on production
 - **Use "selfhost" not "self-host"** - Always write "selfhost" and "selfhosted" (no hyphen)
 
+## Terminology
+
+- **WP** - Marketing site (from WordPress acronym)
+- **AP** - Admin portal
+- **CP** - Guest portal / Client portal
+
 ## Build & Development Commands
 
 ```bash

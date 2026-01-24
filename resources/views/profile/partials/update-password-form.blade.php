@@ -9,9 +9,15 @@
         </p>
     </header>
 
+    @if (is_demo_mode())
+    <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
+        {{ __('messages.demo_mode_settings_disabled') }}
+    </div>
+    @endif
+
     @if(!auth()->user()->hasPassword() && !session('can_set_password'))
         {{-- Google-only user needs to re-authenticate to set password --}}
-        <div class="mt-6">
+        <div class="mt-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 {{ __('messages.google_reauth_to_set_password') }}
             </p>
@@ -33,19 +39,27 @@
             @if(auth()->user()->hasPassword())
             <div>
                 <x-input-label for="update_password_current_password" :value="__('messages.current_password')" />
-                <x-password-input id="update_password_current_password" name="current_password" class="mt-1 block w-full" autocomplete="current-password" />
+                <x-password-input id="update_password_current_password" name="current_password" class="mt-1 block w-full" autocomplete="current-password" :disabled="is_demo_mode()" />
                 <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
             </div>
             @endif
 
             <div>
                 <x-input-label for="update_password_password" :value="__('messages.new_password')" />
-                <x-password-input id="update_password_password" name="password" class="mt-1 block w-full" autocomplete="new-password" />
+                <x-password-input id="update_password_password" name="password" class="mt-1 block w-full" autocomplete="new-password" :disabled="is_demo_mode()" />
                 <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
             </div>
 
             <div class="flex items-center gap-4">
-                <x-primary-button>{{ __('messages.save') }}</x-primary-button>
+                @if (is_demo_mode())
+                    <button type="button"
+                        onclick="alert('{{ __('messages.saving_disabled_demo_mode') }}')"
+                        class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
+                        {{ __('messages.save') }}
+                    </button>
+                @else
+                    <x-primary-button>{{ __('messages.save') }}</x-primary-button>
+                @endif
 
                 @if (session('status') === 'password-updated')
                     <p

@@ -150,6 +150,14 @@ class HomeController extends Controller
             'feedback' => 'required|string|max:5000',
         ]);
 
+        // Block feedback submission in demo mode
+        if (is_demo_mode()) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.demo_mode_restriction'),
+            ], 403);
+        }
+
         $user = $request->user();
         $feedback = $request->input('feedback');
 

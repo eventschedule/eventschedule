@@ -168,3 +168,45 @@ if (! function_exists('blog_url')) {
         return 'https://blog.eventschedule.com'.$path;
     }
 }
+
+if (! function_exists('is_demo_mode')) {
+    /**
+     * Check if the current session is in demo mode
+     * Demo mode restricts certain settings and features
+     */
+    function is_demo_mode(): bool
+    {
+        // Demo mode is only available in hosted or testing mode
+        if (! config('app.hosted') && ! config('app.is_testing')) {
+            return false;
+        }
+
+        // Must be authenticated
+        if (! auth()->check()) {
+            return false;
+        }
+
+        // Check if the user is the demo user
+        return auth()->user()->email === \App\Services\DemoService::DEMO_EMAIL;
+    }
+}
+
+if (! function_exists('is_demo_role')) {
+    /**
+     * Check if a given role is the demo role
+     * Used to block certain operations (like sending emails) for the demo account
+     */
+    function is_demo_role(?\App\Models\Role $role): bool
+    {
+        if (! $role) {
+            return false;
+        }
+
+        // Demo role check is only relevant in hosted or testing mode
+        if (! config('app.hosted') && ! config('app.is_testing')) {
+            return false;
+        }
+
+        return $role->subdomain === \App\Services\DemoService::DEMO_ROLE_SUBDOMAIN;
+    }
+}

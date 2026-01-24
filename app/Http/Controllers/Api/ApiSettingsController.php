@@ -10,6 +10,12 @@ class ApiSettingsController extends Controller
 {
     public function update(Request $request)
     {
+        // Demo mode: prevent API settings changes
+        if (is_demo_mode()) {
+            return redirect()->to(route('profile.edit').'#section-api')
+                ->with('error', __('messages.demo_mode_restriction'));
+        }
+
         $user = auth()->user();
         $enableApi = $request->boolean('enable_api');
 

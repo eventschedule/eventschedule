@@ -891,4 +891,9 @@ return [
     'test_connection' => 'בדוק חיבור',
     'connect' => 'התחבר',
     'connected' => 'מחובר',
+
+    // Demo mode
+    'demo_mode_settings_disabled' => 'חלק מההגדרות מושבתות במצב הדגמה.',
+    'demo_mode_restriction' => 'פעולה זו אינה זמינה במצב הדגמה.',
+    'saving_disabled_demo_mode' => 'השמירה מושבתת במצב הדגמה.',
 ];

@@ -9,6 +9,11 @@
         </p>
     </header>
 
+    @if (is_demo_mode())
+    <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
+        {{ __('messages.demo_mode_settings_disabled') }}
+    </div>
+    @else
     <x-danger-button
         x-data=""
         x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
@@ -65,4 +70,5 @@
             </div>
         </form>
     </x-modal>
+    @endif
 </section>

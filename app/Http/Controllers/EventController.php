@@ -543,8 +543,8 @@ class EventController extends Controller
             $role->save();
         }
 
-        // Send email to the talent who created the request
-        if ($event->creatorRole) {
+        // Send email to the talent who created the request (skip in demo mode)
+        if ($event->creatorRole && ! is_demo_mode()) {
             $emails = $event->creatorRole->members()->pluck('email')->toArray();
             if (count($emails) > 0) {
                 Mail::to($emails)->send(new EventAccepted($event, $role));
@@ -572,8 +572,8 @@ class EventController extends Controller
             $role->save();
         }
 
-        // Send email to the talent who created the request
-        if ($event->creatorRole) {
+        // Send email to the talent who created the request (skip in demo mode)
+        if ($event->creatorRole && ! is_demo_mode()) {
             $emails = $event->creatorRole->members()->pluck('email')->toArray();
             if (count($emails) > 0) {
                 Mail::to($emails)->send(new EventDeclined($event, $role));
@@ -613,8 +613,8 @@ class EventController extends Controller
                 $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
                 $acceptedCount++;
 
-                // Send email to the talent who created the request
-                if ($event->creatorRole) {
+                // Send email to the talent who created the request (skip in demo mode)
+                if ($event->creatorRole && ! is_demo_mode()) {
                     $emails = $event->creatorRole->members()->pluck('email')->toArray();
                     if (count($emails) > 0) {
                         Mail::to($emails)->send(new EventAccepted($event, $role));

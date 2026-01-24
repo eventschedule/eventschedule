@@ -61,7 +61,7 @@ trait RoleBillable
             return null;
         }
 
-        return now()->diffInDays($this->trial_ends_at, false);
+        return (int) floor(now()->diffInDays($this->trial_ends_at, false));
     }
 
     /**

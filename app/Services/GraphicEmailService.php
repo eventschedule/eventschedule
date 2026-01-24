@@ -17,6 +17,13 @@ class GraphicEmailService
      */
     public function sendGraphicEmail(Role $role, string $recipientEmail): bool
     {
+        // Skip sending for demo role
+        if (is_demo_role($role)) {
+            Log::info('Skipping graphic email for demo role', ['role_id' => $role->id]);
+
+            return false;
+        }
+
         try {
             $settings = $role->graphic_settings;
             $layout = $settings['layout'] ?? 'grid';

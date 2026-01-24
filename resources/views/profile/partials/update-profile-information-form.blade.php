@@ -9,6 +9,12 @@
         </p>
     </header>
 
+    @if (is_demo_mode())
+    <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
+        {{ __('messages.demo_mode_settings_disabled') }}
+    </div>
+    @endif
+
     <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="mt-6 space-y-6">
         @csrf
         @method('patch')
@@ -16,39 +22,41 @@
         <div>
             <x-input-label for="name" :value="__('messages.name') . ' *'" />
             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)"
-                required autofocus autocomplete="name" />
+                required autofocus autocomplete="name" :disabled="is_demo_mode()" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
         <div>
             <x-input-label for="email" :value="__('messages.email') . ' *'" />
             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
-                :value="old('email', $user->email)" required autocomplete="username" />
+                :value="old('email', $user->email)" required autocomplete="username" :disabled="is_demo_mode()" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-            <div>
-                <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
-                    {{ __('messages.your_email_address_is_unverified') }}
+            @if (!is_demo_mode())
+                @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+                <div>
+                    <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
+                        {{ __('messages.your_email_address_is_unverified') }}
 
-                    <button form="send-verification"
-                        class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800">
-                        {{ __('messages.click_here_to_re_send_the_verification_email') }}
-                    </button>
-                </p>
+                        <button form="send-verification"
+                            class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800">
+                            {{ __('messages.click_here_to_re_send_the_verification_email') }}
+                        </button>
+                    </p>
 
-                @if (session('status') === 'verification-link-sent')
-                <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
-                    {{ __('messages.new_verification_link_has_been_sent') }}
-                </p>
+                    @if (session('status') === 'verification-link-sent')
+                    <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
+                        {{ __('messages.new_verification_link_has_been_sent') }}
+                    </p>
+                    @endif
+                </div>
                 @endif
-            </div>
             @endif
         </div>
 
         <div>
             <x-input-label for="timezone" :value="__('messages.timezone')" />
-            <select name="timezone" id="timezone" required
+            <select name="timezone" id="timezone" required {{ is_demo_mode() ? 'disabled' : '' }}
                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                 @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
                 <option value="{{ $timezone }}" {{ $user->timezone == $timezone ? 'SELECTED' : '' }}>{{ $timezone }}
@@ -60,7 +68,7 @@
 
         <div>
             <x-input-label for="language_code" :value="__('messages.language')" />
-            <select name="language_code" id="language_code" required
+            <select name="language_code" id="language_code" required {{ is_demo_mode() ? 'disabled' : '' }}
                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                 @foreach([
                 'ar' => 'arabic',
@@ -94,7 +102,15 @@
         -->
 
         <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('messages.save') }}</x-primary-button>
+            @if (is_demo_mode())
+                <button type="button"
+                    onclick="alert('{{ __('messages.saving_disabled_demo_mode') }}')"
+                    class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
+                    {{ __('messages.save') }}
+                </button>
+            @else
+                <x-primary-button>{{ __('messages.save') }}</x-primary-button>
+            @endif
 
             @if (session('status') === 'profile-updated')
             <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"

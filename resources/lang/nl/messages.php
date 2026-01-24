@@ -896,4 +896,9 @@ return [
     'test_connection' => 'Test Verbinding',
     'connect' => 'Verbinden',
     'connected' => 'Verbonden',
+
+    // Demo mode
+    'demo_mode_settings_disabled' => 'Sommige instellingen zijn uitgeschakeld in de demo-modus.',
+    'demo_mode_restriction' => 'Deze actie is niet beschikbaar in de demo-modus.',
+    'saving_disabled_demo_mode' => 'Opslaan is uitgeschakeld in de demo-modus.',
 ];
