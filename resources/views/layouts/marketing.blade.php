@@ -15,6 +15,8 @@
 
     <!-- SEO Meta Tags -->
     <link rel="canonical" href="{{ url()->current() }}">
+    <link rel="alternate" hreflang="en" href="{{ url()->current() }}">
+    <link rel="alternate" hreflang="x-default" href="{{ url()->current() }}">
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
     <meta name="robots" content="index, follow">
     <meta name="author" content="Event Schedule">
@@ -96,6 +98,7 @@
 
     @vite([
         'resources/css/app.css',
+        'resources/css/marketing.css',
         'resources/js/app.js',
     ])
 
@@ -169,27 +172,16 @@
         })();
     </script>
 
-    <style>
-        .gradient-text {
-            background: linear-gradient(135deg, #4E81FA 0%, #7C3AED 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .hero-gradient {
-            background: linear-gradient(135deg, rgba(78, 129, 250, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
-        }
-        .dark .hero-gradient {
-            background: linear-gradient(135deg, rgba(78, 129, 250, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%);
-        }
-    </style>
 
 </head>
 <body class="font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg">
+        Skip to main content
+    </a>
 
     @include('marketing.partials.header')
 
-    <main>
+    <main id="main-content">
         {{ $slot }}
     </main>
 

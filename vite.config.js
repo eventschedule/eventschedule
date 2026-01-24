@@ -23,6 +23,7 @@ export default defineConfig({
                 'resources/js/countrySelect.min.js',
                 //'resources/js/leaflet.js',
                 'resources/css/app.css',
+                'resources/css/marketing.css',
                 'resources/css/countrySelect.min.css',
                 //'resources/css/leaflet.css',
             ],

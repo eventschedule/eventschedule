@@ -5,20 +5,14 @@
     <x-slot name="socialImage">social/features.png</x-slot>
 
     <style>
+        /* Custom emerald gradient for this page */
         .text-gradient {
             background: linear-gradient(135deg, #10b981 0%, #059669 50%, #34d399 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        @keyframes pulse-slow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
+        /* Page-specific animations */
         @keyframes count-up {
             0% { opacity: 0; transform: translateY(10px); }
             100% { opacity: 1; transform: translateY(0); }
@@ -27,21 +21,8 @@
             0% { width: 0%; }
             100% { width: var(--bar-width); }
         }
-        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
-        .animate-float { animation: float 6s ease-in-out infinite; }
         .animate-count { animation: count-up 0.5s ease-out forwards; }
         .animate-bar { animation: bar-grow 1s ease-out forwards; }
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-        .bento-card {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .bento-card:hover {
-            transform: scale(1.02);
-        }
     </style>
 
     <!-- Hero Section -->

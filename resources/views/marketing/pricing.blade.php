@@ -4,35 +4,6 @@
     <x-slot name="keywords">event schedule pricing, free event calendar, event management cost, ticketing fees, no platform fees, custom domain pricing</x-slot>
     <x-slot name="socialImage">social/pricing.png</x-slot>
 
-    <style>
-        .text-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        @keyframes pulse-slow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-        .pricing-card {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .pricing-card:hover {
-            transform: translateY(-8px);
-        }
-    </style>
 
     <!-- Hero Section -->
     <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">

@@ -144,11 +144,6 @@
                     &copy; {{ date('Y') }} Event Schedule. All rights reserved.
                 </p>
             </div>
-            @if(config('app.hosted') && config('app.support_email'))
-                <p class="text-gray-500 dark:text-gray-400 text-sm mt-4 text-center">
-                    For suggestions or feedback, please send an email to <a href="mailto:{{ config('app.support_email') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors underline">{{ config('app.support_email') }}</a>
-                </p>
-            @endif
         </div>
     </div>
 </footer>
