@@ -4,32 +4,12 @@
     <x-slot name="keywords">Invoice Ninja, event invoicing, professional invoices, ticket invoices, B2B ticketing, invoice automation, client management, selfhosted invoicing</x-slot>
 
     <style>
+        /* Custom emerald gradient for this page */
         .text-gradient {
             background: linear-gradient(135deg, #10B981 0%, #14B8A6 50%, #06B6D4 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-        }
-        @keyframes pulse-slow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-        .bento-card {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .bento-card:hover {
-            transform: scale(1.02);
         }
     </style>
 

@@ -1,4 +1,5 @@
 <style>
+    /* Doc-specific gradient text variants */
     .text-gradient-blue {
         background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #4f46e5 100%);
         -webkit-background-clip: text;
@@ -16,16 +17,6 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-    }
-    @keyframes pulse-slow {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-    }
-    .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
-    .glass {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
     }
 
     /* Documentation Styles */

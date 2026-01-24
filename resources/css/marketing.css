@@ -1,0 +1,123 @@
+/**
+ * Marketing Site Shared Styles
+ *
+ * This file contains shared CSS for marketing pages, extracted from
+ * individual page style blocks to reduce duplication.
+ */
+
+/* ========================================
+   Animations
+   ======================================== */
+
+@keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes sync-pulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.animate-sync {
+    animation: sync-pulse 2s ease-in-out infinite;
+}
+
+/* ========================================
+   Glass Effect
+   ======================================== */
+
+.glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+/* ========================================
+   Gradient Text
+   ======================================== */
+
+.text-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #4E81FA 0%, #7C3AED 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ========================================
+   Hero Gradient Background
+   ======================================== */
+
+.hero-gradient {
+    background: linear-gradient(135deg, rgba(78, 129, 250, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+}
+
+.dark .hero-gradient {
+    background: linear-gradient(135deg, rgba(78, 129, 250, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%);
+}
+
+/* ========================================
+   Cards
+   ======================================== */
+
+.bento-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bento-card:hover {
+    transform: scale(1.02);
+}
+
+.feature-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+}
+
+.pricing-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pricing-card:hover {
+    transform: translateY(-8px);
+}
+
+/* ========================================
+   Reduced Motion Support
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-pulse-slow,
+    .animate-float,
+    .animate-sync {
+        animation: none;
+    }
+
+    .bento-card:hover,
+    .feature-card:hover,
+    .pricing-card:hover {
+        transform: none;
+    }
+}

@@ -4,32 +4,12 @@
     <x-slot name="keywords">Stripe payments, event tickets, credit card payments, Apple Pay, Google Pay, Stripe Connect, ticket sales, payment processing</x-slot>
 
     <style>
+        /* Custom violet gradient for this page */
         .text-gradient {
             background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 50%, #4F46E5 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-        }
-        @keyframes pulse-slow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-        .bento-card {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .bento-card:hover {
-            transform: scale(1.02);
         }
     </style>
 
