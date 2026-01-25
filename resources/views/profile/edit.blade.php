@@ -2,14 +2,12 @@
 
     <x-slot name="head">
         <style>
-        /* Hide all sections except the first one on desktop by default */
-        @media (min-width: 1024px) {
-            .section-content {
-                display: none;
-            }
-            .section-content:first-of-type {
-                display: block;
-            }
+        /* Hide all sections except the first one by default */
+        .section-content {
+            display: none;
+        }
+        .section-content:first-of-type {
+            display: block;
         }
         </style>
     </x-slot>
@@ -19,6 +17,25 @@
     </h2>
 
     <div class="py-5">
+        <!-- Mobile section dropdown (visible on small screens, hidden on lg+) -->
+        <div class="lg:hidden mb-4">
+            <label for="mobile-section-select" class="sr-only">{{ __('messages.select_a_tab') }}</label>
+            <select id="mobile-section-select"
+                class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 dark:bg-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-600 focus:ring-2 focus:ring-inset focus:ring-[#4E81FA]">
+                <option value="section-profile">{{ __('messages.profile_information') }}</option>
+                <option value="section-payment-methods">{{ __('messages.payment_methods') }}</option>
+                <option value="section-api">{{ __('API Settings') }}</option>
+                <option value="section-google-calendar">{{ __('messages.google_settings') }}</option>
+                @if (! config('app.hosted') && ! config('app.testing'))
+                <option value="section-app">{{ __('messages.app_update') }}</option>
+                @endif
+                <option value="section-password">{{ __('messages.update_password') }}</option>
+                @if (config('app.hosted') || config('app.is_testing'))
+                <option value="section-delete">{{ __('messages.delete_account') }}</option>
+                @endif
+            </select>
+        </div>
+
         <div class="mx-auto lg:grid lg:grid-cols-12 lg:gap-6">
             <!-- Sidebar Navigation (hidden on small screens, visible on lg+) -->
             <div class="hidden lg:block lg:col-span-3">
@@ -131,9 +148,10 @@
     document.addEventListener('DOMContentLoaded', function() {
         const sectionLinks = document.querySelectorAll('.section-nav-link');
         const sections = document.querySelectorAll('.section-content');
-        
+        const mobileSelect = document.getElementById('mobile-section-select');
+
         // Function to show a specific section and hide others
-        function showSection(sectionId) {
+        function showSection(sectionId, preventScroll = false) {
             sections.forEach(section => {
                 if (section.id === sectionId) {
                     section.style.display = 'block';
@@ -141,7 +159,7 @@
                     section.style.display = 'none';
                 }
             });
-            
+
             // Update active link
             sectionLinks.forEach(link => {
                 if (link.getAttribute('data-section') === sectionId) {
@@ -152,15 +170,25 @@
                     link.classList.add('text-gray-700', 'dark:text-gray-300', 'font-medium', 'border-transparent');
                 }
             });
-            
+
+            // Sync mobile dropdown
+            if (mobileSelect) {
+                mobileSelect.value = sectionId;
+            }
+
             // Update URL hash
             if (history.pushState) {
                 history.pushState(null, null, '#' + sectionId);
             } else {
                 window.location.hash = sectionId;
             }
+
+            // Prevent scroll if requested
+            if (preventScroll) {
+                window.scrollTo(0, 0);
+            }
         }
-        
+
         // Handle navigation link clicks
         sectionLinks.forEach(link => {
             link.addEventListener('click', function(e) {
@@ -169,53 +197,42 @@
                 showSection(sectionId);
             });
         });
-        
+
+        // Handle mobile dropdown change
+        if (mobileSelect) {
+            mobileSelect.addEventListener('change', function() {
+                showSection(this.value);
+            });
+        }
+
         // Check if we're on a large screen
         function isLargeScreen() {
             return window.matchMedia('(min-width: 1024px)').matches;
         }
-        
-        // Initialize: show first section on large screens, all on small screens
+
+        // Initialize: show section based on hash or first section
         function initializeSections() {
-            if (isLargeScreen()) {
-                // Check URL hash first
-                const hash = window.location.hash.replace('#', '');
-                if (hash && document.getElementById(hash)) {
-                    showSection(hash);
-                } else {
-                    // Show first section
-                    const firstSection = sections[0];
-                    if (firstSection) {
-                        showSection(firstSection.id);
-                    }
-                }
+            // Check URL hash first
+            const hash = window.location.hash.replace('#', '');
+            if (hash && document.getElementById(hash)) {
+                showSection(hash, true);
             } else {
-                // On small screens, show all sections
-                sections.forEach(section => {
-                    section.style.display = 'block';
-                });
+                // Show first section
+                const firstSection = sections[0];
+                if (firstSection) {
+                    showSection(firstSection.id, true);
+                }
             }
         }
-        
-        // Handle window resize
-        let resizeTimer;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(function() {
-                initializeSections();
-            }, 250);
-        });
-        
+
         // Handle hash changes
         window.addEventListener('hashchange', function() {
-            if (isLargeScreen()) {
-                const hash = window.location.hash.replace('#', '');
-                if (hash && document.getElementById(hash)) {
-                    showSection(hash);
-                }
+            const hash = window.location.hash.replace('#', '');
+            if (hash && document.getElementById(hash)) {
+                showSection(hash);
             }
         });
-        
+
         // Initialize on page load
         initializeSections();
     });
