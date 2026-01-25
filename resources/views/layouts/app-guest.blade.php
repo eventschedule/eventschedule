@@ -69,7 +69,7 @@
     <x-slot name="head">
 
         @foreach($fonts as $font)
-            <link href="https://fonts.googleapis.com/css2?family={{ str_replace(' ', '+', $font) }}:wght@400;700&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family={{ str_replace(['_', ' '], '+', $font) }}:wght@400;700&display=swap" rel="stylesheet">
         @endforeach
 
         <style>

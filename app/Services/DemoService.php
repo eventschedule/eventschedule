@@ -124,13 +124,13 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
 - **Community Events** - Town meetings, talent shows, and controlled chaos
 
 *D\'oh-n\'t miss out on the action! Our tire fire burns eternal, and so does our event calendar.*';
-            $role->accept_requests = true;
+            $role->accept_requests = false;
             $role->plan_type = 'pro';
             $role->plan_expires = now()->addYear()->format('Y-m-d');
             $role->trial_ends_at = now()->addYear();
             $role->social_links = self::getRandomDemoSocialLinks();
             $role->header_image_url = 'demo_header_town.jpg';
-            $role->profile_image_url = 'demo_profile_moes.jpg';
+            $role->profile_image_url = 'demo_profile_donuts.jpg';
             $role->font_family = 'Bangers';
             $role->save();
 
@@ -302,6 +302,7 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
                 'subdomain' => 'demo-lisajazz',
                 'background_colors' => '#1a237e, #4a148c',
                 'background_rotation' => 135,
+                'accent_color' => '#FFD700',
                 'profile_image' => 'demo_profile_jazz.jpg',
                 'header_image' => 'demo_header_jazz.jpg',
                 'font_family' => 'Playfair_Display',
@@ -325,7 +326,8 @@ Fronted by Springfield Elementary\'s most accomplished saxophonist and future Pr
                 'subdomain' => 'demo-krusty',
                 'background_colors' => '#f44336, #ff9800',
                 'background_rotation' => 45,
-                'profile_image' => 'demo_profile_circus.jpg',
+                'accent_color' => '#FFEB3B',
+                'profile_image' => 'demo_profile_clown.jpg',
                 'header_image' => 'demo_header_circus.jpg',
                 'font_family' => 'Fredoka_One',
                 'description' => '**Forty years of making children laugh (and occasionally causing lawsuits).**
@@ -349,6 +351,7 @@ From seltzer bottles to heart bypass surgery, Krusty the Clown and his team deli
                 'subdomain' => 'demo-djbob',
                 'background_colors' => '#7b1fa2, #00bcd4',
                 'background_rotation' => 160,
+                'accent_color' => '#00E5FF',
                 'profile_image' => 'demo_profile_vinyl.jpg',
                 'font_family' => 'Space_Grotesk',
                 'header_image' => 'demo_header_dj.jpg',
@@ -375,6 +378,7 @@ Former children\'s entertainer turned DJ, bringing an eclectic mix of Gilbert & 
                 'subdomain' => 'demo-rockers',
                 'background_colors' => '#212121, #616161',
                 'background_rotation' => 180,
+                'accent_color' => '#FF1744',
                 'profile_image' => 'demo_profile_rock.jpg',
                 'header_image' => 'demo_header_rock.jpg',
                 'font_family' => 'Anton',
@@ -399,6 +403,7 @@ We\'ve played every venue from the Isotopes Stadium to the Springfield dump (gre
                 'subdomain' => 'demo-lurleen',
                 'background_colors' => '#8B4513, #D2691E',
                 'background_rotation' => 120,
+                'accent_color' => '#FFD54F',
                 'profile_image' => 'demo_profile_country.jpg',
                 'header_image' => 'demo_header_country.jpg',
                 'font_family' => 'Bitter',
@@ -423,8 +428,9 @@ Springfield\'s sweetheart of country music, discovered at the Beer-N-Brawl by he
                 'subdomain' => 'demo-troymcclure',
                 'background_colors' => '#b71c1c, #880e4f',
                 'background_rotation' => 200,
-                'profile_image' => 'demo_profile_popcorn.jpg',
-                'header_image' => 'demo_header_theater.jpg',
+                'accent_color' => '#FFD700',
+                'profile_image' => 'demo_profile_film.jpg',
+                'header_image' => 'demo_header_film.jpg',
                 'font_family' => 'Bodoni_Moda',
                 'description' => '**You might remember me from such events as "The Half-Assed Approach to Foundation Repair" and "Get Confident, Stupid!"**
 
@@ -449,6 +455,7 @@ Bringing Hollywood glamour to Springfield since the \'70s. From educational film
                 'subdomain' => 'demo-frink',
                 'background_colors' => '#0d47a1, #00695c',
                 'background_rotation' => 90,
+                'accent_color' => '#00E676',
                 'profile_image' => 'demo_profile_science.jpg',
                 'header_image' => 'demo_header_science.jpg',
                 'font_family' => 'IBM_Plex_Sans',
@@ -475,7 +482,8 @@ Educational entertainment from Springfield\'s foremost inventor (and Nobel Prize
                 'subdomain' => 'demo-stonecutters',
                 'background_colors' => '#5d4037, #ff8f00',
                 'background_rotation' => 225,
-                'profile_image' => 'demo_profile_secret.jpg',
+                'accent_color' => '#FFB300',
+                'profile_image' => 'demo_profile_beer.jpg',
                 'header_image' => 'demo_header_secret.jpg',
                 'font_family' => 'Cinzel',
                 'description' => '**Who controls the Springfield events scene? WE DO! WE DO!**
@@ -518,6 +526,7 @@ An ancient and totally-not-secret society bringing exclusive entertainment to ou
             $role->background = 'gradient';
             $role->background_colors = $talentData['background_colors'];
             $role->background_rotation = $talentData['background_rotation'];
+            $role->accent_color = $talentData['accent_color'] ?? null;
             $role->plan_type = 'pro';
             $role->plan_expires = now()->addYear()->format('Y-m-d');
             $role->social_links = self::getRandomDemoSocialLinks();
@@ -548,7 +557,7 @@ An ancient and totally-not-secret society bringing exclusive entertainment to ou
                 'name' => "Moe's Tavern",
                 'subdomain' => 'demo-moestavern',
                 'background_colors' => '#D4A017, #8B4513', // Brown/gold
-                'accent_color' => '#4E81FA',
+                'accent_color' => '#F9A825',
                 'header_image' => 'demo_header_bar.jpg',
                 'profile_image' => 'demo_profile_beer.jpg',
                 'font_family' => 'Alfa_Slab_One',
@@ -575,7 +584,7 @@ Famous for our signature cocktails, prank call resilience, and the occasional al
                 'subdomain' => 'demo-bowlarama',
                 'background_colors' => '#8B4513, #FF6B35', // Brown/orange
                 'accent_color' => '#FF6B35',
-                'header_image' => 'demo_header_bar.jpg',
+                'header_image' => 'demo_header_bowling.jpg',
                 'profile_image' => 'demo_profile_bowling.jpg',
                 'font_family' => 'Bowlby_One',
                 'description' => '**Strikes, spares, and questionable nachos since 1955.**
@@ -626,7 +635,7 @@ From golden age Hollywood premieres to modern blockbusters about radioactive mon
                 'name' => 'Springfield Amphitheater',
                 'subdomain' => 'demo-amphitheater',
                 'background_colors' => '#1E90FF, #228B22', // Blue/green outdoor
-                'accent_color' => '#228B22',
+                'accent_color' => '#4FC3F7',
                 'header_image' => 'demo_header_concert.jpg',
                 'profile_image' => 'demo_profile_amphitheater.jpg',
                 'font_family' => 'Concert_One',
@@ -677,7 +686,7 @@ Home of the famous giant donut statue and even more famous actual donuts. Now ho
                 'subdomain' => 'demo-communitycenter',
                 'background_colors' => '#228B22, #FFFFFF', // Civic green/white
                 'accent_color' => '#228B22',
-                'header_image' => 'demo_header_concert.jpg',
+                'header_image' => 'demo_header_civic.jpg',
                 'profile_image' => 'demo_profile_gym.jpg',
                 'font_family' => 'Public_Sans',
                 'description' => '**Where Springfield comes together (for better or worse).**
@@ -725,7 +734,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             $role->background = 'gradient';
             $role->background_colors = $venueData['background_colors'];
             $role->accent_color = $venueData['accent_color'];
-            $role->accept_requests = true;
+            $role->accept_requests = false;
             $role->plan_type = 'pro';
             $role->plan_expires = now()->addYear()->format('Y-m-d');
             $role->trial_ends_at = now()->addYear();

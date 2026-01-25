@@ -163,17 +163,22 @@
                 @endif
               </div>
 
-              {{-- Description below (centered) --}}
+              {{-- Description below --}}
               @if($role->translatedDescription())
-              <div class="text-center">
+              <div class="text-left w-full">
                 <div x-data="{ expanded: false }" class="text-sm text-[#33383C] dark:text-gray-300">
-                  <div class="flex items-start gap-2">
-                    <div :class="{ 'line-clamp-1': !expanded }" class="custom-content flex-1">
+                  <span x-show="!expanded">
+                    {{ Str::words(strip_tags($role->translatedDescription()), 5, '') }}...
+                    <button @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap ms-1">
+                      {{ __('messages.show_more') }}
+                    </button>
+                  </span>
+                  <div x-show="expanded">
+                    <div class="custom-content [&>*:first-child]:mt-0">
                       {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                     </div>
-                    <button @click="expanded = !expanded" class="text-[#4E81FA] hover:underline whitespace-nowrap flex-shrink-0">
-                      <span x-show="!expanded">{{ __('messages.show_more') }}</span>
-                      <span x-show="expanded">{{ __('messages.show_less') }}</span>
+                    <button @click="expanded = false" class="text-[#4E81FA] hover:underline whitespace-nowrap mt-1">
+                      {{ __('messages.show_less') }}
                     </button>
                   </div>
                 </div>
@@ -297,13 +302,18 @@
               {{-- Description below (full width) --}}
               @if($role->translatedDescription())
               <div x-data="{ expanded: false }" class="text-sm text-[#33383C] dark:text-gray-300">
-                <div class="flex items-start gap-2">
-                  <div :class="{ 'line-clamp-1': !expanded }" class="custom-content flex-1">
+                <span x-show="!expanded">
+                  {{ Str::words(strip_tags($role->translatedDescription()), 5, '') }}...
+                  <button @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap ms-1">
+                    {{ __('messages.show_more') }}
+                  </button>
+                </span>
+                <div x-show="expanded">
+                  <div class="custom-content [&>*:first-child]:mt-0">
                     {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                   </div>
-                  <button @click="expanded = !expanded" class="text-[#4E81FA] hover:underline whitespace-nowrap flex-shrink-0">
-                    <span x-show="!expanded">{{ __('messages.show_more') }}</span>
-                    <span x-show="expanded">{{ __('messages.show_less') }}</span>
+                  <button @click="expanded = false" class="text-[#4E81FA] hover:underline whitespace-nowrap mt-1">
+                    {{ __('messages.show_less') }}
                   </button>
                 </div>
               </div>

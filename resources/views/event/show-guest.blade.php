@@ -284,7 +284,7 @@
     >
       <div class="flex flex-col gap-10">
         @if (request()->get('tickets') === 'true' && $event->isPro())
-        <div class="flex flex-col xl:flex-row gap-10 bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-10 sm:p-10 mb-4">
+        <div class="flex flex-col xl:flex-row gap-10 bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-6 sm:p-8 mb-4">
           <div class="flex-1">
             <div class="flex flex-col gap-4">
               <h4 class="text-[28px] leading-snug text-black dark:text-gray-100">
@@ -304,12 +304,7 @@
         @else
         <div>
         @if ($translation ? $translation->description_translated : $event->translatedDescription())
-          <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-8 sm:p-8 mb-6 flex flex-col gap-4 {{ $role->isRtl() || ($translation && $translation->role->isRtl()) ? 'rtl' : '' }}">
-            <h2
-              class="text-[#151B26] dark:text-gray-100 text-[40px] sm:text-{52px} leading-snug font-semibold"
-            >
-              {{ __('messages.event_details') }}
-            </h2>
+          <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-6 sm:p-8 mb-6 flex flex-col gap-4 {{ $role->isRtl() || ($translation && $translation->role->isRtl()) ? 'rtl' : '' }}">
             <div class="text-[#33383C] dark:text-gray-300 text-base custom-content">
               {!! \App\Utils\UrlUtils::convertUrlsToLinks($translation ? $translation->description_translated : $event->translatedDescription()) !!}
             </div>
@@ -320,7 +315,7 @@
             @if (! $each->isClaimed() && ! $each->getFirstVideoUrl())
               @continue       
             @endif
-          <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-8 sm:p-8 mb-6 flex flex-col gap-4">
+          <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-6 sm:p-8 mb-6 flex flex-col gap-4">
             <div
               class="flex flex-row justify-between items-center"
             >
@@ -453,7 +448,7 @@
           @endforeach
 
           @if ($event->flyer_image_url)
-          <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-8 sm:p-8 mb-6 flex flex-col gap-4">
+          <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-6 sm:p-8 mb-6 flex flex-col gap-4">
             <img src="{{ $event->flyer_image_url }}" class="block"/>
           </div>
           @endif
