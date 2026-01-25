@@ -47,23 +47,23 @@
                 <span class="text-gray-600 dark:text-gray-400 w-40">{{ __('messages.status') }}</span>
                 <span class="font-medium">
                     @if ($subscriptionStatus == 'trial')
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
                             {{ __('messages.trial') }}
                         </span>
                     @elseif ($subscriptionStatus == 'active')
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
                             {{ __('messages.active') }}
                         </span>
                     @elseif ($subscriptionStatus == 'cancelled' || $subscriptionStatus == 'grace_period')
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
                             {{ __('messages.cancelled') }}
                         </span>
                     @elseif ($subscriptionStatus == 'past_due')
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
                             {{ __('messages.past_due') }}
                         </span>
                     @else
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
                             {{ __('messages.inactive') }}
                         </span>
                     @endif
@@ -198,7 +198,7 @@
             @endif
 
             {{-- Change to Free Plan (legacy) --}}
-            @if (!$subscription && $role->plan_type == 'pro' && $role->isPro())
+            @if (!$subscription && $role->plan_type == 'pro' && $role->isPro() && !is_demo_mode())
             <div>
                 <a href="{{ route('role.change_plan', ['subdomain' => $role->subdomain, 'plan_type' => 'free']) }}"
                     onclick="return confirm('{{ __('messages.are_you_sure') }}')"
