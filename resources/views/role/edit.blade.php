@@ -35,7 +35,7 @@
         #preview {
             border: 1px solid #dbdbdb;
             border-radius: 8px;
-            height: 180px;
+            height: 140px;
             width: 100%;
             overflow: hidden;
             background-size: cover;
@@ -86,6 +86,18 @@
             });
             $('#background').val('{{ old('background', $role->background) }}');
             $('#background_colors').val('{{ old('background_colors', $role->background_colors) }}');
+
+            // If stored background_colors doesn't match any preset option, select "Custom"
+            var $bgColors = $('#background_colors');
+            var storedBgColors = '{{ old('background_colors', $role->background_colors) }}';
+            if (storedBgColors && $bgColors.val() !== storedBgColors) {
+                $bgColors.val('');
+                // Pre-populate custom color inputs from stored values
+                var storedColors = storedBgColors.split(', ');
+                if (storedColors.length >= 1) $('#custom_color1').val(storedColors[0]);
+                if (storedColors.length >= 2) $('#custom_color2').val(storedColors[1]);
+            }
+
             $('#font_family').val('{{ old('font_family', $role->font_family) }}');
             $('#language_code').val('{{ old('language_code', $role->language_code) }}');
             $('#timezone').val('{{ old('timezone', $role->timezone) }}');
@@ -314,13 +326,15 @@
                     headerHtml +
                     '<div class="px-3 pb-3 flex flex-col">' +
                         profileHtml +
-                        '<div class="text-sm font-semibold text-[#151B26] mb-2 ' + contentTopPadding + '" style="color: ' + fontColor + '; font-family: ' + fontFamily + ';">' + name + '</div>' +
-                        '<div class="flex gap-1.5">' +
-                            '<div class="w-5 h-5 rounded-full flex items-center justify-center" style="background-color: ' + accentColor + '">' +
-                                '<svg class="w-3 h-3" fill="white" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>' +
-                            '</div>' +
-                            '<div class="w-5 h-5 rounded-full flex items-center justify-center" style="background-color: ' + accentColor + '">' +
-                                '<svg class="w-3 h-3" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93z"/></svg>' +
+                        '<div class="flex items-center justify-between gap-2">' +
+                            '<div class="text-sm font-semibold text-[#151B26] ' + contentTopPadding + '" style="color: ' + fontColor + '; font-family: ' + fontFamily + ';">' + name + '</div>' +
+                            '<div class="flex gap-1.5">' +
+                                '<div class="w-5 h-5 rounded-full flex items-center justify-center" style="background-color: ' + accentColor + '">' +
+                                    '<svg class="w-3 h-3" fill="white" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>' +
+                                '</div>' +
+                                '<div class="w-5 h-5 rounded-full flex items-center justify-center" style="background-color: ' + accentColor + '">' +
+                                    '<svg class="w-3 h-3" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93z"/></svg>' +
+                                '</div>' +
                             '</div>' +
                         '</div>' +
                     '</div>' +
@@ -1122,7 +1136,7 @@
                         <!-- Preview (always visible, right column on desktop) -->
                         <div class="w-full xl:w-1/2 mt-6 xl:mt-0">
                             <x-input-label :value="__('messages.preview')" />
-                            <div id="preview" class="h-[180px] w-full"></div>
+                            <div id="preview" class="h-[140px] w-full"></div>
                         </div>
                     </div>
 
