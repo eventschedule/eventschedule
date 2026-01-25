@@ -28,8 +28,19 @@ class DemoAutoLogin
             return $next($request);
         }
 
-        // If already authenticated, let them through
+        // If already authenticated as demo user, redirect to demo schedule from landing page only
         if (Auth::check()) {
+            if (DemoService::isDemoUser(Auth::user())) {
+                // Only redirect from demo landing page, allow other navigation
+                $path = trim($request->path(), '/');
+                if ($path === '' || $path === DemoService::DEMO_SUBDOMAIN) {
+                    return redirect()->route('role.view_admin', [
+                        'subdomain' => DemoService::DEMO_ROLE_SUBDOMAIN,
+                        'tab' => 'schedule',
+                    ]);
+                }
+            }
+
             return $next($request);
         }
 
@@ -38,6 +49,8 @@ class DemoAutoLogin
 
         if ($demoUser) {
             Auth::login($demoUser);
+            $request->session()->regenerate();
+            $request->session()->regenerateToken();
 
             // Redirect to the schedule page after auto-login on demo subdomain
             return redirect()->route('role.view_admin', ['subdomain' => DemoService::DEMO_ROLE_SUBDOMAIN, 'tab' => 'schedule']);
