@@ -969,8 +969,7 @@
                             <textarea
                                 id="eventText"
                                 readonly
-                                class="hidden w-full h-full p-3 border border-gray-200 dark:border-gray-700 rounded-md resize-none font-mono text-sm leading-relaxed whitespace-pre-wrap overflow-y-auto bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none"
-                                style="min-height: 200px;"
+                                class="hidden w-full h-full p-3 border border-gray-200 dark:border-gray-700 rounded-md resize-none font-mono text-sm leading-relaxed whitespace-pre-wrap overflow-y-auto bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none min-h-[50vh] lg:min-h-[200px]"
                                 dir="{{ $role->isRtl() ? 'rtl' : 'ltr' }}"
                             ></textarea>
                         </div>
