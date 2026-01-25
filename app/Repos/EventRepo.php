@@ -442,73 +442,57 @@ class EventRepo
             }
         }
 
+        // Find events attached to both roles (handles all combinations: venue+talent, curator+venue, curator+talent, etc.)
         if ($subdomainRole && $slugRole) {
-            $venue = null;
-            $role = null;
+            if ($eventDate) {
+                $event = Event::with('roles')
+                    ->whereHas('roles', function ($query) use ($subdomainRole) {
+                        $query->where('role_id', $subdomainRole->id);
+                    })
+                    ->whereHas('roles', function ($query) use ($slugRole) {
+                        $query->where('role_id', $slugRole->id);
+                    })
+                    ->where(function ($query) use ($eventDate) {
+                        $query->whereBetween('starts_at', [
+                            $eventDate->copy()->startOfDay(),
+                            $eventDate->copy()->endOfDay(),
+                        ])
+                            ->orWhere(function ($query) use ($eventDate) {
+                                $query->whereNotNull('days_of_week')
+                                    ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
+                                    ->where('starts_at', '<=', $eventDate);
+                            });
+                    })
+                    ->orderBy('starts_at')
+                    ->first();
+            } else {
+                $event = Event::with('roles')
+                    ->whereHas('roles', function ($query) use ($subdomainRole) {
+                        $query->where('role_id', $subdomainRole->id);
+                    })
+                    ->whereHas('roles', function ($query) use ($slugRole) {
+                        $query->where('role_id', $slugRole->id);
+                    })
+                    ->where('starts_at', '>=', now()->subDay())
+                    ->orderBy('starts_at')
+                    ->first();
 
-            if ($subdomainRole->isVenue()) {
-                $venue = $subdomainRole;
-            } elseif ($slugRole->isVenue()) {
-                $venue = $slugRole;
+                if (! $event) {
+                    $event = Event::with('roles')
+                        ->whereHas('roles', function ($query) use ($subdomainRole) {
+                            $query->where('role_id', $subdomainRole->id);
+                        })
+                        ->whereHas('roles', function ($query) use ($slugRole) {
+                            $query->where('role_id', $slugRole->id);
+                        })
+                        ->where('starts_at', '<', now())
+                        ->orderBy('starts_at', 'desc')
+                        ->first();
+                }
             }
 
-            if ($subdomainRole->isTalent()) {
-                $role = $subdomainRole;
-            } elseif ($slugRole->isTalent()) {
-                $role = $slugRole;
-            }
-
-            if ($role && $venue) {
-                if ($eventDate) {
-                    $event = Event::with('roles')
-                        ->whereHas('roles', function ($query) use ($role) {
-                            $query->where('role_id', $role->id);
-                        })
-                        ->whereHas('roles', function ($query) use ($venue) {
-                            $query->where('role_id', $venue->id);
-                        })
-                        ->where(function ($query) use ($eventDate) {
-                            $query->whereBetween('starts_at', [
-                                $eventDate->copy()->startOfDay(),
-                                $eventDate->copy()->endOfDay(),
-                            ])
-                                ->orWhere(function ($query) use ($eventDate) {
-                                    $query->whereNotNull('days_of_week')
-                                        ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
-                                        ->where('starts_at', '<=', $eventDate);
-                                });
-                        })
-                        ->orderBy('starts_at')
-                        ->first();
-                } else {
-                    $event = Event::with('roles')
-                        ->whereHas('roles', function ($query) use ($role) {
-                            $query->where('role_id', $role->id);
-                        })
-                        ->whereHas('roles', function ($query) use ($venue) {
-                            $query->where('role_id', $venue->id);
-                        })
-                        ->where('starts_at', '>=', now()->subDay())
-                        ->orderBy('starts_at')
-                        ->first();
-
-                    if (! $event) {
-                        $event = Event::with('roles')
-                            ->whereHas('roles', function ($query) use ($role) {
-                                $query->where('role_id', $role->id);
-                            })
-                            ->whereHas('roles', function ($query) use ($venue) {
-                                $query->where('role_id', $venue->id);
-                            })
-                            ->where('starts_at', '<', now())
-                            ->orderBy('starts_at', 'desc')
-                            ->first();
-                    }
-                }
-
-                if ($event) {
-                    return $event;
-                }
+            if ($event) {
+                return $event;
             }
         }
 
