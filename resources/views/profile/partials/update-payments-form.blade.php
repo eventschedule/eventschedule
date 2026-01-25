@@ -110,7 +110,7 @@
             </div>
         @else
             <p class="text-sm text-gray-600 dark:text-gray-400">
-                <x-link href="https://invoiceninja.com/partner-perks/event-schedule/" target="_blank">
+                <x-link href="https://invoiceninja.com/partner-perks/event-schedule-perk/" target="_blank">
                     {{ __('messages.invoiceninja_offer') }}
                 </x-link>
             </p>
