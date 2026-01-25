@@ -35,6 +35,11 @@ class DemoService
     public const DEMO_ROLE_SUBDOMAIN = 'demo-simpsons';
 
     /**
+     * Demo social links (Event Schedule social media accounts)
+     */
+    public const DEMO_SOCIAL_LINKS = '[{"url":"https://www.facebook.com/appeventschedule"},{"url":"https://www.instagram.com/eventschedule/"},{"url":"https://youtube.com/@EventSchedule"},{"url":"https://x.com/ScheduleEvent"},{"url":"https://www.linkedin.com/company/eventschedule/"}]';
+
+    /**
      * Check if the given user is the demo user
      */
     public static function isDemoUser(?User $user): bool
@@ -85,12 +90,11 @@ class DemoService
             $role->background = 'gradient';
             $role->background_colors = '#FFD90F, #0064B0'; // Classic Simpsons yellow/blue
             $role->accent_color = '#FFD90F';
-            $role->header_image = 'Chill_Evening';
             $role->accept_requests = true;
             $role->plan_type = 'pro';
             $role->plan_expires = now()->addYear()->format('Y-m-d');
             $role->trial_ends_at = now()->addYear();
-            $role->profile_image_url = 'demo_profile_band.jpg';
+            $role->social_links = self::DEMO_SOCIAL_LINKS;
             $role->save();
 
             // Attach user to role as owner
@@ -280,6 +284,7 @@ class DemoService
             $role->background_rotation = $talentData['background_rotation'];
             $role->plan_type = 'pro';
             $role->plan_expires = now()->addYear()->format('Y-m-d');
+            $role->social_links = self::DEMO_SOCIAL_LINKS;
             $role->save();
 
             // Attach user to role as owner (so it's "claimed")
@@ -360,6 +365,7 @@ class DemoService
             $role->plan_type = 'pro';
             $role->plan_expires = now()->addYear()->format('Y-m-d');
             $role->trial_ends_at = now()->addYear();
+            $role->social_links = self::DEMO_SOCIAL_LINKS;
             $role->save();
 
             // Attach user to role as owner
