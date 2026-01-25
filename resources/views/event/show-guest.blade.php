@@ -5,7 +5,13 @@
     $eventRole = $event->roles->where('id', $role->id)->first();
     $eventIsAccepted = $eventRole->pivot->is_accepted;
     @endphp
-  
+
+    @php
+    $accentColor = (isset($selectedGroup) && $selectedGroup && $selectedGroup->role)
+        ? ($selectedGroup->role->accent_color ?? '#4E81FA')
+        : ($role->accent_color ?? '#4E81FA');
+    $contrastColor = accent_contrast_color($accentColor);
+    @endphp
 
   @if ($eventIsAccepted === null)
   <div class="w-full bg-amber-50 border-b border-amber-200 py-6">
@@ -172,8 +178,9 @@
                     $venueUrl .= '?' . http_build_query($queryParams);
                   }
                 @endphp
-                <a href="{{ $venueUrl }}" class="text-sm text-white hover:underline">
+                <a href="{{ $venueUrl }}" class="text-sm text-white hover:underline flex items-center gap-1">
                   {{ $event->venue->translatedName() }}
+                  <svg class="w-4 h-4 fill-white opacity-70" viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/></svg>
                 </a>
               @else
                 <p class="text-sm">{{ $event->venue->translatedName() }}</p>
@@ -199,8 +206,9 @@
                 d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z"
               />
             </svg>
-            <x-link href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank" hideIcon class="text-sm text-white">
+            <x-link href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank" hideIcon class="text-sm text-white flex items-center gap-1">
                 {{ $event->venue->shortAddress() }}
+                <svg class="w-4 h-4 fill-white opacity-70" viewBox="0 0 24 24"><path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"/></svg>
             </x-link>
           </div>
           @endif
@@ -352,11 +360,14 @@
                 @endif
                 <a
                   href="{{ $memberUrl }}"
-                  class="text-base text-[#151B26] hover:underline cursor-pointer duration-300"
-                >                
-                  <h3 class="text-[28px] font-semibold leading-10 text-[#151B26] dark:text-gray-100">
+                  class="group flex items-center gap-2 cursor-pointer duration-300"
+                >
+                  <h3 class="text-[28px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 group-hover:underline">
                     {{ $each->name }}
                   </h3>
+                  <svg class="w-5 h-5 fill-[#151B26] dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24">
+                    <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
+                  </svg>
                 </a>
                 @else
                 @if ($each->profile_image_url)
@@ -380,8 +391,8 @@
                 <button
                   type="button"
                   name="follow"
-                  style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}"
-                  class="inline-flex items-center rounded-md px-8 py-4 hover:opacity-90 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}; color: {{ accent_contrast_color($otherRole->accent_color ?? '#4E81FA') }}"
+                  class="inline-flex items-center rounded-md px-8 py-4 hover:opacity-90 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
                   {{ auth()->user() && auth()->user()->isMember($role->subdomain) ? __('messages.manage') : __('messages.follow') }}
                 </button>
@@ -456,14 +467,33 @@
 
       <div class="flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
         @if ($event->venue && $event->venue->name)
-        <div class="p-6 rounded-xl flex flex-col gap-6" style="background-color: {{ $role->accent_color ?? '#4E81FA' }}; font-family: {{ $event->venue->font_family }}, sans-serif;">
-          <h4 class="text-white text-[24px] leading-snug font-semibold">
-            {{ $event->venue->translatedName() }}
-          </h4>
+        @php
+            $venueAccentColor = $event->venue->accent_color ?? '#4E81FA';
+            $venueContrastColor = accent_contrast_color($venueAccentColor);
+        @endphp
+        <div class="p-6 rounded-xl flex flex-col gap-2" style="background-color: {{ $venueAccentColor }}; font-family: {{ $event->venue->font_family }}, sans-serif;">
+          @if ($event->venue->isClaimed())
+            @php
+              $venuePanelUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
+            @endphp
+            <a href="{{ $venuePanelUrl }}" class="group flex items-center gap-2 hover:opacity-80 transition-opacity duration-200">
+              <h4 class="text-[24px] leading-snug font-semibold group-hover:underline" style="color: {{ $venueContrastColor }}">
+                {{ $event->venue->translatedName() }}
+              </h4>
+              <svg class="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" style="fill: {{ $venueContrastColor }}" viewBox="0 0 24 24">
+                <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
+              </svg>
+            </a>
+          @else
+            <h4 class="text-[24px] leading-snug font-semibold" style="color: {{ $venueContrastColor }}">
+              {{ $event->venue->translatedName() }}
+            </h4>
+          @endif
           <div class="flex flex-col gap-4">
             @if ($event->venue->phone)
             <div
-              class="flex flex-row gap-2 items-center relative duration-300 text-white fill-white"
+              class="flex flex-row gap-2 items-center relative duration-300"
+              style="color: {{ $venueContrastColor }}; fill: {{ $venueContrastColor }}"
             >
               <svg
                 width="24"
@@ -475,14 +505,15 @@
                   d="M10.0376 5.31617L10.6866 6.4791C11.2723 7.52858 11.0372 8.90532 10.1147 9.8278C10.1147 9.8278 10.1147 9.8278 10.1147 9.8278C10.1146 9.82792 8.99588 10.9468 11.0245 12.9755C13.0525 15.0035 14.1714 13.8861 14.1722 13.8853C14.1722 13.8853 14.1722 13.8853 14.1722 13.8853C15.0947 12.9628 16.4714 12.7277 17.5209 13.3134L18.6838 13.9624C20.2686 14.8468 20.4557 17.0692 19.0628 18.4622C18.2258 19.2992 17.2004 19.9505 16.0669 19.9934C14.1588 20.0658 10.9183 19.5829 7.6677 16.3323C4.41713 13.0817 3.93421 9.84122 4.00655 7.93309C4.04952 6.7996 4.7008 5.77423 5.53781 4.93723C6.93076 3.54428 9.15317 3.73144 10.0376 5.31617Z"
                 />
               </svg>
-              <a href="tel:{{ $event->venue->phone }}" class="text-sm text-white hover:underline"
+              <a href="tel:{{ $event->venue->phone }}" class="text-sm hover:underline"
                 >{{ $event->venue->phone }}</a
               >
             </div>
             @endif
             @if ($event->venue->email && $event->venue->show_email)
             <div
-              class="flex flex-row gap-2 items-center relative duration-300 text-white fill-white"
+              class="flex flex-row gap-2 items-center relative duration-300"
+              style="color: {{ $venueContrastColor }}; fill: {{ $venueContrastColor }}"
             >
               <svg
                 width="24"
@@ -496,14 +527,15 @@
                   d="M3.17157 5.17157C2 6.34315 2 8.22876 2 12C2 15.7712 2 17.6569 3.17157 18.8284C4.34315 20 6.22876 20 10 20H14C17.7712 20 19.6569 20 20.8284 18.8284C22 17.6569 22 15.7712 22 12C22 8.22876 22 6.34315 20.8284 5.17157C19.6569 4 17.7712 4 14 4H10C6.22876 4 4.34315 4 3.17157 5.17157ZM18.5762 7.51986C18.8413 7.83807 18.7983 8.31099 18.4801 8.57617L16.2837 10.4066C15.3973 11.1452 14.6789 11.7439 14.0448 12.1517C13.3843 12.5765 12.7411 12.8449 12 12.8449C11.2589 12.8449 10.6157 12.5765 9.95518 12.1517C9.32112 11.7439 8.60271 11.1452 7.71636 10.4066L5.51986 8.57617C5.20165 8.31099 5.15866 7.83807 5.42383 7.51986C5.68901 7.20165 6.16193 7.15866 6.48014 7.42383L8.63903 9.22291C9.57199 10.0004 10.2197 10.5384 10.7666 10.8901C11.2959 11.2306 11.6549 11.3449 12 11.3449C12.3451 11.3449 12.7041 11.2306 13.2334 10.8901C13.7803 10.5384 14.428 10.0004 15.361 9.22291L17.5199 7.42383C17.8381 7.15866 18.311 7.20165 18.5762 7.51986Z"
                 />
               </svg>
-              <a href="mailto:{{ $role->email }}" class="text-sm text-white hover:underline"
+              <a href="mailto:{{ $role->email }}" class="text-sm hover:underline"
                 >{{ $event->venue->email }}</a
               >
             </div>
             @endif
             @if ($event->venue->website)
             <div
-              class="flex flex-row gap-2 items-center relative duration-300 text-white fill-white"
+              class="flex flex-row gap-2 items-center relative duration-300"
+              style="color: {{ $venueContrastColor }}; fill: {{ $venueContrastColor }}"
             >
               <svg
                 width="24"
@@ -529,7 +561,7 @@
                   d="M16.669 15.6739C16.4501 16.8413 16.1267 17.9171 15.7104 18.8368C15.2966 19.7512 14.7849 20.5247 14.1793 21.0789C13.5708 21.6358 12.831 22 12.0001 22C17.2707 22 21.5889 17.9226 21.9724 12.75H16.9868C16.9512 13.7515 16.8445 14.7381 16.669 15.6739Z"
                 />
               </svg>
-              <x-link href="{{ $event->venue->website }}" target="_blank" class="text-sm text-white">
+              <x-link href="{{ $event->venue->website }}" target="_blank" class="text-sm" style="color: {{ $venueContrastColor }}">
                 {{ App\Utils\UrlUtils::clean($event->venue->website) }}
               </x-link>
             </div>
@@ -537,15 +569,16 @@
           </div>
 
           @if ($event->venue->social_links)
-          <div class="flex flex-row gap-4 items-center">
+          <div class="flex flex-row gap-3 items-center">
             @foreach (json_decode($event->venue->social_links) as $link)
               @if ($link)
-              <a 
+              <a
                 href="{{ $link->url }}" target="_blank"
-                style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}"
-                class="w-[44px] h-[44px] rounded-full flex justify-center items-center hover:opacity-90 duration-300"
+                style="background-color: {{ $venueContrastColor }}"
+                class="w-8 h-8 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
+                title="{{ App\Utils\UrlUtils::clean($link->url) }}"
                 >
-                <x-url-icon>
+                <x-url-icon class="w-5 h-5" :color="$venueAccentColor">
                   {{ \App\Utils\UrlUtils::clean($link->url) }}
                 </x-url-icon>
               </a>
@@ -591,9 +624,9 @@
               type="button"
               name="login"
               class="inline-flex items-center justify-center rounded-xl text-base duration-300 bg-transparent border-[1px] py-4 px-8 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-90"
-              style="border-color: {{ $role->accent_color ?? '#4E81FA' }}; color: {{ $role->accent_color ?? '#4E81FA' }};"
-              onmouseover="this.style.backgroundColor='{{ $role->accent_color ?? '#4E81FA' }}'; this.style.color='white';"
-              onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $role->accent_color ?? '#4E81FA' }}';"
+              style="border-color: {{ $accentColor }}; color: {{ $accentColor }};"
+              onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='white';"
+              onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';"
             >
               {{ __('messages.create_schedule') }}
             </button>
