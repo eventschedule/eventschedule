@@ -249,7 +249,7 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
             // Demo header images - illustrated/artistic style (wide banner format)
             'demo_header_town.jpg' => 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&h=400&fit=crop',
             'demo_header_bar.jpg' => 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=1200&h=400&fit=crop',
-            'demo_header_bowling.jpg' => 'https://images.unsplash.com/photo-1650313525283-f505691c3d73?w=1200&h=400&fit=crop',       // neon lit bowling alley with balls
+            'demo_header_bowling.jpg' => 'https://images.unsplash.com/photo-1538511059256-46e76f13f071?w=1200&h=400&fit=crop',       // bowling pins action shot
             'demo_header_theater.jpg' => 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1200&h=400&fit=crop',
             'demo_header_concert.jpg' => 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=1200&h=400&fit=crop',        // concert crowd silhouettes with stage lights
             'demo_header_donuts.jpg' => 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=1200&h=400&fit=crop',
@@ -2120,24 +2120,106 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'country_code' => 'US',
                 'background_colors' => '#8B0000, #FFD700', // Rival maroon/gold
                 'accent_color' => '#FFD700',
+                'header_image' => 'demo_header_shelbyville.jpg',
+                'profile_image' => 'demo_profile_shelbyville.jpg',
+                'font_family' => 'Anton',
+                'description' => '**The ORIGINAL home of championship sports. Unlike Springfield.**
+
+Home of the Shelbyville Shelbyvillians! Where tradition meets superiority. Our stadium has hosted legendary events since Shelbyville Manhattan founded our town (for totally normal reasons).
+
+> "Shake harder, boy!" - Beloved Shelbyville tradition
+
+---
+
+## 🏆 Why We\'re Better Than Springfield
+- 🏈 **Actual winning teams** - Unlike the Isotopes
+- 🍋 **A lemon tree** - That we definitely acquired legally
+- 🎭 **Culture** - We have it, they don\'t
+- 🅿️ **Parking** - It exists and it works
+
+*"We\'re the original Springfield, and don\'t you forget it!"*
+
+⚠️ *Springfielders welcome (but we\'ll be watching you).*',
                 'events' => [
                     [
-                        'name' => 'Shelbyville vs Springfield Football',
-                        'description' => "The big game! Shelbyville takes on Springfield in the annual rivalry match.\n\n*\"Shake harder, boy!\"*\n\nNote: Lemon tree security has been increased.",
-                        'days_offset' => 7,
-                        'price' => 35,
+                        'name' => '🏈 Shelbyville vs Springfield: The Big Game',
+                        'description' => "The annual rivalry match! Watch the Shelbyville Shelbyvillians dominate Springfield once again.\n\n**Game Day Features:**\n- 🍋 Lemon-themed concessions\n- 🔒 Enhanced lemon tree security\n- 📢 \"Shake harder, boy!\" chant practice at halftime\n\n> \"Their football team is just as lousy as their kids!\" - Shelbyville Coach\n\n*VIP \"Shake Harder\" Package includes premium seating and commemorative lemon.*",
+                        'hour' => 19,
+                        'minute' => 0,
+                        'days_of_week' => '0000001', // Saturday
+                        'duration' => 3,
+                        'tickets' => [
+                            ['type' => 'General Admission', 'price' => 35, 'quantity' => 200],
+                            ['type' => 'VIP "Shake Harder" Package', 'price' => 75, 'quantity' => 50],
+                        ],
                     ],
                     [
-                        'name' => '"Their Lemon Tree is Ours!" Rally',
-                        'description' => "Shelbyville's annual celebration of that time they stole Springfield's lemon tree.\n\n**Activities:**\n- Lemon-themed refreshments\n- \"Shake harder, boy!\" reenactments\n- Springfield mockery contest\n\n*We are the original Springfield!*",
-                        'days_offset' => 14,
-                        'price' => 10,
+                        'name' => '🍋 Lemon Tree Memorial Day',
+                        'description' => "Celebrate Shelbyville's glorious \"acquisition\" of Springfield's beloved lemon tree!\n\n**Activities:**\n- 🍋 Lemon-themed refreshments\n- 🎭 \"Shake harder, boy!\" reenactments\n- 🏆 Springfield mockery contest\n- 📸 Photos with the lemon tree (location classified)\n\n*\"Stupid Springfielders, they'll never find where we hid the lemon tree!\"*\n\nFamily pack includes admission for 2 adults and 2 kids.",
+                        'hour' => 14,
+                        'minute' => 0,
+                        'days_of_week' => '1000000', // Sunday
+                        'duration' => 4,
+                        'tickets' => [
+                            ['type' => 'General Admission', 'price' => 15, 'quantity' => 150],
+                            ['type' => 'Family 4-Pack', 'price' => 40, 'quantity' => 40],
+                        ],
                     ],
                     [
-                        'name' => 'Shelbyville Speedway Race',
-                        'description' => "High-speed racing action at Shelbyville's premier speedway!\n\n*Shelbyville does everything Springfield does, but better.*\n\nCousin dating welcome (it's legal here).",
-                        'days_offset' => 21,
-                        'price' => 25,
+                        'name' => '🏎️ Shelbyville Speedway Showdown',
+                        'description' => "High-speed racing action at Shelbyville's premier speedway!\n\n**Features:**\n- 🏁 Speed E. Gonzales racing exhibition\n- 🏆 Championship qualifiers\n- 🍔 Concessions (better than Springfield's, obviously)\n\n*Shelbyville does everything Springfield does, but better.*\n\nPit Pass includes access to the garage area and driver meet-and-greet.",
+                        'hour' => 17,
+                        'minute' => 0,
+                        'days_of_week' => '1000000', // Sunday
+                        'duration' => 3,
+                        'tickets' => [
+                            ['type' => 'General Admission', 'price' => 25, 'quantity' => 180],
+                            ['type' => 'Pit Pass', 'price' => 55, 'quantity' => 30],
+                        ],
+                    ],
+                    [
+                        'name' => '🎭 Springfield Roast Night',
+                        'description' => "Comedy night dedicated to mocking our inferior neighbors!\n\n**Tonight's Roast Targets:**\n- 🍩 Their obsession with donuts\n- ☢️ Their glowing nuclear plant\n- 🍺 Their sad excuse for a tavern\n- 👨‍👩‍👧‍👦 Their... unusual families\n\n> \"Springfield: where the gene pool has a shallow end.\" - Local comedian\n\n*Laughter guaranteed. Springfield residents get a \"special\" discount.*",
+                        'hour' => 20,
+                        'minute' => 0,
+                        'days_of_week' => '0000010', // Friday
+                        'duration' => 2,
+                        'tickets' => [
+                            ['type' => 'General Admission', 'price' => 20, 'quantity' => 120],
+                        ],
+                    ],
+                    [
+                        'name' => '🎵 Shelbyville Hoedown',
+                        'description' => "Country music celebrating Shelbyville's unique traditions!\n\n**Tonight's Lineup:**\n- 🎸 The Shelbyville Cousins (totally normal band name)\n- 🤠 Line dancing lessons\n- 🍋 Lemon pie eating contest\n\n*\"We put the 'ville' in 'Shelbyville'!\"*\n\nCome for the music, stay for the... family atmosphere.",
+                        'hour' => 19,
+                        'minute' => 0,
+                        'days_of_week' => '0000100', // Thursday
+                        'duration' => 3,
+                        'tickets' => [
+                            ['type' => 'General Admission', 'price' => 18, 'quantity' => 100],
+                        ],
+                    ],
+                    [
+                        'name' => '📢 Town Pride Rally',
+                        'description' => "Weekly pep rally celebrating all things Shelbyville!\n\n**This Week's Agenda:**\n- 📣 School spirit showcase\n- 🏆 Local athlete recognition\n- 🍋 Lemon tree history lesson\n- 📢 Anti-Springfield chants (family-friendly version)\n\n*\"Shelbyville: Founded for a very specific reason!\"*\n\nFree admission - because pride is priceless!",
+                        'hour' => 18,
+                        'minute' => 0,
+                        'days_of_week' => '0100000', // Monday
+                        'duration' => 2,
+                        'tickets' => [
+                            ['type' => 'Free Entry', 'price' => 0, 'quantity' => 200],
+                        ],
+                    ],
+                    [
+                        'name' => '🏆 Shelbyville All-Stars Exhibition',
+                        'description' => "Watch local athletes show Springfield how it's done!\n\n**Featured Sports:**\n- 🏀 Basketball (we actually make baskets)\n- ⚾ Baseball (no Homer Simpsons here)\n- 🏃 Track & Field (running FROM Springfield counts)\n\n*\"Our athletes are naturally superior. Must be something in the water.\"*\n\nCome support your local champions!",
+                        'hour' => 19,
+                        'minute' => 0,
+                        'days_of_week' => '0001000', // Wednesday
+                        'duration' => 2,
+                        'tickets' => [
+                            ['type' => 'General Admission', 'price' => 22, 'quantity' => 150],
+                        ],
                     ],
                 ],
             ],
@@ -2149,24 +2231,108 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'country_code' => 'US',
                 'background_colors' => '#4B0082, #C0C0C0', // Fancy city purple/silver
                 'accent_color' => '#C0C0C0',
+                'header_image' => 'demo_header_capitalcity.jpg',
+                'profile_image' => 'demo_profile_capitalcity.jpg',
+                'font_family' => 'Montserrat',
+                'description' => '**Capital City! Yeah! It\'s a helluva town!**
+
+The state\'s premier entertainment venue. Home of the Capital City Goofballs and world-class events that Springfield can only dream about. We have stuff. Lots of stuff.
+
+> "It\'s a city that\'s got stuff!" - The Capital City Song
+
+---
+
+## ✨ What Sets Us Apart
+- 🏟️ **State-of-the-art facilities** - Not held together with tape
+- 🍽️ **Actual good food** - No Krusty Burger in sight
+- 🚗 **Parking that exists** - Revolutionary, we know
+- 🧹 **Clean restrooms** - Springfield, take notes
+
+**The big city does it better.** Always has, always will.
+
+*Where sophistication meets entertainment!*',
                 'events' => [
                     [
-                        'name' => 'Capital City Goofball Game',
-                        'description' => "Watch the Capital City Goofballs take on their rivals!\n\n**Stadium Features:**\n- Actual good food (not Krusty Burger)\n- Clean restrooms\n- Parking that exists\n\n*The big city does it better!*",
-                        'days_offset' => 5,
-                        'price' => 45,
+                        'name' => '⚾ Capital City Goofballs Game Night',
+                        'description' => "Watch the state's best team play ball!\n\n**Stadium Features:**\n- 🍽️ Gourmet concessions (not a Squishee in sight)\n- 🧹 Clean facilities (revolutionary!)\n- 🅿️ Ample parking (take that, Springfield!)\n\n*\"We're not the Isotopes. We actually win games.\"*\n\nBox seats include waiter service and premium viewing.",
+                        'hour' => 19,
+                        'minute' => 0,
+                        'days_of_week' => '0000001', // Saturday
+                        'duration' => 3,
+                        'tickets' => [
+                            ['type' => 'General Admission', 'price' => 45, 'quantity' => 250],
+                            ['type' => 'Box Seats', 'price' => 95, 'quantity' => 40],
+                        ],
                     ],
                     [
-                        'name' => 'Lurleen Lumpkin Concert',
-                        'description' => "Bunk with Me Tonight! Country star Lurleen Lumpkin performs live!\n\n**Setlist includes:**\n- \"Bunk with Me Tonight\"\n- \"I'm Basting a Turkey with My Tears\"\n- \"Don't Look Up My Dress Unless You Mean It\"\n\n*Colonel Homer approved.*",
-                        'days_offset' => 12,
-                        'price' => 55,
+                        'name' => '🎵 Capital City (That Song) Dance Party',
+                        'description' => "Capital City! Yeah! It's a helluva town!\n\n**Tonight's Entertainment:**\n- 🎤 Live performance of THE song (you know the one)\n- 💃 Dancing all night\n- 🍸 Sophisticated cocktails\n- ✨ Glamour that Springfield lacks\n\n> \"It's a city that's got stuff!\" - Everyone, all night\n\n*VIP Lounge access includes bottle service and reserved seating.*",
+                        'hour' => 21,
+                        'minute' => 0,
+                        'days_of_week' => '0000010', // Friday
+                        'duration' => 4,
+                        'tickets' => [
+                            ['type' => 'General Admission', 'price' => 30, 'quantity' => 200],
+                            ['type' => 'VIP Lounge', 'price' => 60, 'quantity' => 50],
+                        ],
                     ],
                     [
-                        'name' => '"Capital City" (That Song) Dance Night',
-                        'description' => "Capital City! Yeah! It's a helluva town!\n\n**Tonight's Entertainment:**\n- Live performance of the Capital City song\n- Dancing all night\n- Sophistication that Springfield lacks\n\n*\"It's a city that's got stuff!\"*",
-                        'days_offset' => 19,
-                        'price' => 30,
+                        'name' => '🎤 Lurleen Lumpkin: Bunk With Me Tonight Tour',
+                        'description' => "Country star Lurleen Lumpkin performs her greatest hits!\n\n**Setlist Includes:**\n- 🎵 \"Bunk with Me Tonight\"\n- 🦃 \"I'm Basting a Turkey with My Tears\"\n- 👗 \"Don't Look Up My Dress Unless You Mean It\"\n- 💔 \"Stand By Your Manager\"\n\n*Colonel Homer approved!*\n\nMeet & Greet includes photo, autograph, and a hug (if appropriate).",
+                        'hour' => 20,
+                        'minute' => 0,
+                        'days_of_week' => '0001000', // Wednesday
+                        'duration' => 3,
+                        'tickets' => [
+                            ['type' => 'General Admission', 'price' => 55, 'quantity' => 180],
+                            ['type' => 'Meet & Greet', 'price' => 120, 'quantity' => 25],
+                        ],
+                    ],
+                    [
+                        'name' => '🎭 Big City Laughs Comedy Showcase',
+                        'description' => "Comedians who are actually funny!\n\n**Tonight's Lineup:**\n- 🎤 Professional stand-up comedians\n- 🤡 No Krusty! (finally, right?)\n- 😂 Sophisticated humor for sophisticated people\n\n*\"Our comedians tell jokes that land. Every time.\"*\n\nWarning: May contain jokes about Springfield. Lots of them.",
+                        'hour' => 20,
+                        'minute' => 0,
+                        'days_of_week' => '0000100', // Thursday
+                        'duration' => 2,
+                        'tickets' => [
+                            ['type' => 'General Admission', 'price' => 35, 'quantity' => 150],
+                        ],
+                    ],
+                    [
+                        'name' => '🎪 Capital City Spectacular',
+                        'description' => "Family entertainment extravaganza!\n\n**Today's Shows:**\n- 🎪 World-class circus acts\n- 🎭 Street performers\n- 🎨 Face painting and crafts\n- 🍿 Gourmet snacks\n\n*\"Everything Springfield's carnival wishes it could be.\"*\n\nFamily 4-Pack includes admission for 2 adults and 2 children.",
+                        'hour' => 15,
+                        'minute' => 0,
+                        'days_of_week' => '1000000', // Sunday
+                        'duration' => 4,
+                        'tickets' => [
+                            ['type' => 'General Admission', 'price' => 28, 'quantity' => 200],
+                            ['type' => 'Family 4-Pack', 'price' => 75, 'quantity' => 50],
+                        ],
+                    ],
+                    [
+                        'name' => '🎬 Capital City Cinema Under the Stars',
+                        'description' => "Film screenings on the big screen!\n\n**This Week's Feature:**\n- 🎬 Actually good movies (not McBain)\n- 🍿 Gourmet popcorn\n- 🌟 Premium outdoor seating\n- 🌙 Under the city lights\n\n*\"Our movies have plots AND endings!\"*\n\nBring a blanket and enjoy cinema the way it should be.",
+                        'hour' => 20,
+                        'minute' => 0,
+                        'days_of_week' => '0010000', // Tuesday
+                        'duration' => 3,
+                        'tickets' => [
+                            ['type' => 'General Admission', 'price' => 18, 'quantity' => 120],
+                        ],
+                    ],
+                    [
+                        'name' => '🎺 Jazz Night at the Arena',
+                        'description' => "Sophisticated late-night jazz for the cultured crowd.\n\n**Tonight's Experience:**\n- 🎷 World-class jazz musicians\n- 🍸 Craft cocktails\n- ✨ Elegant atmosphere\n- 🌙 Music until midnight\n\n*\"Jazz so smooth, even Lisa Simpson would be impressed.\"*\n\nTable Service includes reserved table, bottle service, and VIP treatment.",
+                        'hour' => 22,
+                        'minute' => 0,
+                        'days_of_week' => '0000001', // Saturday
+                        'duration' => 3,
+                        'tickets' => [
+                            ['type' => 'General Admission', 'price' => 40, 'quantity' => 100],
+                            ['type' => 'Table Service', 'price' => 85, 'quantity' => 20],
+                        ],
                     ],
                 ],
             ],
@@ -2190,18 +2356,42 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             $role->accent_color = $scheduleData['accent_color'];
             $role->plan_type = 'pro';
             $role->plan_expires = now()->addYear()->format('Y-m-d');
+
+            // Apply optional styling fields
+            if (! empty($scheduleData['header_image'])) {
+                $role->header_image_url = $scheduleData['header_image'];
+            }
+            if (! empty($scheduleData['profile_image'])) {
+                $role->profile_image_url = $scheduleData['profile_image'];
+            }
+            if (! empty($scheduleData['font_family'])) {
+                $role->font_family = $scheduleData['font_family'];
+            }
+            if (! empty($scheduleData['description'])) {
+                $role->description = $scheduleData['description'];
+            }
+            $role->social_links = self::getRandomDemoSocialLinks();
             $role->save();
 
             // Attach demo user as follower
             $role->users()->attach($user->id, ['level' => 'follower']);
 
             // Create events for this schedule
-            $now = Carbon::now($role->timezone);
             foreach ($scheduleData['events'] as $eventInfo) {
-                $eventDate = $now->copy()->addDays($eventInfo['days_offset'])
-                    ->setHour(rand(19, 21))
-                    ->setMinute(0)
-                    ->setSecond(0);
+                // For recurring events with days_of_week, use a fixed start date
+                if (isset($eventInfo['days_of_week'])) {
+                    $eventDate = Carbon::parse('2026-01-01', $role->timezone)
+                        ->setHour($eventInfo['hour'])
+                        ->setMinute($eventInfo['minute'] ?? 0)
+                        ->setSecond(0);
+                } else {
+                    // Fallback for one-time events (legacy support)
+                    $now = Carbon::now($role->timezone);
+                    $eventDate = $now->copy()->addDays($eventInfo['days_offset'] ?? 7)
+                        ->setHour($eventInfo['hour'] ?? rand(19, 21))
+                        ->setMinute($eventInfo['minute'] ?? 0)
+                        ->setSecond(0);
+                }
 
                 $event = new Event;
                 $event->user_id = $user->id;
@@ -2209,22 +2399,41 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 $event->name = $eventInfo['name'];
                 $event->description = $eventInfo['description'] ?? 'Join us for an amazing event!';
                 $event->starts_at = $eventDate->utc();
-                $event->duration = rand(2, 4);
+                $event->duration = $eventInfo['duration'] ?? rand(2, 4);
                 $event->slug = Str::slug($eventInfo['name']);
                 $event->tickets_enabled = true;
                 $event->ticket_currency_code = 'USD';
+
+                // Set recurring pattern if specified
+                if (isset($eventInfo['days_of_week'])) {
+                    $event->days_of_week = $eventInfo['days_of_week'];
+                }
+
                 $event->save();
 
                 // Attach event to role
                 $role->events()->attach($event->id, ['is_accepted' => true]);
 
-                // Create ticket
-                Ticket::create([
-                    'event_id' => $event->id,
-                    'type' => 'General Admission',
-                    'price' => $eventInfo['price'],
-                    'quantity' => 100,
-                ]);
+                // Create tickets (supports multiple ticket types)
+                if (isset($eventInfo['tickets']) && is_array($eventInfo['tickets'])) {
+                    foreach ($eventInfo['tickets'] as $ticketData) {
+                        Ticket::create([
+                            'event_id' => $event->id,
+                            'type' => $ticketData['type'],
+                            'price' => $ticketData['price'],
+                            'quantity' => $ticketData['quantity'],
+                            'description' => $ticketData['description'] ?? null,
+                        ]);
+                    }
+                } else {
+                    // Fallback for legacy single-price format
+                    Ticket::create([
+                        'event_id' => $event->id,
+                        'type' => 'General Admission',
+                        'price' => $eventInfo['price'] ?? 25,
+                        'quantity' => 100,
+                    ]);
+                }
             }
         }
     }
