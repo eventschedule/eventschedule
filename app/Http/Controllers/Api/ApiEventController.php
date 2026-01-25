@@ -81,7 +81,14 @@ class ApiEventController extends Controller
             return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
         }
 
-        if (! auth()->user()->isMember($subdomain)) {
+        // Check for owner/admin level, not just membership
+        // Followers should not be able to create events via API
+        $userRole = auth()->user()->roles()
+            ->where('subdomain', $subdomain)
+            ->wherePivotIn('level', ['owner', 'admin'])
+            ->first();
+
+        if (! $userRole) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 

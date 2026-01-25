@@ -177,10 +177,41 @@ class UrlUtils
 
         $host = $parsedUrl['host'];
 
-        // Block private IP ranges and localhost
-        if (filter_var($host, FILTER_VALIDATE_IP)) {
-            return ! filter_var($host, FILTER_VALIDATE_IP,
-                FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+        // Block private IP ranges and localhost (IPv4)
+        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            // Block private and reserved IPv4 ranges
+            if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                return false;
+            }
+        }
+
+        // Block private/reserved IPv6 addresses
+        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            // Block loopback (::1)
+            if ($host === '::1' || strtolower($host) === '0:0:0:0:0:0:0:1') {
+                return false;
+            }
+
+            // Block link-local (fe80::/10)
+            if (self::isIpv6InRange($host, 'fe80::', 10)) {
+                return false;
+            }
+
+            // Block unique local (fc00::/7 - includes fd00::/8)
+            if (self::isIpv6InRange($host, 'fc00::', 7)) {
+                return false;
+            }
+
+            // Block IPv4-mapped IPv6 addresses (::ffff:0:0/96)
+            // These could be used to bypass IPv4 checks
+            if (stripos($host, '::ffff:') === 0) {
+                return false;
+            }
+
+            // Block documentation addresses (2001:db8::/32)
+            if (self::isIpv6InRange($host, '2001:db8::', 32)) {
+                return false;
+            }
         }
 
         // Block common internal hostnames
@@ -188,10 +219,59 @@ class UrlUtils
             'localhost', '127.0.0.1', '::1',
             'metadata.google.internal',
             'instance-data', 'metadata.aws.amazon.com',
+            '169.254.169.254', // AWS metadata
+            'metadata.google.com',
         ];
 
         if (in_array(strtolower($host), $blockedHosts)) {
             return false;
+        }
+
+        // Resolve hostname to IP and check the resolved IP too (DNS rebinding protection)
+        // Only do this for non-IP hosts
+        if (! filter_var($host, FILTER_VALIDATE_IP)) {
+            $resolvedIp = gethostbyname($host);
+            // If resolution fails, gethostbyname returns the original hostname
+            if ($resolvedIp !== $host) {
+                // Check if resolved IP is private/reserved
+                if (filter_var($resolvedIp, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if an IPv6 address is within a given prefix range
+     */
+    private static function isIpv6InRange(string $ip, string $prefix, int $prefixLength): bool
+    {
+        $ipBinary = inet_pton($ip);
+        $prefixBinary = inet_pton($prefix);
+
+        if ($ipBinary === false || $prefixBinary === false) {
+            return false;
+        }
+
+        // Calculate how many full bytes and remaining bits to compare
+        $fullBytes = intdiv($prefixLength, 8);
+        $remainingBits = $prefixLength % 8;
+
+        // Compare full bytes
+        for ($i = 0; $i < $fullBytes; $i++) {
+            if ($ipBinary[$i] !== $prefixBinary[$i]) {
+                return false;
+            }
+        }
+
+        // Compare remaining bits
+        if ($remainingBits > 0 && $fullBytes < 16) {
+            $mask = (0xFF << (8 - $remainingBits)) & 0xFF;
+            if ((ord($ipBinary[$fullBytes]) & $mask) !== (ord($prefixBinary[$fullBytes]) & $mask)) {
+                return false;
+            }
         }
 
         return true;
@@ -313,7 +393,12 @@ class UrlUtils
                                 // Validate extension
                                 $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
                                 if (in_array(strtolower($extension), $allowedExtensions)) {
-                                    $filename = '/tmp/event_'.strtolower(\Str::random(32)).'.'.$extension;
+                                    // Use Laravel's storage directory instead of /tmp for security
+                                    $tempDir = storage_path('app/temp');
+                                    if (! is_dir($tempDir)) {
+                                        mkdir($tempDir, 0700, true);
+                                    }
+                                    $filename = $tempDir.'/event_'.strtolower(\Str::random(32)).'.'.$extension;
 
                                     if (file_put_contents($filename, $imageContents) !== false) {
                                         $result['image_path'] = $filename;

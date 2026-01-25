@@ -31,7 +31,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'payment_url',
         'payment_secret',
         'is_subscribed',
-        'is_admin',
+        // Note: is_admin intentionally NOT in $fillable to prevent mass assignment attacks
+        // Admin status should only be set explicitly via $user->is_admin = true
         'google_id',
         'google_oauth_id',
         'google_token',
@@ -41,6 +42,15 @@ class User extends Authenticatable implements MustVerifyEmail
         'facebook_token',
         'facebook_token_expires_at',
         'email_verified_at',
+    ];
+
+    /**
+     * The attributes that are guarded from mass assignment.
+     *
+     * @var array<int, string>
+     */
+    protected $guarded = [
+        'is_admin', // Prevent privilege escalation via mass assignment
     ];
 
     /**
@@ -232,8 +242,15 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
+        // Check if user has owner or admin role level for any role associated with this event
+        // (not just any member - followers should not be able to edit)
         foreach ($event->roles as $role) {
-            if ($this->isMember($role->subdomain)) {
+            $pivot = $this->roles()
+                ->where('roles.id', $role->id)
+                ->wherePivotIn('level', ['owner', 'admin'])
+                ->first();
+
+            if ($pivot) {
                 return true;
             }
         }

@@ -234,7 +234,7 @@
                         .dark .prose-lg a { color: #a78bfa; }
                         .dark .prose-lg strong { color: #fff; }
                     </style>
-                    {!! $post->content !!}
+                    {!! \App\Utils\MarkdownUtils::sanitizeHtml($post->content) !!}
                 </div>
                 <!-- Related Posts -->
                 @if($relatedPosts->count() > 0)

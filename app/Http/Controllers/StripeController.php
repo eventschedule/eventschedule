@@ -115,7 +115,24 @@ class StripeController extends Controller
                     ->where('transaction_reference', $paymentIntent->id)
                     ->first();
                 if ($sale) {
-                    $sale->payment_amount = $paymentIntent->amount / 100;
+                    $webhookAmount = $paymentIntent->amount / 100;
+
+                    // Validate that the webhook amount matches the expected sale amount
+                    $expectedAmount = $sale->payment_amount;
+                    $amountDifference = abs($webhookAmount - $expectedAmount);
+
+                    // Allow small tolerance for floating point differences (e.g., 0.01)
+                    if ($amountDifference > 0.01) {
+                        \Log::warning('Payment amount mismatch in Stripe webhook', [
+                            'sale_id' => $sale->id,
+                            'expected_amount' => $expectedAmount,
+                            'webhook_amount' => $webhookAmount,
+                            'difference' => $amountDifference,
+                            'payment_intent_id' => $paymentIntent->id,
+                        ]);
+                    }
+
+                    $sale->payment_amount = $webhookAmount;
                     $sale->status = 'paid';
                     $sale->save();
                 }
@@ -128,7 +145,24 @@ class StripeController extends Controller
                     $saleId = UrlUtils::decodeId($session->metadata->sale_id);
                     $sale = Sale::find($saleId);
                     if ($sale && $sale->status !== 'paid') {
-                        $sale->payment_amount = $session->amount_total / 100;
+                        $webhookAmount = $session->amount_total / 100;
+
+                        // Validate that the webhook amount matches the expected sale amount
+                        $expectedAmount = $sale->payment_amount;
+                        $amountDifference = abs($webhookAmount - $expectedAmount);
+
+                        // Allow small tolerance for floating point differences (e.g., 0.01)
+                        if ($amountDifference > 0.01) {
+                            \Log::warning('Payment amount mismatch in Stripe checkout webhook', [
+                                'sale_id' => $sale->id,
+                                'expected_amount' => $expectedAmount,
+                                'webhook_amount' => $webhookAmount,
+                                'difference' => $amountDifference,
+                                'session_id' => $session->id,
+                            ]);
+                        }
+
+                        $sale->payment_amount = $webhookAmount;
                         $sale->status = 'paid';
                         $sale->transaction_reference = $session->payment_intent;
                         $sale->save();

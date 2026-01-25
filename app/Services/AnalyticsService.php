@@ -109,15 +109,17 @@ class AnalyticsService
             return collect();
         }
 
-        $dateFormat = match ($period) {
-            'daily' => '%Y-%m-%d',
-            'weekly' => '%x-%v',  // ISO year and week
-            'monthly' => '%Y-%m',
-            default => '%Y-%m-%d',
+        // Use whitelisted format expressions to prevent SQL injection
+        // The period parameter comes from user input, so we must validate it
+        $dateFormatExpr = match ($period) {
+            'daily' => DB::raw("DATE_FORMAT(date, '%Y-%m-%d') as period"),
+            'weekly' => DB::raw("DATE_FORMAT(date, '%x-%v') as period"),
+            'monthly' => DB::raw("DATE_FORMAT(date, '%Y-%m') as period"),
+            default => DB::raw("DATE_FORMAT(date, '%Y-%m-%d') as period"),
         };
 
         return AnalyticsDaily::select(
-            DB::raw("DATE_FORMAT(date, '{$dateFormat}') as period"),
+            $dateFormatExpr,
             DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as view_count')
         )
             ->forRoles($roleIds)

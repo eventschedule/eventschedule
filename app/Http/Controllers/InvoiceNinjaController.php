@@ -85,7 +85,25 @@ class InvoiceNinjaController extends Controller
 
         // Idempotency check: only process if not already paid
         if ($sale->status !== 'paid') {
-            $sale->payment_amount = $payload['paymentables'][0]['amount'];
+            $webhookAmount = $payload['paymentables'][0]['amount'];
+
+            // Validate that the webhook amount matches the expected sale amount
+            // Log discrepancies for investigation but still process the payment
+            $expectedAmount = $sale->payment_amount;
+            $amountDifference = abs($webhookAmount - $expectedAmount);
+
+            // Allow small tolerance for floating point differences (e.g., 0.01)
+            if ($amountDifference > 0.01) {
+                \Log::warning('Payment amount mismatch in Invoice Ninja webhook', [
+                    'sale_id' => $sale->id,
+                    'expected_amount' => $expectedAmount,
+                    'webhook_amount' => $webhookAmount,
+                    'difference' => $amountDifference,
+                    'invoice_id' => $invoiceId,
+                ]);
+            }
+
+            $sale->payment_amount = $webhookAmount;
             $sale->status = 'paid';
             $sale->save();
         }

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class ApiSettingsController extends Controller
 {
@@ -23,8 +22,9 @@ class ApiSettingsController extends Controller
         // 1. API was disabled and is now being enabled
         // 2. API was enabled and is now being disabled (set to null)
         if ($enableApi && ! $user->api_key) {
-            // Generate new key when enabling
-            $user->api_key = Str::random(32);
+            // Generate new key when enabling using cryptographically secure random bytes
+            // This ensures the API key has sufficient entropy and is unpredictable
+            $user->api_key = bin2hex(random_bytes(16)); // 32 hex characters = 128 bits of entropy
             $showNewKey = true;
         } elseif (! $enableApi && $user->api_key) {
             // Remove key when disabling

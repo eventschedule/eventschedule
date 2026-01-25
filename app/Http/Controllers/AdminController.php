@@ -185,20 +185,36 @@ class AdminController extends Controller
         $daysDiff = $startDate->diffInDays($endDate);
 
         // Determine grouping based on date range
+        // Using whitelisted format strings to prevent SQL injection
+        $allowedFormats = [
+            'daily' => '%Y-%m-%d',
+            'weekly' => '%Y-%u',
+            'monthly' => '%Y-%m',
+        ];
+
         if ($daysDiff <= 31) {
-            $groupFormat = '%Y-%m-%d';
+            $formatKey = 'daily';
             $labelFormat = 'M d';
         } elseif ($daysDiff <= 90) {
-            $groupFormat = '%Y-%u'; // Week
+            $formatKey = 'weekly';
             $labelFormat = 'W';
         } else {
-            $groupFormat = '%Y-%m';
+            $formatKey = 'monthly';
             $labelFormat = 'M Y';
         }
 
+        $groupFormat = $allowedFormats[$formatKey];
+
+        // Build the DATE_FORMAT expression safely using whitelisted format
+        $dateFormatExpr = match ($formatKey) {
+            'daily' => DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as period"),
+            'weekly' => DB::raw("DATE_FORMAT(created_at, '%Y-%u') as period"),
+            'monthly' => DB::raw("DATE_FORMAT(created_at, '%Y-%m') as period"),
+        };
+
         // Users trend (only confirmed)
         $usersTrend = User::select(
-            DB::raw("DATE_FORMAT(created_at, '$groupFormat') as period"),
+            $dateFormatExpr,
             DB::raw('COUNT(*) as count')
         )
             ->whereNotNull('email_verified_at')
@@ -209,7 +225,11 @@ class AdminController extends Controller
 
         // Schedules trend (only claimed)
         $schedulesTrend = Role::select(
-            DB::raw("DATE_FORMAT(created_at, '$groupFormat') as period"),
+            match ($formatKey) {
+                'daily' => DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as period"),
+                'weekly' => DB::raw("DATE_FORMAT(created_at, '%Y-%u') as period"),
+                'monthly' => DB::raw("DATE_FORMAT(created_at, '%Y-%m') as period"),
+            },
             DB::raw('COUNT(*) as count')
         )
             ->whereNotNull('user_id')
@@ -224,7 +244,11 @@ class AdminController extends Controller
 
         // Events trend
         $eventsTrend = Event::select(
-            DB::raw("DATE_FORMAT(created_at, '$groupFormat') as period"),
+            match ($formatKey) {
+                'daily' => DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as period"),
+                'weekly' => DB::raw("DATE_FORMAT(created_at, '%Y-%u') as period"),
+                'monthly' => DB::raw("DATE_FORMAT(created_at, '%Y-%m') as period"),
+            },
             DB::raw('COUNT(*) as count')
         )
             ->whereBetween('created_at', [$startDate, $endDate])
