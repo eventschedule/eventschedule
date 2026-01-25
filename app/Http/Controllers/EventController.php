@@ -439,10 +439,6 @@ class EventController extends Controller
         $currencies = file_get_contents(base_path('storage/currencies.json'));
         $currencies = json_decode($currencies);
 
-        $eventUrlData = $event->getGuestUrlData($subdomain, false);
-        $matchingEvent = $this->eventRepo->getEvent($eventUrlData['subdomain'], $eventUrlData['slug'], false);
-        $isUnique = ! $matchingEvent || $matchingEvent->id == $event->id ? true : false;
-
         return view('event/edit', [
             'role' => $role,
             'effectiveRole' => $effectiveRole,
@@ -456,7 +452,6 @@ class EventController extends Controller
             'selectedMembers' => $selectedMembers,
             'members' => $members,
             'currencies' => $currencies,
-            'isUnique' => $isUnique,
             'event_categories' => get_translated_categories(),
         ]);
     }
