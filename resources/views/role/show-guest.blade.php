@@ -179,6 +179,9 @@
                 @endif
               </div>
 
+              {{-- Spacer to push buttons right --}}
+              <div class="flex-grow"></div>
+
               {{-- Social icons --}}
               @if($hasEmail || $hasWebsite || $hasSocial)
               <div class="flex flex-row gap-3 items-center flex-shrink-0">
@@ -218,9 +221,6 @@
                   @endif
               </div>
               @endif
-
-              {{-- Spacer to push buttons right --}}
-              <div class="flex-grow"></div>
 
               {{-- Action buttons --}}
               @if (config('app.hosted') || config('app.is_testing'))
