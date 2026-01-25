@@ -121,8 +121,107 @@
                     <p class="text-gray-400 mb-4">The invoice includes a unique QR code for event check-in. Customers can use the invoice as their ticket.</p>
 
                     <div class="flex justify-center">
-                        <div class="w-20 h-20 bg-white rounded-xl p-2">
-                            <div class="w-full h-full bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2029%2029%22%3E%3Cpath%20d%3D%22M0%200h7v7H0zm2%202v3h3V2zm8%200h1v1h1v1h-1v1h-1V3h-1V2h1zm4%200h1v4h-1V4h-1V3h1V2zm4%200h3v1h-2v1h-1V2zm5%200h7v7h-7zm2%202v3h3V4zM2%2010h1v1h1v1H2v-1H1v-1h1z%22%2F%3E%3C%2Fsvg%3E')] bg-contain"></div>
+                        <div class="w-24 h-24 bg-white rounded-xl p-2">
+                            <svg viewBox="0 0 25 25" class="w-full h-full">
+                                <!-- Top-left position square -->
+                                <rect x="0" y="0" width="7" height="7" fill="black"/>
+                                <rect x="1" y="1" width="5" height="5" fill="white"/>
+                                <rect x="2" y="2" width="3" height="3" fill="black"/>
+                                <!-- Top-right position square -->
+                                <rect x="18" y="0" width="7" height="7" fill="black"/>
+                                <rect x="19" y="1" width="5" height="5" fill="white"/>
+                                <rect x="20" y="2" width="3" height="3" fill="black"/>
+                                <!-- Bottom-left position square -->
+                                <rect x="0" y="18" width="7" height="7" fill="black"/>
+                                <rect x="1" y="19" width="5" height="5" fill="white"/>
+                                <rect x="2" y="20" width="3" height="3" fill="black"/>
+                                <!-- Data pattern -->
+                                <rect x="8" y="0" width="1" height="1" fill="black"/>
+                                <rect x="10" y="0" width="1" height="1" fill="black"/>
+                                <rect x="12" y="0" width="1" height="1" fill="black"/>
+                                <rect x="8" y="2" width="1" height="1" fill="black"/>
+                                <rect x="10" y="2" width="1" height="1" fill="black"/>
+                                <rect x="14" y="2" width="1" height="1" fill="black"/>
+                                <rect x="9" y="4" width="1" height="1" fill="black"/>
+                                <rect x="11" y="4" width="1" height="1" fill="black"/>
+                                <rect x="13" y="4" width="1" height="1" fill="black"/>
+                                <rect x="8" y="6" width="1" height="1" fill="black"/>
+                                <rect x="12" y="6" width="1" height="1" fill="black"/>
+                                <rect x="0" y="8" width="1" height="1" fill="black"/>
+                                <rect x="2" y="8" width="1" height="1" fill="black"/>
+                                <rect x="4" y="8" width="1" height="1" fill="black"/>
+                                <rect x="6" y="8" width="1" height="1" fill="black"/>
+                                <rect x="8" y="8" width="1" height="1" fill="black"/>
+                                <rect x="10" y="8" width="1" height="1" fill="black"/>
+                                <rect x="14" y="8" width="1" height="1" fill="black"/>
+                                <rect x="18" y="8" width="1" height="1" fill="black"/>
+                                <rect x="20" y="8" width="1" height="1" fill="black"/>
+                                <rect x="22" y="8" width="1" height="1" fill="black"/>
+                                <rect x="24" y="8" width="1" height="1" fill="black"/>
+                                <rect x="9" y="9" width="1" height="1" fill="black"/>
+                                <rect x="11" y="9" width="1" height="1" fill="black"/>
+                                <rect x="13" y="9" width="1" height="1" fill="black"/>
+                                <rect x="15" y="9" width="1" height="1" fill="black"/>
+                                <rect x="19" y="9" width="1" height="1" fill="black"/>
+                                <rect x="23" y="9" width="1" height="1" fill="black"/>
+                                <rect x="8" y="10" width="1" height="1" fill="black"/>
+                                <rect x="12" y="10" width="1" height="1" fill="black"/>
+                                <rect x="16" y="10" width="1" height="1" fill="black"/>
+                                <rect x="20" y="10" width="1" height="1" fill="black"/>
+                                <rect x="24" y="10" width="1" height="1" fill="black"/>
+                                <rect x="9" y="11" width="1" height="1" fill="black"/>
+                                <rect x="11" y="11" width="1" height="1" fill="black"/>
+                                <rect x="15" y="11" width="1" height="1" fill="black"/>
+                                <rect x="17" y="11" width="1" height="1" fill="black"/>
+                                <rect x="21" y="11" width="1" height="1" fill="black"/>
+                                <rect x="8" y="12" width="1" height="1" fill="black"/>
+                                <rect x="10" y="12" width="1" height="1" fill="black"/>
+                                <rect x="14" y="12" width="1" height="1" fill="black"/>
+                                <rect x="18" y="12" width="1" height="1" fill="black"/>
+                                <rect x="22" y="12" width="1" height="1" fill="black"/>
+                                <rect x="9" y="13" width="1" height="1" fill="black"/>
+                                <rect x="13" y="13" width="1" height="1" fill="black"/>
+                                <rect x="15" y="13" width="1" height="1" fill="black"/>
+                                <rect x="19" y="13" width="1" height="1" fill="black"/>
+                                <rect x="23" y="13" width="1" height="1" fill="black"/>
+                                <rect x="8" y="14" width="1" height="1" fill="black"/>
+                                <rect x="12" y="14" width="1" height="1" fill="black"/>
+                                <rect x="16" y="14" width="1" height="1" fill="black"/>
+                                <rect x="20" y="14" width="1" height="1" fill="black"/>
+                                <rect x="24" y="14" width="1" height="1" fill="black"/>
+                                <rect x="11" y="15" width="1" height="1" fill="black"/>
+                                <rect x="13" y="15" width="1" height="1" fill="black"/>
+                                <rect x="17" y="15" width="1" height="1" fill="black"/>
+                                <rect x="21" y="15" width="1" height="1" fill="black"/>
+                                <rect x="0" y="16" width="1" height="1" fill="black"/>
+                                <rect x="2" y="16" width="1" height="1" fill="black"/>
+                                <rect x="4" y="16" width="1" height="1" fill="black"/>
+                                <rect x="6" y="16" width="1" height="1" fill="black"/>
+                                <rect x="8" y="16" width="1" height="1" fill="black"/>
+                                <rect x="10" y="16" width="1" height="1" fill="black"/>
+                                <rect x="14" y="16" width="1" height="1" fill="black"/>
+                                <rect x="18" y="16" width="1" height="1" fill="black"/>
+                                <rect x="22" y="16" width="1" height="1" fill="black"/>
+                                <rect x="18" y="18" width="1" height="1" fill="black"/>
+                                <rect x="20" y="18" width="1" height="1" fill="black"/>
+                                <rect x="24" y="18" width="1" height="1" fill="black"/>
+                                <rect x="19" y="19" width="1" height="1" fill="black"/>
+                                <rect x="21" y="19" width="1" height="1" fill="black"/>
+                                <rect x="23" y="19" width="1" height="1" fill="black"/>
+                                <rect x="18" y="20" width="1" height="1" fill="black"/>
+                                <rect x="22" y="20" width="1" height="1" fill="black"/>
+                                <rect x="19" y="21" width="1" height="1" fill="black"/>
+                                <rect x="21" y="21" width="1" height="1" fill="black"/>
+                                <rect x="23" y="21" width="1" height="1" fill="black"/>
+                                <rect x="18" y="22" width="1" height="1" fill="black"/>
+                                <rect x="20" y="22" width="1" height="1" fill="black"/>
+                                <rect x="24" y="22" width="1" height="1" fill="black"/>
+                                <rect x="19" y="23" width="1" height="1" fill="black"/>
+                                <rect x="21" y="23" width="1" height="1" fill="black"/>
+                                <rect x="18" y="24" width="1" height="1" fill="black"/>
+                                <rect x="22" y="24" width="1" height="1" fill="black"/>
+                                <rect x="24" y="24" width="1" height="1" fill="black"/>
+                            </svg>
                         </div>
                     </div>
                 </div>
@@ -205,21 +304,38 @@
                 </div>
 
                 <!-- Selfhosted Friendly -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900/50 to-emerald-900/50 border border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm font-medium mb-4">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                        </svg>
-                        Selfhosted
-                    </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Selfhosted friendly</h3>
-                    <p class="text-gray-400 mb-4">Works with your own Invoice Ninja installation. Full control over your invoicing data and branding.</p>
-
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span class="text-gray-300 text-sm">Your server, your data</span>
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900/50 to-emerald-900/50 border border-white/10 p-8">
+                    <div class="grid md:grid-cols-2 gap-6 items-center">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm font-medium mb-4">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                                </svg>
+                                Selfhosted
+                            </div>
+                            <h3 class="text-2xl font-bold text-white mb-3">Selfhosted friendly</h3>
+                            <p class="text-gray-400 mb-4">Works with your own Invoice Ninja installation. Full control over your invoicing data and branding.</p>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-black/20 border border-white/5">
+                                <svg class="w-5 h-5 text-teal-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span class="text-gray-300 text-sm">Your server, your data</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-black/20 border border-white/5">
+                                <svg class="w-5 h-5 text-teal-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span class="text-gray-300 text-sm">Custom branding and templates</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-black/20 border border-white/5">
+                                <svg class="w-5 h-5 text-teal-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span class="text-gray-300 text-sm">Works with Invoice Ninja hosted too</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

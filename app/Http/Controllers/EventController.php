@@ -961,6 +961,10 @@ class EventController extends Controller
 
     public function uploadImage(Request $request, $subdomain)
     {
+        if (is_demo_mode()) {
+            return response()->json(['error' => __('messages.demo_mode_restriction')], 403);
+        }
+
         $file = $request->file('image');
 
         if (! $file) {
@@ -995,6 +999,10 @@ class EventController extends Controller
 
     public function guestUploadImage(Request $request, $subdomain)
     {
+        if (is_demo_mode()) {
+            return response()->json(['error' => __('messages.demo_mode_restriction')], 403);
+        }
+
         $file = $request->file('image');
 
         if (! $file) {
