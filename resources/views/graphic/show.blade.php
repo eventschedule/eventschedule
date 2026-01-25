@@ -135,12 +135,19 @@
             }
 
             function loadGraphic() {
-                const spinner = document.getElementById('loadingSpinner');
-                const content = document.getElementById('graphicContent');
                 const errorDiv = document.getElementById('errorMessage');
 
-                spinner.classList.remove('hidden');
-                content.classList.add('hidden');
+                // Get individual section elements
+                const textSpinner = document.getElementById('textLoadingSpinner');
+                const textContent = document.getElementById('eventText');
+                const graphicSpinner = document.getElementById('graphicLoadingSpinner');
+                const graphicImage = document.getElementById('graphicImage');
+
+                // Show spinners, hide content
+                textSpinner.classList.remove('hidden');
+                textContent.classList.add('hidden');
+                graphicSpinner.classList.remove('hidden');
+                graphicImage.classList.add('hidden');
                 errorDiv.classList.add('hidden');
 
                 // Get current form values instead of saved settings
@@ -168,26 +175,32 @@
 
                         graphicData = data;
 
-                        const img = document.getElementById('graphicImage');
-                        img.src = 'data:image/png;base64,' + data.image;
+                        // Hide spinners, show content
+                        textSpinner.classList.add('hidden');
+                        textContent.classList.remove('hidden');
+                        graphicSpinner.classList.add('hidden');
+                        graphicImage.classList.remove('hidden');
 
-                        const textarea = document.getElementById('eventText');
-                        textarea.value = data.text;
+                        graphicImage.src = 'data:image/png;base64,' + data.image;
+                        textContent.value = data.text;
 
                         const downloadBtn = document.getElementById('downloadBtn');
                         downloadBtn.onclick = downloadImage;
-
-                        spinner.classList.add('hidden');
-                        content.classList.remove('hidden');
                     })
                     .catch(error => {
                         console.error('Error loading graphic:', error);
+
+                        // Hide spinners on error too
+                        textSpinner.classList.add('hidden');
+                        textContent.classList.remove('hidden');
+                        graphicSpinner.classList.add('hidden');
+                        graphicImage.classList.remove('hidden');
+
                         const errorTextDiv = document.getElementById('errorMessageText');
                         if (errorTextDiv) {
                             errorTextDiv.textContent = error.message || '{{ __("messages.error_loading_graphic") }}';
                         }
                         errorDiv.classList.remove('hidden');
-                        spinner.classList.add('hidden');
                     });
             }
 
@@ -558,14 +571,6 @@
         @endif
     </div>
 
-    <!-- Loading Spinner -->
-    <div id="loadingSpinner" class="flex justify-center items-center py-20">
-        <div class="text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 dark:border-blue-400 mx-auto mb-4"></div>
-            <p class="text-gray-600 dark:text-gray-400">{{ __('messages.generating_graphic') }}...</p>
-        </div>
-    </div>
-
     <!-- Error Message -->
     <div id="errorMessage" class="hidden bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
         <div class="flex">
@@ -582,7 +587,7 @@
     </div>
 
     <!-- Main Content -->
-    <div id="graphicContent" class="hidden" x-data="{
+    <div id="graphicContent" x-data="{
         activeTab: localStorage.getItem('graphic_page_tab') || 'graphic',
         settingsOpen: localStorage.getItem('graphic_settings_open') === 'true',
         setTab(tab) {
@@ -789,7 +794,7 @@
         <!-- Outer Panel (desktop only) -->
         <div class="lg:bg-white lg:dark:bg-gray-800 lg:rounded-lg lg:shadow lg:dark:shadow-gray-900/50 lg:p-6">
             <!-- Two Column Layout on Desktop -->
-            <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-[40%_1fr] gap-6">
                 <!-- Left Column - Settings (Desktop only) -->
                 <div class="hidden lg:block bg-gray-50 dark:bg-gray-900/50 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
                     <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
@@ -922,14 +927,14 @@
                         @endif
 
                         <!-- Buttons -->
-                        <div class="flex flex-col gap-2">
-                            <button id="saveSettingsBtn" onclick="saveSettings()" class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-md transition-colors">
+                        <div class="flex flex-row gap-2">
+                            <button id="saveSettingsBtn" onclick="saveSettings()" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-md transition-colors">
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
                                 {{ __('messages.save_settings') }}
                             </button>
-                            <button id="runBtn" onclick="loadGraphic()" class="inline-flex items-center justify-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md transition-colors">
+                            <button id="runBtn" onclick="loadGraphic()" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md transition-colors">
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -957,10 +962,14 @@
                             </button>
                         </div>
                         <div class="p-4 flex-1 bg-gray-50 dark:bg-gray-900/50">
+                            <!-- Text Loading Spinner -->
+                            <div id="textLoadingSpinner" class="flex justify-center items-center py-10">
+                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 dark:border-blue-400"></div>
+                            </div>
                             <textarea
                                 id="eventText"
                                 readonly
-                                class="w-full h-full p-3 border border-gray-200 dark:border-gray-700 rounded-md resize-none font-mono text-sm leading-relaxed whitespace-pre-wrap overflow-y-auto bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none"
+                                class="hidden w-full h-full p-3 border border-gray-200 dark:border-gray-700 rounded-md resize-none font-mono text-sm leading-relaxed whitespace-pre-wrap overflow-y-auto bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none"
                                 style="min-height: 200px;"
                                 dir="{{ $role->isRtl() ? 'rtl' : 'ltr' }}"
                             ></textarea>
@@ -982,11 +991,15 @@
                             </button>
                         </div>
                         <div class="p-4 flex items-center justify-center bg-gray-50 dark:bg-gray-900/50" style="min-height: 300px;">
+                            <!-- Graphic Loading Spinner -->
+                            <div id="graphicLoadingSpinner" class="flex justify-center items-center">
+                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 dark:border-green-400"></div>
+                            </div>
                             <img
                                 id="graphicImage"
                                 src=""
                                 alt="{{ __('messages.events_graphic') }}"
-                                class="max-w-full h-auto rounded shadow-sm"
+                                class="hidden max-w-full h-auto rounded shadow-sm"
                                 style="max-height: 50vh; object-fit: contain;"
                             />
                         </div>
