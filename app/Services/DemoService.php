@@ -80,10 +80,10 @@ class DemoService
             $role->email_verified_at = now();
             $role->language_code = 'en';
             $role->timezone = 'America/New_York';
-            $role->city = 'New York';
+            $role->city = 'Springfield';
             $role->country_code = 'US';
             $role->background = 'gradient';
-            $role->background_colors = '#667eea, #764ba2';
+            $role->background_colors = '#D4A017, #8B4513';
             $role->accent_color = '#4E81FA';
             $role->header_image = 'Chill_Evening';
             $role->accept_requests = true;
@@ -138,14 +138,29 @@ class DemoService
 
         // Unsplash Source API URLs (no API key needed)
         $images = [
-            'demo_flyer_jazz.jpg' => 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=800&h=600&fit=crop',
-            'demo_flyer_dj.jpg' => 'https://images.unsplash.com/photo-1574391884720-bbc3740c59d1?w=800&h=600&fit=crop',
-            'demo_flyer_comedy.jpg' => 'https://images.unsplash.com/photo-1585699324551-f6c309eedeca?w=800&h=600&fit=crop',
-            'demo_flyer_openmic.jpg' => 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800&h=600&fit=crop',
-            'demo_flyer_rock.jpg' => 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop',
-            'demo_flyer_party.jpg' => 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&h=600&fit=crop',
-            'demo_flyer_special.jpg' => 'https://images.unsplash.com/photo-1496024840928-4c417adf211d?w=800&h=600&fit=crop',
-            'demo_profile_band.jpg' => 'https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=400&h=400&fit=crop',
+            // Jazz - Dark saxophone player in moody setting
+            'demo_flyer_jazz.jpg' => 'https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=800&h=600&fit=crop',
+
+            // DJ - Dark DJ booth with neon lighting
+            'demo_flyer_dj.jpg' => 'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=800&h=600&fit=crop',
+
+            // Comedy - Stage with microphone under spotlight
+            'demo_flyer_comedy.jpg' => 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800&h=600&fit=crop',
+
+            // Open Mic - Intimate acoustic stage setting
+            'demo_flyer_openmic.jpg' => 'https://images.unsplash.com/photo-1598517834429-cf89c3c0f065?w=800&h=600&fit=crop',
+
+            // Rock - Energetic rock band on stage
+            'demo_flyer_rock.jpg' => 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&h=600&fit=crop',
+
+            // Party - Crowded bar celebration atmosphere
+            'demo_flyer_party.jpg' => 'https://images.unsplash.com/photo-1575444758702-4a6b9222336e?w=800&h=600&fit=crop',
+
+            // Special - Neon bar sign/atmosphere
+            'demo_flyer_special.jpg' => 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=800&h=600&fit=crop',
+
+            // Profile - Bartender at bar counter (square)
+            'demo_profile_band.jpg' => 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=400&fit=crop',
         ];
 
         foreach ($images as $filename => $url) {

@@ -43,6 +43,10 @@ class RoleController extends Controller
 
     public function deleteImage(Request $request, $subdomain)
     {
+        if (is_demo_mode()) {
+            return response()->json(['error' => __('messages.demo_mode_restriction')], 403);
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (auth()->user()->id != $role->user_id) {
@@ -1129,6 +1133,9 @@ class RoleController extends Controller
                 'caldav_sync_direction' => $role->caldav_sync_direction,
                 'email_settings' => null,
             ]);
+            // Remove image uploads
+            $request->files->remove('profile_image');
+            $request->files->remove('header_image');
         }
 
         $existingSettings = $role->getEmailSettings();
