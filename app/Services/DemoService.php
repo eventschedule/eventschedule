@@ -109,45 +109,23 @@ class DemoService
             $role->background = 'gradient';
             $role->background_colors = '#FFD90F, #0064B0'; // Classic Simpsons yellow/blue
             $role->accent_color = '#FFD90F';
-            $role->description = '**Welcome to Springfield\'s ultimate event guide — where the nuclear glow never fades and neither does the entertainment!** ☢️
+            $role->description = '# Welcome to Springfield Events! 🍩
 
-From dive bars to amphitheaters, comedy clubs to secret societies, we\'ve aggregated every happening in America\'s most animated town. Whether you\'re chasing smooth jazz at Lisa\'s quartet, dodging rakes at DJ Sideshow Bob\'s set, or wondering why you can\'t stop humming "Baby on Board" — it\'s all here.
+**Your guide to everything happening in America\'s most nuclear-adjacent town!**
 
-> "To alcohol! The cause of, and solution to, all of life\'s problems." - Homer Simpson 🍺
+From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater, we curate the finest events our beloved city has to offer. Whether you\'re looking for live music, community gatherings, or entertainment that doesn\'t involve monorails (well, maybe sometimes), we\'ve got you covered.
+
+> "Springfield: A city on the grow!" - Mayor Quimby (probably)
 
 ---
 
-## 🗺️ Explore Our Venues
+## What We Offer
+- **Live Music** - From jazz to rock to whatever Otto\'s listening to
+- **Comedy** - Stand-up, improv, and Krusty (when he shows up sober)
+- **Nightlife** - The finest Duff this side of Shelbyville 🍺
+- **Community Events** - Town meetings, talent shows, and controlled chaos
 
-- 🍻 **Moe\'s Tavern** - Where everybody knows your name (and Moe pretends not to)
-- 🎳 **Barney\'s Bowl-A-Rama** - Strikes, spares, and questionable nachos
-- 🎬 **The Aztec Theater** - Art deco elegance, McBain marathons
-- 🎤 **Springfield Amphitheater** - 10,000 seats, premium tire fire views
-- 🍩 **Lard Lad Donuts** - Events as sweet as the frosting
-- 🏛️ **Community Center** - Democracy in action (sort of)
-
-## 🎭 Featured Performers
-
-- 🎷 Lisa Simpson Jazz Quartet
-- 🤡 Krusty Entertainment
-- 💿 DJ Sideshow Bob
-- 🎸 Springfield Rockers
-- 🤠 Lurleen Lumpkin
-- 🎥 Troy McClure Productions
-- 🔬 Professor Frink Presents
-- 🔮 Stonecutters Guild *(who controls the British crown? Who keeps the metric system down?)*
-
-## 🎟️ What You\'ll Find
-
-- 🎵 **Live Music** - Jazz, rock, country, and electronica (with rakes)
-- 😂 **Comedy** - Stand-up, seltzer bottles, and Sideshow Mel
-- 🎪 **Community Events** - Town halls that may include musical numbers
-- 🎃 **Seasonal Specials** - Treehouse of Horror screenings every October
-- 🧪 **Science Shows** - 87% less murderous robots than last time!
-
-*Browse by venue, filter by date, or just let serendipity guide you — like a monorail to nowhere in particular.* 🚝
-
-⚠️ *Disclaimer: Events may be subject to three-eyed fish sightings, escaped zoo animals, comet near-misses, and/or spontaneous mob formation. Shelbyville residents tolerated.*';
+*D\'oh-n\'t miss out on the action! Our tire fire burns eternal, and so does our event calendar.*';
             $role->accept_requests = false;
             $role->plan_type = 'pro';
             $role->plan_expires = now()->addYear()->format('Y-m-d');
@@ -172,8 +150,28 @@ From dive bars to amphitheaters, comedy clubs to secret societies, we\'ve aggreg
     {
         $user = $role->user;
 
-        // Ensure curator has header image set
+        // Ensure curator has all demo properties set (in case of reset)
+        $role->description = '# Welcome to Springfield Events! 🍩
+
+**Your guide to everything happening in America\'s most nuclear-adjacent town!**
+
+From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater, we curate the finest events our beloved city has to offer. Whether you\'re looking for live music, community gatherings, or entertainment that doesn\'t involve monorails (well, maybe sometimes), we\'ve got you covered.
+
+> "Springfield: A city on the grow!" - Mayor Quimby (probably)
+
+---
+
+## What We Offer
+- **Live Music** - From jazz to rock to whatever Otto\'s listening to
+- **Comedy** - Stand-up, improv, and Krusty (when he shows up sober)
+- **Nightlife** - The finest Duff this side of Shelbyville 🍺
+- **Community Events** - Town meetings, talent shows, and controlled chaos
+
+*D\'oh-n\'t miss out on the action! Our tire fire burns eternal, and so does our event calendar.*';
         $role->header_image_url = 'demo_header_town.jpg';
+        $role->profile_image_url = 'demo_profile_donuts.jpg';
+        $role->font_family = 'Bangers';
+        $role->accept_requests = false;
         $role->save();
 
         // Download demo images if they don't exist
@@ -251,7 +249,7 @@ From dive bars to amphitheaters, comedy clubs to secret societies, we\'ve aggreg
             // Demo header images - illustrated/artistic style (wide banner format)
             'demo_header_town.jpg' => 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&h=400&fit=crop',
             'demo_header_bar.jpg' => 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=1200&h=400&fit=crop',
-            'demo_header_bowling.jpg' => 'https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=1200&h=400&fit=crop',       // neon bowling alley
+            'demo_header_bowling.jpg' => 'https://images.unsplash.com/photo-1650313525283-f505691c3d73?w=1200&h=400&fit=crop',       // neon lit bowling alley with balls
             'demo_header_theater.jpg' => 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1200&h=400&fit=crop',
             'demo_header_concert.jpg' => 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=1200&h=400&fit=crop',        // concert crowd silhouettes with stage lights
             'demo_header_donuts.jpg' => 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=1200&h=400&fit=crop',
@@ -291,6 +289,12 @@ From dive bars to amphitheaters, comedy clubs to secret societies, we\'ve aggreg
             'demo_profile_vinyl.jpg' => 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=400&h=400&fit=crop',      // vinyl records
             'demo_profile_circus.jpg' => 'https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&h=400&fit=crop',     // circus tent
             'demo_profile_eye.jpg' => 'https://images.unsplash.com/photo-1584286595398-a59f230e4585?w=400&h=400&fit=crop',           // gothic stone carving detail
+
+            // Followed schedule images (Shelbyville & Capital City)
+            'demo_header_shelbyville.jpg' => 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&h=400&fit=crop',   // football stadium night
+            'demo_profile_shelbyville.jpg' => 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=400&fit=crop',  // lemon
+            'demo_header_capitalcity.jpg' => 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&h=400&fit=crop',   // arena concert lights
+            'demo_profile_capitalcity.jpg' => 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&h=400&fit=crop',  // city skyline night
         ];
 
         foreach ($images as $filename => $url) {

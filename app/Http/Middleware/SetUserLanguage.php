@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\DemoService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -19,6 +20,12 @@ class SetUserLanguage
     {
         if (Auth::check()) {
             $languageCode = Auth::user()->language_code;
+
+            // For demo users, prioritize session-stored language
+            if (DemoService::isDemoUser(Auth::user())) {
+                $languageCode = $request->session()->get('demo_language', $languageCode);
+            }
+
             // Validate the language code before setting it
             if (is_valid_language_code($languageCode)) {
                 App::setLocale($languageCode);
