@@ -204,10 +204,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const paymentTabs = document.querySelectorAll('.payment-tab');
     const paymentTabContents = document.querySelectorAll('.payment-tab-content');
 
+    // Restore active tab from localStorage
+    const savedPaymentTab = localStorage.getItem('paymentActiveTab');
+    if (savedPaymentTab) {
+        switchPaymentTab(savedPaymentTab);
+    }
+
     paymentTabs.forEach(tab => {
         tab.addEventListener('click', function() {
             const tabName = this.dataset.tab;
             switchPaymentTab(tabName);
+            localStorage.setItem('paymentActiveTab', tabName);
         });
     });
 

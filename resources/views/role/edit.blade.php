@@ -1830,7 +1830,17 @@ function showStyleTab(tabName) {
             button.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
         }
     });
+
+    localStorage.setItem('styleActiveTab', tabName);
 }
+
+// Restore active style tab from localStorage on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const savedStyleTab = localStorage.getItem('styleActiveTab');
+    if (savedStyleTab) {
+        showStyleTab(savedStyleTab);
+    }
+});
 
 function addGroupField() {
     const container = document.getElementById('group-items');
