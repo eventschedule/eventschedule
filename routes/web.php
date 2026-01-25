@@ -180,21 +180,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/api-settings', [ApiSettingsController::class, 'update'])->name('api-settings.update');
     Route::post('/api-settings/show-key', [ApiSettingsController::class, 'showApiKey'])->name('api-settings.show-key');
 
-    // Admin routes (only for admin users)
-    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    Route::redirect('/admin', '/admin/dashboard');
-    Route::get('/admin/plans', [AdminController::class, 'plans'])->name('admin.plans');
-    Route::get('/admin/plans/{role}/edit', [AdminController::class, 'editPlan'])->name('admin.plans.edit');
-    Route::put('/admin/plans/{role}', [AdminController::class, 'updatePlan'])->name('admin.plans.update');
+    // Admin routes (only for admin users) - protected by admin middleware for defense-in-depth
+    Route::middleware(['admin'])->group(function () {
+        Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+        Route::redirect('/admin', '/admin/dashboard');
+        Route::get('/admin/plans', [AdminController::class, 'plans'])->name('admin.plans');
+        Route::get('/admin/plans/{role}/edit', [AdminController::class, 'editPlan'])->name('admin.plans.edit');
+        Route::put('/admin/plans/{role}', [AdminController::class, 'updatePlan'])->name('admin.plans.update');
 
-    // Admin blog routes (only for admin users)
-    Route::get('/admin/blog', [BlogController::class, 'adminIndex'])->name('blog.admin.index');
-    Route::get('/admin/blog/create', [BlogController::class, 'create'])->name('blog.create');
-    Route::post('/admin/blog', [BlogController::class, 'store'])->name('blog.store');
-    Route::get('/admin/blog/{blogPost}/edit', [BlogController::class, 'edit'])->name('blog.edit');
-    Route::put('/admin/blog/{blogPost}', [BlogController::class, 'update'])->name('blog.update');
-    Route::delete('/admin/blog/{blogPost}', [BlogController::class, 'destroy'])->name('blog.destroy');
-    Route::post('/admin/blog/generate-content', [BlogController::class, 'generateContent'])->name('blog.generate-content');
+        // Admin blog routes
+        Route::get('/admin/blog', [BlogController::class, 'adminIndex'])->name('blog.admin.index');
+        Route::get('/admin/blog/create', [BlogController::class, 'create'])->name('blog.create');
+        Route::post('/admin/blog', [BlogController::class, 'store'])->name('blog.store');
+        Route::get('/admin/blog/{blogPost}/edit', [BlogController::class, 'edit'])->name('blog.edit');
+        Route::put('/admin/blog/{blogPost}', [BlogController::class, 'update'])->name('blog.update');
+        Route::delete('/admin/blog/{blogPost}', [BlogController::class, 'destroy'])->name('blog.destroy');
+        Route::post('/admin/blog/generate-content', [BlogController::class, 'generateContent'])->name('blog.generate-content');
+    });
 });
 
 Route::get('/tmp/event-image/{filename?}', function ($filename = null) {

@@ -429,19 +429,22 @@ class TicketController extends Controller
         $event = $sale->event;
         $user = $event->user;
 
-        // Verify the secret from the URL
+        // Verify the secret from the URL (using constant-time comparison to prevent timing attacks)
         $secret = request()->query('secret');
-        if ($secret !== $user->payment_secret) {
+        if (! $secret || ! $user->payment_secret || ! hash_equals($user->payment_secret, $secret)) {
             abort(403, 'Invalid secret');
         }
 
-        // Mark the sale as paid
-        $sale->status = 'paid';
-        $sale->transaction_reference = __('messages.manual_payment');
-        $sale->save();
+        // Idempotency check: only process if not already paid
+        if ($sale->status !== 'paid') {
+            // Mark the sale as paid
+            $sale->status = 'paid';
+            $sale->transaction_reference = __('messages.manual_payment');
+            $sale->save();
 
-        // Record sale in analytics
-        AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+            // Record sale in analytics
+            AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+        }
 
         return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
     }
@@ -560,7 +563,7 @@ class TicketController extends Controller
         $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
         $user = auth()->user();
 
-        if ($user->id != $sale->event->user_id) {
+        if ($user->id !== $sale->event->user_id) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
@@ -649,7 +652,7 @@ class TicketController extends Controller
         $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
         $user = auth()->user();
 
-        if ($user->id != $sale->event->user_id) {
+        if ($user->id !== $sale->event->user_id) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 

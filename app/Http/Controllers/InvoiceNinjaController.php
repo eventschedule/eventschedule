@@ -45,7 +45,16 @@ class InvoiceNinjaController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Missing webhook secret'], 400);
         }
 
-        $user = User::where('invoiceninja_webhook_secret', $secret)->first();
+        // Find user with matching webhook secret using constant-time comparison
+        // to prevent timing attacks that could enumerate valid secrets
+        $user = null;
+        $users = User::whereNotNull('invoiceninja_webhook_secret')->get(['id', 'invoiceninja_webhook_secret']);
+        foreach ($users as $candidate) {
+            if (hash_equals($candidate->invoiceninja_webhook_secret, $secret)) {
+                $user = User::find($candidate->id);
+                break;
+            }
+        }
 
         if (! $user) {
             return response()->json(['status' => 'error', 'message' => 'Invalid webhook secret'], 400);
@@ -74,9 +83,12 @@ class InvoiceNinjaController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Sale not found'], 400);
         }
 
-        $sale->payment_amount = $payload['paymentables'][0]['amount'];
-        $sale->status = 'paid';
-        $sale->save();
+        // Idempotency check: only process if not already paid
+        if ($sale->status !== 'paid') {
+            $sale->payment_amount = $payload['paymentables'][0]['amount'];
+            $sale->status = 'paid';
+            $sale->save();
+        }
 
         return response()->json(['status' => 'success']);
     }
