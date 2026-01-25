@@ -457,7 +457,6 @@ class RoleController extends Controller
         }
 
         $fonts = [];
-        /*
         if ($event) {
             $fonts[] = $event->venue->font_family;
             foreach ($event->roles as $each) {
@@ -470,7 +469,6 @@ class RoleController extends Controller
         }
 
         $fonts = array_unique($fonts);
-        */
 
         $response = response()
             ->view($view, compact(
@@ -1175,7 +1173,7 @@ class RoleController extends Controller
         }
 
         // Handle email settings
-        if ($request->has('email_settings')) {
+        if ($request->filled('email_settings')) {
             $submittedSettings = $request->input('email_settings', []);
 
             // If password is all bullets, use the old value
