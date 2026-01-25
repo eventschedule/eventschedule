@@ -20,7 +20,8 @@ class ApiSaleController extends Controller
             'email' => 'required|string|email|max:255',
             'tickets' => 'required|array',
             'tickets.*' => 'required|integer|min:1',
-            'status' => 'nullable|in:unpaid,paid,cancelled,refunded,expired',
+            // Note: status parameter is intentionally not accepted from API input for security
+            // Sales are always created as 'unpaid' and must go through proper payment flow
             'event_date' => 'nullable|date_format:Y-m-d',
         ]);
 
@@ -133,7 +134,7 @@ class ApiSaleController extends Controller
         $sale->event_date = $eventDate;
         $sale->subdomain = $subdomain;
         $sale->payment_method = $event->payment_method;
-        $sale->status = $request->status ?? 'unpaid';
+        $sale->status = 'unpaid';
         $sale->save();
 
         // Create sale tickets
@@ -151,8 +152,8 @@ class ApiSaleController extends Controller
         $sale->payment_amount = $total;
         $sale->save();
 
-        // If total is 0 and status wasn't explicitly set, mark as paid
-        if ($total == 0 && ! $request->has('status')) {
+        // If total is 0, mark as paid (free tickets)
+        if ($total == 0) {
             $sale->status = 'paid';
             $sale->save();
         }

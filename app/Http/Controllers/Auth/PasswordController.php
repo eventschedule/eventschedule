@@ -33,7 +33,13 @@ class PasswordController extends Controller
             $rules['current_password'] = ['required', 'current_password'];
         } else {
             // User doesn't have a password (Google-only) - require re-authentication
-            if (! session('can_set_password')) {
+            $canSetPasswordTimestamp = session('can_set_password');
+            $fiveMinutesAgo = now()->subMinutes(5)->timestamp;
+
+            if (! $canSetPasswordTimestamp || $canSetPasswordTimestamp < $fiveMinutesAgo) {
+                // Clear expired session flag
+                session()->forget('can_set_password');
+
                 return redirect()->to(route('profile.edit').'#section-password')
                     ->withErrors(['password' => __('messages.google_reauth_required')], 'updatePassword');
             }

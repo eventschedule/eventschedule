@@ -126,8 +126,8 @@ class SocialAuthController extends Controller
                 ->withErrors(['password' => __('messages.google_account_mismatch')], 'updatePassword');
         }
 
-        // Set session flag allowing password to be set (expires in 5 minutes)
-        session(['can_set_password' => true]);
+        // Set session flag allowing password to be set with timestamp (expires in 5 minutes)
+        session(['can_set_password' => now()->timestamp]);
 
         return redirect()->to(route('profile.edit').'#section-password')
             ->with('status', 'google-verified');
