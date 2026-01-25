@@ -112,6 +112,7 @@
             toggleCustomImageInput();
             updateHeaderNavButtons();
             toggleCustomHeaderInput();
+            updateFontNavButtons();
             
             // Handle accept_requests checkbox
             const acceptRequestsCheckbox = document.querySelector('input[name="accept_requests"][type="checkbox"]');
@@ -217,15 +218,20 @@
             $('#header_image').on('input', function() {
                 var headerImageUrl = $(this).find(':selected').val();
                 if (headerImageUrl && headerImageUrl !== 'none') {
+                    // Preset header selected
                     headerImageUrl = "{{ asset('images/headers/thumbs') }}" + '/' + headerImageUrl + '.jpg';
                     $('#header_image_preview').attr('src', headerImageUrl).show();
                     $('#delete_header_image').hide();
-                } else if (headerImageUrl === '' && {{ $role->header_image_url ? 'true' : 'false' }}) {
-                    // Custom option selected and there's an existing custom image
-                    $('#header_image_preview').attr('src', '{{ $role->header_image_url }}').show();
-                    $('#delete_header_image').show();
+                } else if (headerImageUrl === '') {
+                    // Custom option selected - show existing custom image if available
+                    var existingCustomUrl = '{{ $role->header_image_url }}';
+                    if (existingCustomUrl) {
+                        $('#header_image_preview').attr('src', existingCustomUrl).show();
+                        $('#delete_header_image').show();
+                    }
+                    // Don't hide preview - let file upload handler manage it
                 } else {
-                    // 'none' selected or no image
+                    // 'none' selected
                     $('#header_image_preview').hide();
                     $('#delete_header_image').hide();
                 }
@@ -234,6 +240,7 @@
             $('#header_image_url').on('change', function() {
                 previewImage(this, 'header_image_preview');
                 $('#header_image_preview').show();
+                updatePreview();
             });
 
             $('#background_image_url').on('change', function() {
@@ -264,7 +271,6 @@
         }
 
         function onChangeFont() {
-            /*
             var font_family = $('#font_family').find(':selected').text();
             var link = document.createElement('link');
 
@@ -275,8 +281,8 @@
 
             link.onload = function() {
                 updatePreview();
+                $('#font_preview').css('font-family', "'" + font_family.trim() + "', sans-serif");
             };
-            */
         }
 
         function updatePreview() {
@@ -303,7 +309,7 @@
             if (headerImage && headerImage !== 'none' && headerImage !== '') {
                 var headerUrl = "{{ asset('images/headers/thumbs') }}" + '/' + headerImage + '.jpg';
                 headerHtml = '<div class="w-full h-16 bg-cover bg-center rounded-t-lg" style="background-image: url(\'' + headerUrl + '\')"></div>';
-            } else if (headerImage === '' && {{ $role->header_image_url ? 'true' : 'false' }}) {
+            } else if (headerImage === '') {
                 // Custom header image
                 var customHeaderUrl = $('#header_image_preview').attr('src') || '{{ $role->header_image_url }}';
                 if (customHeaderUrl) {
@@ -329,10 +335,10 @@
                         '<div class="flex items-center justify-between gap-2">' +
                             '<div class="text-sm font-semibold text-[#151B26] ' + contentTopPadding + '" style="color: ' + fontColor + '; font-family: ' + fontFamily + ';">' + name + '</div>' +
                             '<div class="flex gap-1.5">' +
-                                '<div class="w-5 h-5 rounded-full flex items-center justify-center" style="background-color: ' + accentColor + '">' +
+                                '<div class="w-6 h-6 rounded-md flex items-center justify-center shadow-sm" style="background-color: ' + accentColor + '">' +
                                     '<svg class="w-3 h-3" fill="white" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>' +
                                 '</div>' +
-                                '<div class="w-5 h-5 rounded-full flex items-center justify-center" style="background-color: ' + accentColor + '">' +
+                                '<div class="w-6 h-6 rounded-md flex items-center justify-center shadow-sm" style="background-color: ' + accentColor + '">' +
                                     '<svg class="w-3 h-3" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93z"/></svg>' +
                                 '</div>' +
                             '</div>' +
@@ -513,6 +519,26 @@
             const customInput = document.getElementById('custom_header_input');
             // Show custom input only for 'Custom' option (empty value), not for 'none' or presets
             customInput.style.display = select.value === '' ? 'block' : 'none';
+        }
+
+        function updateFontNavButtons() {
+            const select = document.getElementById('font_family');
+            const prevButton = document.getElementById('prev_font');
+            const nextButton = document.getElementById('next_font');
+
+            prevButton.disabled = select.selectedIndex === 0;
+            nextButton.disabled = select.selectedIndex === select.options.length - 1;
+        }
+
+        function changeFont(direction) {
+            const select = document.getElementById('font_family');
+            const newIndex = select.selectedIndex + direction;
+
+            if (newIndex >= 0 && newIndex < select.options.length) {
+                select.selectedIndex = newIndex;
+                onChangeFont();
+                updateFontNavButtons();
+            }
         }
 
 
@@ -856,30 +882,6 @@
 
                     <!-- Images Tab Content -->
                     <div id="style-content-images">
-                            <!--
-                            <div class="mb-6">
-                                <x-input-label for="font_family" :value="__('messages.font_family')" />
-                                <select id="font_family" name="font_family" onchange="onChangeFont()"
-                                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                    @foreach($fonts as $font)
-                                    <option value="{{ $font->value }}"
-                                        {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
-                                        {{ $font->label }}</option>
-                                    @endforeach
-                                </select>
-                                <x-input-error class="mt-2" :messages="$errors->get('font_family')" />
-                            </div>
-
-                            <div class="mb-6">
-                                <x-input-label for="font_color" :value="__('messages.font_color')" />
-                                <x-text-input id="font_color" name="font_color" type="color" class="mt-1 block w-1/2"
-                                    :value="old('font_color', $role->font_color)" oninput="updatePreview()" />
-                                <x-input-error class="mt-2" :messages="$errors->get('font_color')" />
-                            </div>
-                            -->
-
-                            
-                            
                             <div class="mb-6">
                                 <x-input-label for="profile_image" :value="__('messages.square_profile_image')" />
                                 <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100"
@@ -1117,6 +1119,42 @@
                                 <x-text-input id="accent_color" name="accent_color" type="color" class="mt-1 block w-1/2"
                                     :value="old('accent_color', $role->accent_color)" oninput="updatePreview()" />
                                 <x-input-error class="mt-2" :messages="$errors->get('accent_color')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="font_family" :value="__('messages.font_family')" />
+                                <select id="font_family" name="font_family" onchange="onChangeFont(); updateFontNavButtons();"
+                                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                    @foreach($fonts as $font)
+                                    <option value="{{ $font->value }}"
+                                        {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
+                                        {{ $font->label }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="flex gap-2 mt-2">
+                                    <button type="button"
+                                            id="prev_font"
+                                            class="color-nav-button"
+                                            onclick="changeFont(-1)"
+                                            title="{{ __('messages.previous') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                        </svg>
+                                    </button>
+                                    <button type="button"
+                                            id="next_font"
+                                            class="color-nav-button"
+                                            onclick="changeFont(1)"
+                                            title="{{ __('messages.next') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <x-input-error class="mt-2" :messages="$errors->get('font_family')" />
+                                <div id="font_preview" class="mt-3 text-2xl text-gray-900 dark:text-gray-100" style="font-family: '{{ $role->font_family }}', sans-serif;">
+                                    {{ $role->name }}
+                                </div>
                             </div>
 
                             <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">

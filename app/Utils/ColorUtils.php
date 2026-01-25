@@ -28,4 +28,33 @@ class ColorUtils
 
         return $backgrounds[$random]->name;
     }
+
+    /**
+     * Calculate relative luminance of a hex color (WCAG formula)
+     */
+    public static function getLuminance(string $hexColor): float
+    {
+        $hex = ltrim($hexColor, '#');
+
+        $r = hexdec(substr($hex, 0, 2)) / 255;
+        $g = hexdec(substr($hex, 2, 2)) / 255;
+        $b = hexdec(substr($hex, 4, 2)) / 255;
+
+        // sRGB to linear RGB conversion
+        $r = $r <= 0.03928 ? $r / 12.92 : pow(($r + 0.055) / 1.055, 2.4);
+        $g = $g <= 0.03928 ? $g / 12.92 : pow(($g + 0.055) / 1.055, 2.4);
+        $b = $b <= 0.03928 ? $b / 12.92 : pow(($b + 0.055) / 1.055, 2.4);
+
+        return 0.2126 * $r + 0.7152 * $g + 0.0722 * $b;
+    }
+
+    /**
+     * Get contrasting text color (black or white) for a background
+     */
+    public static function getContrastColor(string $backgroundColor): string
+    {
+        $luminance = self::getLuminance($backgroundColor);
+
+        return $luminance > 0.179 ? '#000000' : '#ffffff';
+    }
 }

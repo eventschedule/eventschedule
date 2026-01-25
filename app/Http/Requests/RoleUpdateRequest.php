@@ -24,7 +24,10 @@ class RoleUpdateRequest extends FormRequest
                 ['required', 'string', 'email', 'max:255'],
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
-            'new_subdomain' => ['required', 'string', 'max:50'],
+            'new_subdomain' => array_merge(
+                is_demo_mode() ? [] : ['required'],
+                ['string', 'max:50']
+            ),
             'custom_domain' => ['nullable', 'string', 'url', 'max:255'],
             'profile_image' => ['image', 'max:2500', new SquareImage],
             'background_image_url' => ['image', 'max:2500'],
@@ -37,6 +40,7 @@ class RoleUpdateRequest extends FormRequest
             'email_settings.from_address' => ['nullable', 'email', 'max:255'],
             'email_settings.from_name' => ['nullable', 'string', 'max:255'],
             'custom_css' => ['nullable', 'string', 'max:10000'],
+            'font_family' => ['nullable', 'string', 'max:100'],
         ];
     }
 }

@@ -69,7 +69,7 @@
     <x-slot name="head">
 
         @foreach($fonts as $font)
-            <link href="https://fonts.googleapis.com/css2?family={{ $font }}:wght@400;700&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family={{ str_replace(' ', '+', $font) }}:wght@400;700&display=swap" rel="stylesheet">
         @endforeach
 
         <style>
@@ -90,7 +90,7 @@
             @media (prefers-color-scheme: light) {
                 color: #33383C !important;
             }
-            font-family: '{{ isset($otherRole) && $otherRole ? $otherRole->font_family : $role->font_family }}', sans-serif !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif !important;
             min-height: 100vh;
             background-attachment: scroll;
             display: flex;

@@ -320,9 +320,7 @@
             @if (! $each->isClaimed() && ! $each->getFirstVideoUrl())
               @continue       
             @endif
-          <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-8 sm:p-8 mb-6 flex flex-col gap-4" 
-            style="font-family: {{ $each->isClaimed() ? $each->font_family : $otherRole->font_family }}, sans-serif;"
-          >
+          <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-8 sm:p-8 mb-6 flex flex-col gap-4">
             <div
               class="flex flex-row justify-between items-center"
             >
@@ -362,7 +360,7 @@
                   href="{{ $memberUrl }}"
                   class="group flex items-center gap-2 cursor-pointer duration-300"
                 >
-                  <h3 class="text-[28px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 group-hover:underline">
+                  <h3 class="text-[28px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 group-hover:underline" style="font-family: '{{ $each->font_family }}', sans-serif;">
                     {{ $each->name }}
                   </h3>
                   <svg class="w-5 h-5 fill-[#151B26] dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24">
@@ -376,7 +374,7 @@
                   class="rounded-lg w-[56px] h-[56px]"
                 />
                 @endif
-                <h3 class="text-[28px] font-semibold leading-10 text-[#151B26] dark:text-gray-100">
+                <h3 class="text-[28px] font-semibold leading-10 text-[#151B26] dark:text-gray-100" style="font-family: '{{ $each->isClaimed() ? $each->font_family : $otherRole->font_family }}', sans-serif;">
                   {{ $each->translatedName() }}
                 </h3>
                 @endif
@@ -471,13 +469,13 @@
             $venueAccentColor = $event->venue->accent_color ?? '#4E81FA';
             $venueContrastColor = accent_contrast_color($venueAccentColor);
         @endphp
-        <div class="p-6 rounded-xl flex flex-col gap-2" style="background-color: {{ $venueAccentColor }}; font-family: {{ $event->venue->font_family }}, sans-serif;">
+        <div class="p-6 rounded-xl flex flex-col gap-2" style="background-color: {{ $venueAccentColor }};">
           @if ($event->venue->isClaimed())
             @php
               $venuePanelUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
             @endphp
             <a href="{{ $venuePanelUrl }}" class="group flex items-center gap-2 hover:opacity-80 transition-opacity duration-200">
-              <h4 class="text-[24px] leading-snug font-semibold group-hover:underline" style="color: {{ $venueContrastColor }}">
+              <h4 class="text-[24px] leading-snug font-semibold group-hover:underline" style="color: {{ $venueContrastColor }}; font-family: '{{ $event->venue->font_family }}', sans-serif;">
                 {{ $event->venue->translatedName() }}
               </h4>
               <svg class="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" style="fill: {{ $venueContrastColor }}" viewBox="0 0 24 24">
@@ -485,7 +483,7 @@
               </svg>
             </a>
           @else
-            <h4 class="text-[24px] leading-snug font-semibold" style="color: {{ $venueContrastColor }}">
+            <h4 class="text-[24px] leading-snug font-semibold" style="color: {{ $venueContrastColor }}; font-family: '{{ $event->venue->font_family }}', sans-serif;">
               {{ $event->venue->translatedName() }}
             </h4>
           @endif

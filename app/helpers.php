@@ -210,3 +210,15 @@ if (! function_exists('is_demo_role')) {
         return $role->subdomain === \App\Services\DemoService::DEMO_ROLE_SUBDOMAIN;
     }
 }
+
+if (! function_exists('accent_contrast_color')) {
+    /**
+     * Get contrasting text color (black or white) for an accent color background
+     */
+    function accent_contrast_color(?string $accentColor): string
+    {
+        $color = $accentColor ?? '#4E81FA';
+
+        return \App\Utils\ColorUtils::getContrastColor($color);
+    }
+}
