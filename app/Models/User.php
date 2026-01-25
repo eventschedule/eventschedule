@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
+use App\Services\DemoService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -313,7 +314,13 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function isRtl(): bool
     {
-        return in_array($this->language_code, ['ar', 'he']);
+        $languageCode = $this->language_code;
+
+        if (DemoService::isDemoUser($this) && session()->has('demo_language')) {
+            $languageCode = session('demo_language');
+        }
+
+        return in_array($languageCode, ['ar', 'he']);
     }
 
     /**

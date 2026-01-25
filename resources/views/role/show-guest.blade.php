@@ -165,7 +165,7 @@
 
               {{-- Description below --}}
               @if($role->translatedDescription())
-              <div class="text-left w-full">
+              <div class="text-left w-full mt-2">
                 <div x-data="{ expanded: false }" class="text-sm text-[#33383C] dark:text-gray-300">
                   <span x-show="!expanded">
                     {{ Str::words(strip_tags($role->translatedDescription()), 5, '') }}...

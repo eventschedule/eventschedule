@@ -52,6 +52,9 @@ class DemoAutoLogin
             $request->session()->regenerate();
             $request->session()->regenerateToken();
 
+            // Detect and store browser language for demo users
+            $this->detectAndStoreDemoLanguage($request);
+
             // Redirect to the schedule page after auto-login on demo subdomain
             return redirect()->route('role.view_admin', ['subdomain' => DemoService::DEMO_ROLE_SUBDOMAIN, 'tab' => 'schedule']);
         }
@@ -120,5 +123,19 @@ class DemoAutoLogin
         }
 
         return null;
+    }
+
+    /**
+     * Detect browser language and store in session for demo users
+     */
+    protected function detectAndStoreDemoLanguage(Request $request): void
+    {
+        if ($request->session()->has('demo_language')) {
+            return; // Preserve existing selection
+        }
+
+        $supportedLanguages = config('app.supported_languages', ['en']);
+        $browserLanguage = $request->getPreferredLanguage($supportedLanguages);
+        $request->session()->put('demo_language', $browserLanguage ?? 'en');
     }
 }
