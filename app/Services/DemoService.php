@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\AnalyticsDaily;
+use App\Models\AnalyticsEventsDaily;
+use App\Models\AnalyticsReferrersDaily;
 use App\Models\Event;
 use App\Models\Group;
 use App\Models\Role;
@@ -29,7 +32,7 @@ class DemoService
     /**
      * Demo role subdomain (the actual schedule)
      */
-    public const DEMO_ROLE_SUBDOMAIN = 'thenightowls';
+    public const DEMO_ROLE_SUBDOMAIN = 'moestavern';
 
     /**
      * Check if the given user is the demo user
@@ -71,8 +74,8 @@ class DemoService
             $role = new Role;
             $role->user_id = $user->id;
             $role->subdomain = self::DEMO_ROLE_SUBDOMAIN;
-            $role->type = 'talent';
-            $role->name = 'The Night Owls';
+            $role->type = 'venue';
+            $role->name = "Moe's Tavern";
             $role->email = self::DEMO_EMAIL;
             $role->email_verified_at = now();
             $role->language_code = 'en';
@@ -112,6 +115,15 @@ class DemoService
 
         // Create events with tickets
         $this->createEvents($role, $user, $groups);
+
+        // Create followed schedules for the demo user
+        $this->createFollowedSchedules($user);
+
+        // Create ticket purchases for the demo user
+        $this->createUserTicketPurchases($user);
+
+        // Create analytics data for the demo role
+        $this->createAnalyticsData($role);
     }
 
     /**
@@ -164,6 +176,8 @@ class DemoService
     public function resetDemoData(Role $role): void
     {
         DB::transaction(function () use ($role) {
+            $user = $role->user;
+
             // Delete sales and sale tickets for events owned by this role
             $eventIds = $role->events()->pluck('events.id');
 
@@ -184,6 +198,41 @@ class DemoService
 
             // Delete groups
             Group::where('role_id', $role->id)->delete();
+
+            // Delete analytics data for the demo role
+            AnalyticsDaily::where('role_id', $role->id)->delete();
+            AnalyticsEventsDaily::whereIn('event_id', $eventIds)->delete();
+            AnalyticsReferrersDaily::where('role_id', $role->id)->delete();
+
+            // Delete demo user's ticket purchases (sales where user_id is demo user)
+            if ($user) {
+                $userSaleIds = Sale::where('user_id', $user->id)->pluck('id');
+                SaleTicket::whereIn('sale_id', $userSaleIds)->delete();
+                Sale::where('user_id', $user->id)->delete();
+            }
+
+            // Delete followed schedules (roles with subdomain starting with 'demo-')
+            $followedRoles = Role::where('subdomain', 'like', 'demo-%')->get();
+            foreach ($followedRoles as $followedRole) {
+                // Delete events and related data for the followed role
+                $followedEventIds = $followedRole->events()->pluck('events.id');
+
+                SaleTicket::whereIn('sale_id', function ($query) use ($followedEventIds) {
+                    $query->select('id')
+                        ->from('sales')
+                        ->whereIn('event_id', $followedEventIds);
+                })->delete();
+
+                Sale::whereIn('event_id', $followedEventIds)->delete();
+                Ticket::whereIn('event_id', $followedEventIds)->delete();
+                $followedRole->events()->detach();
+                Event::where('creator_role_id', $followedRole->id)->delete();
+                Group::where('role_id', $followedRole->id)->delete();
+
+                // Detach users and delete the role
+                $followedRole->users()->detach();
+                $followedRole->delete();
+            }
 
             // Repopulate
             $this->populateDemoData($role);
@@ -222,25 +271,32 @@ class DemoService
     {
         $events = $this->getEventTemplates();
         $now = Carbon::now($role->timezone);
-        $pastEventCount = 5;
 
         foreach ($events as $index => $eventData) {
-            // Split events: ~5 past (last 14 days), rest future (next 30 days)
-            if ($index < $pastEventCount) {
-                // Past events: random 1-14 days ago
-                $daysAgo = rand(1, 14);
-                $eventDate = $now->copy()->subDays($daysAgo)
+            $isRecurring = ! empty($eventData['days_of_week']);
+
+            if ($isRecurring) {
+                // For recurring events, find the most recent occurrence of the target day
+                // This ensures events appear in the past and recur into the future
+                $targetDayOfWeek = strpos($eventData['days_of_week'], '1');
+                $eventDate = $now->copy()
+                    ->previous($targetDayOfWeek) // Get last occurrence of this day
                     ->setHour(rand(18, 21))
                     ->setMinute(rand(0, 1) * 30)
                     ->setSecond(0);
             } else {
-                // Future events: base spacing + random offset
-                $futureIndex = $index - $pastEventCount;
-                $daysAhead = max(1, ($futureIndex * 3) + rand(-1, 2));
-                $eventDate = $now->copy()->addDays($daysAhead)
-                    ->setHour(rand(18, 22))
-                    ->setMinute(rand(0, 1) * 30)
+                // One-time events (like New Year's Eve): set to next Dec 31
+                $eventDate = $now->copy()
+                    ->setMonth(12)
+                    ->setDay(31)
+                    ->setHour(21)
+                    ->setMinute(0)
                     ->setSecond(0);
+
+                // If Dec 31 has passed this year, use next year
+                if ($eventDate->isPast()) {
+                    $eventDate->addYear();
+                }
             }
 
             // Create event
@@ -255,6 +311,13 @@ class DemoService
             $event->tickets_enabled = true;
             $event->ticket_currency_code = 'USD';
             $event->flyer_image_url = $eventData['image'] ?? null;
+
+            // Set recurring fields for recurring events
+            if ($isRecurring) {
+                $event->days_of_week = $eventData['days_of_week'];
+                $event->recurring_end_type = 'never';
+            }
+
             $event->save();
 
             // Attach to role with group
@@ -268,8 +331,8 @@ class DemoService
             // Create tickets
             $this->createTicketsForEvent($event, $eventData['tickets']);
 
-            // Create sample sales for past events
-            if ($index < $pastEventCount) {
+            // Create sample sales for recurring events (they have past occurrences)
+            if ($isRecurring) {
                 $this->createSalesForEvent($event, $role);
             }
         }
@@ -301,8 +364,8 @@ class DemoService
 
         // Create 2-5 sample sales per event
         $numSales = rand(2, 5);
-        $firstNames = ['John', 'Jane', 'Mike', 'Sarah', 'David', 'Emily', 'Chris', 'Anna'];
-        $lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis'];
+        $firstNames = ['Homer', 'Marge', 'Bart', 'Lisa', 'Maggie', 'Ned', 'Maude', 'Milhouse'];
+        $lastNames = ['Simpson', 'Flanders', 'Van Houten', 'Bouvier', 'Burns', 'Carlson', 'Leonard', 'Szyslak'];
 
         for ($i = 0; $i < $numSales; $i++) {
             $firstName = $firstNames[array_rand($firstNames)];
@@ -316,6 +379,7 @@ class DemoService
                 'subdomain' => $role->subdomain,
                 'status' => 'paid',
                 'payment_method' => 'stripe',
+                'transaction_reference' => __('messages.manual_payment'),
                 'secret' => Str::random(32),
             ]);
 
@@ -329,6 +393,7 @@ class DemoService
                     'sale_id' => $sale->id,
                     'ticket_id' => $ticket->id,
                     'quantity' => $quantity,
+                    'seats' => json_encode(array_fill(1, $quantity, null)),
                 ]);
 
                 // Update ticket sold count
@@ -348,164 +413,500 @@ class DemoService
     {
         return [
             [
-                'name' => 'Jazz Night with The Blue Notes',
-                'description' => "Join us for an unforgettable evening of smooth jazz! The Blue Notes bring their signature blend of classic and contemporary jazz that will transport you to another era.\n\n**What to expect:**\n- Live jazz performance\n- Full bar service\n- Appetizers available",
-                'duration' => 3,
+                'name' => 'Duffapalooza',
+                'description' => "The greatest beer festival this side of Shelbyville! Live music, unlimited Duff samples, and good times guaranteed.\n\n**What to expect:**\n- Live performances all night\n- Duff, Duff Lite, and Duff Dry on tap\n- Pork chops and donuts available\n\nD'oh-n't miss it!",
+                'duration' => 4,
                 'group' => 'Live Music',
-                'image' => 'demo_flyer_jazz.jpg',
+                'image' => 'demo_flyer_rock.jpg',
+                'days_of_week' => '0000010', // Friday
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 20, 'quantity' => 100],
-                    ['type' => 'VIP Table', 'price' => 50, 'quantity' => 20, 'description' => 'Reserved seating with bottle service'],
+                    ['type' => 'Duff VIP', 'price' => 50, 'quantity' => 20, 'description' => 'Reserved seating with unlimited Duff'],
                 ],
             ],
             [
-                'name' => 'DJ MaxBeat - Electronic Dance Night',
-                'description' => "Get ready to dance! DJ MaxBeat spins the hottest electronic tracks all night long. State-of-the-art sound system and incredible light show included.\n\n21+ event. Valid ID required.",
+                'name' => 'DJ Sideshow Bob',
+                'description' => "Get ready to dance! DJ Sideshow Bob spins the hottest electronic tracks all night long. State-of-the-art sound system included.\n\n**WARNING:** Rakes have been removed from the premises for your safety.\n\n21+ event. Valid Springfield ID required.",
                 'duration' => 4,
                 'group' => 'DJ Nights',
                 'image' => 'demo_flyer_dj.jpg',
+                'days_of_week' => '0000001', // Saturday
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 15, 'quantity' => 200],
-                    ['type' => 'VIP Access', 'price' => 45, 'quantity' => 30, 'description' => 'Skip the line + VIP lounge access'],
+                    ['type' => 'VIP Access', 'price' => 45, 'quantity' => 30, 'description' => 'Skip the line + avoid rakes'],
                 ],
             ],
             [
-                'name' => 'Comedy Showcase',
-                'description' => "Laugh until it hurts! Our monthly comedy showcase features 5 hilarious comedians from the local scene and beyond.\n\n**Lineup:**\n- Mike Thompson (Headliner)\n- Sarah Chen\n- David Martinez\n- And more!",
+                'name' => 'Stand-Up with Krusty',
+                'description' => "Hey hey! Krusty the Clown brings his legendary stand-up act to Moe's Tavern!\n\n**Lineup:**\n- Krusty the Clown (Headliner)\n- Mr. Teeny (Opening Act)\n- Sideshow Mel\n\nHey hey! This show is Krusty-approved!",
                 'duration' => 2.5,
                 'group' => 'Comedy',
                 'image' => 'demo_flyer_comedy.jpg',
+                'days_of_week' => '0000010', // Friday
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 18, 'quantity' => 80],
-                    ['type' => 'Front Row', 'price' => 35, 'quantity' => 15, 'description' => 'Best seats in the house - be prepared to be part of the show!'],
+                    ['type' => 'Front Row', 'price' => 35, 'quantity' => 15, 'description' => 'Best seats - warning: may get squirted with seltzer'],
                 ],
             ],
             [
-                'name' => 'Open Mic Night',
-                'description' => "Share your talent with the world! Our weekly open mic welcomes musicians, comedians, poets, and performers of all kinds.\n\n**Sign-up starts at 6:30 PM**\n\nFirst-timers welcome!",
+                'name' => 'Open Mic Night - Springfield Edition',
+                'description' => "Share your talent with Springfield! Our weekly open mic welcomes musicians, comedians, poets, and performers of all kinds.\n\n**Featured Acts:**\n- Homer's interpretive poetry\n- Milhouse's magic tricks\n- Ralph's show and tell\n\n**Sign-up starts at 6:30 PM**\n\nEverybody's welcome! Even Shelbyville residents.",
                 'duration' => 3,
                 'group' => 'Open Mic',
                 'image' => 'demo_flyer_openmic.jpg',
+                'days_of_week' => '0000100', // Thursday
                 'tickets' => [
                     ['type' => 'Free Entry', 'price' => 0, 'quantity' => 100],
                 ],
             ],
             [
-                'name' => 'Rock The House - Live Band Night',
-                'description' => "Three incredible rock bands take the stage for one epic night!\n\n**Performing:**\n- The Electric Storm\n- Midnight Ravens\n- Steel Thunder\n\nDoors open at 7 PM. Earplugs recommended!",
+                'name' => 'The Stonecutters Secret Show',
+                'description' => "Who controls the British crown? Who keeps the metric system down? WE DO! WE DO!\n\nExclusive members-only event. Sacred Parchment required for entry.\n\n**Number 908 (Homer) NOT invited.**\n\nRemember: We do! We do!",
                 'duration' => 4,
-                'group' => 'Live Music',
-                'image' => 'demo_flyer_rock.jpg',
+                'group' => 'Special Events',
+                'image' => 'demo_flyer_special.jpg',
+                'days_of_week' => '0000001', // Saturday
                 'tickets' => [
-                    ['type' => 'General Admission', 'price' => 25, 'quantity' => 150],
-                    ['type' => 'VIP Backstage', 'price' => 60, 'quantity' => 25, 'description' => 'Meet the bands + exclusive merchandise'],
+                    ['type' => 'Stonecutter Member', 'price' => 25, 'quantity' => 150],
+                    ['type' => 'Stone of Triumph Package', 'price' => 60, 'quantity' => 25, 'description' => 'Exclusive robes + sacred parchment'],
                 ],
             ],
             [
-                'name' => 'Tropical House Party',
-                'description' => "Escape to paradise! Our resident DJs spin tropical house and summer vibes all night. Specialty cocktails and island-inspired decor.\n\nDress code: Beach chic",
+                'name' => 'Flaming Moe Night',
+                'description' => "Try the drink that put Moe's on the map! The legendary Flaming Moe - now with a secret ingredient that definitely isn't cough syrup.\n\n**Specials:**\n- $5 Flaming Moes all night\n- Fire extinguishers provided\n- Aerosmith NOT scheduled to appear\n\nDress code: Casual (fire-resistant clothing recommended)",
                 'duration' => 5,
-                'group' => 'DJ Nights',
+                'group' => 'Special Events',
                 'image' => 'demo_flyer_party.jpg',
+                'days_of_week' => '0000010', // Friday
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 20, 'quantity' => 180],
-                    ['type' => 'Cabana Package', 'price' => 150, 'quantity' => 8, 'description' => 'Private cabana for up to 6 guests + bottle service'],
+                    ['type' => 'Flaming Moe Package', 'price' => 75, 'quantity' => 8, 'description' => '5 Flaming Moes + commemorative glass'],
                 ],
             ],
             [
-                'name' => 'Improv Comedy Night',
-                'description' => "Anything can happen! Our improv troupe takes your suggestions and turns them into hilarious scenes. Interactive, unpredictable, and absolutely hilarious.\n\nFamily-friendly show at 7 PM, adult show at 9 PM.",
+                'name' => 'Trivia: Springfield History',
+                'description' => "Test your knowledge of our beloved town! Hosted by Professor Frink.\n\n**Sample Questions:**\n- Who really founded Springfield?\n- What's the tire fire's birthday?\n- How many times has Sideshow Bob tried to kill Bart?\n\nGlayvin! Prizes for top scorers!",
                 'duration' => 2,
-                'group' => 'Comedy',
-                'image' => 'demo_flyer_comedy.jpg',
+                'group' => 'Special Events',
+                'image' => 'demo_flyer_special.jpg',
+                'days_of_week' => '0001000', // Wednesday
                 'tickets' => [
-                    ['type' => 'General Admission', 'price' => 15, 'quantity' => 60],
+                    ['type' => 'General Admission', 'price' => 10, 'quantity' => 60],
                 ],
             ],
             [
-                'name' => 'Acoustic Sessions',
-                'description' => "An intimate evening of acoustic performances in our cozy lounge setting. Perfect for date night or a relaxing evening with friends.\n\nFeaturing local singer-songwriters sharing their original music.",
-                'duration' => 2.5,
-                'group' => 'Live Music',
-                'image' => 'demo_flyer_jazz.jpg',
-                'tickets' => [
-                    ['type' => 'General Admission', 'price' => 12, 'quantity' => 50],
-                ],
-            ],
-            [
-                'name' => 'Poetry Slam',
-                'description' => "Words that move you! Competitive spoken word poetry with cash prizes for the top performers.\n\n**Prizes:**\n- 1st Place: $200\n- 2nd Place: $100\n- 3rd Place: $50\n\nAudience voting determines the winners!",
+                'name' => 'Karaoke Night',
+                'description' => "Grab the mic and belt out your favorites! \"Baby on Board\" performances strongly encouraged.\n\n**Fan Favorites:**\n- \"See My Vest\" (Mr. Burns)\n- \"We Put The Spring in Springfield\"\n- \"Happy Birthday, Lisa\"\n\nThe Be Sharps reunions welcome!",
                 'duration' => 3,
                 'group' => 'Open Mic',
                 'image' => 'demo_flyer_openmic.jpg',
+                'days_of_week' => '0000100', // Thursday
                 'tickets' => [
-                    ['type' => 'Audience', 'price' => 10, 'quantity' => 100],
-                    ['type' => 'Performer Entry', 'price' => 5, 'quantity' => 20],
+                    ['type' => 'General Admission', 'price' => 8, 'quantity' => 75],
                 ],
             ],
             [
-                'name' => 'New Year\'s Eve Spectacular',
-                'description' => "Ring in the new year with style! Live band, DJ after midnight, champagne toast, party favors, and the best view of the fireworks in town.\n\n**Package includes:**\n- Open bar 9 PM - 2 AM\n- Gourmet appetizers\n- Champagne toast at midnight\n- Party favors",
-                'duration' => 6,
-                'group' => 'Special Events',
-                'image' => 'demo_flyer_special.jpg',
-                'tickets' => [
-                    ['type' => 'General Admission', 'price' => 75, 'quantity' => 200],
-                    ['type' => 'VIP Package', 'price' => 150, 'quantity' => 50, 'description' => 'Premium open bar + private lounge + gift bag'],
-                ],
-            ],
-            [
-                'name' => 'Blues & BBQ',
-                'description' => "Soul food and soulful music! Live blues band performs while you enjoy our famous BBQ spread.\n\n**Menu highlights:**\n- Smoked brisket\n- Pulled pork\n- Mac & cheese\n- Cornbread\n\nFood included with admission!",
-                'duration' => 4,
+                'name' => 'Jazz Night with Bleeding Gums Murphy',
+                'description' => "A tribute to Springfield's greatest jazz musician. Lisa Simpson and friends perform classic Bleeding Gums Murphy hits.\n\n**Featuring:**\n- \"Sax on the Beach\"\n- \"Jazzman\"\n- And more smooth saxophone\n\nBring your tissues. This one's emotional.",
+                'duration' => 3,
                 'group' => 'Live Music',
                 'image' => 'demo_flyer_jazz.jpg',
+                'days_of_week' => '1000000', // Sunday
                 'tickets' => [
-                    ['type' => 'General Admission (includes meal)', 'price' => 45, 'quantity' => 100],
+                    ['type' => 'General Admission', 'price' => 22, 'quantity' => 100],
+                    ['type' => 'VIP Table', 'price' => 55, 'quantity' => 20, 'description' => 'Reserved seating + commemorative saxophone pin'],
                 ],
             ],
             [
-                'name' => '80s Retro Dance Party',
-                'description' => "Flashback to the greatest decade! Dress in your best 80s attire and dance to all the classics.\n\n**Costume contest at 11 PM!**\n\nPrizes for best dressed. Hair spray and neon encouraged!",
+                'name' => 'Comedy Roast: Principal Skinner',
+                'description' => "SKINNER! Tonight we roast Springfield Elementary's finest principal. Hosted by Superintendent Chalmers.\n\n**Roasters include:**\n- Superintendent Chalmers\n- Groundskeeper Willie\n- Mrs. Krabappel (via video tribute)\n- Bart Simpson\n\nSteamed hams will NOT be served. It's an Albany expression.",
+                'duration' => 2.5,
+                'group' => 'Comedy',
+                'image' => 'demo_flyer_comedy.jpg',
+                'days_of_week' => '0000001', // Saturday
+                'tickets' => [
+                    ['type' => 'General Admission', 'price' => 18, 'quantity' => 100],
+                    ['type' => 'Aurora Borealis Package', 'price' => 40, 'quantity' => 20, 'description' => 'Front row + steamed ham (actually grilled)'],
+                ],
+            ],
+            [
+                'name' => 'Battle of the Bands',
+                'description' => "Springfield's biggest musical showdown!\n\n**Tonight's Lineup:**\n- School of Rock (starring Otto)\n- Spinal Tap Tribute Band\n- Sadgasm (featuring Homer)\n- The Party Posse\n\nMay the best band win! Voting by applause.",
+                'duration' => 4,
+                'group' => 'Live Music',
+                'image' => 'demo_flyer_rock.jpg',
+                'days_of_week' => '0000010', // Friday
+                'tickets' => [
+                    ['type' => 'General Admission', 'price' => 25, 'quantity' => 150],
+                    ['type' => 'Backstage Pass', 'price' => 65, 'quantity' => 30, 'description' => 'Meet the bands + exclusive merch'],
+                ],
+            ],
+            [
+                'name' => '80s Night: Do The Bartman',
+                'description' => "Flashback to the greatest decade! Dress in your best 80s/90s attire and dance to all the classics.\n\n**Featuring:**\n- \"Do The Bartman\" dance-off at 11 PM\n- Costume contest (Marge's hair encouraged)\n- Deep Cuts from the Springfield Files\n\nAy caramba!",
                 'duration' => 4,
                 'group' => 'DJ Nights',
                 'image' => 'demo_flyer_party.jpg',
+                'days_of_week' => '0000001', // Saturday
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 18, 'quantity' => 150],
                 ],
             ],
             [
-                'name' => 'Stand-Up Spotlight',
-                'description' => "One comedian, one hour of non-stop laughs! This month featuring national touring headliner Amy Roberts as seen on Netflix.\n\nMeet & greet after the show for VIP ticket holders.",
-                'duration' => 1.5,
-                'group' => 'Comedy',
-                'image' => 'demo_flyer_comedy.jpg',
-                'tickets' => [
-                    ['type' => 'General Admission', 'price' => 30, 'quantity' => 120],
-                    ['type' => 'VIP Meet & Greet', 'price' => 55, 'quantity' => 25, 'description' => 'Photo op + signed merchandise'],
-                ],
-            ],
-            [
-                'name' => 'Songwriter Circle',
-                'description' => "Four acclaimed songwriters share the stage, trading songs and stories in an intimate \"in the round\" setting.\n\nA rare opportunity to hear the stories behind the songs.",
+                'name' => "Poetry Slam: Moe's Haiku Hour",
+                'description' => "Words that move you... to tears. Competitive spoken word poetry featuring Springfield's most melancholic verses.\n\n**Hosted by Moe Szyslak**\n\nSample:\n*\"My life is empty\nNo one calls, the bar is dead\nPass the rat poison\"*\n\nTissues provided. Bring your sad poems.",
                 'duration' => 2.5,
-                'group' => 'Live Music',
-                'image' => 'demo_flyer_rock.jpg',
+                'group' => 'Open Mic',
+                'image' => 'demo_flyer_openmic.jpg',
+                'days_of_week' => '0010000', // Tuesday
                 'tickets' => [
-                    ['type' => 'General Admission', 'price' => 22, 'quantity' => 75],
+                    ['type' => 'Audience', 'price' => 10, 'quantity' => 100],
+                    ['type' => 'Poet Entry', 'price' => 5, 'quantity' => 20],
                 ],
             ],
             [
-                'name' => 'Latin Night Fiesta',
-                'description' => "Salsa, bachata, merengue and more! Live Latin band followed by DJ playing the hottest reggaeton tracks.\n\n**Free salsa lesson at 8 PM!**\n\nNo partner needed.",
-                'duration' => 5,
+                'name' => "New Year's Eve: Springfield Countdown",
+                'description' => "Ring in the new year Springfield style! Live music, DJ after midnight, Duff toast, party favors, and the best view of the tire fire!\n\n**Package includes:**\n- Open Duff bar 9 PM - 2 AM\n- Krusty Burger appetizers\n- Duff toast at midnight\n- Party favors (Itchy & Scratchy themed)\n\nHappy New Year! Don't have a cow, man!",
+                'duration' => 6,
                 'group' => 'Special Events',
                 'image' => 'demo_flyer_special.jpg',
+                'days_of_week' => null, // One-time event
                 'tickets' => [
-                    ['type' => 'General Admission', 'price' => 20, 'quantity' => 175],
-                    ['type' => 'VIP Booth', 'price' => 100, 'quantity' => 10, 'description' => 'Reserved booth for 4 + bottle service'],
+                    ['type' => 'General Admission', 'price' => 75, 'quantity' => 200],
+                    ['type' => 'VIP Package', 'price' => 150, 'quantity' => 50, 'description' => 'Premium open bar + Mr. Burns private lounge'],
+                ],
+            ],
+            [
+                'name' => "Talent Show: Springfield's Got Talent",
+                'description' => "Springfield's finest showcase their hidden talents!\n\n**Expected Performances:**\n- Mr. Burns: Juggling (with hounds)\n- Hans Moleman: \"Football in the Groin\" reenactment\n- Comic Book Guy: Worst. Performance. Ever.\n- Ralph Wiggum: TBD (probably glue-related)\n\nJudges: Mayor Quimby, Krusty, Lisa Simpson",
+                'duration' => 3,
+                'group' => 'Special Events',
+                'image' => 'demo_flyer_special.jpg',
+                'days_of_week' => '1000000', // Sunday
+                'tickets' => [
+                    ['type' => 'General Admission', 'price' => 15, 'quantity' => 120],
+                    ['type' => 'Judges Table', 'price' => 40, 'quantity' => 15, 'description' => 'Best seats + voting privileges'],
                 ],
             ],
         ];
+    }
+
+    /**
+     * Create schedules that the demo user follows
+     */
+    protected function createFollowedSchedules(User $user): void
+    {
+        $schedules = [
+            [
+                'name' => 'The Leftorium',
+                'subdomain' => 'demo-leftorium',
+                'type' => 'venue',
+                'city' => 'Springfield',
+                'country_code' => 'US',
+                'background_colors' => '#2e7d32, #1b5e20',
+                'accent_color' => '#81c784',
+                'events' => [
+                    ['name' => 'Left-Handed Guitar Night', 'days_offset' => -7, 'price' => 25],
+                    ['name' => 'Ned Flanders Gospel Hour', 'days_offset' => 5, 'price' => 15],
+                    ['name' => 'Okily Dokily Open Mic', 'days_offset' => 12, 'price' => 10],
+                ],
+            ],
+            [
+                'name' => 'Krusty Burger Arena',
+                'subdomain' => 'demo-krustyburger',
+                'type' => 'venue',
+                'city' => 'Springfield',
+                'country_code' => 'US',
+                'background_colors' => '#d32f2f, #b71c1c',
+                'accent_color' => '#ffeb3b',
+                'events' => [
+                    ['name' => 'Monster Truck Rally', 'days_offset' => -3, 'price' => 35],
+                    ['name' => 'Wrestling: Bumblebee Man vs Dr. Nick', 'days_offset' => 8, 'price' => 40],
+                ],
+            ],
+            [
+                'name' => "The Android's Dungeon",
+                'subdomain' => 'demo-androidsdungeon',
+                'type' => 'venue',
+                'city' => 'Springfield',
+                'country_code' => 'US',
+                'background_colors' => '#4a148c, #7b1fa2',
+                'accent_color' => '#ce93d8',
+                'events' => [
+                    ['name' => 'Radioactive Man Signing', 'days_offset' => -10, 'price' => 20],
+                    ['name' => 'D&D Night: Dungeons & Donuts', 'days_offset' => 3, 'price' => 15],
+                    ['name' => 'Worst. Cosplay Contest. Ever.', 'days_offset' => 15, 'price' => 12],
+                ],
+            ],
+            [
+                'name' => 'Springfield Bowl',
+                'subdomain' => 'demo-springfieldbowl',
+                'type' => 'venue',
+                'city' => 'Springfield',
+                'country_code' => 'US',
+                'background_colors' => '#1565c0, #0d47a1',
+                'accent_color' => '#64b5f6',
+                'events' => [
+                    ['name' => 'Springfield Philharmonic', 'days_offset' => -5, 'price' => 45],
+                    ['name' => 'Spinal Tap Live!', 'days_offset' => 20, 'price' => 55],
+                ],
+            ],
+        ];
+
+        foreach ($schedules as $scheduleData) {
+            // Create the role
+            $role = new Role;
+            $role->user_id = $user->id;
+            $role->subdomain = $scheduleData['subdomain'];
+            $role->type = $scheduleData['type'];
+            $role->name = $scheduleData['name'];
+            $role->email = 'demo-'.Str::random(8).'@example.com';
+            $role->email_verified_at = now();
+            $role->language_code = 'en';
+            $role->timezone = 'America/New_York';
+            $role->city = $scheduleData['city'];
+            $role->country_code = $scheduleData['country_code'];
+            $role->background = 'gradient';
+            $role->background_colors = $scheduleData['background_colors'];
+            $role->accent_color = $scheduleData['accent_color'];
+            $role->plan_type = 'pro';
+            $role->plan_expires = now()->addYear()->format('Y-m-d');
+            $role->save();
+
+            // Attach demo user as follower
+            $role->users()->attach($user->id, ['level' => 'follower']);
+
+            // Create events for this schedule
+            $now = Carbon::now($role->timezone);
+            foreach ($scheduleData['events'] as $eventInfo) {
+                $eventDate = $now->copy()->addDays($eventInfo['days_offset'])
+                    ->setHour(rand(19, 21))
+                    ->setMinute(0)
+                    ->setSecond(0);
+
+                $event = new Event;
+                $event->user_id = $user->id;
+                $event->creator_role_id = $role->id;
+                $event->name = $eventInfo['name'];
+                $event->description = 'Join us for an amazing event!';
+                $event->starts_at = $eventDate->utc();
+                $event->duration = rand(2, 4);
+                $event->slug = Str::slug($eventInfo['name']);
+                $event->tickets_enabled = true;
+                $event->ticket_currency_code = 'USD';
+                $event->save();
+
+                // Attach event to role
+                $role->events()->attach($event->id, ['is_accepted' => true]);
+
+                // Create ticket
+                Ticket::create([
+                    'event_id' => $event->id,
+                    'type' => 'General Admission',
+                    'price' => $eventInfo['price'],
+                    'quantity' => 100,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Create ticket purchases for the demo user
+     */
+    protected function createUserTicketPurchases(User $user): void
+    {
+        // Get events from followed schedules (demo- prefixed roles)
+        $followedRoles = Role::where('subdomain', 'like', 'demo-%')->get();
+
+        foreach ($followedRoles as $role) {
+            $events = $role->events;
+
+            foreach ($events as $event) {
+                // 70% chance of having purchased tickets to each event
+                if (rand(1, 100) > 70) {
+                    continue;
+                }
+
+                $ticket = $event->tickets->first();
+                if (! $ticket) {
+                    continue;
+                }
+
+                $eventDate = Carbon::parse($event->starts_at)->format('Y-m-d');
+                $quantity = rand(1, 2);
+                $totalAmount = $ticket->price * $quantity;
+
+                $sale = Sale::create([
+                    'event_id' => $event->id,
+                    'user_id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'event_date' => $eventDate,
+                    'subdomain' => $role->subdomain,
+                    'status' => 'paid',
+                    'payment_method' => 'stripe',
+                    'payment_amount' => $totalAmount,
+                    'transaction_reference' => __('messages.manual_payment'),
+                    'secret' => Str::random(32),
+                ]);
+
+                SaleTicket::create([
+                    'sale_id' => $sale->id,
+                    'ticket_id' => $ticket->id,
+                    'quantity' => $quantity,
+                    'seats' => json_encode(array_fill(1, $quantity, null)),
+                ]);
+                // Note: ticket sold count is automatically updated via SaleTicket::booted()
+            }
+        }
+    }
+
+    /**
+     * Create analytics data for the demo role
+     */
+    protected function createAnalyticsData(Role $role): void
+    {
+        $now = Carbon::now();
+
+        // Generate 365 days of analytics data
+        for ($daysAgo = 365; $daysAgo >= 0; $daysAgo--) {
+            $date = $now->copy()->subDays($daysAgo);
+
+            // Base views increase over time (growth trend)
+            $growthFactor = 1 + (365 - $daysAgo) / 365; // 1.0 to 2.0
+
+            // Weekend boost (Friday, Saturday, Sunday)
+            $dayOfWeek = $date->dayOfWeek;
+            $weekendMultiplier = in_array($dayOfWeek, [0, 5, 6]) ? 1.5 : 1.0;
+
+            // Random daily variation
+            $randomVariation = 0.7 + (rand(0, 60) / 100); // 0.7 to 1.3
+
+            // Calculate base daily views (targeting ~50-70 views per day on average)
+            $baseViews = 40 * $growthFactor * $weekendMultiplier * $randomVariation;
+
+            // Device breakdown: ~50% mobile, ~35% desktop, ~15% tablet
+            $mobileViews = (int) round($baseViews * 0.50 * (0.9 + rand(0, 20) / 100));
+            $desktopViews = (int) round($baseViews * 0.35 * (0.9 + rand(0, 20) / 100));
+            $tabletViews = (int) round($baseViews * 0.12 * (0.9 + rand(0, 20) / 100));
+            $unknownViews = (int) round($baseViews * 0.03 * (0.9 + rand(0, 20) / 100));
+
+            // Only create record if there are views
+            if ($mobileViews + $desktopViews + $tabletViews + $unknownViews > 0) {
+                AnalyticsDaily::create([
+                    'role_id' => $role->id,
+                    'date' => $date->toDateString(),
+                    'desktop_views' => $desktopViews,
+                    'mobile_views' => $mobileViews,
+                    'tablet_views' => $tabletViews,
+                    'unknown_views' => $unknownViews,
+                ]);
+            }
+
+            // Create referrer data
+            $this->createReferrerDataForDay($role, $date, $baseViews);
+        }
+
+        // Create event-specific analytics for past events
+        $this->createEventAnalyticsData($role);
+    }
+
+    /**
+     * Create referrer data for a specific day
+     */
+    protected function createReferrerDataForDay(Role $role, Carbon $date, float $baseViews): void
+    {
+        $sources = [
+            ['source' => 'direct', 'domain' => '', 'weight' => 40],
+            ['source' => 'social', 'domain' => 'instagram.com', 'weight' => 15],
+            ['source' => 'social', 'domain' => 'facebook.com', 'weight' => 10],
+            ['source' => 'search', 'domain' => 'google.com', 'weight' => 20],
+            ['source' => 'other', 'domain' => 'linktr.ee', 'weight' => 8],
+            ['source' => 'email', 'domain' => 'mail.google.com', 'weight' => 5],
+            ['source' => 'social', 'domain' => 't.co', 'weight' => 2],
+        ];
+
+        foreach ($sources as $sourceData) {
+            // Calculate views for this source based on weight
+            $sourceViews = (int) round($baseViews * ($sourceData['weight'] / 100) * (0.8 + rand(0, 40) / 100));
+
+            if ($sourceViews > 0) {
+                AnalyticsReferrersDaily::create([
+                    'role_id' => $role->id,
+                    'date' => $date->toDateString(),
+                    'source' => $sourceData['source'],
+                    'domain' => $sourceData['domain'],
+                    'views' => $sourceViews,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Create event-specific analytics data
+     */
+    protected function createEventAnalyticsData(Role $role): void
+    {
+        $now = Carbon::now();
+        $events = $role->events;
+
+        foreach ($events as $event) {
+            $eventDate = Carbon::parse($event->starts_at);
+
+            // Generate views for 30 days before the event (or from event creation if more recent)
+            $startDate = $eventDate->copy()->subDays(30);
+            if ($startDate->isFuture()) {
+                $startDate = $now->copy()->subDays(7);
+            }
+
+            $endDate = min($eventDate->copy()->addDays(1), $now);
+
+            // Skip if event is in the future
+            if ($startDate->gt($now)) {
+                continue;
+            }
+
+            $currentDate = $startDate->copy();
+            while ($currentDate->lte($endDate) && $currentDate->lte($now)) {
+                // Views increase as event approaches
+                $daysUntilEvent = $currentDate->diffInDays($eventDate, false);
+                $proximityBoost = max(1, 3 - abs($daysUntilEvent) / 10);
+
+                $baseViews = rand(5, 20) * $proximityBoost;
+
+                // Device breakdown
+                $mobileViews = (int) round($baseViews * 0.55);
+                $desktopViews = (int) round($baseViews * 0.35);
+                $tabletViews = (int) round($baseViews * 0.10);
+
+                // Sales data (only for past events and days before the event)
+                $salesCount = 0;
+                $revenue = 0;
+
+                if ($daysUntilEvent > 0 && $daysUntilEvent <= 21) {
+                    // Higher chance of sales in the 3 weeks before event
+                    if (rand(1, 100) <= 60) {
+                        $salesCount = rand(1, 4);
+                        $ticket = $event->tickets->first();
+                        if ($ticket) {
+                            $revenue = $salesCount * $ticket->price * rand(1, 2);
+                        }
+                    }
+                }
+
+                AnalyticsEventsDaily::create([
+                    'event_id' => $event->id,
+                    'date' => $currentDate->toDateString(),
+                    'desktop_views' => $desktopViews,
+                    'mobile_views' => $mobileViews,
+                    'tablet_views' => $tabletViews,
+                    'unknown_views' => 0,
+                    'sales_count' => $salesCount,
+                    'revenue' => $revenue,
+                ]);
+
+                $currentDate->addDay();
+            }
+        }
     }
 }

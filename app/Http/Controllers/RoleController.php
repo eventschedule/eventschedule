@@ -783,6 +783,10 @@ class RoleController extends Controller
 
     public function create($type)
     {
+        if (is_demo_mode()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
         if (! is_hosted_or_admin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
@@ -867,6 +871,10 @@ class RoleController extends Controller
 
     public function store(RoleCreateRequest $request): RedirectResponse
     {
+        if (is_demo_mode()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
         if (! is_hosted_or_admin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
@@ -1827,6 +1835,10 @@ class RoleController extends Controller
 
     public function changePlan($subdomain, $plan_type)
     {
+        if (is_demo_mode() && $plan_type === 'free') {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (auth()->user()->id != $role->user_id) {

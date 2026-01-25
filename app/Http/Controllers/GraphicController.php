@@ -136,7 +136,11 @@ class GraphicController extends Controller
         }
 
         $graphicSettings = $role->graphic_settings;
-        $useScreenCapture = $graphicSettings['use_screen_capture'] ?? false;
+
+        // Use request parameters if provided, otherwise fall back to saved settings
+        $useScreenCapture = $request->has('use_screen_capture')
+            ? $request->boolean('use_screen_capture')
+            : ($graphicSettings['use_screen_capture'] ?? false);
 
         if (config('services.capturekit.key') && $role->isEnterprise() && $useScreenCapture) {
             $url = $role->getGuestUrl($role->subdomain).'?embed=true&graphic=true';
@@ -192,7 +196,10 @@ class GraphicController extends Controller
         $eventText = $this->generateEventText($role, $events, $directRegistration);
 
         // Process text through AI if ai_prompt is set (Pro feature)
-        $aiPrompt = trim($graphicSettings['ai_prompt'] ?? '');
+        // Use request parameter if provided, otherwise fall back to saved settings
+        $aiPrompt = $request->has('ai_prompt')
+            ? trim($request->get('ai_prompt', ''))
+            : trim($graphicSettings['ai_prompt'] ?? '');
         if ($role->isPro() && ! empty($aiPrompt) && config('services.google.gemini_key')) {
             $aiProcessedText = $this->processTextWithAI($eventText, $aiPrompt);
             if ($aiProcessedText) {
