@@ -109,7 +109,7 @@ class DemoService
             $role->background = 'gradient';
             $role->background_colors = '#FFD90F, #0064B0'; // Classic Simpsons yellow/blue
             $role->accent_color = '#FFD90F';
-            $role->description = '# 🍩 Welcome to Springfield Events!
+            $role->description = '# Welcome to Springfield Events! 🍩
 
 **Your guide to everything happening in America\'s most nuclear-adjacent town!**
 
@@ -119,11 +119,11 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
 
 ---
 
-## 🎭 What We Offer
-- 🎵 **Live Music** - From jazz to rock to whatever Otto\'s listening to
-- 🎤 **Comedy** - Stand-up, improv, and Krusty (when he shows up sober)
-- 🍺 **Nightlife** - The finest Duff this side of Shelbyville
-- 🎪 **Community Events** - Town meetings, talent shows, and controlled chaos
+## What We Offer
+- **Live Music** - From jazz to rock to whatever Otto\'s listening to
+- **Comedy** - Stand-up, improv, and Krusty (when he shows up sober)
+- **Nightlife** - The finest Duff this side of Shelbyville 🍺
+- **Community Events** - Town meetings, talent shows, and controlled chaos
 
 *D\'oh-n\'t miss out on the action! Our tire fire burns eternal, and so does our event calendar.*';
             $role->accept_requests = true;
@@ -342,29 +342,27 @@ We\'ve played every venue from the Isotopes Stadium to the Springfield dump (gre
 *We put the "rock" in "Springfield rocks!" and the "roll" in "let\'s roll to Moe\'s after the show."*',
             ],
             [
-                'name' => 'Open Mic Collective',
-                'subdomain' => 'demo-openmic',
-                'background_colors' => '#4e342e, #8d6e63',
+                'name' => 'Lurleen Lumpkin',
+                'subdomain' => 'demo-lurleen',
+                'background_colors' => '#8B4513, #D2691E',
                 'background_rotation' => 120,
-                'description' => '# 🎤 Open Mic Collective - Everyone Gets a Chance
+                'description' => '# Lurleen Lumpkin - Country Music Star
 
-**Where Springfield\'s hidden talents shine (and sometimes crash and burn).**
+**Your wife don\'t understand you, but I do.**
 
-Poets, musicians, comedians, and that guy who plays the spoons—everyone gets a chance. We\'ve launched careers, ended friendships, and provided hours of content for future therapy sessions.
+Springfield\'s sweetheart of country music, discovered at the Beer-N-Brawl by her former manager Homer Simpson. From humble waitress origins to chart-topping success, Lurleen brings heartfelt honky-tonk to venues across the state.
 
-> "This is exactly what it\'s like to be Moe. Deep depression, and then the happy." - Moe Szyslak
+> "I\'ve been down so long, it looks like up to me." - Lurleen Lumpkin
 
 ---
 
-## 🎭 What You\'ll See
-- 🎸 **Musicians** - From virtuosos to... Homer
-- 📝 **Poets** - Moe\'s melancholy verses included
-- 🎤 **Comedians** - Laughter and awkward silence
-- 🥄 **Spoon Guy** - He\'s always there
+## Hit Songs
+- "Your Wife Don\'t Understand You"
+- "I\'m Basting a Turkey With My Tears"
+- "Don\'t Look Up My Dress Unless You Mean It"
+- "Bagged Me a Homer"
 
-⚠️ *You might bomb, but at least Moe\'s drinks are cheap and his sympathy is... present.*
-
-*Springfield\'s got talent. Sometimes. Maybe. Come find out!*',
+*Stand by your ma-aa-aan...*',
             ],
             [
                 'name' => 'Troy McClure Productions',
@@ -971,8 +969,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             // MOE'S TAVERN EVENTS
             // ===========================
             [
-                'name' => 'Jazz Night with Bleeding Gums Murphy',
-                'description' => "## 🎷 A Night of Smooth Jazz\n\nA tribute to Springfield's greatest jazz musician. Lisa Simpson and friends perform classic Bleeding Gums Murphy hits in this emotional evening of saxophone excellence.\n\n> \"The blues isn't about feeling better. It's about making other people feel worse.\" - Bleeding Gums Murphy\n\n### 🎵 Tonight's Setlist\n- 🎷 *\"Sax on the Beach\"*\n- 🎵 *\"Jazzman\"*\n- 🎶 *\"I Never Had an Italian Suit Blues\"*\n- 🎹 Plus improvisational pieces that would make Lisa cry (in a good way)\n\n---\n\n⚠️ **Warning:** Bring tissues. This one hits different.\n\n*\"When you hit a wrong note, it's the next note that makes it good or bad.\"*",
+                'name' => '🎷 Jazz Night with Bleeding Gums Murphy',
+                'description' => "## A Night of Smooth Jazz 🎷\n\nA tribute to Springfield's greatest jazz musician. Lisa Simpson and friends perform classic Bleeding Gums Murphy hits in this emotional evening of saxophone excellence. 🎵\n\n> \"The blues isn't about feeling better. It's about making other people feel worse.\" - Bleeding Gums Murphy\n\n### Tonight's Setlist\n- 🎷 *\"Sax on the Beach\"*\n- 🎶 *\"Jazzman\"*\n- 💔 *\"I Never Had an Italian Suit Blues\"*\n- ✨ Plus improvisational pieces that would make Lisa cry (in a good way)\n\n---\n\n⚠️ **Warning:** Bring tissues. This one hits different. 😢\n\n*\"When you hit a wrong note, it's the next note that makes it good or bad.\"*",
                 'duration' => 3,
                 'group' => 'Live Music',
                 'curator_group' => 'Arts & Culture',
@@ -988,8 +986,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'Monorail Karaoke Night',
-                'description' => "## 🚝 MONORAIL! MONORAIL! MONORAIL!\n\nI've sold monorails to Brockway, Ogdenville, and North Haverbrook, and by gum, it put them on the map!\n\n> \"Is there a chance the track could bend?\" \"Not on your life, my Hindu friend!\"\n\n### 🎤 Tonight's Setlist\n- 🚝 *\"Monorail\"* (mandatory opener - crowd participation required)\n- 🌸 *\"We Put the Spring in Springfield\"*\n- 🦊 *\"See My Vest\"* (fur-free version)\n- 🏪 *\"Who Needs the Kwik-E-Mart\"*\n\n---\n\n**Karaoke Rules:**\n1. Lyle Lanley impressions get bonus points\n2. Singing with a partner encouraged\n3. If Marge objects, we ignore it\n\n*What about us brain-dead slobs? You'll be given cushy jobs!*",
+                'name' => '🚝 Monorail Karaoke Night',
+                'description' => "## MONORAIL! MONORAIL! MONORAIL! 🚝\n\nI've sold monorails to Brockway, Ogdenville, and North Haverbrook, and by gum, it put them on the map! 🗺️\n\n> \"Is there a chance the track could bend?\" \"Not on your life, my Hindu friend!\"\n\n### 🎵 Tonight's Setlist\n- 🚝 *\"Monorail\"* (mandatory opener - crowd participation required)\n- 🌸 *\"We Put the Spring in Springfield\"*\n- 🧥 *\"See My Vest\"* (fur-free version)\n- 🏪 *\"Who Needs the Kwik-E-Mart\"*\n\n---\n\n**Karaoke Rules:** 📋\n1. 🎭 Lyle Lanley impressions get bonus points\n2. 👫 Singing with a partner encouraged\n3. 🙉 If Marge objects, we ignore it\n\n*What about us brain-dead slobs? You'll be given cushy jobs!* 💼",
                 'duration' => 3,
                 'group' => 'Open Mic',
                 'curator_group' => 'Bars & Nightlife',
@@ -998,15 +996,15 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'hour' => 20,
                 'minute' => 0,
                 'days_of_week' => '0100000', // Monday
-                'talent' => 'demo-openmic',
+                'talent' => 'demo-lurleen',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 12, 'quantity' => 100],
                     ['type' => 'Lyle Lanley VIP', 'price' => 30, 'quantity' => 20, 'description' => 'Reserved seating + monorail conductor hat'],
                 ],
             ],
             [
-                'name' => 'Isotopes Game Watch Party',
-                'description' => "## ⚾ GO ISOTOPES!\n\nWatch Springfield's beloved baseball team on the big screen! The only team that almost moved to Albuquerque!\n\n> \"Mattingly! I thought I told you to trim those sideburns! GO HOME! You're off the team!\" - Mr. Burns\n\n### 🌭 Game Day Specials\n- 🌭 **$3 Hot Dogs** - Made from 100% Grade-F meat (\"Mostly Circus Animals\")\n- 🍺 **$2 Duffs** - During innings 1-3\n- 🧀 **Free Nachos** - Every time the Isotopes score (so... rarely)\n\n---\n\n⚠️ *Warning: Team may relocate to Albuquerque at any moment. Dancin' Homer appearances NOT guaranteed but always hoped for.*\n\n*Remember: Capital City is still just a small market team with a minor league attitude.*",
+                'name' => '⚾ Isotopes Game Watch Party',
+                'description' => "## GO ISOTOPES! ⚾\n\nWatch Springfield's beloved baseball team on the big screen! The only team that almost moved to Albuquerque!\n\n> \"Mattingly! I thought I told you to trim those sideburns! GO HOME! You're off the team!\" - Mr. Burns\n\n### Game Day Specials\n- **$3 Hot Dogs** - Made from 100% Grade-F meat (\"Mostly Circus Animals\")\n- **$2 Duffs** - During innings 1-3\n- **Free Nachos** - Every time the Isotopes score (so... rarely)\n\n---\n\n⚠️ *Warning: Team may relocate to Albuquerque at any moment. Dancin' Homer appearances NOT guaranteed but always hoped for.*\n\n*Remember: Capital City is still just a small market team with a minor league attitude.*",
                 'duration' => 3,
                 'group' => 'Special Events',
                 'curator_group' => 'Bars & Nightlife',
@@ -1021,8 +1019,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => "Poetry Slam: Moe's Haiku Hour",
-                'description' => "## 📝 Words That Move You... To Tears\n\nCompetitive spoken word poetry featuring Springfield's most melancholic verses. Hosted by the Sultan of Sadness himself, Moe Szyslak.\n\n> \"I'm better than dirt. Well, most kinds of dirt. Not that fancy store-bought dirt. That stuff's loaded with nutrients.\" - Moe Szyslak\n\n### 🎭 Sample Verse (by Moe)\n*\"My life is empty*\n*No one calls, the bar is dead*\n*Pass the rat poison\"*\n\n---\n\n### 🏆 Categories\n- 💔 **Most Depressing** - The Moe Special\n- 😢 **Most Tears Generated** - Audience vote\n- 🎭 **Best Performance** - Drama counts\n\n*Tissues provided. Bring your sad poems and your sadder life experiences.*",
+                'name' => "📝 Poetry Slam: Moe's Haiku Hour",
+                'description' => "## 📝 Words That Move You... To Tears 😢\n\nCompetitive spoken word poetry featuring Springfield's most melancholic verses. Hosted by the Sultan of Sadness himself, Moe Szyslak.\n\n> \"I'm better than dirt. Well, most kinds of dirt. Not that fancy store-bought dirt. That stuff's loaded with nutrients.\" - Moe Szyslak\n\n### 🎭 Sample Verse (by Moe)\n*\"My life is empty*\n*No one calls, the bar is dead*\n*Pass the rat poison\"*\n\n---\n\n### 🏆 Categories\n- 💔 **Most Depressing** - The Moe Special\n- 😭 **Most Tears Generated** - Audience vote\n- 🎭 **Best Performance** - Drama counts\n\n*Tissues provided. Bring your sad poems and your sadder life experiences.* 📜",
                 'duration' => 2.5,
                 'group' => 'Open Mic',
                 'curator_group' => 'Bars & Nightlife',
@@ -1031,15 +1029,15 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'hour' => 20,
                 'minute' => 0,
                 'days_of_week' => '0010000', // Tuesday
-                'talent' => 'demo-openmic',
+                'talent' => 'demo-lurleen',
                 'tickets' => [
                     ['type' => 'Audience', 'price' => 10, 'quantity' => 100],
                     ['type' => 'Poet Entry', 'price' => 5, 'quantity' => 20],
                 ],
             ],
             [
-                'name' => 'Trivia: Springfield History',
-                'description' => "## 🧠 Test Your Springfield IQ!\n\nTrivia night for true Springfieldians! Hosted by Professor Frink, with the questions and the answers and the GLAVIN!\n\n> \"A little knowledge is a dangerous thing. So is a lot.\" - Professor Frink\n\n### 📋 Sample Questions\n- 🗺️ Who *really* founded Springfield? (Jebediah or Hans?)\n- 🔥 What's the tire fire's birthday? (Hint: It's older than you think)\n- 💀 How many times has Sideshow Bob tried to kill Bart?\n- ☢️ What sector does Homer work in? (And what does he do there?)\n\n---\n\n### 🏆 Prizes\n- 🥇 **1st Place** - Flaming Moe pitcher + bragging rights\n- 🥈 **2nd Place** - Duff 6-pack\n- 🥉 **3rd Place** - A sense of adequacy\n\n*GLAVIN! May the smartest Springfieldian win!*",
+                'name' => '🧠 Trivia: Springfield History',
+                'description' => "## 🧠 Test Your Springfield IQ!\n\nTrivia night for true Springfieldians! Hosted by Professor Frink, with the questions and the answers and the GLAVIN!\n\n> \"A little knowledge is a dangerous thing. So is a lot.\" - Professor Frink\n\n### Sample Questions\n- Who *really* founded Springfield? (Jebediah or Hans?)\n- What's the tire fire's birthday? (Hint: It's older than you think)\n- How many times has Sideshow Bob tried to kill Bart?\n- What sector does Homer work in? (And what does he do there?)\n\n---\n\n### Prizes 🏆\n- **1st Place** - Flaming Moe pitcher + bragging rights\n- **2nd Place** - Duff 6-pack\n- **3rd Place** - A sense of adequacy\n\n*GLAVIN! May the smartest Springfieldian win!*",
                 'duration' => 2,
                 'group' => 'Special Events',
                 'curator_group' => 'Bars & Nightlife',
@@ -1054,8 +1052,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'Open Mic Night - Springfield Edition',
-                'description' => "## 🎤 Share Your Talent with Springfield!\n\nOur weekly open mic welcomes musicians, comedians, poets, and performers of all kinds. Yes, even you. Yes, even *that* act.\n\n> \"I'm a star! A star, I tell you!\" - Krusty (before he bombed)\n\n### 🌟 Past Featured Acts\n- 🎭 Homer's interpretive poetry (surprisingly emotional)\n- 🎩 Milhouse's magic tricks (everything vanishes, including the audience)\n- 🖍️ Ralph's show and tell (\"I found a moon rock in my nose!\")\n- 🎸 Otto's air guitar (technically perfect)\n\n---\n\n📝 **Sign-up starts at 6:30 PM**\n\n*Everybody's welcome! Even Shelbyville residents (we're watching you though).*",
+                'name' => '🎙️ Open Mic Night - Springfield Edition',
+                'description' => "## 🎙️ Share Your Talent with Springfield!\n\nOur weekly open mic welcomes musicians, comedians, poets, and performers of all kinds. Yes, even you. Yes, even *that* act. 🌟\n\n> \"I'm a star! A star, I tell you!\" - Krusty (before he bombed)\n\n### 🎭 Past Featured Acts\n- 📝 Homer's interpretive poetry (surprisingly emotional)\n- 🎩 Milhouse's magic tricks (everything vanishes, including the audience)\n- 🌙 Ralph's show and tell (\"I found a moon rock in my nose!\")\n- 🎸 Otto's air guitar (technically perfect)\n\n---\n\n**Sign-up starts at 6:30 PM** ⏰\n\n*Everybody's welcome! Even Shelbyville residents (we're watching you though).* 👀",
                 'duration' => 3,
                 'group' => 'Open Mic',
                 'curator_group' => 'Bars & Nightlife',
@@ -1064,14 +1062,14 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'hour' => 19,
                 'minute' => 0,
                 'days_of_week' => '0000100', // Thursday
-                'talents' => ['demo-openmic', 'demo-lisajazz'],
+                'talents' => ['demo-lurleen', 'demo-lisajazz'],
                 'tickets' => [
                     ['type' => 'Free Entry', 'price' => 0, 'quantity' => 100],
                 ],
             ],
             [
-                'name' => 'Karaoke Night',
-                'description' => "## 🎤 Grab the Mic!\n\nBelt out your favorites! \"Baby on Board\" performances strongly encouraged. Be Sharps reunions welcome!\n\n> \"Baby on board, how I've adored, that sign on my car's window pane...\" - The Be Sharps\n\n### 🎵 Fan Favorites\n- 🦊 *\"See My Vest\"* - Mr. Burns' fashion anthem\n- 🌸 *\"We Put The Spring in Springfield\"* - Town pride!\n- 🎂 *\"Happy Birthday, Lisa\"* - Michael Jackson (\"John Jay Smith\") approved\n- 🍺 *\"It Was a Very Good Beer\"* - Homer's ballad\n\n---\n\n### 🏆 Prizes Tonight\n- 🥇 Best Performance: Free pitcher of Duff\n- 🎭 Best Costume: Moe's respect (priceless)\n- 💔 Most Emotional: Tissues and a hug\n\n*Warning: \"Bawitdaba\" is banned after last week's incident.*",
+                'name' => '🎤 Karaoke Night',
+                'description' => "## 🎤 Grab the Mic!\n\nBelt out your favorites! \"Baby on Board\" performances strongly encouraged. Be Sharps reunions welcome!\n\n> \"Baby on board, how I've adored, that sign on my car's window pane...\" - The Be Sharps\n\n### Fan Favorites\n- *\"See My Vest\"* - Mr. Burns' fashion anthem\n- *\"We Put The Spring in Springfield\"* - Town pride!\n- *\"Happy Birthday, Lisa\"* - Michael Jackson (\"John Jay Smith\") approved\n- *\"It Was a Very Good Beer\"* - Homer's ballad 🍺\n\n---\n\n### Prizes Tonight\n- Best Performance: Free pitcher of Duff\n- Best Costume: Moe's respect (priceless)\n- Most Emotional: Tissues and a hug\n\n*Warning: \"Bawitdaba\" is banned after last week's incident.*",
                 'duration' => 3,
                 'group' => 'Open Mic',
                 'curator_group' => 'Bars & Nightlife',
@@ -1080,14 +1078,14 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'hour' => 21,
                 'minute' => 0,
                 'days_of_week' => '0000100', // Thursday
-                'talent' => 'demo-openmic',
+                'talent' => 'demo-lurleen',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 8, 'quantity' => 75],
                 ],
             ],
             [
-                'name' => 'Stand-Up with Krusty',
-                'description' => "## 🤡 HEY HEY! Comedy Night!\n\nKrusty the Clown brings his legendary stand-up act to Moe's Tavern! Forty years of comedy... and counting!\n\n> \"I heartily endorse this event or product!\" - Krusty\n\n### 🎭 Tonight's Lineup\n- 🤡 **Krusty the Clown** - Headliner (if he shows up sober)\n- 🐒 **Mr. Teeny** - Opening Act (may smoke on stage)\n- 🎪 **Sideshow Mel** - Bone-in-hair comedy stylings\n\n---\n\n### ⚠️ Important Notes\n- 💊 Krusty's medication schedule has been adjusted\n- 🚫 No asking about Sideshow Bob\n- 📸 Photos allowed (Krusty needs the publicity)\n\n*This show is Krusty-approved! (Terms and conditions apply)*",
+                'name' => '🤡 Stand-Up with Krusty',
+                'description' => "## HEY HEY! Comedy Night! 🤡\n\nKrusty the Clown brings his legendary stand-up act to Moe's Tavern! Forty years of comedy... and counting! 🎭\n\n> \"I heartily endorse this event or product!\" - Krusty\n\n### 🎤 Tonight's Lineup\n- 🤡 **Krusty the Clown** - Headliner (if he shows up sober)\n- 🐒 **Mr. Teeny** - Opening Act (may smoke on stage)\n- 🦴 **Sideshow Mel** - Bone-in-hair comedy stylings\n\n---\n\n### ⚠️ Important Notes\n- 💊 Krusty's medication schedule has been adjusted\n- 🚫 No asking about Sideshow Bob\n- 📸 Photos allowed (Krusty needs the publicity)\n\n*This show is Krusty-approved! (Terms and conditions apply)* ✅",
                 'duration' => 2.5,
                 'group' => 'Comedy',
                 'curator_group' => 'Entertainment',
@@ -1103,8 +1101,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'Flaming Moe Night',
-                'description' => "## 🔥 The Drink That Put Moe's on the Map!\n\nThe legendary Flaming Moe returns! Now with a secret ingredient that is *definitely* not children's cough syrup.\n\n> \"I invented this drink! Well, actually Homer told me... but I made it famous!\" - Moe\n\n### 🍹 Tonight's Specials\n- 🔥 **$5 Flaming Moes** - All night long\n- 🧯 **Fire extinguishers** - Provided at each table\n- 🎸 **Aerosmith** - NOT scheduled to appear (sorry)\n- 🎵 **Live Music** - To drown out the fire alarms\n\n---\n\n### 👔 Dress Code\nCasual (fire-resistant clothing *strongly* recommended)\n\n⚠️ *Warning: Side effects may include: euphoria, dancing, and temporary belief that you can sing.*\n\n*\"Happiness is just a Flaming Moe away!\"*",
+                'name' => '🔥 Flaming Moe Night',
+                'description' => "## 🔥 The Drink That Put Moe's on the Map!\n\nThe legendary Flaming Moe returns! Now with a secret ingredient that is *definitely* not children's cough syrup. 🍹\n\n> \"I invented this drink! Well, actually Homer told me... but I made it famous!\" - Moe\n\n### 🍸 Tonight's Specials\n- 🔥 **$5 Flaming Moes** - All night long\n- 🧯 **Fire extinguishers** - Provided at each table\n- 🎸 **Aerosmith** - NOT scheduled to appear (sorry)\n- 🎵 **Live Music** - To drown out the fire alarms\n\n---\n\n### 👔 Dress Code\nCasual (fire-resistant clothing *strongly* recommended) 👕\n\n⚠️ *Warning: Side effects may include: euphoria, dancing, and temporary belief that you can sing.* 🎤\n\n*\"Happiness is just a Flaming Moe away!\"* 🥳",
                 'duration' => 5,
                 'group' => 'Special Events',
                 'curator_group' => 'Bars & Nightlife',
@@ -1120,8 +1118,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'DJ Sideshow Bob',
-                'description' => "## 🎧 The Cultured Criminal Spins!\n\nGet ready to dance! DJ Sideshow Bob brings his unique blend of Gilbert & Sullivan meets electronica. State-of-the-art sound system included.\n\n> \"Oh, I'll stay away from your son, all right. Stay away... FOREVER!\" - Sideshow Bob (about something else)\n\n### 🎵 Tonight's Vibe\n- 🎭 **Gilbert & Sullivan Remixes** - H.M.S. Pinafore goes HARD\n- 💀 **Dark Electronica** - Revenge beats\n- 🎹 **Classical Drops** - Beethoven would be proud (probably)\n\n---\n\n### ⚠️ IMPORTANT SAFETY NOTICE\n🚫 All rakes have been removed from the premises\n🚫 Bart Simpson banned from attendance\n✅ 21+ event with valid Springfield ID\n\n*\"No one who speaks German could be an evil man!\" ...just saying.*",
+                'name' => '🎧 DJ Sideshow Bob',
+                'description' => "## 🎧 The Cultured Criminal Spins!\n\nGet ready to dance! DJ Sideshow Bob brings his unique blend of Gilbert & Sullivan meets electronica. State-of-the-art sound system included. 🔊\n\n> \"Oh, I'll stay away from your son, all right. Stay away... FOREVER!\" - Sideshow Bob (about something else)\n\n### 🎵 Tonight's Vibe\n- ⚓ **Gilbert & Sullivan Remixes** - H.M.S. Pinafore goes HARD\n- 💀 **Dark Electronica** - Revenge beats\n- 🎹 **Classical Drops** - Beethoven would be proud (probably)\n\n---\n\n### ⚠️ IMPORTANT SAFETY NOTICE\n- 🚫 All rakes have been removed from the premises\n- 👦 Bart Simpson banned from attendance\n- 🪪 21+ event with valid Springfield ID\n\n*\"No one who speaks German could be an evil man!\" ...just saying.* 🇩🇪",
                 'duration' => 4,
                 'group' => 'DJ Nights',
                 'curator_group' => 'Bars & Nightlife',
@@ -1137,8 +1135,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'Comedy Roast: Principal Skinner',
-                'description' => "## 🔥 SKINNER!\n\nTonight we roast Springfield Elementary's finest principal! Hosted by Superintendent Chalmers, who has been waiting for this moment.\n\n> \"SKINNER! Why is there smoke coming out of your oven?\" \"That's not smoke, it's steam!\" - Classic Chalmers-Skinner\n\n### 🎤 Tonight's Roasters\n- 😤 **Superintendent Chalmers** - Finally gets to say what he's been thinking\n- 🏴󠁧󠁢󠁳󠁣󠁴󠁿 **Groundskeeper Willie** - \"Grease me up, woman!\"\n- 💔 **Mrs. Krabappel** - Via video tribute (RIP Marcia)\n- 😈 **Bart Simpson** - \"Eat my shorts, Skinner!\"\n- 👩 **Agnes Skinner** - The ultimate roast material\n\n---\n\n### 🍖 Food & Drink\n⚠️ Steamed hams will NOT be served (it's an Albany expression)\n✅ Regular hamburgers available\n✅ Aurora Borealis viewing NOT included\n\n*\"May I see it?\" \"...No.\"*",
+                'name' => '🔥 Comedy Roast: Principal Skinner',
+                'description' => "## SKINNER! 🔥\n\nTonight we roast Springfield Elementary's finest principal! Hosted by Superintendent Chalmers, who has been waiting for this moment.\n\n> \"SKINNER! Why is there smoke coming out of your oven?\" \"That's not smoke, it's steam!\" - Classic Chalmers-Skinner\n\n### Tonight's Roasters\n- **Superintendent Chalmers** - Finally gets to say what he's been thinking\n- **Groundskeeper Willie** - \"Grease me up, woman!\"\n- **Mrs. Krabappel** - Via video tribute (RIP Marcia)\n- **Bart Simpson** - \"Eat my shorts, Skinner!\"\n- **Agnes Skinner** - The ultimate roast material\n\n---\n\n### Food & Drink\n⚠️ Steamed hams will NOT be served (it's an Albany expression)\n- Regular hamburgers available\n- Aurora Borealis viewing NOT included\n\n*\"May I see it?\" \"...No.\"*",
                 'duration' => 2.5,
                 'group' => 'Comedy',
                 'curator_group' => 'Entertainment',
@@ -1147,15 +1145,15 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'hour' => 19,
                 'minute' => 0,
                 'days_of_week' => '0000001', // Saturday
-                'talents' => ['demo-krusty', 'demo-openmic'],
+                'talents' => ['demo-krusty', 'demo-lurleen'],
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 18, 'quantity' => 100],
                     ['type' => 'Aurora Borealis Package', 'price' => 40, 'quantity' => 20, 'description' => 'Front row + steamed ham (actually grilled)'],
                 ],
             ],
             [
-                'name' => '80s Night: Do The Bartman',
-                'description' => "## 🕺 Flashback to the Greatest Decade!\n\nDress in your best 80s/90s attire and dance to all the classics! Neon, leg warmers, and Marge wigs welcome!\n\n> \"Eat my shorts!\" - Bart Simpson (1989-forever)\n\n### 🎉 Tonight's Events\n- 💃 **\"Do The Bartman\" Dance-Off** - 11 PM sharp\n- 👗 **Costume Contest** - Marge's hair encouraged (extra points for height)\n- 🎵 **Deep Cuts** - From the Springfield Files and beyond\n- 📺 **Music Videos** - All the classics on the big screen\n\n---\n\n### 🏆 Costume Categories\n- 🔵 Best Marge Hair (must be at least 2 feet tall)\n- 🛹 Best Bart Impression\n- 🍩 Best Homer Belly\n- 🎷 Best Lisa Nerd\n\n*Ay caramba! Don't have a cow, man!*",
+                'name' => '🕺 80s Night: Do The Bartman',
+                'description' => "## Flashback to the Greatest Decade! 🕺\n\nDress in your best 80s/90s attire and dance to all the classics! Neon, leg warmers, and Marge wigs welcome!\n\n> \"Eat my shorts!\" - Bart Simpson (1989-forever)\n\n### Tonight's Events\n- **\"Do The Bartman\" Dance-Off** - 11 PM sharp\n- **Costume Contest** - Marge's hair encouraged (extra points for height)\n- **Deep Cuts** - From the Springfield Files and beyond\n- **Music Videos** - All the classics on the big screen\n\n---\n\n### Costume Categories\n- Best Marge Hair (must be at least 2 feet tall)\n- Best Bart Impression 🛹\n- Best Homer Belly\n- Best Lisa Nerd\n\n*Ay caramba! Don't have a cow, man!*",
                 'duration' => 4,
                 'group' => 'DJ Nights',
                 'curator_group' => 'Bars & Nightlife',
@@ -1170,8 +1168,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'Happy Hour: $1 Squishees',
-                'description' => "## 🥤 Who Needs the Kwik-E-Mart? WE DO!\n\nOur partnership with Apu brings the Squishee experience to Moe's!\n\n> \"Thank you, come again!\" - Apu Nahasapeemapetilon\n\n### 🍹 Happy Hour Specials (4-6 PM)\n- 🥤 **$1 Squishees** - All 47 flavors available\n- 🧊 **Brain Freeze Competition** - 5 PM sharp\n- 🌮 **Apu's Secret Recipe Nachos** - With cheese from... somewhere\n- 🍺 **$2 Duffs** - To wash it all down\n\n---\n\n### 🧠 Brain Freeze Rules\n1. Drink as fast as you can\n2. First to NOT get brain freeze wins\n3. Winner gets a free Squishee (more brain freeze potential)\n\n⚠️ *Note: Squishee machine may occasionally achieve sentience. Just ignore it.*\n\n*The syrup-to-ice ratio has been scientifically optimized by Professor Frink!*",
+                'name' => '🥤 Happy Hour: $1 Squishees',
+                'description' => "## Who Needs the Kwik-E-Mart? WE DO!\n\nOur partnership with Apu brings the Squishee experience to Moe's!\n\n> \"Thank you, come again!\" - Apu Nahasapeemapetilon\n\n### Happy Hour Specials (4-6 PM)\n- **$1 Squishees** - All 47 flavors available 🥤\n- **Brain Freeze Competition** - 5 PM sharp\n- **Apu's Secret Recipe Nachos** - With cheese from... somewhere\n- **$2 Duffs** - To wash it all down\n\n---\n\n### Brain Freeze Rules\n1. Drink as fast as you can\n2. First to NOT get brain freeze wins\n3. Winner gets a free Squishee (more brain freeze potential)\n\n⚠️ *Note: Squishee machine may occasionally achieve sentience. Just ignore it.*\n\n*The syrup-to-ice ratio has been scientifically optimized by Professor Frink!*",
                 'duration' => 2,
                 'group' => 'Special Events',
                 'curator_group' => 'Bars & Nightlife',
@@ -1186,8 +1184,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'Legal Sea Foods with Lionel Hutz',
-                'description' => "## ⚖️ Works on Contingency? No, Money Down!\n\nLegal advice from Springfield's finest law-talking guy! Lionel Hutz, Attorney at Law (business card printer at large).\n\n> \"Mr. Simpson, this is the most blatant case of fraudulent advertising since my suit against the film 'The Neverending Story.'\" - Lionel Hutz\n\n### 📚 Tonight's Seminar\n- 📜 **How to Read Contracts** - (Hint: don't, just sign)\n- 👨‍⚖️ **\"That's Why You're the Judge and I'm the Law-Talking Guy\"**\n- 🖨️ **Business Card Printing Workshop** - We use the finest crayon\n- 🚬 **Smoking in Court: Pros and Cons**\n- 🍞 **Free Breadsticks** - Technically a loophole\n\n---\n\n### 💼 Lionel's Credentials\n- 🎓 Graduate of \"Harvard, Yale, MIT, Oxford, the Sorbonne, the Louvre\"\n- 🏆 Never convicted of anything they could prove\n- 📍 Office located \"above that S&M place on Fourth Street\"\n\n*\"Care to join me in a belt of scotch?\" \"It's 9:30 in the morning.\" \"Yeah, but I haven't slept in days.\"*",
+                'name' => '⚖️ Legal Sea Foods with Lionel Hutz',
+                'description' => "## Works on Contingency? No, Money Down!\n\nLegal advice from Springfield's finest law-talking guy! Lionel Hutz, Attorney at Law (business card printer at large).\n\n> \"Mr. Simpson, this is the most blatant case of fraudulent advertising since my suit against the film 'The Neverending Story.'\" - Lionel Hutz\n\n### Tonight's Seminar\n- **How to Read Contracts** - (Hint: don't, just sign)\n- **\"That's Why You're the Judge and I'm the Law-Talking Guy\"**\n- **Business Card Printing Workshop** - We use the finest crayon\n- **Smoking in Court: Pros and Cons**\n- **Free Breadsticks** - Technically a loophole\n\n---\n\n### Lionel's Credentials ⚖️\n- Graduate of \"Harvard, Yale, MIT, Oxford, the Sorbonne, the Louvre\"\n- Never convicted of anything they could prove\n- Office located \"above that S&M place on Fourth Street\"\n\n*\"Care to join me in a belt of scotch?\" \"It's 9:30 in the morning.\" \"Yeah, but I haven't slept in days.\"*",
                 'duration' => 2,
                 'group' => 'Comedy',
                 'curator_group' => 'Entertainment',
@@ -1203,8 +1201,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'Dental Plan Night',
-                'description' => "## 🦷 Lisa Needs Braces! DENTAL PLAN!\n\nUnion Meeting & Celebration! Come for the dental plan, stay for the braces!\n\n> \"Lisa needs braces!\" \"DENTAL PLAN!\" \"Lisa needs braces!\" \"DENTAL PLAN!\" - Homer's brain, on loop\n\n### 📋 Tonight's Agenda\n- 🦷 **Free Dental Checkups** - Real dentist (not Dr. Nick)\n- 📊 **Carl Carlson's PowerPoint** - \"Why Unions Matter\"\n- 👁️ **Lenny's Eye Patch Station** - My eye! The goggles do nothing!\n- 🌯 **\"Where's My Burrito?\" Snack Bar** - With mystery meat\n\n---\n\n### 🏭 Sponsored by Local 643\n- ☢️ Nuclear Workers Unite!\n- 🍺 Free Duff for union members\n- 📝 Sign up for the dental plan (obviously)\n\n*\"First thing tomorrow morning, I'm gonna punch Lenny in the back of the head!\"*",
+                'name' => '🦷 Dental Plan Night',
+                'description' => "## Lisa Needs Braces! DENTAL PLAN! 🦷\n\nUnion Meeting & Celebration! Come for the dental plan, stay for the braces!\n\n> \"Lisa needs braces!\" \"DENTAL PLAN!\" \"Lisa needs braces!\" \"DENTAL PLAN!\" - Homer's brain, on loop\n\n### Tonight's Agenda\n- **Free Dental Checkups** - Real dentist (not Dr. Nick)\n- **Carl Carlson's PowerPoint** - \"Why Unions Matter\"\n- **Lenny's Eye Patch Station** - My eye! The goggles do nothing!\n- **\"Where's My Burrito?\" Snack Bar** - With mystery meat\n\n---\n\n### Sponsored by Local 643\n- Nuclear Workers Unite!\n- Free Duff for union members\n- Sign up for the dental plan (obviously)\n\n*\"First thing tomorrow morning, I'm gonna punch Lenny in the back of the head!\"*",
                 'duration' => 3,
                 'group' => 'Special Events',
                 'curator_group' => 'Community',
@@ -1220,8 +1218,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'Canyonero Night',
-                'description' => "## 🚙 CAN YOU NAME THE TRUCK WITH FOUR-WHEEL DRIVE?\n\n**SMELLS LIKE A STEAK AND SEATS THIRTY-FIVE!**\n\n> \"Canyonero! Canyonero! She blinds everybody with her super high beams!\" - The Jingle\n\n### 🎉 CANYONERO!\n\n**Tonight's Events:**\n- 🚗 **SUV Parade** - In the parking lot (bring earplugs)\n- 📝 **Disclaimer Signing** - \"Unexplained fires are a matter for the courts\"\n- 📏 **12 Yards Long, 2 Lanes Wide Display** - Marvel at the size!\n- 🐿️ **Squirrel-Crushing Demonstration** - (No actual squirrels harmed... probably)\n\n---\n\n### 🎵 The Specs\n- 🦅 Top of the line in utility sports!\n- 💨 Smells like a steak and seats thirty-five!\n- 🔦 Blinds everybody with her super high beams!\n- 🔥 Unexplained fires are a matter for the courts!\n\n*Whoa, Canyonero! CANYONERO!*",
+                'name' => '🚙 Canyonero Night',
+                'description' => "## CAN YOU NAME THE TRUCK WITH FOUR-WHEEL DRIVE? 🚙\n\n**SMELLS LIKE A STEAK AND SEATS THIRTY-FIVE!**\n\n> \"Canyonero! Canyonero! She blinds everybody with her super high beams!\" - The Jingle\n\n### CANYONERO!\n\n**Tonight's Events:**\n- **SUV Parade** - In the parking lot (bring earplugs)\n- **Disclaimer Signing** - \"Unexplained fires are a matter for the courts\"\n- **12 Yards Long, 2 Lanes Wide Display** - Marvel at the size!\n- **Squirrel-Crushing Demonstration** - (No actual squirrels harmed... probably)\n\n---\n\n### The Specs\n- Top of the line in utility sports!\n- Smells like a steak and seats thirty-five!\n- Blinds everybody with her super high beams!\n- Unexplained fires are a matter for the courts! 🔥\n\n*Whoa, Canyonero! CANYONERO!*",
                 'duration' => 3,
                 'group' => 'Special Events',
                 'curator_group' => 'Bars & Nightlife',
@@ -1238,7 +1236,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             ],
             [
                 'name' => 'Sneed\'s Night (Formerly Chuck\'s)',
-                'description' => "## 🌾 Feed and Seed! (Formerly Chuck's)\n\nA night celebrating Springfield's agricultural heritage... and wordplay.\n\n> \"Feed and Seed\" - It says what it does!\n\n### 🌽 What We Offer\n- 🌾 **Quality Feed** - For all your livestock needs\n- 🌱 **Premium Seed** - Plant the future!\n- 🚜 **Agricultural Supplies** - The finest in Springfield\n- 🤔 **Subtle Humor** - Ask about the previous owner's naming convention\n\n---\n\n### 🎉 Tonight's Events\n- 🏆 **Best Farm Pun Contest** - Winner gets free feed\n- 🍺 **Duff on Tap** - $3 all night\n- 🎵 **Country Music** - Live from the Springfield Rockers\n\n*Families welcome. Those who appreciate subtle humor extra welcome.*\n\n⚠️ *This event is exactly what it says it is. Nothing more.*",
+                'description' => "## Feed and Seed! (Formerly Chuck's)\n\nA night celebrating Springfield's agricultural heritage... and wordplay.\n\n> \"Feed and Seed\" - It says what it does!\n\n### What We Offer\n- **Quality Feed** - For all your livestock needs\n- **Premium Seed** - Plant the future!\n- **Agricultural Supplies** - The finest in Springfield\n- **Subtle Humor** - Ask about the previous owner's naming convention\n\n---\n\n### Tonight's Events\n- **Best Farm Pun Contest** - Winner gets free feed\n- **Duff on Tap** - $3 all night\n- **Country Music** - Live from the Springfield Rockers 🎵\n\n*Families welcome. Those who appreciate subtle humor extra welcome.*\n\n⚠️ *This event is exactly what it says it is. Nothing more.*",
                 'duration' => 3,
                 'group' => 'Special Events',
                 'curator_group' => 'Bars & Nightlife',
@@ -1254,7 +1252,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             ],
             [
                 'name' => "Dr. Nick's Medical Seminar",
-                'description' => "## 👨‍⚕️ Hi, Everybody! HI, DR. NICK!\n\nMedical advice from Springfield's most affordable doctor!\n\n> \"The coroner? I'm so sick of that guy!\" - Dr. Nick Riviera\n\n### 📋 Tonight's Topics\n- 🦴 **The Knee Bone's Connected to the... Something** - Anatomy basics\n- 📞 **\"Call 1-600-DOCTORB\"** - The B is for bargain!\n- 🔥 **Inflammable Means Flammable?!** - Who knew!\n- 🫀 **Organ Identification** - Which one goes where?\n- 🩺 **How to Perform Surgery** - On yourself, if necessary\n\n---\n\n### 🎓 Dr. Nick's Credentials\n- 🏥 Hollywood Upstairs Medical College (Class of Whenever)\n- 💉 \"You've tried the best, now try the rest!\"\n- 🏆 Zero malpractice suits (that stuck)\n\n⚠️ *Disclaimer: This is for entertainment purposes only. Please consult a real doctor. Like Dr. Hibbert.*\n\n*\"Well, if it isn't my old friend Mr. McGreg! With a leg for an arm and an arm for a leg!\"*",
+                'description' => "## Hi, Everybody! HI, DR. NICK!\n\nMedical advice from Springfield's most affordable doctor!\n\n> \"The coroner? I'm so sick of that guy!\" - Dr. Nick Riviera\n\n### Tonight's Topics\n- **The Knee Bone's Connected to the... Something** - Anatomy basics\n- **\"Call 1-600-DOCTORB\"** - The B is for bargain!\n- **Inflammable Means Flammable?!** - Who knew!\n- **Organ Identification** - Which one goes where?\n- **How to Perform Surgery** - On yourself, if necessary\n\n---\n\n### Dr. Nick's Credentials 👨‍⚕️\n- Hollywood Upstairs Medical College (Class of Whenever)\n- \"You've tried the best, now try the rest!\"\n- Zero malpractice suits (that stuck)\n\n⚠️ *Disclaimer: This is for entertainment purposes only. Please consult a real doctor. Like Dr. Hibbert.*\n\n*\"Well, if it isn't my old friend Mr. McGreg! With a leg for an arm and an arm for a leg!\"*",
                 'duration' => 2,
                 'group' => 'Comedy',
                 'curator_group' => 'Entertainment',
@@ -1274,8 +1272,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             // BARNEY'S BOWL-A-RAMA EVENTS
             // ===========================
             [
-                'name' => 'Pin Pals Bowling Tournament',
-                'description' => "## 🎳 PIN PALS! PIN PALS!\n\nWe're the Pin Pals! Springfield's biggest bowling tournament returns!\n\n> \"It's like David and Goliath, only this time David won!\" - Homer (after bowling a 300)\n\n### 🏆 Teams Welcome\n- 🎳 **Original Pin Pals** - Homer, Apu, Moe, Otto\n- ⛪ **The Holy Rollers** - Ned Flanders' church team\n- 🌍 **The Stereotypes** - Representing diversity in bowling\n- 📺 **Channel 6 Wastelanders** - Kent Brockman's crew\n- 💰 **The Fat Cats** - Mr. Burns' replacement team\n\n---\n\n### 🥇 Prizes\n- 🏆 **First Place:** Mr. Burns' actual bowling team trophy\n- 🥈 **Second Place:** Year supply of bowling shoe spray\n- 🥉 **Third Place:** Free nachos for a month\n- 🎀 **Last Place:** \"You Tried\" participation ribbon\n\n*Homer's bowling hand is ready. Is yours?*",
+                'name' => '🎳 Pin Pals Bowling Tournament',
+                'description' => "## PIN PALS! PIN PALS! 🎳\n\nWe're the Pin Pals! Springfield's biggest bowling tournament returns! 🏆\n\n> \"It's like David and Goliath, only this time David won!\" - Homer (after bowling a 300)\n\n### 👥 Teams Welcome\n- 🍩 **Original Pin Pals** - Homer, Apu, Moe, Otto\n- ⛪ **The Holy Rollers** - Ned Flanders' church team\n- 🌍 **The Stereotypes** - Representing diversity in bowling\n- 📺 **Channel 6 Wastelanders** - Kent Brockman's crew\n- 💰 **The Fat Cats** - Mr. Burns' replacement team\n\n---\n\n### 🎁 Prizes\n- 🥇 **First Place:** Mr. Burns' actual bowling team trophy\n- 🥈 **Second Place:** Year supply of bowling shoe spray\n- 🥉 **Third Place:** Free nachos for a month\n- 🎀 **Last Place:** \"You Tried\" participation ribbon\n\n*Homer's bowling hand is ready. Is yours?* 🤚",
                 'duration' => 4,
                 'group' => 'Special Events',
                 'curator_group' => 'Entertainment',
@@ -1291,8 +1289,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => '"Beer Baron" Prohibition League Night',
-                'description' => "## 🍺 To Alcohol! The Cause Of, And Solution To, All of Life's Problems!\n\nProhibition-era themed bowling league night!\n\n> \"Listen, rummy, I'm gonna say it plain and simple: Where'd you pinch the hooch?\" - Rex Banner\n\n### 🎉 Tonight's Activities\n- 🎳 **Prohibition-Era Bowling League** - Dress the part!\n- 🚪 **Secret Speakeasy** - In the back (password: \"Duff\")\n- 🕵️ **Rex Banner** - NOT invited (please don't tell him)\n- 📣 **\"I Am the Beer Baron!\" Shouting Contest** - 10 PM\n\n---\n\n### 🥃 What's Included\n- 👟 Bowling shoes (vintage style)\n- 🥃 \"Bathtub gin\" (actually just regular gin)\n- 🎩 Complimentary fedora rental\n- 🚨 Lookout posted for Rex Banner\n\n*\"I'm the Beer Baron!\" - Homer (the actual Beer Baron)*\n\n⚠️ *Note: If you see a man in a gray suit asking about hooch, you didn't see anything.*",
+                'name' => '🍺 "Beer Baron" Prohibition League Night',
+                'description' => "## To Alcohol! The Cause Of, And Solution To, All of Life's Problems! 🍺\n\nProhibition-era themed bowling league night!\n\n> \"Listen, rummy, I'm gonna say it plain and simple: Where'd you pinch the hooch?\" - Rex Banner\n\n### Tonight's Activities\n- **Prohibition-Era Bowling League** - Dress the part!\n- **Secret Speakeasy** - In the back (password: \"Duff\")\n- **Rex Banner** - NOT invited (please don't tell him)\n- **\"I Am the Beer Baron!\" Shouting Contest** - 10 PM\n\n---\n\n### What's Included\n- Bowling shoes (vintage style)\n- \"Bathtub gin\" (actually just regular gin)\n- Complimentary fedora rental 🎩\n- Lookout posted for Rex Banner\n\n*\"I'm the Beer Baron!\" - Homer (the actual Beer Baron)*\n\n⚠️ *Note: If you see a man in a gray suit asking about hooch, you didn't see anything.*",
                 'duration' => 3,
                 'group' => 'Special Events',
                 'curator_group' => 'Entertainment',
@@ -1308,8 +1306,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => '"Two Dozen and One Greyhounds" Dog Show',
-                'description' => "## 🐕 See My Vest! See My Vest!\n\nA celebration of dogs! (Not the kind Mr. Burns had in mind.)\n\n> \"See my vest! See my vest! Made from real gorilla chest!\" - Mr. Burns (NOT invited)\n\n### 🎉 Event Schedule\n- 🏃 **Greyhound Racing** - No gambling... officially\n- 🐕 **Santa's Little Helper Agility Course** - Can he do it? (Probably not)\n- 🏆 **\"Good Dog\" vs \"Bad Dog\" Competition** - Who's a good boy?\n- 👔 **Best-Dressed Pet Contest** - Costumes encouraged!\n\n---\n\n### 🐾 Rules & Regulations\n- ✅ All dogs welcome (except robotic ones)\n- ✅ Treats allowed\n- 🚫 Mr. Burns NOT allowed as a judge\n- 🚫 No discussion of greyhound fur applications\n\n⚠️ *Warning: Do not leave puppies unattended near wealthy industrialists.*\n\n*\"Smithers, release the hounds!\" - NOT happening here.*",
+                'name' => '🐕 "Two Dozen and One Greyhounds" Dog Show',
+                'description' => "## See My Vest! See My Vest! 🐕\n\nA celebration of dogs! (Not the kind Mr. Burns had in mind.)\n\n> \"See my vest! See my vest! Made from real gorilla chest!\" - Mr. Burns (NOT invited)\n\n### Event Schedule\n- **Greyhound Racing** - No gambling... officially\n- **Santa's Little Helper Agility Course** - Can he do it? (Probably not)\n- **\"Good Dog\" vs \"Bad Dog\" Competition** - Who's a good boy?\n- **Best-Dressed Pet Contest** - Costumes encouraged!\n\n---\n\n### Rules & Regulations\n- All dogs welcome (except robotic ones)\n- Treats allowed\n- Mr. Burns NOT allowed as a judge\n- No discussion of greyhound fur applications\n\n⚠️ *Warning: Do not leave puppies unattended near wealthy industrialists.*\n\n*\"Smithers, release the hounds!\" - NOT happening here.*",
                 'duration' => 3,
                 'group' => 'Special Events',
                 'curator_group' => 'Community',
@@ -1318,7 +1316,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'hour' => 14,
                 'minute' => 0,
                 'days_of_week' => '1000000', // Sunday
-                'talent' => 'demo-openmic',
+                'talent' => 'demo-lurleen',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 12, 'quantity' => 100],
                     ['type' => 'Dog Entry', 'price' => 20, 'quantity' => 30, 'description' => 'Includes dog treats + bandana'],
@@ -1326,7 +1324,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             ],
             [
                 'name' => "Homer's Perfect Game Challenge",
-                'description' => "## 🎳 WOOHOO! Can You Beat Homer's 300?\n\nThe legendary perfect game challenge! Homer did it, can you?\n\n> \"Woohoo! Who's the greatest bowler in the world?\" - Homer Simpson\n\n### 🏆 Challenge Rules\n- 🎳 **Bowl your best game** - No pressure\n- 🔢 **Beat 300** - Good luck (it's literally impossible to beat)\n- 🍩 **Win a lifetime supply of donuts** - Valued at $47/year for Homer\n\n---\n\n### 🤫 Secrets to Success\n- ✨ Mystery spots on the alley may or may not help\n- 🍺 Optimal Duff consumption level: unknown\n- 👁️ Visualization techniques: think of donuts rolling toward pins\n- 🤞 Hope for \"the Homer Simpson luck\"\n\n*\"I thought I told you to trim those sideburns!\" - Mr. Burns (unrelated)*\n\n⚠️ *Note: Challenging Homer's record may result in feelings of inadequacy.*",
+                'description' => "## WOOHOO! Can You Beat Homer's 300? 🎳\n\nThe legendary perfect game challenge! Homer did it, can you?\n\n> \"Woohoo! Who's the greatest bowler in the world?\" - Homer Simpson\n\n### Challenge Rules\n- **Bowl your best game** - No pressure\n- **Beat 300** - Good luck (it's literally impossible to beat)\n- **Win a lifetime supply of donuts** - Valued at $47/year for Homer\n\n---\n\n### Secrets to Success\n- Mystery spots on the alley may or may not help\n- Optimal Duff consumption level: unknown\n- Visualization techniques: think of donuts rolling toward pins 🍩\n- Hope for \"the Homer Simpson luck\"\n\n*\"I thought I told you to trim those sideburns!\" - Mr. Burns (unrelated)*\n\n⚠️ *Note: Challenging Homer's record may result in feelings of inadequacy.*",
                 'duration' => 4,
                 'group' => 'Special Events',
                 'curator_group' => 'Entertainment',
@@ -1346,8 +1344,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             // THE AZTEC THEATER EVENTS
             // ===========================
             [
-                'name' => 'Troy McClure Film Festival',
-                'description' => "## 🎬 Hi, I'm Troy McClure!\n\nYou may remember me from such film festivals as \"The Decaffeinated Man vs. The Case of the Missing Coffee\" and \"P is for Psycho.\"\n\n> \"Get confident, stupid!\" - Troy McClure, motivational speaker\n\n### 🎥 Tonight's Features\n- 🔧 *\"The Contrabulous Fabtraption of Professor Horatio Hufnagel\"*\n- ☎️ *\"Dial M for Murderousness\"*\n- 🧑‍✈️ *\"The President's Neck is Missing\"*\n- 💪 *\"Hydro, the Man With the Hydraulic Arms\"*\n- 🦶 *\"Leper in the Backfield\"*\n\n---\n\n### 🍿 Theater Extras\n- 📸 **Troy McClure Photo Op** - $15 (autograph extra)\n- 🎞️ **Vintage Trailers** - From Troy's extensive filmography\n- 🥤 **Concessions** - Popcorn, Buzz Cola, and Krusty-O's\n\n*\"Hi, I'm Troy McClure! You might remember me from tonight!\"*",
+                'name' => '🎬 Troy McClure Film Festival',
+                'description' => "## Hi, I'm Troy McClure! 🎬\n\nYou may remember me from such film festivals as \"The Decaffeinated Man vs. The Case of the Missing Coffee\" and \"P is for Psycho.\" ☕\n\n> \"Get confident, stupid!\" - Troy McClure, motivational speaker\n\n### 🎥 Tonight's Features\n- 🔬 *\"The Contrabulous Fabtraption of Professor Horatio Hufnagel\"*\n- 📞 *\"Dial M for Murderousness\"*\n- 🗽 *\"The President's Neck is Missing\"*\n- 💪 *\"Hydro, the Man With the Hydraulic Arms\"*\n- 🏈 *\"Leper in the Backfield\"*\n\n---\n\n### 🎭 Theater Extras\n- 📸 **Troy McClure Photo Op** - $15 (autograph extra)\n- 📽️ **Vintage Trailers** - From Troy's extensive filmography\n- 🍿 **Concessions** - Popcorn, Buzz Cola, and Krusty-O's\n\n*\"Hi, I'm Troy McClure! You might remember me from tonight!\"* ⭐",
                 'duration' => 4,
                 'group' => 'Special Events',
                 'curator_group' => 'Arts & Culture',
@@ -1363,8 +1361,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'McBain Double Feature',
-                'description' => "## 🦸 ICE TO MEET YOU!\n\nRainier Wolfcastle IS McBain in this explosive double feature!\n\n> \"Right now I'm thinking about holding another meeting... IN BED!\" - McBain\n\n### 🎬 Tonight's Films\n- 💥 *\"McBain: Let's Get Silly\"* (1991) - The one with the ice cream van\n- 🔫 *\"McBain IV: Fatal Discharge\"* - MENDOZA!\n\n---\n\n### 🎭 What to Expect\n- 💀 **Commie-nazis** getting what they deserve\n- 🗣️ **One-liners** that don't make sense in context\n- 👔 **Senator Mendoza's** ultimate comeuppance\n- 🔥 **Explosions** - Approximately 47 per film\n- 🕶️ **Sunglasses** - McBain never takes them off\n\n### 🍿 Included\n- Free popcorn (it's showtime)\n- One-liner cards for audience participation\n- Mendoza effigy (for throwing things at)\n\n*\"The film is just me in front of a brick wall for an hour and a half. It cost $80 million.\"* - Rainier Wolfcastle",
+                'name' => '💥 McBain Double Feature',
+                'description' => "## ICE TO MEET YOU!\n\nRainier Wolfcastle IS McBain in this explosive double feature!\n\n> \"Right now I'm thinking about holding another meeting... IN BED!\" - McBain\n\n### Tonight's Films\n- *\"McBain: Let's Get Silly\"* (1991) - The one with the ice cream van\n- *\"McBain IV: Fatal Discharge\"* - MENDOZA!\n\n---\n\n### What to Expect\n- **Commie-nazis** getting what they deserve\n- **One-liners** that don't make sense in context\n- **Senator Mendoza's** ultimate comeuppance\n- **Explosions** - Approximately 47 per film 💥\n- **Sunglasses** - McBain never takes them off\n\n### Included\n- Free popcorn (it's showtime)\n- One-liner cards for audience participation\n- Mendoza effigy (for throwing things at)\n\n*\"The film is just me in front of a brick wall for an hour and a half. It cost $80 million.\"* - Rainier Wolfcastle",
                 'duration' => 4,
                 'group' => 'Special Events',
                 'curator_group' => 'Arts & Culture',
@@ -1380,8 +1378,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'Hans Moleman Film Festival',
-                'description' => "## 🏈 \"Man Getting Hit by Football\" & More!\n\nAcademy Award-nominated cinema from Springfield's most enduring victim.\n\n> \"I was saying Boo-urns!\" - Hans Moleman\n\n### 🎬 Tonight's Films\n- 🏈 *\"Man Getting Hit by Football\"* - Academy Award nominee (lost to \"A Burns for All Seasons\")\n- 🎞️ *\"Hans Moleman Productions Presents: Hans Moleman Productions\"*\n- ⚖️ *\"The Trials of Hans Moleman\"* - A documentary of suffering\n- 🚗 *\"Hans Moleman in 'Driving to the Store'\"* - Short film\n\n---\n\n### 📊 Fun Facts\n- 👴 Hans Moleman is **31 years old** (hard to believe, we know)\n- 💀 He's \"died\" 26 times on screen\n- 🏆 Still waiting for that Oscar\n- 🎵 \"Nobody's gay for Moleman\"\n\n*\"Drinking has ruined my life. I'm 31 years old!\"*\n\n⚠️ *Warning: Film may cause feelings of profound sadness and/or groin sympathy pain.*",
+                'name' => '🎥 Hans Moleman Film Festival',
+                'description' => "## \"Man Getting Hit by Football\" & More!\n\nAcademy Award-nominated cinema from Springfield's most enduring victim.\n\n> \"I was saying Boo-urns!\" - Hans Moleman\n\n### Tonight's Films\n- *\"Man Getting Hit by Football\"* - Academy Award nominee (lost to \"A Burns for All Seasons\") 🏈\n- *\"Hans Moleman Productions Presents: Hans Moleman Productions\"*\n- *\"The Trials of Hans Moleman\"* - A documentary of suffering\n- *\"Hans Moleman in 'Driving to the Store'\"* - Short film\n\n---\n\n### Fun Facts\n- Hans Moleman is **31 years old** (hard to believe, we know)\n- He's \"died\" 26 times on screen\n- Still waiting for that Oscar\n- \"Nobody's gay for Moleman\"\n\n*\"Drinking has ruined my life. I'm 31 years old!\"*\n\n⚠️ *Warning: Film may cause feelings of profound sadness and/or groin sympathy pain.*",
                 'duration' => 2,
                 'group' => 'Comedy',
                 'curator_group' => 'Arts & Culture',
@@ -1396,8 +1394,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'Treehouse of Horror Marathon',
-                'description' => "## 👻 The Following Program Contains Scenes of Extreme Violence...\n\nViewer discretion is advised. Seriously.\n\n> \"Quiet, you! Do you want to get sued?!\" - Homer (re: \"The Shining\")\n\n### 🎃 Tonight's Episodes\n- 🪓 *\"The Shinning\"* - \"No TV and no beer make Homer go crazy?\" \"Don't mind if I do!\"\n- ⏰ *\"Time and Punishment\"* - DON'T TOUCH ANYTHING! (Homer touches everything)\n- 🍽️ *\"Nightmare Cafeteria\"* - Grade F meat has never been scarier\n- 🤡 *\"Clown Without Pity\"* - \"The doll's trying to kill me and the toaster's been laughing at me!\"\n\n---\n\n### 💀 What to Expect\n- 😱 **Jump scares** - Approximately 12 per hour\n- 🩸 **Gratuitous violence** - It's Halloween, baby!\n- 🐸 **Hypno-Toad** - Wait, wrong show\n- 🎃 **Candy** - Distributed between segments\n\n⚠️ *Warning: May cause nightmares, fear of dolls, and an irrational distrust of toasters.*",
+                'name' => '👻 Treehouse of Horror Marathon',
+                'description' => "## The Following Program Contains Scenes of Extreme Violence... 👻\n\nViewer discretion is advised. Seriously. 💀\n\n> \"Quiet, you! Do you want to get sued?!\" - Homer (re: \"The Shining\")\n\n### 📺 Tonight's Episodes\n- ❄️ *\"The Shinning\"* - \"No TV and no beer make Homer go crazy?\" \"Don't mind if I do!\"\n- ⏰ *\"Time and Punishment\"* - DON'T TOUCH ANYTHING! (Homer touches everything)\n- 🍖 *\"Nightmare Cafeteria\"* - Grade F meat has never been scarier\n- 🤡 *\"Clown Without Pity\"* - \"The doll's trying to kill me and the toaster's been laughing at me!\"\n\n---\n\n### 🎃 What to Expect\n- 😱 **Jump scares** - Approximately 12 per hour\n- 🩸 **Gratuitous violence** - It's Halloween, baby!\n- 🐸 **Hypno-Toad** - Wait, wrong show\n- 🍬 **Candy** - Distributed between segments\n\n⚠️ *Warning: May cause nightmares, fear of dolls, and an irrational distrust of toasters.* 🍞",
                 'duration' => 5,
                 'group' => 'Special Events',
                 'curator_group' => 'Entertainment',
@@ -1413,8 +1411,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'Gabbo Night',
-                'description' => "## 🎭 GABBO! GABBO! GABBO!\n\nHe's here! Springfield's favorite ventriloquist dummy returns!\n\n> \"All the kids in Springfield are S.O.B.s!\" - Gabbo (on a hot mic)\n\n### 🎪 Tonight's Show\n- 🗣️ **Gabbo and Arthur Crandall** perform their greatest hits\n- 🎭 **\"Look, Smithers! Garbo is coming!\"** - Mr. Burns, confused as always\n- 🤡 **Special Appearance** - That 2nd-rate ventriloquist, Krusty\n- 🎵 **Musical Numbers** - \"Gabbo! Gabbo! GABBO!\"\n\n---\n\n### 😈 Famous Gabbo Quotes\n- 🗣️ \"I'm a bad wittle boy!\"\n- 📺 \"GABBO! GABBO! GABBOOOO!\"\n- 😬 \"All the kids in Springfield are S.O.B.s!\" (the incident)\n\n⚠️ *Warning: May contain phrases that sound like profanity. Ventriloquist will deny everything.*\n\n*\"Gabbo is great! Gabbo has all the answers!\"*",
+                'name' => '🎭 Gabbo Night',
+                'description' => "## GABBO! GABBO! GABBO! 🎭\n\nHe's here! Springfield's favorite ventriloquist dummy returns!\n\n> \"All the kids in Springfield are S.O.B.s!\" - Gabbo (on a hot mic)\n\n### Tonight's Show\n- **Gabbo and Arthur Crandall** perform their greatest hits\n- **\"Look, Smithers! Garbo is coming!\"** - Mr. Burns, confused as always\n- **Special Appearance** - That 2nd-rate ventriloquist, Krusty\n- **Musical Numbers** - \"Gabbo! Gabbo! GABBO!\"\n\n---\n\n### Famous Gabbo Quotes\n- \"I'm a bad wittle boy!\"\n- \"GABBO! GABBO! GABBOOOO!\"\n- \"All the kids in Springfield are S.O.B.s!\" (the incident)\n\n⚠️ *Warning: May contain phrases that sound like profanity. Ventriloquist will deny everything.*\n\n*\"Gabbo is great! Gabbo has all the answers!\"*",
                 'duration' => 2,
                 'group' => 'Comedy',
                 'curator_group' => 'Entertainment',
@@ -1447,7 +1445,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'Radioactive Man Premier Night',
+                'name' => '☢️ Radioactive Man Premier Night',
                 'description' => "## ☢️ UP AND ATOM!\n\nThe premiere of Springfield's greatest superhero film!\n\n> \"My eyes! The goggles do nothing!\" - Rainier Wolfcastle\n\n### 🦸 Featuring\n- ☢️ **Radioactive Man** - Rainier Wolfcastle in his finest role\n- 👦 **Fallout Boy Tryouts** - On stage! Say \"Jiminy jilikers\" correctly to win!\n- 🥽 **Goggles Giveaway** - \"The goggles do nothing!\" edition\n- 🎬 **Meet the Cast** - Those who survived production\n\n---\n\n### 🎬 Production Notes\n- 📍 Filmed on location in Springfield (until the town kicked them out)\n- 💰 Budget: $30 million (mostly acid pits)\n- 🤕 Injuries on set: 47 (all stunt-related... mostly)\n- 🎭 Milhouse's audition: \"Up and at them!\" - REJECTED\n\n*\"Jiminy jilikers!\" - Fallout Boy (correct pronunciation)*\n\n⚠️ *Warning: Real radioactive material was NOT used in the filming of this movie. Probably.*",
                 'duration' => 4,
                 'group' => 'Special Events',
@@ -1464,7 +1462,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => '"Who Shot Mr. Burns?" Mystery Screening',
+                'name' => '🔍 "Who Shot Mr. Burns?" Mystery Screening',
                 'description' => "## 🔍 WHO SHOT MR. BURNS?!\n\nSpringfield's greatest mystery! An interactive screening event!\n\n> \"I'm Mr. Burns, blah blah blah, do this, do that, blah blah blah.\" - Homer's impression\n\n### 🎬 Interactive Mystery Night\n- 📺 **Watch Both Parts** - Back to back, as intended\n- 🤔 **Submit Your Guess** - During intermission (winner gets bragging rights)\n- 🔎 **Clue-Finding Contest** - Pause and analyze!\n- 🎉 **Reveal Party** - Even though we all know it was...\n\n---\n\n### 🕵️ Suspects Ranked (No Spoilers... Maybe)\n- 👶 The baby? Nah, too obvious\n- 🤡 Krusty? He had motive!\n- 🏫 Skinner? SKINNER!\n- 🍺 Moe? Always suspicious\n- 😤 Everyone Homer insulted? That's... everyone\n\n*Spoiler alert: It's always who you least suspect.*\n\n⚠️ *If you already know who did it, please don't ruin it for the one person who doesn't.*",
                 'duration' => 3,
                 'group' => 'Special Events',
@@ -1485,8 +1483,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             // SPRINGFIELD AMPHITHEATER EVENTS
             // ===========================
             [
-                'name' => 'Duffapalooza',
-                'description' => "## 🍺 The Greatest Beer Festival This Side of Shelbyville!\n\nLive music, unlimited Duff samples, and good times guaranteed!\n\n> \"Ah, beer. The cause of, and solution to, all of life's problems.\" - Homer J. Simpson\n\n### 🎉 What to Expect\n- 🎸 **Live Performances** - All night long\n- 🍺 **Duff Varieties on Tap:**\n  - 🔴 Duff Classic\n  - ⚪ Duff Lite (same thing, different can)\n  - 🔵 Duff Dry (also the same thing)\n- 🍖 **Food Available** - Pork chops and donuts (Homer-approved)\n- 🎵 **Beer Garden DJ** - Spinning Duff-fueled hits\n\n---\n\n### 🏆 Duffman Says\n- 💪 \"Oh yeah!\"\n- 🍺 \"Duff Beer for me, Duff Beer for you!\"\n- 🎉 \"Can't get enough of that wonderful Duff!\"\n\n*D'oh-n't miss it! Woohoo!*",
+                'name' => '🍺 Duffapalooza',
+                'description' => "## The Greatest Beer Festival This Side of Shelbyville! 🍺\n\nLive music, unlimited Duff samples, and good times guaranteed! 🎉\n\n> \"Ah, beer. The cause of, and solution to, all of life's problems.\" - Homer J. Simpson\n\n### 🎵 What to Expect\n- 🎤 **Live Performances** - All night long\n- 🍺 **Duff Varieties on Tap:**\n  - 🟡 Duff Classic\n  - ⚪ Duff Lite (same thing, different can)\n  - 🟤 Duff Dry (also the same thing)\n- 🍖 **Food Available** - Pork chops and donuts (Homer-approved)\n- 🎧 **Beer Garden DJ** - Spinning Duff-fueled hits\n\n---\n\n### 💪 Duffman Says\n- \"Oh yeah!\" 😎\n- \"Duff Beer for me, Duff Beer for you!\"\n- \"Can't get enough of that wonderful Duff!\"\n\n*D'oh-n't miss it! Woohoo!* 🎊",
                 'duration' => 4,
                 'group' => 'Live Music',
                 'curator_group' => 'Arts & Culture',
@@ -1502,7 +1500,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'Battle of the Bands',
+                'name' => '🎸 Battle of the Bands',
                 'description' => "## 🎸 Springfield's Biggest Musical Showdown!\n\nBands compete for glory, bragging rights, and a year's supply of Duff!\n\n> \"That's it! You people have stood in my way long enough. I'm going to clown college!\" - Homer (different career choice)\n\n### 🎤 Tonight's Lineup\n- 🚌 **School of Rock** - Starring Otto (man, he rocks hard)\n- 🔊 **Spinal Tap Tribute Band** - These go to eleven\n- 😢 **Sadgasm** - Featuring Homer's grunge phase\n- 💫 **The Party Posse** - Bart, Milhouse, Nelson, Ralph (subliminal messages removed)\n\n---\n\n### 🏆 How It Works\n- 👏 **Voting by applause** - The louder, the better\n- 🎸 **Each band plays 3 songs** - Choose wisely!\n- 🥇 **Winner gets:** Year supply of Duff + studio time\n- 🎤 **Judges:** Lisa (musical expertise), Krusty (celebrity), Disco Stu (groove factor)\n\n*May the best band win! Rock and/or roll!*",
                 'duration' => 4,
                 'group' => 'Live Music',
@@ -1519,8 +1517,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'Homerpalooza Festival',
-                'description' => "## 🎸 AM I COOL, MAN? YES!\n\nThe greatest rock festival Springfield has ever seen returns!\n\n> \"I used to rock and roll all night and party every day. Then it was every other day. Now I'm lucky if I can find half an hour a week in which to get funky.\" - Homer\n\n### 🎤 Festival Lineup\n- 🎃 **Smashing Pumpkins** - \"Homer Simpson wrecks my pig, Cypress Hill steals my orchestra...\"\n- 🌿 **Cypress Hill** - \"You gotta fight for your right to party!\"\n- 🎸 **Sonic Youth** - \"That guy's cool!\"\n- 🎹 **Peter Frampton** - \"I do believe I'm getting younger!\"\n\n---\n\n### 🎪 Festival Extras\n- 🎯 **Cannonball to the Gut Show** - Safety NOT guaranteed\n- 📚 **\"Getting High\" Workshop** - It's an alternative definition\n- 🌲 **Hippie Tent** - Peace, love, and Duff\n- 👴 **\"Am I Cool?\" Booth** - Find out if you're hip!\n\n*\"What the hell is this? A freak show?!\" \"That's an unfair stereotype. It's actually a music festival.\"*",
+                'name' => '🎸 Homerpalooza Festival',
+                'description' => "## 🎸 AM I COOL, MAN? YES! 😎\n\nThe greatest rock festival Springfield has ever seen returns! 🤘\n\n> \"I used to rock and roll all night and party every day. Then it was every other day. Now I'm lucky if I can find half an hour a week in which to get funky.\" - Homer\n\n### 🎤 Festival Lineup\n- 🎃 **Smashing Pumpkins** - \"Homer Simpson wrecks my pig, Cypress Hill steals my orchestra...\"\n- 🌿 **Cypress Hill** - \"You gotta fight for your right to party!\"\n- 🎸 **Sonic Youth** - \"That guy's cool!\"\n- 🎹 **Peter Frampton** - \"I do believe I'm getting younger!\"\n\n---\n\n### 🎪 Festival Extras\n- 🎯 **Cannonball to the Gut Show** - Safety NOT guaranteed 💥\n- 📚 **\"Getting High\" Workshop** - It's an alternative definition\n- 🌲 **Hippie Tent** - Peace, love, and Duff ☮️\n- 👴 **\"Am I Cool?\" Booth** - Find out if you're hip!\n\n*\"What the hell is this? A freak show?!\" \"That's an unfair stereotype. It's actually a music festival.\"* 🎵",
                 'duration' => 6,
                 'group' => 'Live Music',
                 'curator_group' => 'Arts & Culture',
@@ -1536,8 +1534,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'Be Sharps Reunion Concert',
-                'description' => "## 🎤 BABY ON BOARD!\n\nThe legendary Be Sharps reunite for one night only!\n\n> \"It's been done.\" - George Harrison (watching from a rooftop)\n\n### 🎵 Setlist Includes\n- 👶 *\"Baby on Board\"* - The #1 hit that swept the nation\n- 🌊 *\"Goodbye My Coney Island Baby\"* - Barbershop classic\n- 🎤 *\"Number 8... Number 8...\"* - A deep cut\n- 🏢 **Surprise Rooftop Finale** - Just like you-know-who\n\n---\n\n### 🎭 The Be Sharps\n- 🍩 **Homer Simpson** - Lead baritone, donut enthusiast\n- 🍺 **Barney Gumble** - The Yoko of the group\n- 🏫 **Skinner** - Principal by day, tenor by night\n- 🏪 **Apu** - \"Who needs the Kwik-E-Mart? Not meeeee!\"\n\n*\"Barney, you're just like Yoko!\" - Moe*\n\n⭐ *Special appearance by George Harrison (hologram pending approval from his estate)*",
+                'name' => '🎤 Be Sharps Reunion Concert',
+                'description' => "## 🎤 BABY ON BOARD! 👶\n\nThe legendary Be Sharps reunite for one night only! ⭐\n\n> \"It's been done.\" - George Harrison (watching from a rooftop)\n\n### 🎵 Setlist Includes\n- 👶 *\"Baby on Board\"* - The #1 hit that swept the nation 🏆\n- 🌊 *\"Goodbye My Coney Island Baby\"* - Barbershop classic\n- 🎤 *\"Number 8... Number 8...\"* - A deep cut\n- 🏢 **Surprise Rooftop Finale** - Just like you-know-who 🎸\n\n---\n\n### 🎭 The Be Sharps\n- 🍩 **Homer Simpson** - Lead baritone, donut enthusiast\n- 🍺 **Barney Gumble** - The Yoko of the group\n- 🏫 **Skinner** - Principal by day, tenor by night\n- 🏪 **Apu** - \"Who needs the Kwik-E-Mart? Not meeeee!\"\n\n*\"Barney, you're just like Yoko!\" - Moe* 😤\n\n⭐ *Special appearance by George Harrison (hologram pending approval from his estate)* 🌟",
                 'duration' => 3,
                 'group' => 'Live Music',
                 'curator_group' => 'Arts & Culture',
@@ -1546,15 +1544,15 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'hour' => 20,
                 'minute' => 0,
                 'days_of_week' => '0000001', // Saturday
-                'talents' => ['demo-rockers', 'demo-openmic'],
+                'talents' => ['demo-rockers', 'demo-lurleen'],
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 35, 'quantity' => 200],
                     ['type' => 'Barbershop Package', 'price' => 75, 'quantity' => 40, 'description' => 'Includes vintage album + bow tie'],
                 ],
             ],
             [
-                'name' => 'Springfield Symphony with Lisa',
-                'description' => "## 🎷 A Night of Classical Refinement\n\nCulture comes to Springfield! Lisa Simpson leads an evening of sophisticated music.\n\n> \"I used to think classical music was boring. Then I realized I wasn't listening hard enough.\" - Lisa Simpson\n\n### 🎵 Tonight's Program\n- 🎷 **Lisa Simpson: Saxophone Solo** - The prodigy performs\n- 💔 **Bleeding Gums Murphy Tribute** - Tissues recommended\n- 🎶 *\"Jazzman\" Orchestral Arrangement* - Full symphony version\n- 🎹 **Beethoven's 5th** - The 4th was too short anyway\n- 🏖️ *\"Sax on the Beach\"* - Lisa's original composition\n\n---\n\n### 👔 Dress Code\n- 🎩 Black tie **optional** (Homer will be in a muumuu)\n- 🎭 Cultural appreciation **required**\n- 🍩 Donuts **confiscated at door** (sorry, Homer)\n\n*\"If anyone wants me, I'll be in my room.\" - Lisa, after an amazing performance*",
+                'name' => '🎷 Springfield Symphony with Lisa',
+                'description' => "## 🎷 A Night of Classical Refinement ✨\n\nCulture comes to Springfield! Lisa Simpson leads an evening of sophisticated music. 🌟\n\n> \"I used to think classical music was boring. Then I realized I wasn't listening hard enough.\" - Lisa Simpson\n\n### 🎵 Tonight's Program\n- 🎷 **Lisa Simpson: Saxophone Solo** - The prodigy performs\n- 💔 **Bleeding Gums Murphy Tribute** - Tissues recommended 😢\n- 🎶 *\"Jazzman\" Orchestral Arrangement* - Full symphony version\n- 🎹 **Beethoven's 5th** - The 4th was too short anyway\n- 🏖️ *\"Sax on the Beach\"* - Lisa's original composition\n\n---\n\n### 👔 Dress Code\n- 🎩 Black tie **optional** (Homer will be in a muumuu 👗)\n- 🎭 Cultural appreciation **required**\n- 🍩 Donuts **confiscated at door** (sorry, Homer)\n\n*\"If anyone wants me, I'll be in my room.\" - Lisa, after an amazing performance* 🚪",
                 'duration' => 3,
                 'group' => 'Live Music',
                 'curator_group' => 'Arts & Culture',
@@ -1570,8 +1568,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => "New Year's Eve: Springfield Countdown",
-                'description' => "## 🎆 Ring in the New Year Springfield Style!\n\nLive music, DJ after midnight, Duff toast, and the best view of the tire fire!\n\n> \"Another year gone, another year of being Homer Simpson.\" - Homer (optimistically)\n\n### 🎉 Package Includes\n- 🍺 **Open Duff Bar** - 9 PM to 2 AM (pace yourself!)\n- 🍔 **Krusty Burger Appetizers** - Partially gelatinated, non-dairy, gum-based\n- 🥂 **Duff Toast at Midnight** - The official Springfield tradition\n- 🎊 **Party Favors** - Itchy & Scratchy themed (mildly violent)\n- 🔥 **Tire Fire Viewing** - Best seats in the house!\n\n---\n\n### 📅 Countdown Schedule\n- 🎵 **9 PM:** Live music begins\n- 🎧 **11 PM:** DJ Sideshow Bob takes over\n- 🥂 **11:59 PM:** Champagne (Duff) toast prep\n- 🎆 **12:00 AM:** HAPPY NEW YEAR!\n- 🎉 **12:01 AM:** \"Don't have a cow, man!\" - Annual Bart quote\n\n*Happy New Year, Springfield! May your tire fire burn eternal!*",
+                'name' => "🎆 New Year's Eve: Springfield Countdown",
+                'description' => "## 🎆 Ring in the New Year Springfield Style! 🥳\n\nLive music, DJ after midnight, Duff toast, and the best view of the tire fire! ✨\n\n> \"Another year gone, another year of being Homer Simpson.\" - Homer (optimistically)\n\n### 🎉 Package Includes\n- 🍺 **Open Duff Bar** - 9 PM to 2 AM (pace yourself!)\n- 🍔 **Krusty Burger Appetizers** - Partially gelatinated, non-dairy, gum-based\n- 🥂 **Duff Toast at Midnight** - The official Springfield tradition\n- 🎊 **Party Favors** - Itchy & Scratchy themed (mildly violent)\n- 🔥 **Tire Fire Viewing** - Best seats in the house!\n\n---\n\n### 📅 Countdown Schedule\n- 🎵 **9 PM:** Live music begins 🎤\n- 🎧 **11 PM:** DJ Sideshow Bob takes over\n- 🥂 **11:59 PM:** Champagne (Duff) toast prep\n- 🎆 **12:00 AM:** HAPPY NEW YEAR! 🎊\n- 🎉 **12:01 AM:** \"Don't have a cow, man!\" - Annual Bart quote 🐄\n\n*Happy New Year, Springfield! May your tire fire burn eternal!* 🔥",
                 'duration' => 6,
                 'group' => 'Special Events',
                 'curator_group' => 'Entertainment',
@@ -1589,8 +1587,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             // LARD LAD DONUTS EVENTS
             // ===========================
             [
-                'name' => 'Lard Lad Donut Eating Contest',
-                'description' => "## 🍩 Mmm... Competitive Eating!\n\nHomer Simpson's record: 47 donuts in one sitting. Can you beat it?\n\n> \"Donuts. Is there anything they can't do?\" - Homer Simpson\n\n### 📋 Contest Rules\n- 🙌 **No hands** for the first round (face-first eating only)\n- 🎀 **Pink frosted sprinkled donuts only** - Homer's favorite\n- 🗣️ **\"I can't believe I ate the whole thing\"** must be said after\n- ⏱️ **Time limit:** 30 minutes or until you give up\n\n---\n\n### 🏆 Prizes\n- 🥇 **1st Place:** Golden Lard Lad statue + year supply of donuts\n- 🥈 **2nd Place:** Giant pink donut pillow\n- 🥉 **3rd Place:** Antacids and our respect\n\n### ⚠️ Medical Disclaimer\n- 🩺 Dr. Hibbert will be on standby\n- 💊 Tums provided\n- 🤢 Bucket available (no shame)\n\n*\"I've eaten eight different kinds of honey!\" - Homer (training regimen)*",
+                'name' => '🍩 Lard Lad Donut Eating Contest',
+                'description' => "## 🍩 Mmm... Competitive Eating! 😋\n\nHomer Simpson's record: 47 donuts in one sitting. Can you beat it? 🏆\n\n> \"Donuts. Is there anything they can't do?\" - Homer Simpson\n\n### 📋 Contest Rules\n- 🙌 **No hands** for the first round (face-first eating only)\n- 🎀 **Pink frosted sprinkled donuts only** - Homer's favorite\n- 🗣️ **\"I can't believe I ate the whole thing\"** must be said after\n- ⏱️ **Time limit:** 30 minutes or until you give up\n\n---\n\n### 🏆 Prizes\n- 🥇 **1st Place:** Golden Lard Lad statue + year supply of donuts 🍩\n- 🥈 **2nd Place:** Giant pink donut pillow\n- 🥉 **3rd Place:** Antacids and our respect\n\n### ⚠️ Medical Disclaimer\n- 🩺 Dr. Hibbert will be on standby (\"Hehehehe!\")\n- 💊 Tums provided\n- 🤢 Bucket available (no shame)\n\n*\"I've eaten eight different kinds of honey!\" - Homer (training regimen)* 🍯",
                 'duration' => 2,
                 'group' => 'Special Events',
                 'curator_group' => 'Entertainment',
@@ -1606,8 +1604,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 ],
             ],
             [
-                'name' => 'Tomacco Tasting Night',
-                'description' => "## 🍅 It Tastes Like Grandma! I Want More!\n\nTry Homer's controversial hybrid crop: the legendary Tomacco!\n\n> \"This tomacco is refreshing and addictive! That makes it okay, right?\" - Ralph Wiggum\n\n### 🧪 Tonight's Tasting Menu\n- 🍅 **Pure Tomacco Samples** - The original hybrid\n- 🥤 **Tomacco Juice** - Surprisingly smooth\n- 🌶️ **Tomacco Salsa** - Highly addictive (we warned you)\n- 🥗 **Tomacco Salad** - It's healthy... ish\n\n---\n\n### ⚠️ Important Warnings\n- 🐄 **Product may be highly addictive** - Animals WILL break down fences\n- 🐑 **Keep away from farm animals** - They become obsessed\n- 🚬 **Tobacco company executives NOT invited** - We're watching\n- 🏢 **Laramie sponsorship** - Pending legal review\n\n*\"This is horrible! More please!\" - Everyone who tries it*\n\n**Side effects may include:** Craving more tomacco, inexplicable happiness, and an urge to grow your own.",
+                'name' => '🍅 Tomacco Tasting Night',
+                'description' => "## 🍅 It Tastes Like Grandma! I Want More! 😋\n\nTry Homer's controversial hybrid crop: the legendary Tomacco! 🌱\n\n> \"This tomacco is refreshing and addictive! That makes it okay, right?\" - Ralph Wiggum\n\n### 🍽️ Tonight's Tasting Menu\n- 🍅 **Pure Tomacco Samples** - The original hybrid\n- 🥤 **Tomacco Juice** - Surprisingly smooth\n- 🫙 **Tomacco Salsa** - Highly addictive (we warned you)\n- 🥗 **Tomacco Salad** - It's healthy... ish\n\n---\n\n### ⚠️ Important Warnings\n- 🚨 **Product may be highly addictive** - Animals WILL break down fences\n- 🐄 **Keep away from farm animals** - They become obsessed\n- 🚫 **Tobacco company executives NOT invited** - We're watching\n- 💰 **Laramie sponsorship** - Pending legal review\n\n*\"This is horrible! More please!\" - Everyone who tries it* 🤤\n\n**Side effects may include:** Craving more tomacco, inexplicable happiness, and an urge to grow your own. 🌿",
                 'duration' => 2,
                 'group' => 'Special Events',
                 'curator_group' => 'Community',
@@ -1624,7 +1622,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             ],
             [
                 'name' => 'Le Grille BBQ Cookoff',
-                'description' => "## 🔥 What the Hell is That?! LE GRILLE?!\n\nOur weekly BBQ competition! Assembly instructions NOT included.\n\n> \"Why must I fail at every attempt at masonry?!\" - Homer Simpson, grill assembly expert\n\n### 🍖 Competition Categories\n- 🧇 **Homer's Moon Waffles** - Caramelized with a toothpaste glaze\n- 🔥 **Hibachi Grilling** - Build it yourself (good luck)\n- 🍗 **Best Burnt Offerings** - Sometimes charcoal is the goal\n- 🥓 **Bacon of the Gods** - As thick as Homer's... confidence\n\n---\n\n### 🛠️ Grill Assembly Station\n- 📖 Instructions available in **French only** (Le Grille!)\n- 🔧 Extra parts provided (you'll need them)\n- 🤬 Frustration counselor on site\n- 🍺 Duff provided to ease the pain\n\n### 🏆 Prizes\n- 🥇 **Best BBQ:** New grill (pre-assembled)\n- 🥈 **Best Assembly Meltdown:** Fire extinguisher\n- 🥉 **Participation:** Leftover charcoal\n\n*\"Stupid Lisa! Stupid hamburger-eater!\" - Homer (mid-assembly)*",
+                'description' => "## 🔥 What the Hell is That?! LE GRILLE?! 😤\n\nOur weekly BBQ competition! Assembly instructions NOT included. 📦\n\n> \"Why must I fail at every attempt at masonry?!\" - Homer Simpson, grill assembly expert\n\n### 🏆 Competition Categories\n- 🧇 **Homer's Moon Waffles** - Caramelized with a toothpaste glaze\n- 🔥 **Hibachi Grilling** - Build it yourself (good luck)\n- 🥓 **Best Burnt Offerings** - Sometimes charcoal is the goal\n- 🥓 **Bacon of the Gods** - As thick as Homer's... confidence\n\n---\n\n### 🔧 Grill Assembly Station\n- 🇫🇷 Instructions available in **French only** (Le Grille!)\n- 🔩 Extra parts provided (you'll need them)\n- 😤 Frustration counselor on site\n- 🍺 Duff provided to ease the pain\n\n### 🎁 Prizes\n- 🥇 **Best BBQ:** New grill (pre-assembled)\n- 🧯 **Best Assembly Meltdown:** Fire extinguisher\n- 🥉 **Participation:** Leftover charcoal\n\n*\"Stupid Lisa! Stupid hamburger-eater!\" - Homer (mid-assembly)* 🤬",
                 'duration' => 4,
                 'group' => 'Special Events',
                 'curator_group' => 'Community',
@@ -1633,15 +1631,15 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'hour' => 17,
                 'minute' => 0,
                 'days_of_week' => '1000000', // Sunday
-                'talent' => 'demo-openmic',
+                'talent' => 'demo-lurleen',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 12, 'quantity' => 80],
                     ['type' => 'Competitor Entry', 'price' => 25, 'quantity' => 20, 'description' => 'Includes grill station + propane'],
                 ],
             ],
             [
-                'name' => 'Steamed Hams Cooking Class',
-                'description' => "## 🍔 Steamed Hams! An Albany Expression!\n\nWell, Seymour, you are an odd fellow, but I must say... you steam a good ham.\n\n> \"I said 'steamed hams!' It's an Albany expression!\" - Principal Skinner\n\n### 🍳 Tonight's Menu\n- 🍔 **Steamed Hams** - Obviously grilled, we call them steamed\n- 🌌 **Aurora Borealis Flambé** - Localized entirely within your kitchen\n- 🎩 **Superintendent's Surprise** - Chalmers-approved\n- 🥗 **Side Salad** - To pretend this is healthy\n\n---\n\n### 🔥 Cooking Class Includes\n- 👨‍🍳 **Technique:** How to pass off grilled as steamed\n- 🚨 **Fire safety:** Extinguishers serviced and ready\n- 🎭 **Acting lessons:** \"Well, I should be— GOOD LORD, WHAT IS HAPPENING IN THERE?!\"\n- 🌠 **Aurora Borealis tutorial:** \"At this time of year, at this time of day, in this part of the country, localized entirely within your kitchen?\"\n\n*\"May I see it?\" \"No.\"*",
+                'name' => '🍔 Steamed Hams Cooking Class',
+                'description' => "## Steamed Hams! An Albany Expression!\n\nWell, Seymour, you are an odd fellow, but I must say... you steam a good ham.\n\n> \"I said 'steamed hams!' It's an Albany expression!\" - Principal Skinner\n\n### Tonight's Menu\n- **Steamed Hams** - Obviously grilled, we call them steamed 🍔\n- **Aurora Borealis Flambé** - Localized entirely within your kitchen\n- **Superintendent's Surprise** - Chalmers-approved\n- **Side Salad** - To pretend this is healthy\n\n---\n\n### Cooking Class Includes\n- **Technique:** How to pass off grilled as steamed\n- **Fire safety:** Extinguishers serviced and ready\n- **Acting lessons:** \"Well, I should be— GOOD LORD, WHAT IS HAPPENING IN THERE?!\"\n- **Aurora Borealis tutorial:** \"At this time of year, at this time of day, in this part of the country, localized entirely within your kitchen?\"\n\n*\"May I see it?\" \"No.\"*",
                 'duration' => 2,
                 'group' => 'Special Events',
                 'curator_group' => 'Community',
@@ -1662,7 +1660,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             // ===========================
             [
                 'name' => "Talent Show: Springfield's Got Talent",
-                'description' => "## ⭐ Springfield's Finest Showcase Their Hidden Talents!\n\nYou've got talent! (Maybe. We'll see.)\n\n> \"I bent my wookie!\" - Ralph Wiggum, potential contestant\n\n### 🎭 Expected Performances\n- 💰 **Mr. Burns:** Juggling (with hounds as backup)\n- 🏈 **Hans Moleman:** \"Football in the Groin\" reenactment (audience participation optional)\n- 🦸 **Comic Book Guy:** Worst. Performance. Ever. (his words)\n- 🖍️ **Ralph Wiggum:** TBD (probably glue-related)\n- 🎷 **Lisa Simpson:** Setting the bar impossibly high\n\n---\n\n### 👨‍⚖️ Judges Panel\n- 🎩 **Mayor Quimby** - \"Vote Quimby... er, I mean, I judge fairly!\"\n- 🤡 **Krusty** - \"Hey hey! This better not waste my time!\"\n- 🎷 **Lisa Simpson** - The only qualified judge\n\n### 🏆 Prizes\n- 🥇 **Winner:** $100 + glory\n- 🥈 **Runner-up:** Krusty Burger gift card\n- 🥉 **Everyone else:** Participated!\n\n*\"I'm Idaho!\" - Ralph, during his act*",
+                'description' => "## 🌟 Springfield's Finest Showcase Their Hidden Talents!\n\nYou've got talent! (Maybe. We'll see.) 🎭\n\n> \"I bent my wookie!\" - Ralph Wiggum, potential contestant\n\n### 🎤 Expected Performances\n- 🎩 **Mr. Burns:** Juggling (with hounds as backup)\n- 🏈 **Hans Moleman:** \"Football in the Groin\" reenactment (audience participation optional)\n- 🦸 **Comic Book Guy:** Worst. Performance. Ever. (his words)\n- 🖍️ **Ralph Wiggum:** TBD (probably glue-related)\n- 🎷 **Lisa Simpson:** Setting the bar impossibly high\n\n---\n\n### 👨‍⚖️ Judges Panel\n- 🎩 **Mayor Quimby** - \"Vote Quimby... er, I mean, I judge fairly!\"\n- 🤡 **Krusty** - \"Hey hey! This better not waste my time!\"\n- 🎷 **Lisa Simpson** - The only qualified judge\n\n### 🏆 Prizes\n- 🥇 **Winner:** $100 + glory\n- 🥈 **Runner-up:** Krusty Burger gift card\n- 🎀 **Everyone else:** Participated!\n\n*\"I'm Idaho!\" - Ralph, during his act* 🥔",
                 'duration' => 3,
                 'group' => 'Special Events',
                 'curator_group' => 'Community',
@@ -1671,15 +1669,15 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'hour' => 14,
                 'minute' => 0,
                 'days_of_week' => '1000000', // Sunday
-                'talents' => ['demo-krusty', 'demo-openmic', 'demo-lisajazz'],
+                'talents' => ['demo-krusty', 'demo-lurleen', 'demo-lisajazz'],
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 15, 'quantity' => 120],
                     ['type' => 'Judges Table', 'price' => 40, 'quantity' => 15, 'description' => 'Best seats + voting privileges'],
                 ],
             ],
             [
-                'name' => 'The Stonecutters Secret Show',
-                'description' => "## 🏛️ Who Controls the British Crown? WE DO! WE DO!\n\nExclusive Stonecutters members-only event!\n\n> \"Who keeps Atlantis off the maps? Who keeps the Martians under wraps? WE DO! WE DO!\" - The Sacred Song\n\n### 🔮 Tonight's Agenda\n- 🎵 **Sacred Songs** - Full \"We Do\" performance\n- 🤫 **Secret Rituals** - (Can't tell you, it's secret)\n- 🍻 **Brotherhood Bonding** - Duff, but fancy\n- 📜 **Parchment Reading** - Ancient wisdom or something\n\n---\n\n### 📋 Entry Requirements\n- 📜 **Sacred Parchment** - Required at door\n- 🔢 **Member Number** - Know yours!\n- 🚫 **Number 908 (Homer)** - Still NOT invited (he knows what he did)\n- 👔 **Dress Code:** Robes or business casual\n\n### 🏆 Who Made Steve Guttenberg a Star?\n**WE DO! WE DO!**\n\n*\"Oh no, no, wait, wait. Let me explain about the car chase. I thought the cop was a ghost!\"*",
+                'name' => '🏛️ The Stonecutters Secret Show',
+                'description' => "## Who Controls the British Crown? WE DO! WE DO!\n\nExclusive Stonecutters members-only event!\n\n> \"Who keeps Atlantis off the maps? Who keeps the Martians under wraps? WE DO! WE DO!\" - The Sacred Song\n\n### Tonight's Agenda\n- **Sacred Songs** - Full \"We Do\" performance\n- **Secret Rituals** - (Can't tell you, it's secret) 🤫\n- **Brotherhood Bonding** - Duff, but fancy\n- **Parchment Reading** - Ancient wisdom or something\n\n---\n\n### Entry Requirements\n- **Sacred Parchment** - Required at door\n- **Member Number** - Know yours!\n- **Number 908 (Homer)** - Still NOT invited (he knows what he did)\n- **Dress Code:** Robes or business casual\n\n### Who Made Steve Guttenberg a Star?\n**WE DO! WE DO!**\n\n*\"Oh no, no, wait, wait. Let me explain about the car chase. I thought the cop was a ghost!\"*",
                 'duration' => 4,
                 'group' => 'Special Events',
                 'curator_group' => 'Community',
@@ -1696,7 +1694,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             ],
             [
                 'name' => 'S-M-R-T Spelling Bee',
-                'description' => "## 📚 I Am So Smart! S-M-R-T!\n\nI mean S-M-A-R-T! Springfield's most entertaining spelling bee!\n\n> \"I am so smart! I am so smart! S-M-R-T! I mean S-M-A-R-T!\" - Homer Simpson\n\n### 🏆 Competition Rules\n- ✅ **Words like \"be\" and \"cat\" accepted** - We're inclusive\n- 🤔 **Homer Simpson as guest judge** - What could go wrong?\n- 🎉 **Prize:** A feeling of adequacy and a small trophy\n- 📝 **Practice words provided** - \"Cromulent\" and \"embiggen\" included\n\n---\n\n### 🎓 Sample Words by Difficulty\n- 😊 **Easy:** Cat, dog, Duff\n- 😐 **Medium:** Saxophone, nuclear, donut\n- 😰 **Hard:** Nahasapeemapetilon, Terwilliger\n- 💀 **Homer Level:** SMART (results may vary)\n\n*Sponsored by Springfield Elementary's \"No Child Left Behind\" Program*\n\n**Winner gets to say \"I am so smart!\" on stage!** (Correctly.)",
+                'description' => "## 🧠 I Am So Smart! S-M-R-T!\n\nI mean S-M-A-R-T! Springfield's most entertaining spelling bee! 📝\n\n> \"I am so smart! I am so smart! S-M-R-T! I mean S-M-A-R-T!\" - Homer Simpson\n\n### 📋 Competition Rules\n- ✅ **Words like \"be\" and \"cat\" accepted** - We're inclusive\n- 🍩 **Homer Simpson as guest judge** - What could go wrong?\n- 🏆 **Prize:** A feeling of adequacy and a small trophy\n- 📚 **Practice words provided** - \"Cromulent\" and \"embiggen\" included\n\n---\n\n### 🔤 Sample Words by Difficulty\n- 🟢 **Easy:** Cat, dog, Duff\n- 🟡 **Medium:** Saxophone, nuclear, donut\n- 🔴 **Hard:** Nahasapeemapetilon, Terwilliger\n- 🍩 **Homer Level:** SMART (results may vary)\n\n*Sponsored by Springfield Elementary's \"No Child Left Behind\" Program* 🏫\n\n**Winner gets to say \"I am so smart!\" on stage!** (Correctly.) 🎤",
                 'duration' => 2,
                 'group' => 'Comedy',
                 'curator_group' => 'Community',
@@ -1713,7 +1711,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             ],
             [
                 'name' => 'Bingo with Abe Simpson',
-                'description' => "## 🎱 Back in My Day, We Had to Walk 15 Miles!\n\nJust to play bingo! And we LIKED it! Hosted by Abraham \"Grampa\" Simpson.\n\n> \"We can't bust heads like we used to, but we have our ways. One trick is to tell 'em stories that don't go anywhere.\" - Grampa\n\n### 👴 Expect Long Stories About\n- 🧅 **The onion on his belt** - \"Which was the style at the time!\"\n- 🚗 **Shelbyville and their speed holes** - They make the car go faster\n- 📝 **\"Dear Mr. President, there are too many states nowadays\"** - Full reading\n- 🛫 **The time he was almost Taft** - Or was it Roosevelt?\n\n---\n\n### 🎰 Bingo Prizes\n- 🥇 **Full House:** $50 + one of Grampa's war stories\n- 📰 **Five in a Row:** Subscription to the Springfield Shopper\n- 🍬 **Participation:** Hard candy from Grampa's pocket\n\n*\"Old Man Yells At Bingo Card\" - Headline waiting to happen*\n\n⚠️ *Warning: Stories may take 45 minutes with no discernible point.*",
+                'description' => "## 👴 Back in My Day, We Had to Walk 15 Miles!\n\nJust to play bingo! And we LIKED it! Hosted by Abraham \"Grampa\" Simpson. 🎯\n\n> \"We can't bust heads like we used to, but we have our ways. One trick is to tell 'em stories that don't go anywhere.\" - Grampa\n\n### 📖 Expect Long Stories About\n- 🧅 **The onion on his belt** - \"Which was the style at the time!\"\n- 🚗 **Shelbyville and their speed holes** - They make the car go faster\n- 📝 **\"Dear Mr. President, there are too many states nowadays\"** - Full reading\n- 🎩 **The time he was almost Taft** - Or was it Roosevelt?\n\n---\n\n### 🎁 Bingo Prizes\n- 🥇 **Full House:** $50 + one of Grampa's war stories\n- 🥈 **Five in a Row:** Subscription to the Springfield Shopper\n- 🍬 **Participation:** Hard candy from Grampa's pocket\n\n*\"Old Man Yells At Bingo Card\" - Headline waiting to happen* 📰\n\n⚠️ *Warning: Stories may take 45 minutes with no discernible point.* 😴",
                 'duration' => 2,
                 'group' => 'Special Events',
                 'curator_group' => 'Community',
@@ -1722,7 +1720,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'hour' => 14,
                 'minute' => 0,
                 'days_of_week' => '0010000', // Tuesday
-                'talent' => 'demo-openmic',
+                'talent' => 'demo-lurleen',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 8, 'quantity' => 50],
                     ['type' => 'Retirement Castle Package', 'price' => 15, 'quantity' => 20, 'description' => '3 bingo cards + pudding cup'],
@@ -1730,7 +1728,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             ],
             [
                 'name' => 'Do It For Her Night',
-                'description' => "## 💕 DON'T FORGET: YOU'RE HERE FOREVER\n\n...covered by Maggie's photos to spell \"DO IT FOR HER.\"\n\n> \"This is the most emotional room at the nuclear plant.\" - Every visitor to Homer's workstation\n\n### 🖼️ A Heartwarming Evening\n- 📸 **Photo Collage Workshop** - Create your own \"Do It For Her\" display\n- 🎨 **Motivational Sign-Making** - Turn your dread into inspiration\n- 📝 **Templates Provided** - Make any workplace bearable\n- 🧅 **Onions Available** - For crying purposes (no judgment)\n\n---\n\n### 💔 Why This Works\n- 😭 **Homer had a sign** that said \"Don't Forget: You're Here Forever\"\n- 👶 **Maggie's photos** now cover it to spell \"Do It For Her\"\n- 😢 **It gets us every time** - Every. Single. Time.\n\n### 🎁 Take Home\n- 🖼️ Your completed collage\n- 💕 A renewed sense of purpose\n- 😭 Tissues (you'll need them)\n\n*Maggie appearances not guaranteed but highly probable. Bring photos of your loved ones!*",
+                'description' => "## 💕 DON'T FORGET: YOU'RE HERE FOREVER\n\n...covered by Maggie's photos to spell \"DO IT FOR HER.\" 👶\n\n> \"This is the most emotional room at the nuclear plant.\" - Every visitor to Homer's workstation\n\n### 🎨 A Heartwarming Evening\n- 🖼️ **Photo Collage Workshop** - Create your own \"Do It For Her\" display\n- ✨ **Motivational Sign-Making** - Turn your dread into inspiration\n- 📋 **Templates Provided** - Make any workplace bearable\n- 🧅 **Onions Available** - For crying purposes (no judgment)\n\n---\n\n### 💖 Why This Works\n- 📝 **Homer had a sign** that said \"Don't Forget: You're Here Forever\"\n- 👶 **Maggie's photos** now cover it to spell \"Do It For Her\"\n- 😢 **It gets us every time** - Every. Single. Time.\n\n### 🎁 Take Home\n- 🖼️ Your completed collage\n- 💪 A renewed sense of purpose\n- 🧻 Tissues (you'll need them)\n\n*Maggie appearances not guaranteed but highly probable. Bring photos of your loved ones!* ❤️",
                 'duration' => 2,
                 'group' => 'Special Events',
                 'curator_group' => 'Community',
@@ -1739,7 +1737,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'hour' => 18,
                 'minute' => 0,
                 'days_of_week' => '1000000', // Sunday
-                'talent' => 'demo-openmic',
+                'talent' => 'demo-lurleen',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 10, 'quantity' => 60],
                     ['type' => 'Family Package', 'price' => 25, 'quantity' => 20, 'description' => 'Includes photo frame + tissue box'],
@@ -1747,7 +1745,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             ],
             [
                 'name' => '"Monorail!" Town Meeting',
-                'description' => "## 🚝 MONORAIL! MONORAIL! MONORAIL!\n\nA re-creation of Springfield's most musical town meeting!\n\n> \"I've sold monorails to Brockway, Ogdenville, and North Haverbrook, and by gum, it put them on the map!\" - Lyle Lanley\n\n### 📋 Tonight's Agenda\n- 🚝 **Should Springfield get a monorail?** (Spoiler: The answer is always yes)\n- 🎤 **Lyle Lanley Presentation** - Watch the master at work\n- 🛣️ **\"But Main Street's still all cracked and broken!\" rebuttals** - Sorry, Marge\n- 🎵 **Group Singing** - Encouraged! Required! MONORAIL!\n\n---\n\n### 🎵 Song Lyrics (Practice These!)\n*\"Monorail! Monorail! Monorail!\"*\n*\"What about us brain-dead slobs?\"*\n*\"You'll be given cushy jobs!\"*\n\n### ⚠️ Disclaimers\n- 🤫 **Marge's concerns** will be politely ignored\n- 🚫 **No one from North Haverbrook** may attend\n- 🦝 **Possum problems** are not our responsibility\n\n*Is there a chance the track could bend? NOT ON YOUR LIFE, MY HINDU FRIEND!*",
+                'description' => "## MONORAIL! MONORAIL! MONORAIL! 🚝\n\nA re-creation of Springfield's most musical town meeting!\n\n> \"I've sold monorails to Brockway, Ogdenville, and North Haverbrook, and by gum, it put them on the map!\" - Lyle Lanley\n\n### Tonight's Agenda\n- **Should Springfield get a monorail?** (Spoiler: The answer is always yes)\n- **Lyle Lanley Presentation** - Watch the master at work\n- **\"But Main Street's still all cracked and broken!\" rebuttals** - Sorry, Marge\n- **Group Singing** - Encouraged! Required! MONORAIL!\n\n---\n\n### Song Lyrics (Practice These!)\n*\"Monorail! Monorail! Monorail!\"*\n*\"What about us brain-dead slobs?\"*\n*\"You'll be given cushy jobs!\"*\n\n### ⚠️ Disclaimers\n- **Marge's concerns** will be politely ignored\n- **No one from North Haverbrook** may attend\n- **Possum problems** are not our responsibility\n\n*Is there a chance the track could bend? NOT ON YOUR LIFE, MY HINDU FRIEND!*",
                 'duration' => 2,
                 'group' => 'Special Events',
                 'curator_group' => 'Community',
@@ -1756,7 +1754,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'hour' => 19,
                 'minute' => 0,
                 'days_of_week' => '0100000', // Monday
-                'talent' => 'demo-openmic',
+                'talent' => 'demo-lurleen',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 0, 'quantity' => 200],
                 ],
@@ -1813,7 +1811,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             ],
             [
                 'name' => 'I Choo-Choo-Choose You Speed Dating',
-                'description' => "## 💕 Let's Bee Friends! I Choo-Choo-Choose You!\n\nSpringfield's premier singles event for lonely hearts!\n\n> \"You choo-choo-choose me?\" - Ralph Wiggum (the origin of all this)\n\n### 💘 How It Works\n- ⏱️ **5 minutes per date** - Make it count!\n- 💝 **Free conversation hearts** - \"Bee Mine,\" \"U R 2 QT\"\n- 🚂 **\"I Choo-Choo-Choose You\" cards** - Provided\n- 📝 **Match cards** - Mark \"yes\" or \"Moe's level of loneliness\"\n\n---\n\n### ⚠️ Important Rules\n- 🚫 **Ralph Wiggum NOT in attendance** - (Restraining order, long story)\n- 🐱 **Please do not give valentines** to anyone whose cat's breath smells like cat food\n- 💔 **No Lisa-shaming** - She said no, and that's okay\n- 🍺 **Moe will be bartending** - He understands your pain\n\n### 💑 Success Stories\n- 👫 Kirk & Luann (remarried!)\n- 👫 Lenny & Carl (best friends count)\n- 👫 Homer & Marge (they met here! Just kidding, they didn't)\n\n*\"So, do you like... stuff?\" - Your opening line, probably*",
+                'description' => "## 💕 Let's Bee Friends! I Choo-Choo-Choose You! 🚂\n\nSpringfield's premier singles event for lonely hearts! 💘\n\n> \"You choo-choo-choose me?\" - Ralph Wiggum (the origin of all this)\n\n### 💝 How It Works\n- ⏱️ **5 minutes per date** - Make it count!\n- 💌 **Free conversation hearts** - \"Bee Mine,\" \"U R 2 QT\"\n- 🚂 **\"I Choo-Choo-Choose You\" cards** - Provided\n- 📝 **Match cards** - Mark \"yes\" or \"Moe's level of loneliness\"\n\n---\n\n### ⚠️ Important Rules\n- 🚫 **Ralph Wiggum NOT in attendance** - (Restraining order, long story)\n- 🐱 **Please do not give valentines** to anyone whose cat's breath smells like cat food\n- 🙅 **No Lisa-shaming** - She said no, and that's okay\n- 🍺 **Moe will be bartending** - He understands your pain\n\n### 💑 Success Stories\n- 💒 Kirk & Luann (remarried!)\n- 👬 Lenny & Carl (best friends count)\n- 💕 Homer & Marge (they met here! Just kidding, they didn't)\n\n*\"So, do you like... stuff?\" - Your opening line, probably* 😅",
                 'duration' => 3,
                 'group' => 'Special Events',
                 'curator_group' => 'Community',
@@ -1822,7 +1820,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'hour' => 19,
                 'minute' => 0,
                 'days_of_week' => '0001000', // Wednesday
-                'talent' => 'demo-openmic',
+                'talent' => 'demo-lurleen',
                 'tickets' => [
                     ['type' => 'Singles Entry', 'price' => 25, 'quantity' => 50],
                     ['type' => 'Milhouse Package', 'price' => 40, 'quantity' => 15, 'description' => 'Guaranteed second date (not really)'],
@@ -1830,7 +1828,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             ],
             [
                 'name' => 'Max Power Networking Night',
-                'description' => "## 💪 Nobody Snuggles with MAX POWER!\n\nYou strap yourself in and FEEL THE Gs!\n\n> \"Max Power! He's the man whose name you'd love to touch! But you mustn't touch!\" - The Song\n\n### 🤝 Network with Springfield's Elite\n- 📝 **Name Change Workshop** - Find YOUR power name\n- 🤵 **Meet Trent Steel** and other successful people\n- 🤝 **Power Handshakes** - Firm, meaningful, intimidating\n- 💼 **Business Card Exchange** - Make yours memorable\n\n---\n\n### 💡 Power Naming Tips\n- 🔥 **Names inspired by hair dryers** - Welcome!\n- 💪 **Two power words** - Like \"Max Power\" or \"Rembrandt Q. Einstein\"\n- 🚫 **Avoid:** Homer-like names (too relatable)\n- ✅ **Aim for:** \"Man whose name you'd love to touch\"\n\n### 🏆 Featured Speakers\n- 💪 **Max Power** (née Homer Simpson)\n- 🎸 **Rock Strongo** - Motivation specialist\n- 💎 **Trent Steel** - Success incarnate\n\n*\"His name sounds good in your ear, but when you say it, you mustn't fear!\"*",
+                'description' => "## Nobody Snuggles with MAX POWER! 💪\n\nYou strap yourself in and FEEL THE Gs!\n\n> \"Max Power! He's the man whose name you'd love to touch! But you mustn't touch!\" - The Song\n\n### Network with Springfield's Elite\n- **Name Change Workshop** - Find YOUR power name\n- **Meet Trent Steel** and other successful people\n- **Power Handshakes** - Firm, meaningful, intimidating\n- **Business Card Exchange** - Make yours memorable\n\n---\n\n### Power Naming Tips\n- **Names inspired by hair dryers** - Welcome!\n- **Two power words** - Like \"Max Power\" or \"Rembrandt Q. Einstein\"\n- **Avoid:** Homer-like names (too relatable)\n- **Aim for:** \"Man whose name you'd love to touch\"\n\n### Featured Speakers\n- **Max Power** (née Homer Simpson)\n- **Rock Strongo** - Motivation specialist\n- **Trent Steel** - Success incarnate\n\n*\"His name sounds good in your ear, but when you say it, you mustn't fear!\"*",
                 'duration' => 2.5,
                 'group' => 'Special Events',
                 'curator_group' => 'Community',
@@ -1847,7 +1845,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             ],
             [
                 'name' => "Everything's Coming Up Milhouse",
-                'description' => "## 🎉 Finally! Everything's Coming Up Milhouse!\n\nA celebration of mediocrity! Tonight, EVERYBODY likes Milhouse!\n\n> \"My feet are soaked, but my cuffs are bone dry! Everything's coming up Milhouse!\" - Milhouse Van Houten\n\n### 🎊 Tonight's Festivities\n- 🎮 **Thrillho Video Game Tournament** - Play as \"THRILLHO\" (name didn't fit)\n- 👩 **\"My Mom Says I'm Cool\" Affirmation Station** - She does!\n- 💈 **Vaseline-Based Hair Styling Tips** - Get that Milhouse sheen\n- 🍇 **Purple Fruit Drinks** - Milhouse's favorite!\n\n---\n\n### 😎 Milhouse Facts\n- 👓 His glasses are prescription AND style\n- 💔 Lisa has said no 47 times (and counting)\n- 🏠 His parents are divorced (it's complicated)\n- 🌟 He's a meme! (That's cool, right?)\n\n### 🏆 Prizes\n- 🥇 **Best Milhouse Impression:** Dignity\n- 🥈 **Thrillho Champion:** Video game (slightly used)\n- 🥉 **Participation:** Knowing you're not alone\n\n*\"Remember: Nobody likes Milhouse!\" - Tonight, that changes.*",
+                'description' => "## 🎉 Finally! Everything's Coming Up Milhouse! 🌈\n\nA celebration of mediocrity! Tonight, EVERYBODY likes Milhouse! 🤓\n\n> \"My feet are soaked, but my cuffs are bone dry! Everything's coming up Milhouse!\" - Milhouse Van Houten\n\n### 🥳 Tonight's Festivities\n- 🎮 **Thrillho Video Game Tournament** - Play as \"THRILLHO\" (name didn't fit)\n- 💪 **\"My Mom Says I'm Cool\" Affirmation Station** - She does!\n- 💇 **Vaseline-Based Hair Styling Tips** - Get that Milhouse sheen\n- 🍇 **Purple Fruit Drinks** - Milhouse's favorite!\n\n---\n\n### 📊 Milhouse Facts\n- 👓 His glasses are prescription AND style\n- 💔 Lisa has said no 47 times (and counting)\n- 👨‍👩‍👦 His parents are divorced (it's complicated)\n- 📱 He's a meme! (That's cool, right?)\n\n### 🏆 Prizes\n- 🥇 **Best Milhouse Impression:** Dignity\n- 🎮 **Thrillho Champion:** Video game (slightly used)\n- 🤗 **Participation:** Knowing you're not alone\n\n*\"Remember: Nobody likes Milhouse!\" - Tonight, that changes.* ✨",
                 'duration' => 3,
                 'group' => 'Special Events',
                 'curator_group' => 'Community',
@@ -1856,7 +1854,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'hour' => 18,
                 'minute' => 0,
                 'days_of_week' => '1000000', // Sunday
-                'talent' => 'demo-openmic',
+                'talent' => 'demo-lurleen',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 10, 'quantity' => 80],
                     ['type' => 'Thrillho Package', 'price' => 25, 'quantity' => 20, 'description' => 'Includes race car bed photo op'],
@@ -1864,7 +1862,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             ],
             [
                 'name' => 'Inanimate Carbon Rod Appreciation Night',
-                'description' => "## 🏆 IN ROD WE TRUST!\n\nCelebrate the hero that saved the Corvair space shuttle!\n\n> \"In Rod We Trust!\" - The Nation\n\n### 🎬 Tonight's Program\n- 🎥 **Documentary Screening:** \"Rod: The Movie\"\n- 🤝 **Meet and Greet** with THE Rod (inanimate carbon rod)\n- 📰 **Time Magazine \"Inanimate Object of the Year\"** ceremony\n- 📸 **Photo Ops** with the Rod (it won't move, don't worry)\n\n---\n\n### 🌟 Rod's Accomplishments\n- 🚀 **Saved the Corvair space shuttle** - By being a rod\n- 📰 **Time Magazine cover** - \"In Rod We Trust!\"\n- 🏆 **Beat Homer Simpson** for recognition (he's still bitter)\n- 🎖️ **National hero status** - For rodding\n\n### ⚠️ Attendance Notes\n- 🚫 **Homer Simpson NOT invited** - He's still upset about this\n- 📸 **The rod will be under glass** - Look, don't touch\n- 🎉 **Inanimate carbon rod enthusiasts** welcome!\n\n*\"Huh?! An inanimate carbon rod?!\" - Homer (furiously)*",
+                'description' => "## IN ROD WE TRUST! 🏆\n\nCelebrate the hero that saved the Corvair space shuttle!\n\n> \"In Rod We Trust!\" - The Nation\n\n### Tonight's Program\n- **Documentary Screening:** \"Rod: The Movie\"\n- **Meet and Greet** with THE Rod (inanimate carbon rod)\n- **Time Magazine \"Inanimate Object of the Year\"** ceremony\n- **Photo Ops** with the Rod (it won't move, don't worry)\n\n---\n\n### Rod's Accomplishments\n- **Saved the Corvair space shuttle** - By being a rod\n- **Time Magazine cover** - \"In Rod We Trust!\"\n- **Beat Homer Simpson** for recognition (he's still bitter)\n- **National hero status** - For rodding\n\n### ⚠️ Attendance Notes\n- **Homer Simpson NOT invited** - He's still upset about this\n- **The rod will be under glass** - Look, don't touch\n- **Inanimate carbon rod enthusiasts** welcome!\n\n*\"Huh?! An inanimate carbon rod?!\" - Homer (furiously)*",
                 'duration' => 2,
                 'group' => 'Special Events',
                 'curator_group' => 'Community',
@@ -1881,7 +1879,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             ],
             [
                 'name' => 'Poochie Memorial Night',
-                'description' => "## 🐕 I Have to Go Now. My Planet Needs Me.\n\n*Note: Poochie died on the way back to his home planet.*\n\n> \"When are they gonna get to the fireworks factory?!\" - Milhouse\n\n### 🎬 Tonight's Tribute\n- 📺 **Screening of Poochie's only episode** - The one. The only.\n- 🍹 **\"Poochitize Me, Cap'n!\" Drink Specials** - Extreme!\n- 🏄 **Rastafarian Surfer Costume Contest** - Proactive! Paradigm!\n- 👤 **Roy Appearance** - Maybe! (Who's Roy?)\n\n---\n\n### 🐕 Who Was Poochie?\n- 🛹 **Extreme dog** with attitude\n- 🏄 **Surfed** and... rapped?\n- 🌟 **\"One outrageous dude\"** - According to Homer's voice acting\n- 💀 **Died on the way back** to his home planet (RIP)\n\n### 🎭 Focus Group Results\n- 👎 \"Cute! But I want a dog, not Fonzie in a dog suit.\"\n- 👍 \"The original dog... he's better than 10 Super Bowls!\"\n- 🤷 \"So he's proactive, huh?\"\n\n*\"Rest in peace, brave Poochie. You were like a dog... to me.\"*",
+                'description' => "## I Have to Go Now. My Planet Needs Me.\n\n*Note: Poochie died on the way back to his home planet.*\n\n> \"When are they gonna get to the fireworks factory?!\" - Milhouse\n\n### Tonight's Tribute\n- **Screening of Poochie's only episode** - The one. The only.\n- **\"Poochitize Me, Cap'n!\" Drink Specials** - Extreme!\n- **Rastafarian Surfer Costume Contest** - Proactive! Paradigm! 🏄\n- **Roy Appearance** - Maybe! (Who's Roy?)\n\n---\n\n### Who Was Poochie?\n- **Extreme dog** with attitude\n- **Surfed** and... rapped?\n- **\"One outrageous dude\"** - According to Homer's voice acting\n- **Died on the way back** to his home planet (RIP)\n\n### Focus Group Results\n- \"Cute! But I want a dog, not Fonzie in a dog suit.\"\n- \"The original dog... he's better than 10 Super Bowls!\"\n- \"So he's proactive, huh?\"\n\n*\"Rest in peace, brave Poochie. You were like a dog... to me.\"*",
                 'duration' => 2,
                 'group' => 'Special Events',
                 'curator_group' => 'Entertainment',
