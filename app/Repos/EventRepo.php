@@ -522,8 +522,7 @@ class EventRepo
                     $query->whereBetween('starts_at', [$startOfDay, $endOfDay])
                         ->orWhere(function ($query) use ($eventDate) {
                             $query->whereNotNull('days_of_week')
-                                ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
-                                ->where('starts_at', '<=', $eventDate);
+                                ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1]);
                         });
                 })
                 ->where(function ($query) use ($subdomain) {
