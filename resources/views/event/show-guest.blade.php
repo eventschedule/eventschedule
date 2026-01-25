@@ -304,8 +304,8 @@
         @else
         <div>
         @if ($translation ? $translation->description_translated : $event->translatedDescription())
-          <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-6 sm:p-8 mb-6 flex flex-col gap-4 {{ $role->isRtl() || ($translation && $translation->role->isRtl()) ? 'rtl' : '' }}">
-            <div class="text-[#33383C] dark:text-gray-300 text-base custom-content">
+          <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-6 sm:px-8 mb-6 flex flex-col gap-4 {{ $role->isRtl() || ($translation && $translation->role->isRtl()) ? 'rtl' : '' }}">
+            <div class="text-[#33383C] dark:text-gray-300 text-base custom-content [&>*:first-child]:mt-0">
               {!! \App\Utils\UrlUtils::convertUrlsToLinks($translation ? $translation->description_translated : $event->translatedDescription()) !!}
             </div>
           </div>
