@@ -111,7 +111,7 @@
             <div class="flex flex-row gap-2 w-full md:w-auto">
                 {{-- Schedule Select --}}
                 @if(isset($role) && $role->groups && $role->groups->count() > 1)
-                    <select v-model="selectedGroup" class="border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                    <select v-model="selectedGroup" class="border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 min-w-[180px] hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
                         <option value="">{{ __('messages.all_schedules') }}</option>
                         @foreach($role->groups as $group)
                             <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
@@ -120,8 +120,8 @@
                 @endif
 
                 {{-- Category Select --}}
-                @if(count($uniqueCategoryIds ?? []) > 1)
-                    <select v-model="selectedCategory" class="border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                @if(count($uniqueCategoryIds ?? []) > 0)
+                    <select v-model="selectedCategory" class="border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 min-w-[180px] hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
                         <option value="">{{ __('messages.all_categories') }}</option>
                         <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
                     </select>
@@ -138,7 +138,7 @@
                         {{ __('messages.save') }}
                     </button>
                 @endif
-            @elseif ($route == 'home')
+            @elseif ($route == 'home' && !is_demo_mode())
                 <div style="font-family: sans-serif" class="relative inline-block text-left w-full md:w-auto">
                     <button type="button" onclick="onPopUpClick('calendar-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-5 py-3 text-base font-bold text-gray-500 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700" id="menu-button" aria-expanded="true" aria-haspopup="true">
                         {{ __('messages.new_schedule') }}
@@ -151,7 +151,7 @@
                         <a href="{{ route('new', ['type' => 'talent']) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700" role="menuitem" tabindex="-1">
                                 <svg class="{{ rtl_class($role ?? null, 'ml-3', 'mr-3', $isAdminRoute) }} h-5 w-5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                 <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
-                                </svg>                        
+                                </svg>
                                 <div>
                                     {{ __('messages.talent') }}
                                     <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.new_schedule_tooltip') }}</div>
