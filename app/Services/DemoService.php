@@ -109,21 +109,45 @@ class DemoService
             $role->background = 'gradient';
             $role->background_colors = '#FFD90F, #0064B0'; // Classic Simpsons yellow/blue
             $role->accent_color = '#FFD90F';
-            $role->description = '**Your guide to everything happening in America\'s most nuclear-adjacent town!**
+            $role->description = '**Welcome to Springfield\'s ultimate event guide — where the nuclear glow never fades and neither does the entertainment!** ☢️
 
-From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater, we curate the finest events our beloved city has to offer. Whether you\'re looking for live music, community gatherings, or entertainment that doesn\'t involve monorails (well, maybe sometimes), we\'ve got you covered.
+From dive bars to amphitheaters, comedy clubs to secret societies, we\'ve aggregated every happening in America\'s most animated town. Whether you\'re chasing smooth jazz at Lisa\'s quartet, dodging rakes at DJ Sideshow Bob\'s set, or wondering why you can\'t stop humming "Baby on Board" — it\'s all here.
 
-> "Springfield: A city on the grow!" - Mayor Quimby (probably)
+> "To alcohol! The cause of, and solution to, all of life\'s problems." - Homer Simpson 🍺
 
 ---
 
-## What We Offer
-- **Live Music** - From jazz to rock to whatever Otto\'s listening to
-- **Comedy** - Stand-up, improv, and Krusty (when he shows up sober)
-- **Nightlife** - The finest Duff this side of Shelbyville 🍺
-- **Community Events** - Town meetings, talent shows, and controlled chaos
+## 🗺️ Explore Our Venues
 
-*D\'oh-n\'t miss out on the action! Our tire fire burns eternal, and so does our event calendar.*';
+- 🍻 **Moe\'s Tavern** - Where everybody knows your name (and Moe pretends not to)
+- 🎳 **Barney\'s Bowl-A-Rama** - Strikes, spares, and questionable nachos
+- 🎬 **The Aztec Theater** - Art deco elegance, McBain marathons
+- 🎤 **Springfield Amphitheater** - 10,000 seats, premium tire fire views
+- 🍩 **Lard Lad Donuts** - Events as sweet as the frosting
+- 🏛️ **Community Center** - Democracy in action (sort of)
+
+## 🎭 Featured Performers
+
+- 🎷 Lisa Simpson Jazz Quartet
+- 🤡 Krusty Entertainment
+- 💿 DJ Sideshow Bob
+- 🎸 Springfield Rockers
+- 🤠 Lurleen Lumpkin
+- 🎥 Troy McClure Productions
+- 🔬 Professor Frink Presents
+- 🔮 Stonecutters Guild *(who controls the British crown? Who keeps the metric system down?)*
+
+## 🎟️ What You\'ll Find
+
+- 🎵 **Live Music** - Jazz, rock, country, and electronica (with rakes)
+- 😂 **Comedy** - Stand-up, seltzer bottles, and Sideshow Mel
+- 🎪 **Community Events** - Town halls that may include musical numbers
+- 🎃 **Seasonal Specials** - Treehouse of Horror screenings every October
+- 🧪 **Science Shows** - 87% less murderous robots than last time!
+
+*Browse by venue, filter by date, or just let serendipity guide you — like a monorail to nowhere in particular.* 🚝
+
+⚠️ *Disclaimer: Events may be subject to three-eyed fish sightings, escaped zoo animals, comet near-misses, and/or spontaneous mob formation. Shelbyville residents tolerated.*';
             $role->accept_requests = false;
             $role->plan_type = 'pro';
             $role->plan_expires = now()->addYear()->format('Y-m-d');
