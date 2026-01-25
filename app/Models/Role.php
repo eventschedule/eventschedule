@@ -710,7 +710,12 @@ class Role extends Model implements MustVerifyEmail
             return true;
         }
 
-        // Check the plan_type field
+        // Check for active enterprise Stripe subscription
+        if ($this->hasActiveEnterpriseSubscription()) {
+            return true;
+        }
+
+        // Legacy: Check the plan_type field
         return $this->plan_expires >= now()->format('Y-m-d') && $this->plan_type === 'enterprise';
     }
 
