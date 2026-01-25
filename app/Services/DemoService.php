@@ -110,6 +110,9 @@ class DemoService
         // Download demo images if they don't exist
         $this->downloadDemoImages();
 
+        // Create demo talent roles with themed gradients
+        $this->createDemoTalents($user);
+
         // Create groups
         $groups = $this->createGroups($role);
 
@@ -182,6 +185,91 @@ class DemoService
                     continue;
                 }
             }
+        }
+    }
+
+    /**
+     * Create demo talent roles with themed gradients
+     */
+    protected function createDemoTalents(User $user): void
+    {
+        $talents = [
+            [
+                'name' => 'Lisa Simpson Jazz Quartet',
+                'subdomain' => 'demo-lisajazz',
+                'background_colors' => '#1a237e, #4a148c',
+                'background_rotation' => 135,
+            ],
+            [
+                'name' => 'Krusty Entertainment',
+                'subdomain' => 'demo-krusty',
+                'background_colors' => '#f44336, #ff9800',
+                'background_rotation' => 45,
+            ],
+            [
+                'name' => 'DJ Sideshow Bob',
+                'subdomain' => 'demo-djbob',
+                'background_colors' => '#7b1fa2, #00bcd4',
+                'background_rotation' => 160,
+            ],
+            [
+                'name' => 'Springfield Rockers',
+                'subdomain' => 'demo-rockers',
+                'background_colors' => '#212121, #616161',
+                'background_rotation' => 180,
+            ],
+            [
+                'name' => 'Open Mic Collective',
+                'subdomain' => 'demo-openmic',
+                'background_colors' => '#4e342e, #8d6e63',
+                'background_rotation' => 120,
+            ],
+            [
+                'name' => 'Troy McClure Productions',
+                'subdomain' => 'demo-troymcclure',
+                'background_colors' => '#b71c1c, #880e4f',
+                'background_rotation' => 200,
+            ],
+            [
+                'name' => 'Professor Frink Presents',
+                'subdomain' => 'demo-frink',
+                'background_colors' => '#0d47a1, #00695c',
+                'background_rotation' => 90,
+            ],
+            [
+                'name' => 'Stonecutters Guild',
+                'subdomain' => 'demo-stonecutters',
+                'background_colors' => '#5d4037, #ff8f00',
+                'background_rotation' => 225,
+            ],
+        ];
+
+        foreach ($talents as $talentData) {
+            // Skip if already exists
+            if (Role::where('subdomain', $talentData['subdomain'])->exists()) {
+                continue;
+            }
+
+            $role = new Role;
+            $role->user_id = $user->id;
+            $role->subdomain = $talentData['subdomain'];
+            $role->type = 'talent';
+            $role->name = $talentData['name'];
+            $role->email = self::DEMO_EMAIL;
+            $role->email_verified_at = now();
+            $role->language_code = 'en';
+            $role->timezone = 'America/New_York';
+            $role->city = 'Springfield';
+            $role->country_code = 'US';
+            $role->background = 'gradient';
+            $role->background_colors = $talentData['background_colors'];
+            $role->background_rotation = $talentData['background_rotation'];
+            $role->plan_type = 'pro';
+            $role->plan_expires = now()->addYear()->format('Y-m-d');
+            $role->save();
+
+            // Attach user to role as owner (so it's "claimed")
+            $role->users()->attach($user->id, ['level' => 'owner']);
         }
     }
 
@@ -344,6 +432,14 @@ class DemoService
                 'group_id' => $group?->id,
             ]);
 
+            // Attach talent role if specified
+            if (! empty($eventData['talent'])) {
+                $talentRole = Role::where('subdomain', $eventData['talent'])->first();
+                if ($talentRole) {
+                    $talentRole->events()->attach($event->id, ['is_accepted' => true]);
+                }
+            }
+
             // Create tickets
             $this->createTicketsForEvent($event, $eventData['tickets']);
 
@@ -438,6 +534,7 @@ class DemoService
                 'hour' => 19,
                 'minute' => 0,
                 'days_of_week' => '1000000', // Sunday
+                'talent' => 'demo-lisajazz',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 22, 'quantity' => 100],
                     ['type' => 'VIP Table', 'price' => 55, 'quantity' => 20, 'description' => 'Reserved seating + commemorative saxophone pin'],
@@ -452,6 +549,7 @@ class DemoService
                 'hour' => 14,
                 'minute' => 0,
                 'days_of_week' => '1000000', // Sunday
+                'talent' => 'demo-krusty',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 15, 'quantity' => 120],
                     ['type' => 'Judges Table', 'price' => 40, 'quantity' => 15, 'description' => 'Best seats + voting privileges'],
@@ -466,6 +564,7 @@ class DemoService
                 'hour' => 17,
                 'minute' => 0,
                 'days_of_week' => '1000000', // Sunday
+                'talent' => 'demo-openmic',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 12, 'quantity' => 80],
                     ['type' => 'Competitor Entry', 'price' => 25, 'quantity' => 20, 'description' => 'Includes grill station + propane'],
@@ -482,6 +581,7 @@ class DemoService
                 'hour' => 20,
                 'minute' => 0,
                 'days_of_week' => '0100000', // Monday
+                'talent' => 'demo-openmic',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 12, 'quantity' => 100],
                     ['type' => 'Lyle Lanley VIP', 'price' => 30, 'quantity' => 20, 'description' => 'Reserved seating + monorail conductor hat'],
@@ -496,6 +596,7 @@ class DemoService
                 'hour' => 18,
                 'minute' => 30,
                 'days_of_week' => '0100000', // Monday
+                'talent' => 'demo-stonecutters',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 15, 'quantity' => 50],
                     ['type' => 'Burns Package', 'price' => 100, 'quantity' => 5, 'description' => 'Private consultation + \"Excellent\" photo op'],
@@ -510,6 +611,7 @@ class DemoService
                 'hour' => 19,
                 'minute' => 0,
                 'days_of_week' => '0100000', // Monday
+                'talent' => 'demo-rockers',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 5, 'quantity' => 150],
                 ],
@@ -525,6 +627,7 @@ class DemoService
                 'hour' => 20,
                 'minute' => 0,
                 'days_of_week' => '0010000', // Tuesday
+                'talent' => 'demo-openmic',
                 'tickets' => [
                     ['type' => 'Audience', 'price' => 10, 'quantity' => 100],
                     ['type' => 'Poet Entry', 'price' => 5, 'quantity' => 20],
@@ -539,6 +642,7 @@ class DemoService
                 'hour' => 18,
                 'minute' => 0,
                 'days_of_week' => '0010000', // Tuesday
+                'talent' => 'demo-frink',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 35, 'quantity' => 30],
                     ['type' => 'Albany Package', 'price' => 60, 'quantity' => 10, 'description' => 'Includes apron + \"It\'s a regional dialect\" certificate'],
@@ -553,6 +657,7 @@ class DemoService
                 'hour' => 19,
                 'minute' => 30,
                 'days_of_week' => '0010000', // Tuesday
+                'talent' => 'demo-krusty',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 20, 'quantity' => 75],
                     ['type' => 'Power Package', 'price' => 45, 'quantity' => 25, 'description' => 'Premium name tag + business cards'],
@@ -569,6 +674,7 @@ class DemoService
                 'hour' => 20,
                 'minute' => 0,
                 'days_of_week' => '0001000', // Wednesday
+                'talent' => 'demo-frink',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 10, 'quantity' => 60],
                 ],
@@ -582,6 +688,7 @@ class DemoService
                 'hour' => 19,
                 'minute' => 0,
                 'days_of_week' => '0001000', // Wednesday
+                'talent' => 'demo-openmic',
                 'tickets' => [
                     ['type' => 'Singles Entry', 'price' => 25, 'quantity' => 50],
                     ['type' => 'Milhouse Package', 'price' => 40, 'quantity' => 15, 'description' => 'Guaranteed second date (not really)'],
@@ -596,6 +703,7 @@ class DemoService
                 'hour' => 18,
                 'minute' => 30,
                 'days_of_week' => '0001000', // Wednesday
+                'talent' => 'demo-frink',
                 'tickets' => [
                     ['type' => 'Spectator', 'price' => 8, 'quantity' => 80],
                     ['type' => 'Speller Entry', 'price' => 12, 'quantity' => 20],
@@ -612,6 +720,7 @@ class DemoService
                 'hour' => 19,
                 'minute' => 0,
                 'days_of_week' => '0000100', // Thursday
+                'talent' => 'demo-openmic',
                 'tickets' => [
                     ['type' => 'Free Entry', 'price' => 0, 'quantity' => 100],
                 ],
@@ -625,6 +734,7 @@ class DemoService
                 'hour' => 21,
                 'minute' => 0,
                 'days_of_week' => '0000100', // Thursday
+                'talent' => 'demo-openmic',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 8, 'quantity' => 75],
                 ],
@@ -638,6 +748,7 @@ class DemoService
                 'hour' => 18,
                 'minute' => 0,
                 'days_of_week' => '0000100', // Thursday
+                'talent' => 'demo-troymcclure',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 15, 'quantity' => 80],
                     ['type' => 'Stop the Planet of the Apes Package', 'price' => 40, 'quantity' => 15, 'description' => 'Includes popcorn + autographed headshot'],
@@ -654,6 +765,7 @@ class DemoService
                 'hour' => 18,
                 'minute' => 0,
                 'days_of_week' => '0000010', // Friday
+                'talent' => 'demo-rockers',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 20, 'quantity' => 100],
                     ['type' => 'Duff VIP', 'price' => 50, 'quantity' => 20, 'description' => 'Reserved seating with unlimited Duff'],
@@ -668,6 +780,7 @@ class DemoService
                 'hour' => 21,
                 'minute' => 0,
                 'days_of_week' => '0000010', // Friday
+                'talent' => 'demo-krusty',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 18, 'quantity' => 80],
                     ['type' => 'Front Row', 'price' => 35, 'quantity' => 15, 'description' => 'Best seats - warning: may get squirted with seltzer'],
@@ -682,6 +795,7 @@ class DemoService
                 'hour' => 17,
                 'minute' => 0,
                 'days_of_week' => '0000010', // Friday
+                'talent' => 'demo-stonecutters',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 20, 'quantity' => 180],
                     ['type' => 'Flaming Moe Package', 'price' => 75, 'quantity' => 8, 'description' => '5 Flaming Moes + commemorative glass'],
@@ -696,6 +810,7 @@ class DemoService
                 'hour' => 20,
                 'minute' => 0,
                 'days_of_week' => '0000010', // Friday
+                'talent' => 'demo-rockers',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 25, 'quantity' => 150],
                     ['type' => 'Backstage Pass', 'price' => 65, 'quantity' => 30, 'description' => 'Meet the bands + exclusive merch'],
@@ -712,6 +827,7 @@ class DemoService
                 'hour' => 22,
                 'minute' => 0,
                 'days_of_week' => '0000001', // Saturday
+                'talent' => 'demo-djbob',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 15, 'quantity' => 200],
                     ['type' => 'VIP Access', 'price' => 45, 'quantity' => 30, 'description' => 'Skip the line + avoid rakes'],
@@ -726,6 +842,7 @@ class DemoService
                 'hour' => 20,
                 'minute' => 0,
                 'days_of_week' => '0000001', // Saturday
+                'talent' => 'demo-stonecutters',
                 'tickets' => [
                     ['type' => 'Stonecutter Member', 'price' => 25, 'quantity' => 150],
                     ['type' => 'Stone of Triumph Package', 'price' => 60, 'quantity' => 25, 'description' => 'Exclusive robes + sacred parchment'],
@@ -740,6 +857,7 @@ class DemoService
                 'hour' => 19,
                 'minute' => 0,
                 'days_of_week' => '0000001', // Saturday
+                'talent' => 'demo-krusty',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 18, 'quantity' => 100],
                     ['type' => 'Aurora Borealis Package', 'price' => 40, 'quantity' => 20, 'description' => 'Front row + steamed ham (actually grilled)'],
@@ -754,6 +872,7 @@ class DemoService
                 'hour' => 21,
                 'minute' => 0,
                 'days_of_week' => '0000001', // Saturday
+                'talent' => 'demo-djbob',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 18, 'quantity' => 150],
                 ],
@@ -768,7 +887,8 @@ class DemoService
                 'image' => 'demo_flyer_special.jpg',
                 'hour' => 16,
                 'minute' => 0,
-                'days_of_week' => '0111110', // Mon-Fri
+                'days_of_week' => '0000010', // Friday
+                'talent' => 'demo-frink',
                 'tickets' => [
                     ['type' => 'Free Entry', 'price' => 0, 'quantity' => 200],
                 ],
@@ -781,7 +901,8 @@ class DemoService
                 'image' => 'demo_flyer_special.jpg',
                 'hour' => 14,
                 'minute' => 0,
-                'days_of_week' => '0010101', // Tue/Thu/Sat
+                'days_of_week' => '0010000', // Tuesday
+                'talent' => 'demo-openmic',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 8, 'quantity' => 50],
                     ['type' => 'Retirement Castle Package', 'price' => 15, 'quantity' => 20, 'description' => '3 bingo cards + pudding cup'],
@@ -795,7 +916,8 @@ class DemoService
                 'image' => 'demo_flyer_party.jpg',
                 'hour' => 15,
                 'minute' => 0,
-                'days_of_week' => '0000011', // Fri/Sat
+                'days_of_week' => '0000001', // Saturday
+                'talent' => 'demo-krusty',
                 'tickets' => [
                     ['type' => 'Spectator', 'price' => 5, 'quantity' => 100],
                     ['type' => 'Competitor Entry', 'price' => 20, 'quantity' => 15, 'description' => 'Includes warm-up donut + antacids'],
@@ -809,7 +931,8 @@ class DemoService
                 'image' => 'demo_flyer_comedy.jpg',
                 'hour' => 19,
                 'minute' => 30,
-                'days_of_week' => '0001010', // Wed/Fri
+                'days_of_week' => '0001000', // Wednesday
+                'talent' => 'demo-krusty',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 15, 'quantity' => 60],
                     ['type' => 'I Can\'t Believe It\'s a Law Firm Package', 'price' => 35, 'quantity' => 15, 'description' => 'Includes fake business cards + orange drink'],
@@ -826,6 +949,7 @@ class DemoService
                 'hour' => 18,
                 'minute' => 0,
                 'days_of_week' => '0000100', // Thursday
+                'talent' => 'demo-frink',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 10, 'quantity' => 75],
                     ['type' => 'Rod VIP Package', 'price' => 25, 'quantity' => 20, 'description' => 'Photo with the Rod + commemorative pin'],
@@ -840,6 +964,7 @@ class DemoService
                 'hour' => 20,
                 'minute' => 0,
                 'days_of_week' => '0000010', // Friday
+                'talent' => 'demo-troymcclure',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 12, 'quantity' => 100],
                     ['type' => 'Mendoza Package', 'price' => 30, 'quantity' => 20, 'description' => 'Premium seating + McBain T-shirt'],
@@ -854,6 +979,7 @@ class DemoService
                 'hour' => 18,
                 'minute' => 30,
                 'days_of_week' => '0000010', // Friday
+                'talent' => 'demo-rockers',
                 'tickets' => [
                     ['type' => 'Union Member', 'price' => 0, 'quantity' => 100],
                     ['type' => 'Management', 'price' => 50, 'quantity' => 10, 'description' => 'No dental plan for you'],
@@ -868,6 +994,7 @@ class DemoService
                 'hour' => 21,
                 'minute' => 0,
                 'days_of_week' => '0000001', // Saturday
+                'talent' => 'demo-djbob',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 15, 'quantity' => 120],
                     ['type' => 'Krusty Doll Package', 'price' => 35, 'quantity' => 25, 'description' => 'Good/Evil switch included'],
@@ -882,6 +1009,7 @@ class DemoService
                 'hour' => 17,
                 'minute' => 0,
                 'days_of_week' => '1000000', // Sunday
+                'talent' => 'demo-troymcclure',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 8, 'quantity' => 60],
                 ],
@@ -895,6 +1023,7 @@ class DemoService
                 'hour' => 18,
                 'minute' => 0,
                 'days_of_week' => '1000000', // Sunday
+                'talent' => 'demo-openmic',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 10, 'quantity' => 80],
                     ['type' => 'Thrillho Package', 'price' => 25, 'quantity' => 20, 'description' => 'Includes race car bed photo op'],
@@ -909,6 +1038,7 @@ class DemoService
                 'hour' => 18,
                 'minute' => 0,
                 'days_of_week' => '0000100', // Thursday
+                'talent' => 'demo-rockers',
                 'tickets' => [
                     ['type' => 'Spectator', 'price' => 5, 'quantity' => 100],
                     ['type' => 'Team Entry (4 people)', 'price' => 60, 'quantity' => 8, 'description' => 'Lane reservation + team shirts'],
@@ -923,6 +1053,7 @@ class DemoService
                 'hour' => 20,
                 'minute' => 0,
                 'days_of_week' => '0000001', // Saturday
+                'talent' => 'demo-krusty',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 20, 'quantity' => 100],
                     ['type' => 'Gabbo VIP Package', 'price' => 45, 'quantity' => 25, 'description' => 'Meet Gabbo + photo op (ventriloquist not included)'],
@@ -937,6 +1068,7 @@ class DemoService
                 'hour' => 19,
                 'minute' => 0,
                 'days_of_week' => '0000100', // Thursday
+                'talent' => 'demo-frink',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 15, 'quantity' => 50],
                     ['type' => 'Farmer Package', 'price' => 30, 'quantity' => 15, 'description' => 'Take home tomacco seeds (results may vary)'],
@@ -951,6 +1083,7 @@ class DemoService
                 'hour' => 19,
                 'minute' => 0,
                 'days_of_week' => '0000001', // Saturday
+                'talent' => 'demo-rockers',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 10, 'quantity' => 100],
                     ['type' => 'F Series Package', 'price' => 40, 'quantity' => 20, 'description' => 'Test drive + bumper sticker'],
@@ -965,6 +1098,7 @@ class DemoService
                 'hour' => 20,
                 'minute' => 0,
                 'days_of_week' => '0001000', // Wednesday
+                'talent' => 'demo-troymcclure',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 8, 'quantity' => 80],
                 ],
@@ -978,6 +1112,7 @@ class DemoService
                 'hour' => 19,
                 'minute' => 0,
                 'days_of_week' => '0000001', // Saturday
+                'talent' => 'demo-stonecutters',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 12, 'quantity' => 75],
                 ],
@@ -991,6 +1126,7 @@ class DemoService
                 'hour' => 20,
                 'minute' => 0,
                 'days_of_week' => '0010000', // Tuesday
+                'talent' => 'demo-frink',
                 'tickets' => [
                     ['type' => 'Player Entry', 'price' => 10, 'quantity' => 60],
                     ['type' => 'Team Registration (10 people)', 'price' => 80, 'quantity' => 6],
@@ -1005,6 +1141,7 @@ class DemoService
                 'hour' => 18,
                 'minute' => 0,
                 'days_of_week' => '1000000', // Sunday
+                'talent' => 'demo-openmic',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 10, 'quantity' => 60],
                     ['type' => 'Family Package', 'price' => 25, 'quantity' => 20, 'description' => 'Includes photo frame + tissue box'],
@@ -1019,6 +1156,7 @@ class DemoService
                 'hour' => 19,
                 'minute' => 0,
                 'days_of_week' => '0100000', // Monday
+                'talent' => 'demo-krusty',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 5, 'quantity' => 100],
                     ['type' => 'Sun and Run Package', 'price' => 15, 'quantity' => 30, 'description' => 'Includes free bandage + dubious medical advice'],
@@ -1033,6 +1171,7 @@ class DemoService
                 'hour' => 18,
                 'minute' => 0,
                 'days_of_week' => '0010000', // Tuesday
+                'talent' => 'demo-troymcclure',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 12, 'quantity' => 80],
                     ['type' => 'Collector Package', 'price' => 35, 'quantity' => 20, 'description' => 'Includes limited edition trading card'],
@@ -1047,6 +1186,7 @@ class DemoService
                 'group' => 'Special Events',
                 'image' => 'demo_flyer_special.jpg',
                 'days_of_week' => null, // One-time event
+                'talent' => 'demo-djbob',
                 'tickets' => [
                     ['type' => 'General Admission', 'price' => 75, 'quantity' => 200],
                     ['type' => 'VIP Package', 'price' => 150, 'quantity' => 50, 'description' => 'Premium open bar + Mr. Burns private lounge'],
@@ -1067,7 +1207,7 @@ class DemoService
                 'type' => 'venue',
                 'city' => 'Springfield',
                 'country_code' => 'US',
-                'background_colors' => '#2e7d32, #1b5e20',
+                'background_colors' => '#66bb6a, #2e7d32',
                 'accent_color' => '#81c784',
                 'events' => [
                     ['name' => 'Left-Handed Guitar Night', 'days_offset' => -7, 'price' => 25],
@@ -1081,7 +1221,7 @@ class DemoService
                 'type' => 'venue',
                 'city' => 'Springfield',
                 'country_code' => 'US',
-                'background_colors' => '#d32f2f, #b71c1c',
+                'background_colors' => '#ff5722, #d32f2f',
                 'accent_color' => '#ffeb3b',
                 'events' => [
                     ['name' => 'Monster Truck Rally', 'days_offset' => -3, 'price' => 35],
@@ -1094,7 +1234,7 @@ class DemoService
                 'type' => 'venue',
                 'city' => 'Springfield',
                 'country_code' => 'US',
-                'background_colors' => '#4a148c, #7b1fa2',
+                'background_colors' => '#9c27b0, #4a148c',
                 'accent_color' => '#ce93d8',
                 'events' => [
                     ['name' => 'Radioactive Man Signing', 'days_offset' => -10, 'price' => 20],
@@ -1108,7 +1248,7 @@ class DemoService
                 'type' => 'venue',
                 'city' => 'Springfield',
                 'country_code' => 'US',
-                'background_colors' => '#1565c0, #0d47a1',
+                'background_colors' => '#42a5f5, #1565c0',
                 'accent_color' => '#64b5f6',
                 'events' => [
                     ['name' => 'Springfield Philharmonic', 'days_offset' => -5, 'price' => 45],
@@ -1124,7 +1264,7 @@ class DemoService
             $role->subdomain = $scheduleData['subdomain'];
             $role->type = $scheduleData['type'];
             $role->name = $scheduleData['name'];
-            $role->email = 'demo-'.Str::random(8).'@example.com';
+            $role->email = self::DEMO_EMAIL;
             $role->email_verified_at = now();
             $role->language_code = 'en';
             $role->timezone = 'America/New_York';
