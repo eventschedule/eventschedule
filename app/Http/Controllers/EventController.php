@@ -833,7 +833,12 @@ class EventController extends Controller
 
             return response()->json($parsed);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            // Log the full error server-side but return generic message to user
+            \Log::error('Event parsing failed: '.$e->getMessage(), [
+                'role_id' => $role->id,
+            ]);
+
+            return response()->json(['error' => __('messages.event_parsing_failed')], 500);
         }
     }
 
@@ -854,7 +859,12 @@ class EventController extends Controller
 
             return response()->json($parsed);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            // Log the full error server-side but return generic message to user
+            \Log::error('Guest event parsing failed: '.$e->getMessage(), [
+                'role_subdomain' => $subdomain,
+            ]);
+
+            return response()->json(['error' => __('messages.event_parsing_failed')], 500);
         }
     }
 
@@ -991,7 +1001,13 @@ class EventController extends Controller
             return response()->json(['success' => false, 'error' => 'File is not a valid image'], 400);
         }
 
-        $filename = '/tmp/event_'.strtolower(Str::random(32)).'.'.$extension;
+        // Use Laravel's storage directory instead of /tmp for security
+        $tempDir = storage_path('app/temp');
+        if (! is_dir($tempDir)) {
+            mkdir($tempDir, 0700, true);
+        }
+
+        $filename = $tempDir.'/event_'.strtolower(Str::random(32)).'.'.$extension;
         move_uploaded_file($file->getPathname(), $filename);
 
         return response()->json(['success' => true, 'filename' => $filename]);
@@ -1029,7 +1045,13 @@ class EventController extends Controller
             return response()->json(['success' => false, 'error' => 'File is not a valid image'], 400);
         }
 
-        $filename = '/tmp/event_'.strtolower(Str::random(32)).'.'.$extension;
+        // Use Laravel's storage directory instead of /tmp for security
+        $tempDir = storage_path('app/temp');
+        if (! is_dir($tempDir)) {
+            mkdir($tempDir, 0700, true);
+        }
+
+        $filename = $tempDir.'/event_'.strtolower(Str::random(32)).'.'.$extension;
         move_uploaded_file($file->getPathname(), $filename);
 
         return response()->json(['success' => true, 'filename' => $filename]);

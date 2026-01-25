@@ -16,6 +16,7 @@ use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Stripe\StripeClient;
@@ -113,103 +114,118 @@ class TicketController extends Controller
             $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
         }
 
-        // Check ticket availability
-        foreach ($request->tickets as $ticketId => $quantity) {
-            if ($quantity > 0) {
-                $ticketModel = $event->tickets()->findOrFail(UrlUtils::decodeId($ticketId));
+        // Use database transaction with row locking to prevent race conditions
+        // that could lead to overselling tickets
+        try {
+            $sale = DB::transaction(function () use ($request, $event, $user) {
+                // Check ticket availability with row locking
+                foreach ($request->tickets as $ticketId => $quantity) {
+                    if ($quantity > 0) {
+                        // Lock the ticket row to prevent concurrent modifications
+                        $ticketModel = $event->tickets()->lockForUpdate()->findOrFail(UrlUtils::decodeId($ticketId));
 
-                if (! $ticketModel) {
-                    return back()->with('error', __('messages.ticket_not_found'));
-                }
-
-                if ($ticketModel->quantity > 0) {
-                    // Handle combined mode logic
-                    if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
-                        $totalSold = $event->tickets->sum(function ($ticket) use ($request) {
-                            $ticketSold = $ticket->sold ? json_decode($ticket->sold, true) : [];
-
-                            return $ticketSold[$request->event_date] ?? 0;
-                        });
-                        // In combined mode, the total quantity is the same as individual quantity
-                        $totalQuantity = $event->getSameTicketQuantity();
-                        $remainingTickets = $totalQuantity - $totalSold;
-
-                        // Check if the total requested quantity exceeds remaining tickets
-                        $totalRequested = array_sum($request->tickets);
-                        if ($totalRequested > $remainingTickets) {
-                            return back()->with('error', __('messages.tickets_not_available'));
+                        if (! $ticketModel) {
+                            throw new \Exception(__('messages.ticket_not_found'));
                         }
-                    } else {
-                        $sold = json_decode($ticketModel->sold, true);
-                        $soldCount = $sold[$request->event_date] ?? 0;
-                        $remainingTickets = $ticketModel->quantity - $soldCount;
 
-                        if ($quantity > $remainingTickets) {
-                            return back()->with('error', __('messages.tickets_not_available'));
+                        if ($ticketModel->quantity > 0) {
+                            // Handle combined mode logic
+                            if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
+                                // Lock all tickets for combined mode
+                                $event->tickets()->lockForUpdate()->get();
+                                $totalSold = $event->tickets->sum(function ($ticket) use ($request) {
+                                    $ticketSold = $ticket->sold ? json_decode($ticket->sold, true) : [];
+
+                                    return $ticketSold[$request->event_date] ?? 0;
+                                });
+                                // In combined mode, the total quantity is the same as individual quantity
+                                $totalQuantity = $event->getSameTicketQuantity();
+                                $remainingTickets = $totalQuantity - $totalSold;
+
+                                // Check if the total requested quantity exceeds remaining tickets
+                                $totalRequested = array_sum($request->tickets);
+                                if ($totalRequested > $remainingTickets) {
+                                    throw new \Exception(__('messages.tickets_not_available'));
+                                }
+                            } else {
+                                $sold = json_decode($ticketModel->sold, true);
+                                $soldCount = $sold[$request->event_date] ?? 0;
+                                $remainingTickets = $ticketModel->quantity - $soldCount;
+
+                                if ($quantity > $remainingTickets) {
+                                    throw new \Exception(__('messages.tickets_not_available'));
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
 
-        $sale = new Sale;
-        $sale->fill($request->all());
-        $sale->event_id = $event->id;
-        $sale->user_id = $user ? $user->id : null;
-        $sale->secret = strtolower(Str::random(32));
-        $sale->payment_method = $event->payment_method;
+                $sale = new Sale;
+                $sale->fill($request->all());
+                $sale->event_id = $event->id;
+                $sale->user_id = $user ? $user->id : null;
+                $sale->secret = strtolower(Str::random(32));
+                $sale->payment_method = $event->payment_method;
 
-        if (! $sale->event_date) {
-            $sale->event_date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
-        }
+                if (! $sale->event_date) {
+                    $sale->event_date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
+                }
 
-        // Store event-level custom field values
-        $eventCustomValues = $request->input('event_custom_values', []);
-        $eventCustomFields = $event->custom_fields ?? [];
-        $fieldIndex = 1;
-        foreach ($eventCustomFields as $fieldKey => $fieldConfig) {
-            if ($fieldIndex <= 8) {
-                $value = $eventCustomValues[$fieldKey] ?? null;
-                $sale->{"custom_value{$fieldIndex}"} = $value;
-                $fieldIndex++;
-            }
-        }
+                // Store event-level custom field values
+                $eventCustomValues = $request->input('event_custom_values', []);
+                $eventCustomFields = $event->custom_fields ?? [];
+                $fieldIndex = 1;
+                foreach ($eventCustomFields as $fieldKey => $fieldConfig) {
+                    if ($fieldIndex <= 8) {
+                        $value = $eventCustomValues[$fieldKey] ?? null;
+                        $sale->{"custom_value{$fieldIndex}"} = $value;
+                        $fieldIndex++;
+                    }
+                }
 
-        $sale->save();
-
-        // Store ticket-level custom field values
-        $ticketCustomValues = $request->input('ticket_custom_values', []);
-
-        foreach ($request->tickets as $ticketId => $quantity) {
-            if ($quantity > 0) {
-                $ticketModel = $event->tickets()->findOrFail(UrlUtils::decodeId($ticketId));
-                $ticketCustomFields = $ticketModel->custom_fields ?? [];
-
-                $saleTicketData = [
-                    'sale_id' => $sale->id,
-                    'ticket_id' => UrlUtils::decodeId($ticketId),
-                    'quantity' => $quantity,
-                    'seats' => json_encode(array_fill(1, $quantity, null)),
-                ];
+                $sale->save();
 
                 // Store ticket-level custom field values
-                $ticketFieldIndex = 1;
-                foreach ($ticketCustomFields as $fieldKey => $fieldConfig) {
-                    if ($ticketFieldIndex <= 8) {
-                        $value = $ticketCustomValues[$ticketId][$fieldKey] ?? null;
-                        $saleTicketData["custom_value{$ticketFieldIndex}"] = $value;
-                        $ticketFieldIndex++;
+                $ticketCustomValues = $request->input('ticket_custom_values', []);
+
+                foreach ($request->tickets as $ticketId => $quantity) {
+                    if ($quantity > 0) {
+                        $ticketModel = $event->tickets()->findOrFail(UrlUtils::decodeId($ticketId));
+                        $ticketCustomFields = $ticketModel->custom_fields ?? [];
+
+                        $saleTicketData = [
+                            'sale_id' => $sale->id,
+                            'ticket_id' => UrlUtils::decodeId($ticketId),
+                            'quantity' => $quantity,
+                            'seats' => json_encode(array_fill(1, $quantity, null)),
+                        ];
+
+                        // Store ticket-level custom field values
+                        $ticketFieldIndex = 1;
+                        foreach ($ticketCustomFields as $fieldKey => $fieldConfig) {
+                            if ($ticketFieldIndex <= 8) {
+                                $value = $ticketCustomValues[$ticketId][$fieldKey] ?? null;
+                                $saleTicketData["custom_value{$ticketFieldIndex}"] = $value;
+                                $ticketFieldIndex++;
+                            }
+                        }
+
+                        $sale->saleTickets()->create($saleTicketData);
                     }
                 }
 
-                $sale->saleTickets()->create($saleTicketData);
-            }
+                $total = $sale->calculateTotal();
+
+                $sale->payment_amount = $total;
+                $sale->save();
+
+                return $sale;
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
         }
 
-        $total = $sale->calculateTotal();
-
-        $sale->payment_amount = $total;
-        $sale->save();
+        $total = $sale->payment_amount;
 
         // Send email when sale is created
         $this->sendTicketPurchaseEmail($sale, $event);
@@ -567,12 +583,16 @@ class TicketController extends Controller
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
+        $previousStatus = $sale->status;
+        $actionPerformed = false;
+
         switch ($request->action) {
             case 'mark_paid':
                 if ($sale->status === 'unpaid') {
                     $sale->status = 'paid';
                     $sale->transaction_reference = __('messages.manual_payment');
                     $sale->save();
+                    $actionPerformed = true;
 
                     // Record sale in analytics
                     AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
@@ -583,6 +603,7 @@ class TicketController extends Controller
                 if ($sale->status === 'paid') {
                     $sale->status = 'refunded';
                     $sale->save();
+                    $actionPerformed = true;
                 }
                 break;
 
@@ -590,13 +611,32 @@ class TicketController extends Controller
                 if (in_array($sale->status, ['unpaid', 'paid'])) {
                     $sale->status = 'cancelled';
                     $sale->save();
+                    $actionPerformed = true;
                 }
                 break;
 
             case 'delete':
                 $sale->is_deleted = true;
                 $sale->save();
+                $actionPerformed = true;
                 break;
+        }
+
+        // Audit log for all payment-related status changes
+        if ($actionPerformed) {
+            \Log::info('Sale status change audit', [
+                'action' => $request->action,
+                'sale_id' => $sale->id,
+                'event_id' => $sale->event_id,
+                'previous_status' => $previousStatus,
+                'new_status' => $sale->status,
+                'payment_amount' => $sale->payment_amount,
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'timestamp' => now()->toIso8601String(),
+            ]);
         }
 
         if ($request->ajax()) {
@@ -676,7 +716,12 @@ class TicketController extends Controller
                 return response()->json(['error' => __('messages.failed_to_send_email')], 500);
             }
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            // Log the full error server-side but return generic message to user
+            \Log::error('Resend ticket email failed: '.$e->getMessage(), [
+                'sale_id' => $sale->id ?? null,
+            ]);
+
+            return response()->json(['error' => __('messages.failed_to_send_email')], 500);
         }
     }
 }

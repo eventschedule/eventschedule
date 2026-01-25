@@ -1916,6 +1916,7 @@ class RoleController extends Controller
                 $outputText = $output->fetch();
             } catch (\Exception $e) {
                 // Fallback to shell_exec if Artisan call fails
+                // Use escapeshellarg() to prevent command injection
                 $urlArgs = '';
                 $cityArgs = '';
 
@@ -1926,7 +1927,9 @@ class RoleController extends Controller
                     $cityArgs = ' --cities='.implode(' --cities=', array_map('escapeshellarg', $cities));
                 }
 
-                $command = "php artisan app:import-curator-events --role_id={$roleId} --test{$urlArgs}{$cityArgs} 2>&1";
+                // Escape roleId to prevent command injection
+                $escapedRoleId = escapeshellarg((string) $roleId);
+                $command = "php artisan app:import-curator-events --role_id={$escapedRoleId} --test{$urlArgs}{$cityArgs} 2>&1";
                 $outputText = shell_exec($command);
                 $exitCode = 0; // Assume success for shell_exec
             }
@@ -2350,7 +2353,13 @@ class RoleController extends Controller
 
             return response()->json(['success' => true, 'message' => __('messages.test_email_sent')]);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            // Log the full error server-side but return generic message to user
+            \Log::error('Test email failed: '.$e->getMessage(), [
+                'role_id' => $role->id,
+                'email' => $email,
+            ]);
+
+            return response()->json(['error' => __('messages.failed_to_send_email')], 500);
         }
     }
 }

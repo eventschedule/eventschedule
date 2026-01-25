@@ -17,6 +17,12 @@ class AnalyticsController extends Controller
         // Get selected role for filtering (decode from URL-safe format)
         $selectedRoleId = $request->role_id ? UrlUtils::decodeId($request->role_id) : null;
 
+        // Security: Validate that the selected role ID belongs to the authenticated user
+        // This prevents enumeration attacks where attackers try to view analytics for other users' roles
+        if ($selectedRoleId && ! $roleIds->contains($selectedRoleId)) {
+            abort(403, 'Unauthorized access to analytics');
+        }
+
         // Date range filter
         $range = $request->range ?? 'last_30_days';
         [$start, $end] = match ($range) {
