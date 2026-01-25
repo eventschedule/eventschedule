@@ -412,12 +412,7 @@
 
 <script>
 function handleEventsGraphicClick() {
-    @if (!$role->isPro())
-        alert('{{ __("messages.requires_pro_plan") }}');
-        return false;
-    @else
-        window.location.href = '{{ route("event.generate_graphic", ["subdomain" => $role->subdomain]) }}';
-    @endif
+    window.location.href = '{{ route("event.generate_graphic", ["subdomain" => $role->subdomain]) }}';
 }
 
 function syncEventsFromDropdown() {

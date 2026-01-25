@@ -155,4 +155,24 @@ trait RoleBillable
 
         return 'monthly';
     }
+
+    /**
+     * Check if the role has an active enterprise subscription.
+     *
+     * @return bool
+     */
+    public function hasActiveEnterpriseSubscription()
+    {
+        $subscription = $this->subscription('default');
+
+        if (! $subscription || ! $subscription->active()) {
+            return false;
+        }
+
+        $enterpriseMonthly = config('services.stripe_platform.enterprise_price_monthly');
+        $enterpriseYearly = config('services.stripe_platform.enterprise_price_yearly');
+
+        return ($enterpriseMonthly && $subscription->hasPrice($enterpriseMonthly)) ||
+               ($enterpriseYearly && $subscription->hasPrice($enterpriseYearly));
+    }
 }

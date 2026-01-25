@@ -366,151 +366,6 @@
         @endif
     </div>
 
-    <!-- Settings Panel -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 p-5 mb-6 max-w-2xl mx-auto">
-        <!-- AI Prompt (Enterprise Feature) -->
-        @if ($isEnterprise)
-        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h3>
-            </div>
-            <div>
-                <textarea id="ai_prompt" rows="3" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-none" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
-                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
-            </div>
-        </div>
-        @endif
-
-        <!-- Link Type Options -->
-        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.options') }}</h3>
-            <div class="flex flex-wrap gap-x-6 gap-y-2">
-                <label class="flex items-center cursor-pointer group">
-                    <input type="radio" name="link_type" value="schedule" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_event_page') }}</span>
-                </label>
-                <label class="flex items-center cursor-pointer group">
-                    <input type="radio" name="link_type" value="registration" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_registration') }}</span>
-                </label>
-            </div>
-        </div>
-
-        <!-- Screen Capture Rendering (Enterprise Feature) -->
-        @if ($isEnterprise)
-        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.screen_capture_rendering') }}</h3>
-            </div>
-            <div class="flex items-center gap-3">
-                <label class="flex items-center cursor-pointer">
-                    <input type="checkbox" id="use_screen_capture" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="toggleScreenCapture()">
-                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_screen_capture') }}</span>
-                </label>
-            </div>
-            <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.screen_capture_help') }}</p>
-        </div>
-        @endif
-
-        <!-- Email Scheduling (Enterprise Feature) -->
-        @if ($isEnterprise)
-        <div class="mb-5">
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.email_scheduling') }}</h3>
-            </div>
-
-            <div>
-                <!-- Enable Toggle -->
-                <div class="flex items-center gap-3 mb-4">
-                    <label class="flex items-center cursor-pointer">
-                        <input type="checkbox" id="email_enabled" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="toggleEmailOptions()">
-                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_scheduled_emails') }}</span>
-                    </label>
-                </div>
-
-                <!-- Schedule Row (shown/hidden based on checkbox) -->
-                <div id="email_options_container" class="hidden">
-                    <div class="flex flex-wrap items-end gap-3 mb-4">
-                        <div>
-                            <label for="frequency" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.frequency') }}</label>
-                            <select id="frequency" class="min-w-[120px] px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                                <option value="daily">{{ __('messages.daily') }}</option>
-                                <option value="weekly">{{ __('messages.weekly') }}</option>
-                                <option value="monthly">{{ __('messages.monthly') }}</option>
-                            </select>
-                        </div>
-
-                        <div id="weekly_day_container" class="hidden">
-                            <label for="weekly_day" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_on') }}</label>
-                            <select id="weekly_day" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                                <option value="0">{{ __('messages.sunday') }}</option>
-                                <option value="1">{{ __('messages.monday') }}</option>
-                                <option value="2">{{ __('messages.tuesday') }}</option>
-                                <option value="3">{{ __('messages.wednesday') }}</option>
-                                <option value="4">{{ __('messages.thursday') }}</option>
-                                <option value="5">{{ __('messages.friday') }}</option>
-                                <option value="6">{{ __('messages.saturday') }}</option>
-                            </select>
-                        </div>
-
-                        <div id="monthly_day_container" class="hidden">
-                            <label for="monthly_day" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.day_of_month') }}</label>
-                            <select id="monthly_day" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                                @for ($i = 1; $i <= 28; $i++)
-                                    <option value="{{ $i }}">{{ $i }}</option>
-                                @endfor
-                            </select>
-                        </div>
-
-                        <div>
-                            <label for="send_hour" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_at_hour') }}</label>
-                            <select id="send_hour" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                                @for ($i = 0; $i < 24; $i++)
-                                    <option value="{{ $i }}">{{ sprintf('%02d:00', $i) }}</option>
-                                @endfor
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="recipient_emails" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                            {{ __('messages.recipient_emails') }}
-                        </label>
-                        <input type="text" id="recipient_emails"
-                            class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm"
-                            placeholder="{{ __('messages.recipient_emails_placeholder') }}">
-                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.recipient_emails_help') }}</p>
-                    </div>
-
-                    <button id="testEmailBtn" onclick="sendTestEmail()" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
-                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
-                        {{ __('messages.send_test_email') }}
-                    </button>
-                </div>
-            </div>
-        </div>
-        @endif
-
-        <!-- Buttons -->
-        <div class="flex justify-end gap-2">
-            <button id="saveSettingsBtn" onclick="saveSettings()" class="inline-flex items-center px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-md transition-colors">
-                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                {{ __('messages.save_settings') }}
-            </button>
-            <button id="runBtn" onclick="loadGraphic()" class="inline-flex items-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md transition-colors">
-                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                {{ __('messages.run') }}
-            </button>
-        </div>
-    </div>
-
     <!-- Loading Spinner -->
     <div id="loadingSpinner" class="flex justify-center items-center py-20">
         <div class="text-center">
@@ -538,9 +393,159 @@
     <div id="graphicContent" class="hidden">
         <!-- Outer Panel (desktop only) -->
         <div class="lg:bg-white lg:dark:bg-gray-800 lg:rounded-lg lg:shadow lg:dark:shadow-gray-900/50 lg:p-6">
-            <!-- Two Column Layout -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Left Column - Image -->
+            <!-- Three Column Layout on Desktop -->
+            <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr_1fr] gap-6">
+                <!-- Left Column - Settings -->
+                <div class="bg-white dark:bg-gray-800 lg:bg-gray-50 lg:dark:bg-gray-900/50 rounded-lg shadow lg:shadow-none dark:shadow-gray-900/50 overflow-hidden lg:border lg:border-gray-200 lg:dark:border-gray-700">
+                    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.settings') }}</h3>
+                    </div>
+                    <div class="p-4 bg-gray-50 dark:bg-gray-900/50">
+                        <!-- AI Prompt (Pro Feature) -->
+                        @if ($isPro)
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
+                            </div>
+                            <div>
+                                <textarea id="ai_prompt" rows="3" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-none" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Link Type Options -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.options') }}</h4>
+                            <div class="flex flex-col gap-2">
+                                <label class="flex items-center cursor-pointer group">
+                                    <input type="radio" name="link_type" value="schedule" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_event_page') }}</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer group">
+                                    <input type="radio" name="link_type" value="registration" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_registration') }}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Screen Capture Rendering (Enterprise Feature) -->
+                        @if ($isEnterprise)
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.screen_capture_rendering') }}</h4>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" id="use_screen_capture" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="toggleScreenCapture()">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_screen_capture') }}</span>
+                                </label>
+                            </div>
+                            <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.screen_capture_help') }}</p>
+                        </div>
+                        @endif
+
+                        <!-- Email Scheduling (Enterprise Feature) -->
+                        @if ($isEnterprise)
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.email_scheduling') }}</h4>
+                            </div>
+
+                            <div>
+                                <!-- Enable Toggle -->
+                                <div class="flex items-center gap-3 mb-4">
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="checkbox" id="email_enabled" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="toggleEmailOptions()">
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_scheduled_emails') }}</span>
+                                    </label>
+                                </div>
+
+                                <!-- Schedule Row (shown/hidden based on checkbox) -->
+                                <div id="email_options_container" class="hidden">
+                                    <div class="flex flex-col gap-3 mb-4">
+                                        <div>
+                                            <label for="frequency" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.frequency') }}</label>
+                                            <select id="frequency" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                                <option value="daily">{{ __('messages.daily') }}</option>
+                                                <option value="weekly">{{ __('messages.weekly') }}</option>
+                                                <option value="monthly">{{ __('messages.monthly') }}</option>
+                                            </select>
+                                        </div>
+
+                                        <div id="weekly_day_container" class="hidden">
+                                            <label for="weekly_day" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_on') }}</label>
+                                            <select id="weekly_day" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                                <option value="0">{{ __('messages.sunday') }}</option>
+                                                <option value="1">{{ __('messages.monday') }}</option>
+                                                <option value="2">{{ __('messages.tuesday') }}</option>
+                                                <option value="3">{{ __('messages.wednesday') }}</option>
+                                                <option value="4">{{ __('messages.thursday') }}</option>
+                                                <option value="5">{{ __('messages.friday') }}</option>
+                                                <option value="6">{{ __('messages.saturday') }}</option>
+                                            </select>
+                                        </div>
+
+                                        <div id="monthly_day_container" class="hidden">
+                                            <label for="monthly_day" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.day_of_month') }}</label>
+                                            <select id="monthly_day" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                                @for ($i = 1; $i <= 28; $i++)
+                                                    <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label for="send_hour" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_at_hour') }}</label>
+                                            <select id="send_hour" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                                @for ($i = 0; $i < 24; $i++)
+                                                    <option value="{{ $i }}">{{ sprintf('%02d:00', $i) }}</option>
+                                                @endfor
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="recipient_emails" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                            {{ __('messages.recipient_emails') }}
+                                        </label>
+                                        <input type="text" id="recipient_emails"
+                                            class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm"
+                                            placeholder="{{ __('messages.recipient_emails_placeholder') }}">
+                                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.recipient_emails_help') }}</p>
+                                    </div>
+
+                                    <button id="testEmailBtn" onclick="sendTestEmail()" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                        </svg>
+                                        {{ __('messages.send_test_email') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Buttons -->
+                        <div class="flex flex-col gap-2">
+                            <button id="saveSettingsBtn" onclick="saveSettings()" class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-md transition-colors">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                {{ __('messages.save_settings') }}
+                            </button>
+                            <button id="runBtn" onclick="loadGraphic()" class="inline-flex items-center justify-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md transition-colors">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                {{ __('messages.run') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Middle Column - Image -->
                 <div class="bg-white dark:bg-gray-800 lg:bg-gray-50 lg:dark:bg-gray-900/50 rounded-lg shadow lg:shadow-none dark:shadow-gray-900/50 overflow-hidden lg:border lg:border-gray-200 lg:dark:border-gray-700">
                     <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-end">
                         <button
