@@ -46,7 +46,7 @@ class BlogPostReview extends Mailable
             ['blogPost' => $this->blogPost->id]
         );
 
-        $viewUrl = url('/blog/'.$this->blogPost->slug);
+        $viewUrl = blog_url('/'.$this->blogPost->slug);
         $editUrl = route('blog.edit', ['blogPost' => $this->blogPost->id]);
 
         // Truncate content for email

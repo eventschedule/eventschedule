@@ -18,6 +18,7 @@ class Sale extends Model
         'status',
         'payment_method',
         'payment_amount',
+        'transaction_reference',
         'custom_value1',
         'custom_value2',
         'custom_value3',

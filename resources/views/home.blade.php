@@ -2,7 +2,7 @@
     <div>
         
         <!-- Get Started Panel -->
-        @if($schedules->isEmpty() && $venues->isEmpty() && $curators->isEmpty() && auth()->user()->tickets()->count() === 0)
+        @if($schedules->isEmpty() && $venues->isEmpty() && $curators->isEmpty() && auth()->user()->tickets()->count() === 0 && !is_demo_mode())
         <div class="mb-8">
             <!-- Header -->
             <div class="text-center mb-6">

@@ -188,9 +188,11 @@
                             </span>
                             <div class="absolute inset-0 animate-shimmer"></div>
                         </a>
+                        @if (!Auth::check() || \App\Services\DemoService::isDemoUser(Auth::user()))
                         <a href="{{ route('role.view_guest', ['subdomain' => 'demo']) }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white glass rounded-2xl hover:bg-white/10 transition-all">
                             View demo
                         </a>
+                        @endif
                     </div>
                 </div>
 

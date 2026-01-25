@@ -35,7 +35,7 @@ class ResetDemo extends Command
         }
 
         // Find demo role
-        $role = Role::where('subdomain', DemoService::DEMO_SUBDOMAIN)->first();
+        $role = Role::where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)->first();
 
         if (! $role) {
             $this->error('Demo role not found. Run app:setup-demo first.');
