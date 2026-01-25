@@ -18,6 +18,81 @@ use Illuminate\Support\Str;
 
 class EventRepo
 {
+    /**
+     * Get UTC date range for a date in a given timezone
+     */
+    private function getUtcDateRange(Carbon $date): array
+    {
+        return [
+            $date->copy()->startOfDay()->utc(),
+            $date->copy()->endOfDay()->utc(),
+        ];
+    }
+
+    /**
+     * Find event attached to both roles on a specific date
+     */
+    private function findEventForBothRoles(Role $subdomainRole, Role $slugRole, Carbon $eventDate): ?Event
+    {
+        [$startOfDay, $endOfDay] = $this->getUtcDateRange($eventDate);
+
+        return Event::with('roles')
+            ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id))
+            ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id))
+            ->where(function ($query) use ($startOfDay, $endOfDay, $eventDate) {
+                $query->whereBetween('starts_at', [$startOfDay, $endOfDay])
+                    ->orWhere(function ($query) use ($eventDate, $endOfDay) {
+                        $query->whereNotNull('days_of_week')
+                            ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
+                            ->where('starts_at', '<=', $endOfDay);
+                    });
+            })
+            ->orderBy('starts_at')
+            ->first();
+    }
+
+    /**
+     * Find event by slug on a specific date
+     */
+    private function findEventBySlug(string $subdomain, string $slug, Carbon $eventDate): ?Event
+    {
+        [$startOfDay, $endOfDay] = $this->getUtcDateRange($eventDate);
+
+        return Event::with('roles')
+            ->where('slug', $slug)
+            ->where(function ($query) use ($startOfDay, $endOfDay, $eventDate) {
+                $query->whereBetween('starts_at', [$startOfDay, $endOfDay])
+                    ->orWhere(function ($query) use ($eventDate) {
+                        $query->whereNotNull('days_of_week')
+                            ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1]);
+                    });
+            })
+            ->where(function ($query) use ($subdomain) {
+                $query->whereHas('roles', function ($q) use ($subdomain) {
+                    $q->where('subdomain', $subdomain);
+                });
+            })
+            ->orderBy('starts_at')
+            ->first();
+    }
+
+    /**
+     * Find event by subdomain on a specific date (final fallback)
+     */
+    private function findEventBySubdomain(string $subdomain, Carbon $eventDate): ?Event
+    {
+        [$startOfDay, $endOfDay] = $this->getUtcDateRange($eventDate);
+
+        return Event::with('roles')
+            ->whereBetween('starts_at', [$startOfDay, $endOfDay])
+            ->where(function ($query) use ($subdomain) {
+                $query->whereHas('roles', function ($q) use ($subdomain) {
+                    $q->where('subdomain', $subdomain);
+                });
+            })
+            ->first();
+    }
+
     public function saveEvent($currentRole, $request, $event = null)
     {
         $user = $request->user();
@@ -426,11 +501,15 @@ class EventRepo
     public function getEvent($subdomain, $slug, $date = null)
     {
         $event = null;
-        $eventDate = $date ? Carbon::parse($date) : null;
 
         $subdomainRole = Role::where('subdomain', $subdomain)->first();
         $slugRole = Role::where('subdomain', $slug)->first();
         $eventId = UrlUtils::decodeId($slug);
+
+        // Parse dates with timezone context - local timezone first, then UTC as fallback
+        $roleTimezone = $subdomainRole?->timezone ?? config('app.timezone');
+        $eventDateLocal = $date ? Carbon::parse($date, $roleTimezone) : null;
+        $eventDateUtc = $date ? Carbon::parse($date, 'UTC') : null;
 
         if ($subdomainRole && $eventId) {
             $event = Event::with('roles')
@@ -444,47 +523,29 @@ class EventRepo
 
         // Find events attached to both roles (handles all combinations: venue+talent, curator+venue, curator+talent, etc.)
         if ($subdomainRole && $slugRole) {
-            if ($eventDate) {
+            // Try local timezone interpretation first
+            if ($eventDateLocal) {
+                $event = $this->findEventForBothRoles($subdomainRole, $slugRole, $eventDateLocal);
+            }
+
+            // Fallback to UTC interpretation if local didn't find anything
+            if (! $event && $eventDateUtc && $eventDateLocal->format('Y-m-d') !== $eventDateUtc->format('Y-m-d')) {
+                $event = $this->findEventForBothRoles($subdomainRole, $slugRole, $eventDateUtc);
+            }
+
+            // No date provided - find most recent/upcoming
+            if (! $event && ! $date) {
                 $event = Event::with('roles')
-                    ->whereHas('roles', function ($query) use ($subdomainRole) {
-                        $query->where('role_id', $subdomainRole->id);
-                    })
-                    ->whereHas('roles', function ($query) use ($slugRole) {
-                        $query->where('role_id', $slugRole->id);
-                    })
-                    ->where(function ($query) use ($eventDate) {
-                        $query->whereBetween('starts_at', [
-                            $eventDate->copy()->startOfDay(),
-                            $eventDate->copy()->endOfDay(),
-                        ])
-                            ->orWhere(function ($query) use ($eventDate) {
-                                $query->whereNotNull('days_of_week')
-                                    ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
-                                    ->where('starts_at', '<=', $eventDate);
-                            });
-                    })
-                    ->orderBy('starts_at')
-                    ->first();
-            } else {
-                $event = Event::with('roles')
-                    ->whereHas('roles', function ($query) use ($subdomainRole) {
-                        $query->where('role_id', $subdomainRole->id);
-                    })
-                    ->whereHas('roles', function ($query) use ($slugRole) {
-                        $query->where('role_id', $slugRole->id);
-                    })
+                    ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id))
+                    ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id))
                     ->where('starts_at', '>=', now()->subDay())
                     ->orderBy('starts_at')
                     ->first();
 
                 if (! $event) {
                     $event = Event::with('roles')
-                        ->whereHas('roles', function ($query) use ($subdomainRole) {
-                            $query->where('role_id', $subdomainRole->id);
-                        })
-                        ->whereHas('roles', function ($query) use ($slugRole) {
-                            $query->where('role_id', $slugRole->id);
-                        })
+                        ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id))
+                        ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id))
                         ->where('starts_at', '<', now())
                         ->orderBy('starts_at', 'desc')
                         ->first();
@@ -496,26 +557,14 @@ class EventRepo
             }
         }
 
-        if ($eventDate) {
-            $event = Event::with('roles')
-                ->where('slug', $slug)
-                ->where(function ($query) use ($eventDate) {
-                    $startOfDay = $eventDate->copy()->startOfDay();
-                    $endOfDay = $eventDate->copy()->endOfDay();
+        // Try slug-based search with local timezone first
+        if ($eventDateLocal) {
+            $event = $this->findEventBySlug($subdomain, $slug, $eventDateLocal);
 
-                    $query->whereBetween('starts_at', [$startOfDay, $endOfDay])
-                        ->orWhere(function ($query) use ($eventDate) {
-                            $query->whereNotNull('days_of_week')
-                                ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1]);
-                        });
-                })
-                ->where(function ($query) use ($subdomain) {
-                    $query->whereHas('roles', function ($q) use ($subdomain) {
-                        $q->where('subdomain', $subdomain);
-                    });
-                })
-                ->orderBy('starts_at')
-                ->first();
+            // Fallback to UTC interpretation if local didn't find anything
+            if (! $event && $eventDateLocal->format('Y-m-d') !== $eventDateUtc->format('Y-m-d')) {
+                $event = $this->findEventBySlug($subdomain, $slug, $eventDateUtc);
+            }
         } else {
             $event = Event::with('roles')
                 ->where('slug', $slug)
@@ -539,7 +588,6 @@ class EventRepo
                     })
                     ->orderBy('starts_at', 'desc')
                     ->first();
-
             }
         }
 
@@ -547,20 +595,14 @@ class EventRepo
             return $event;
         }
 
-        if ($eventDate) {
-            $event = Event::with('roles')
-                ->where(function ($query) use ($eventDate) {
-                    $startOfDay = $eventDate->copy()->startOfDay();
-                    $endOfDay = $eventDate->copy()->endOfDay();
+        // Final fallback: try subdomain-based search with local timezone first
+        if ($eventDateLocal) {
+            $event = $this->findEventBySubdomain($subdomain, $eventDateLocal);
 
-                    $query->whereBetween('starts_at', [$startOfDay, $endOfDay]);
-                })
-                ->where(function ($query) use ($subdomain) {
-                    $query->whereHas('roles', function ($q) use ($subdomain) {
-                        $q->where('subdomain', $subdomain);
-                    });
-                })
-                ->first();
+            // Fallback to UTC interpretation if local didn't find anything
+            if (! $event && $eventDateLocal->format('Y-m-d') !== $eventDateUtc->format('Y-m-d')) {
+                $event = $this->findEventBySubdomain($subdomain, $eventDateUtc);
+            }
         }
 
         return $event;
