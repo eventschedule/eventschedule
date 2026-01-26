@@ -656,7 +656,12 @@ const calendarApp = createApp({
         getEventUrl(event, occurrenceDate = null) {
             let url = event.guest_url;
             let queryParams = [];
-            
+
+            // Event ID as first parameter for disambiguation when multiple events on same day
+            if (event.id) {
+                queryParams.push('id=' + event.id);
+            }
+
             // For recurring events, use the occurrence date (the date being viewed)
             // For mobile view, use occurrenceDate if available (already set for recurring events)
             // For desktop view, use the passed occurrenceDate parameter
@@ -684,7 +689,8 @@ const calendarApp = createApp({
                 dateToUse = event.utc_date;
             }
             
-            if (dateToUse) {
+            // Only add date for recurring events (regular events use ID for lookup)
+            if (isRecurring && dateToUse) {
                 queryParams.push('date=' + dateToUse);
             }
             
