@@ -77,11 +77,8 @@ class RegisteredUserController extends Controller
         // Generate 6-digit code
         $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-        // Store code in cache for 10 minutes
-        $codeKey = 'signup_code_'.$email;
-        Cache::put($codeKey, $code, now()->addMinutes(10));
-
         // Store reverse mapping (code -> email) for validation
+        // Each code has its own independent 10-minute expiration
         Cache::put('signup_code_email_'.$code, $email, now()->addMinutes(10));
 
         // Increment attempts counter (expires in 1 hour)
@@ -206,26 +203,14 @@ class RegisteredUserController extends Controller
         // Validate verification code for hosted mode only
         if (config('app.hosted') && ! config('app.is_testing')) {
             $email = strtolower($request->email);
-            $codeKey = 'signup_code_'.$email;
-            $cachedCode = Cache::get($codeKey);
 
-            if (! $cachedCode || $cachedCode !== $request->verification_code) {
-                throw ValidationException::withMessages([
-                    'verification_code' => [__('messages.code_invalid')],
-                ]);
-            }
-
-            // Validate that the email matches the email the code was originally sent to
-            $originalEmail = Cache::get('signup_code_email_'.$request->verification_code);
+            // Atomically get and remove the code to prevent race conditions
+            $originalEmail = Cache::pull('signup_code_email_'.$request->verification_code);
             if (! $originalEmail || strtolower($originalEmail) !== $email) {
                 throw ValidationException::withMessages([
                     'verification_code' => [__('messages.code_invalid')],
                 ]);
             }
-
-            // Code is valid, remove it from cache
-            Cache::forget($codeKey);
-            Cache::forget('signup_code_email_'.$request->verification_code);
         }
 
         $user = User::create([
