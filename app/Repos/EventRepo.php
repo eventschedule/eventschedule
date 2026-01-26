@@ -498,22 +498,23 @@ class EventRepo
         return $event;
     }
 
-    public function getEvent($subdomain, $slug, $date = null)
+    public function getEvent($subdomain, $slug, $date = null, $eventId = null)
     {
         $event = null;
 
         $subdomainRole = Role::where('subdomain', $subdomain)->first();
         $slugRole = Role::where('subdomain', $slug)->first();
-        $eventId = UrlUtils::decodeId($slug);
+        // Use explicit event ID if provided, otherwise try to decode from slug
+        $lookupEventId = $eventId ?: UrlUtils::decodeId($slug);
 
         // Parse dates with timezone context - local timezone first, then UTC as fallback
         $roleTimezone = $subdomainRole?->timezone ?? config('app.timezone');
         $eventDateLocal = $date ? Carbon::parse($date, $roleTimezone) : null;
         $eventDateUtc = $date ? Carbon::parse($date, 'UTC') : null;
 
-        if ($subdomainRole && $eventId) {
+        if ($subdomainRole && $lookupEventId) {
             $event = Event::with('roles')
-                ->where('id', $eventId)
+                ->where('id', $lookupEventId)
                 ->first();
 
             if ($event) {

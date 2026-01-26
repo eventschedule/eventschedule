@@ -300,6 +300,7 @@ class RoleController extends Controller
         $event = null;
         $selectedGroup = null;
         $date = $request->date ? date('Y-m-d', strtotime($request->date)) : null;
+        $eventIdParam = $request->id ? UrlUtils::decodeId($request->id) : null;
 
         if ($date && $date != '1970-01-01') {
             $dateObj = Carbon::parse($date);
@@ -319,11 +320,11 @@ class RoleController extends Controller
                     $slug = ''; // Clear slug since it's a group, not an event
                 } else {
                     // Try to find event by slug
-                    $event = $this->eventRepo->getEvent($subdomain, $slug, $date);
+                    $event = $this->eventRepo->getEvent($subdomain, $slug, $date, $eventIdParam);
                 }
             } else {
                 // Try to find event by slug
-                $event = $this->eventRepo->getEvent($subdomain, $slug, $date);
+                $event = $this->eventRepo->getEvent($subdomain, $slug, $date, $eventIdParam);
             }
 
             if ($event) {
@@ -364,12 +365,24 @@ class RoleController extends Controller
         }
 
         if ($event) {
-            if ($event->venue) {
+            if ($role->isCurator()) {
+                // When viewing from curator, prioritize first claimed talent with styling, fallback to venue
+                $talentRoles = $event->roles->filter(fn ($r) => $r->type === 'talent');
+                $claimedTalentWithStyling = $talentRoles->first(fn ($r) => $r->isClaimed() && $r->accent_color);
+                if ($claimedTalentWithStyling) {
+                    $otherRole = $claimedTalentWithStyling;
+                } elseif ($event->venue) {
+                    $otherRole = $event->venue;
+                } else {
+                    $otherRole = $role;
+                }
+            } elseif ($event->venue) {
                 if ($event->venue->subdomain == $subdomain) {
                     // When viewing from venue, find a talent role (exclude venue from roles)
                     $talentRoles = $event->roles->filter(fn ($r) => $r->id !== $event->venue->id);
                     if ($talentRoles->count() > 0) {
-                        $otherRole = $talentRoles->first();
+                        // Prioritize the role matching the URL slug, otherwise use first talent
+                        $otherRole = $talentRoles->firstWhere('subdomain', $slug) ?? $talentRoles->first();
                     } else {
                         $otherRole = $role;
                     }

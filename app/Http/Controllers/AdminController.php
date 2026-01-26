@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\DemoService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -29,76 +30,105 @@ class AdminController extends Controller
         $previousStartDate = $dates['previous_start'];
         $previousEndDate = $dates['previous_end'];
 
-        // Key Metrics (only count confirmed users and claimed roles)
-        $totalUsers = User::whereNotNull('email_verified_at')->count();
+        // Key Metrics (only count confirmed users and claimed roles, excluding demo data)
+        $totalUsers = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->count();
         $totalSchedules = Role::whereNotNull('user_id')
             ->where(function ($query) {
                 $query->whereNotNull('email_verified_at')
                     ->orWhereNotNull('phone_verified_at');
             })
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
             ->count();
-        $totalEvents = Event::count();
+        $totalEvents = Event::whereDoesntHave('roles', function ($query) {
+            $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
+                ->orWhere('subdomain', 'like', 'demo-%');
+        })->count();
 
-        // Users in current period (only confirmed)
+        // Users in current period (only confirmed, excluding demo user)
         $usersInPeriod = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
             ->whereBetween('created_at', [$startDate, $endDate])->count();
         $usersInPreviousPeriod = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
             ->whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
         $usersChangePercent = $usersInPreviousPeriod > 0
             ? round((($usersInPeriod - $usersInPreviousPeriod) / $usersInPreviousPeriod) * 100, 1)
             : ($usersInPeriod > 0 ? 100 : 0);
 
-        // Schedules in current period (only claimed)
+        // Schedules in current period (only claimed, excluding demo roles)
         $schedulesInPeriod = Role::whereNotNull('user_id')
             ->where(function ($query) {
                 $query->whereNotNull('email_verified_at')
                     ->orWhereNotNull('phone_verified_at');
             })
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
             ->whereBetween('created_at', [$startDate, $endDate])->count();
         $schedulesInPreviousPeriod = Role::whereNotNull('user_id')
             ->where(function ($query) {
                 $query->whereNotNull('email_verified_at')
                     ->orWhereNotNull('phone_verified_at');
             })
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
             ->whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
         $schedulesChangePercent = $schedulesInPreviousPeriod > 0
             ? round((($schedulesInPeriod - $schedulesInPreviousPeriod) / $schedulesInPreviousPeriod) * 100, 1)
             : ($schedulesInPeriod > 0 ? 100 : 0);
 
-        // Events in current period
-        $eventsInPeriod = Event::whereBetween('created_at', [$startDate, $endDate])->count();
-        $eventsInPreviousPeriod = Event::whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
+        // Events in current period (excluding demo events)
+        $eventsInPeriod = Event::whereDoesntHave('roles', function ($query) {
+            $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
+                ->orWhere('subdomain', 'like', 'demo-%');
+        })->whereBetween('created_at', [$startDate, $endDate])->count();
+        $eventsInPreviousPeriod = Event::whereDoesntHave('roles', function ($query) {
+            $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
+                ->orWhere('subdomain', 'like', 'demo-%');
+        })->whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
         $eventsChangePercent = $eventsInPreviousPeriod > 0
             ? round((($eventsInPeriod - $eventsInPreviousPeriod) / $eventsInPreviousPeriod) * 100, 1)
             : ($eventsInPeriod > 0 ? 100 : 0);
 
-        // Active users (confirmed users who logged in within the period)
+        // Active users (confirmed users who logged in within the period, excluding demo user)
         $activeUsers7Days = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
             ->where('updated_at', '>=', now()->subDays(7))->count();
         $activeUsers30Days = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
             ->where('updated_at', '>=', now()->subDays(30))->count();
 
         // Average events per schedule
         $avgEventsPerSchedule = $totalSchedules > 0 ? round($totalEvents / $totalSchedules, 1) : 0;
 
-        // Top schedules by event count
+        // Top schedules by event count (excluding demo roles)
         $topSchedulesByEvents = Role::withCount('events')
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
             ->orderBy('events_count', 'desc')
             ->limit(10)
             ->get();
 
-        // Recent schedules (only claimed)
+        // Recent schedules (only claimed, excluding demo roles)
         $recentSchedules = Role::whereNotNull('user_id')
             ->where(function ($query) {
                 $query->whereNotNull('email_verified_at')
                     ->orWhereNotNull('phone_verified_at');
             })
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
 
-        // Recent events
+        // Recent events (excluding demo events)
         $recentEvents = Event::with('roles')
+            ->whereDoesntHave('roles', function ($query) {
+                $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
+                    ->orWhere('subdomain', 'like', 'demo-%');
+            })
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
@@ -212,18 +242,19 @@ class AdminController extends Controller
             'monthly' => DB::raw("DATE_FORMAT(created_at, '%Y-%m') as period"),
         };
 
-        // Users trend (only confirmed)
+        // Users trend (only confirmed, excluding demo user)
         $usersTrend = User::select(
             $dateFormatExpr,
             DB::raw('COUNT(*) as count')
         )
             ->whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->groupBy('period')
             ->orderBy('period')
             ->get();
 
-        // Schedules trend (only claimed)
+        // Schedules trend (only claimed, excluding demo roles)
         $schedulesTrend = Role::select(
             match ($formatKey) {
                 'daily' => DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as period"),
@@ -237,12 +268,14 @@ class AdminController extends Controller
                 $query->whereNotNull('email_verified_at')
                     ->orWhereNotNull('phone_verified_at');
             })
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->groupBy('period')
             ->orderBy('period')
             ->get();
 
-        // Events trend
+        // Events trend (excluding demo events)
         $eventsTrend = Event::select(
             match ($formatKey) {
                 'daily' => DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as period"),
@@ -251,6 +284,10 @@ class AdminController extends Controller
             },
             DB::raw('COUNT(*) as count')
         )
+            ->whereDoesntHave('roles', function ($query) {
+                $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
+                    ->orWhere('subdomain', 'like', 'demo-%');
+            })
             ->whereBetween('created_at', [$startDate, $endDate])
             ->groupBy('period')
             ->orderBy('period')
@@ -301,13 +338,15 @@ class AdminController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        // Plan statistics
+        // Plan statistics (excluding demo roles)
         $planCounts = Role::select('plan_type', DB::raw('COUNT(*) as count'))
             ->whereNotNull('user_id')
             ->where(function ($query) {
                 $query->whereNotNull('email_verified_at')
                     ->orWhereNotNull('phone_verified_at');
             })
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
             ->groupBy('plan_type')
             ->pluck('count', 'plan_type')
             ->toArray();
@@ -316,23 +355,30 @@ class AdminController extends Controller
         $proCount = $planCounts['pro'] ?? 0;
         $enterpriseCount = $planCounts['enterprise'] ?? 0;
 
-        // Active Stripe subscriptions
+        // Active Stripe subscriptions (excluding demo roles)
         $activeSubscriptions = Role::whereHas('subscriptions', function ($query) {
             $query->where('stripe_status', 'active');
-        })->count();
+        })
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
+            ->count();
 
-        // Expiring in 30 days
+        // Expiring in 30 days (excluding demo roles)
         $expiringSoon = Role::where('plan_type', '!=', 'free')
             ->whereNotNull('plan_expires')
             ->whereBetween('plan_expires', [now()->format('Y-m-d'), now()->addDays(30)->format('Y-m-d')])
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
             ->count();
 
-        // Build query for role list
+        // Build query for role list (excluding demo roles)
         $query = Role::whereNotNull('user_id')
             ->where(function ($q) {
                 $q->whereNotNull('email_verified_at')
                     ->orWhereNotNull('phone_verified_at');
             })
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
             ->with('user');
 
         // Search filter
