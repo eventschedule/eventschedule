@@ -107,7 +107,7 @@ class DemoService
             $role->city = 'Springfield';
             $role->country_code = 'US';
             $role->background = 'gradient';
-            $role->background_colors = '#FFD90F, #4A90D9'; // Classic Simpsons yellow/blue
+            $role->background_colors = '#FFD90F, #009DDC'; // Classic Simpsons yellow/blue
             $role->background_rotation = 180;
             $role->accent_color = '#FFD90F'; // Classic Simpsons yellow
             $role->description = '# Welcome to Springfield Events! 🍩
@@ -182,6 +182,10 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
         $role->font_family = 'Bangers';
         $role->accept_requests = false;
         $role->social_links = self::getRandomDemoSocialLinks();
+        $role->background = 'gradient';
+        $role->background_colors = '#FFD90F, #009DDC';
+        $role->background_rotation = 180;
+        $role->accent_color = '#FFD90F';
         $role->save();
 
         // Download demo images if they don't exist

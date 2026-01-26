@@ -969,4 +969,8 @@ return [
     'text_template' => 'Text Template',
     'text_template_help' => 'Customize the text format for each event. Leave blank for default.',
     'view_docs' => 'View Docs',
+
+    // Recurring events
+    'recurring_events' => 'Recurring Events',
+    'exclude_recurring_events' => 'Exclude recurring events',
 ];

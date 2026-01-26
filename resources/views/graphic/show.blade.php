@@ -6,6 +6,7 @@
             const isPro = {{ $isPro ? 'true' : 'false' }};
             const isEnterprise = {{ $isEnterprise ? 'true' : 'false' }};
             const currentUserEmail = '{{ auth()->user()->email }}';
+            const hasRecurringEvents = @json($hasRecurringEvents);
 
             function copyToClipboard(text, buttonId) {
                 navigator.clipboard.writeText(text).then(function() {
@@ -59,12 +60,15 @@
                                      document.getElementById('text_template_mobile')?.value || '';
                 const useScreenCapture = document.getElementById('use_screen_capture')?.checked ||
                                          document.getElementById('use_screen_capture_mobile')?.checked || false;
+                const excludeRecurring = document.getElementById('exclude_recurring')?.checked ||
+                                         document.getElementById('exclude_recurring_mobile')?.checked || false;
 
                 return {
                     link_type: linkType,
                     ai_prompt: aiPrompt,
                     text_template: textTemplate,
-                    use_screen_capture: useScreenCapture
+                    use_screen_capture: useScreenCapture,
+                    exclude_recurring: excludeRecurring
                 };
             }
 
@@ -99,6 +103,13 @@
                 const screenCaptureMobile = document.getElementById('use_screen_capture_mobile');
                 if (screenCaptureDesktop && screenCaptureMobile) {
                     screenCaptureMobile.checked = screenCaptureDesktop.checked;
+                }
+
+                // Sync exclude recurring
+                const excludeRecurringDesktop = document.getElementById('exclude_recurring');
+                const excludeRecurringMobile = document.getElementById('exclude_recurring_mobile');
+                if (excludeRecurringDesktop && excludeRecurringMobile) {
+                    excludeRecurringMobile.checked = excludeRecurringDesktop.checked;
                 }
 
                 // Sync email enabled
@@ -166,8 +177,9 @@
                 const screenCaptureParam = formSettings.use_screen_capture ? '&use_screen_capture=1' : '';
                 const aiPromptParam = formSettings.ai_prompt ? '&ai_prompt=' + encodeURIComponent(formSettings.ai_prompt) : '';
                 const textTemplateParam = formSettings.text_template ? '&text_template=' + encodeURIComponent(formSettings.text_template) : '';
+                const excludeRecurringParam = formSettings.exclude_recurring ? '&exclude_recurring=1' : '';
 
-                fetch('{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain, "layout" => $layout]) }}' + directParam + screenCaptureParam + aiPromptParam + textTemplateParam)
+                fetch('{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain, "layout" => $layout]) }}' + directParam + screenCaptureParam + aiPromptParam + textTemplateParam + excludeRecurringParam)
                     .then(response => {
                         if (!response.ok) {
                             if (response.status === 404) {
@@ -291,6 +303,13 @@
                     }
                 });
 
+                ['exclude_recurring', 'exclude_recurring_mobile'].forEach(id => {
+                    const excludeRecurring = document.getElementById(id);
+                    if (excludeRecurring) {
+                        excludeRecurring.checked = currentSettings.exclude_recurring || false;
+                    }
+                });
+
                 ['recipient_emails', 'recipient_emails_mobile'].forEach(id => {
                     const recipientEmails = document.getElementById(id);
                     if (recipientEmails) {
@@ -392,6 +411,7 @@
                 const aiPrompt = document.getElementById('ai_prompt') || document.getElementById('ai_prompt_mobile');
                 const textTemplate = document.getElementById('text_template') || document.getElementById('text_template_mobile');
                 const useScreenCapture = document.getElementById('use_screen_capture') || document.getElementById('use_screen_capture_mobile');
+                const excludeRecurring = document.getElementById('exclude_recurring') || document.getElementById('exclude_recurring_mobile');
                 const recipientEmails = document.getElementById('recipient_emails') || document.getElementById('recipient_emails_mobile');
 
                 // Validate recipient emails is required when email scheduling is enabled
@@ -423,6 +443,7 @@
                     link_type: linkTypeChecked ? linkTypeChecked.value : 'schedule',
                     layout: '{{ $layout }}',
                     use_screen_capture: useScreenCapture ? useScreenCapture.checked : false,
+                    exclude_recurring: excludeRecurring ? excludeRecurring.checked : false,
                     recipient_emails: recipientEmails ? recipientEmails.value : ''
                 };
 
@@ -520,8 +541,12 @@
             }
 
             // Textarea height persistence functions
+            const minTextareaHeight = 100; // Minimum height in pixels (roughly 5 rows)
+
             function saveTextareaHeight(id, height) {
-                localStorage.setItem('textarea_height_' + id, height);
+                if (height >= minTextareaHeight) {
+                    localStorage.setItem('textarea_height_' + id, height);
+                }
             }
 
             function restoreTextareaHeights() {
@@ -529,7 +554,7 @@
                 textareaIds.forEach(id => {
                     const textarea = document.getElementById(id);
                     const savedHeight = localStorage.getItem('textarea_height_' + id);
-                    if (textarea && savedHeight) {
+                    if (textarea && savedHeight && parseInt(savedHeight) >= minTextareaHeight) {
                         textarea.style.height = savedHeight + 'px';
                     }
                 });
@@ -540,7 +565,7 @@
                 const resizeObserver = new ResizeObserver(entries => {
                     entries.forEach(entry => {
                         const id = entry.target.id;
-                        const height = entry.contentRect.height;
+                        const height = entry.target.offsetHeight;
                         if (height > 0) {
                             saveTextareaHeight(id, height);
                         }
@@ -704,7 +729,7 @@
                         </div>
                         <textarea id="text_template_mobile" rows="5"
                             aria-label="{{ __('messages.text_template') }}"
-                            class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm font-mono resize-y"
+                            class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-xs font-mono resize-y"
                             placeholder="*{day_name}* {date_dmy} | {time}&#10;*{event_name}*:&#10;{venue} | {city}&#10;{url}"></textarea>
                         <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
                     </div>
@@ -716,7 +741,7 @@
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
                         </div>
                         <div>
-                            <textarea id="ai_prompt_mobile" rows="3" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
+                            <textarea id="ai_prompt_mobile" rows="5" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
                         </div>
                     </div>
@@ -736,6 +761,17 @@
                             </label>
                         </div>
                     </div>
+
+                    <!-- Recurring Events Option -->
+                    @if ($hasRecurringEvents)
+                    <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                        <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.recurring_events') }}</h4>
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="checkbox" id="exclude_recurring_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="syncFormFields()">
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.exclude_recurring_events') }}</span>
+                        </label>
+                    </div>
+                    @endif
 
                     <!-- Screen Capture Rendering (Enterprise Feature) -->
                     @if ($isEnterprise)
@@ -875,7 +911,7 @@
         <!-- Outer Panel (desktop only) -->
         <div class="lg:bg-white lg:dark:bg-gray-800 lg:rounded-lg lg:shadow lg:dark:shadow-gray-900/50 lg:p-6">
             <!-- Two Column Layout on Desktop -->
-            <div class="grid grid-cols-1 lg:grid-cols-[40%_1fr] gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-[45%_1fr] gap-6">
                 <!-- Left Column - Settings (Desktop only) -->
                 <div class="hidden lg:block bg-gray-50 dark:bg-gray-900/50 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
                     <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
@@ -893,7 +929,7 @@
                             </div>
                             <textarea id="text_template" rows="5"
                                 aria-label="{{ __('messages.text_template') }}"
-                                class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm font-mono resize-y"
+                                class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-xs font-mono resize-y"
                                 placeholder="*{day_name}* {date_dmy} | {time}&#10;*{event_name}*:&#10;{venue} | {city}&#10;{url}"></textarea>
                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
                         </div>
@@ -905,7 +941,7 @@
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
                             </div>
                             <div>
-                                <textarea id="ai_prompt" rows="3" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
+                                <textarea id="ai_prompt" rows="5" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
                             </div>
                         </div>
@@ -925,6 +961,17 @@
                                 </label>
                             </div>
                         </div>
+
+                        <!-- Recurring Events Option -->
+                        @if ($hasRecurringEvents)
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.recurring_events') }}</h4>
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="checkbox" id="exclude_recurring" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="syncFormFields()">
+                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.exclude_recurring_events') }}</span>
+                            </label>
+                        </div>
+                        @endif
 
                         <!-- Screen Capture Rendering (Enterprise Feature) -->
                         @if ($isEnterprise)
