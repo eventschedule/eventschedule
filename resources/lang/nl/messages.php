@@ -341,6 +341,8 @@ return [
     'schedule_url' => 'Schema-URL',
     'back_to_schedule' => 'Terug naar Schema',
     'all_schedules' => 'Alle Schema\'s',
+    'filters' => 'Filters',
+    'clear_filters' => 'Filters wissen',
 
     // Categories
     'parties_&_festivals' => 'Feesten & Festivals',

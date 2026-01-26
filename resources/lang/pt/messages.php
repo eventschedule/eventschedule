@@ -347,6 +347,8 @@ return [
     'schedule_url' => 'URL da Agenda',
     'back_to_schedule' => 'Voltar para Agenda',
     'all_schedules' => 'Todas as Agendas',
+    'filters' => 'Filtros',
+    'clear_filters' => 'Limpar filtros',
 
     // Categories
     'parties_&_festivals' => 'Festas e Festivais',

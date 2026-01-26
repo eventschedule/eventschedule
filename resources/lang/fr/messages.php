@@ -498,6 +498,8 @@ return [
     'schedule_url' => 'URL du Programme',
     'back_to_schedule' => 'Retour au Programme',
     'all_schedules' => 'Tous les Programmes',
+    'filters' => 'Filtres',
+    'clear_filters' => 'Effacer les filtres',
 
     // Categories
     'parties_&_festivals' => 'Fêtes et Festivals',

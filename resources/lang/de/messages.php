@@ -494,6 +494,8 @@ return [
     'schedule_url' => 'Zeitplan-URL',
     'back_to_schedule' => 'Zurück zum Zeitplan',
     'all_schedules' => 'Alle Zeitpläne',
+    'filters' => 'Filter',
+    'clear_filters' => 'Filter löschen',
 
     // Categories
     'parties_&_festivals' => 'Partys & Festivals',
