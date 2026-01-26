@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class PageView
 {
@@ -41,8 +42,9 @@ class PageView
      */
     public static function isBot(?string $userAgent): bool
     {
-        if (! $userAgent) {
-            return false;
+        // Real browsers ALWAYS send a user-agent - empty/short/unknown UAs are bots
+        if (! $userAgent || strtolower(trim($userAgent)) === 'unknown' || strlen(trim($userAgent)) < 10) {
+            return true;
         }
 
         $botPatterns = [
@@ -126,6 +128,61 @@ class PageView
             'chrome-lighthouse',
             'pagespeed',
             'gtmetrix',
+
+            // AI Assistants/Crawlers
+            'claudebot',
+            'claude-web',
+            'anthropic',
+            'gptbot',
+            'chatgpt',
+            'chatgpt-user',
+            'oai-searchbot',
+            'perplexitybot',
+            'cohere-ai',
+            'diffbot',
+            'bytespider',
+            'petalbot',
+            'yisou',
+            'megaindex',
+            'blexbot',
+            'icc-crawler',
+            'amazonbot',
+
+            // Security scanners
+            'httpx',
+            'nessus',
+            'nikto',
+            'qualys',
+            'acunetix',
+            'burp',
+            'zap',
+            'openvas',
+
+            // Additional HTTP libraries
+            'guzzle',
+            'http_request',
+            'libcurl',
+            'php/',
+            'ruby',
+            'perl',
+            'scrapy',
+            'aiohttp',
+            'httplib',
+            'requests/',
+            'http.rb',
+
+            // Headless/automation
+            'chromeheadless',
+            'headlesschrome',
+            'jsdom',
+            'zombiejs',
+
+            // Additional Google/Bing crawlers
+            'googlebot-image',
+            'googlebot-video',
+            'google-inspectiontool',
+            'bingpreview',
+            'yandeximages',
         ];
 
         $userAgentLower = strtolower($userAgent);
@@ -140,6 +197,56 @@ class PageView
     }
 
     /**
+     * Check if request has suspicious headers (missing Accept-Language, generic Accept)
+     */
+    public static function isSuspiciousRequest(Request $request): bool
+    {
+        // Real browsers ALWAYS send Accept-Language
+        $acceptLanguage = $request->header('Accept-Language');
+        if (empty($acceptLanguage)) {
+            return true;
+        }
+
+        // Real browsers send specific Accept headers, not just "*/*"
+        $accept = $request->header('Accept');
+        if (empty($accept) || $accept === '*/*') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Generate a privacy-preserving hash for an IP address
+     */
+    protected static function getIpHash(string $ip): string
+    {
+        $dailySalt = config('app.key').now()->format('Y-m-d');
+
+        return hash('sha256', $ip.$dailySalt);
+    }
+
+    /**
+     * Check if IP has exceeded view limit for a role today
+     */
+    protected static function hasExceededViewLimit(int $roleId, string $ipHash): bool
+    {
+        $maxViewsPerIpPerRole = 10; // Max views to count per IP per role per day
+
+        $cacheKey = "analytics_view:{$roleId}:{$ipHash}";
+        $viewCount = Cache::get($cacheKey, 0);
+
+        if ($viewCount >= $maxViewsPerIpPerRole) {
+            return true;
+        }
+
+        $secondsUntilMidnight = now()->endOfDay()->diffInSeconds(now());
+        Cache::put($cacheKey, $viewCount + 1, $secondsUntilMidnight);
+
+        return false;
+    }
+
+    /**
      * Record a page view (returns false if bot detected)
      */
     public static function recordView(Role $role, ?Event $event, Request $request): bool
@@ -148,6 +255,17 @@ class PageView
 
         // Skip recording for bots/crawlers
         if (self::isBot($userAgent)) {
+            return false;
+        }
+
+        // Skip recording for requests with suspicious headers
+        if (self::isSuspiciousRequest($request)) {
+            return false;
+        }
+
+        // Skip recording if IP has exceeded view limit for this role today
+        $ipHash = self::getIpHash($request->ip());
+        if (self::hasExceededViewLimit($role->id, $ipHash)) {
             return false;
         }
 

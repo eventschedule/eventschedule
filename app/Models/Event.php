@@ -235,6 +235,27 @@ class Event extends Model
         });
     }
 
+    /**
+     * Get a role that can be used to view this event publicly.
+     * Priority: first claimed role, then creatorRole if claimed, then any role.
+     */
+    public function getViewableRole()
+    {
+        // First, try to find a claimed role
+        $claimed = $this->roles->first(fn ($role) => $role->isClaimed());
+        if ($claimed) {
+            return $claimed;
+        }
+
+        // Fall back to creatorRole (which should be claimed if it's a curator)
+        if ($this->creatorRole && $this->creatorRole->isClaimed()) {
+            return $this->creatorRole;
+        }
+
+        // Last resort: return first role even if unclaimed
+        return $this->roles->first();
+    }
+
     public function isPro()
     {
         foreach ($this->roles as $role) {
