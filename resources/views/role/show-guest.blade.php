@@ -21,17 +21,17 @@
       <div class="container mx-auto pt-7 pb-10 px-5">
         <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-xl mb-6 {{ $hasHeaderImage ? 'overflow-hidden' : '' }} {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }}">
           <div
-            class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0"
+            class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0 before:rounded-t-xl"
           >
 
             @if ($role->header_image && $role->header_image !== 'none')
             <img
-              class="block max-h-72 w-full object-cover rounded-t-2xl"
+              class="block max-h-72 w-full object-cover"
               src="{{ asset('images/headers') }}/{{ $role->header_image }}.png"
             />
             @elseif ($role->header_image_url)
             <img
-              class="block max-h-72 w-full object-cover rounded-t-2xl"
+              class="block max-h-72 w-full object-cover"
               src="{{ $role->header_image_url }}"
             />
             @endif
