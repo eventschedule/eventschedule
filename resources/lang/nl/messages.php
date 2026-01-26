@@ -962,4 +962,7 @@ return [
     // Recurring events
     'recurring_events' => 'Terugkerende Evenementen',
     'exclude_recurring_events' => 'Terugkerende evenementen uitsluiten',
+
+    // Bot protection
+    'turnstile_verification_failed' => 'Verificatie mislukt. Probeer het opnieuw.',
 ];
