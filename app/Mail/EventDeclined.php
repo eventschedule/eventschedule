@@ -54,6 +54,7 @@ class EventDeclined extends Mailable
 
         return new Content(
             view: 'mail.event.declined',
+            text: 'mail.event.declined_text',
             with: [
                 'event' => $event,
                 'role' => $role,

@@ -695,6 +695,8 @@ return [
     'signup_verification_code_intro' => 'Bitte verwenden Sie den folgenden Code, um Ihre Anmeldung abzuschließen:',
     'your_verification_code' => 'Ihr Bestätigungscode',
     'signup_verification_code_expiry' => 'Dieser Code läuft in 10 Minuten ab.',
+    'signup_verification_code_ignore' => 'Wenn Sie diesen Code nicht angefordert haben, können Sie diese E-Mail ignorieren.',
+    'signup_verification_code_security_notice' => 'Zu Ihrer Sicherheit: Teilen Sie diesen Bestätigungscode niemals mit anderen. Unser Team wird Sie niemals nach diesem Code fragen.',
     'send_code' => 'Code senden',
     'verification_code' => 'Bestätigungscode',
     'code_sent' => 'Bestätigungscode wurde an Ihre E-Mail gesendet.',

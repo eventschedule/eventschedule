@@ -54,6 +54,7 @@ class EventAccepted extends Mailable
 
         return new Content(
             view: 'mail.event.accepted',
+            text: 'mail.event.accepted_text',
             with: [
                 'event' => $event,
                 'role' => $role,

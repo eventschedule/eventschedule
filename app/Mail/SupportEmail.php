@@ -50,6 +50,7 @@ class SupportEmail extends Mailable
     {
         return new Content(
             view: 'emails.support_email',
+            text: 'emails.support_email_text',
             with: [
                 'name' => $this->name,
                 'email' => $this->email,

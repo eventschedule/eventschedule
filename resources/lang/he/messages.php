@@ -684,6 +684,8 @@ return [
     'signup_verification_code_intro' => 'אנא השתמש בקוד הבא כדי להשלים את ההרשמה שלך:',
     'your_verification_code' => 'קוד האימות שלך',
     'signup_verification_code_expiry' => 'קוד זה יפוג תוך 10 דקות.',
+    'signup_verification_code_ignore' => 'אם לא ביקשת קוד זה, תוכל להתעלם מהודעה זו בביטחון.',
+    'signup_verification_code_security_notice' => 'לביטחונך, לעולם אל תשתף קוד אימות זה עם אף אחד. הצוות שלנו לעולם לא יבקש ממך קוד זה.',
     'send_code' => 'שלח קוד',
     'verification_code' => 'קוד אימות',
     'code_sent' => 'קוד האימות נשלח לדוא"ל שלך.',
