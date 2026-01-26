@@ -163,8 +163,8 @@ class PageView
             'http_request',
             'libcurl',
             'php/',
-            'ruby',
-            'perl',
+            'ruby/',
+            'libwww-perl',
             'scrapy',
             'aiohttp',
             'httplib',
@@ -234,16 +234,17 @@ class PageView
         $maxViewsPerIpPerRole = 10; // Max views to count per IP per role per day
 
         $cacheKey = "analytics_view:{$roleId}:{$ipHash}";
-        $viewCount = Cache::get($cacheKey, 0);
 
-        if ($viewCount >= $maxViewsPerIpPerRole) {
-            return true;
+        // Use atomic increment to avoid race conditions
+        $secondsUntilMidnight = now()->endOfDay()->diffInSeconds(now());
+        $viewCount = Cache::increment($cacheKey);
+
+        // Set expiry on first increment (increment creates key with no expiry)
+        if ($viewCount === 1) {
+            Cache::put($cacheKey, 1, $secondsUntilMidnight);
         }
 
-        $secondsUntilMidnight = now()->endOfDay()->diffInSeconds(now());
-        Cache::put($cacheKey, $viewCount + 1, $secondsUntilMidnight);
-
-        return false;
+        return $viewCount > $maxViewsPerIpPerRole;
     }
 
     /**
@@ -264,9 +265,12 @@ class PageView
         }
 
         // Skip recording if IP has exceeded view limit for this role today
-        $ipHash = self::getIpHash($request->ip());
-        if (self::hasExceededViewLimit($role->id, $ipHash)) {
-            return false;
+        $ip = $request->ip();
+        if ($ip) {
+            $ipHash = self::getIpHash($ip);
+            if (self::hasExceededViewLimit($role->id, $ipHash)) {
+                return false;
+            }
         }
 
         $deviceType = self::detectDeviceType($userAgent);
