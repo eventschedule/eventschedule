@@ -125,7 +125,11 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
 - **Nightlife** - The finest Duff this side of Shelbyville 🍺
 - **Community Events** - Town meetings, talent shows, and controlled chaos
 
-*D\'oh-n\'t miss out on the action! Our tire fire burns eternal, and so does our event calendar.*';
+*D\'oh-n\'t miss out on the action! Our tire fire burns eternal, and so does our event calendar.*
+
+---
+
+✨ **Mmm... free events page.** Create your own schedule at [eventschedule.com](https://eventschedule.com) - no donuts required (but encouraged).';
             $role->accept_requests = false;
             $role->plan_type = 'pro';
             $role->plan_expires = now()->addYear()->format('Y-m-d');
@@ -167,7 +171,11 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
 - **Nightlife** - The finest Duff this side of Shelbyville 🍺
 - **Community Events** - Town meetings, talent shows, and controlled chaos
 
-*D\'oh-n\'t miss out on the action! Our tire fire burns eternal, and so does our event calendar.*';
+*D\'oh-n\'t miss out on the action! Our tire fire burns eternal, and so does our event calendar.*
+
+---
+
+✨ **Mmm... free events page.** Create your own schedule at [eventschedule.com](https://eventschedule.com) - no donuts required (but encouraged).';
         $role->header_image_url = 'demo_header_town.jpg';
         $role->profile_image_url = 'demo_profile_donuts.jpg';
         $role->font_family = 'Bangers';
@@ -276,10 +284,11 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
             'demo_profile_bowling_ball.jpg' => 'https://images.unsplash.com/photo-1595177707511-1daccc734e8e?w=400&h=400&fit=crop', // bowling ball
             'demo_profile_popcorn.jpg' => 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&h=400&fit=crop',      // vintage film projector
             'demo_profile_donut_box.jpg' => 'https://images.unsplash.com/photo-1527515545081-5db817172677?w=400&h=400&fit=crop',    // donut box
+            'demo_profile_civic.jpg' => 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=400&h=400&fit=crop',        // auditorium seats
 
             // Talent profile images (square 400x400)
             'demo_profile_jazz.jpg' => 'https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=400&h=400&fit=crop',       // saxophone
-            'demo_profile_clown.jpg' => 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400&h=400&fit=crop',      // circus clown
+            'demo_profile_clown.jpg' => 'https://images.unsplash.com/photo-5hhHKl7ohCU?w=400&h=400&fit=crop',      // colorful clown face
             'demo_profile_dj.jpg' => 'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=400&h=400&fit=crop',         // DJ turntable
             'demo_profile_rock.jpg' => 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&h=400&fit=crop',       // rock band
             'demo_profile_country.jpg' => 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=400&h=400&fit=crop',    // cowboy guitar
@@ -289,10 +298,11 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
             'demo_profile_vinyl.jpg' => 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=400&h=400&fit=crop',      // vinyl records
             'demo_profile_circus.jpg' => 'https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&h=400&fit=crop',     // circus tent
             'demo_profile_eye.jpg' => 'https://images.unsplash.com/photo-1584286595398-a59f230e4585?w=400&h=400&fit=crop',           // gothic stone carving detail
+            'demo_profile_eye_triangle.jpg' => 'https://images.unsplash.com/photo-1766054910220-3aae7d880d6d?w=400&h=400&fit=crop',  // masonic symbol banner
 
             // Followed schedule images (Shelbyville & Capital City)
             'demo_header_shelbyville.jpg' => 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&h=400&fit=crop',   // football stadium night
-            'demo_profile_shelbyville.jpg' => 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=400&fit=crop',  // lemon
+            'demo_profile_shelbyville.jpg' => 'https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&h=400&fit=crop',  // football
             'demo_header_capitalcity.jpg' => 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&h=400&fit=crop',   // arena concert lights
             'demo_profile_capitalcity.jpg' => 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&h=400&fit=crop',  // city skyline night
         ];
@@ -511,7 +521,7 @@ Educational entertainment from Springfield\'s foremost inventor (and Nobel Prize
                 'background_colors' => '#5d4037, #ff8f00',
                 'background_rotation' => 225,
                 'accent_color' => '#FFB300',
-                'profile_image' => 'demo_profile_beer.jpg',
+                'profile_image' => 'demo_profile_eye_triangle.jpg',
                 'header_image' => 'demo_header_secret.jpg',
                 'font_family' => 'Cinzel',
                 'description' => '**Who controls the Springfield events scene? WE DO! WE DO!**
@@ -715,7 +725,7 @@ Home of the famous giant donut statue and even more famous actual donuts. Now ho
                 'background_colors' => '#228B22, #FFFFFF', // Civic green/white
                 'accent_color' => '#228B22',
                 'header_image' => 'demo_header_civic.jpg',
-                'profile_image' => 'demo_profile_gym.jpg',
+                'profile_image' => 'demo_profile_civic.jpg',
                 'font_family' => 'Public_Sans',
                 'description' => '**Where Springfield comes together (for better or worse).**
 
