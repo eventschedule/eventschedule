@@ -498,6 +498,8 @@ return [
     'schedule_url' => 'URL del Horario',
     'back_to_schedule' => 'Volver al Horario',
     'all_schedules' => 'Todos los Horarios',
+    'filters' => 'Filtros',
+    'clear_filters' => 'Borrar Filtros',
 
     // Categories
     'parties_&_festivals' => 'Fiestas y Festivales',

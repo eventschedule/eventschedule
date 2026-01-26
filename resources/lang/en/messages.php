@@ -539,6 +539,8 @@ return [
     'subschedules' => 'Subschedules',
     'slug' => 'Slug',
     'all_schedules' => 'All Schedules',
+    'filters' => 'Filters',
+    'clear_filters' => 'Clear Filters',
     'schedule_url' => 'Schedule URL',
     'back_to_schedule' => 'Back to Schedule',
     'parties_&_festivals' => 'Parties & Festivals',

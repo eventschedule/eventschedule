@@ -38,7 +38,7 @@
           </div>
           <div id="schedule-header" class="px-6 lg:px-16 pb-4 relative z-10 {{ $isRtl ? 'rtl' : '' }}">
             @if ($role->profile_image_url)
-            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] {{ $isRtl ? '-mr-2 sm:ml-auto sm:mr-0' : '-ml-2' }} mb-6 bg-[#F5F9FE] dark:bg-gray-800 flex items-center justify-center">
+            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] {{ $isRtl ? '-mr-2 sm:ml-auto sm:mr-0' : '-ml-2' }} mb-3 sm:mb-6 bg-[#F5F9FE] dark:bg-gray-800 flex items-center justify-center">
               <img
                 class="rounded-lg w-[120px] h-[120px] object-cover"
                 src="{{ $role->profile_image_url }}"
@@ -46,7 +46,7 @@
               />
             </div>
             @else
-            <div style="height: 42px;"></div>
+            <div class="h-6 sm:h-[42px]"></div>
             @endif
             @php
                 $hasEmail = $role->email && $role->show_email;
@@ -56,7 +56,7 @@
             {{-- Mobile layout (< sm): stacked, centered --}}
             <div class="flex sm:hidden flex-col items-center gap-3 mb-5">
               {{-- Name/Location (centered) --}}
-              <div class="text-center">
+              <div class="text-center mb-1">
                 <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ $role->font_family }}', sans-serif;">
                   {{ $role->translatedName() }}
                 </h3>
@@ -165,7 +165,7 @@
 
               {{-- Description below --}}
               @if($role->translatedDescription())
-              <div class="text-left w-full mt-2">
+              <div class="text-left w-full">
                 <div x-data="{ expanded: false }" class="text-sm text-[#33383C] dark:text-gray-300">
                   <span x-show="!expanded">
                     {{ Str::words(strip_tags($role->translatedDescription()), 5, '') }}...

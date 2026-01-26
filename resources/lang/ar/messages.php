@@ -490,6 +490,8 @@ return [
     'schedule_url' => 'رابط الجدول',
     'back_to_schedule' => 'العودة إلى الجدول',
     'all_schedules' => 'جميع الجداول',
+    'filters' => 'الفلاتر',
+    'clear_filters' => 'مسح الفلاتر',
 
     // Categories
     'parties_&_festivals' => 'الحفلات والمهرجانات',
