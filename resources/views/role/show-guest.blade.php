@@ -58,7 +58,7 @@
               {{-- Name/Location (centered) --}}
               <div class="text-center mb-1">
                 <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ $role->font_family }}', sans-serif;">
-                  {{ $role->translatedName() }}
+                  {!! str_replace(' , ', '<br>', e($role->translatedName())) !!}
                 </h3>
                 @if($role->isVenue())
                 <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($role->bestAddress()) }}"
@@ -167,13 +167,13 @@
               @if($role->translatedDescription())
               <div class="text-left w-full mt-2">
                 <div x-data="{ expanded: false }" class="text-sm text-[#33383C] dark:text-gray-300">
-                  <span x-show="!expanded">
+                  <span x-show="!expanded" class="description-collapsed">
                     {{ Str::words(strip_tags($role->translatedDescription()), 5, '') }}...
                     <button @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap ms-1">
                       {{ __('messages.show_more') }}
                     </button>
                   </span>
-                  <div x-show="expanded">
+                  <div x-show="expanded" x-cloak class="description-expanded">
                     <div class="custom-content [&>*:first-child]:mt-0">
                       {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                     </div>
@@ -193,7 +193,7 @@
                 {{-- Name/Location --}}
                 <div class="min-w-0">
                   <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ $role->font_family }}', sans-serif;">
-                    {{ $role->translatedName() }}
+                    {!! str_replace(' , ', '<br>', e($role->translatedName())) !!}
                   </h3>
                   @if($role->isVenue())
                   <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($role->bestAddress()) }}"
@@ -302,13 +302,13 @@
               {{-- Description below (full width) --}}
               @if($role->translatedDescription())
               <div x-data="{ expanded: false }" class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
-                <span x-show="!expanded">
+                <span x-show="!expanded" class="description-collapsed">
                   {{ Str::words(strip_tags($role->translatedDescription()), 5, '') }}...
                   <button @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap ms-1">
                     {{ __('messages.show_more') }}
                   </button>
                 </span>
-                <div x-show="expanded">
+                <div x-show="expanded" x-cloak class="description-expanded">
                   <div class="custom-content [&>*:first-child]:mt-0">
                     {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                   </div>
@@ -499,6 +499,9 @@
 
 <style>
 [v-cloak] {
+  display: none !important;
+}
+[x-cloak] {
   display: none !important;
 }
 
