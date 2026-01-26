@@ -15,7 +15,7 @@
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
 
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <x-docs-breadcrumb currentTitle="SaaS Setup" />
+            <x-docs-breadcrumb currentTitle="SaaS Setup" section="selfhost" sectionTitle="Selfhost" sectionRoute="marketing.docs.selfhost" />
 
             <div class="flex items-center gap-4 mb-4">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/20">
@@ -377,7 +377,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                             <h2 class="doc-heading">Stripe Subscription Setup (Pro Plans)</h2>
                             <p class="text-gray-300 mb-6">To enable paid Pro plans for your customers, configure Stripe subscription billing.</p>
 
-                            <p class="text-gray-300 mb-6">See <a href="{{ route('marketing.docs.stripe') }}" class="text-blue-400 hover:text-blue-300 underline">Stripe Integration Documentation</a> for detailed Stripe configuration instructions.</p>
+                            <p class="text-gray-300 mb-6">See <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="text-blue-400 hover:text-blue-300 underline">Stripe Integration Documentation</a> for detailed Stripe configuration instructions.</p>
 
                             <h3 class="text-lg font-semibold text-white mb-4">Required Environment Variables</h3>
                             <div class="doc-code-block">

@@ -4,6 +4,49 @@
     <x-slot name="keywords">event schedule pricing, free event calendar, event management cost, ticketing fees, no platform fees, custom domain pricing</x-slot>
     <x-slot name="socialImage">social/pricing.png</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Is there really a free plan?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes! The free plan includes unlimited events and all core features. You only need to upgrade if you want custom domains or want to remove branding."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What does \"first year free\" mean?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "When you sign up for Pro, your first year is completely free. After that, it's $5/month billed yearly. You can cancel anytime."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I cancel anytime?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Absolutely. You can cancel your Pro subscription at any time and you'll keep access until the end of your billing period."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Do you take a cut of ticket sales?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No! We don't charge any fees on ticket sales. You only pay the standard Stripe processing fees (typically 2.9% + $0.30 per transaction)."
+                }
+            }
+        ]
+    }
+    </script>
+    </x-slot>
+
 
     <!-- Hero Section -->
     <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">

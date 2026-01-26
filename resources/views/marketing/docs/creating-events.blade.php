@@ -1,0 +1,232 @@
+<x-marketing-layout>
+    <x-slot name="title">Creating Events - Event Schedule</x-slot>
+    <x-slot name="description">Learn how to add events to your schedule. Create events manually, import from text or images using AI, or sync from Google Calendar.</x-slot>
+    <x-slot name="keywords">create events, add events, import events, AI event parsing, event calendar, flyer import</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
+
+    @include('marketing.docs.partials.styles')
+
+    <!-- Hero Section -->
+    <section class="relative bg-[#0a0a0f] py-16 overflow-hidden border-b border-white/5">
+        <div class="absolute inset-0">
+            <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+        </div>
+        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+
+        <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <x-docs-breadcrumb currentTitle="Creating Events" />
+
+            <div class="flex items-center gap-4 mb-4">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/20">
+                    <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                </div>
+                <h1 class="text-3xl md:text-4xl font-bold text-white">Creating Events</h1>
+            </div>
+            <p class="text-lg text-gray-400 max-w-3xl">
+                Add events to your schedule manually, import from text or images using AI, or sync from external calendars.
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="bg-[#0a0a0f] py-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row gap-10">
+                <!-- Sidebar Navigation -->
+                <aside class="lg:w-64 flex-shrink-0">
+                    <nav class="lg:sticky lg:top-8 space-y-1">
+                        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
+                        <a href="#manual" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Creating Events Manually</a>
+                        <a href="#ai-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">AI Import</a>
+                        <a href="#text-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors pl-6">From Text</a>
+                        <a href="#image-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors pl-6">From Images/Flyers</a>
+                        <a href="#calendar-sync" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Calendar Sync</a>
+                        <a href="#recurring" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Recurring Events</a>
+                        <a href="#event-details" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Event Details</a>
+                    </nav>
+                </aside>
+
+                <!-- Content -->
+                <div class="flex-1 min-w-0">
+                    <div class="prose-dark">
+                        <!-- Manual Creation -->
+                        <section id="manual" class="doc-section">
+                            <h2 class="doc-heading">Creating Events Manually</h2>
+                            <p class="text-gray-300 mb-6">The simplest way to add an event is to create it manually from your schedule's admin page.</p>
+
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Go to your schedule's <strong class="text-white">Schedule</strong> tab</li>
+                                <li>Click <strong class="text-white">"Add Event"</strong></li>
+                                <li>Fill in the event details:
+                                    <ul class="doc-list mt-2 mb-2">
+                                        <li>Event name (required)</li>
+                                        <li>Date and time</li>
+                                        <li>Duration</li>
+                                        <li>Venue/location</li>
+                                        <li>Description</li>
+                                        <li>Event image</li>
+                                    </ul>
+                                </li>
+                                <li>Click <strong class="text-white">"Save"</strong> to publish the event</li>
+                            </ol>
+                        </section>
+
+                        <!-- AI Import -->
+                        <section id="ai-import" class="doc-section">
+                            <h2 class="doc-heading">AI Import</h2>
+                            <p class="text-gray-300 mb-6">Event Schedule uses AI to help you quickly import events from text or images. This feature can save you significant time when adding multiple events.</p>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">AI-Powered</div>
+                                <p>AI import uses Google Gemini to intelligently extract event information from unstructured text and images.</p>
+                            </div>
+                        </section>
+
+                        <!-- Text Import -->
+                        <section id="text-import" class="doc-section">
+                            <h3 class="text-lg font-semibold text-white mb-4">Importing from Text</h3>
+                            <p class="text-gray-300 mb-6">Copy and paste event information from any source - emails, websites, social media posts - and AI will extract the event details.</p>
+
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Click <strong class="text-white">"Import"</strong> from your schedule page</li>
+                                <li>Paste your event text into the text box</li>
+                                <li>Click <strong class="text-white">"Parse Events"</strong></li>
+                                <li>Review the extracted events and make any corrections</li>
+                                <li>Click <strong class="text-white">"Import"</strong> to add them to your schedule</li>
+                            </ol>
+
+                            <div class="bg-white/5 rounded-xl p-4 border border-white/10 mb-6">
+                                <h4 class="font-semibold text-white mb-2">Example Input</h4>
+                                <p class="text-sm text-gray-400 code-block">
+                                    Live Jazz Night<br>
+                                    Friday, March 15th at 8pm<br>
+                                    The Blue Note, 123 Main Street<br>
+                                    Featuring the John Smith Trio<br>
+                                    Tickets: $20
+                                </p>
+                            </div>
+
+                            <p class="text-gray-300">The AI will extract the event name, date, time, venue, and any other relevant details automatically.</p>
+                        </section>
+
+                        <!-- Image Import -->
+                        <section id="image-import" class="doc-section">
+                            <h3 class="text-lg font-semibold text-white mb-4">Importing from Images/Flyers</h3>
+                            <p class="text-gray-300 mb-6">Upload an event flyer or poster and AI will read the text and extract event information.</p>
+
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Click <strong class="text-white">"Import"</strong> from your schedule page</li>
+                                <li>Upload an image file (JPG, PNG, etc.)</li>
+                                <li>Click <strong class="text-white">"Parse Events"</strong></li>
+                                <li>Review the extracted events</li>
+                                <li>The uploaded image can automatically become the event's featured image</li>
+                                <li>Click <strong class="text-white">"Import"</strong> to add them to your schedule</li>
+                            </ol>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Image Tips</div>
+                                <p>For best results, use clear, high-contrast images where text is easily readable. The AI works best with images that have legible text.</p>
+                            </div>
+                        </section>
+
+                        <!-- Calendar Sync -->
+                        <section id="calendar-sync" class="doc-section">
+                            <h2 class="doc-heading">Calendar Sync</h2>
+                            <p class="text-gray-300 mb-6">Sync events automatically from your existing calendars:</p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Google Calendar</h4>
+                                    <p class="text-sm text-gray-400">Connect your Google Calendar for bidirectional sync. Events added in either place will appear in both.</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">CalDAV</h4>
+                                    <p class="text-sm text-gray-400">Connect any CalDAV-compatible calendar (Apple Calendar, Outlook, Fastmail, etc.).</p>
+                                </div>
+                            </div>
+
+                            <p class="text-gray-300">To set up calendar sync, go to <strong class="text-white">Settings</strong> and connect your preferred calendar service.</p>
+                        </section>
+
+                        <!-- Recurring Events -->
+                        <section id="recurring" class="doc-section">
+                            <h2 class="doc-heading">Recurring Events</h2>
+                            <p class="text-gray-300 mb-6">For events that happen regularly (weekly open mic, monthly meetup), you can add multiple dates at once:</p>
+
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>When creating an event, look for the <strong class="text-white">"Add more dates"</strong> option</li>
+                                <li>Add as many dates as needed</li>
+                                <li>All dates will share the same event details</li>
+                            </ol>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>For truly recurring events, consider using Google Calendar sync - create a recurring event in Google Calendar and it will automatically sync to Event Schedule.</p>
+                            </div>
+                        </section>
+
+                        <!-- Event Details -->
+                        <section id="event-details" class="doc-section">
+                            <h2 class="doc-heading">Event Details</h2>
+                            <p class="text-gray-300 mb-6">Here's what you can include with each event:</p>
+
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Field</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="font-semibold text-white">Name</span></td>
+                                            <td>The event title (required)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-white">Date & Time</span></td>
+                                            <td>When the event starts</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-white">Duration</span></td>
+                                            <td>How long the event lasts (in hours)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-white">Venue</span></td>
+                                            <td>Where the event takes place (name and address)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-white">Description</span></td>
+                                            <td>Details about the event (supports markdown formatting)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-white">Image</span></td>
+                                            <td>A flyer or photo for the event</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-white">Category</span></td>
+                                            <td>Organize events by type</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-white">Registration URL</span></td>
+                                            <td>Link to external registration or ticketing</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-white">Members</span></td>
+                                            <td>Tag performers, speakers, or other participants</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @include('marketing.docs.partials.scripts')
+</x-marketing-layout>

@@ -101,15 +101,17 @@
                 @elseif ($otherRole->background == 'solid')
                     background-color: {{ $otherRole->background_color }} !important;
                 @elseif ($otherRole->background == 'image')
-                    @if ($otherRole->background_image)
-                        background-image: url("{{ asset('images/backgrounds/' . $otherRole->background_image . '.png') }}");
-                    @else
-                        background-image: url("{{ $otherRole->background_image_url }}");
-                    @endif
-                    background-size: cover;
-                    background-position: center;
-                    height: 100%;
-                    margin: 0;
+                    @media (min-width: 768px) {
+                        @if ($otherRole->background_image)
+                            background-image: url("{{ asset('images/backgrounds/' . $otherRole->background_image . '.png') }}");
+                        @else
+                            background-image: url("{{ $otherRole->background_image_url }}");
+                        @endif
+                        background-size: cover;
+                        background-position: center;
+                        height: 100%;
+                        margin: 0;
+                    }
                 @endif
             @else
                 @if ($role->background == 'gradient')
@@ -117,23 +119,25 @@
                 @elseif ($role->background == 'solid')
                     background-color: {{ $role->background_color }} !important;
                 @elseif ($role->background == 'image')
-                    @if ($role->background_image)
-                        background-image:
-                            @if (request()->graphic)
-                                linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
-                            @endif
-                        url("{{ asset('images/backgrounds/' . $role->background_image . '.png') }}");
-                    @else
-                        background-image: 
-                            @if (request()->graphic)
-                                linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
-                            @endif
-                        url("{{ $role->background_image_url }}");
-                    @endif
-                    background-size: cover;
-                    background-position: center;
-                    height: 100%;
-                    margin: 0;            
+                    @media (min-width: 768px) {
+                        @if ($role->background_image)
+                            background-image:
+                                @if (request()->graphic)
+                                    linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
+                                @endif
+                            url("{{ asset('images/backgrounds/' . $role->background_image . '.png') }}");
+                        @else
+                            background-image:
+                                @if (request()->graphic)
+                                    linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
+                                @endif
+                            url("{{ $role->background_image_url }}");
+                        @endif
+                        background-size: cover;
+                        background-position: center;
+                        height: 100%;
+                        margin: 0;
+                    }
                 @endif
             @endif
         }
@@ -270,6 +274,30 @@
     @endphp
 
     <div class="flex-grow">
+        @php
+            $showMobileBanner = false;
+            $mobileBannerUrl = '';
+
+            if ($event && $otherRole && $otherRole->isClaimed() && $otherRole->background == 'image') {
+                $showMobileBanner = true;
+                $mobileBannerUrl = $otherRole->background_image
+                    ? asset('images/backgrounds/' . $otherRole->background_image . '.png')
+                    : $otherRole->background_image_url;
+            } elseif ($role->background == 'image') {
+                $showMobileBanner = true;
+                $mobileBannerUrl = $role->background_image
+                    ? asset('images/backgrounds/' . $role->background_image . '.png')
+                    : $role->background_image_url;
+            }
+        @endphp
+
+        @if ($showMobileBanner && $mobileBannerUrl)
+        <div
+            class="block md:hidden h-[240px] w-full bg-cover bg-center flex-shrink-0"
+            style="background-image: url('{{ $mobileBannerUrl }}');"
+        ></div>
+        @endif
+
         @if (! request()->embed && $role->language_code != 'en' && ! ($event && $event->exists))
             <div class="container mx-auto flex {{ $isRtl ? 'justify-start pl-5' : 'justify-end pr-5' }} pt-4">
                 <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-800 p-1 text-sm shadow-md z-50 {{ $isRtl ? 'flex-row-reverse' : '' }}" translate="no">
