@@ -19,9 +19,9 @@
   <main>
     <div>
       <div class="container mx-auto pt-7 pb-10 px-5">
-        <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-xl mb-6 {{ $hasHeaderImage ? 'overflow-hidden' : '' }} {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }}">
+        <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-xl mb-6 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }}">
           <div
-            class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0 before:rounded-t-xl"
+            class="relative overflow-hidden rounded-t-xl before:block before:absolute before:bg-[#00000033] before:-inset-0 before:rounded-t-xl"
           >
 
             @if ($role->header_image && $role->header_image !== 'none')
@@ -165,7 +165,7 @@
 
               {{-- Description below --}}
               @if($role->translatedDescription())
-              <div class="text-left w-full">
+              <div class="text-left w-full mt-2">
                 <div x-data="{ expanded: false }" class="text-sm text-[#33383C] dark:text-gray-300">
                   <span x-show="!expanded">
                     {{ Str::words(strip_tags($role->translatedDescription()), 5, '') }}...
@@ -301,7 +301,7 @@
 
               {{-- Description below (full width) --}}
               @if($role->translatedDescription())
-              <div x-data="{ expanded: false }" class="text-sm text-[#33383C] dark:text-gray-300">
+              <div x-data="{ expanded: false }" class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
                 <span x-show="!expanded">
                   {{ Str::words(strip_tags($role->translatedDescription()), 5, '') }}...
                   <button @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap ms-1">
