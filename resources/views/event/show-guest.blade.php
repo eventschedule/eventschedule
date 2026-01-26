@@ -7,9 +7,11 @@
     @endphp
 
     @php
-    $accentColor = (isset($selectedGroup) && $selectedGroup && $selectedGroup->role)
-        ? ($selectedGroup->role->accent_color ?? '#4E81FA')
-        : ($role->accent_color ?? '#4E81FA');
+    $accentColor = (isset($otherRole) && $otherRole && $otherRole->isClaimed())
+        ? ($otherRole->accent_color ?? '#4E81FA')
+        : ((isset($selectedGroup) && $selectedGroup && $selectedGroup->role)
+            ? ($selectedGroup->role->accent_color ?? '#4E81FA')
+            : ($role->accent_color ?? '#4E81FA'));
     $contrastColor = accent_contrast_color($accentColor);
     @endphp
 
@@ -98,18 +100,22 @@
                   onclick="alert('{{ __('messages.payment_url_mobile_only') }}'); return false;"
                 @endif
               >
-                  <button type="button" 
-                        class="min-w-[180px] inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                  <button type="button"
+                        class="min-w-[180px] inline-flex w-full justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm hover:opacity-90"
+                        style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
+                        id="menu-button" aria-expanded="true" aria-haspopup="true">
                     {{ $event->registration_url ? __('messages.view_event') : ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets')) }}
                 </button>            
               </a>
             @endif
           @else
-                <button type="button" 
+                <button type="button"
                     onclick="onPopUpClick('calendar-pop-up-menu', event)"
-                    class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                    class="inline-flex w-full justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm hover:opacity-90"
+                    style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
+                    id="menu-button" aria-expanded="true" aria-haspopup="true">
                 {{ __('messages.add_to_calendar') }}
-                <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <svg class="-mr-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                 </svg>
                 </button>
@@ -614,7 +620,7 @@
               name="login"
               class="inline-flex items-center justify-center rounded-xl text-base duration-300 bg-transparent border-[1px] py-4 px-8 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-90"
               style="border-color: {{ $accentColor }}; color: {{ $accentColor }};"
-              onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='white';"
+              onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';"
               onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';"
             >
               {{ __('messages.create_schedule') }}

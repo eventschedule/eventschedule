@@ -887,8 +887,20 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             // Now clean up the curator (the role passed in)
             $curatorEventIds = $role->events()->pluck('events.id');
 
-            // Detach events from curator (events were already deleted above when venues were cleaned)
+            // Delete sales and tickets for curator's events first
+            SaleTicket::whereIn('sale_id', function ($query) use ($curatorEventIds) {
+                $query->select('id')
+                    ->from('sales')
+                    ->whereIn('event_id', $curatorEventIds);
+            })->delete();
+            Sale::whereIn('event_id', $curatorEventIds)->delete();
+            Ticket::whereIn('event_id', $curatorEventIds)->delete();
+
+            // Detach events from curator
             $role->events()->detach();
+
+            // Delete events created by the curator (this catches user-created events)
+            Event::where('creator_role_id', $role->id)->delete();
 
             // Delete curator groups
             Group::where('role_id', $role->id)->delete();
@@ -2396,14 +2408,26 @@ The state\'s premier entertainment venue. Home of the Capital City Goofballs and
 
             // Create events for this schedule
             foreach ($scheduleData['events'] as $eventInfo) {
-                // For recurring events with days_of_week, use a fixed start date
+                // For recurring events with days_of_week, find the next occurrence
                 if (isset($eventInfo['days_of_week'])) {
-                    $eventDate = Carbon::parse('2026-01-01', $role->timezone)
-                        ->setHour($eventInfo['hour'])
+                    $now = Carbon::now($role->timezone);
+                    $daysOfWeek = $eventInfo['days_of_week'];
+
+                    // Find the next day that matches the pattern
+                    $eventDate = $now->copy()->startOfDay();
+                    for ($i = 0; $i < 7; $i++) {
+                        $dayIndex = $eventDate->dayOfWeek; // 0=Sunday, 6=Saturday
+                        if ($daysOfWeek[$dayIndex] === '1') {
+                            break;
+                        }
+                        $eventDate->addDay();
+                    }
+
+                    $eventDate->setHour($eventInfo['hour'])
                         ->setMinute($eventInfo['minute'] ?? 0)
                         ->setSecond(0);
                 } else {
-                    // Fallback for one-time events (legacy support)
+                    // Fallback for one-time events
                     $now = Carbon::now($role->timezone);
                     $eventDate = $now->copy()->addDays($eventInfo['days_offset'] ?? 7)
                         ->setHour($eventInfo['hour'] ?? rand(19, 21))
@@ -2480,7 +2504,22 @@ The state\'s premier entertainment venue. Home of the Capital City Goofballs and
                     continue;
                 }
 
-                $eventDate = Carbon::parse($event->starts_at)->format('Y-m-d');
+                // For recurring events, find the next occurrence date
+                if ($event->days_of_week) {
+                    $now = Carbon::now();
+                    $eventDate = $now->copy()->startOfDay();
+                    for ($i = 0; $i < 7; $i++) {
+                        $dayIndex = $eventDate->dayOfWeek;
+                        if ($event->days_of_week[$dayIndex] === '1') {
+                            break;
+                        }
+                        $eventDate->addDay();
+                    }
+                    $eventDate = $eventDate->format('Y-m-d');
+                } else {
+                    $eventDate = Carbon::parse($event->starts_at)->format('Y-m-d');
+                }
+
                 $quantity = rand(1, 2);
                 $totalAmount = $ticket->price * $quantity;
 
