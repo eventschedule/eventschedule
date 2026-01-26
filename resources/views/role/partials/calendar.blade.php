@@ -113,7 +113,7 @@
         </h1>
 
         {{-- All Controls Wrapper: Groups all interactive elements. Stacks on mobile, row on desktop. --}}
-        <div class="flex flex-col md:flex-row md:items-center gap-3">
+        <div class="flex flex-col md:flex-row md:items-center md:ml-auto gap-3">
 
             {{-- Schedule and Category Selects Container (desktop only) --}}
             <div class="hidden md:flex flex-row gap-2 w-full md:w-auto">
