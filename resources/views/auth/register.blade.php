@@ -138,6 +138,10 @@
                             if (nameInput) {
                                 nameInput.focus();
                             }
+                            // Reset Turnstile widget so user gets a fresh token for form submission
+                            if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
+                                turnstile.reset(turnstileWidgetId);
+                            }
                         } else {
                             // Handle validation errors or other errors
                             var errorMessage = data.message || '{{ __('messages.error_sending_code') }}';
