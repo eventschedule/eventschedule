@@ -105,7 +105,7 @@
 @if (! request()->graphic)
 <header class="py-4 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
     {{-- Main container: Stacks content on mobile, aligns in a row on desktop. --}}
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div class="flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-4">
 
         {{-- Month and Year Title: Always visible and positioned first. --}}
         <h1 class="text-2xl font-semibold leading-6 flex-shrink-0 hidden md:block text-gray-900 dark:text-gray-100">
