@@ -45,6 +45,7 @@
     }
     $uniqueGroupIds = array_unique($eventGroupIds);
     $uniqueCategoryIds = array_unique($eventCategoryIds);
+    $hasOnlineEvents = $events->contains(fn($event) => !empty($event->event_url));
 
     // Prepare data for Vue
     $eventsForVue = [];
@@ -70,6 +71,7 @@
             'recurring_end_type' => $event->recurring_end_type ?? 'never',
             'recurring_end_value' => $event->recurring_end_value,
             'start_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
+            'is_online' => !empty($event->event_url),
         ];
     }
 
@@ -92,6 +94,12 @@
             ];
         }
     }
+
+    // Calculate filter count for mobile display logic
+    $filterCount = 0;
+    if (isset($role) && $role->groups && $role->groups->count() > 1) $filterCount++;
+    if (count($uniqueCategoryIds ?? []) > 0) $filterCount++;
+    if ($hasOnlineEvents) $filterCount++;
 @endphp
 
 @if (! request()->graphic)
@@ -107,8 +115,8 @@
         {{-- All Controls Wrapper: Groups all interactive elements. Stacks on mobile, row on desktop. --}}
         <div class="flex flex-col md:flex-row md:items-center gap-3">
 
-            {{-- Schedule and Category Selects Container --}}
-            <div class="flex flex-row gap-2 w-full md:w-auto">
+            {{-- Schedule and Category Selects Container (desktop only) --}}
+            <div class="hidden md:flex flex-row gap-2 w-full md:w-auto">
                 {{-- Schedule Select --}}
                 @if(isset($role) && $role->groups && $role->groups->count() > 1)
                     <select v-model="selectedGroup" class="py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 min-w-[180px] hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-sm font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
@@ -119,6 +127,14 @@
                     </select>
                 @endif
 
+                {{-- Online Events Checkbox --}}
+                @if($hasOnlineEvents)
+                    <label class="inline-flex items-center gap-2 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
+                        <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.online') }}</span>
+                    </label>
+                @endif
+
                 {{-- Category Select --}}
                 @if(count($uniqueCategoryIds ?? []) > 0)
                     <select v-model="selectedCategory" class="py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 min-w-[180px] hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-sm font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
@@ -127,6 +143,52 @@
                     </select>
                 @endif
             </div>
+
+            {{-- Mobile Filters (mobile only) --}}
+            @if($filterCount > 0)
+            <div class="md:hidden flex flex-col gap-2 w-full">
+                @if($filterCount == 1)
+                    {{-- Single filter: show directly without button --}}
+                    @if($hasOnlineEvents && !(isset($role) && $role->groups && $role->groups->count() > 1) && count($uniqueCategoryIds ?? []) == 0)
+                        {{-- Only online filter --}}
+                        <label class="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
+                            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.online') }}</span>
+                        </label>
+                    @elseif(isset($role) && $role->groups && $role->groups->count() > 1 && !$hasOnlineEvents && count($uniqueCategoryIds ?? []) == 0)
+                        {{-- Only schedule filter --}}
+                        <select v-model="selectedGroup" class="w-full py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-sm font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                            <option value="">{{ __('messages.all_schedules') }}</option>
+                            @foreach($role->groups as $group)
+                                <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
+                            @endforeach
+                        </select>
+                    @elseif(count($uniqueCategoryIds ?? []) > 0 && !$hasOnlineEvents && !(isset($role) && $role->groups && $role->groups->count() > 1))
+                        {{-- Only category filter --}}
+                        <select v-model="selectedCategory" class="w-full py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-sm font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                            <option value="">{{ __('messages.all_categories') }}</option>
+                            <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
+                        </select>
+                    @endif
+                @else
+                    {{-- Multiple filters: show Filters button --}}
+                    <button @click="showFiltersDrawer = true"
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5
+                                   border border-gray-300 dark:border-gray-600 rounded-md
+                                   bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                                   text-sm font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3H19C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z"/>
+                        </svg>
+                        {{ __('messages.filters') }}
+                        <span v-if="activeFilterCount > 0"
+                              class="ml-1 px-1.5 py-0.5 text-xs bg-[#4E81FA] text-white rounded-full">
+                            @{{ activeFilterCount }}
+                        </span>
+                    </button>
+                @endif
+            </div>
+            @endif
 
                         {{-- Save Button --}}
             @if ($route == 'admin' && $role->email_verified_at)
@@ -395,6 +457,81 @@
         @endif
 
 
+{{-- Mobile Filters Bottom Sheet Drawer --}}
+@if($filterCount >= 2)
+<div v-if="showFiltersDrawer" class="md:hidden fixed inset-0 z-50">
+    {{-- Backdrop --}}
+    <div @click="showFiltersDrawer = false"
+         class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity"></div>
+
+    {{-- Bottom sheet panel --}}
+    <div class="fixed inset-x-0 bottom-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl max-h-[80vh] overflow-y-auto {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+        {{-- Handle bar --}}
+        <div class="flex justify-center py-3 sticky top-0 bg-white dark:bg-gray-800">
+            <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+        </div>
+
+        {{-- Header --}}
+        <div class="px-6 pb-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.filters') }}</h3>
+            <button v-if="activeFilterCount > 0"
+                    @click="clearFilters"
+                    class="text-sm text-[#4E81FA] hover:text-[#3d6fd9] font-medium">
+                {{ __('messages.clear_filters') }}
+            </button>
+        </div>
+
+        {{-- Schedule Filter --}}
+        @if(isset($role) && $role->groups && $role->groups->count() > 1)
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.schedule') }}</label>
+            <select v-model="selectedGroup"
+                    class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
+                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
+                <option value="">{{ __('messages.all_schedules') }} (@{{ eventCountByGroup[''] }})</option>
+                <option v-for="group in groups" :key="group.slug" :value="group.slug">
+                    @{{ group.name }} (@{{ eventCountByGroup[group.slug] || 0 }})
+                </option>
+            </select>
+        </div>
+        @endif
+
+        {{-- Online Filter --}}
+        @if($hasOnlineEvents)
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <label class="flex items-center justify-between cursor-pointer">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.online') }}</span>
+                <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
+            </label>
+        </div>
+        @endif
+
+        {{-- Category Filter --}}
+        @if(count($uniqueCategoryIds ?? []) > 0)
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.category') }}</label>
+            <select v-model="selectedCategory"
+                    class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
+                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
+                <option value="">{{ __('messages.all_categories') }} (@{{ eventCountByCategory[''] }})</option>
+                <option v-for="category in availableCategories" :key="category.id" :value="category.id">
+                    @{{ category.name }} (@{{ eventCountByCategory[category.id] || 0 }})
+                </option>
+            </select>
+        </div>
+        @endif
+
+        {{-- Done button --}}
+        <div class="px-6 py-4">
+            <button @click="showFiltersDrawer = false"
+                    class="w-full py-3 bg-[#4E81FA] text-white font-semibold rounded-md hover:bg-[#3d6fd9] transition-colors">
+                {{ __('messages.done') }}
+            </button>
+        </div>
+    </div>
+</div>
+@endif
+
 <!-- Event Popup Component -->
 <div id="event-popup" class="event-popup">
     <div class="event-popup-content">
@@ -442,10 +579,64 @@ const calendarApp = createApp({
             isRtl: {{ isset($role) && $role->isRtl() ? 'true' : 'false' }},
             languageCode: '{{ $isAdminRoute && auth()->check() ? app()->getLocale() : (session()->has('translate') ? 'en' : (isset($role) && $role->language_code ? $role->language_code : 'en')) }}',
             userTimezone: '{{ auth()->check() && auth()->user()->timezone ? auth()->user()->timezone : null }}',
-            popupTimeout: null
+            popupTimeout: null,
+            showFiltersDrawer: false,
+            showOnlineOnly: false
         }
     },
     computed: {
+        activeFilterCount() {
+            let count = 0;
+            if (this.selectedGroup) count++;
+            if (this.selectedCategory) count++;
+            if (this.showOnlineOnly) count++;
+            return count;
+        },
+        selectedGroupName() {
+            if (!this.selectedGroup) return '';
+            const group = this.groups.find(g => g.slug === this.selectedGroup);
+            return group ? group.name : this.selectedGroup;
+        },
+        selectedCategoryName() {
+            if (!this.selectedCategory) return '';
+            const cat = this.availableCategories.find(c => c.id == this.selectedCategory);
+            return cat ? cat.name : '';
+        },
+        eventCountByGroup() {
+            // Filter by online first if showOnlineOnly is true
+            const baseEvents = this.showOnlineOnly
+                ? this.allEvents.filter(e => e.is_online)
+                : this.allEvents;
+
+            const counts = { '': baseEvents.length };
+            this.groups.forEach(g => {
+                counts[g.slug] = baseEvents.filter(e => {
+                    const selectedGroupObj = this.groups.find(grp => grp.slug === g.slug);
+                    return selectedGroupObj && e.group_id === selectedGroupObj.id;
+                }).length;
+            });
+            return counts;
+        },
+        eventCountByCategory() {
+            // Filter by group and online status
+            const filteredEvents = this.allEvents.filter(event => {
+                if (this.selectedGroup) {
+                    const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
+                    if (selectedGroupObj && event.group_id !== selectedGroupObj.id) {
+                        return false;
+                    }
+                }
+                if (this.showOnlineOnly && !event.is_online) {
+                    return false;
+                }
+                return true;
+            });
+            const counts = { '': filteredEvents.length };
+            this.availableCategories.forEach(c => {
+                counts[c.id] = filteredEvents.filter(e => e.category_id == c.id).length;
+            });
+            return counts;
+        },
         filteredEvents() {
             return this.allEvents.filter(event => {
                 if (this.selectedGroup) {
@@ -456,6 +647,9 @@ const calendarApp = createApp({
                     }
                 }
                 if (this.selectedCategory && event.category_id != this.selectedCategory) {
+                    return false;
+                }
+                if (this.showOnlineOnly && !event.is_online) {
                     return false;
                 }
                 return true;
@@ -630,6 +824,11 @@ const calendarApp = createApp({
         }
     },
     methods: {
+        clearFilters() {
+            this.selectedGroup = '';
+            this.selectedCategory = '';
+            this.showOnlineOnly = false;
+        },
         getEventsForDate(dateStr) {
             // Use the pre-calculated events map from the backend
             if (this.eventsMap[dateStr]) {
@@ -649,6 +848,9 @@ const calendarApp = createApp({
                 }
             }
             if (this.selectedCategory && event.category_id != this.selectedCategory) {
+                return false;
+            }
+            if (this.showOnlineOnly && !event.is_online) {
                 return false;
             }
             return true;
@@ -1006,10 +1208,10 @@ const calendarApp = createApp({
         this.$nextTick(() => {
             const showPastEventsBtn = document.getElementById('showPastEventsBtn');
             const pastEvents = document.querySelectorAll('.past-event');
-            
+
             if (pastEvents.length > 0) {
                 showPastEventsBtn?.classList.remove('hidden');
-                
+
                 showPastEventsBtn?.addEventListener('click', function() {
                     pastEvents.forEach(event => {
                         event.classList.remove('hidden');
@@ -1018,6 +1220,7 @@ const calendarApp = createApp({
                 });
             }
         });
+
     }
 });
 
