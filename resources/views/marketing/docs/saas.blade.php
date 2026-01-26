@@ -524,24 +524,14 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                             <p class="text-gray-300 mb-6 mt-4">This creates a demo user, a schedule called <code class="doc-inline-code">thenightowls</code>, and populates it with sample events, tickets, groups, and sales data.</p>
 
                             <h3 class="text-lg font-semibold text-white mb-4">Resetting Demo Data</h3>
-                            <p class="text-gray-300 mb-4">To reset the demo data back to its initial state:</p>
+                            <p class="text-gray-300 mb-4">Running the setup command again will automatically reset the demo data:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>bash</span>
                                     <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
                                 </div>
-                                <pre><code>php artisan app:reset-demo</code></pre>
-                            </div>
-
-                            <p class="text-gray-300 mb-6 mt-4">You can also combine setup and reset in one command:</p>
-
-                            <div class="doc-code-block">
-                                <div class="doc-code-header">
-                                    <span>bash</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
-                                </div>
-                                <pre><code>php artisan app:setup-demo --reset</code></pre>
+                                <pre><code>php artisan app:setup-demo</code></pre>
                             </div>
 
                             <h3 class="text-lg font-semibold text-white mb-4 mt-8">Scheduling Automatic Resets (Optional)</h3>
@@ -552,7 +542,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                                     <span>crontab</span>
                                     <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
                                 </div>
-                                <pre><code>0 * * * * cd /path/to/eventschedule && php artisan app:reset-demo >> /dev/null 2>&1</code></pre>
+                                <pre><code>0 * * * * cd /path/to/eventschedule && php artisan app:setup-demo >> /dev/null 2>&1</code></pre>
                             </div>
 
                             <div class="doc-callout doc-callout-info mt-6">

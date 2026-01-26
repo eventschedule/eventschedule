@@ -946,4 +946,9 @@ return [
     'enable_screen_capture' => 'השתמש בלכידת מסך ליצירת גרפיקה',
     'screen_capture_help' => 'משתמש בעיבוד מבוסס דפדפן לתמיכה טובה יותר בשפות RTL',
     'sync_direction_updated' => 'כיוון הסנכרון עודכן.',
+
+    // Text template
+    'text_template' => 'תבנית טקסט',
+    'text_template_help' => 'התאם אישית את פורמט הטקסט לכל אירוע. השאר ריק לפורמט ברירת מחדל.',
+    'view_docs' => 'צפה בתיעוד',
 ];

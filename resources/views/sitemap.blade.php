@@ -158,6 +158,12 @@
         <priority>0.7</priority>
     </url>
     <url>
+        <loc>{{ url('/docs/event-graphics') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
         <loc>{{ url('/privacy') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>yearly</changefreq>

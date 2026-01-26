@@ -451,6 +451,42 @@
             white-space: pre-wrap;
         }
 
+        .dark .custom-content a {
+            color: #60a5fa; /* Tailwind blue-400 - readable on dark backgrounds */
+        }
+
+        .dark .custom-content a:visited {
+            color: #a78bfa; /* Tailwind violet-400 - lighter purple, readable on dark */
+        }
+
+        .dark .custom-content a:hover {
+            color: #93c5fd; /* Tailwind blue-300 - slightly lighter on hover */
+        }
+
+        .custom-content h1 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-top: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .custom-content h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .custom-content h3,
+        .custom-content h4,
+        .custom-content h5,
+        .custom-content h6 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
         input[type="text"],
         input[type="email"],
         input[type="password"],

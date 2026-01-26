@@ -35,6 +35,6 @@ Schedule::call(function () {
 
 Schedule::call(function () {
     if (config('app.hosted')) {
-        Artisan::call('app:reset-demo');
+        Artisan::call('app:setup-demo');
     }
 })->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));

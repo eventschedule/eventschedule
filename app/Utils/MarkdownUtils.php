@@ -24,6 +24,10 @@ class MarkdownUtils
         $html = $converter->convertToHtml($markdown);
 
         $config = HTMLPurifier_Config::createDefault();
+        $config->set('HTML.TargetBlank', true);
+        $config->set('HTML.Nofollow', true);
+        $config->set('Attr.AllowedFrameTargets', ['_blank']);
+
         $purifier = new HTMLPurifier($config);
 
         return $purifier->purify($html);

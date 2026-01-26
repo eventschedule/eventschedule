@@ -12,7 +12,7 @@ class SetupDemo extends Command
      *
      * @var string
      */
-    protected $signature = 'app:setup-demo {--reset : Reset existing demo data}';
+    protected $signature = 'app:setup-demo';
 
     /**
      * The console command description.
@@ -43,20 +43,15 @@ class SetupDemo extends Command
         $role = $demoService->getOrCreateDemoRole($user);
         $this->info('Demo role ready: '.$role->subdomain);
 
-        // Check if we should reset or just populate
-        if ($this->option('reset')) {
-            $this->info('Resetting demo data...');
+        // Populate or reset demo data
+        if ($role->events()->count() === 0) {
+            $this->info('Populating demo data...');
+            $demoService->populateDemoData($role);
+            $this->info('Demo data has been populated.');
+        } else {
+            $this->info('Resetting existing demo data...');
             $demoService->resetDemoData($role);
             $this->info('Demo data has been reset.');
-        } else {
-            // Only populate if the role has no events
-            if ($role->events()->count() === 0) {
-                $this->info('Populating demo data...');
-                $demoService->populateDemoData($role);
-                $this->info('Demo data has been populated.');
-            } else {
-                $this->info('Demo data already exists. Use --reset to reset the data.');
-            }
         }
 
         $this->info('Demo setup complete!');

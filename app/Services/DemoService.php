@@ -32,7 +32,7 @@ class DemoService
     /**
      * Demo role subdomain (the actual schedule - curator that aggregates all venues)
      */
-    public const DEMO_ROLE_SUBDOMAIN = 'demo-simpsons';
+    public const DEMO_ROLE_SUBDOMAIN = 'simpsons';
 
     /**
      * Demo social links (Event Schedule social media accounts)
@@ -107,8 +107,9 @@ class DemoService
             $role->city = 'Springfield';
             $role->country_code = 'US';
             $role->background = 'gradient';
-            $role->background_colors = '#FFD90F, #0064B0'; // Classic Simpsons yellow/blue
-            $role->accent_color = '#FFD90F';
+            $role->background_colors = '#FFD90F, #4A90D9'; // Classic Simpsons yellow/blue
+            $role->background_rotation = 180;
+            $role->accent_color = '#FFD90F'; // Classic Simpsons yellow
             $role->description = '# Welcome to Springfield Events! 🍩
 
 **Your guide to everything happening in America\'s most nuclear-adjacent town!**
@@ -180,6 +181,7 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
         $role->profile_image_url = 'demo_profile_donuts.jpg';
         $role->font_family = 'Bangers';
         $role->accept_requests = false;
+        $role->social_links = self::getRandomDemoSocialLinks();
         $role->save();
 
         // Download demo images if they don't exist
@@ -255,7 +257,7 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
             'demo_profile_band.jpg' => 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=400&fit=crop',
 
             // Demo header images - illustrated/artistic style (wide banner format)
-            'demo_header_town.jpg' => 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&h=400&fit=crop',
+            'demo_header_town.jpg' => 'https://images.unsplash.com/photo-1525428568752-3a35d800e0b1?w=1200&h=400&fit=crop',  // blue sky with clouds
             'demo_header_bar.jpg' => 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=1200&h=400&fit=crop',
             'demo_header_bowling.jpg' => 'https://images.unsplash.com/photo-1538511059256-46e76f13f071?w=1200&h=400&fit=crop',       // bowling pins action shot
             'demo_header_theater.jpg' => 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1200&h=400&fit=crop',
@@ -278,7 +280,7 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
             'demo_profile_bowling.jpg' => 'https://images.unsplash.com/photo-1556302132-40bb13638500?w=400&h=400&fit=crop',       // bowling pins
             'demo_profile_theater.jpg' => 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=400&fit=crop',    // theater seats
             'demo_profile_amphitheater.jpg' => 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&h=400&fit=crop', // outdoor stage
-            'demo_profile_donuts.jpg' => 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&h=400&fit=crop',        // pink donut
+            'demo_profile_donuts.jpg' => 'https://images.unsplash.com/photo-1570727624862-3008fe67a6be?w=400&h=400&fit=crop',  // pink donut with sprinkles (bitten)
             'demo_profile_gym.jpg' => 'https://images.unsplash.com/photo-1504450758481-7338eba7524a?w=400&h=400&fit=crop',        // basketball court
             'demo_profile_beer.jpg' => 'https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&h=400&fit=crop',       // beer glass
             'demo_profile_bowling_ball.jpg' => 'https://images.unsplash.com/photo-1595177707511-1daccc734e8e?w=400&h=400&fit=crop', // bowling ball
@@ -578,6 +580,7 @@ An ancient and totally-not-secret society bringing exclusive entertainment to ou
             if (! empty($talentData['font_family'])) {
                 $role->font_family = $talentData['font_family'];
             }
+            $role->accept_requests = false;
             $role->save();
 
             // Attach user to role as owner (so it's "claimed")
@@ -812,10 +815,10 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
 
         $groups = [];
         foreach ($groupNames as $name) {
-            $group = $role->groups()->create([
-                'name' => $name,
-                'slug' => Str::slug($name),
-            ]);
+            $group = $role->groups()->firstOrCreate(
+                ['slug' => Str::slug($name)],
+                ['name' => $name]
+            );
             $groups[$name] = $group;
         }
 
@@ -838,7 +841,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 Sale::where('user_id', $user->id)->delete();
             }
 
-            // Delete all demo-prefixed roles EXCEPT the curator (demo-simpsons)
+            // Delete all demo-prefixed roles EXCEPT the curator (simpsons)
             // This includes venues (demo-moestavern, demo-bowlarama, etc.), talents, and followed schedules
             $demoRoles = Role::where('subdomain', 'like', 'demo-%')
                 ->where('subdomain', '!=', self::DEMO_ROLE_SUBDOMAIN)
@@ -911,10 +914,10 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
 
         $groups = [];
         foreach ($groupNames as $name) {
-            $group = $role->groups()->create([
-                'name' => $name,
-                'slug' => Str::slug($name),
-            ]);
+            $group = $role->groups()->firstOrCreate(
+                ['slug' => Str::slug($name)],
+                ['name' => $name]
+            );
             $groups[$name] = $group;
         }
 
@@ -2381,6 +2384,7 @@ The state\'s premier entertainment venue. Home of the Capital City Goofballs and
                 $role->description = $scheduleData['description'];
             }
             $role->social_links = self::getRandomDemoSocialLinks();
+            $role->accept_requests = false;
             $role->save();
 
             // Attach demo user as follower

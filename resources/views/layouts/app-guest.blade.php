@@ -21,9 +21,9 @@
 
         @if ($event && $event->exists) 
             @if ($role->language_code != 'en')
-                <link rel="canonical" href="{{ $event->getGuestUrl() }}&{{ 'lang=' . (request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code)) }}">
+                <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}&{{ 'lang=' . (request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code)) }}">
             @else
-                <link rel="canonical" href="{{ $event->getGuestUrl() }}">
+                <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}">
             @endif
             @if ($event->description_html)
             <meta name="description" content="{{ trim(strip_tags($event->translatedDescription())) }}">
@@ -33,7 +33,7 @@
             <meta property="og:title" content="{{ $event->translatedName() }}">
             <meta property="og:description" content="{{ $event->getMetaDescription($date) }}">
             <meta property="og:image" content="{{ $event->getImageUrl() }}">
-            <meta property="og:url" content="{{ str_replace('http://', 'https://', request()->url()) }}">
+            <meta property="og:url" content="{{ $event->getGuestUrl(false, $date) }}">
             <meta property="og:site_name" content="Event Schedule">
             <meta name="twitter:title" content="{{ $event->translatedName() }}">
             <meta name="twitter:description" content="{{ $event->getMetaDescription($date) }}">
@@ -60,7 +60,7 @@
             <meta property="og:image" content="{{ $image }}">
             <meta name="twitter:image" content="{{ $image }}">
             @endif
-            <meta property="og:url" content="{{ str_replace('http://', 'https://', request()->url()) }}">
+            <meta property="og:url" content="{{ $role->getGuestUrl() }}">
             <meta property="og:site_name" content="Event Schedule">
             <meta name="twitter:card" content="summary_large_image">
         @endif
@@ -153,7 +153,7 @@
                 if (empty($eventDescription)) {
                     $eventDescription = $event->translatedName() . ' - ' . __('messages.event');
                 }
-                $eventUrl = $event->getGuestUrl();
+                $eventUrl = $event->getGuestUrl(false, $date ?? null);
                 $eventImage = $event->getImageUrl();
                 $startDate = $event->getSchemaStartDate($date ?? null);
                 $endDate = $event->getSchemaEndDate($date ?? null);

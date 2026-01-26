@@ -951,4 +951,9 @@ return [
     'enable_screen_capture' => 'Gebruik schermopname voor het genereren van afbeeldingen',
     'screen_capture_help' => 'Gebruikt browsergebaseerde rendering voor betere RTL-taalondersteuning',
     'sync_direction_updated' => 'Synchronisatierichting bijgewerkt.',
+
+    // Text template
+    'text_template' => 'Tekstsjabloon',
+    'text_template_help' => 'Pas het tekstformaat aan voor elk evenement. Laat leeg voor standaard.',
+    'view_docs' => 'Bekijk Docs',
 ];

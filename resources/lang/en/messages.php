@@ -964,4 +964,9 @@ return [
     'demo_mode_settings_disabled' => 'Some settings are disabled in demo mode.',
     'demo_mode_restriction' => 'This action is not available in demo mode.',
     'saving_disabled_demo_mode' => 'Saving is disabled in demo mode.',
+
+    // Text template
+    'text_template' => 'Text Template',
+    'text_template_help' => 'Customize the text format for each event. Leave blank for default.',
+    'view_docs' => 'View Docs',
 ];
