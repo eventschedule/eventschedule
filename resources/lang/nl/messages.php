@@ -958,4 +958,8 @@ return [
     'text_template' => 'Tekstsjabloon',
     'text_template_help' => 'Pas het tekstformaat aan voor elk evenement. Laat leeg voor standaard.',
     'view_docs' => 'Bekijk Docs',
+
+    // Recurring events
+    'recurring_events' => 'Terugkerende Evenementen',
+    'exclude_recurring_events' => 'Terugkerende evenementen uitsluiten',
 ];

@@ -961,4 +961,8 @@ return [
     'text_template' => 'قالب النص',
     'text_template_help' => 'خصص تنسيق النص لكل حدث. اتركه فارغاً للتنسيق الافتراضي.',
     'view_docs' => 'عرض التوثيق',
+
+    // Recurring events
+    'recurring_events' => 'أحداث متكررة',
+    'exclude_recurring_events' => 'استبعاد الأحداث المتكررة',
 ];
