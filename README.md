@@ -7,7 +7,7 @@
         An open-source platform to share events, sell tickets and bring communities together.
     </p>
     <p>
-        <a href="https://openmicnight.eventschedule.com">View Demo</a> · <a href="https://www.eventschedule.com">Hosted Version</a> · <a href="https://eventschedule.com/docs/installation">Self-Host Guide</a>
+        <a href="https://demo.eventschedule.com">View Demo</a> · <a href="https://www.eventschedule.com">Hosted Version</a> · <a href="https://eventschedule.com/docs/installation">Self-Host Guide</a>
     </p>
 </div>
 
