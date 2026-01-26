@@ -40,7 +40,7 @@
             @if ($role->profile_image_url)
             <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] {{ $isRtl ? '-mr-2 sm:ml-auto sm:mr-0' : '-ml-2' }} mb-3 sm:mb-6 bg-[#F5F9FE] dark:bg-gray-800 flex items-center justify-center">
               <img
-                class="rounded-lg w-[120px] h-[120px] object-cover"
+                class="rounded-md w-[120px] h-[120px] object-cover"
                 src="{{ $role->profile_image_url }}"
                 alt="person"
               />
