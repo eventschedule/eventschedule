@@ -191,7 +191,7 @@
               {{-- Top row: Name/Location left, Buttons right --}}
               <div class="flex flex-wrap items-start gap-3">
                 {{-- Name/Location --}}
-                <div class="flex-shrink-0">
+                <div class="min-w-0">
                   <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ $role->font_family }}', sans-serif;">
                     {{ $role->translatedName() }}
                   </h3>
