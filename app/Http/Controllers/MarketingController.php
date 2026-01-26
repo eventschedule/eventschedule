@@ -202,64 +202,51 @@ class MarketingController extends Controller
      */
     public function docsIndex()
     {
-        return view('marketing.docs.index', [
-            'docs' => $this->getDocsList(),
-        ]);
+        return view('marketing.docs.index');
+    }
+
+    // ==========================================
+    // User Guide Pages (at /docs root level)
+    // ==========================================
+
+    /**
+     * Getting Started documentation page
+     */
+    public function docsGettingStarted()
+    {
+        return view('marketing.docs.getting-started');
     }
 
     /**
-     * SaaS documentation page
+     * Creating Schedules documentation page
      */
-    public function docsSaas()
+    public function docsCreatingSchedules()
     {
-        return view('marketing.docs.saas', [
-            'docs' => $this->getDocsList(),
-            'currentDoc' => 'saas',
-        ]);
+        return view('marketing.docs.creating-schedules');
     }
 
     /**
-     * Stripe documentation page
+     * Creating Events documentation page
      */
-    public function docsStripe()
+    public function docsCreatingEvents()
     {
-        return view('marketing.docs.stripe', [
-            'docs' => $this->getDocsList(),
-            'currentDoc' => 'stripe',
-        ]);
+        return view('marketing.docs.creating-events');
     }
 
     /**
-     * Google Calendar documentation page
+     * Sharing documentation page
      */
-    public function docsGoogleCalendar()
+    public function docsSharing()
     {
-        return view('marketing.docs.google-calendar', [
-            'docs' => $this->getDocsList(),
-            'currentDoc' => 'google-calendar',
-        ]);
+        return view('marketing.docs.sharing');
     }
 
     /**
-     * Installation documentation page
+     * Tickets documentation page
      */
-    public function docsInstallation()
+    public function docsTickets()
     {
-        return view('marketing.docs.installation', [
-            'docs' => $this->getDocsList(),
-            'currentDoc' => 'installation',
-        ]);
-    }
-
-    /**
-     * API documentation page
-     */
-    public function docsApi()
-    {
-        return view('marketing.docs.api', [
-            'docs' => $this->getDocsList(),
-            'currentDoc' => 'api',
-        ]);
+        return view('marketing.docs.tickets');
     }
 
     /**
@@ -267,51 +254,63 @@ class MarketingController extends Controller
      */
     public function docsEventGraphics()
     {
-        return view('marketing.docs.event-graphics', [
-            'docs' => $this->getDocsList(),
-            'currentDoc' => 'event-graphics',
-        ]);
+        return view('marketing.docs.event-graphics');
+    }
+
+    // ==========================================
+    // Selfhost Section
+    // ==========================================
+
+    /**
+     * Selfhost section index page
+     */
+    public function docsSelfhostIndex()
+    {
+        return view('marketing.docs.selfhost.index');
     }
 
     /**
-     * Get documentation list
+     * Installation documentation page
      */
-    protected function getDocsList(): array
+    public function docsSelfhostInstallation()
     {
-        return [
-            [
-                'slug' => 'installation',
-                'title' => 'Installation Guide',
-                'description' => 'Set up Event Schedule on your own server with this step-by-step guide.',
-                'icon' => 'download',
-                'color' => 'cyan',
-                'route' => 'marketing.docs.installation',
-            ],
-            [
-                'slug' => 'saas',
-                'title' => 'SaaS Setup',
-                'description' => 'Configure Event Schedule for SaaS deployment with subdomain-based multi-tenant routing.',
-                'icon' => 'server',
-                'color' => 'blue',
-                'route' => 'marketing.docs.saas',
-            ],
-            [
-                'slug' => 'stripe',
-                'title' => 'Stripe Integration',
-                'description' => 'Set up Stripe Connect for ticket sales and Laravel Cashier for subscription billing.',
-                'icon' => 'credit-card',
-                'color' => 'indigo',
-                'route' => 'marketing.docs.stripe',
-            ],
-            [
-                'slug' => 'google-calendar',
-                'title' => 'Google Calendar',
-                'description' => 'Enable bidirectional sync between Event Schedule and Google Calendar.',
-                'icon' => 'calendar',
-                'color' => 'violet',
-                'route' => 'marketing.docs.google_calendar',
-            ],
-        ];
+        return view('marketing.docs.selfhost.installation');
+    }
+
+    /**
+     * SaaS documentation page
+     */
+    public function docsSelfhostSaas()
+    {
+        return view('marketing.docs.selfhost.saas');
+    }
+
+    /**
+     * Stripe documentation page
+     */
+    public function docsSelfhostStripe()
+    {
+        return view('marketing.docs.selfhost.stripe');
+    }
+
+    /**
+     * Google Calendar documentation page
+     */
+    public function docsSelfhostGoogleCalendar()
+    {
+        return view('marketing.docs.selfhost.google-calendar');
+    }
+
+    // ==========================================
+    // Developer Section
+    // ==========================================
+
+    /**
+     * API documentation page
+     */
+    public function docsDeveloperApi()
+    {
+        return view('marketing.docs.developer.api');
     }
 
     /**

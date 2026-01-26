@@ -15,7 +15,7 @@
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
 
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <x-docs-breadcrumb currentTitle="Stripe Integration" />
+            <x-docs-breadcrumb currentTitle="Stripe Integration" section="selfhost" sectionTitle="Selfhost" sectionRoute="marketing.docs.selfhost" />
 
             <div class="flex items-center gap-4 mb-4">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-500/20">

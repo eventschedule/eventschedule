@@ -15,7 +15,7 @@
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
 
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <x-docs-breadcrumb currentTitle="Installation Guide" />
+            <x-docs-breadcrumb currentTitle="Installation Guide" section="selfhost" sectionTitle="Selfhost" sectionRoute="marketing.docs.selfhost" />
 
             <div class="flex items-center gap-4 mb-4">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-500/20">
@@ -273,8 +273,8 @@
                             <h3 class="text-lg font-semibold text-white mb-4 mt-8">Next Steps</h3>
                             <p class="text-gray-300 mb-4">Now that Event Schedule is installed, you may want to:</p>
                             <ul class="doc-list">
-                                <li>Configure <a href="{{ route('marketing.docs.stripe') }}" class="text-cyan-400 hover:text-cyan-300">Stripe payments</a> for ticket sales</li>
-                                <li>Set up <a href="{{ route('marketing.docs.google_calendar') }}" class="text-cyan-400 hover:text-cyan-300">Google Calendar integration</a></li>
+                                <li>Configure <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="text-cyan-400 hover:text-cyan-300">Stripe payments</a> for ticket sales</li>
+                                <li>Set up <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="text-cyan-400 hover:text-cyan-300">Google Calendar integration</a></li>
                                 <li>Configure email settings for notifications</li>
                                 <li>Customize your branding and appearance</li>
                             </ul>

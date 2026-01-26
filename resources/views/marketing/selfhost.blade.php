@@ -49,7 +49,7 @@
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="{{ route('marketing.docs.installation') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-emerald-500/25">
+                <a href="{{ route('marketing.docs.selfhost.installation') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-emerald-500/25">
                     Installation Guide
                     <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -552,7 +552,7 @@
                 Get started with the installation guide. Have questions? Check out our GitHub discussions.
             </p>
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="{{ route('marketing.docs.installation') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-emerald-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
+                <a href="{{ route('marketing.docs.selfhost.installation') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-emerald-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                     Read Installation Guide
                     <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

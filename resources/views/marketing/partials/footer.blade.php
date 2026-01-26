@@ -23,10 +23,15 @@
                 </ul>
             </div>
 
-            <!-- Developer -->
+            <!-- Resources -->
             <div>
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Developer</h3>
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Resources</h3>
                 <ul class="space-y-3">
+                    <li>
+                        <a href="{{ marketing_url('/docs') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                            Docs
+                        </a>
+                    </li>
                     <li>
                         <a href="{{ marketing_url('/selfhost') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                             Selfhost
@@ -35,11 +40,6 @@
                     <li>
                         <a href="{{ marketing_url('/saas') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                             SaaS
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ marketing_url('/docs') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-                            Documentation
                         </a>
                     </li>
                 </ul>
