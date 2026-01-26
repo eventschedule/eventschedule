@@ -24,8 +24,9 @@ class GraphicController extends Controller
         $isPro = $role->isPro();
         $isEnterprise = $role->isEnterprise();
         $graphicSettings = $role->graphic_settings;
+        $hasRecurringEvents = $role->events()->whereNotNull('days_of_week')->exists();
 
-        return view('graphic.show', compact('role', 'layout', 'isPro', 'isEnterprise', 'graphicSettings'));
+        return view('graphic.show', compact('role', 'layout', 'isPro', 'isEnterprise', 'graphicSettings', 'hasRecurringEvents'));
     }
 
     public function getSettings($subdomain)
@@ -54,6 +55,7 @@ class GraphicController extends Controller
             'send_hour' => 'integer|min:0|max:23',
             'use_screen_capture' => 'boolean',
             'recipient_emails' => 'nullable|string|max:1000',
+            'exclude_recurring' => 'boolean',
         ]);
 
         // Merge with existing settings to preserve defaults
@@ -121,14 +123,19 @@ class GraphicController extends Controller
         }
 
         // Get the next 10 events
-        $events = Event::with(['roles', 'tickets', 'venue'])
+        $query = Event::with(['roles', 'tickets', 'venue'])
             ->whereHas('roles', function ($query) use ($role) {
                 $query->where('role_id', $role->id)->where('is_accepted', true);
             })
             ->where('starts_at', '>=', now())
-            ->where('flyer_image_url', '!=', null)
-            ->whereNull('days_of_week')
-            ->orderBy('starts_at')
+            ->where('flyer_image_url', '!=', null);
+
+        // Only exclude recurring events if setting is true
+        if ($request->boolean('exclude_recurring', false)) {
+            $query->whereNull('days_of_week');
+        }
+
+        $events = $query->orderBy('starts_at')
             ->limit(10)
             ->get();
 
@@ -233,14 +240,22 @@ class GraphicController extends Controller
         }
 
         // Get the next 10 events
-        $events = Event::with(['roles', 'tickets', 'venue'])
+        $graphicSettings = $role->graphic_settings;
+        $excludeRecurring = $graphicSettings['exclude_recurring'] ?? false;
+
+        $query = Event::with(['roles', 'tickets', 'venue'])
             ->whereHas('roles', function ($query) use ($role) {
                 $query->where('role_id', $role->id)->where('is_accepted', true);
             })
             ->where('starts_at', '>=', now())
-            ->where('flyer_image_url', '!=', null)
-            ->whereNull('days_of_week')
-            ->orderBy('starts_at')
+            ->where('flyer_image_url', '!=', null);
+
+        // Only exclude recurring events if setting is true
+        if ($excludeRecurring) {
+            $query->whereNull('days_of_week');
+        }
+
+        $events = $query->orderBy('starts_at')
             ->limit(10)
             ->get();
 
@@ -248,7 +263,6 @@ class GraphicController extends Controller
             return redirect()->back()->with('error', __('messages.no_events_found'));
         }
 
-        $graphicSettings = $role->graphic_settings;
         $useScreenCapture = $graphicSettings['use_screen_capture'] ?? false;
 
         if (config('services.capturekit.key') && $role->isEnterprise() && $useScreenCapture) {
@@ -321,7 +335,7 @@ class GraphicController extends Controller
 
         foreach ($events as $event) {
             $text .= $this->parseTemplate($template, $event, $role, $directRegistration);
-            $text .= "\n";
+            $text .= "\n\n";
         }
 
         return $text;
