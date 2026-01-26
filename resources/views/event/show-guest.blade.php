@@ -460,25 +460,21 @@
 
       <div class="flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
         @if ($event->venue && $event->venue->name)
-        @php
-            $venueAccentColor = $event->venue->accent_color ?? '#4E81FA';
-            $venueContrastColor = accent_contrast_color($venueAccentColor);
-        @endphp
-        <div class="p-6 rounded-xl flex flex-col gap-2" style="background-color: {{ $venueAccentColor }};">
+        <div class="p-6 rounded-xl flex flex-col gap-2" style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }};">
           @if ($event->venue->isClaimed())
             @php
               $venuePanelUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
             @endphp
             <a href="{{ $venuePanelUrl }}" class="group flex items-center gap-2 hover:opacity-80 transition-opacity duration-200">
-              <h4 class="text-[24px] leading-snug font-semibold group-hover:underline" style="color: {{ $venueContrastColor }}; font-family: '{{ $event->venue->font_family }}', sans-serif;">
+              <h4 class="text-[24px] leading-snug font-semibold group-hover:underline" style="color: {{ accent_contrast_color($otherRole->accent_color ?? '#4E81FA') }}; font-family: '{{ $event->venue->font_family }}', sans-serif;">
                 {{ $event->venue->translatedName() }}
               </h4>
-              <svg class="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" style="fill: {{ $venueContrastColor }}" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" style="fill: {{ accent_contrast_color($otherRole->accent_color ?? '#4E81FA') }}" viewBox="0 0 24 24">
                 <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
               </svg>
             </a>
           @else
-            <h4 class="text-[24px] leading-snug font-semibold" style="color: {{ $venueContrastColor }}; font-family: '{{ $event->venue->font_family }}', sans-serif;">
+            <h4 class="text-[24px] leading-snug font-semibold" style="color: {{ accent_contrast_color($otherRole->accent_color ?? '#4E81FA') }}; font-family: '{{ $event->venue->font_family }}', sans-serif;">
               {{ $event->venue->translatedName() }}
             </h4>
           @endif
@@ -486,7 +482,7 @@
             @if ($event->venue->phone)
             <div
               class="flex flex-row gap-2 items-center relative duration-300"
-              style="color: {{ $venueContrastColor }}; fill: {{ $venueContrastColor }}"
+              style="color: {{ accent_contrast_color($otherRole->accent_color ?? '#4E81FA') }}; fill: {{ accent_contrast_color($otherRole->accent_color ?? '#4E81FA') }}"
             >
               <svg
                 width="24"
@@ -506,7 +502,7 @@
             @if ($event->venue->email && $event->venue->show_email)
             <div
               class="flex flex-row gap-2 items-center relative duration-300"
-              style="color: {{ $venueContrastColor }}; fill: {{ $venueContrastColor }}"
+              style="color: {{ accent_contrast_color($otherRole->accent_color ?? '#4E81FA') }}; fill: {{ accent_contrast_color($otherRole->accent_color ?? '#4E81FA') }}"
             >
               <svg
                 width="24"
@@ -528,7 +524,7 @@
             @if ($event->venue->website)
             <div
               class="flex flex-row gap-2 items-center relative duration-300"
-              style="color: {{ $venueContrastColor }}; fill: {{ $venueContrastColor }}"
+              style="color: {{ accent_contrast_color($otherRole->accent_color ?? '#4E81FA') }}; fill: {{ accent_contrast_color($otherRole->accent_color ?? '#4E81FA') }}"
             >
               <svg
                 width="24"
@@ -554,7 +550,7 @@
                   d="M16.669 15.6739C16.4501 16.8413 16.1267 17.9171 15.7104 18.8368C15.2966 19.7512 14.7849 20.5247 14.1793 21.0789C13.5708 21.6358 12.831 22 12.0001 22C17.2707 22 21.5889 17.9226 21.9724 12.75H16.9868C16.9512 13.7515 16.8445 14.7381 16.669 15.6739Z"
                 />
               </svg>
-              <x-link href="{{ $event->venue->website }}" target="_blank" class="text-sm" style="color: {{ $venueContrastColor }}">
+              <x-link href="{{ $event->venue->website }}" target="_blank" class="text-sm" style="color: {{ accent_contrast_color($otherRole->accent_color ?? '#4E81FA') }}">
                 {{ App\Utils\UrlUtils::clean($event->venue->website) }}
               </x-link>
             </div>
@@ -567,11 +563,11 @@
               @if ($link)
               <a
                 href="{{ $link->url }}" target="_blank"
-                style="background-color: {{ $venueContrastColor }}"
+                style="background-color: {{ accent_contrast_color($otherRole->accent_color ?? '#4E81FA') }}"
                 class="w-8 h-8 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
                 title="{{ App\Utils\UrlUtils::clean($link->url) }}"
                 >
-                <x-url-icon class="w-5 h-5" :color="$venueAccentColor">
+                <x-url-icon class="w-5 h-5" :color="$otherRole->accent_color ?? '#4E81FA'">
                   {{ \App\Utils\UrlUtils::clean($link->url) }}
                 </x-url-icon>
               </a>
