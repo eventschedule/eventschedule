@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Notifications\SignupVerificationCode;
 use App\Rules\NoFakeEmail;
+use App\Rules\ValidTurnstile;
+use App\Utils\TurnstileUtils;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
@@ -42,6 +44,25 @@ class RegisteredUserController extends Controller
      */
     public function sendVerificationCode(Request $request): JsonResponse
     {
+        // Honeypot check
+        if ($request->filled('website')) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.invalid_request'),
+            ], 422);
+        }
+
+        // Turnstile verification
+        if (TurnstileUtils::isEnabled() && ! config('app.is_testing')) {
+            if (! TurnstileUtils::verify($request->input('cf-turnstile-response'), $request->ip())) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.turnstile_verification_failed'),
+                    'errors' => ['cf-turnstile-response' => [__('messages.turnstile_verification_failed')]],
+                ], 422);
+            }
+        }
+
         $emailValidationRules = ['required', 'string', 'email', 'max:255'];
 
         // Add fake email validation for hosted mode
@@ -191,6 +212,7 @@ class RegisteredUserController extends Controller
             ),
             'password' => ['required', 'string', 'min:8'],
             'language_code' => ['nullable', 'string', 'in:'.implode(',', config('app.supported_languages', ['en']))],
+            'cf-turnstile-response' => [new ValidTurnstile],
         ];
 
         // Add verification code validation for hosted mode only

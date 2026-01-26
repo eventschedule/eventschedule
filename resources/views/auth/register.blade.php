@@ -26,6 +26,7 @@
 
         @if (config('app.hosted'))
         var lockedEmail = null;
+        var turnstileWidgetId = null;
 
         // Show all fields if form is reloaded with validation errors or if code was already sent
         document.addEventListener('DOMContentLoaded', function() {
@@ -73,6 +74,20 @@
                     return;
                 }
 
+                // Get Turnstile token if available
+                var turnstileToken = '';
+                var turnstileInput = document.querySelector('input[name="cf-turnstile-response"]');
+                if (turnstileInput) {
+                    turnstileToken = turnstileInput.value;
+                }
+
+                // Get honeypot value
+                var honeypotValue = '';
+                var honeypotInput = document.querySelector('input[name="website"]');
+                if (honeypotInput) {
+                    honeypotValue = honeypotInput.value;
+                }
+
                 // Disable button and show loading
                 sendCodeBtn.disabled = true;
                 sendCodeBtn.innerHTML = '{{ __('messages.sending') }}...';
@@ -86,7 +101,9 @@
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        email: email
+                        email: email,
+                        'cf-turnstile-response': turnstileToken,
+                        website: honeypotValue
                     })
                 })
                 .then(response => {
@@ -124,23 +141,40 @@
                         } else {
                             // Handle validation errors or other errors
                             var errorMessage = data.message || '{{ __('messages.error_sending_code') }}';
-                            
+
                             // Check for Laravel validation errors (422 status)
                             if (data.errors && data.errors.email) {
                                 errorMessage = Array.isArray(data.errors.email) ? data.errors.email[0] : data.errors.email;
                             }
-                            
+                            // Check for Turnstile validation errors
+                            if (data.errors && data.errors['cf-turnstile-response']) {
+                                errorMessage = Array.isArray(data.errors['cf-turnstile-response']) ? data.errors['cf-turnstile-response'][0] : data.errors['cf-turnstile-response'];
+                            }
+
                             codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + errorMessage + '</span>';
+
+                            // Reset Turnstile widget on failure
+                            if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
+                                turnstile.reset(turnstileWidgetId);
+                            }
                         }
                     }).catch(function(jsonError) {
                         // If JSON parsing fails, show generic error
                         codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + '{{ __('messages.error_sending_code') }}' + '</span>';
+                        // Reset Turnstile widget on failure
+                        if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
+                            turnstile.reset(turnstileWidgetId);
+                        }
                     });
                 })
                 .catch(error => {
                     codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + '{{ __('messages.error_sending_code') }}' + '</span>';
                     sendCodeBtn.disabled = false;
                     sendCodeBtn.innerHTML = '{{ __('messages.send_code') }}';
+                    // Reset Turnstile widget on failure
+                    if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
+                        turnstile.reset(turnstileWidgetId);
+                    }
                 });
             }
 
@@ -372,6 +406,26 @@
         <div class="hidden">
             <input type="text" name="website" autocomplete="off" tabindex="-1">
         </div>
+
+        <!-- Turnstile widget -->
+        @if (\App\Utils\TurnstileUtils::isEnabled())
+            <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad" async defer></script>
+            <script {!! nonce_attr() !!}>
+                function onTurnstileLoad() {
+                    @if (config('app.hosted'))
+                    turnstileWidgetId = turnstile.render('#turnstile-widget', {
+                        sitekey: '{{ \App\Utils\TurnstileUtils::getSiteKey() }}',
+                    });
+                    @else
+                    turnstile.render('#turnstile-widget', {
+                        sitekey: '{{ \App\Utils\TurnstileUtils::getSiteKey() }}',
+                    });
+                    @endif
+                }
+            </script>
+            <div id="turnstile-widget" class="mt-4"></div>
+            <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2" />
+        @endif
 
         <div class="mt-8" id="terms-field" @if(config('app.hosted')) style="display: none;" @endif>
             <div class="relative flex items-start">

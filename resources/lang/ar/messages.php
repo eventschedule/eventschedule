@@ -965,4 +965,7 @@ return [
     // Recurring events
     'recurring_events' => 'أحداث متكررة',
     'exclude_recurring_events' => 'استبعاد الأحداث المتكررة',
+
+    // Bot protection
+    'turnstile_verification_failed' => 'فشل التحقق. يرجى المحاولة مرة أخرى.',
 ];

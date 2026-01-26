@@ -1,5 +1,8 @@
 <x-slot name="head">
   <script src="{{ asset('js/vue.global.prod.js') }}"></script>
+  @if (\App\Utils\TurnstileUtils::isEnabled())
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+  @endif
   <script {!! nonce_attr() !!}>
     window.addEventListener('DOMContentLoaded', function() {
         const { createApp, ref } = Vue;
@@ -21,6 +24,10 @@
                     email: @json(old('email', auth()->check() ? auth()->user()->email : '')),
                     password: '',
                     totalTicketsMode: @json($event->total_tickets_mode ?? 'individual'),
+                    turnstileEnabled: @json(\App\Utils\TurnstileUtils::isEnabled()),
+                    turnstileSiteKey: @json(\App\Utils\TurnstileUtils::getSiteKey()),
+                    turnstileToken: '',
+                    turnstileWidgetId: null,
                 };
             },
             created() {
@@ -29,6 +36,23 @@
                         ticket.selectedQty = 0;
                     }
                 });
+            },
+            mounted() {
+                if (this.turnstileEnabled && this.turnstileSiteKey) {
+                    const checkTurnstile = () => {
+                        if (typeof turnstile !== 'undefined') {
+                            this.turnstileWidgetId = turnstile.render('#turnstile-checkout-widget', {
+                                sitekey: this.turnstileSiteKey,
+                                callback: (token) => {
+                                    this.turnstileToken = token;
+                                },
+                            });
+                        } else {
+                            setTimeout(checkTurnstile, 100);
+                        }
+                    };
+                    checkTurnstile();
+                }
             },
             computed: {
                 totalAmount() {
@@ -76,6 +100,12 @@
                     if (!this.hasSelectedTickets) {
                         e.preventDefault();
                         alert('Please select at least one ticket');
+                        return;
+                    }
+                    if (this.turnstileEnabled && !this.turnstileToken) {
+                        e.preventDefault();
+                        alert('{{ __('messages.turnstile_verification_failed') }}');
+                        return;
                     }
                 },
                 getAvailableQuantity(ticket) {
@@ -307,6 +337,13 @@
                 <span class="text-gray-600 dark:text-gray-400">Total</span>
                 <span class="text-xl font-bold text-gray-900 dark:text-gray-100">@{{ formatPrice(totalAmount) }}</span>
             </div>
+        </div>
+
+        <!-- Turnstile widget -->
+        <div v-if="turnstileEnabled" class="mt-4">
+            <div id="turnstile-checkout-widget"></div>
+            <input type="hidden" name="cf-turnstile-response" :value="turnstileToken">
+            <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2" />
         </div>
 
         <div class="flex justify-center items-center py-4 gap-8">

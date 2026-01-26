@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\Sale;
 use App\Models\User;
 use App\Rules\NoFakeEmail;
+use App\Rules\ValidTurnstile;
 use App\Services\EmailService;
 use App\Utils\InvoiceNinja;
 use App\Utils\UrlUtils;
@@ -92,6 +93,7 @@ class TicketController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'tickets' => ['required', 'array'],
+            'cf-turnstile-response' => [new ValidTurnstile],
         ]);
 
         if (! $user && $request->create_account && config('app.hosted')) {

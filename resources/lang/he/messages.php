@@ -957,4 +957,7 @@ return [
     // Recurring events
     'recurring_events' => 'אירועים חוזרים',
     'exclude_recurring_events' => 'לא לכלול אירועים חוזרים',
+
+    // Bot protection
+    'turnstile_verification_failed' => 'האימות נכשל. אנא נסה שוב.',
 ];

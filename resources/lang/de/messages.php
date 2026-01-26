@@ -968,4 +968,7 @@ return [
     // Recurring events
     'recurring_events' => 'Wiederkehrende Veranstaltungen',
     'exclude_recurring_events' => 'Wiederkehrende Veranstaltungen ausschließen',
+
+    // Bot protection
+    'turnstile_verification_failed' => 'Überprüfung fehlgeschlagen. Bitte versuchen Sie es erneut.',
 ];
