@@ -24,8 +24,13 @@
         
         <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 10px 0; color: #666;">{{ __('messages.signup_verification_code_expiry') }}</p>
+            <p style="margin: 10px 0; color: #666;">{{ __('messages.signup_verification_code_ignore') }}</p>
         </div>
-        
+
+        <div style="background-color: #f0f4ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; color: #555; font-size: 14px;">{{ __('messages.signup_verification_code_security_notice') }}</p>
+        </div>
+
         <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
             {{ __('messages.thank_you_for_using') }}
         </p>

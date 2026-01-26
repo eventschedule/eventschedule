@@ -57,6 +57,7 @@ class BlogPostReview extends Mailable
 
         return new Content(
             view: 'emails.blog_post_review',
+            text: 'emails.blog_post_review_text',
             with: [
                 'blogPost' => $this->blogPost,
                 'truncatedContent' => $truncatedContent,

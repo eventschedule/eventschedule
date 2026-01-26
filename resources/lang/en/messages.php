@@ -711,6 +711,8 @@ return [
     'signup_verification_code_intro' => 'Please use the following code to complete your signup:',
     'your_verification_code' => 'Your verification code',
     'signup_verification_code_expiry' => 'This code will expire in 10 minutes.',
+    'signup_verification_code_ignore' => 'If you did not request this code, you can safely ignore this email.',
+    'signup_verification_code_security_notice' => 'For your security, never share this verification code with anyone. Our team will never ask you for this code.',
     'send_code' => 'Send Code',
     'verification_code' => 'Verification Code',
     'code_sent' => 'Verification code has been sent to your email.',

@@ -689,6 +689,8 @@ return [
     'signup_verification_code_intro' => 'Gebruik de volgende code om je aanmelding te voltooien:',
     'your_verification_code' => 'Je verificatiecode',
     'signup_verification_code_expiry' => 'Deze code verloopt over 10 minuten.',
+    'signup_verification_code_ignore' => 'Als je deze code niet hebt aangevraagd, kun je deze e-mail veilig negeren.',
+    'signup_verification_code_security_notice' => 'Voor je veiligheid: deel deze verificatiecode nooit met anderen. Ons team zal je nooit om deze code vragen.',
     'send_code' => 'Code Versturen',
     'verification_code' => 'Verificatiecode',
     'code_sent' => 'Verificatiecode is naar je e-mailadres verzonden.',

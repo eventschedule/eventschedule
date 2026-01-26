@@ -692,6 +692,8 @@ return [
     'signup_verification_code_intro' => 'Per favore usa il seguente codice per completare la tua iscrizione:',
     'your_verification_code' => 'Il tuo codice di verifica',
     'signup_verification_code_expiry' => 'Questo codice scadrà tra 10 minuti.',
+    'signup_verification_code_ignore' => 'Se non hai richiesto questo codice, puoi ignorare questa email.',
+    'signup_verification_code_security_notice' => 'Per la tua sicurezza, non condividere mai questo codice di verifica con nessuno. Il nostro team non ti chiederà mai questo codice.',
     'send_code' => 'Invia Codice',
     'verification_code' => 'Codice di Verifica',
     'code_sent' => 'Il codice di verifica è stato inviato alla tua email.',

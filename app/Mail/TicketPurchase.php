@@ -85,6 +85,7 @@ class TicketPurchase extends Mailable
 
         return new Content(
             view: 'emails.ticket_purchase',
+            text: 'emails.ticket_purchase_text',
             with: [
                 'sale' => $this->sale,
                 'event' => $this->event,

@@ -53,6 +53,12 @@ class NewRequestsNotification extends Notification
                 'requestCount' => $this->requestCount,
                 'actionUrl' => $actionUrl,
                 'unsubscribeUrl' => $unsubscribeUrl,
+            ])
+            ->text('emails.new_requests_text', [
+                'role' => $this->role,
+                'requestCount' => $this->requestCount,
+                'actionUrl' => $actionUrl,
+                'unsubscribeUrl' => $unsubscribeUrl,
             ]);
     }
 

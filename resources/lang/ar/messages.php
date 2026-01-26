@@ -692,6 +692,8 @@ return [
     'signup_verification_code_intro' => 'يرجى استخدام الرمز التالي لإكمال تسجيلك:',
     'your_verification_code' => 'رمز التحقق الخاص بك',
     'signup_verification_code_expiry' => 'سينتهي هذا الرمز خلال 10 دقائق.',
+    'signup_verification_code_ignore' => 'إذا لم تطلب هذا الرمز، يمكنك تجاهل هذا البريد الإلكتروني بأمان.',
+    'signup_verification_code_security_notice' => 'لأمانك، لا تشارك رمز التحقق هذا مع أي شخص أبداً. فريقنا لن يطلب منك هذا الرمز أبداً.',
     'send_code' => 'إرسال الرمز',
     'verification_code' => 'رمز التحقق',
     'code_sent' => 'تم إرسال رمز التحقق إلى بريدك الإلكتروني.',

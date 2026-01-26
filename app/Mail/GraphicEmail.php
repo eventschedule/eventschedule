@@ -65,6 +65,7 @@ class GraphicEmail extends Mailable
 
         return new Content(
             view: 'emails.graphic_email',
+            text: 'emails.graphic_email_text',
             with: [
                 'role' => $this->role,
                 'eventText' => $this->eventText,

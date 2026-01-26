@@ -79,6 +79,7 @@ class SignupVerificationCode extends Notification
             {
                 return new Content(
                     view: 'emails.signup_verification_code',
+                    text: 'emails.signup_verification_code_text',
                     with: [
                         'code' => $this->code,
                     ]
