@@ -366,8 +366,10 @@ class RoleController extends Controller
         if ($event) {
             if ($event->venue) {
                 if ($event->venue->subdomain == $subdomain) {
-                    if ($event->roles->count() > 0) {
-                        $otherRole = $event->roles[0];
+                    // When viewing from venue, find a talent role (exclude venue from roles)
+                    $talentRoles = $event->roles->filter(fn ($r) => $r->id !== $event->venue->id);
+                    if ($talentRoles->count() > 0) {
+                        $otherRole = $talentRoles->first();
                     } else {
                         $otherRole = $role;
                     }
