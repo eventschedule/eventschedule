@@ -964,4 +964,8 @@ return [
     'text_template' => 'Textvorlage',
     'text_template_help' => 'Passen Sie das Textformat für jedes Event an. Leer lassen für Standard.',
     'view_docs' => 'Docs anzeigen',
+
+    // Recurring events
+    'recurring_events' => 'Wiederkehrende Veranstaltungen',
+    'exclude_recurring_events' => 'Wiederkehrende Veranstaltungen ausschließen',
 ];

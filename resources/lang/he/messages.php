@@ -953,4 +953,8 @@ return [
     'text_template' => 'תבנית טקסט',
     'text_template_help' => 'התאם אישית את פורמט הטקסט לכל אירוע. השאר ריק לפורמט ברירת מחדל.',
     'view_docs' => 'צפה בתיעוד',
+
+    // Recurring events
+    'recurring_events' => 'אירועים חוזרים',
+    'exclude_recurring_events' => 'לא לכלול אירועים חוזרים',
 ];

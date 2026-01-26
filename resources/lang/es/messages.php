@@ -960,4 +960,8 @@ return [
     'text_template' => 'Plantilla de Texto',
     'text_template_help' => 'Personaliza el formato de texto para cada evento. Deja en blanco para usar el predeterminado.',
     'view_docs' => 'Ver Docs',
+
+    // Recurring events
+    'recurring_events' => 'Eventos Recurrentes',
+    'exclude_recurring_events' => 'Excluir eventos recurrentes',
 ];

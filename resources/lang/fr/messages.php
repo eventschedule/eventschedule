@@ -960,4 +960,8 @@ return [
     'text_template' => 'Modèle de Texte',
     'text_template_help' => 'Personnalisez le format du texte pour chaque événement. Laissez vide pour le format par défaut.',
     'view_docs' => 'Voir la Doc',
+
+    // Recurring events
+    'recurring_events' => 'Événements Récurrents',
+    'exclude_recurring_events' => 'Exclure les événements récurrents',
 ];

@@ -959,4 +959,8 @@ return [
     'text_template' => 'Modelo de Texto',
     'text_template_help' => 'Personalize o formato do texto para cada evento. Deixe em branco para usar o padrão.',
     'view_docs' => 'Ver Docs',
+
+    // Recurring events
+    'recurring_events' => 'Eventos Recorrentes',
+    'exclude_recurring_events' => 'Excluir eventos recorrentes',
 ];
