@@ -19,7 +19,8 @@ Route::middleware('guest')->group(function () {
     Route::post('sign_up/send-code', [RegisteredUserController::class, 'sendVerificationCode'])
         ->name('sign_up.send_code');
 
-    Route::post('sign_up', [RegisteredUserController::class, 'store']);
+    Route::post('sign_up', [RegisteredUserController::class, 'store'])
+        ->middleware('throttle:5,1');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
