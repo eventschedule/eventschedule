@@ -258,6 +258,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/google-calendar', [MarketingController::class, 'docsGoogleCalendar'])->name('marketing.docs.google_calendar');
         Route::get('/docs/installation', [MarketingController::class, 'docsInstallation'])->name('marketing.docs.installation');
         Route::get('/docs/api', [MarketingController::class, 'docsApi'])->name('marketing.docs.api');
+        Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
     } else {
         // Nexus mode: show marketing pages at root URLs on eventschedule.com
         Route::domain('eventschedule.com')->group(function () {
@@ -290,6 +291,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/google-calendar', [MarketingController::class, 'docsGoogleCalendar'])->name('marketing.docs.google_calendar');
             Route::get('/docs/installation', [MarketingController::class, 'docsInstallation'])->name('marketing.docs.installation');
             Route::get('/docs/api', [MarketingController::class, 'docsApi'])->name('marketing.docs.api');
+            Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
         });
 
         // Redirect www.eventschedule.com marketing pages to non-www
@@ -323,6 +325,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/google-calendar', fn () => redirect('https://eventschedule.com/docs/google-calendar', 301));
             Route::get('/docs/installation', fn () => redirect('https://eventschedule.com/docs/installation', 301));
             Route::get('/docs/api', fn () => redirect('https://eventschedule.com/docs/api', 301));
+            Route::get('/docs/event-graphics', fn () => redirect('https://eventschedule.com/docs/event-graphics', 301));
         });
     }
 } else {
@@ -351,6 +354,7 @@ if (config('app.is_nexus')) {
     Route::get('/docs/google-calendar', fn () => redirect()->route('home'));
     Route::get('/docs/installation', fn () => redirect()->route('home'));
     Route::get('/docs/api', fn () => redirect()->route('home'));
+    Route::get('/docs/event-graphics', fn () => redirect()->route('home'));
 }
 
 // Blog routes: use /blog path for local dev, testing, and selfhosted users

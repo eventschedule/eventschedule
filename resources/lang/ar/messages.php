@@ -954,4 +954,9 @@ return [
     'screen_capture_rendering' => 'عرض التقاط الشاشة',
     'enable_screen_capture' => 'استخدام التقاط الشاشة لتوليد الرسومات',
     'sync_direction_updated' => 'تم تحديث اتجاه المزامنة.',
+
+    // Text template
+    'text_template' => 'قالب النص',
+    'text_template_help' => 'خصص تنسيق النص لكل حدث. اتركه فارغاً للتنسيق الافتراضي.',
+    'view_docs' => 'عرض التوثيق',
 ];

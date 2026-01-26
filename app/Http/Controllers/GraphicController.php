@@ -47,6 +47,7 @@ class GraphicController extends Controller
             'enabled' => 'boolean',
             'frequency' => 'in:daily,weekly,monthly',
             'ai_prompt' => 'nullable|string|max:500',
+            'text_template' => 'nullable|string|max:2000',
             'link_type' => 'in:schedule,registration',
             'layout' => 'in:grid,list',
             'send_day' => 'integer|min:0|max:31',
@@ -120,7 +121,7 @@ class GraphicController extends Controller
         }
 
         // Get the next 10 events
-        $events = Event::with('roles')
+        $events = Event::with(['roles', 'tickets', 'venue'])
             ->whereHas('roles', function ($query) use ($role) {
                 $query->where('role_id', $role->id)->where('is_accepted', true);
             })
@@ -192,8 +193,13 @@ class GraphicController extends Controller
         // Convert image data to base64 for display
         $imageBase64 = base64_encode($imageData);
 
+        // Get text template - use request parameter if provided, otherwise fall back to saved settings
+        $textTemplate = $request->has('text_template')
+            ? $request->get('text_template', '')
+            : ($graphicSettings['text_template'] ?? '');
+
         // Generate event text content
-        $eventText = $this->generateEventText($role, $events, $directRegistration);
+        $eventText = $this->generateEventText($role, $events, $directRegistration, $textTemplate);
 
         // Process text through AI if ai_prompt is set (Pro feature)
         // Use request parameter if provided, otherwise fall back to saved settings
@@ -227,7 +233,7 @@ class GraphicController extends Controller
         }
 
         // Get the next 10 events
-        $events = Event::with('roles')
+        $events = Event::with(['roles', 'tickets', 'venue'])
             ->whereHas('roles', function ($query) use ($role) {
                 $query->where('role_id', $role->id)->where('is_accepted', true);
             })
@@ -304,49 +310,113 @@ class GraphicController extends Controller
             ->header('Expires', '0');
     }
 
-    private function generateEventText($role, $events, $directRegistration = false)
+    private function generateEventText($role, $events, $directRegistration = false, $template = null)
     {
         $text = '';
 
+        // Use provided template or default
+        if (empty($template)) {
+            $template = $this->getDefaultTemplate();
+        }
+
         foreach ($events as $event) {
-            $startDate = $event->getStartDateTime(null, true);
-            $dayName = $startDate->format('l');
-            $dateStr = $startDate->format('j/n');
-            $timeStr = $startDate->format('H:i');
-
-            // Line 1: *DayName* d/m | HH:MM
-            $text .= "*{$dayName}* {$dateStr} | {$timeStr}\n";
-
-            // Line 2: *Event Name*:
-            $text .= "*{$event->translatedName()}*:\n";
-
-            // Line 3: Venue | City
-            if ($event->venue) {
-                $venueName = $event->venue->translatedName();
-                $city = $event->venue->translatedCity();
-                if ($city) {
-                    $text .= "{$venueName} | {$city}\n";
-                } else {
-                    $text .= "{$venueName}\n";
-                }
-            }
-
-            // Line 4: URL
-            $eventUrl = $event->getGuestUrl($role->subdomain, null, true);
-            if ($directRegistration && $event->registration_url) {
-                if (str_contains($eventUrl, '?')) {
-                    $eventUrl = str_replace('?', '/?', $eventUrl);
-                } else {
-                    $eventUrl .= '/';
-                }
-            }
-            $text .= "{$eventUrl}\n";
-
-            // Blank line between events
+            $text .= $this->parseTemplate($template, $event, $role, $directRegistration);
             $text .= "\n";
         }
 
         return $text;
+    }
+
+    private function getDefaultTemplate()
+    {
+        return "*{day_name}* {date_dmy} | {time}\n*{event_name}*:\n{venue} | {city}\n{url}";
+    }
+
+    private function parseTemplate($template, $event, $role, $directRegistration)
+    {
+        // Set Carbon locale for translated date formats
+        $locale = $role->language_code ?? 'en';
+        \Carbon\Carbon::setLocale($locale);
+
+        $startDate = $event->getStartDateTime(null, true);
+        $endDate = $event->getEndDateTime(null, true);
+
+        // Determine time format based on role's 24h setting
+        $timeFormat = $role->use_24_hour_time ? 'H:i' : 'g:i A';
+
+        // Build the URL
+        $eventUrl = $event->getGuestUrl($role->subdomain, null, true);
+        if ($directRegistration && $event->registration_url) {
+            if (str_contains($eventUrl, '?')) {
+                $eventUrl = str_replace('?', '/?', $eventUrl);
+            } else {
+                $eventUrl .= '/';
+            }
+        }
+
+        // Build replacements array
+        $replacements = [
+            // Date/Time variables
+            '{day_name}' => $startDate->translatedFormat('l'),
+            '{day_short}' => $startDate->translatedFormat('D'),
+            '{date_dmy}' => $startDate->format('j/n'),
+            '{date_mdy}' => $startDate->format('n/j'),
+            '{date_full_dmy}' => $startDate->format('d/m/Y'),
+            '{date_full_mdy}' => $startDate->format('m/d/Y'),
+            '{month}' => $startDate->format('n'),
+            '{month_name}' => $startDate->translatedFormat('F'),
+            '{month_short}' => $startDate->translatedFormat('M'),
+            '{day}' => $startDate->format('j'),
+            '{year}' => $startDate->format('Y'),
+            '{time}' => $startDate->format($timeFormat),
+            '{end_time}' => $endDate ? $endDate->format($timeFormat) : '',
+            '{duration}' => $event->duration ?? '',
+
+            // Event variables
+            '{event_name}' => $event->translatedName(),
+            '{description}' => $event->translatedDescription() ?? '',
+            '{url}' => $eventUrl,
+
+            // Venue variables
+            '{venue}' => $event->venue ? ($event->venue->translatedName() ?? '') : '',
+            '{city}' => $event->venue ? ($event->venue->translatedCity() ?? '') : '',
+            '{address}' => $event->venue ? ($event->venue->address1 ?? '') : '',
+            '{state}' => $event->venue ? ($event->venue->state ?? '') : '',
+            '{country}' => $event->venue ? ($event->venue->country ?? '') : '',
+
+            // Ticket variables
+            '{currency}' => $event->ticket_currency_code ?? '',
+            '{price}' => $this->getPrice($event),
+        ];
+
+        return str_replace(array_keys($replacements), array_values($replacements), $template);
+    }
+
+    private function getPrice($event)
+    {
+        if (! $event->tickets || $event->tickets->isEmpty()) {
+            return '';
+        }
+
+        $prices = $event->tickets->pluck('price')->filter(function ($price) {
+            return $price !== null;
+        });
+
+        if ($prices->isEmpty()) {
+            return '';
+        }
+
+        // Check if all tickets are free
+        $allFree = $prices->every(function ($price) {
+            return $price === 0;
+        });
+
+        if ($allFree) {
+            return __('messages.free');
+        }
+
+        // Return lowest price
+        return $prices->min();
     }
 
     private function processTextWithAI($text, $aiPrompt)

@@ -55,12 +55,15 @@
                                  document.querySelector('input[name="link_type_mobile"]:checked')?.value || 'schedule';
                 const aiPrompt = document.getElementById('ai_prompt')?.value ||
                                  document.getElementById('ai_prompt_mobile')?.value || '';
+                const textTemplate = document.getElementById('text_template')?.value ||
+                                     document.getElementById('text_template_mobile')?.value || '';
                 const useScreenCapture = document.getElementById('use_screen_capture')?.checked ||
                                          document.getElementById('use_screen_capture_mobile')?.checked || false;
 
                 return {
                     link_type: linkType,
                     ai_prompt: aiPrompt,
+                    text_template: textTemplate,
                     use_screen_capture: useScreenCapture
                 };
             }
@@ -82,6 +85,13 @@
                 const aiPromptMobile = document.getElementById('ai_prompt_mobile');
                 if (aiPromptDesktop && aiPromptMobile) {
                     aiPromptMobile.value = aiPromptDesktop.value;
+                }
+
+                // Sync text template
+                const textTemplateDesktop = document.getElementById('text_template');
+                const textTemplateMobile = document.getElementById('text_template_mobile');
+                if (textTemplateDesktop && textTemplateMobile) {
+                    textTemplateMobile.value = textTemplateDesktop.value;
                 }
 
                 // Sync screen capture
@@ -155,8 +165,9 @@
                 const directParam = formSettings.link_type === 'registration' ? '&direct=1' : '';
                 const screenCaptureParam = formSettings.use_screen_capture ? '&use_screen_capture=1' : '';
                 const aiPromptParam = formSettings.ai_prompt ? '&ai_prompt=' + encodeURIComponent(formSettings.ai_prompt) : '';
+                const textTemplateParam = formSettings.text_template ? '&text_template=' + encodeURIComponent(formSettings.text_template) : '';
 
-                fetch('{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain, "layout" => $layout]) }}' + directParam + screenCaptureParam + aiPromptParam)
+                fetch('{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain, "layout" => $layout]) }}' + directParam + screenCaptureParam + aiPromptParam + textTemplateParam)
                     .then(response => {
                         if (!response.ok) {
                             if (response.status === 404) {
@@ -257,6 +268,19 @@
                     const aiPrompt = document.getElementById(id);
                     if (aiPrompt) {
                         aiPrompt.value = currentSettings.ai_prompt || '';
+                    }
+                });
+
+                ['text_template', 'text_template_mobile'].forEach(id => {
+                    const textTemplate = document.getElementById(id);
+                    if (textTemplate) {
+                        const savedValue = currentSettings.text_template || '';
+                        // If empty, use default template for better UX
+                        const defaultTemplate = `*{day_name}* {date_dmy} | {time}
+*{event_name}*:
+{venue} | {city}
+{url}`;
+                        textTemplate.value = savedValue || defaultTemplate;
                     }
                 });
 
@@ -366,6 +390,7 @@
                 const emailEnabled = document.getElementById('email_enabled') || document.getElementById('email_enabled_mobile');
                 const sendHour = document.getElementById('send_hour') || document.getElementById('send_hour_mobile');
                 const aiPrompt = document.getElementById('ai_prompt') || document.getElementById('ai_prompt_mobile');
+                const textTemplate = document.getElementById('text_template') || document.getElementById('text_template_mobile');
                 const useScreenCapture = document.getElementById('use_screen_capture') || document.getElementById('use_screen_capture_mobile');
                 const recipientEmails = document.getElementById('recipient_emails') || document.getElementById('recipient_emails_mobile');
 
@@ -394,6 +419,7 @@
                     send_day: parseInt(sendDay),
                     send_hour: sendHour ? parseInt(sendHour.value) : 9,
                     ai_prompt: aiPrompt ? aiPrompt.value : '',
+                    text_template: textTemplate ? textTemplate.value : '',
                     link_type: linkTypeChecked ? linkTypeChecked.value : 'schedule',
                     layout: '{{ $layout }}',
                     use_screen_capture: useScreenCapture ? useScreenCapture.checked : false,
@@ -493,8 +519,47 @@
                 }, 3000);
             }
 
+            // Textarea height persistence functions
+            function saveTextareaHeight(id, height) {
+                localStorage.setItem('textarea_height_' + id, height);
+            }
+
+            function restoreTextareaHeights() {
+                const textareaIds = ['text_template', 'text_template_mobile', 'ai_prompt', 'ai_prompt_mobile'];
+                textareaIds.forEach(id => {
+                    const textarea = document.getElementById(id);
+                    const savedHeight = localStorage.getItem('textarea_height_' + id);
+                    if (textarea && savedHeight) {
+                        textarea.style.height = savedHeight + 'px';
+                    }
+                });
+            }
+
+            function initTextareaResize() {
+                const textareaIds = ['text_template', 'text_template_mobile', 'ai_prompt', 'ai_prompt_mobile'];
+                const resizeObserver = new ResizeObserver(entries => {
+                    entries.forEach(entry => {
+                        const id = entry.target.id;
+                        const height = entry.contentRect.height;
+                        if (height > 0) {
+                            saveTextareaHeight(id, height);
+                        }
+                    });
+                });
+
+                textareaIds.forEach(id => {
+                    const textarea = document.getElementById(id);
+                    if (textarea) {
+                        resizeObserver.observe(textarea);
+                    }
+                });
+
+                restoreTextareaHeights();
+            }
+
             document.addEventListener('DOMContentLoaded', function() {
                 updateSettingsUI();
+                initTextareaResize();
 
                 // Add change listeners for both desktop and mobile link type radios
                 document.querySelectorAll('input[name="link_type"], input[name="link_type_mobile"]').forEach(radio => {
@@ -628,6 +693,22 @@
                      x-transition:leave-start="opacity-100 translate-y-0"
                      x-transition:leave-end="opacity-0 -translate-y-2"
                      class="p-4 bg-gray-50 dark:bg-gray-900/50">
+                    <!-- Text Template -->
+                    <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.text_template') }}</h4>
+                            <a href="{{ route('marketing.docs.event_graphics') }}" target="_blank"
+                               class="text-xs text-blue-500 hover:text-blue-400">
+                                {{ __('messages.view_docs') }}
+                            </a>
+                        </div>
+                        <textarea id="text_template_mobile" rows="5"
+                            aria-label="{{ __('messages.text_template') }}"
+                            class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm font-mono resize-y"
+                            placeholder="*{day_name}* {date_dmy} | {time}&#10;*{event_name}*:&#10;{venue} | {city}&#10;{url}"></textarea>
+                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
+                    </div>
+
                     <!-- AI Prompt (Pro Feature) -->
                     @if ($isPro)
                     <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
@@ -635,7 +716,7 @@
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
                         </div>
                         <div>
-                            <textarea id="ai_prompt_mobile" rows="3" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-none" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
+                            <textarea id="ai_prompt_mobile" rows="3" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
                         </div>
                     </div>
@@ -801,6 +882,22 @@
                         <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.settings') }}</h3>
                     </div>
                     <div class="p-4 bg-gray-50 dark:bg-gray-900/50">
+                        <!-- Text Template -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.text_template') }}</h4>
+                                <a href="{{ route('marketing.docs.event_graphics') }}" target="_blank"
+                                   class="text-xs text-blue-500 hover:text-blue-400">
+                                    {{ __('messages.view_docs') }}
+                                </a>
+                            </div>
+                            <textarea id="text_template" rows="5"
+                                aria-label="{{ __('messages.text_template') }}"
+                                class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm font-mono resize-y"
+                                placeholder="*{day_name}* {date_dmy} | {time}&#10;*{event_name}*:&#10;{venue} | {city}&#10;{url}"></textarea>
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
+                        </div>
+
                         <!-- AI Prompt (Pro Feature) -->
                         @if ($isPro)
                         <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
@@ -808,7 +905,7 @@
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
                             </div>
                             <div>
-                                <textarea id="ai_prompt" rows="3" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-none" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
+                                <textarea id="ai_prompt" rows="3" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
                             </div>
                         </div>

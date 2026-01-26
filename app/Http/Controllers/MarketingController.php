@@ -263,6 +263,17 @@ class MarketingController extends Controller
     }
 
     /**
+     * Event Graphics documentation page
+     */
+    public function docsEventGraphics()
+    {
+        return view('marketing.docs.event-graphics', [
+            'docs' => $this->getDocsList(),
+            'currentDoc' => 'event-graphics',
+        ]);
+    }
+
+    /**
      * Get documentation list
      */
     protected function getDocsList(): array

@@ -954,4 +954,9 @@ return [
     'enable_screen_capture' => 'Usa cattura schermo per generazione grafiche',
     'screen_capture_help' => 'Utilizza il rendering basato su browser per un migliore supporto delle lingue RTL',
     'sync_direction_updated' => 'Direzione di sincronizzazione aggiornata.',
+
+    // Text template
+    'text_template' => 'Modello di Testo',
+    'text_template_help' => 'Personalizza il formato del testo per ogni evento. Lascia vuoto per il formato predefinito.',
+    'view_docs' => 'Vedi Docs',
 ];

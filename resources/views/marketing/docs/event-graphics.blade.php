@@ -1,0 +1,426 @@
+<x-marketing-layout>
+    <x-slot name="title">Event Graphics Documentation - Event Schedule</x-slot>
+    <x-slot name="description">Learn how to use the Event Graphics feature to generate shareable images and text for your upcoming events.</x-slot>
+    <x-slot name="keywords">event graphics, social media sharing, event promotion, text templates, event schedule</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
+
+    @include('marketing.docs.partials.styles')
+
+    <!-- Hero Section -->
+    <section class="relative bg-[#0a0a0f] py-16 overflow-hidden border-b border-white/5">
+        <div class="absolute inset-0">
+            <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-rose-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-pink-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+        </div>
+        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+
+        <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <x-docs-breadcrumb currentTitle="Event Graphics" />
+
+            <div class="flex items-center gap-4 mb-4">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-rose-500/20">
+                    <svg class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <h1 class="text-3xl md:text-4xl font-bold text-white">Event Graphics</h1>
+            </div>
+            <p class="text-lg text-gray-400 max-w-3xl">
+                Generate shareable images and formatted text for your upcoming events. Perfect for social media, messaging apps, and newsletters.
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="bg-[#0a0a0f] py-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row gap-10">
+                <!-- Sidebar Navigation -->
+                <aside class="lg:w-64 flex-shrink-0">
+                    <nav class="lg:sticky lg:top-8 space-y-1">
+                        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
+                        <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Overview</a>
+                        <a href="#text-template" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Text Template</a>
+                        <a href="#variables" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Template Variables</a>
+                        <a href="#ai-prompt" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">AI Text Prompt</a>
+                        <a href="#link-options" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Link Options</a>
+                        <a href="#screen-capture" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Screen Capture</a>
+                        <a href="#email-scheduling" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Email Scheduling</a>
+                    </nav>
+                </aside>
+
+                <!-- Content -->
+                <div class="flex-1 min-w-0">
+                    <div class="prose-dark">
+                        <!-- Overview -->
+                        <section id="overview" class="doc-section">
+                            <h2 class="doc-heading">Overview</h2>
+                            <p class="text-gray-300 mb-4">
+                                The Event Graphics feature generates a visual collage of your upcoming events along with formatted text that you can copy and share. It's perfect for:
+                            </p>
+                            <ul class="doc-list mb-6">
+                                <li>Social media posts (Instagram, Facebook, Twitter)</li>
+                                <li>WhatsApp and Telegram messages</li>
+                                <li>Email newsletters</li>
+                                <li>Website embeds</li>
+                            </ul>
+                            <p class="text-gray-300 mb-4">
+                                The generated graphic displays up to 10 upcoming events with their flyer images in a grid or list layout. The text output provides event details in a format optimized for copying and pasting.
+                            </p>
+                        </section>
+
+                        <!-- Text Template -->
+                        <section id="text-template" class="doc-section">
+                            <h2 class="doc-heading">Text Template</h2>
+                            <p class="text-gray-300 mb-4">
+                                The text template defines how each event is formatted in the generated text output. You can customize this template using variables that are automatically replaced with event data.
+                            </p>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">Default Template</h3>
+                            <p class="text-gray-300 mb-4">If you leave the template blank, the following default format is used:</p>
+
+                            <div class="doc-code-block">
+                                <div class="doc-code-header">
+                                    <span>Default Template</span>
+                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>*{day_name}* {date_dmy} | {time}
+*{event_name}*:
+{venue} | {city}
+{url}</code></pre>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">Example Output</h3>
+                            <div class="doc-code-block">
+                                <div class="doc-code-header">
+                                    <span>Generated Text</span>
+                                </div>
+                                <pre><code>*Wednesday* 15/3 | 20:00
+*Summer Concert*:
+Central Park | New York
+https://example.com/event/summer-concert</code></pre>
+                            </div>
+
+                            <div class="doc-callout doc-callout-tip mt-6">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>Use <code class="doc-inline-code">*text*</code> for bold formatting on WhatsApp and Telegram, or <code class="doc-inline-code">_text_</code> for italics.</p>
+                            </div>
+                        </section>
+
+                        <!-- Variables -->
+                        <section id="variables" class="doc-section">
+                            <h2 class="doc-heading">Template Variables</h2>
+                            <p class="text-gray-300 mb-4">
+                                Use these variables in your template. They will be replaced with the actual event data when generating text.
+                            </p>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">Date & Time</h3>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{day_name}</code></td>
+                                            <td>Full day name (translated)</td>
+                                            <td>Wednesday</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{day_short}</code></td>
+                                            <td>Short day name (translated)</td>
+                                            <td>Wed</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{date_dmy}</code></td>
+                                            <td>Day/month format</td>
+                                            <td>15/3</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{date_mdy}</code></td>
+                                            <td>Month/day format</td>
+                                            <td>3/15</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{date_full_dmy}</code></td>
+                                            <td>Full date (day/month/year)</td>
+                                            <td>15/03/2025</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{date_full_mdy}</code></td>
+                                            <td>Full date (month/day/year)</td>
+                                            <td>03/15/2025</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{month}</code></td>
+                                            <td>Month number</td>
+                                            <td>3</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{month_name}</code></td>
+                                            <td>Full month name (translated)</td>
+                                            <td>March</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{month_short}</code></td>
+                                            <td>Short month name (translated)</td>
+                                            <td>Mar</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{day}</code></td>
+                                            <td>Day of month</td>
+                                            <td>15</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{year}</code></td>
+                                            <td>Year</td>
+                                            <td>2025</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{time}</code></td>
+                                            <td>Start time (uses schedule's 24h setting)</td>
+                                            <td>20:00 or 8:00 PM</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{end_time}</code></td>
+                                            <td>End time (uses schedule's 24h setting)</td>
+                                            <td>22:00 or 10:00 PM</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{duration}</code></td>
+                                            <td>Duration in hours</td>
+                                            <td>2</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">Event Information</h3>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{event_name}</code></td>
+                                            <td>Event name (translated)</td>
+                                            <td>Summer Concert</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{description}</code></td>
+                                            <td>Event description</td>
+                                            <td>Join us for a night of music...</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{url}</code></td>
+                                            <td>Event URL</td>
+                                            <td>https://...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">Venue Information</h3>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{venue}</code></td>
+                                            <td>Venue name (translated)</td>
+                                            <td>Central Park</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{city}</code></td>
+                                            <td>City</td>
+                                            <td>New York</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{address}</code></td>
+                                            <td>Street address</td>
+                                            <td>123 Main St</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{state}</code></td>
+                                            <td>State/Province</td>
+                                            <td>NY</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{country}</code></td>
+                                            <td>Country</td>
+                                            <td>US</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">Ticket Information</h3>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{currency}</code></td>
+                                            <td>Currency code</td>
+                                            <td>USD</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{price}</code></td>
+                                            <td>Lowest ticket price (or "Free")</td>
+                                            <td>10</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Localization</div>
+                                <p>Date and time variables like <code class="doc-inline-code">{day_name}</code>, <code class="doc-inline-code">{month_name}</code>, and <code class="doc-inline-code">{time}</code> are automatically translated to your schedule's language and respect its 24-hour time setting.</p>
+                            </div>
+                        </section>
+
+                        <!-- AI Prompt -->
+                        <section id="ai-prompt" class="doc-section">
+                            <h2 class="doc-heading">AI Text Prompt</h2>
+                            <p class="text-gray-300 mb-4">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-500/20 text-rose-300 mr-2">Pro Feature</span>
+                                Use AI to transform the generated text with custom instructions.
+                            </p>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">How It Works</h3>
+                            <p class="text-gray-300 mb-4">
+                                After the text is generated from your template, you can apply AI transformations using the AI Text Prompt field. This allows you to:
+                            </p>
+                            <ul class="doc-list mb-6">
+                                <li>Add emojis to make posts more engaging</li>
+                                <li>Translate text to another language</li>
+                                <li>Adjust formatting for specific platforms</li>
+                                <li>Add hashtags or mentions</li>
+                            </ul>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">Example Prompts</h3>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <code class="text-rose-300">Add a calendar emoji before each date and a pin emoji before each venue</code>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <code class="text-rose-300">Translate to Spanish</code>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <code class="text-rose-300">Add relevant hashtags for Instagram</code>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Link Options -->
+                        <section id="link-options" class="doc-section">
+                            <h2 class="doc-heading">Link Options</h2>
+                            <p class="text-gray-300 mb-4">
+                                Choose how event links are generated:
+                            </p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Link to Event Page</h4>
+                                    <p class="text-sm text-gray-400">Links point to the event's page on your schedule where visitors can see full details before taking action.</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Link Directly to Registration</h4>
+                                    <p class="text-sm text-gray-400">Links include a trailing slash which triggers the event's registration URL or ticket purchase flow directly.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Screen Capture -->
+                        <section id="screen-capture" class="doc-section">
+                            <h2 class="doc-heading">Screen Capture Rendering</h2>
+                            <p class="text-gray-300 mb-4">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-500/20 text-purple-300 mr-2">Enterprise Feature</span>
+                                Use browser-based rendering for the graphic image instead of the default server-side generation.
+                            </p>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">When to Use</h3>
+                            <ul class="doc-list mb-6">
+                                <li>Better support for right-to-left (RTL) languages like Hebrew and Arabic</li>
+                                <li>More accurate rendering of special characters and fonts</li>
+                                <li>Pixel-perfect representation of your schedule's styling</li>
+                            </ul>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Note</div>
+                                <p>Screen capture rendering may take slightly longer than server-side generation due to the browser rendering process.</p>
+                            </div>
+                        </section>
+
+                        <!-- Email Scheduling -->
+                        <section id="email-scheduling" class="doc-section">
+                            <h2 class="doc-heading">Email Scheduling</h2>
+                            <p class="text-gray-300 mb-4">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-500/20 text-purple-300 mr-2">Enterprise Feature</span>
+                                Automatically send event graphics to your email list on a schedule.
+                            </p>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">Configuration Options</h3>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Option</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="font-semibold text-white">Frequency</span></td>
+                                            <td>Daily, Weekly, or Monthly</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-white">Send On</span></td>
+                                            <td>Day of week (for weekly) or day of month (for monthly)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-white">Send At</span></td>
+                                            <td>Hour of day to send the email</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-white">Recipients</span></td>
+                                            <td>Comma-separated list of email addresses</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">Test Email</h3>
+                            <p class="text-gray-300 mb-4">
+                                Use the "Send Test Email" button to preview exactly what recipients will receive. The test email is sent to your account email address.
+                            </p>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @include('marketing.docs.partials.scripts')
+</x-marketing-layout>
