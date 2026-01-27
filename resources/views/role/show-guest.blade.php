@@ -18,7 +18,7 @@
 
   <main>
     <div>
-      <div class="container mx-auto pt-10 md:pt-7 pb-10 px-5 md:mt-0 relative z-10">
+      <div class="container mx-auto pt-6 md:pt-4 pb-10 px-5 md:mt-0 relative z-10">
         {{-- Mobile background wrapper - covers header and carousel only --}}
         @php
             $mobileBannerUrl = null;
