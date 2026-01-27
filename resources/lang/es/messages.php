@@ -973,4 +973,9 @@ return [
 
     // Bot protection
     'turnstile_verification_failed' => 'La verificación falló. Por favor, inténtalo de nuevo.',
+
+    // Slug pattern
+    'slug_pattern' => 'Patrón de URL del Evento',
+    'slug_pattern_help' => 'Personaliza las URLs de los nuevos eventos. Ejemplo: {event_name}-{date_dmy}. Deja vacío para usar el nombre del evento.',
+    'show_available_variables' => 'Mostrar variables disponibles',
 ];

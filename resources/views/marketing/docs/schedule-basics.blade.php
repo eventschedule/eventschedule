@@ -205,6 +205,11 @@
                                     <p class="text-sm text-gray-400">Choose between 12-hour (2:00 PM) or 24-hour (14:00) time format based on your audience's preference.</p>
                                 </div>
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Event URL Pattern</h4>
+                                    <p class="text-sm text-gray-400 mb-2">Customize how event URLs are generated. Use variables like <code class="doc-inline-code">{event_name}</code>, <code class="doc-inline-code">{date_dmy}</code>, <code class="doc-inline-code">{venue}</code>, etc.</p>
+                                    <p class="text-sm text-gray-400">Example: <code class="doc-inline-code">{event_name}-{date_dmy}</code> creates URLs like <code class="doc-inline-code">my-event-27-1</code></p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
                                     <h4 class="font-semibold text-white mb-2">Accept Event Requests</h4>
                                     <p class="text-sm text-gray-400 mb-2">Allow others to submit events to your schedule. Perfect for:</p>
                                     <ul class="text-sm text-gray-400 list-disc list-inside space-y-1">

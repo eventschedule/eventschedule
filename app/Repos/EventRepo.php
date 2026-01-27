@@ -10,6 +10,7 @@ use App\Models\Ticket;
 use App\Models\User;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
+use App\Utils\SlugPatternUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
@@ -246,28 +247,11 @@ class EventRepo
 
         $venueId = $venue ? $venue->id : null;
 
-        if (! $event) {
+        $isNewEvent = ! $event;
+        if ($isNewEvent) {
             $event = new Event;
             $event->user_id = $user->id;
             $event->creator_role_id = $creatorRoleId;
-
-            if ($request->name_en) {
-                $event->slug = \Str::slug($request->name_en);
-            } else {
-                $event->slug = \Str::slug($request->name);
-            }
-
-            if (! $event->slug) {
-                $translated = GeminiUtils::translate($request->name, 'auto', 'en');
-
-                if ($translated) {
-                    $event->slug = Str::slug($translated);
-                }
-            }
-
-            if (! $event->slug) {
-                $event->slug = strtolower(\Str::random(5));
-            }
         }
 
         // Decode event-level custom_fields from JSON string
@@ -339,6 +323,18 @@ class EventRepo
         }
 
         $event->fill($request->all());
+
+        // Generate slug after event data is populated (needs starts_at for date variables)
+        if ($isNewEvent) {
+            $event->slug = SlugPatternUtils::generateSlug(
+                $currentRole?->slug_pattern,
+                $request->name,
+                $request->name_en,
+                $event,
+                $currentRole,
+                $venue  // Pass venue directly since relationship isn't loaded yet
+            );
+        }
 
         $days_of_week = '';
         $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];

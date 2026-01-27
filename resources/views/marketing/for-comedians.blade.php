@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Comedians | Track Your Spots, Fill Your Shows</x-slot>
-    <x-slot name="description">The grind is real. Track open mics, guest spots, and headlining gigs in one place. Email fans directly - no algorithm burying your posts. Zero fees on ticket sales. Built by comics, for comics.</x-slot>
+    <x-slot name="description">One link for every set. Track your mics, guest spots, and headlines. Email fans directly - algorithms can't bury it. Zero fees when you sell tickets. Free forever.</x-slot>
     <x-slot name="keywords">comedian schedule, stand-up comedy calendar, open mic tracker, comedy show tickets, tight 5, comedy club spots, headliner schedule, improv shows, comedy tour dates</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
 
@@ -28,21 +28,21 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                     </svg>
                 </div>
-                <span class="text-sm text-amber-200/90 font-medium tracking-wide">For Stand-Up Comics</span>
+                <span class="text-sm text-amber-200/90 font-medium tracking-wide">Built for Comics</span>
             </div>
 
             <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
                 The grind is real.<br>
-                <span class="neon-text">Track every spot.</span>
+                <span class="neon-text">One link for every set.</span>
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
-                Open mics Monday. Guest set Wednesday. Headlining Friday. Finally, one place to track it all - and tell fans where to find you.
+                Open mic Monday. Barking Tuesday. Guest set Wednesday. Headlining Friday. One link shows fans every set - yours, not the algorithm's.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
                 <a href="{{ route('sign_up') }}" class="group inline-flex items-center px-8 py-4 text-lg font-semibold text-black bg-gradient-to-r from-amber-400 to-amber-500 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-amber-500/25">
-                    Start tracking your spots
+                    Get your link
                     <svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
@@ -78,15 +78,15 @@
             <div class="grid md:grid-cols-3 gap-6 text-center">
                 <div class="p-6">
                     <div class="text-4xl font-bold text-red-400 mb-2">7</div>
-                    <div class="text-gray-400 text-sm">open mics a week to get stage time</div>
+                    <div class="text-gray-400 text-sm">mics a week just to stay sharp</div>
                 </div>
                 <div class="p-6 border-x border-white/5">
                     <div class="text-4xl font-bold text-amber-400 mb-2">5</div>
-                    <div class="text-gray-400 text-sm">different clubs you're trying to get passed at</div>
+                    <div class="text-gray-400 text-sm">clubs where you're trying to get regular</div>
                 </div>
                 <div class="p-6">
-                    <div class="text-4xl font-bold text-rose-400 mb-2">0%</div>
-                    <div class="text-gray-400 text-sm">of your Instagram followers see your show posts</div>
+                    <div class="text-4xl font-bold text-rose-400 mb-2">~3%</div>
+                    <div class="text-gray-400 text-sm">of your followers actually see your show posts</div>
                 </div>
             </div>
         </div>
@@ -109,8 +109,8 @@
                             </svg>
                             Your Weekly Lineup
                         </div>
-                        <h2 class="text-3xl lg:text-4xl font-bold text-white mb-6">Track every spot.<br>Never double-book a mic.</h2>
-                        <p class="text-gray-400 text-lg mb-6">Running between clubs for spots? Trying to remember which nights you're booked? One calendar shows your tight 5s, guest sets, and headlining gigs all in one place.</p>
+                        <h2 class="text-3xl lg:text-4xl font-bold text-white mb-6">See your whole week.<br>Never double-book again.</h2>
+                        <p class="text-gray-400 text-lg mb-6">Running between clubs? Texting yourself set times? One calendar shows every mic, every guest set, every headline - plus your total stage time for the week.</p>
                         <ul class="space-y-3 text-gray-300">
                             <li class="flex items-center gap-3">
                                 <svg class="w-5 h-5 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -204,7 +204,7 @@
                             Direct to Fans
                         </div>
                         <h3 class="text-2xl font-bold text-white mb-4">Instagram buried your post.<br>Email won't.</h3>
-                        <p class="text-gray-400 mb-6">Social algorithms hate comedians. You posted about your show and 3% of your followers saw it. With newsletters, 100% of your fans get notified. No algorithm. No pay-to-play.</p>
+                        <p class="text-gray-400 mb-6">You posted about your show. 3% of your followers saw it. The rest saw ads. With email, everyone who signed up actually gets notified. No algorithm deciding who deserves to see it.</p>
 
                         <div class="bg-black/40 rounded-xl border border-white/10 p-4">
                             <div class="flex items-center gap-3 mb-3">
@@ -273,7 +273,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-bold text-white mb-2">Built for late nights</h3>
-                    <p class="text-gray-400 text-sm mb-4">10:30 PM show? Midnight mic? We handle overnight times correctly. No more "is that PM or AM?" confusion.</p>
+                    <p class="text-gray-400 text-sm mb-4">10:30 show? Midnight mic that runs until 2? We get it. No more calendar apps showing tomorrow's date for tonight's set.</p>
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-violet-900/30 border border-violet-800/30">
                         <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -289,8 +289,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-white mb-2">Clubs book you, fans see it</h3>
-                    <p class="text-gray-400 text-sm mb-4">When a club adds you to their lineup, it shows on your schedule automatically. No double-entry.</p>
+                    <h3 class="text-lg font-bold text-white mb-2">Booked by a club? It shows up automatically.</h3>
+                    <p class="text-gray-400 text-sm mb-4">When a club adds you to their lineup, your schedule updates. No copy-paste. No 'wait, what time did they say?'</p>
                     <div class="flex items-center gap-2">
                         <div class="w-6 h-6 rounded bg-amber-900/40 flex items-center justify-center text-amber-300 text-[10px] font-bold">CC</div>
                         <div class="w-6 h-6 rounded bg-rose-900/40 flex items-center justify-center text-rose-300 text-[10px] font-bold">GC</div>
@@ -306,8 +306,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-white mb-2">Promo graphics, auto-made</h3>
-                    <p class="text-gray-400 text-sm mb-4">Download show flyers sized for Instagram. Stop paying designers for every gig announcement.</p>
+                    <h3 class="text-lg font-bold text-white mb-2">Show graphics in one click</h3>
+                    <p class="text-gray-400 text-sm mb-4">Download Instagram-ready flyers for any set. Stop begging your friend who 'knows Canva.'</p>
                     <div class="flex justify-center">
                         <div class="w-16 h-20 rounded-lg bg-gradient-to-br from-orange-600/40 to-rose-600/40 border border-orange-500/30 flex items-center justify-center">
                             <svg class="w-6 h-6 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -351,8 +351,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Getting passed</h3>
-                    <p class="text-gray-400 text-sm">Guest spots coming in? Track which clubs you're regular at and build your schedule.</p>
+                    <h3 class="text-lg font-semibold text-white mb-2">Getting regular</h3>
+                    <p class="text-gray-400 text-sm">Guest spots coming in? Track which rooms you're regular at and build your schedule.</p>
                 </div>
 
                 <!-- Feature Acts -->
@@ -507,7 +507,7 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
-                    Three steps to packed shows
+                    Three steps. More butts in seats.
                 </h2>
             </div>
 
@@ -516,7 +516,7 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-red-600 to-red-700 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-red-600/25">
                         1
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Add your spots</h3>
+                    <h3 class="text-lg font-semibold text-white mb-2">Add your sets</h3>
                     <p class="text-gray-400 text-sm">
                         Import from Google Calendar or add your mics, guest sets, and headlining gigs.
                     </p>
@@ -526,7 +526,7 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-amber-600 to-amber-700 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-amber-600/25">
                         2
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Share your link</h3>
+                    <h3 class="text-lg font-semibold text-white mb-2">Share one link</h3>
                     <p class="text-gray-400 text-sm">
                         Drop it in your bio. Fans see all your upcoming shows in one place.
                     </p>
@@ -554,13 +554,13 @@
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-                Stop posting into the void.
+                Your fans want to see you.<br class="hidden md:block">Give them one link.
             </h2>
             <p class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
-                Your fans want to see you perform. Tell them where.<br class="hidden md:block">Free forever.
+                No catch. No 'premium tier.'<br class="hidden md:block">Free forever.
             </p>
             <a href="{{ route('sign_up') }}" class="group inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-black bg-gradient-to-r from-amber-400 to-amber-500 rounded-2xl hover:scale-105 transition-all shadow-xl shadow-amber-500/20">
-                Start tracking your spots
+                Get your link
                 <svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>

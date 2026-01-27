@@ -971,4 +971,9 @@ return [
 
     // Bot protection
     'turnstile_verification_failed' => 'Verificatie mislukt. Probeer het opnieuw.',
+
+    // Slug pattern
+    'slug_pattern' => 'Evenement URL-patroon',
+    'slug_pattern_help' => 'Pas URL-slugs aan voor nieuwe evenementen. Voorbeeld: {event_name}-{date_dmy}. Laat leeg om de evenementnaam te gebruiken.',
+    'show_available_variables' => 'Beschikbare variabelen tonen',
 ];
