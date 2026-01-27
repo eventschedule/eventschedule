@@ -406,7 +406,26 @@ class MarketingController extends Controller
      */
     public function docsScheduleBasics()
     {
-        return view('marketing.docs.schedule-basics');
+        $customFieldsData = [];
+
+        if (auth()->check()) {
+            $user = auth()->user();
+            $roles = $user->member()->get();
+
+            foreach ($roles as $role) {
+                $fields = $role->getEventCustomFields();
+                if (! empty($fields)) {
+                    $customFieldsData[] = [
+                        'role_name' => $role->name,
+                        'fields' => $fields,
+                    ];
+                }
+            }
+        }
+
+        return view('marketing.docs.schedule-basics', [
+            'customFieldsData' => $customFieldsData,
+        ]);
     }
 
     /**

@@ -1307,7 +1307,7 @@
                                 placeholder="{event_name}" />
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.slug_pattern_help') }}</p>
 
-                            <x-link href="{{ marketing_url('/docs/event-graphics#variables') }}" target="_blank" class="text-sm mt-2">
+                            <x-link href="{{ marketing_url('/docs/schedule-basics#slug-variables') }}" target="_blank" class="text-sm mt-2">
                                 {{ __('messages.show_available_variables') }}
                             </x-link>
                             <x-input-error class="mt-2" :messages="$errors->get('slug_pattern')" />
