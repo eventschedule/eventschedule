@@ -26,7 +26,7 @@
                 <h1 class="text-3xl md:text-4xl font-bold text-white">Advanced Schedule Settings</h1>
             </div>
             <p class="text-lg text-gray-400 max-w-3xl">
-                Configure subschedules, auto import, calendar integrations, and email settings for your schedule.
+                Automate your workflow and never manually add an event again. Configure subschedules, auto import, calendar integrations, and more.
             </p>
         </div>
     </section>
@@ -103,7 +103,8 @@
                             <div class="space-y-4 mb-6">
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
                                     <h4 class="font-semibold text-white mb-2">Import from URLs</h4>
-                                    <p class="text-sm text-gray-400">Add URLs of event pages, venue calendars, or artist websites. Event Schedule's AI will automatically parse and import events from these sources on a regular schedule.</p>
+                                    <p class="text-sm text-gray-400 mb-3">Add URLs of event pages, venue calendars, or artist websites. Event Schedule's AI will automatically parse and import events from these sources on a regular schedule.</p>
+                                    <p class="text-sm text-gray-400"><strong class="text-white">Works great with:</strong> Venue event pages, artist tour pages, Facebook event listings, Eventbrite organizer pages, Bandsintown profiles, and most websites that list events.</p>
                                 </div>
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
                                     <h4 class="font-semibold text-white mb-2">Import by City Search</h4>

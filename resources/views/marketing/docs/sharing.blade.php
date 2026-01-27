@@ -26,7 +26,7 @@
                 <h1 class="text-3xl md:text-4xl font-bold text-white">Sharing Your Schedule</h1>
             </div>
             <p class="text-lg text-gray-400 max-w-3xl">
-                Share your schedule with the world. Embed it on your website, share on social media, and let fans follow your events.
+                Reach your audience wherever they are. Embed your schedule on your website, share on social media, and let fans subscribe to your events.
             </p>
         </div>
     </section>
@@ -43,6 +43,7 @@
                         <a href="#embed" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Embedding on Your Website</a>
                         <a href="#social" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Social Media Sharing</a>
                         <a href="#followers" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Building Followers</a>
+                        <a href="#calendar-feeds" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Calendar Subscriptions</a>
                         <a href="#qr-code" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">QR Codes</a>
                         <a href="#troubleshooting" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Embed Troubleshooting</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">See Also</a>
@@ -143,6 +144,7 @@
                                 <li>Visitors click <strong class="text-white">"Follow"</strong> on your schedule</li>
                                 <li>They enter their email address</li>
                                 <li>Your schedule appears on their dashboard for easy access</li>
+                                <li>They can subscribe to your calendar feed to see events in their own calendar</li>
                                 <li>They can unfollow at any time</li>
                             </ol>
 
@@ -157,6 +159,34 @@
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Privacy</div>
                                 <p>Follower emails are only used for event notifications. We never share or sell email addresses.</p>
+                            </div>
+                        </section>
+
+                        <!-- Calendar Subscriptions -->
+                        <section id="calendar-feeds" class="doc-section">
+                            <h2 class="doc-heading">Calendar Subscriptions</h2>
+                            <p class="text-gray-300 mb-6">Let your audience subscribe to your events directly in their calendar apps. Events automatically stay in sync.</p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">iCal Feed</h4>
+                                    <p class="text-sm text-gray-400 mb-2">Your schedule has an iCal feed URL that works with Google Calendar, Apple Calendar, Outlook, and any calendar app that supports subscriptions.</p>
+                                    <p class="text-sm text-gray-400">Find your iCal URL at: <code class="doc-inline-code">your-schedule-url/ical</code></p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">RSS Feed</h4>
+                                    <p class="text-sm text-gray-400 mb-2">For readers and aggregators that support RSS, your events are available as an RSS feed.</p>
+                                    <p class="text-sm text-gray-400">Find your RSS URL at: <code class="doc-inline-code">your-schedule-url/rss</code></p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Add to Calendar Buttons</h4>
+                                    <p class="text-sm text-gray-400">Each event page includes "Add to Calendar" buttons. Visitors can add individual events to their Google Calendar, Apple Calendar, or download an .ics file.</p>
+                                </div>
+                            </div>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>Subscribed calendars automatically update when you add or change events. No action needed from your subscribers - they always see your latest schedule.</p>
                             </div>
                         </section>
 

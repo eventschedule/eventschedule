@@ -46,6 +46,7 @@
                         <a href="#calendar-sync" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Calendar Sync</a>
                         <a href="#recurring" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Recurring Events</a>
                         <a href="#event-details" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Event Details</a>
+                        <a href="#managing" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Managing Events</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
                 </aside>
@@ -77,12 +78,12 @@
 
                         <!-- AI Import -->
                         <section id="ai-import" class="doc-section">
-                            <h2 class="doc-heading">AI Import</h2>
-                            <p class="text-gray-300 mb-6">Event Schedule uses AI to help you quickly import events from text or images. This feature can save you significant time when adding multiple events.</p>
+                            <h2 class="doc-heading">Let AI Do the Heavy Lifting</h2>
+                            <p class="text-gray-300 mb-6">Save hours of manual data entry. Paste any event text - emails, social media posts, website listings, or even flyer descriptions - and watch it transform into a ready-to-publish event in seconds.</p>
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">AI-Powered</div>
-                                <p>AI import uses Google Gemini to intelligently extract event information from unstructured text and images.</p>
+                                <p>AI import uses Google Gemini to intelligently extract event name, date, time, venue, description, and more from unstructured text and images.</p>
                             </div>
                         </section>
 
@@ -99,18 +100,31 @@
                                 <li>Click <strong class="text-white">"Import"</strong> to add them to your schedule</li>
                             </ol>
 
-                            <div class="bg-white/5 rounded-xl p-4 border border-white/10 mb-6">
-                                <h4 class="font-semibold text-white mb-2">Example Input</h4>
-                                <p class="text-sm text-gray-400 code-block">
-                                    Live Jazz Night<br>
-                                    Friday, March 15th at 8pm<br>
-                                    The Blue Note, 123 Main Street<br>
-                                    Featuring the John Smith Trio<br>
-                                    Tickets: $20
-                                </p>
+                            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Example Input</h4>
+                                    <p class="text-sm text-gray-400 code-block">
+                                        Live Jazz Night<br>
+                                        Friday, March 15th at 8pm<br>
+                                        The Blue Note, 123 Main Street<br>
+                                        Featuring the John Smith Trio<br>
+                                        Tickets: $20
+                                    </p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-emerald-500/30">
+                                    <h4 class="font-semibold text-emerald-400 mb-2">AI Extracts</h4>
+                                    <ul class="text-sm text-gray-400 space-y-1">
+                                        <li><strong class="text-white">Name:</strong> Live Jazz Night</li>
+                                        <li><strong class="text-white">Date:</strong> March 15</li>
+                                        <li><strong class="text-white">Time:</strong> 8:00 PM</li>
+                                        <li><strong class="text-white">Venue:</strong> The Blue Note</li>
+                                        <li><strong class="text-white">Address:</strong> 123 Main Street</li>
+                                        <li><strong class="text-white">Description:</strong> Featuring the John Smith Trio</li>
+                                    </ul>
+                                </div>
                             </div>
 
-                            <p class="text-gray-300">The AI will extract the event name, date, time, venue, and any other relevant details automatically.</p>
+                            <p class="text-gray-300">Review the extracted details, make any corrections, and click Import. You can process multiple events at once.</p>
                         </section>
 
                         <!-- Image Import -->
@@ -155,17 +169,29 @@
                         <!-- Recurring Events -->
                         <section id="recurring" class="doc-section">
                             <h2 class="doc-heading">Recurring Events</h2>
-                            <p class="text-gray-300 mb-6">For events that happen regularly (weekly open mic, monthly meetup), you can add multiple dates at once:</p>
+                            <p class="text-gray-300 mb-6">For events that happen regularly - weekly open mics, monthly meetups, daily happy hours - you can add multiple dates at once.</p>
 
+                            <h3 class="text-lg font-semibold text-white mb-4">Adding Multiple Dates</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>When creating an event, look for the <strong class="text-white">"Add more dates"</strong> option</li>
-                                <li>Add as many dates as needed</li>
-                                <li>All dates will share the same event details</li>
+                                <li>Click to add additional dates - add as many as you need</li>
+                                <li>All dates will share the same event details (name, description, venue)</li>
+                                <li>Each date becomes its own event, so you can edit them individually later if needed</li>
                             </ol>
 
+                            <div class="bg-white/5 rounded-xl p-4 border border-white/10 mb-6">
+                                <h4 class="font-semibold text-white mb-2">Common Patterns</h4>
+                                <ul class="doc-list text-sm">
+                                    <li><strong class="text-white">Weekly:</strong> Open mic nights, trivia, live music residencies</li>
+                                    <li><strong class="text-white">Bi-weekly:</strong> Book clubs, game nights</li>
+                                    <li><strong class="text-white">Monthly:</strong> Networking events, first Friday art walks</li>
+                                    <li><strong class="text-white">Custom:</strong> Festival dates, workshop series</li>
+                                </ul>
+                            </div>
+
                             <div class="doc-callout doc-callout-tip">
-                                <div class="doc-callout-title">Tip</div>
-                                <p>For truly recurring events, consider using Google Calendar sync - create a recurring event in Google Calendar and it will automatically sync to Event Schedule.</p>
+                                <div class="doc-callout-title">Pro Tip: Use Google Calendar for True Recurrence</div>
+                                <p>For events with complex recurrence patterns (every Tuesday and Thursday, first Monday of the month, etc.), create a recurring event in Google Calendar and sync it to Event Schedule. The calendar sync handles all the pattern logic automatically.</p>
                             </div>
                         </section>
 
@@ -221,6 +247,32 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                            </div>
+                        </section>
+
+                        <!-- Managing Events -->
+                        <section id="managing" class="doc-section">
+                            <h2 class="doc-heading">Managing Events</h2>
+                            <p class="text-gray-300 mb-6">Once events are created, you can edit, clone, or delete them from your schedule.</p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Editing Events</h4>
+                                    <p class="text-sm text-gray-400">Click on any event in <strong class="text-white">Admin Panel &rarr; Schedule</strong> to edit it. Changes are saved immediately when you click Save.</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Cloning Events</h4>
+                                    <p class="text-sm text-gray-400">Use the clone option to duplicate an event. Great for creating similar events on different dates - just clone and change the date.</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Deleting Events</h4>
+                                    <p class="text-sm text-gray-400">Delete events from the event edit page. <strong class="text-white">Warning:</strong> If the event has sold tickets, you should refund ticket holders before deleting.</p>
+                                </div>
+                            </div>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Pending Events</div>
+                                <p>If you have "Require Approval" enabled, submitted events appear in a pending queue. Review them in <strong class="text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong> and approve or reject each one.</p>
                             </div>
                         </section>
 

@@ -26,7 +26,7 @@
                 <h1 class="text-3xl md:text-4xl font-bold text-white">Selling Tickets</h1>
             </div>
             <p class="text-lg text-gray-400 max-w-3xl">
-                Set up ticketing for your events. Connect payment processing, create ticket types, and start selling.
+                Set up ticketing for your events with zero platform fees. Connect payment processing, create ticket types, and keep 100% of your sales.
             </p>
         </div>
     </section>
@@ -43,7 +43,9 @@
                         <a href="#payment-setup" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Payment Setup</a>
                         <a href="#create-tickets" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Creating Tickets</a>
                         <a href="#ticket-types" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Ticket Types</a>
+                        <a href="#checkout-fields" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Custom Checkout Fields</a>
                         <a href="#managing-sales" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Managing Sales</a>
+                        <a href="#export" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Exporting Sales Data</a>
                         <a href="#check-in" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Check-in at the Door</a>
                         <a href="#free-events" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Free Events & RSVPs</a>
                         <a href="#financial" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Financial Information</a>
@@ -57,7 +59,12 @@
                         <!-- Overview -->
                         <section id="overview" class="doc-section">
                             <h2 class="doc-heading">Overview</h2>
-                            <p class="text-gray-300 mb-6">Event Schedule includes full ticketing functionality. Sell tickets directly from your event pages with secure payment processing, automatic confirmation emails, and QR code tickets.</p>
+                            <p class="text-gray-300 mb-6">Event Schedule includes full ticketing functionality. Sell tickets directly from your event pages with secure payment processing, automatic confirmation emails, and QR code tickets. <strong class="text-white">Keep 100% of your ticket sales - we never charge platform fees.</strong></p>
+
+                            <div class="doc-callout doc-callout-tip mb-6">
+                                <div class="doc-callout-title">Zero Platform Fees</div>
+                                <p>Unlike other ticketing platforms that take a cut of every sale, Event Schedule charges nothing. You only pay standard payment processor fees (like Stripe's 2.9% + $0.30).</p>
+                            </div>
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
@@ -69,13 +76,15 @@
                                         <li>Automatic confirmation emails</li>
                                         <li>Sales tracking and reporting</li>
                                         <li>Mobile-friendly checkout</li>
+                                        <li>Pay-what-you-wish pricing option</li>
+                                        <li>Custom checkout fields for attendee info</li>
                                     </ul>
                                 </div>
                             </div>
 
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Pro Feature</div>
-                                <p>Ticketing is available on Pro plans. Upgrade your schedule to enable ticket sales.</p>
+                                <p>Ticketing is available on Pro plans. The first year is free, then just $5/month - still with zero platform fees on your ticket sales.</p>
                             </div>
                         </section>
 
@@ -125,8 +134,8 @@
                                 <li>Enter ticket details:
                                     <ul class="doc-list mt-2 mb-2">
                                         <li>Name (e.g., "General Admission", "VIP")</li>
-                                        <li>Price</li>
-                                        <li>Quantity available (optional)</li>
+                                        <li>Price (or $0 for free tickets, or leave blank for pay-what-you-wish)</li>
+                                        <li>Quantity available (leave blank for unlimited)</li>
                                         <li>Description (optional)</li>
                                     </ul>
                                 </li>
@@ -170,16 +179,49 @@
                                             <td><span class="font-semibold text-white">Table</span></td>
                                             <td>Reserved seating for groups</td>
                                         </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-white">Pay What You Wish</span></td>
+                                            <td>Let attendees choose their price (set minimum optional)</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
 
                             <h3 class="text-lg font-semibold text-white mb-4">Ticket Settings</h3>
-                            <ul class="doc-list">
-                                <li><strong class="text-white">Quantity:</strong> Limit how many tickets can be sold</li>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-white">Quantity:</strong> Limit how many tickets can be sold (leave blank for unlimited)</li>
                                 <li><strong class="text-white">Per-person limit:</strong> Limit how many one person can buy</li>
                                 <li><strong class="text-white">Sales end date:</strong> Stop selling tickets at a specific time</li>
+                                <li><strong class="text-white">Combined inventory:</strong> Set a total ticket limit across all ticket types for your event</li>
                             </ul>
+                        </section>
+
+                        <!-- Custom Checkout Fields -->
+                        <section id="checkout-fields" class="doc-section">
+                            <h2 class="doc-heading">Custom Checkout Fields</h2>
+                            <p class="text-gray-300 mb-6">Collect additional information from attendees during checkout. You can add up to 8 custom fields per event.</p>
+
+                            <h3 class="text-lg font-semibold text-white mb-4">Setting Up Custom Fields</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Edit your event</li>
+                                <li>Scroll to the <strong class="text-white">"Checkout Fields"</strong> section</li>
+                                <li>Add field labels (e.g., "Dietary Requirements", "T-Shirt Size")</li>
+                                <li>Mark fields as required or optional</li>
+                                <li>Save the event</li>
+                            </ol>
+
+                            <div class="bg-white/5 rounded-xl p-4 border border-white/10 mb-6">
+                                <h4 class="font-semibold text-white mb-2">Common Use Cases</h4>
+                                <ul class="doc-list text-sm">
+                                    <li>Dietary restrictions for catered events</li>
+                                    <li>T-shirt sizes for swag</li>
+                                    <li>Company name for business events</li>
+                                    <li>Emergency contact information</li>
+                                    <li>How did you hear about us?</li>
+                                </ul>
+                            </div>
+
+                            <p class="text-gray-300">Responses are stored with each sale and can be viewed in your sales dashboard or exported.</p>
                         </section>
 
                         <!-- Managing Sales -->
@@ -201,6 +243,36 @@
                                 <li><strong class="text-white">Mark as paid:</strong> For cash or external payments</li>
                                 <li><strong class="text-white">Cancel/refund:</strong> Cancel a sale (refunds handled in Stripe)</li>
                             </ul>
+                        </section>
+
+                        <!-- Export -->
+                        <section id="export" class="doc-section">
+                            <h2 class="doc-heading">Exporting Sales Data</h2>
+                            <p class="text-gray-300 mb-6">Export your sales data for accounting, tax purposes, or to import into other systems.</p>
+
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Go to <strong class="text-white">Admin Panel &rarr; Sales</strong></li>
+                                <li>Filter by event or date range if needed</li>
+                                <li>Click the <strong class="text-white">"Export"</strong> button</li>
+                                <li>Download your sales data as a spreadsheet</li>
+                            </ol>
+
+                            <div class="bg-white/5 rounded-xl p-4 border border-white/10 mb-6">
+                                <h4 class="font-semibold text-white mb-2">Export Includes</h4>
+                                <ul class="doc-list text-sm">
+                                    <li>Buyer name and email</li>
+                                    <li>Ticket type and quantity</li>
+                                    <li>Purchase date and amount</li>
+                                    <li>Payment status</li>
+                                    <li>Check-in status</li>
+                                    <li>Custom checkout field responses</li>
+                                </ul>
+                            </div>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>Export your sales data regularly for your records. This is especially useful for tax reporting and financial reconciliation.</p>
+                            </div>
                         </section>
 
                         <!-- Check-in -->
