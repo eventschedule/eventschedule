@@ -37,6 +37,7 @@ return [
     'log_in' => 'התחברות',
     'name' => 'שם',
     'english_name' => 'שם באנגלית',
+    'auto_translated_placeholder' => 'יתורגם אוטומטית אם יישאר ריק',
     'confirm_password' => 'אשר סיסמה',
     'terms_of_service' => 'תנאי השירות',
     'privacy_policy' => 'מדיניות פרטיות',

@@ -344,37 +344,66 @@ https://example.com/event/summer-concert</code></pre>
                             <p class="text-gray-300 mb-4">
                                 If you have defined <a href="{{ marketing_url('/custom-fields') }}" class="text-rose-400 hover:text-rose-300">Event Custom Fields</a> in your schedule settings, you can include their values in graphics using numbered variables.
                             </p>
-                            <div class="overflow-x-auto mb-6">
-                                <table class="doc-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Variable</th>
-                                            <th>Description</th>
-                                            <th>Example</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><code class="doc-inline-code">{custom_1}</code></td>
-                                            <td>Value of the 1st custom field</td>
-                                            <td>John Smith</td>
-                                        </tr>
-                                        <tr>
-                                            <td><code class="doc-inline-code">{custom_2}</code></td>
-                                            <td>Value of the 2nd custom field</td>
-                                            <td>Room 101</td>
-                                        </tr>
-                                        <tr>
-                                            <td><code class="doc-inline-code">{custom_3}</code></td>
-                                            <td>Value of the 3rd custom field</td>
-                                            <td>Workshop</td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="3" class="text-gray-400 text-sm">...up to {custom_8}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+
+                            @if (!empty($customFieldsData))
+                                {{-- Dynamic: Show user's actual custom fields --}}
+                                @foreach ($customFieldsData as $scheduleData)
+                                    <h4 class="text-md font-medium text-gray-200 mb-2">{{ $scheduleData['role_name'] }}</h4>
+                                    <div class="overflow-x-auto mb-6">
+                                        <table class="doc-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Variable</th>
+                                                    <th>Field Name</th>
+                                                    <th>Type</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($scheduleData['fields'] as $index => $field)
+                                                <tr>
+                                                    <td><code class="doc-inline-code">{custom_{{ $loop->iteration }}}</code></td>
+                                                    <td>{{ $field['name'] }}</td>
+                                                    <td>{{ ucfirst(str_replace('_', ' ', $field['type'] ?? 'string')) }}</td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endforeach
+                            @else
+                                {{-- Static: Generic documentation for logged-out users or users without custom fields --}}
+                                <div class="overflow-x-auto mb-6">
+                                    <table class="doc-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Variable</th>
+                                                <th>Description</th>
+                                                <th>Example</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><code class="doc-inline-code">{custom_1}</code></td>
+                                                <td>Value of the 1st custom field</td>
+                                                <td>John Smith</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code class="doc-inline-code">{custom_2}</code></td>
+                                                <td>Value of the 2nd custom field</td>
+                                                <td>Room 101</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code class="doc-inline-code">{custom_3}</code></td>
+                                                <td>Value of the 3rd custom field</td>
+                                                <td>Workshop</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="3" class="text-gray-400 text-sm">...up to {custom_8}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
 
                             <div class="doc-callout doc-callout-tip mb-6">
                                 <div class="doc-callout-title">Tip</div>

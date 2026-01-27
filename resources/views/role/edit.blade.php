@@ -572,7 +572,6 @@
                     <option value="section-contact-info">{{ __('messages.contact_info') }}</option>
                     <option value="section-style">{{ __('messages.schedule_style') }}</option>
                     <option value="section-settings">{{ __('messages.schedule_settings') }}</option>
-                    <option value="section-subschedules">{{ __('messages.subschedules') }}</option>
                     @if (! config('app.hosted'))
                     <option value="section-auto-import">{{ __('messages.auto_import_settings') }}</option>
                     @endif
@@ -623,19 +622,6 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                                 {{ __('messages.schedule_settings') }}
-                            </a>
-                            <a href="#section-event-custom-fields" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-event-custom-fields">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
-                                </svg>
-                                {{ __('messages.event_custom_fields') }}
-                            </a>
-                            <a href="#section-subschedules" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-subschedules">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 004.5 9v.878m13.5-3A2.25 2.25 0 0119.5 9v.878m0 0a2.25 2.25 0 01-2.25 2.25h-4.5A2.25 2.25 0 0113.5 9.878m-4.5 0a2.25 2.25 0 00-2.25 2.25v6a2.25 2.25 0 002.25 2.25h10.5A2.25 2.25 0 0021.75 18v-6a2.25 2.25 0 00-2.25-2.25h-4.5m-4.5 0V9a2.25 2.25 0 012.25-2.25h4.5m0 0V6a2.25 2.25 0 00-2.25-2.25h-4.5A2.25 2.25 0 009 6v.878" />
-                                </svg>
-                                {{ __('messages.subschedules') }}
                             </a>
                             @if (! config('app.hosted'))
                             <a href="#section-auto-import" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-auto-import">
@@ -1204,7 +1190,25 @@
                             {{ __('messages.demo_mode_settings_disabled') }}
                         </div>
                         @endif
-                        
+
+                        <!-- Tab Navigation -->
+                        <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                            <nav class="flex space-x-4" aria-label="Tabs">
+                                <button type="button" class="settings-tab px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="general">
+                                    {{ __('messages.general') }}
+                                </button>
+                                <button type="button" class="settings-tab px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
+                                    {{ __('messages.custom_fields') }}
+                                </button>
+                                <button type="button" class="settings-tab px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="subschedules">
+                                    {{ __('messages.subschedules') }}
+                                </button>
+                            </nav>
+                        </div>
+
+                        <!-- Tab Content: General -->
+                        <div id="settings-tab-general" class="settings-tab-content">
+
                         @if ($role->exists)
                         <div class="mb-6" id="url-display">
                             <x-input-label :value="__('messages.schedule_url')" />
@@ -1322,21 +1326,11 @@
                         </div>
                         -->
 
+                        </div>
+                        <!-- End Tab Content: General -->
 
-                    </div>
-                </div>
-
-                <div id="section-event-custom-fields" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
-                    <div class="max-w-xl">
-
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
-                            </svg>
-                            {{ __('messages.event_custom_fields') }}
-                        </h2>
-
+                        <!-- Tab Content: Custom Fields -->
+                        <div id="settings-tab-custom-fields" class="settings-tab-content hidden">
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                             {{ __('messages.event_custom_fields_help') }}
                         </p>
@@ -1368,6 +1362,15 @@
                                         </select>
                                     </div>
                                 </div>
+                                @if($role->language_code !== 'en')
+                                <div class="mt-3">
+                                    <x-input-label :value="__('messages.english_name')" class="text-sm" />
+                                    <x-text-input type="text" name="event_custom_fields[{{ $fieldKey }}][name_en]"
+                                        value="{{ $field['name_en'] ?? '' }}"
+                                        class="mt-1 block w-full"
+                                        :placeholder="__('messages.auto_translated_placeholder')" />
+                                </div>
+                                @endif
                                 <div class="mt-3 event-field-options-container" style="{{ ($field['type'] ?? '') === 'dropdown' ? '' : 'display: none;' }}">
                                     <x-input-label :value="__('messages.field_options')" class="text-sm" />
                                     <x-text-input type="text" name="event_custom_fields[{{ $fieldKey }}][options]"
@@ -1400,20 +1403,11 @@
                         <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
                             {{ __('messages.event_custom_fields_graphic_help') }}
                         </p>
+                        </div>
+                        <!-- End Tab Content: Custom Fields -->
 
-                    </div>
-                </div>
-
-                <div id="section-subschedules" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
-                    <div class="max-w-xl">
-
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 004.5 9v.878m13.5-3A2.25 2.25 0 0119.5 9v.878m0 0a2.25 2.25 0 01-2.25 2.25h-4.5A2.25 2.25 0 0113.5 9.878m-4.5 0a2.25 2.25 0 00-2.25 2.25v6a2.25 2.25 0 002.25 2.25h10.5A2.25 2.25 0 0021.75 18v-6a2.25 2.25 0 00-2.25-2.25h-4.5m-4.5 0V9a2.25 2.25 0 012.25-2.25h4.5m0 0V6a2.25 2.25 0 00-2.25-2.25h-4.5A2.25 2.25 0 009 6v.878" />
-                            </svg>
-                            {{ __('messages.subschedules') }}
-                        </h2>
-
+                        <!-- Tab Content: Subschedules -->
+                        <div id="settings-tab-subschedules" class="settings-tab-content hidden">
                         <div class="mb-6">
                             <div id="groups-list">
                                 @php $groups = $role->groups ?? []; @endphp
@@ -1476,6 +1470,8 @@
                             </div>
                             <x-input-error class="mt-2" :messages="$errors->get('groups')" />
                         </div>
+                        </div>
+                        <!-- End Tab Content: Subschedules -->
 
                     </div>
                 </div>
@@ -2019,7 +2015,7 @@ function addGroupField() {
         </div>
         @endif
         <div class="flex gap-4 items-center">
-            <button type="button" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.parentElement.remove()">
+            <button type="button" class="inline-flex items-center justify-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.parentElement.remove()">
                 {{ __('messages.remove') }}
             </button>
         </div>
@@ -2219,7 +2215,7 @@ function addImportUrlField() {
             <input name="import_urls[new_${idx}]" type="url" id="import_url_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
         </div>
         <div class="flex gap-4 items-center">
-            <button type="button" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.parentElement.remove()">
+            <button type="button" class="inline-flex items-center justify-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.parentElement.remove()">
                 {{ __('messages.remove') }}
             </button>
         </div>
@@ -2238,7 +2234,7 @@ function addImportCityField() {
             <input name="import_cities[new_${idx}]" type="text" id="import_city_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" placeholder="New York" />
         </div>
         <div class="flex gap-4 items-center">
-            <button type="button" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.parentElement.remove()">
+            <button type="button" class="inline-flex items-center justify-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.parentElement.remove()">
                 {{ __('messages.remove') }}
             </button>
         </div>
@@ -2769,6 +2765,49 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Settings tabs switching
+document.addEventListener('DOMContentLoaded', function() {
+    const settingsTabs = document.querySelectorAll('.settings-tab');
+    const settingsTabContents = document.querySelectorAll('.settings-tab-content');
+
+    // Restore active tab from localStorage
+    const savedSettingsTab = localStorage.getItem('settingsActiveTab');
+    if (savedSettingsTab) {
+        switchSettingsTab(savedSettingsTab);
+    }
+
+    settingsTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabName = this.dataset.tab;
+            switchSettingsTab(tabName);
+            localStorage.setItem('settingsActiveTab', tabName);
+        });
+    });
+
+    function switchSettingsTab(tabName) {
+        // Update tab buttons
+        settingsTabs.forEach(tab => {
+            if (tab.dataset.tab === tabName) {
+                tab.classList.add('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
+            } else {
+                tab.classList.remove('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
+            }
+        });
+
+        // Update tab contents
+        settingsTabContents.forEach(content => {
+            const contentId = content.id.replace('settings-tab-', '');
+            if (contentId === tabName) {
+                content.classList.remove('hidden');
+            } else {
+                content.classList.add('hidden');
+            }
+        });
+    }
+});
+
 // CalDAV integration functions
 document.addEventListener('DOMContentLoaded', function() {
     const caldavTestBtn = document.getElementById('caldav-test-btn');
@@ -3058,6 +3097,14 @@ function addEventCustomField() {
                     </select>
                 </div>
             </div>
+            @if($role->language_code !== 'en')
+            <div class="mt-3">
+                <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.english_name') !!}</label>
+                <input type="text" name="event_custom_fields[${fieldKey}][name_en]"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                    placeholder="{!! __('messages.auto_translated_placeholder') !!}" />
+            </div>
+            @endif
             <div class="mt-3 event-field-options-container" style="display: none;">
                 <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_options') !!}</label>
                 <input type="text" name="event_custom_fields[${fieldKey}][options]"
@@ -3072,7 +3119,7 @@ function addEventCustomField() {
                         class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
                     <label for="event_field_required_${fieldKey}" class="ml-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{!! __('messages.field_required') !!}</label>
                 </div>
-                <button type="button" onclick="removeEventCustomField(this)" class="inline-flex items-center px-2 py-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
+                <button type="button" onclick="removeEventCustomField(this)" class="inline-flex items-center justify-center px-2 py-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
                     {!! __('messages.remove') !!}
                 </button>
             </div>

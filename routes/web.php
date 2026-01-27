@@ -253,6 +253,9 @@ if (config('app.is_nexus')) {
         Route::get('/for-talent', [MarketingController::class, 'forTalent'])->name('marketing.for_talent');
         Route::get('/for-venues', [MarketingController::class, 'forVenues'])->name('marketing.for_venues');
         Route::get('/for-curators', [MarketingController::class, 'forCurators'])->name('marketing.for_curators');
+        Route::get('/for-musicians', [MarketingController::class, 'forMusicians'])->name('marketing.for_musicians');
+        Route::get('/for-djs', [MarketingController::class, 'forDJs'])->name('marketing.for_djs');
+        Route::get('/for-comedians', [MarketingController::class, 'forComedians'])->name('marketing.for_comedians');
         Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
         Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
         Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
@@ -307,6 +310,9 @@ if (config('app.is_nexus')) {
             Route::get('/for-talent', [MarketingController::class, 'forTalent'])->name('marketing.for_talent');
             Route::get('/for-venues', [MarketingController::class, 'forVenues'])->name('marketing.for_venues');
             Route::get('/for-curators', [MarketingController::class, 'forCurators'])->name('marketing.for_curators');
+            Route::get('/for-musicians', [MarketingController::class, 'forMusicians'])->name('marketing.for_musicians');
+            Route::get('/for-djs', [MarketingController::class, 'forDJs'])->name('marketing.for_djs');
+            Route::get('/for-comedians', [MarketingController::class, 'forComedians'])->name('marketing.for_comedians');
             Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
             Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
             Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
@@ -362,6 +368,9 @@ if (config('app.is_nexus')) {
             Route::get('/for-talent', fn () => redirect('https://eventschedule.com/for-talent', 301));
             Route::get('/for-venues', fn () => redirect('https://eventschedule.com/for-venues', 301));
             Route::get('/for-curators', fn () => redirect('https://eventschedule.com/for-curators', 301));
+            Route::get('/for-musicians', fn () => redirect('https://eventschedule.com/for-musicians', 301));
+            Route::get('/for-djs', fn () => redirect('https://eventschedule.com/for-djs', 301));
+            Route::get('/for-comedians', fn () => redirect('https://eventschedule.com/for-comedians', 301));
             Route::get('/privacy', fn () => redirect('https://eventschedule.com/privacy', 301));
             Route::get('/terms-of-service', fn () => redirect('https://eventschedule.com/terms-of-service', 301));
             Route::get('/self-hosting-terms-of-service', fn () => redirect('https://eventschedule.com/self-hosting-terms-of-service', 301));
@@ -415,6 +424,9 @@ if (config('app.is_nexus')) {
     Route::get('/for-talent', fn () => redirect()->route('home'));
     Route::get('/for-venues', fn () => redirect()->route('home'));
     Route::get('/for-curators', fn () => redirect()->route('home'));
+    Route::get('/for-musicians', fn () => redirect()->route('home'));
+    Route::get('/for-djs', fn () => redirect()->route('home'));
+    Route::get('/for-comedians', fn () => redirect()->route('home'));
     Route::get('/selfhost', fn () => redirect()->route('home'));
     Route::get('/saas', fn () => redirect()->route('home'));
     Route::get('/docs', fn () => redirect()->route('home'));

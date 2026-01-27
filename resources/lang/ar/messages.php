@@ -36,6 +36,7 @@ return [
     'log_in' => 'تسجيل الدخول',
     'name' => 'الاسم',
     'english_name' => 'الاسم بالإنجليزية',
+    'auto_translated_placeholder' => 'يترجم تلقائياً إذا ترك فارغاً',
     'confirm_password' => 'تأكيد كلمة المرور',
     'terms_of_service' => 'شروط الخدمة',
     'privacy_policy' => 'سياسة الخصوصية',

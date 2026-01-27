@@ -117,6 +117,10 @@ class Translate extends Command
                         $q->whereNotNull('request_terms')
                             ->where('request_terms', '!=', '')
                             ->whereNull('request_terms_en');
+                    })
+                    ->orWhere(function ($q) {
+                        // Include roles with custom fields that might need translation
+                        $q->whereNotNull('event_custom_fields');
                     });
             });
 
@@ -205,6 +209,44 @@ class Translate extends Command
                 $role->request_terms_en = GeminiUtils::translate($role->request_terms, $role->language_code, 'en');
                 if ($debug) {
                     $this->info("Translated request terms from {$role->language_code} to en: '{$role->request_terms}' → '{$role->request_terms_en}'");
+                }
+            }
+
+            // Translate event custom field names
+            if ($role->event_custom_fields) {
+                $customFields = $role->event_custom_fields;
+                $fieldsNeedingTranslation = [];
+
+                foreach ($customFields as $fieldKey => $fieldConfig) {
+                    if (! empty($fieldConfig['name']) && empty($fieldConfig['name_en'])) {
+                        $fieldsNeedingTranslation[$fieldKey] = $fieldConfig['name'];
+                    }
+                }
+
+                if (! empty($fieldsNeedingTranslation)) {
+                    if ($debug) {
+                        $this->info('Translating '.count($fieldsNeedingTranslation).' custom field names');
+                    }
+
+                    try {
+                        $translations = GeminiUtils::translateCustomFieldNames(
+                            array_values($fieldsNeedingTranslation),
+                            $role->language_code
+                        );
+
+                        foreach ($fieldsNeedingTranslation as $fieldKey => $fieldName) {
+                            if (isset($translations[$fieldName])) {
+                                $customFields[$fieldKey]['name_en'] = $translations[$fieldName];
+                                if ($debug) {
+                                    $this->info("Translated custom field '{$fieldName}' → '{$translations[$fieldName]}'");
+                                }
+                            }
+                        }
+
+                        $role->event_custom_fields = $customFields;
+                    } catch (\Exception $e) {
+                        $this->error('Failed to translate custom field names: '.$e->getMessage());
+                    }
                 }
             }
 

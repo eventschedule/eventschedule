@@ -174,6 +174,30 @@ class MarketingController extends Controller
     }
 
     /**
+     * For Musicians page
+     */
+    public function forMusicians()
+    {
+        return view('marketing.for-musicians');
+    }
+
+    /**
+     * For DJs page
+     */
+    public function forDJs()
+    {
+        return view('marketing.for-djs');
+    }
+
+    /**
+     * For Comedians page
+     */
+    public function forComedians()
+    {
+        return view('marketing.for-comedians');
+    }
+
+    /**
      * Integrations page
      */
     public function integrations()
@@ -294,7 +318,27 @@ class MarketingController extends Controller
      */
     public function docsEventGraphics()
     {
-        return view('marketing.docs.event-graphics');
+        $customFieldsData = [];
+
+        if (auth()->check()) {
+            $user = auth()->user();
+            // Get roles where user is owner or admin
+            $roles = $user->member()->get();
+
+            foreach ($roles as $role) {
+                $fields = $role->getEventCustomFields();
+                if (! empty($fields)) {
+                    $customFieldsData[] = [
+                        'role_name' => $role->name,
+                        'fields' => $fields,
+                    ];
+                }
+            }
+        }
+
+        return view('marketing.docs.event-graphics', [
+            'customFieldsData' => $customFieldsData,
+        ]);
     }
 
     // ==========================================
