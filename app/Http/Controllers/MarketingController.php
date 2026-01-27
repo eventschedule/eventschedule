@@ -198,6 +198,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * For Circus & Acrobatics page
+     */
+    public function forCircusAcrobatics()
+    {
+        return view('marketing.for-circus-acrobatics');
+    }
+
+    /**
      * Integrations page
      */
     public function integrations()
