@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->
         <div class="absolute inset-0">
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-amber-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
@@ -23,19 +23,19 @@
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-8">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
                 <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                 </svg>
-                <span class="text-sm text-gray-300">For Bars, Pubs & Taprooms</span>
+                <span class="text-sm text-gray-600 dark:text-gray-300">For Bars, Pubs & Taprooms</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
                 <span class="text-gradient-amber">Your bar.</span><br>
                 Your crowd.
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
                 Stop paying to reach your own regulars. Build your email list, announce what's on, and fill your bar - without begging the algorithm.
             </p>
 
@@ -61,12 +61,12 @@
     </section>
 
     <!-- Bento Grid Features -->
-    <section class="bg-[#0a0a0f] py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Weekly Regulars Email - HERO FEATURE (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
@@ -75,11 +75,11 @@
                                 </svg>
                                 Newsletter
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Tell your regulars what's on</h3>
-                            <p class="text-gray-400 text-lg mb-6">No algorithm. No pay-to-play. Wednesday trivia's back? New band this Friday? One click sends the week's lineup straight to everyone who wants to know.</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Tell your regulars what's on</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">No algorithm. No pay-to-play. Wednesday trivia's back? New band this Friday? One click sends the week's lineup straight to everyone who wants to know.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Skip the algorithm</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Your crowd, your reach</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Skip the algorithm</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Your crowd, your reach</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -92,22 +92,22 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <div class="text-white text-sm font-medium">This Week at The Tap Room</div>
+                                            <div class="text-gray-900 dark:text-white text-sm font-medium">This Week at The Tap Room</div>
                                             <div class="text-amber-300 text-xs">Sending to 847 followers...</div>
                                         </div>
                                     </div>
                                     <div class="space-y-2">
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
                                             <div class="w-2 h-2 rounded-full bg-amber-400"></div>
-                                            <span class="text-gray-300 text-xs">Wed - Trivia Night</span>
+                                            <span class="text-gray-600 dark:text-gray-300 text-xs">Wed - Trivia Night</span>
                                         </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
                                             <div class="w-2 h-2 rounded-full bg-orange-400"></div>
-                                            <span class="text-gray-300 text-xs">Fri - Live Jazz</span>
+                                            <span class="text-gray-600 dark:text-gray-300 text-xs">Fri - Live Jazz</span>
                                         </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
                                             <div class="w-2 h-2 rounded-full bg-yellow-400"></div>
-                                            <span class="text-gray-300 text-xs">Sat - IPA Release Party</span>
+                                            <span class="text-gray-600 dark:text-gray-300 text-xs">Sat - IPA Release Party</span>
                                         </div>
                                     </div>
                                 </div>
@@ -117,24 +117,24 @@
                 </div>
 
                 <!-- Your Bar's Rhythm -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-900/50 to-amber-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-900/50 to-amber-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 text-orange-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                         Recurring Events
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Trivia Wednesdays. Jazz Fridays.</h3>
-                    <p class="text-gray-400 mb-6">Bars run on weekly rhythms. Set up recurring events once, they show automatically.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Trivia Wednesdays. Jazz Fridays.</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Bars run on weekly rhythms. Set up recurring events once, they show automatically.</p>
 
                     <!-- Mini week view -->
                     <div class="grid grid-cols-7 gap-1">
                         <div class="text-center">
-                            <div class="text-gray-500 text-[10px] mb-1">M</div>
-                            <div class="w-6 h-6 rounded-full bg-white/5 mx-auto"></div>
+                            <div class="text-gray-500 dark:text-gray-500 text-[10px] mb-1">M</div>
+                            <div class="w-6 h-6 rounded-full bg-gray-100 dark:bg-white/5 mx-auto"></div>
                         </div>
                         <div class="text-center">
-                            <div class="text-gray-500 text-[10px] mb-1">T</div>
+                            <div class="text-gray-500 dark:text-gray-500 text-[10px] mb-1">T</div>
                             <div class="w-6 h-6 rounded-full bg-amber-500/30 border border-amber-400/50 mx-auto"></div>
                         </div>
                         <div class="text-center">
@@ -142,7 +142,7 @@
                             <div class="w-6 h-6 rounded-full bg-orange-500 mx-auto"></div>
                         </div>
                         <div class="text-center">
-                            <div class="text-gray-500 text-[10px] mb-1">T</div>
+                            <div class="text-gray-500 dark:text-gray-500 text-[10px] mb-1">T</div>
                             <div class="w-6 h-6 rounded-full bg-amber-500/30 border border-amber-400/50 mx-auto"></div>
                         </div>
                         <div class="text-center">
@@ -154,23 +154,23 @@
                             <div class="w-6 h-6 rounded-full bg-orange-500 mx-auto"></div>
                         </div>
                         <div class="text-center">
-                            <div class="text-gray-500 text-[10px] mb-1">S</div>
+                            <div class="text-gray-500 dark:text-gray-500 text-[10px] mb-1">S</div>
                             <div class="w-6 h-6 rounded-full bg-amber-500/30 border border-amber-400/50 mx-auto"></div>
                         </div>
                     </div>
-                    <div class="text-center mt-3 text-gray-500 text-xs">Weekly events auto-repeat</div>
+                    <div class="text-center mt-3 text-gray-500 dark:text-gray-500 text-xs">Weekly events auto-repeat</div>
                 </div>
 
                 <!-- Tap Takeovers & Specials -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-yellow-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-yellow-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                         </svg>
                         Specials
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Announce what's pouring</h3>
-                    <p class="text-gray-400 mb-6">New keg? Brewery collab? Whiskey tasting? Let your crowd know what's special this week.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Announce what's pouring</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">New keg? Brewery collab? Whiskey tasting? Let your crowd know what's special this week.</p>
 
                     <!-- Tap handles visual -->
                     <div class="flex justify-center gap-3">
@@ -188,7 +188,7 @@
                 </div>
 
                 <!-- Watch Parties & Game Days (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-900/50 to-emerald-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-900/50 to-emerald-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/20 text-green-300 text-sm font-medium mb-4">
@@ -197,21 +197,21 @@
                                 </svg>
                                 Watch Parties
                             </div>
-                            <h3 class="text-3xl font-bold text-white mb-4">Game on the big screen</h3>
-                            <p class="text-gray-400 text-lg mb-4">NFL Sundays, UFC fight nights, World Cup matches. Your sports fans follow to know what's showing and when.</p>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Game on the big screen</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">NFL Sundays, UFC fight nights, World Cup matches. Your sports fans follow to know what's showing and when.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Live sports</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Watch parties</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Big screen events</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Live sports</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Watch parties</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Big screen events</span>
                             </div>
                         </div>
                         <div class="flex justify-center">
                             <!-- TV screen visual -->
-                            <div class="bg-black/50 rounded-xl border-4 border-gray-700 p-4 w-48">
+                            <div class="bg-gray-200 dark:bg-black/50 rounded-xl border-4 border-gray-700 p-4 w-48">
                                 <div class="bg-gradient-to-br from-green-600/30 to-emerald-600/30 rounded-lg p-3 text-center">
                                     <div class="text-3xl mb-1">&#9917;</div>
                                     <div class="text-green-300 text-sm font-bold">LIVE</div>
-                                    <div class="text-gray-400 text-xs">Sunday 4pm</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-xs">Sunday 4pm</div>
                                 </div>
                                 <div class="flex justify-center gap-1 mt-2">
                                     <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
@@ -224,15 +224,15 @@
                 </div>
 
                 <!-- Ticketed Events -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-900/50 to-pink-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-900/50 to-pink-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                         </svg>
                         Ticketing
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Charge at the door</h3>
-                    <p class="text-gray-400 mb-6">Comedy night? Special tasting? Sell tickets, scan QR codes at entry. Zero platform fees.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Charge at the door</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Comedy night? Special tasting? Sell tickets, scan QR codes at entry. Zero platform fees.</p>
 
                     <div class="flex justify-center">
                         <div class="w-20 h-20 bg-white rounded-xl p-2 relative">
@@ -240,25 +240,25 @@
                             <div class="absolute inset-x-0 top-2 h-0.5 bg-gradient-to-r from-rose-500 to-pink-500 animate-pulse"></div>
                         </div>
                     </div>
-                    <div class="text-center mt-3 text-gray-400 text-xs">Scan to check in</div>
+                    <div class="text-center mt-3 text-gray-500 dark:text-gray-400 text-xs">Scan to check in</div>
                 </div>
 
                 <!-- Performers Request to Play -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-violet-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-violet-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         Booking Inbox
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Bands come to you</h3>
-                    <p class="text-gray-400 mb-6">Musicians and DJs request to play. Review, approve, book - without the back-and-forth.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Bands come to you</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Musicians and DJs request to play. Review, approve, book - without the back-and-forth.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-500/20 border border-indigo-400/30">
                             <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white text-xs font-semibold">BT</div>
                             <div class="flex-1">
-                                <div class="text-white text-sm font-medium">Blues Trio</div>
+                                <div class="text-gray-900 dark:text-white text-sm font-medium">Blues Trio</div>
                                 <div class="text-indigo-300 text-xs">Requesting Sat night</div>
                             </div>
                             <div class="flex gap-1">
@@ -274,19 +274,19 @@
                 </div>
 
                 <!-- What's Working -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-teal-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-teal-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                         Analytics
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">See what fills seats</h3>
-                    <p class="text-gray-400 mb-6">Which nights draw crowds? What events get shares? Know what's working.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">See what fills seats</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Which nights draw crowds? What events get shares? Know what's working.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
-                            <span class="text-gray-400 text-xs">Trivia</span>
+                            <span class="text-gray-500 dark:text-gray-400 text-xs">Trivia</span>
                             <div class="flex items-center gap-2">
                                 <div class="w-20 h-2 bg-cyan-500/30 rounded-full overflow-hidden">
                                     <div class="w-[90%] h-full bg-cyan-400 rounded-full"></div>
@@ -294,7 +294,7 @@
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-gray-400 text-xs">Live Music</span>
+                            <span class="text-gray-500 dark:text-gray-400 text-xs">Live Music</span>
                             <div class="flex items-center gap-2">
                                 <div class="w-20 h-2 bg-cyan-500/30 rounded-full overflow-hidden">
                                     <div class="w-[65%] h-full bg-cyan-400 rounded-full"></div>
@@ -302,7 +302,7 @@
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-gray-400 text-xs">Karaoke</span>
+                            <span class="text-gray-500 dark:text-gray-400 text-xs">Karaoke</span>
                             <div class="flex items-center gap-2">
                                 <div class="w-20 h-2 bg-cyan-500/30 rounded-full overflow-hidden">
                                     <div class="w-[45%] h-full bg-cyan-400 rounded-full"></div>
@@ -317,34 +317,34 @@
     </section>
 
     <!-- Your Week at a Glance Section - UNIQUE TO BARS -->
-    <section class="bg-[#0f0f14] py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Your week at a glance
                 </h2>
-                <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
                     Bars run on rhythm. Weekly trivia, Friday bands, Sunday brunch - your regulars know the schedule by heart. Show them what's on, every week.
                 </p>
             </div>
 
             <!-- Weekly Calendar Visual -->
-            <div class="bg-gradient-to-br from-amber-900/30 to-orange-900/30 rounded-3xl border border-white/10 p-6 md:p-8">
+            <div class="bg-gradient-to-br from-amber-900/30 to-orange-900/30 rounded-3xl border border-gray-200 dark:border-white/10 p-6 md:p-8">
                 <div class="grid grid-cols-7 gap-2 md:gap-4">
                     <!-- Monday -->
                     <div class="text-center">
-                        <div class="text-gray-500 text-xs md:text-sm font-medium mb-2 md:mb-3">Mon</div>
-                        <div class="bg-white/5 rounded-xl p-2 md:p-3 min-h-[80px] md:min-h-[100px]">
+                        <div class="text-gray-500 dark:text-gray-500 text-xs md:text-sm font-medium mb-2 md:mb-3">Mon</div>
+                        <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-2 md:p-3 min-h-[80px] md:min-h-[100px]">
                             <div class="text-amber-400 text-[10px] md:text-xs font-medium">Industry Night</div>
-                            <div class="text-gray-500 text-[9px] md:text-[10px] mt-1">50% off for service workers</div>
+                            <div class="text-gray-500 dark:text-gray-500 text-[9px] md:text-[10px] mt-1">50% off for service workers</div>
                         </div>
                     </div>
                     <!-- Tuesday -->
                     <div class="text-center">
-                        <div class="text-gray-500 text-xs md:text-sm font-medium mb-2 md:mb-3">Tue</div>
-                        <div class="bg-white/5 rounded-xl p-2 md:p-3 min-h-[80px] md:min-h-[100px]">
+                        <div class="text-gray-500 dark:text-gray-500 text-xs md:text-sm font-medium mb-2 md:mb-3">Tue</div>
+                        <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-2 md:p-3 min-h-[80px] md:min-h-[100px]">
                             <div class="text-orange-400 text-[10px] md:text-xs font-medium">Taco Tuesday</div>
-                            <div class="text-gray-500 text-[9px] md:text-[10px] mt-1">$2 tacos all night</div>
+                            <div class="text-gray-500 dark:text-gray-500 text-[9px] md:text-[10px] mt-1">$2 tacos all night</div>
                         </div>
                     </div>
                     <!-- Wednesday - Highlighted -->
@@ -358,10 +358,10 @@
                     </div>
                     <!-- Thursday -->
                     <div class="text-center">
-                        <div class="text-gray-500 text-xs md:text-sm font-medium mb-2 md:mb-3">Thu</div>
-                        <div class="bg-white/5 rounded-xl p-2 md:p-3 min-h-[80px] md:min-h-[100px]">
+                        <div class="text-gray-500 dark:text-gray-500 text-xs md:text-sm font-medium mb-2 md:mb-3">Thu</div>
+                        <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-2 md:p-3 min-h-[80px] md:min-h-[100px]">
                             <div class="text-violet-400 text-[10px] md:text-xs font-medium">Open Mic</div>
-                            <div class="text-gray-500 text-[9px] md:text-[10px] mt-1">Sign up 6pm</div>
+                            <div class="text-gray-500 dark:text-gray-500 text-[9px] md:text-[10px] mt-1">Sign up 6pm</div>
                         </div>
                     </div>
                     <!-- Friday -->
@@ -382,10 +382,10 @@
                     </div>
                     <!-- Sunday -->
                     <div class="text-center">
-                        <div class="text-gray-500 text-xs md:text-sm font-medium mb-2 md:mb-3">Sun</div>
-                        <div class="bg-white/5 rounded-xl p-2 md:p-3 min-h-[80px] md:min-h-[100px]">
+                        <div class="text-gray-500 dark:text-gray-500 text-xs md:text-sm font-medium mb-2 md:mb-3">Sun</div>
+                        <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-2 md:p-3 min-h-[80px] md:min-h-[100px]">
                             <div class="text-yellow-400 text-[10px] md:text-xs font-medium">Brunch</div>
-                            <div class="text-gray-500 text-[9px] md:text-[10px] mt-1">Bloody Mary bar</div>
+                            <div class="text-gray-500 dark:text-gray-500 text-[9px] md:text-[10px] mt-1">Bloody Mary bar</div>
                         </div>
                     </div>
                 </div>

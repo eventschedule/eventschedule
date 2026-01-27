@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class EventRepo
 {
@@ -450,6 +451,18 @@ class EventRepo
         }
 
         if ($request->hasFile('flyer_image')) {
+            $file = $request->file('flyer_image');
+
+            // Validate file extension and MIME type
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $extension = strtolower($file->getClientOriginalExtension());
+            if (! in_array($extension, $allowedExtensions) || ! in_array($file->getMimeType(), $allowedMimeTypes)) {
+                throw ValidationException::withMessages([
+                    'flyer_image' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp',
+                ]);
+            }
+
             if ($event->flyer_image_url) {
                 $path = $event->getAttributes()['flyer_image_url'];
                 if (config('filesystems.default') == 'local') {
@@ -458,8 +471,7 @@ class EventRepo
                 Storage::delete($path);
             }
 
-            $file = $request->file('flyer_image');
-            $filename = strtolower('flyer_'.Str::random(32).'.'.$file->getClientOriginalExtension());
+            $filename = strtolower('flyer_'.Str::random(32).'.'.$extension);
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $event->flyer_image_url = $filename;

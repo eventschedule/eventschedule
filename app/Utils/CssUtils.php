@@ -33,6 +33,9 @@ class CssUtils
      * - javascript: - JavaScript URLs
      * - @import - External stylesheet inclusion
      * - behavior, binding, -moz-binding - Browser-specific code execution
+     * - url() with http/https/data URIs - External resource loading and data exfiltration
+     * - @font-face - External font loading (can be used for data exfiltration)
+     * - @charset - Character set manipulation
      */
     private static function removeDangerousCss(string $css): string
     {
@@ -41,6 +44,12 @@ class CssUtils
             '/javascript\s*:/i',
             '/@import/i',
             '/(behavior|binding|-moz-binding)\s*:/i',
+            // Block url() with external protocols or data URIs
+            '/url\s*\(\s*["\']?\s*(https?:|data:|\/\/)/i',
+            // Block @font-face entirely (external font loading)
+            '/@font-face\s*\{[^}]*\}/is',
+            // Block @charset manipulation
+            '/@charset/i',
         ];
 
         return preg_replace($patterns, '', $css);

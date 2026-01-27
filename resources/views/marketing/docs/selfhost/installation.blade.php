@@ -7,7 +7,7 @@
     @include('marketing.docs.partials.styles')
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-16 overflow-hidden border-b border-white/5">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-cyan-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
             <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-teal-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
@@ -23,30 +23,30 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold text-white">Installation Guide</h1>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Installation Guide</h1>
             </div>
-            <p class="text-lg text-gray-400 max-w-3xl">
+            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
                 Set up Event Schedule on your own server with this step-by-step guide. For automated installation, consider using <a href="https://www.softaculous.com/apps/calendars/Event_Schedule" target="_blank" class="text-cyan-400 hover:text-cyan-300">Softaculous</a> or <a href="https://github.com/eventschedule/dockerfiles" target="_blank" class="text-cyan-400 hover:text-cyan-300">Docker</a>.
             </p>
         </div>
     </section>
 
     <!-- Main Content -->
-    <section class="bg-[#0a0a0f] py-12">
+    <section class="bg-white dark:bg-[#0a0a0f] py-12">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row gap-10">
                 <!-- Sidebar Navigation -->
                 <aside class="lg:w-64 flex-shrink-0">
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
-                        <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Overview</a>
-                        <a href="#requirements" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Requirements</a>
-                        <a href="#database" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">1. Set Up Database</a>
-                        <a href="#download" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">2. Download Application</a>
-                        <a href="#permissions" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">3. Set File Permissions</a>
-                        <a href="#environment" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">4. Configure Environment</a>
-                        <a href="#cron" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">5. Set Up Cron Job</a>
-                        <a href="#verification" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Verification</a>
+                        <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Overview</a>
+                        <a href="#requirements" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Requirements</a>
+                        <a href="#database" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">1. Set Up Database</a>
+                        <a href="#download" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">2. Download Application</a>
+                        <a href="#permissions" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">3. Set File Permissions</a>
+                        <a href="#environment" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">4. Configure Environment</a>
+                        <a href="#cron" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">5. Set Up Cron Job</a>
+                        <a href="#verification" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Verification</a>
                     </nav>
                 </aside>
 
@@ -56,7 +56,7 @@
                         <!-- Overview -->
                         <section id="overview" class="doc-section">
                             <h2 class="doc-heading">Overview</h2>
-                            <p class="text-gray-300 mb-6">This guide walks you through manually installing Event Schedule on your own server. The installation process involves setting up a database, downloading the application files, configuring permissions, and setting up scheduled tasks.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">This guide walks you through manually installing Event Schedule on your own server. The installation process involves setting up a database, downloading the application files, configuring permissions, and setting up scheduled tasks.</p>
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Automated Installation Options</div>
@@ -71,7 +71,7 @@
                         <!-- Requirements -->
                         <section id="requirements" class="doc-section">
                             <h2 class="doc-heading">Requirements</h2>
-                            <p class="text-gray-300 mb-6">Before you begin, ensure your server meets the following requirements:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Before you begin, ensure your server meets the following requirements:</p>
 
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
@@ -84,22 +84,22 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td><span class="font-semibold text-white">PHP</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">PHP</span></td>
                                             <td>8.1+</td>
                                             <td>With required extensions (see below)</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">MySQL</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">MySQL</span></td>
                                             <td>5.7+ or MariaDB 10.3+</td>
                                             <td>For database storage</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Web Server</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Web Server</span></td>
                                             <td>Apache or Nginx</td>
                                             <td>With mod_rewrite or equivalent</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">SSL Certificate</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">SSL Certificate</span></td>
                                             <td>Required</td>
                                             <td>HTTPS is required for security</td>
                                         </tr>
@@ -107,7 +107,7 @@
                                 </table>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Required PHP Extensions</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Required PHP Extensions</h3>
                             <ul class="doc-list">
                                 <li>BCMath</li>
                                 <li>Ctype</li>
@@ -126,7 +126,7 @@
                         <!-- 1. Set Up Database -->
                         <section id="database" class="doc-section">
                             <h2 class="doc-heading">1. Set Up the Database</h2>
-                            <p class="text-gray-300 mb-6">Create a MySQL database and user for Event Schedule. Run the following commands in your MySQL client:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Create a MySQL database and user for Event Schedule. Run the following commands in your MySQL client:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -147,7 +147,7 @@
                         <!-- 2. Download Application -->
                         <section id="download" class="doc-section">
                             <h2 class="doc-heading">2. Download the Application</h2>
-                            <p class="text-gray-300 mb-6">Download the latest release and extract it to your web server's document root.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Download the latest release and extract it to your web server's document root.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Download <a href="https://github.com/eventschedule/eventschedule/releases/latest" target="_blank" class="text-cyan-400 hover:text-cyan-300">eventschedule.zip</a> from the latest GitHub release</li>
@@ -174,7 +174,7 @@
                         <!-- 3. Set File Permissions -->
                         <section id="permissions" class="doc-section">
                             <h2 class="doc-heading">3. Set File Permissions</h2>
-                            <p class="text-gray-300 mb-6">Ensure the web server has proper permissions to write to storage and cache directories.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Ensure the web server has proper permissions to write to storage and cache directories.</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -195,7 +195,7 @@
                         <!-- 4. Configure Environment -->
                         <section id="environment" class="doc-section">
                             <h2 class="doc-heading">4. Configure Environment</h2>
-                            <p class="text-gray-300 mb-6">Copy the example environment file to create your configuration:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Copy the example environment file to create your configuration:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -205,7 +205,7 @@
                                 <pre><code><span class="code-keyword">cp</span> .env.example .env</code></pre>
                             </div>
 
-                            <p class="text-gray-300 mb-6">Now access your application at <code class="doc-inline-code">https://your-domain.com</code> in your browser. You'll see the setup wizard where you can configure:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Now access your application at <code class="doc-inline-code">https://your-domain.com</code> in your browser. You'll see the setup wizard where you can configure:</p>
 
                             <ul class="doc-list mb-6">
                                 <li>Database connection details</li>
@@ -214,17 +214,17 @@
                                 <li>Admin account credentials</li>
                             </ul>
 
-                            <div class="bg-white/5 rounded-xl p-4 border border-white/10 mb-6">
-                                <p class="text-gray-300 text-sm">The setup wizard will guide you through the initial configuration and run database migrations automatically.</p>
+                            <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
+                                <p class="text-gray-600 dark:text-gray-300 text-sm">The setup wizard will guide you through the initial configuration and run database migrations automatically.</p>
                             </div>
                         </section>
 
                         <!-- 5. Set Up Cron Job -->
                         <section id="cron" class="doc-section">
                             <h2 class="doc-heading">5. Set Up the Cron Job</h2>
-                            <p class="text-gray-300 mb-6">Event Schedule requires a cron job to run scheduled tasks like sending reminder emails, syncing calendars, and releasing expired ticket reservations.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule requires a cron job to run scheduled tasks like sending reminder emails, syncing calendars, and releasing expired ticket reservations.</p>
 
-                            <p class="text-gray-300 mb-4">Add the following line to your server's crontab:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Add the following line to your server's crontab:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -234,8 +234,8 @@
                                 <pre><code>* * * * * php /path/to/eventschedule/artisan schedule:run</code></pre>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4 mt-8">Adding the Cron Job</h3>
-                            <p class="text-gray-300 mb-4">To edit your crontab, run:</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Adding the Cron Job</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">To edit your crontab, run:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -245,7 +245,7 @@
                                 <pre><code><span class="code-keyword">crontab</span> -e</code></pre>
                             </div>
 
-                            <p class="text-gray-300 mb-4">Add the cron line at the end of the file, making sure to replace <code class="doc-inline-code">/path/to/eventschedule</code> with your actual installation path.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Add the cron line at the end of the file, making sure to replace <code class="doc-inline-code">/path/to/eventschedule</code> with your actual installation path.</p>
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">cPanel Users</div>
@@ -256,13 +256,13 @@
                         <!-- Verification -->
                         <section id="verification" class="doc-section">
                             <h2 class="doc-heading">Verification</h2>
-                            <p class="text-gray-300 mb-6">After completing the installation, verify everything is working correctly:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">After completing the installation, verify everything is working correctly:</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li><span class="font-semibold text-white">Access the application:</span> Visit <code class="doc-inline-code">https://your-domain.com</code> and confirm the homepage loads</li>
-                                <li><span class="font-semibold text-white">Create an account:</span> Register a new user account to verify database connectivity</li>
-                                <li><span class="font-semibold text-white">Create a schedule:</span> Create a test schedule and add an event</li>
-                                <li><span class="font-semibold text-white">Check logs:</span> Review <code class="doc-inline-code">storage/logs/laravel.log</code> for any errors</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Access the application:</span> Visit <code class="doc-inline-code">https://your-domain.com</code> and confirm the homepage loads</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Create an account:</span> Register a new user account to verify database connectivity</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Create a schedule:</span> Create a test schedule and add an event</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Check logs:</span> Review <code class="doc-inline-code">storage/logs/laravel.log</code> for any errors</li>
                             </ol>
 
                             <div class="doc-callout doc-callout-info">
@@ -270,8 +270,8 @@
                                 <p>If you encounter any issues during installation, check the <a href="https://github.com/eventschedule/eventschedule/issues" target="_blank" class="text-cyan-400 hover:text-cyan-300">GitHub Issues</a> or start a <a href="https://github.com/eventschedule/eventschedule/discussions" target="_blank" class="text-cyan-400 hover:text-cyan-300">Discussion</a>.</p>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4 mt-8">Next Steps</h3>
-                            <p class="text-gray-300 mb-4">Now that Event Schedule is installed, you may want to:</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Next Steps</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Now that Event Schedule is installed, you may want to:</p>
                             <ul class="doc-list">
                                 <li>Configure <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="text-cyan-400 hover:text-cyan-300">Stripe payments</a> for ticket sales</li>
                                 <li>Set up <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="text-cyan-400 hover:text-cyan-300">Google Calendar integration</a></li>

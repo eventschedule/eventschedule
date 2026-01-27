@@ -42,9 +42,9 @@
                     {{ __('API Key') }}
                 </label>
                 <div class="mt-1 relative">
-                    <input type="text" id="api_key" 
-                           value="{{ session('show_new_api_key') ? auth()->user()->api_key : substr(auth()->user()->api_key, 0, 6) . str_repeat('•', 26) }}" 
-                           class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm {{ session('show_new_api_key') ? 'rounded-r-none pr-12' : '' }} font-mono" 
+                    <input type="text" id="api_key"
+                           value="{{ session('new_api_key') ? session('new_api_key') : str_repeat('•', 32) }}"
+                           class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm {{ session('show_new_api_key') ? 'rounded-r-none pr-12' : '' }} font-mono"
                            readonly>
                     @if(session('show_new_api_key'))
                         <div class="absolute inset-y-0 right-0 flex items-center">

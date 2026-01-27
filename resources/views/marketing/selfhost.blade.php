@@ -19,7 +19,7 @@
     </style>
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->
         <div class="absolute inset-0">
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
@@ -31,20 +31,20 @@
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-8">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
                 <span class="relative flex h-2 w-2">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span class="text-sm text-gray-300">100% Open Source</span>
+                <span class="text-sm text-gray-600 dark:text-gray-300">100% Open Source</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
                 Your server,<br>
                 <span class="text-gradient">your rules</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
                 Run Event Schedule on your own infrastructure. Full control, exclusive features, and zero platform fees.
             </p>
 
@@ -55,7 +55,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                 </a>
-                <a href="https://github.com/eventschedule/eventschedule" target="_blank" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white glass border border-white/10 rounded-2xl hover:bg-white/10 transition-all">
+                <a href="https://github.com/eventschedule/eventschedule" target="_blank" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-gray-900 dark:text-white glass border border-gray-200 dark:border-white/10 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all">
                     <svg class="mr-2 w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                     </svg>
@@ -66,7 +66,7 @@
     </section>
 
     <!-- Installation Options -->
-    <section class="bg-[#0a0a0f] py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
@@ -75,15 +75,15 @@
                     </svg>
                     Easy Installation
                 </div>
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Get up and running in minutes</h2>
-                <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Get up and running in minutes</h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
                     Choose your preferred installation method. Both options provide automated setup with minimal configuration.
                 </p>
             </div>
 
             <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                 <!-- Softaculous -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-white/10 p-8 flex flex-col h-full">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-gray-200 dark:border-white/10 p-8 flex flex-col h-full">
                     <div class="flex items-center gap-4 mb-6">
                         <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
                             <svg class="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -91,27 +91,27 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-2xl font-bold text-white">Softaculous</h3>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Softaculous</h3>
                             <p class="text-blue-300">One-click installer</p>
                         </div>
                     </div>
-                    <p class="text-gray-400 mb-6">
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">
                         Available on most cPanel hosting providers. Install Event Schedule with a single click - no command line required.
                     </p>
                     <ul class="space-y-3 mb-8 flex-grow">
-                        <li class="flex items-center gap-3 text-gray-300">
+                        <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Automatic database setup
                         </li>
-                        <li class="flex items-center gap-3 text-gray-300">
+                        <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Auto-configured environment
                         </li>
-                        <li class="flex items-center gap-3 text-gray-300">
+                        <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
@@ -127,7 +127,7 @@
                 </div>
 
                 <!-- Docker -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-teal-900/50 border border-white/10 p-8 flex flex-col h-full">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-teal-900/50 border border-gray-200 dark:border-white/10 p-8 flex flex-col h-full">
                     <div class="flex items-center gap-4 mb-6">
                         <div class="w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
                             <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -135,27 +135,27 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-2xl font-bold text-white">Docker</h3>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Docker</h3>
                             <p class="text-cyan-300">Containerized deployment</p>
                         </div>
                     </div>
-                    <p class="text-gray-400 mb-6">
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">
                         Deploy with Docker Compose for a consistent, isolated environment. Perfect for VPS, cloud servers, or local development.
                     </p>
                     <ul class="space-y-3 mb-8 flex-grow">
-                        <li class="flex items-center gap-3 text-gray-300">
+                        <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Isolated environment
                         </li>
-                        <li class="flex items-center gap-3 text-gray-300">
+                        <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Easy scaling and backups
                         </li>
-                        <li class="flex items-center gap-3 text-gray-300">
+                        <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
@@ -174,7 +174,7 @@
     </section>
 
     <!-- One-Click Updates -->
-    <section class="bg-[#0a0a0f] py-24 border-t border-white/5">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <div>
@@ -184,8 +184,8 @@
                         </svg>
                         Automatic Updates
                     </div>
-                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">One-click updates</h2>
-                    <p class="text-xl text-gray-400 mb-8">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">One-click updates</h2>
+                    <p class="text-xl text-gray-500 dark:text-gray-400 mb-8">
                         Keep your installation up to date with a single click. When a new version is available, just click the update button in your admin panel - no terminal access needed.
                     </p>
                     <ul class="space-y-4">
@@ -196,8 +196,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h4 class="font-semibold text-white">Database migrations included</h4>
-                                <p class="text-gray-400 text-sm">Schema changes are applied automatically</p>
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Database migrations included</h4>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm">Schema changes are applied automatically</p>
                             </div>
                         </li>
                         <li class="flex items-start gap-4">
@@ -207,8 +207,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h4 class="font-semibold text-white">No downtime required</h4>
-                                <p class="text-gray-400 text-sm">Updates complete in seconds with minimal disruption</p>
+                                <h4 class="font-semibold text-gray-900 dark:text-white">No downtime required</h4>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm">Updates complete in seconds with minimal disruption</p>
                             </div>
                         </li>
                         <li class="flex items-start gap-4">
@@ -218,34 +218,34 @@
                                 </svg>
                             </div>
                             <div>
-                                <h4 class="font-semibold text-white">Version notifications</h4>
-                                <p class="text-gray-400 text-sm">Get notified in your admin panel when updates are available</p>
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Version notifications</h4>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm">Get notified in your admin panel when updates are available</p>
                             </div>
                         </li>
                     </ul>
                 </div>
                 <div class="relative">
-                    <div class="animate-float bg-gradient-to-br from-violet-900/50 to-purple-900/50 border border-white/10 rounded-2xl p-6 shadow-2xl">
+                    <div class="animate-float bg-gradient-to-br from-violet-900/50 to-purple-900/50 border border-gray-200 dark:border-white/10 rounded-2xl p-6 shadow-2xl">
                         <div class="flex items-center justify-between mb-6">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
                                     <span class="text-white font-bold">ES</span>
                                 </div>
                                 <div>
-                                    <div class="text-white font-semibold">Event Schedule</div>
-                                    <div class="text-gray-400 text-sm">v2.4.1 installed</div>
+                                    <div class="text-gray-900 dark:text-white font-semibold">Event Schedule</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-sm">v2.4.1 installed</div>
                                 </div>
                             </div>
                             <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-medium">
                                 Update Available
                             </span>
                         </div>
-                        <div class="bg-black/30 rounded-xl p-4 mb-4">
+                        <div class="bg-gray-200 dark:bg-black/30 rounded-xl p-4 mb-4">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-gray-300">New version:</span>
-                                <span class="text-white font-medium">v2.5.0</span>
+                                <span class="text-gray-600 dark:text-gray-300">New version:</span>
+                                <span class="text-gray-900 dark:text-white font-medium">v2.5.0</span>
                             </div>
-                            <div class="text-gray-400 text-sm">
+                            <div class="text-gray-500 dark:text-gray-400 text-sm">
                                 New features, bug fixes, and security updates
                             </div>
                         </div>
@@ -262,7 +262,7 @@
     </section>
 
     <!-- Selfhost Exclusive Features -->
-    <section class="bg-[#0a0a0f] py-24 border-t border-white/5">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
@@ -271,37 +271,37 @@
                     </svg>
                     Exclusive Features
                 </div>
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Only available when selfhosting</h2>
-                <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Only available when selfhosting</h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
                     Unlock powerful features that are exclusive to selfhosted installations.
                 </p>
             </div>
 
             <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                 <!-- Auto Import -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
                         Auto Import
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-4">Automatic event importing</h3>
-                    <p class="text-gray-400 mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Automatic event importing</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">
                         Automatically pull events from external websites into your schedule. Our intelligent system extracts event details from any webpage using AI-powered parsing.
                     </p>
-                    <div class="bg-black/30 rounded-xl p-4 mb-6">
+                    <div class="bg-gray-200 dark:bg-black/30 rounded-xl p-4 mb-6">
                         <div class="flex items-center gap-3 mb-3">
                             <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
-                            <span class="text-white font-medium">Respects robots.txt</span>
+                            <span class="text-gray-900 dark:text-white font-medium">Respects robots.txt</span>
                         </div>
-                        <p class="text-gray-400 text-sm">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">
                             We check each website's robots.txt file before importing to ensure we only access content that site owners have permitted for automated access.
                         </p>
                     </div>
-                    <ul class="space-y-2 text-gray-300 text-sm">
+                    <ul class="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
                         <li class="flex items-center gap-2">
                             <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -324,18 +324,18 @@
                 </div>
 
                 <!-- AI Blog -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-900/50 to-pink-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-900/50 to-pink-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                         </svg>
                         AI-Powered Blog
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-4">Automated content for SEO</h3>
-                    <p class="text-gray-400 mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Automated content for SEO</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">
                         Generate relevant blog content automatically to drive organic traffic to your event schedule. Our AI creates engaging posts tailored to your events and audience.
                     </p>
-                    <div class="bg-black/30 rounded-xl p-4 mb-6">
+                    <div class="bg-gray-200 dark:bg-black/30 rounded-xl p-4 mb-6">
                         <div class="space-y-3">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-lg bg-fuchsia-500/30 flex items-center justify-center">
@@ -344,7 +344,7 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <div class="text-white text-sm font-medium">Best Jazz Venues in Your City</div>
+                                    <div class="text-gray-900 dark:text-white text-sm font-medium">Best Jazz Venues in Your City</div>
                                     <div class="text-gray-500 text-xs">Generated 2 hours ago</div>
                                 </div>
                             </div>
@@ -355,13 +355,13 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <div class="text-white text-sm font-medium">This Week's Must-See Events</div>
+                                    <div class="text-gray-900 dark:text-white text-sm font-medium">This Week's Must-See Events</div>
                                     <div class="text-gray-500 text-xs">Scheduled for tomorrow</div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <ul class="space-y-2 text-gray-300 text-sm">
+                    <ul class="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
                         <li class="flex items-center gap-2">
                             <svg class="w-4 h-4 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -387,44 +387,44 @@
     </section>
 
     <!-- Open Source Section -->
-    <section class="bg-[#0a0a0f] py-24 border-t border-white/5">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/5">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
-                <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/10 mb-8">
-                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gray-200 dark:bg-white/10 mb-8">
+                    <svg class="w-10 h-10 text-gray-900 dark:text-white" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                     </svg>
                 </div>
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
                     100% Open Source
                 </h2>
-                <p class="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+                <p class="text-xl text-gray-500 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
                     Event Schedule is fully open source under the AAL license. Inspect the code, contribute improvements, or fork it for your own needs.
                 </p>
 
                 <div class="grid sm:grid-cols-3 gap-6 mb-10">
-                    <div class="bg-white/5 rounded-xl p-6 border border-white/10">
-                        <div class="text-3xl font-bold text-white mb-2">100%</div>
-                        <div class="text-gray-400 text-sm">Open Source</div>
+                    <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-6 border border-gray-200 dark:border-white/10">
+                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">100%</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-sm">Open Source</div>
                     </div>
-                    <div class="bg-white/5 rounded-xl p-6 border border-white/10">
-                        <div class="text-3xl font-bold text-white mb-2">Free</div>
-                        <div class="text-gray-400 text-sm">Forever</div>
+                    <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-6 border border-gray-200 dark:border-white/10">
+                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Free</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-sm">Forever</div>
                     </div>
-                    <div class="bg-white/5 rounded-xl p-6 border border-white/10">
-                        <div class="text-3xl font-bold text-white mb-2">AAL</div>
-                        <div class="text-gray-400 text-sm">Licensed</div>
+                    <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-6 border border-gray-200 dark:border-white/10">
+                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">AAL</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-sm">Licensed</div>
                     </div>
                 </div>
 
                 <div class="flex flex-wrap justify-center gap-4">
-                    <a href="https://github.com/eventschedule/eventschedule" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white font-medium transition-colors">
+                    <a href="https://github.com/eventschedule/eventschedule" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 border border-gray-300 dark:border-white/20 rounded-xl text-gray-900 dark:text-white font-medium transition-colors">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                         </svg>
                         Main Repository
                     </a>
-                    <a href="https://github.com/eventschedule/dockerfiles" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white font-medium transition-colors">
+                    <a href="https://github.com/eventschedule/dockerfiles" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 border border-gray-300 dark:border-white/20 rounded-xl text-gray-900 dark:text-white font-medium transition-colors">
                         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m0 2.716h2.118a.187.187 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.887c0 .102.082.186.185.186m-2.93 0h2.12a.186.186 0 00.184-.186V6.29a.185.185 0 00-.185-.185H8.1a.185.185 0 00-.185.185v1.887c0 .102.083.186.185.186m-2.964 0h2.119a.186.186 0 00.185-.186V6.29a.185.185 0 00-.185-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.186.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m-2.93 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.083.185.185.185m-2.964 0h2.119a.185.185 0 00.185-.185V9.006a.185.185 0 00-.185-.186h-2.119a.185.185 0 00-.186.185v1.888c0 .102.084.185.186.185m-2.92 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.186.185v1.888c0 .102.084.185.186.185m-.165 2.715h2.119a.186.186 0 00.185-.185v-1.888a.185.185 0 00-.185-.185H2.136a.186.186 0 00-.186.185v1.888c0 .102.084.185.186.185"/>
                         </svg>
@@ -436,9 +436,9 @@
     </section>
 
     <!-- SaaS White-Label Section -->
-    <section class="bg-[#0a0a0f] py-24 border-t border-white/5">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 via-violet-900/50 to-purple-900/50 border border-white/10 p-8 md:p-12">
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 via-violet-900/50 to-purple-900/50 border border-gray-200 dark:border-white/10 p-8 md:p-12">
                 <!-- Background decoration -->
                 <div class="absolute top-0 right-0 w-64 h-64 bg-violet-500/20 rounded-full blur-[100px]"></div>
                 <div class="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-[100px]"></div>
@@ -451,32 +451,32 @@
                             </svg>
                             Business Opportunity
                         </div>
-                        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                             Build your own SaaS business
                         </h2>
-                        <p class="text-xl text-gray-300 mb-6">
+                        <p class="text-xl text-gray-600 dark:text-gray-300 mb-6">
                             Turn Event Schedule into your own white-label SaaS platform. Offer event scheduling as a service to your customers under your own brand.
                         </p>
                         <ul class="space-y-3 mb-8">
-                            <li class="flex items-center gap-3 text-gray-300">
+                            <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                                 <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Multi-tenant architecture built-in
                             </li>
-                            <li class="flex items-center gap-3 text-gray-300">
+                            <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                                 <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Stripe integration for subscriptions
                             </li>
-                            <li class="flex items-center gap-3 text-gray-300">
+                            <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                                 <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Full white-label customization
                             </li>
-                            <li class="flex items-center gap-3 text-gray-300">
+                            <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                                 <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
@@ -493,42 +493,42 @@
 
                     <!-- Visual mockup -->
                     <div class="relative">
-                        <div class="bg-black/30 rounded-2xl border border-white/10 p-6">
+                        <div class="bg-gray-200 dark:bg-black/30 rounded-2xl border border-gray-200 dark:border-white/10 p-6">
                             <div class="flex items-center gap-3 mb-6">
                                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
                                     <span class="text-white font-bold text-sm">YB</span>
                                 </div>
                                 <div>
-                                    <div class="text-white font-semibold">Your Brand</div>
-                                    <div class="text-gray-400 text-sm">yourbrand.com</div>
+                                    <div class="text-gray-900 dark:text-white font-semibold">Your Brand</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-sm">yourbrand.com</div>
                                 </div>
                             </div>
                             <div class="space-y-4">
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/5">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-100 dark:border-white/5">
                                     <div class="flex justify-between items-center mb-2">
-                                        <span class="text-gray-300 text-sm">Monthly subscribers</span>
+                                        <span class="text-gray-600 dark:text-gray-300 text-sm">Monthly subscribers</span>
                                         <span class="text-emerald-400 text-sm">+12%</span>
                                     </div>
-                                    <div class="text-2xl font-bold text-white">247</div>
+                                    <div class="text-2xl font-bold text-gray-900 dark:text-white">247</div>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/5">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-100 dark:border-white/5">
                                     <div class="flex justify-between items-center mb-2">
-                                        <span class="text-gray-300 text-sm">Monthly revenue</span>
+                                        <span class="text-gray-600 dark:text-gray-300 text-sm">Monthly revenue</span>
                                         <span class="text-emerald-400 text-sm">+8%</span>
                                     </div>
-                                    <div class="text-2xl font-bold text-white">$4,940</div>
+                                    <div class="text-2xl font-bold text-gray-900 dark:text-white">$4,940</div>
                                 </div>
                                 <div class="grid grid-cols-3 gap-2">
                                     <div class="bg-violet-500/20 rounded-lg p-3 text-center">
-                                        <div class="text-white font-semibold">Free</div>
+                                        <div class="text-gray-900 dark:text-white font-semibold">Free</div>
                                         <div class="text-violet-300 text-xs">142 users</div>
                                     </div>
                                     <div class="bg-indigo-500/20 rounded-lg p-3 text-center">
-                                        <div class="text-white font-semibold">Pro</div>
+                                        <div class="text-gray-900 dark:text-white font-semibold">Pro</div>
                                         <div class="text-indigo-300 text-xs">89 users</div>
                                     </div>
                                     <div class="bg-purple-500/20 rounded-lg p-3 text-center">
-                                        <div class="text-white font-semibold">Team</div>
+                                        <div class="text-gray-900 dark:text-white font-semibold">Team</div>
                                         <div class="text-purple-300 text-xs">16 users</div>
                                     </div>
                                 </div>

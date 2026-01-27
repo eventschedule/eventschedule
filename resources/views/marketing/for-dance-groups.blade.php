@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
 
     <!-- Hero Section - Movement/Flow Theme -->
-    <section class="relative bg-gradient-to-b from-stone-950 via-stone-900 to-stone-950 py-32 overflow-hidden">
+    <section class="relative bg-gradient-to-b from-white via-gray-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-950 py-32 overflow-hidden">
         <!-- Flowing gradient shapes suggesting movement -->
         <div class="absolute inset-0 overflow-hidden">
             <div class="absolute top-0 -left-20 w-[500px] h-[800px] bg-gradient-to-br from-rose-500/20 via-pink-500/10 to-transparent rounded-full blur-3xl transform -rotate-12"></div>
@@ -25,16 +25,16 @@
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-sm">
-                <span class="text-sm text-rose-200/80">For Dance Companies, Troupes & Studios</span>
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8 backdrop-blur-sm">
+                <span class="text-sm text-rose-600 dark:text-rose-200/80">For Dance Companies, Troupes & Studios</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-light text-white mb-6 leading-tight tracking-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-light text-gray-900 dark:text-white mb-6 leading-tight tracking-tight">
                 From studio<br>
                 <span class="font-normal bg-gradient-to-r from-rose-300 via-pink-300 to-fuchsia-300 bg-clip-text text-transparent">to stage</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-stone-400 max-w-2xl mx-auto mb-12 font-light">
+            <p class="text-xl md:text-2xl text-stone-500 dark:text-stone-400 max-w-2xl mx-auto mb-12 font-light">
                 One schedule for rehearsals, performances, and classes. One link for your audience to find you.
             </p>
 
@@ -48,42 +48,42 @@
     </section>
 
     <!-- The Dance Life Section - Unique to dancers -->
-    <section class="bg-stone-950 py-20">
+    <section class="bg-gray-50 dark:bg-stone-950 py-20">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-4 gap-8 text-center">
                 <div class="p-6">
                     <div class="text-4xl mb-3">🩰</div>
-                    <div class="text-stone-400 text-sm">Rehearsals sync to your public schedule</div>
+                    <div class="text-stone-500 dark:text-stone-400 text-sm">Rehearsals sync to your public schedule</div>
                 </div>
                 <div class="p-6">
                     <div class="text-4xl mb-3">🎭</div>
-                    <div class="text-stone-400 text-sm">Sell tickets to performances directly</div>
+                    <div class="text-stone-500 dark:text-stone-400 text-sm">Sell tickets to performances directly</div>
                 </div>
                 <div class="p-6">
                     <div class="text-4xl mb-3">📧</div>
-                    <div class="text-stone-400 text-sm">Build your email list, own your audience</div>
+                    <div class="text-stone-500 dark:text-stone-400 text-sm">Build your email list, own your audience</div>
                 </div>
                 <div class="p-6">
                     <div class="text-4xl mb-3">🎓</div>
-                    <div class="text-stone-400 text-sm">Fill your classes and workshops</div>
+                    <div class="text-stone-500 dark:text-stone-400 text-sm">Fill your classes and workshops</div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Main Feature: Season Planning -->
-    <section class="bg-stone-900 py-24">
+    <section class="bg-white dark:bg-stone-900 py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div>
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-500/10 text-rose-300 text-sm font-medium mb-6 border border-rose-500/20">
                         Season Planning
                     </div>
-                    <h2 class="text-4xl md:text-5xl font-light text-white mb-6 leading-tight">
+                    <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
                         Your entire season,<br>
                         <span class="text-rose-300">one view</span>
                     </h2>
-                    <p class="text-lg text-stone-400 mb-8 leading-relaxed">
+                    <p class="text-lg text-stone-500 dark:text-stone-400 mb-8 leading-relaxed">
                         Fall program. Winter showcase. Spring recital. Nutcracker run. Import from Google Calendar or add performances manually. Your audience sees everything in one place.
                     </p>
                     <ul class="space-y-4">
@@ -91,27 +91,27 @@
                             <svg class="w-5 h-5 text-rose-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
-                            <span class="text-stone-300">Two-way Google Calendar sync for rehearsals and shows</span>
+                            <span class="text-stone-600 dark:text-stone-300">Two-way Google Calendar sync for rehearsals and shows</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <svg class="w-5 h-5 text-rose-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
-                            <span class="text-stone-300">Multiple venues - theater, studio, outdoor stages</span>
+                            <span class="text-stone-600 dark:text-stone-300">Multiple venues - theater, studio, outdoor stages</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <svg class="w-5 h-5 text-rose-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
-                            <span class="text-stone-300">Share one link everywhere - programs, posters, social bios</span>
+                            <span class="text-stone-600 dark:text-stone-300">Share one link everywhere - programs, posters, social bios</span>
                         </li>
                     </ul>
                 </div>
                 <div class="relative">
                     <!-- Season calendar mockup -->
-                    <div class="bg-stone-950 rounded-2xl border border-stone-800 p-6 shadow-2xl">
+                    <div class="bg-gray-50 dark:bg-stone-950 rounded-2xl border border-gray-200 dark:border-stone-800 p-6 shadow-2xl">
                         <div class="flex items-center justify-between mb-6">
-                            <span class="text-white font-medium">2025-26 Season</span>
+                            <span class="text-gray-900 dark:text-white font-medium">2025-26 Season</span>
                             <span class="text-xs text-stone-500">City Dance Company</span>
                         </div>
                         <div class="space-y-3">
@@ -121,8 +121,8 @@
                                     <div class="text-white font-medium">18-20</div>
                                 </div>
                                 <div>
-                                    <div class="text-white text-sm font-medium">Fall Repertory</div>
-                                    <div class="text-stone-500 text-xs">Mainstage Theater</div>
+                                    <div class="text-gray-900 dark:text-white text-sm font-medium">Fall Repertory</div>
+                                    <div class="text-stone-500 dark:text-stone-500 text-xs">Mainstage Theater</div>
                                 </div>
                             </div>
                             <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-rose-500/10 to-transparent border-l-2 border-rose-400">
@@ -131,8 +131,8 @@
                                     <div class="text-white font-medium">6-22</div>
                                 </div>
                                 <div>
-                                    <div class="text-white text-sm font-medium">The Nutcracker</div>
-                                    <div class="text-stone-500 text-xs">Historic Opera House</div>
+                                    <div class="text-gray-900 dark:text-white text-sm font-medium">The Nutcracker</div>
+                                    <div class="text-stone-500 dark:text-stone-500 text-xs">Historic Opera House</div>
                                 </div>
                             </div>
                             <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-pink-500/10 to-transparent border-l-2 border-pink-400">
@@ -141,8 +141,8 @@
                                     <div class="text-white font-medium">14-16</div>
                                 </div>
                                 <div>
-                                    <div class="text-white text-sm font-medium">Contemporary Showcase</div>
-                                    <div class="text-stone-500 text-xs">Black Box Studio</div>
+                                    <div class="text-gray-900 dark:text-white text-sm font-medium">Contemporary Showcase</div>
+                                    <div class="text-stone-500 dark:text-stone-500 text-xs">Black Box Studio</div>
                                 </div>
                             </div>
                             <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-fuchsia-500/10 to-transparent border-l-2 border-fuchsia-400">
@@ -151,8 +151,8 @@
                                     <div class="text-white font-medium">30-31</div>
                                 </div>
                                 <div>
-                                    <div class="text-white text-sm font-medium">Spring Gala</div>
-                                    <div class="text-stone-500 text-xs">City Amphitheater</div>
+                                    <div class="text-gray-900 dark:text-white text-sm font-medium">Spring Gala</div>
+                                    <div class="text-stone-500 dark:text-stone-500 text-xs">City Amphitheater</div>
                                 </div>
                             </div>
                         </div>
@@ -163,52 +163,52 @@
     </section>
 
     <!-- Classes & Workshops Section - Unique to dance -->
-    <section class="bg-stone-950 py-24 border-t border-stone-800/50">
+    <section class="bg-gray-50 dark:bg-stone-950 py-24 border-t border-gray-200 dark:border-stone-800/50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div class="order-2 lg:order-1">
                     <!-- Class schedule mockup -->
-                    <div class="bg-stone-900 rounded-2xl border border-stone-800 p-6 shadow-2xl">
-                        <div class="text-stone-400 text-xs uppercase tracking-wider mb-4">Weekly Classes</div>
+                    <div class="bg-white dark:bg-stone-900 rounded-2xl border border-gray-200 dark:border-stone-800 p-6 shadow-2xl">
+                        <div class="text-stone-500 dark:text-stone-400 text-xs uppercase tracking-wider mb-4">Weekly Classes</div>
                         <div class="space-y-2">
-                            <div class="flex items-center justify-between p-3 rounded-lg bg-stone-800/50">
+                            <div class="flex items-center justify-between p-3 rounded-lg bg-gray-100 dark:bg-stone-800/50">
                                 <div class="flex items-center gap-3">
                                     <div class="w-2 h-2 rounded-full bg-pink-400"></div>
-                                    <span class="text-white text-sm">Ballet Fundamentals</span>
+                                    <span class="text-gray-900 dark:text-white text-sm">Ballet Fundamentals</span>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-stone-400 text-xs">Mon/Wed 6pm</div>
+                                    <div class="text-stone-500 dark:text-stone-400 text-xs">Mon/Wed 6pm</div>
                                     <div class="text-emerald-400 text-xs">3 spots left</div>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-between p-3 rounded-lg bg-stone-800/50">
+                            <div class="flex items-center justify-between p-3 rounded-lg bg-gray-100 dark:bg-stone-800/50">
                                 <div class="flex items-center gap-3">
                                     <div class="w-2 h-2 rounded-full bg-violet-400"></div>
-                                    <span class="text-white text-sm">Contemporary Technique</span>
+                                    <span class="text-gray-900 dark:text-white text-sm">Contemporary Technique</span>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-stone-400 text-xs">Tue/Thu 7pm</div>
+                                    <div class="text-stone-500 dark:text-stone-400 text-xs">Tue/Thu 7pm</div>
                                     <div class="text-emerald-400 text-xs">5 spots left</div>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-between p-3 rounded-lg bg-stone-800/50">
+                            <div class="flex items-center justify-between p-3 rounded-lg bg-gray-100 dark:bg-stone-800/50">
                                 <div class="flex items-center gap-3">
                                     <div class="w-2 h-2 rounded-full bg-amber-400"></div>
-                                    <span class="text-white text-sm">Hip-Hop Foundations</span>
+                                    <span class="text-gray-900 dark:text-white text-sm">Hip-Hop Foundations</span>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-stone-400 text-xs">Sat 2pm</div>
-                                    <div class="text-stone-500 text-xs">FULL</div>
+                                    <div class="text-stone-500 dark:text-stone-400 text-xs">Sat 2pm</div>
+                                    <div class="text-stone-500 dark:text-stone-500 text-xs">FULL</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-4 pt-4 border-t border-stone-700">
-                            <div class="text-stone-400 text-xs uppercase tracking-wider mb-3">Upcoming Workshops</div>
+                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-stone-700">
+                            <div class="text-stone-500 dark:text-stone-400 text-xs uppercase tracking-wider mb-3">Upcoming Workshops</div>
                             <div class="p-3 rounded-lg bg-gradient-to-r from-rose-500/10 to-fuchsia-500/10 border border-rose-500/20">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <div class="text-white text-sm font-medium">Partnering Intensive</div>
-                                        <div class="text-stone-400 text-xs">Feb 15-16 with Guest Artist</div>
+                                        <div class="text-gray-900 dark:text-white text-sm font-medium">Partnering Intensive</div>
+                                        <div class="text-stone-500 dark:text-stone-400 text-xs">Feb 15-16 with Guest Artist</div>
                                     </div>
                                     <div class="text-rose-300 text-sm font-medium">$85</div>
                                 </div>
@@ -220,18 +220,18 @@
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-fuchsia-500/10 text-fuchsia-300 text-sm font-medium mb-6 border border-fuchsia-500/20">
                         Classes & Workshops
                     </div>
-                    <h2 class="text-4xl md:text-5xl font-light text-white mb-6 leading-tight">
+                    <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
                         Teach and perform<br>
                         <span class="text-fuchsia-300">from one schedule</span>
                     </h2>
-                    <p class="text-lg text-stone-400 mb-8 leading-relaxed">
+                    <p class="text-lg text-stone-500 dark:text-stone-400 mb-8 leading-relaxed">
                         Most dance groups teach alongside performing. List your weekly classes, drop-ins, and intensive workshops. Sell registrations with zero platform fees - you keep everything.
                     </p>
                     <div class="flex flex-wrap gap-3">
-                        <span class="px-3 py-1.5 rounded-full bg-stone-800 text-stone-300 text-sm border border-stone-700">Weekly technique</span>
-                        <span class="px-3 py-1.5 rounded-full bg-stone-800 text-stone-300 text-sm border border-stone-700">Drop-in classes</span>
-                        <span class="px-3 py-1.5 rounded-full bg-stone-800 text-stone-300 text-sm border border-stone-700">Masterclasses</span>
-                        <span class="px-3 py-1.5 rounded-full bg-stone-800 text-stone-300 text-sm border border-stone-700">Summer intensives</span>
+                        <span class="px-3 py-1.5 rounded-full bg-gray-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-sm border border-gray-200 dark:border-stone-700">Weekly technique</span>
+                        <span class="px-3 py-1.5 rounded-full bg-gray-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-sm border border-gray-200 dark:border-stone-700">Drop-in classes</span>
+                        <span class="px-3 py-1.5 rounded-full bg-gray-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-sm border border-gray-200 dark:border-stone-700">Masterclasses</span>
+                        <span class="px-3 py-1.5 rounded-full bg-gray-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-sm border border-gray-200 dark:border-stone-700">Summer intensives</span>
                     </div>
                 </div>
             </div>
@@ -239,51 +239,51 @@
     </section>
 
     <!-- The Algorithm Problem - Unique messaging -->
-    <section class="bg-stone-900 py-24">
+    <section class="bg-white dark:bg-stone-900 py-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl font-light text-white mb-6">
+            <h2 class="text-3xl md:text-4xl font-light text-gray-900 dark:text-white mb-6">
                 Stop relying on the algorithm
             </h2>
-            <p class="text-xl text-stone-400 mb-12 max-w-2xl mx-auto">
+            <p class="text-xl text-stone-500 dark:text-stone-400 mb-12 max-w-2xl mx-auto">
                 You post about your show. Facebook shows it to 3% of your followers. Unless you pay. <span class="text-rose-300">There's a better way.</span>
             </p>
             <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-stone-800/50 rounded-2xl p-6 border border-stone-700">
+                <div class="bg-gray-100 dark:bg-stone-800/50 rounded-2xl p-6 border border-gray-200 dark:border-stone-700">
                     <div class="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-4">
                         <svg class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <h3 class="text-white font-medium mb-2">Build your email list</h3>
-                    <p class="text-stone-400 text-sm">Fans subscribe directly. You own the relationship, not a platform.</p>
+                    <h3 class="text-gray-900 dark:text-white font-medium mb-2">Build your email list</h3>
+                    <p class="text-stone-500 dark:text-stone-400 text-sm">Fans subscribe directly. You own the relationship, not a platform.</p>
                 </div>
-                <div class="bg-stone-800/50 rounded-2xl p-6 border border-stone-700">
+                <div class="bg-gray-100 dark:bg-stone-800/50 rounded-2xl p-6 border border-gray-200 dark:border-stone-700">
                     <div class="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-4">
                         <svg class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
                     </div>
-                    <h3 class="text-white font-medium mb-2">Notify on new shows</h3>
-                    <p class="text-stone-400 text-sm">New performance? Email goes out. Everyone who wants to know, knows.</p>
+                    <h3 class="text-gray-900 dark:text-white font-medium mb-2">Notify on new shows</h3>
+                    <p class="text-stone-500 dark:text-stone-400 text-sm">New performance? Email goes out. Everyone who wants to know, knows.</p>
                 </div>
-                <div class="bg-stone-800/50 rounded-2xl p-6 border border-stone-700">
+                <div class="bg-gray-100 dark:bg-stone-800/50 rounded-2xl p-6 border border-gray-200 dark:border-stone-700">
                     <div class="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-4">
                         <svg class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-white font-medium mb-2">Zero platform fees</h3>
-                    <p class="text-stone-400 text-sm">Sell tickets directly. Stripe processes payment. You keep 100%.</p>
+                    <h3 class="text-gray-900 dark:text-white font-medium mb-2">Zero platform fees</h3>
+                    <p class="text-stone-500 dark:text-stone-400 text-sm">Sell tickets directly. Stripe processes payment. You keep 100%.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Virtual Performances - Link to online events -->
-    <section class="bg-stone-950 py-24 border-t border-stone-800/50">
+    <section class="bg-gray-50 dark:bg-stone-950 py-24 border-t border-gray-200 dark:border-stone-800/50">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-stone-900 to-stone-800 rounded-3xl border border-stone-700 p-8 lg:p-12 hover:border-indigo-500/30 transition-all duration-300">
+                <div class="bg-gradient-to-br from-gray-100 dark:from-stone-900 to-gray-50 dark:to-stone-800 rounded-3xl border border-gray-200 dark:border-stone-700 p-8 lg:p-12 hover:border-indigo-500/30 transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300 text-sm font-medium mb-4 border border-indigo-500/20">
@@ -292,10 +292,10 @@
                                 </svg>
                                 Livestream
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-light text-white mb-3 group-hover:text-indigo-200 transition-colors">
+                            <h3 class="text-2xl lg:text-3xl font-light text-gray-900 dark:text-white mb-3 group-hover:text-indigo-200 transition-colors">
                                 Perform for audiences anywhere
                             </h3>
-                            <p class="text-stone-400 text-lg mb-4">
+                            <p class="text-stone-500 dark:text-stone-400 text-lg mb-4">
                                 Livestream your showcase. Host a virtual masterclass. Reach audiences who can't make it to the theater - and sell tickets to viewers worldwide.
                             </p>
                             <span class="inline-flex items-center text-indigo-400 text-sm font-medium group-hover:gap-3 gap-2 transition-all">
@@ -306,14 +306,14 @@
                             </span>
                         </div>
                         <div class="flex-shrink-0">
-                            <div class="w-48 h-32 bg-stone-950 rounded-xl border border-stone-700 flex items-center justify-center relative overflow-hidden">
+                            <div class="w-48 h-32 bg-gray-50 dark:bg-stone-950 rounded-xl border border-gray-200 dark:border-stone-700 flex items-center justify-center relative overflow-hidden">
                                 <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-fuchsia-500/10"></div>
                                 <div class="relative text-center">
                                     <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center mx-auto mb-2 animate-pulse">
                                         <div class="w-2 h-2 rounded-full bg-white"></div>
                                     </div>
-                                    <div class="text-white text-xs font-medium">LIVE</div>
-                                    <div class="text-stone-500 text-[10px]">347 watching</div>
+                                    <div class="text-gray-900 dark:text-white text-xs font-medium">LIVE</div>
+                                    <div class="text-stone-500 dark:text-stone-500 text-[10px]">347 watching</div>
                                 </div>
                             </div>
                         </div>
@@ -324,70 +324,70 @@
     </section>
 
     <!-- Team Coordination -->
-    <section class="bg-stone-900 py-24">
+    <section class="bg-white dark:bg-stone-900 py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div>
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 text-violet-300 text-sm font-medium mb-6 border border-violet-500/20">
                         Company Management
                     </div>
-                    <h2 class="text-4xl md:text-5xl font-light text-white mb-6 leading-tight">
+                    <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
                         Coordinate your<br>
                         <span class="text-violet-300">entire company</span>
                     </h2>
-                    <p class="text-lg text-stone-400 mb-8 leading-relaxed">
+                    <p class="text-lg text-stone-500 dark:text-stone-400 mb-8 leading-relaxed">
                         Invite your artistic director, choreographers, rehearsal directors, and company managers. Everyone can update the schedule. Changes sync everywhere instantly.
                     </p>
                     <div class="space-y-3">
-                        <div class="flex items-center gap-3 p-3 rounded-xl bg-stone-800/50 border border-stone-700">
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-stone-800/50 border border-gray-200 dark:border-stone-700">
                             <div class="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium">AD</div>
                             <div class="flex-1">
-                                <div class="text-white text-sm">Sarah Chen</div>
-                                <div class="text-stone-500 text-xs">Artistic Director</div>
+                                <div class="text-gray-900 dark:text-white text-sm">Sarah Chen</div>
+                                <div class="text-stone-500 dark:text-stone-500 text-xs">Artistic Director</div>
                             </div>
                             <span class="px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-xs">Owner</span>
                         </div>
-                        <div class="flex items-center gap-3 p-3 rounded-xl bg-stone-800/30 border border-stone-700/50">
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-stone-800/30 border border-gray-200/50 dark:border-stone-700/50">
                             <div class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white text-sm font-medium">MR</div>
                             <div class="flex-1">
-                                <div class="text-stone-300 text-sm">Marcus Rivera</div>
-                                <div class="text-stone-500 text-xs">Choreographer</div>
+                                <div class="text-stone-600 dark:text-stone-300 text-sm">Marcus Rivera</div>
+                                <div class="text-stone-500 dark:text-stone-500 text-xs">Choreographer</div>
                             </div>
                             <span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 text-xs">Admin</span>
                         </div>
-                        <div class="flex items-center gap-3 p-3 rounded-xl bg-stone-800/30 border border-stone-700/50">
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-stone-800/30 border border-gray-200/50 dark:border-stone-700/50">
                             <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-sm font-medium">JT</div>
                             <div class="flex-1">
-                                <div class="text-stone-300 text-sm">Jamie Torres</div>
-                                <div class="text-stone-500 text-xs">Company Manager</div>
+                                <div class="text-stone-600 dark:text-stone-300 text-sm">Jamie Torres</div>
+                                <div class="text-stone-500 dark:text-stone-500 text-xs">Company Manager</div>
                             </div>
                             <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-xs">Admin</span>
                         </div>
                     </div>
                 </div>
                 <div class="flex justify-center">
-                    <div class="bg-stone-950 rounded-2xl border border-stone-800 p-6 max-w-sm">
-                        <div class="text-stone-400 text-xs uppercase tracking-wider mb-4">Recent Activity</div>
+                    <div class="bg-gray-50 dark:bg-stone-950 rounded-2xl border border-gray-200 dark:border-stone-800 p-6 max-w-sm">
+                        <div class="text-stone-500 dark:text-stone-400 text-xs uppercase tracking-wider mb-4">Recent Activity</div>
                         <div class="space-y-4">
                             <div class="flex gap-3">
                                 <div class="w-1 rounded-full bg-violet-500"></div>
                                 <div>
-                                    <div class="text-white text-sm">Sarah added "Spring Gala"</div>
-                                    <div class="text-stone-500 text-xs">2 hours ago</div>
+                                    <div class="text-gray-900 dark:text-white text-sm">Sarah added "Spring Gala"</div>
+                                    <div class="text-stone-500 dark:text-stone-500 text-xs">2 hours ago</div>
                                 </div>
                             </div>
                             <div class="flex gap-3">
                                 <div class="w-1 rounded-full bg-rose-500"></div>
                                 <div>
-                                    <div class="text-white text-sm">Marcus updated rehearsal times</div>
-                                    <div class="text-stone-500 text-xs">Yesterday</div>
+                                    <div class="text-gray-900 dark:text-white text-sm">Marcus updated rehearsal times</div>
+                                    <div class="text-stone-500 dark:text-stone-500 text-xs">Yesterday</div>
                                 </div>
                             </div>
                             <div class="flex gap-3">
                                 <div class="w-1 rounded-full bg-amber-500"></div>
                                 <div>
-                                    <div class="text-white text-sm">Jamie added ticket link</div>
-                                    <div class="text-stone-500 text-xs">2 days ago</div>
+                                    <div class="text-gray-900 dark:text-white text-sm">Jamie added ticket link</div>
+                                    <div class="text-stone-500 dark:text-stone-500 text-xs">2 days ago</div>
                                 </div>
                             </div>
                         </div>
@@ -582,7 +582,7 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="relative bg-stone-950 py-24 overflow-hidden">
+    <section class="relative bg-gray-50 dark:bg-stone-950 py-24 overflow-hidden">
         <!-- Flowing gradient background -->
         <div class="absolute inset-0 overflow-hidden">
             <div class="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-rose-500/15 to-transparent rounded-full blur-3xl"></div>
@@ -590,14 +590,14 @@
         </div>
 
         <div class="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p class="text-stone-500 text-sm uppercase tracking-wider mb-6">Free forever</p>
+            <p class="text-stone-500 dark:text-stone-500 text-sm uppercase tracking-wider mb-6">Free forever</p>
 
-            <h2 class="text-4xl md:text-5xl font-light text-white mb-6 leading-tight">
+            <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
                 Let audiences find<br>
                 <span class="bg-gradient-to-r from-rose-300 via-pink-300 to-fuchsia-300 bg-clip-text text-transparent">your next performance</span>
             </h2>
 
-            <p class="text-lg text-stone-400 mb-10 max-w-xl mx-auto">
+            <p class="text-lg text-stone-500 dark:text-stone-400 mb-10 max-w-xl mx-auto">
                 Join dance companies, studios, and troupes who've simplified how they share their schedule.
             </p>
 

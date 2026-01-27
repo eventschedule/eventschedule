@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
 
     <!-- Hero Section - The Marquee -->
-    <section class="relative bg-[#0a0808] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0808] py-32 overflow-hidden">
         <!-- Marquee light bulbs effect - top border -->
         <div class="absolute top-0 left-0 right-0 h-2 flex justify-center">
             <div class="flex gap-4 px-8">
@@ -28,12 +28,12 @@
                 <span class="text-sm text-amber-200/90">For Actors, Companies & Productions</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-light text-white mb-6 leading-tight tracking-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-light text-gray-900 dark:text-white mb-6 leading-tight tracking-tight">
                 Your name<br>
                 <span class="font-semibold bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent">in lights</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-stone-400 max-w-2xl mx-auto mb-12 font-light">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-stone-400 max-w-2xl mx-auto mb-12 font-light">
                 Share your productions, sell tickets, and let audiences know when the curtain rises.
             </p>
 
@@ -57,13 +57,13 @@
     </section>
 
     <!-- Production Timeline Section (UNIQUE TO THEATER) -->
-    <section class="bg-[#0a0808] py-20 border-t border-amber-900/20">
+    <section class="bg-white dark:bg-[#0a0808] py-20 border-t border-amber-200 dark:border-amber-900/20">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-light text-white mb-4">
+                <h2 class="text-3xl md:text-4xl font-light text-gray-900 dark:text-white mb-4">
                     From auditions to <span class="text-amber-400">closing night</span>
                 </h2>
-                <p class="text-stone-400 text-lg">Track every stage of your production journey</p>
+                <p class="text-gray-500 dark:text-stone-400 text-lg">Track every stage of your production journey</p>
             </div>
 
             <!-- Horizontal Timeline -->
@@ -79,7 +79,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7" />
                             </svg>
                         </div>
-                        <div class="text-white text-sm font-medium">Auditions</div>
+                        <div class="text-gray-900 dark:text-white text-sm font-medium">Auditions</div>
                         <div class="text-stone-500 text-xs mt-1">Open call</div>
                     </div>
 
@@ -90,7 +90,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <div class="text-white text-sm font-medium">Callbacks</div>
+                        <div class="text-gray-900 dark:text-white text-sm font-medium">Callbacks</div>
                         <div class="text-stone-500 text-xs mt-1">Final selection</div>
                     </div>
 
@@ -101,7 +101,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <div class="text-white text-sm font-medium">Rehearsals</div>
+                        <div class="text-gray-900 dark:text-white text-sm font-medium">Rehearsals</div>
                         <div class="text-stone-500 text-xs mt-1">Build the show</div>
                     </div>
 
@@ -112,7 +112,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                             </svg>
                         </div>
-                        <div class="text-white text-sm font-medium">Tech Week</div>
+                        <div class="text-gray-900 dark:text-white text-sm font-medium">Tech Week</div>
                         <div class="text-stone-500 text-xs mt-1">Lights & sound</div>
                     </div>
 
@@ -124,7 +124,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
                         </div>
-                        <div class="text-white text-sm font-medium">Preview</div>
+                        <div class="text-gray-900 dark:text-white text-sm font-medium">Preview</div>
                         <div class="text-stone-500 text-xs mt-1">First audience</div>
                     </div>
 
@@ -146,7 +146,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        <div class="text-white text-sm font-medium">The Run</div>
+                        <div class="text-gray-900 dark:text-white text-sm font-medium">The Run</div>
                         <div class="text-stone-500 text-xs mt-1">Fill every seat</div>
                     </div>
 
@@ -157,7 +157,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                         </div>
-                        <div class="text-white text-sm font-medium">Closing</div>
+                        <div class="text-gray-900 dark:text-white text-sm font-medium">Closing</div>
                         <div class="text-stone-500 text-xs mt-1">Take a bow</div>
                     </div>
                 </div>
@@ -166,17 +166,17 @@
     </section>
 
     <!-- "Now Playing" Feature - Show Runs -->
-    <section class="bg-[#0c0a0a] py-24">
+    <section class="bg-gray-50 dark:bg-[#0c0a0a] py-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-900/30 border border-red-700/30 mb-6">
                     <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
                     <span class="text-red-300 text-sm font-medium uppercase tracking-wider">Now Playing</span>
                 </div>
-                <h2 class="text-3xl md:text-4xl font-light text-white mb-4">
+                <h2 class="text-3xl md:text-4xl font-light text-gray-900 dark:text-white mb-4">
                     Your entire run, <span class="text-red-400">one schedule</span>
                 </h2>
-                <p class="text-stone-400 text-lg max-w-2xl mx-auto">
+                <p class="text-gray-500 dark:text-stone-400 text-lg max-w-2xl mx-auto">
                     Preview to closing night. Matinees and evening shows. Audiences see availability at a glance.
                 </p>
             </div>
@@ -291,18 +291,18 @@
     </section>
 
     <!-- Season Announcement Section (UNIQUE TO THEATER) -->
-    <section class="bg-[#0a0808] py-24 border-t border-amber-900/10">
+    <section class="bg-white dark:bg-[#0a0808] py-24 border-t border-amber-200 dark:border-amber-900/10">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <div>
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-300 text-sm font-medium mb-6 border border-amber-500/20">
                         Season Announcements
                     </div>
-                    <h2 class="text-4xl md:text-5xl font-light text-white mb-6 leading-tight">
+                    <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
                         Announce your entire<br>
                         <span class="text-amber-300">season at once</span>
                     </h2>
-                    <p class="text-lg text-stone-400 mb-8 leading-relaxed">
+                    <p class="text-lg text-gray-500 dark:text-stone-400 mb-8 leading-relaxed">
                         Theater companies plan seasons in advance. Add all your upcoming productions to one schedule. Subscribers get notified of your full season - and can plan which shows to see.
                     </p>
                     <ul class="space-y-3">
@@ -310,19 +310,19 @@
                             <svg class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
-                            <span class="text-stone-300">Multiple productions on one schedule</span>
+                            <span class="text-gray-600 dark:text-stone-300">Multiple productions on one schedule</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <svg class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
-                            <span class="text-stone-300">Season subscribers get first notice</span>
+                            <span class="text-gray-600 dark:text-stone-300">Season subscribers get first notice</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <svg class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
-                            <span class="text-stone-300">Build anticipation months ahead</span>
+                            <span class="text-gray-600 dark:text-stone-300">Build anticipation months ahead</span>
                         </li>
                     </ul>
                 </div>
@@ -371,17 +371,17 @@
     </section>
 
     <!-- Bento Grid for Features -->
-    <section class="bg-[#0c0a0a] py-24 border-t border-amber-900/10">
+    <section class="bg-gray-50 dark:bg-[#0c0a0a] py-24 border-t border-amber-200 dark:border-amber-900/10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-light text-white mb-4">
+                <h2 class="text-3xl md:text-4xl font-light text-gray-900 dark:text-white mb-4">
                     Everything you need to <span class="text-amber-400">fill the house</span>
                 </h2>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Zero-Fee Ticketing (spans 2 cols) -->
-                <div class="lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-950/50 to-red-900/30 border border-red-800/30 p-8 lg:p-10">
+                <div class="lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-950/50 to-red-900/30 border border-gray-200 dark:border-red-800/30 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-sm font-medium mb-4">
@@ -390,30 +390,30 @@
                                 </svg>
                                 Zero-Fee Ticketing
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-light text-white mb-4">Fill every seat, keep every dollar</h3>
-                            <p class="text-stone-400 text-lg mb-6">Sell tickets directly through your schedule. Connect Stripe and you're ready to go. No platform fees - just payment processing.</p>
+                            <h3 class="text-3xl lg:text-4xl font-light text-gray-900 dark:text-white mb-4">Fill every seat, keep every dollar</h3>
+                            <p class="text-gray-500 dark:text-stone-400 text-lg mb-6">Sell tickets directly through your schedule. Connect Stripe and you're ready to go. No platform fees - just payment processing.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-stone-300 text-sm">Preview discounts</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-stone-300 text-sm">Opening night premium</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-stone-300 text-sm">Student rush</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-stone-300 text-sm">Preview discounts</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-stone-300 text-sm">Opening night premium</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-stone-300 text-sm">Student rush</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
-                            <div class="bg-black/30 rounded-2xl border border-white/10 p-5 max-w-xs">
+                            <div class="bg-gray-100 dark:bg-black/30 rounded-2xl border border-gray-200 dark:border-white/10 p-5 max-w-xs">
                                 <div class="space-y-3">
-                                    <div class="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/10">
+                                    <div class="flex items-center justify-between p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-300 dark:border-white/10">
                                         <div>
-                                            <div class="text-white font-medium">Orchestra</div>
+                                            <div class="text-gray-900 dark:text-white font-medium">Orchestra</div>
                                             <div class="text-red-400 text-xs">24 remaining</div>
                                         </div>
-                                        <div class="text-xl font-semibold text-white">$35</div>
+                                        <div class="text-xl font-semibold text-gray-900 dark:text-white">$35</div>
                                     </div>
                                     <div class="flex items-center justify-between p-3 rounded-xl bg-red-500/20 border border-red-400/30">
                                         <div>
-                                            <div class="text-white font-medium">Balcony</div>
+                                            <div class="text-gray-900 dark:text-white font-medium">Balcony</div>
                                             <div class="text-red-300 text-xs">48 remaining</div>
                                         </div>
-                                        <div class="text-xl font-semibold text-white">$25</div>
+                                        <div class="text-xl font-semibold text-gray-900 dark:text-white">$25</div>
                                     </div>
                                 </div>
                             </div>
@@ -422,15 +422,15 @@
                 </div>
 
                 <!-- Email List -->
-                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-950/50 to-amber-900/30 border border-amber-800/30 p-8">
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-950/50 to-amber-900/30 border border-gray-200 dark:border-amber-800/30 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         Newsletter
                     </div>
-                    <h3 class="text-2xl font-light text-white mb-3">Build your audience</h3>
-                    <p class="text-stone-400 mb-6">Fans subscribe directly. New production? Send an email. No algorithm decides who sees it.</p>
+                    <h3 class="text-2xl font-light text-gray-900 dark:text-white mb-3">Build your audience</h3>
+                    <p class="text-gray-500 dark:text-stone-400 mb-6">Fans subscribe directly. New production? Send an email. No algorithm decides who sees it.</p>
 
                     <div class="flex justify-center">
                         <div class="relative">
@@ -447,28 +447,28 @@
                 </div>
 
                 <!-- Cast & Crew -->
-                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-950/50 to-violet-900/30 border border-violet-800/30 p-8">
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-950/50 to-violet-900/30 border border-gray-200 dark:border-violet-800/30 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
                         Company
                     </div>
-                    <h3 class="text-2xl font-light text-white mb-3">Coordinate your ensemble</h3>
-                    <p class="text-stone-400 mb-6">Invite cast, crew, and stage management. Everyone sees the schedule. Changes sync instantly.</p>
+                    <h3 class="text-2xl font-light text-gray-900 dark:text-white mb-3">Coordinate your ensemble</h3>
+                    <p class="text-gray-500 dark:text-stone-400 mb-6">Invite cast, crew, and stage management. Everyone sees the schedule. Changes sync instantly.</p>
 
                     <div class="space-y-2">
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold">SM</div>
                             <div class="flex-1">
-                                <div class="text-white text-sm">Stage Manager</div>
+                                <div class="text-gray-900 dark:text-white text-sm">Stage Manager</div>
                             </div>
                             <span class="px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 text-[10px]">Admin</span>
                         </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white text-xs font-semibold">JK</div>
                             <div class="flex-1">
-                                <div class="text-stone-300 text-sm">Cast Member</div>
+                                <div class="text-gray-600 dark:text-stone-300 text-sm">Cast Member</div>
                             </div>
                             <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">View</span>
                         </div>
@@ -476,15 +476,15 @@
                 </div>
 
                 <!-- Google Calendar Sync -->
-                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-950/50 to-emerald-900/30 border border-emerald-800/30 p-8">
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-950/50 to-emerald-900/30 border border-gray-200 dark:border-emerald-800/30 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Calendar
                     </div>
-                    <h3 class="text-2xl font-light text-white mb-3">Sync with Google Calendar</h3>
-                    <p class="text-stone-400 mb-6">Two-way sync keeps rehearsals, tech week, and performances updated everywhere.</p>
+                    <h3 class="text-2xl font-light text-gray-900 dark:text-white mb-3">Sync with Google Calendar</h3>
+                    <p class="text-gray-500 dark:text-stone-400 mb-6">Two-way sync keeps rehearsals, tech week, and performances updated everywhere.</p>
 
                     <div class="flex items-center justify-center gap-3">
                         <div class="bg-emerald-500/20 rounded-xl border border-emerald-400/30 p-3 w-20">
@@ -502,8 +502,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
                         </div>
-                        <div class="bg-white/10 rounded-xl border border-white/20 p-3 w-20">
-                            <div class="text-[10px] text-stone-300 mb-1 text-center">Google</div>
+                        <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-3 w-20">
+                            <div class="text-[10px] text-gray-600 dark:text-stone-300 mb-1 text-center">Google</div>
                             <div class="space-y-1">
                                 <div class="h-1.5 bg-blue-400/40 rounded"></div>
                                 <div class="h-1.5 bg-green-400/40 rounded w-3/4"></div>
@@ -513,15 +513,15 @@
                 </div>
 
                 <!-- Virtual Performances -->
-                <a href="{{ marketing_url('/online-events') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-950/50 to-indigo-900/30 border border-indigo-800/30 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/online-events') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-950/50 to-indigo-900/30 border border-gray-200 dark:border-indigo-800/30 p-8 hover:scale-[1.02] transition-all">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                         Livestream
                     </div>
-                    <h3 class="text-2xl font-light text-white mb-3 group-hover:text-indigo-300 transition-colors">Stream performances worldwide</h3>
-                    <p class="text-stone-400 mb-6">Reach audiences who can't make it to the theater. Sell tickets to your stream.</p>
+                    <h3 class="text-2xl font-light text-gray-900 dark:text-white mb-3 group-hover:text-indigo-300 transition-colors">Stream performances worldwide</h3>
+                    <p class="text-gray-500 dark:text-stone-400 mb-6">Reach audiences who can't make it to the theater. Sell tickets to your stream.</p>
 
                     <div class="flex justify-center">
                         <div class="w-12 h-12 bg-gradient-to-br from-indigo-500/30 to-blue-500/30 rounded-xl flex items-center justify-center border border-indigo-400/30">
@@ -539,22 +539,22 @@
                 </a>
 
                 <!-- Promo Graphics -->
-                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-950/50 to-orange-900/30 border border-orange-800/30 p-8">
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-950/50 to-orange-900/30 border border-gray-200 dark:border-orange-800/30 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 text-orange-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Graphics
                     </div>
-                    <h3 class="text-2xl font-light text-white mb-3">Share-ready images</h3>
-                    <p class="text-stone-400 mb-6">Auto-generate promotional graphics for social media. Announce your production instantly.</p>
+                    <h3 class="text-2xl font-light text-gray-900 dark:text-white mb-3">Share-ready images</h3>
+                    <p class="text-gray-500 dark:text-stone-400 mb-6">Auto-generate promotional graphics for social media. Announce your production instantly.</p>
 
                     <div class="flex justify-center">
                         <div class="relative w-28 h-28 bg-gradient-to-br from-orange-500/30 to-red-500/30 rounded-xl border border-orange-400/30 p-2">
                             <div class="w-full h-full bg-gradient-to-br from-red-900/60 to-amber-900/60 rounded-lg flex flex-col items-center justify-center">
-                                <div class="text-white text-[8px] font-medium mb-0.5">NOW PLAYING</div>
+                                <div class="text-gray-900 dark:text-white text-[8px] font-medium mb-0.5">NOW PLAYING</div>
                                 <div class="text-amber-300 text-xs font-semibold text-center">A Midsummer Night's Dream</div>
-                                <div class="text-stone-400 text-[8px] mt-1">Mar 7-22</div>
+                                <div class="text-gray-500 dark:text-stone-400 text-[8px] mt-1">Mar 7-22</div>
                             </div>
                             <div class="absolute -bottom-2 -right-2 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
                                 <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -718,7 +718,7 @@
     </section>
 
     <!-- CTA Section - "Take a Bow" -->
-    <section class="relative bg-[#0a0808] py-24 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0808] py-24 overflow-hidden">
         <!-- Spotlight effect -->
         <div class="absolute inset-0 overflow-hidden">
             <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[400px] bg-gradient-to-b from-amber-500/15 via-amber-400/5 to-transparent rounded-full blur-3xl"></div>
@@ -733,12 +733,12 @@
         <div class="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <p class="text-stone-500 text-sm uppercase tracking-wider mb-6">Free forever</p>
 
-            <h2 class="text-4xl md:text-5xl font-light text-white mb-6 leading-tight">
+            <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
                 The show must go on<br>
                 <span class="bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent">and audiences need to find it</span>
             </h2>
 
-            <p class="text-lg text-stone-400 mb-10 max-w-xl mx-auto">
+            <p class="text-lg text-gray-500 dark:text-stone-400 mb-10 max-w-xl mx-auto">
                 Join theater companies and performers who've simplified sharing their schedule.
             </p>
 

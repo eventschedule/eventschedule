@@ -180,6 +180,10 @@ class TicketController extends Controller
                 foreach ($eventCustomFields as $fieldKey => $fieldConfig) {
                     if ($fieldIndex <= 8) {
                         $value = $eventCustomValues[$fieldKey] ?? null;
+                        // Sanitize custom field values to prevent stored XSS
+                        if ($value !== null) {
+                            $value = trim(strip_tags($value));
+                        }
                         $sale->{"custom_value{$fieldIndex}"} = $value;
                         $fieldIndex++;
                     }
@@ -207,6 +211,10 @@ class TicketController extends Controller
                         foreach ($ticketCustomFields as $fieldKey => $fieldConfig) {
                             if ($ticketFieldIndex <= 8) {
                                 $value = $ticketCustomValues[$ticketId][$fieldKey] ?? null;
+                                // Sanitize custom field values to prevent stored XSS
+                                if ($value !== null) {
+                                    $value = trim(strip_tags($value));
+                                }
                                 $saleTicketData["custom_value{$ticketFieldIndex}"] = $value;
                                 $ticketFieldIndex++;
                             }
@@ -561,6 +569,7 @@ class TicketController extends Controller
         $result = $writer->write($qrCode);
 
         header('Content-Type: '.$result->getMimeType());
+        header('X-Content-Type-Options: nosniff');
 
         echo $result->getString();
 

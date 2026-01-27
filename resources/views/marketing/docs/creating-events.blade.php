@@ -7,7 +7,7 @@
     @include('marketing.docs.partials.styles')
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-16 overflow-hidden border-b border-white/5">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
             <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
@@ -23,31 +23,31 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold text-white">Creating Events</h1>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Creating Events</h1>
             </div>
-            <p class="text-lg text-gray-400 max-w-3xl">
+            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
                 Add events to your schedule manually, import from text or images using AI, or sync from external calendars.
             </p>
         </div>
     </section>
 
     <!-- Main Content -->
-    <section class="bg-[#0a0a0f] py-12">
+    <section class="bg-white dark:bg-[#0a0a0f] py-12">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row gap-10">
                 <!-- Sidebar Navigation -->
                 <aside class="lg:w-64 flex-shrink-0">
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
-                        <a href="#manual" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Creating Events Manually</a>
-                        <a href="#ai-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">AI Import</a>
-                        <a href="#text-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors pl-6">From Text</a>
-                        <a href="#image-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors pl-6">From Images/Flyers</a>
-                        <a href="#calendar-sync" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Calendar Sync</a>
-                        <a href="#recurring" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Recurring Events</a>
-                        <a href="#event-details" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Event Details</a>
-                        <a href="#managing" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Managing Events</a>
-                        <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">See Also</a>
+                        <a href="#manual" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Creating Events Manually</a>
+                        <a href="#ai-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">AI Import</a>
+                        <a href="#text-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">From Text</a>
+                        <a href="#image-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">From Images/Flyers</a>
+                        <a href="#calendar-sync" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Calendar Sync</a>
+                        <a href="#recurring" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Recurring Events</a>
+                        <a href="#event-details" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Event Details</a>
+                        <a href="#managing" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Managing Events</a>
+                        <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
                 </aside>
 
@@ -57,11 +57,11 @@
                         <!-- Manual Creation -->
                         <section id="manual" class="doc-section">
                             <h2 class="doc-heading">Creating Events Manually</h2>
-                            <p class="text-gray-300 mb-6">The simplest way to add an event is to create it manually from your schedule's admin page.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">The simplest way to add an event is to create it manually from your schedule's admin page.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to <strong class="text-white">Admin Panel &rarr; Schedule</strong></li>
-                                <li>Click <strong class="text-white">"Add Event"</strong></li>
+                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule</strong></li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">"Add Event"</strong></li>
                                 <li>Fill in the event details:
                                     <ul class="doc-list mt-2 mb-2">
                                         <li>Event name (required)</li>
@@ -72,14 +72,14 @@
                                         <li>Event image</li>
                                     </ul>
                                 </li>
-                                <li>Click <strong class="text-white">"Save"</strong> to publish the event</li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">"Save"</strong> to publish the event</li>
                             </ol>
                         </section>
 
                         <!-- AI Import -->
                         <section id="ai-import" class="doc-section">
                             <h2 class="doc-heading">Let AI Do the Heavy Lifting</h2>
-                            <p class="text-gray-300 mb-6">Save hours of manual data entry. Paste any event text - emails, social media posts, website listings, or even flyer descriptions - and watch it transform into a ready-to-publish event in seconds.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Save hours of manual data entry. Paste any event text - emails, social media posts, website listings, or even flyer descriptions - and watch it transform into a ready-to-publish event in seconds.</p>
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">AI-Powered</div>
@@ -89,20 +89,20 @@
 
                         <!-- Text Import -->
                         <section id="text-import" class="doc-section">
-                            <h3 class="text-lg font-semibold text-white mb-4">Importing from Text</h3>
-                            <p class="text-gray-300 mb-6">Copy and paste event information from any source - emails, websites, social media posts - and AI will extract the event details.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Importing from Text</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Copy and paste event information from any source - emails, websites, social media posts - and AI will extract the event details.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to <strong class="text-white">Admin Panel &rarr; Schedule</strong> and click <strong class="text-white">"Import"</strong></li>
+                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule</strong> and click <strong class="text-gray-900 dark:text-white">"Import"</strong></li>
                                 <li>Paste your event text into the text box</li>
-                                <li>Click <strong class="text-white">"Parse Events"</strong></li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">"Parse Events"</strong></li>
                                 <li>Review the extracted events and make any corrections</li>
-                                <li>Click <strong class="text-white">"Import"</strong> to add them to your schedule</li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">"Import"</strong> to add them to your schedule</li>
                             </ol>
 
                             <div class="grid md:grid-cols-2 gap-4 mb-6">
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Example Input</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Example Input</h4>
                                     <p class="text-sm text-gray-400 code-block">
                                         Live Jazz Night<br>
                                         Friday, March 15th at 8pm<br>
@@ -113,32 +113,32 @@
                                 </div>
                                 <div class="bg-white/5 rounded-xl p-4 border border-emerald-500/30">
                                     <h4 class="font-semibold text-emerald-400 mb-2">AI Extracts</h4>
-                                    <ul class="text-sm text-gray-400 space-y-1">
-                                        <li><strong class="text-white">Name:</strong> Live Jazz Night</li>
-                                        <li><strong class="text-white">Date:</strong> March 15</li>
-                                        <li><strong class="text-white">Time:</strong> 8:00 PM</li>
-                                        <li><strong class="text-white">Venue:</strong> The Blue Note</li>
-                                        <li><strong class="text-white">Address:</strong> 123 Main Street</li>
-                                        <li><strong class="text-white">Description:</strong> Featuring the John Smith Trio</li>
+                                    <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                                        <li><strong class="text-gray-900 dark:text-white">Name:</strong> Live Jazz Night</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Date:</strong> March 15</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Time:</strong> 8:00 PM</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Venue:</strong> The Blue Note</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Address:</strong> 123 Main Street</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Description:</strong> Featuring the John Smith Trio</li>
                                     </ul>
                                 </div>
                             </div>
 
-                            <p class="text-gray-300">Review the extracted details, make any corrections, and click Import. You can process multiple events at once.</p>
+                            <p class="text-gray-600 dark:text-gray-300">Review the extracted details, make any corrections, and click Import. You can process multiple events at once.</p>
                         </section>
 
                         <!-- Image Import -->
                         <section id="image-import" class="doc-section">
-                            <h3 class="text-lg font-semibold text-white mb-4">Importing from Images/Flyers</h3>
-                            <p class="text-gray-300 mb-6">Upload an event flyer or poster and AI will read the text and extract event information.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Importing from Images/Flyers</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Upload an event flyer or poster and AI will read the text and extract event information.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to <strong class="text-white">Admin Panel &rarr; Schedule</strong> and click <strong class="text-white">"Import"</strong></li>
+                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule</strong> and click <strong class="text-gray-900 dark:text-white">"Import"</strong></li>
                                 <li>Upload an image file (JPG, PNG, etc.)</li>
-                                <li>Click <strong class="text-white">"Parse Events"</strong></li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">"Parse Events"</strong></li>
                                 <li>Review the extracted events</li>
                                 <li>The uploaded image can automatically become the event's featured image</li>
-                                <li>Click <strong class="text-white">"Import"</strong> to add them to your schedule</li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">"Import"</strong> to add them to your schedule</li>
                             </ol>
 
                             <div class="doc-callout doc-callout-info">
@@ -150,42 +150,42 @@
                         <!-- Calendar Sync -->
                         <section id="calendar-sync" class="doc-section">
                             <h2 class="doc-heading">Calendar Sync</h2>
-                            <p class="text-gray-300 mb-6">Sync events automatically from your existing calendars:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Sync events automatically from your existing calendars:</p>
 
                             <div class="space-y-4 mb-6">
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Google Calendar</h4>
-                                    <p class="text-sm text-gray-400">Connect your Google Calendar for bidirectional sync. Events added in either place will appear in both.</p>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Google Calendar</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect your Google Calendar for bidirectional sync. Events added in either place will appear in both.</p>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">CalDAV</h4>
-                                    <p class="text-sm text-gray-400">Connect any CalDAV-compatible calendar (Apple Calendar, Outlook, Fastmail, etc.).</p>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">CalDAV</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect any CalDAV-compatible calendar (Apple Calendar, Outlook, Fastmail, etc.).</p>
                                 </div>
                             </div>
 
-                            <p class="text-gray-300">To set up calendar sync, go to <strong class="text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and scroll to the Calendar Sync section.</p>
+                            <p class="text-gray-600 dark:text-gray-300">To set up calendar sync, go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and scroll to the Calendar Sync section.</p>
                         </section>
 
                         <!-- Recurring Events -->
                         <section id="recurring" class="doc-section">
                             <h2 class="doc-heading">Recurring Events</h2>
-                            <p class="text-gray-300 mb-6">For events that happen regularly - weekly open mics, monthly meetups, daily happy hours - you can add multiple dates at once.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">For events that happen regularly - weekly open mics, monthly meetups, daily happy hours - you can add multiple dates at once.</p>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Adding Multiple Dates</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Adding Multiple Dates</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>When creating an event, look for the <strong class="text-white">"Add more dates"</strong> option</li>
+                                <li>When creating an event, look for the <strong class="text-gray-900 dark:text-white">"Add more dates"</strong> option</li>
                                 <li>Click to add additional dates - add as many as you need</li>
                                 <li>All dates will share the same event details (name, description, venue)</li>
                                 <li>Each date becomes its own event, so you can edit them individually later if needed</li>
                             </ol>
 
-                            <div class="bg-white/5 rounded-xl p-4 border border-white/10 mb-6">
-                                <h4 class="font-semibold text-white mb-2">Common Patterns</h4>
+                            <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
+                                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Common Patterns</h4>
                                 <ul class="doc-list text-sm">
-                                    <li><strong class="text-white">Weekly:</strong> Open mic nights, trivia, live music residencies</li>
-                                    <li><strong class="text-white">Bi-weekly:</strong> Book clubs, game nights</li>
-                                    <li><strong class="text-white">Monthly:</strong> Networking events, first Friday art walks</li>
-                                    <li><strong class="text-white">Custom:</strong> Festival dates, workshop series</li>
+                                    <li><strong class="text-gray-900 dark:text-white">Weekly:</strong> Open mic nights, trivia, live music residencies</li>
+                                    <li><strong class="text-gray-900 dark:text-white">Bi-weekly:</strong> Book clubs, game nights</li>
+                                    <li><strong class="text-gray-900 dark:text-white">Monthly:</strong> Networking events, first Friday art walks</li>
+                                    <li><strong class="text-gray-900 dark:text-white">Custom:</strong> Festival dates, workshop series</li>
                                 </ul>
                             </div>
 
@@ -198,7 +198,7 @@
                         <!-- Event Details -->
                         <section id="event-details" class="doc-section">
                             <h2 class="doc-heading">Event Details</h2>
-                            <p class="text-gray-300 mb-6">Here's what you can include with each event:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Here's what you can include with each event:</p>
 
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
@@ -210,39 +210,39 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Name</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Name</span></td>
                                             <td>The event title (required)</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Date & Time</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Date & Time</span></td>
                                             <td>When the event starts</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Duration</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Duration</span></td>
                                             <td>How long the event lasts (in hours)</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Venue</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Venue</span></td>
                                             <td>Where the event takes place (name and address)</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Description</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Description</span></td>
                                             <td>Details about the event (supports markdown formatting)</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Image</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Image</span></td>
                                             <td>A flyer or photo for the event</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Subschedule</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Subschedule</span></td>
                                             <td>Organize events by type (e.g., "Live Music", "Comedy")</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Registration URL</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Registration URL</span></td>
                                             <td>Link to external registration or ticketing</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Members</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Members</span></td>
                                             <td>Tag performers, speakers, or other participants</td>
                                         </tr>
                                     </tbody>
@@ -253,26 +253,26 @@
                         <!-- Managing Events -->
                         <section id="managing" class="doc-section">
                             <h2 class="doc-heading">Managing Events</h2>
-                            <p class="text-gray-300 mb-6">Once events are created, you can edit, clone, or delete them from your schedule.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Once events are created, you can edit, clone, or delete them from your schedule.</p>
 
                             <div class="space-y-4 mb-6">
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Editing Events</h4>
-                                    <p class="text-sm text-gray-400">Click on any event in <strong class="text-white">Admin Panel &rarr; Schedule</strong> to edit it. Changes are saved immediately when you click Save.</p>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Editing Events</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Click on any event in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule</strong> to edit it. Changes are saved immediately when you click Save.</p>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Cloning Events</h4>
-                                    <p class="text-sm text-gray-400">Use the clone option to duplicate an event. Great for creating similar events on different dates - just clone and change the date.</p>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Cloning Events</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Use the clone option to duplicate an event. Great for creating similar events on different dates - just clone and change the date.</p>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Deleting Events</h4>
-                                    <p class="text-sm text-gray-400">Delete events from the event edit page. <strong class="text-white">Warning:</strong> If the event has sold tickets, you should refund ticket holders before deleting.</p>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Deleting Events</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Delete events from the event edit page. <strong class="text-gray-900 dark:text-white">Warning:</strong> If the event has sold tickets, you should refund ticket holders before deleting.</p>
                                 </div>
                             </div>
 
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Pending Events</div>
-                                <p>If you have "Require Approval" enabled, submitted events appear in a pending queue. Review them in <strong class="text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong> and approve or reject each one.</p>
+                                <p>If you have "Require Approval" enabled, submitted events appear in a pending queue. Review them in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong> and approve or reject each one.</p>
                             </div>
                         </section>
 

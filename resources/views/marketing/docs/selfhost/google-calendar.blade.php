@@ -7,7 +7,7 @@
     @include('marketing.docs.partials.styles')
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-16 overflow-hidden border-b border-white/5">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
             <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-teal-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
@@ -23,29 +23,29 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold text-white">Google Calendar Integration</h1>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Google Calendar Integration</h1>
             </div>
-            <p class="text-lg text-gray-400 max-w-3xl">
+            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
                 Set up and use the Google Calendar integration feature for bidirectional sync between Event Schedule and Google Calendar.
             </p>
         </div>
     </section>
 
     <!-- Main Content -->
-    <section class="bg-[#0a0a0f] py-12">
+    <section class="bg-white dark:bg-[#0a0a0f] py-12">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row gap-10">
                 <!-- Sidebar Navigation -->
                 <aside class="lg:w-64 flex-shrink-0">
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
-                        <a href="#prerequisites" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Prerequisites</a>
-                        <a href="#setup" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Setup Instructions</a>
-                        <a href="#features" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Features</a>
-                        <a href="#usage" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Usage</a>
-                        <a href="#api-endpoints" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">API Endpoints</a>
-                        <a href="#troubleshooting" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Troubleshooting</a>
-                        <a href="#security" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Security Considerations</a>
+                        <a href="#prerequisites" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Prerequisites</a>
+                        <a href="#setup" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Setup Instructions</a>
+                        <a href="#features" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Features</a>
+                        <a href="#usage" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Usage</a>
+                        <a href="#api-endpoints" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">API Endpoints</a>
+                        <a href="#troubleshooting" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Troubleshooting</a>
+                        <a href="#security" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Security Considerations</a>
                     </nav>
                 </aside>
 
@@ -66,7 +66,7 @@
                         <section id="setup" class="doc-section">
                             <h2 class="doc-heading">Setup Instructions</h2>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">1. Google Cloud Console Setup</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">1. Google Cloud Console Setup</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Go to the <a href="https://console.cloud.google.com/" target="_blank" class="text-emerald-400 hover:text-emerald-300">Google Cloud Console</a></li>
                                 <li>Create a new project or select an existing one</li>
@@ -79,7 +79,7 @@
                                 </li>
                             </ol>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">2. OAuth 2.0 Credentials</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">2. OAuth 2.0 Credentials</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Go to "APIs & Services" > "Credentials"</li>
                                 <li>Click "Create Credentials" > "OAuth 2.0 Client IDs"</li>
@@ -93,8 +93,8 @@
                                 <li>Save the credentials and note down the Client ID and Client Secret</li>
                             </ol>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">3. Environment Configuration</h3>
-                            <p class="text-gray-300 mb-4">Add the following environment variables to your <code class="doc-inline-code">.env</code> file:</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">3. Environment Configuration</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Add the following environment variables to your <code class="doc-inline-code">.env</code> file:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -111,7 +111,7 @@
                         <section id="features" class="doc-section">
                             <h2 class="doc-heading">Features</h2>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">User Features</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">User Features</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li><strong class="text-white">Connect Google Calendar:</strong> Users can connect their Google Calendar account from their profile page</li>
                                 <li><strong class="text-white">Sync All Events:</strong> Users can sync all their events to Google Calendar at once</li>
@@ -122,7 +122,7 @@
                                 <li><strong class="text-white">Real-time Updates:</strong> Changes in Google Calendar are automatically synced to Event Schedule via webhooks</li>
                             </ol>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Event Information Synced</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Event Information Synced</h3>
                             <ul class="doc-list mb-6">
                                 <li>Event name</li>
                                 <li>Event description (with venue and URL information)</li>
@@ -131,8 +131,8 @@
                                 <li>Event URL</li>
                             </ul>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Sync Status</h3>
-                            <p class="text-gray-300 mb-4">Events can have three sync statuses:</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Sync Status</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Events can have three sync statuses:</p>
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>
@@ -143,23 +143,23 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Not Connected</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Not Connected</span></td>
                                             <td>User hasn't connected their Google Calendar</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Not Synced</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Not Synced</span></td>
                                             <td>User has connected Google Calendar but this event isn't synced</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Synced</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Synced</span></td>
                                             <td>Event is synced to Google Calendar</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Bidirectional Sync</h3>
-                            <p class="text-gray-300 mb-4">When bidirectional sync is enabled:</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Bidirectional Sync</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">When bidirectional sync is enabled:</p>
                             <ul class="doc-list">
                                 <li>Events created in Event Schedule are automatically added to Google Calendar</li>
                                 <li>Events created in Google Calendar are automatically added to Event Schedule</li>
@@ -172,11 +172,11 @@
                         <section id="usage" class="doc-section">
                             <h2 class="doc-heading">Usage</h2>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">For Users</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">For Users</h3>
 
                             <div class="space-y-6 mb-8">
-                                <div class="bg-white/5 rounded-xl p-5 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-3">1. Connect Google Calendar</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-5 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">1. Connect Google Calendar</h4>
                                     <ol class="doc-list doc-list-numbered text-sm">
                                         <li>Go to your settings page (<code class="doc-inline-code">/settings</code>)</li>
                                         <li>Scroll to the "Google Calendar Integration" section</li>
@@ -185,16 +185,16 @@
                                     </ol>
                                 </div>
 
-                                <div class="bg-white/5 rounded-xl p-5 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-3">2. Sync All Events</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-5 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">2. Sync All Events</h4>
                                     <ol class="doc-list doc-list-numbered text-sm">
                                         <li>After connecting, click "Sync All Events" in your profile</li>
                                         <li>This will sync all your events to your primary Google Calendar</li>
                                     </ol>
                                 </div>
 
-                                <div class="bg-white/5 rounded-xl p-5 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-3">3. Sync Individual Events</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-5 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">3. Sync Individual Events</h4>
                                     <ol class="doc-list doc-list-numbered text-sm">
                                         <li>Go to any event edit page</li>
                                         <li>Scroll to the "Google Calendar Sync" section</li>
@@ -202,8 +202,8 @@
                                     </ol>
                                 </div>
 
-                                <div class="bg-white/5 rounded-xl p-5 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-3">4. Enable Bidirectional Sync</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-5 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">4. Enable Bidirectional Sync</h4>
                                     <ol class="doc-list doc-list-numbered text-sm">
                                         <li>Go to your role/schedule edit page</li>
                                         <li>Scroll to the "Google Calendar Integration" section</li>
@@ -213,8 +213,8 @@
                                     </ol>
                                 </div>
 
-                                <div class="bg-white/5 rounded-xl p-5 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-3">5. Manual Sync Options</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-5 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">5. Manual Sync Options</h4>
                                     <ul class="doc-list text-sm">
                                         <li><strong class="text-white">Sync to Google Calendar:</strong> Push all events from Event Schedule to Google Calendar</li>
                                         <li><strong class="text-white">Sync from Google Calendar:</strong> Pull all events from Google Calendar to Event Schedule</li>
@@ -222,18 +222,18 @@
                                 </div>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">For Developers</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">For Developers</h3>
 
-                            <h4 class="text-base font-semibold text-white mb-3">Automatic Sync</h4>
-                            <p class="text-gray-300 mb-4">Events are automatically synced when:</p>
+                            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-3">Automatic Sync</h4>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Events are automatically synced when:</p>
                             <ul class="doc-list mb-6">
                                 <li>Created (if user has Google Calendar connected)</li>
                                 <li>Updated (if user has Google Calendar connected)</li>
                                 <li>Deleted (if event was previously synced)</li>
                             </ul>
 
-                            <h4 class="text-base font-semibold text-white mb-3">Manual Sync</h4>
-                            <p class="text-gray-300 mb-4">You can manually sync events using the Event model:</p>
+                            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-3">Manual Sync</h4>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">You can manually sync events using the Event model:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -330,19 +330,19 @@
                         <section id="troubleshooting" class="doc-section">
                             <h2 class="doc-heading">Troubleshooting</h2>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Common Issues</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Common Issues</h3>
 
                             <div class="space-y-4 mb-8">
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">"Google Calendar not connected" error</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Google Calendar not connected" error</h4>
                                     <ul class="doc-list text-sm">
                                         <li>User needs to connect their Google Calendar account first</li>
                                         <li>Check if OAuth credentials are correctly configured</li>
                                     </ul>
                                 </div>
 
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">"Failed to sync event" error</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Failed to sync event" error</h4>
                                     <ul class="doc-list text-sm">
                                         <li>Check if Google Calendar API is enabled</li>
                                         <li>Verify OAuth credentials are correct</li>
@@ -350,8 +350,8 @@
                                     </ul>
                                 </div>
 
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Events not syncing automatically</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Events not syncing automatically</h4>
                                     <ul class="doc-list text-sm">
                                         <li>Ensure queue workers are running for background jobs</li>
                                         <li>Check if user has valid Google Calendar tokens</li>
@@ -359,18 +359,18 @@
                                 </div>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Logs</h3>
-                            <p class="text-gray-300 mb-4">Sync operations are logged in the application logs. Check <code class="doc-inline-code">storage/logs/laravel.log</code> for detailed information about sync operations.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Logs</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Sync operations are logged in the application logs. Check <code class="doc-inline-code">storage/logs/laravel.log</code> for detailed information about sync operations.</p>
                         </section>
 
                         <!-- Security Considerations -->
                         <section id="security" class="doc-section">
                             <h2 class="doc-heading">Security Considerations</h2>
                             <ol class="doc-list doc-list-numbered">
-                                <li><span class="font-semibold text-white">Token Storage:</span> Google OAuth tokens are stored encrypted in the database</li>
-                                <li><span class="font-semibold text-white">Scope Limitation:</span> The integration only requests necessary Google Calendar permissions</li>
-                                <li><span class="font-semibold text-white">User Authorization:</span> Users can only sync events they have access to</li>
-                                <li><span class="font-semibold text-white">Token Refresh:</span> Access tokens are automatically refreshed when needed</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Token Storage:</span> Google OAuth tokens are stored encrypted in the database</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Scope Limitation:</span> The integration only requests necessary Google Calendar permissions</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">User Authorization:</span> Users can only sync events they have access to</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Token Refresh:</span> Access tokens are automatically refreshed when needed</li>
                             </ol>
                         </section>
                     </div>

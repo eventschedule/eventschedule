@@ -26,6 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'language_code',
         'stripe_account_id',
         'api_key',
+        'api_key_hash',
         'invoiceninja_api_key',
         'invoiceninja_api_url',
         'invoiceninja_webhook_secret',
@@ -67,6 +68,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'invoiceninja_api_url',
         'invoiceninja_webhook_secret',
         'api_key',
+        'api_key_hash',
         'payment_secret',
         'google_token',
         'google_refresh_token',
@@ -118,6 +120,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'facebook_token_expires_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'invoiceninja_api_key' => 'encrypted',
+            'invoiceninja_webhook_secret' => 'encrypted',
         ];
     }
 

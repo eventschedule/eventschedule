@@ -7,7 +7,7 @@
     @include('marketing.docs.partials.styles')
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-16 overflow-hidden border-b border-white/5">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
             <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-teal-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
@@ -23,32 +23,32 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                     </svg>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold text-white">API Reference</h1>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">API Reference</h1>
             </div>
-            <p class="text-lg text-gray-400 max-w-3xl">
+            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
                 Programmatically manage schedules and events with the Event Schedule REST API. API access requires a Pro plan.
             </p>
         </div>
     </section>
 
     <!-- Main Content -->
-    <section class="bg-[#0a0a0f] py-12">
+    <section class="bg-white dark:bg-[#0a0a0f] py-12">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row gap-10">
                 <!-- Sidebar Navigation -->
                 <aside class="lg:w-64 flex-shrink-0">
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
-                        <a href="#authentication" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Authentication</a>
-                        <a href="#response-format" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Response Format</a>
-                        <a href="#pagination" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Pagination</a>
+                        <a href="#authentication" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Authentication</a>
+                        <a href="#response-format" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Response Format</a>
+                        <a href="#pagination" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Pagination</a>
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 mt-6">Endpoints</div>
-                        <a href="#list-schedules" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">List Schedules</a>
-                        <a href="#list-events" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">List Events</a>
-                        <a href="#create-event" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Create Event</a>
-                        <a href="#create-sale" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Create Sale</a>
+                        <a href="#list-schedules" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">List Schedules</a>
+                        <a href="#list-events" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">List Events</a>
+                        <a href="#create-event" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Create Event</a>
+                        <a href="#create-sale" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Create Sale</a>
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 mt-6">Reference</div>
-                        <a href="#error-handling" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Error Handling</a>
+                        <a href="#error-handling" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Error Handling</a>
                     </nav>
                 </aside>
 
@@ -58,7 +58,7 @@
                         <!-- Authentication -->
                         <section id="authentication" class="doc-section">
                             <h2 class="doc-heading">Authentication</h2>
-                            <p class="text-gray-300 mb-6">All API requests must include your API key in the <code class="doc-inline-code">X-API-Key</code> header. You can generate an API key from your account settings.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">All API requests must include your API key in the <code class="doc-inline-code">X-API-Key</code> header. You can generate an API key from your account settings.</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -86,7 +86,7 @@
                         <!-- Response Format -->
                         <section id="response-format" class="doc-section">
                             <h2 class="doc-heading">Response Format</h2>
-                            <p class="text-gray-300 mb-6">All API responses follow a consistent format with two main properties:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">All API responses follow a consistent format with two main properties:</p>
 
                             <ul class="doc-list mb-6">
                                 <li><code class="doc-inline-code">data</code> - Contains the response payload (array for lists, object for single items)</li>
@@ -116,7 +116,7 @@
                         <!-- Pagination -->
                         <section id="pagination" class="doc-section">
                             <h2 class="doc-heading">Pagination</h2>
-                            <p class="text-gray-300 mb-6">List endpoints support pagination through query parameters:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">List endpoints support pagination through query parameters:</p>
 
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
@@ -159,7 +159,7 @@
                                 <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">GET</span>
                                 <code class="doc-inline-code">/api/schedules</code>
                             </div>
-                            <p class="text-gray-300 mb-6">Returns a paginated list of all schedules you have access to.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a paginated list of all schedules you have access to.</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -212,7 +212,7 @@
                                 <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">GET</span>
                                 <code class="doc-inline-code">/api/events</code>
                             </div>
-                            <p class="text-gray-300 mb-6">Returns a paginated list of all events.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a paginated list of all events.</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -260,7 +260,7 @@
                                 <span class="bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">POST</span>
                                 <code class="doc-inline-code">/api/events/{subdomain}</code>
                             </div>
-                            <p class="text-gray-300 mb-6">Create a new event using either JSON data or a flyer image.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Create a new event using either JSON data or a flyer image.</p>
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Schedule & Category Support</div>
@@ -272,7 +272,7 @@
                                 <p class="mt-2">When using names, the API will automatically find matching schedules by slug and categories by name.</p>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4 mt-8">JSON Request</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">JSON Request</h3>
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>cURL (JSON)</span>
@@ -301,8 +301,8 @@
      }'</span></code></pre>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4 mt-8">Flyer Image Request</h3>
-                            <p class="text-gray-300 mb-4">You can also upload a flyer image along with the event data using multipart form data:</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Flyer Image Request</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">You can also upload a flyer image along with the event data using multipart form data:</p>
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>cURL (Flyer Image)</span>
@@ -324,7 +324,7 @@
     -F <span class="code-string">"members[0][email]=john@example.com"</span></code></pre>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4 mt-8">Response</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Response</h3>
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>Response</span>
@@ -362,9 +362,9 @@
                                 <span class="bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">POST</span>
                                 <code class="doc-inline-code">/api/sales</code>
                             </div>
-                            <p class="text-gray-300 mb-6">Create a new sale manually for an event. This allows you to programmatically create sales records with associated tickets.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Create a new sale manually for an event. This allows you to programmatically create sales records with associated tickets.</p>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Request Body</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Request Body</h3>
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>
@@ -440,7 +440,7 @@
                                 </ul>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4 mt-8">Response</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Response</h3>
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>Response</span>
@@ -486,9 +486,9 @@
                         <!-- Error Handling -->
                         <section id="error-handling" class="doc-section">
                             <h2 class="doc-heading">Error Handling</h2>
-                            <p class="text-gray-300 mb-6">The API uses standard HTTP status codes and returns error messages in JSON format.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">The API uses standard HTTP status codes and returns error messages in JSON format.</p>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Status Codes</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Status Codes</h3>
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>

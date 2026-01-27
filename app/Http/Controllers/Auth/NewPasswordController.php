@@ -40,11 +40,18 @@ class NewPasswordController extends Controller
         $status = Password::reset(
             $request->only('email', 'password', 'token'),
             function ($user) use ($request) {
-                $user->forceFill([
+                $updateData = [
                     'password' => Hash::make($request->password),
                     'remember_token' => Str::random(60),
-                    'email_verified_at' => now(),
-                ])->save();
+                ];
+
+                // Only re-verify email if it was previously verified
+                // This prevents users from bypassing email verification via password reset
+                if ($user->email_verified_at !== null) {
+                    $updateData['email_verified_at'] = now();
+                }
+
+                $user->forceFill($updateData)->save();
 
                 event(new PasswordReset($user));
             }

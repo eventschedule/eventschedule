@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background with neon glow -->
         <div class="absolute inset-0">
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-indigo-600/30 rounded-full blur-[120px] animate-pulse-slow"></div>
@@ -86,22 +86,22 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <!-- Animated spinning vinyl badge -->
-            <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full glass border border-white/10 mb-8">
+            <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
                 <div class="relative w-6 h-6 animate-spin-slow">
                     <div class="absolute inset-0 rounded-full bg-gradient-to-br from-gray-900 to-black border-2 border-gray-700">
                         <div class="absolute inset-1 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600"></div>
                         <div class="absolute inset-[40%] rounded-full bg-gray-900"></div>
                     </div>
                 </div>
-                <span class="text-sm text-gray-300">For DJs & Electronic Producers</span>
+                <span class="text-sm text-gray-600 dark:text-gray-300">For DJs & Electronic Producers</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
                 Fill the dancefloor.<br>
                 <span class="text-gradient-neon">Skip the algorithm.</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
                 Your residencies. Your guest spots. One link. Direct to fans - no promoter middleman, no pay-to-play socials.
             </p>
 
@@ -126,12 +126,12 @@
     </section>
 
     <!-- Bento Grid Features -->
-    <section class="bg-[#0a0a0f] py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Row 1: Residency Tracker (2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-purple-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-purple-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
@@ -140,12 +140,12 @@
                                 </svg>
                                 Residency Tracker
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Track your residencies & guest spots</h3>
-                            <p class="text-gray-400 text-lg mb-6">Weekly residency at Output? Monthly at Basement? One schedule shows everything - your regular slots AND one-off bookings.</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Track your residencies & guest spots</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Weekly residency at Output? Monthly at Basement? One schedule shows everything - your regular slots AND one-off bookings.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Weekly residencies</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Guest spots</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">One-off bookings</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Weekly residencies</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Guest spots</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">One-off bookings</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -156,22 +156,22 @@
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-indigo-500/20 border border-indigo-400/20">
                                             <div class="text-indigo-300 text-xs font-bold w-12">FRI 6</div>
                                             <div class="flex-1">
-                                                <div class="text-white text-sm font-semibold">Fabric</div>
-                                                <div class="text-gray-400 text-[10px]">Every Friday</div>
+                                                <div class="text-gray-900 dark:text-white text-sm font-semibold">Fabric</div>
+                                                <div class="text-gray-500 dark:text-gray-400 text-[10px]">Every Friday</div>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-purple-500/20 border border-purple-400/20">
                                             <div class="text-purple-300 text-xs font-bold w-12">SAT 14</div>
                                             <div class="flex-1">
-                                                <div class="text-white text-sm font-semibold">Berghain</div>
-                                                <div class="text-gray-400 text-[10px]">Guest spot</div>
+                                                <div class="text-gray-900 dark:text-white text-sm font-semibold">Berghain</div>
+                                                <div class="text-gray-500 dark:text-gray-400 text-[10px]">Guest spot</div>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-indigo-500/20 border border-indigo-400/20">
                                             <div class="text-indigo-300 text-xs font-bold w-12">FRI 20</div>
                                             <div class="flex-1">
-                                                <div class="text-white text-sm font-semibold">Fabric</div>
-                                                <div class="text-gray-400 text-[10px]">Every Friday</div>
+                                                <div class="text-gray-900 dark:text-white text-sm font-semibold">Fabric</div>
+                                                <div class="text-gray-500 dark:text-gray-400 text-[10px]">Every Friday</div>
                                             </div>
                                         </div>
                                     </div>
@@ -182,15 +182,15 @@
                 </div>
 
                 <!-- Row 1: Late Night Ready (1 col) -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
                         Late Night
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Built for late nights</h3>
-                    <p class="text-gray-400 mb-6">Sets that start at 11 PM and end at 6 AM? No problem. We handle overnight events correctly.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Built for late nights</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Sets that start at 11 PM and end at 6 AM? No problem. We handle overnight events correctly.</p>
 
                     <div class="flex justify-center">
                         <div class="relative">
@@ -200,7 +200,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                                     </svg>
                                 </div>
-                                <div class="text-white text-2xl font-bold">11 PM - 4 AM</div>
+                                <div class="text-gray-900 dark:text-white text-2xl font-bold">11 PM - 4 AM</div>
                                 <div class="text-violet-300 text-xs mt-1">Saturday into Sunday</div>
                             </div>
                         </div>
@@ -208,15 +208,15 @@
                 </div>
 
                 <!-- Row 2: Club Sync (1 col) -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-900/50 to-purple-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-900/50 to-purple-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                         Club Sync
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Clubs book you, fans know instantly</h3>
-                    <p class="text-gray-400 mb-6">When promoters add you to their lineup, it auto-appears on your schedule. No double-entry.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Clubs book you, fans know instantly</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">When promoters add you to their lineup, it auto-appears on your schedule. No double-entry.</p>
 
                     <div class="flex items-center justify-center gap-2">
                         <div class="bg-fuchsia-500/20 rounded-lg border border-fuchsia-400/30 p-2 w-16">
@@ -227,8 +227,8 @@
                         <svg class="w-4 h-4 text-fuchsia-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
-                        <div class="bg-white/10 rounded-lg border border-white/20 p-2 w-16">
-                            <div class="text-[10px] text-gray-300 text-center mb-1">You</div>
+                        <div class="bg-gray-200 dark:bg-white/10 rounded-lg border border-gray-300 dark:border-white/20 p-2 w-16">
+                            <div class="text-[10px] text-gray-600 dark:text-gray-300 text-center mb-1">You</div>
                             <div class="h-1.5 bg-white/20 rounded mb-1"></div>
                             <div class="h-1.5 bg-indigo-400/40 rounded w-3/4"></div>
                         </div>
@@ -236,7 +236,7 @@
                 </div>
 
                 <!-- Row 2: One Link Everywhere (2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium mb-4">
@@ -245,25 +245,25 @@
                                 </svg>
                                 Share Link
                             </div>
-                            <h3 class="text-3xl font-bold text-white mb-4">One link for Linktree, RA, SoundCloud</h3>
-                            <p class="text-gray-400 text-lg">Drop your schedule link anywhere. Fans see all upcoming sets - residencies, festivals, guest spots.</p>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">One link for Linktree, RA, SoundCloud</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg">Drop your schedule link anywhere. Fans see all upcoming sets - residencies, festivals, guest spots.</p>
                         </div>
-                        <div class="bg-black/30 rounded-2xl p-5 border border-white/10">
+                        <div class="bg-gray-100 dark:bg-black/30 rounded-2xl p-5 border border-gray-200 dark:border-white/10">
                             <div class="text-xs text-gray-500 mb-2">Your schedule link</div>
                             <div class="flex items-center gap-2 p-3 rounded-xl bg-blue-500/20 border border-blue-400/30">
                                 <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                                 </svg>
-                                <span class="text-white text-sm font-mono">eventschedule.com/djnova</span>
+                                <span class="text-gray-900 dark:text-white text-sm font-mono">eventschedule.com/djnova</span>
                             </div>
                             <div class="mt-3 flex gap-2">
-                                <div class="flex-1 text-center p-2 rounded-lg bg-white/5">
+                                <div class="flex-1 text-center p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                     <div class="text-blue-300 text-xs">Resident Advisor</div>
                                 </div>
-                                <div class="flex-1 text-center p-2 rounded-lg bg-white/5">
+                                <div class="flex-1 text-center p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                     <div class="text-blue-300 text-xs">SoundCloud</div>
                                 </div>
-                                <div class="flex-1 text-center p-2 rounded-lg bg-white/5">
+                                <div class="flex-1 text-center p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                     <div class="text-blue-300 text-xs">Mixcloud</div>
                                 </div>
                             </div>
@@ -272,15 +272,15 @@
                 </div>
 
                 <!-- Row 3: Newsletter to Dancefloor (1 col) -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-900/50 to-rose-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-900/50 to-rose-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         Newsletter
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Email the dancefloor directly</h3>
-                    <p class="text-gray-400 mb-6">No algorithm throttling. One click sends set graphics to everyone who wants to come dance.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Email the dancefloor directly</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">No algorithm throttling. One click sends set graphics to everyone who wants to come dance.</p>
 
                     <div class="flex items-center justify-center">
                         <div class="relative">
@@ -307,23 +307,23 @@
                 </div>
 
                 <!-- Row 3: Set Graphics (1 col) -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Graphics
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Promo flyers, auto-generated</h3>
-                    <p class="text-gray-400 mb-6">Download graphics sized for Instagram stories, RA event pages, WhatsApp groups.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Promo flyers, auto-generated</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Download graphics sized for Instagram stories, RA event pages, WhatsApp groups.</p>
 
                     <div class="flex justify-center">
                         <div class="relative w-28 h-36 bg-gradient-to-br from-amber-500/30 to-orange-500/30 rounded-xl border border-amber-400/30 p-2 neon-glow-subtle">
                             <div class="w-full h-full bg-gradient-to-br from-indigo-600/60 to-purple-600/60 rounded-lg flex flex-col items-center justify-center">
-                                <div class="text-white text-[8px] font-semibold mb-1">THIS SATURDAY</div>
+                                <div class="text-gray-900 dark:text-white text-[8px] font-semibold mb-1">THIS SATURDAY</div>
                                 <div class="text-amber-300 text-sm font-bold">DJ NOVA</div>
-                                <div class="text-white text-[10px] mt-1">@ FABRIC</div>
-                                <div class="text-gray-300 text-[8px] mt-1">11 PM - 4 AM</div>
+                                <div class="text-gray-900 dark:text-white text-[10px] mt-1">@ FABRIC</div>
+                                <div class="text-gray-600 dark:text-gray-300 text-[8px] mt-1">11 PM - 4 AM</div>
                             </div>
                             <div class="absolute -bottom-2 -right-2 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
                                 <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -335,22 +335,22 @@
                 </div>
 
                 <!-- Row 3: Zero Fees (1 col) -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-green-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-green-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Ticketing
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Your door, your money</h3>
-                    <p class="text-gray-400 mb-6">Sell advance tickets with zero platform cut. Stripe pays you direct.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your door, your money</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Sell advance tickets with zero platform cut. Stripe pays you direct.</p>
 
                     <div class="flex justify-center">
                         <div class="bg-emerald-500/20 rounded-xl border border-emerald-400/30 p-4 w-full max-w-[180px]">
                             <div class="text-center mb-3">
                                 <div class="text-emerald-300 text-xs">Platform fee</div>
-                                <div class="text-white text-3xl font-bold">$0</div>
-                                <div class="text-gray-400 text-xs">You keep 100%</div>
+                                <div class="text-gray-900 dark:text-white text-3xl font-bold">$0</div>
+                                <div class="text-gray-500 dark:text-gray-400 text-xs">You keep 100%</div>
                             </div>
                             <div class="border-t border-emerald-400/20 pt-3">
                                 <div class="flex items-center justify-center gap-1">

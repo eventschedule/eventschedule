@@ -15,7 +15,7 @@
     </style>
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->
         <div class="absolute inset-0">
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-cyan-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
@@ -26,19 +26,19 @@
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-8">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
                 <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
-                <span class="text-sm text-gray-300">Collaborate together</span>
+                <span class="text-sm text-gray-600 dark:text-gray-300">Collaborate together</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
                 Team<br>
                 <span class="text-gradient">Scheduling</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
                 Invite your team, assign permissions, and manage events together seamlessly.
             </p>
 
@@ -54,12 +54,12 @@
     </section>
 
     <!-- Bento Grid Features -->
-    <section class="bg-[#0a0a0f] py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Invite Team Members (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-teal-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-teal-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-medium mb-4">
@@ -68,42 +68,42 @@
                                 </svg>
                                 Invite Members
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Invite team members via email</h3>
-                            <p class="text-gray-400 text-lg mb-6">Add teammates by email address. They'll receive an invitation and can join instantly, even if they don't have an account yet.</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Invite team members via email</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Add teammates by email address. They'll receive an invitation and can join instantly, even if they don't have an account yet.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Email invitations</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Auto-create accounts</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Resend invites</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Email invitations</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Auto-create accounts</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Resend invites</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="animate-float">
-                                <div class="bg-black/30 rounded-2xl p-5 border border-white/10 space-y-3 max-w-xs">
+                                <div class="bg-gray-100 dark:bg-black/30 rounded-2xl p-5 border border-gray-200 dark:border-white/10 space-y-3 max-w-xs">
                                     <!-- Team member 1 -->
-                                    <div class="flex items-center gap-3 p-3 rounded-xl bg-white/10 border border-white/10">
+                                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
                                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center text-white font-semibold text-sm">JD</div>
                                         <div class="flex-1 min-w-0">
-                                            <div class="text-white text-sm font-medium truncate">John Doe</div>
-                                            <div class="text-gray-400 text-xs truncate">john@example.com</div>
+                                            <div class="text-gray-900 dark:text-white text-sm font-medium truncate">John Doe</div>
+                                            <div class="text-gray-500 dark:text-gray-400 text-xs truncate">john@example.com</div>
                                         </div>
                                         <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-xs">Owner</span>
                                     </div>
                                     <!-- Team member 2 -->
-                                    <div class="flex items-center gap-3 p-3 rounded-xl bg-white/10 border border-white/10">
+                                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
                                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center text-white font-semibold text-sm">AS</div>
                                         <div class="flex-1 min-w-0">
-                                            <div class="text-white text-sm font-medium truncate">Alice Smith</div>
-                                            <div class="text-gray-400 text-xs truncate">alice@example.com</div>
+                                            <div class="text-gray-900 dark:text-white text-sm font-medium truncate">Alice Smith</div>
+                                            <div class="text-gray-500 dark:text-gray-400 text-xs truncate">alice@example.com</div>
                                         </div>
                                         <span class="px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 text-xs">Admin</span>
                                     </div>
                                     <!-- Pending invite -->
-                                    <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-dashed border-white/20">
+                                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-dashed border-gray-300 dark:border-white/20">
                                         <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
                                             <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <div class="text-gray-400 text-sm truncate">bob@example.com</div>
+                                            <div class="text-gray-500 dark:text-gray-400 text-sm truncate">bob@example.com</div>
                                             <div class="text-gray-500 text-xs">Invitation pending</div>
                                         </div>
                                     </div>
@@ -114,15 +114,15 @@
                 </div>
 
                 <!-- Permission Levels -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900/50 to-emerald-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900/50 to-emerald-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                         Permissions
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Role-based access</h3>
-                    <p class="text-gray-400 mb-6">Assign the right level of access to each team member based on their responsibilities.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Role-based access</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Assign the right level of access to each team member based on their responsibilities.</p>
 
                     <div class="space-y-3">
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
@@ -130,46 +130,46 @@
                                 <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
                             </div>
                             <div>
-                                <span class="text-white text-sm font-medium">Owner</span>
-                                <p class="text-gray-400 text-xs">Full control & billing</p>
+                                <span class="text-gray-900 dark:text-white text-sm font-medium">Owner</span>
+                                <p class="text-gray-500 dark:text-gray-400 text-xs">Full control & billing</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3 p-3 rounded-xl bg-white/10 border border-white/10">
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
                             <div class="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center">
                                 <svg class="w-4 h-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                             </div>
                             <div>
-                                <span class="text-white text-sm font-medium">Admin</span>
-                                <p class="text-gray-400 text-xs">Manage events & members</p>
+                                <span class="text-gray-900 dark:text-white text-sm font-medium">Admin</span>
+                                <p class="text-gray-500 dark:text-gray-400 text-xs">Manage events & members</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3 p-3 rounded-xl bg-white/10 border border-white/10">
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
                             <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                                 <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                             </div>
                             <div>
-                                <span class="text-white text-sm font-medium">Follower</span>
-                                <p class="text-gray-400 text-xs">View-only access</p>
+                                <span class="text-gray-900 dark:text-white text-sm font-medium">Follower</span>
+                                <p class="text-gray-500 dark:text-gray-400 text-xs">View-only access</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Shared Event Editing -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-blue-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-blue-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                         Collaboration
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Shared editing</h3>
-                    <p class="text-gray-400 mb-6">All team members with the right permissions can create and edit events on your schedule.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Shared editing</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">All team members with the right permissions can create and edit events on your schedule.</p>
 
-                    <div class="bg-black/30 rounded-xl p-4 border border-white/10">
+                    <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center justify-between mb-3">
-                            <span class="text-white text-sm font-medium">Team Workshop</span>
-                            <span class="text-gray-400 text-xs">Edited 2m ago</span>
+                            <span class="text-gray-900 dark:text-white text-sm font-medium">Team Workshop</span>
+                            <span class="text-gray-500 dark:text-gray-400 text-xs">Edited 2m ago</span>
                         </div>
                         <div class="flex -space-x-2">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 border-2 border-[#0a0a0f] flex items-center justify-center text-white text-xs font-semibold">J</div>
@@ -180,7 +180,7 @@
                 </div>
 
                 <!-- Member Availability (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900/50 to-cyan-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900/50 to-cyan-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm font-medium mb-4">
@@ -189,11 +189,11 @@
                                 </svg>
                                 Availability
                             </div>
-                            <h3 class="text-3xl font-bold text-white mb-4">Track member availability</h3>
-                            <p class="text-gray-400 text-lg">Team members can mark dates when they're unavailable, helping you coordinate schedules and plan events when everyone can participate.</p>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Track member availability</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg">Team members can mark dates when they're unavailable, helping you coordinate schedules and plan events when everyone can participate.</p>
                         </div>
-                        <div class="bg-black/30 rounded-2xl p-6 border border-white/10">
-                            <div class="text-gray-400 text-sm mb-4">January 2025</div>
+                        <div class="bg-gray-100 dark:bg-black/30 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
+                            <div class="text-gray-500 dark:text-gray-400 text-sm mb-4">January 2025</div>
                             <div class="grid grid-cols-7 gap-1 text-center text-xs">
                                 <div class="text-gray-500 py-1">S</div>
                                 <div class="text-gray-500 py-1">M</div>
@@ -203,36 +203,36 @@
                                 <div class="text-gray-500 py-1">F</div>
                                 <div class="text-gray-500 py-1">S</div>
                                 <!-- Calendar days -->
-                                <div class="py-2 text-gray-600">29</div>
-                                <div class="py-2 text-gray-600">30</div>
-                                <div class="py-2 text-gray-600">31</div>
-                                <div class="py-2 text-white">1</div>
-                                <div class="py-2 text-white">2</div>
-                                <div class="py-2 text-white">3</div>
-                                <div class="py-2 text-white">4</div>
-                                <div class="py-2 text-white">5</div>
-                                <div class="py-2 text-white">6</div>
-                                <div class="py-2 text-white">7</div>
+                                <div class="py-2 text-gray-400 dark:text-gray-600">29</div>
+                                <div class="py-2 text-gray-400 dark:text-gray-600">30</div>
+                                <div class="py-2 text-gray-400 dark:text-gray-600">31</div>
+                                <div class="py-2 text-gray-900 dark:text-white">1</div>
+                                <div class="py-2 text-gray-900 dark:text-white">2</div>
+                                <div class="py-2 text-gray-900 dark:text-white">3</div>
+                                <div class="py-2 text-gray-900 dark:text-white">4</div>
+                                <div class="py-2 text-gray-900 dark:text-white">5</div>
+                                <div class="py-2 text-gray-900 dark:text-white">6</div>
+                                <div class="py-2 text-gray-900 dark:text-white">7</div>
                                 <div class="py-2 rounded-lg bg-red-500/20 text-red-400">8</div>
                                 <div class="py-2 rounded-lg bg-red-500/20 text-red-400">9</div>
-                                <div class="py-2 text-white">10</div>
-                                <div class="py-2 text-white">11</div>
-                                <div class="py-2 text-white">12</div>
-                                <div class="py-2 text-white">13</div>
-                                <div class="py-2 text-white">14</div>
+                                <div class="py-2 text-gray-900 dark:text-white">10</div>
+                                <div class="py-2 text-gray-900 dark:text-white">11</div>
+                                <div class="py-2 text-gray-900 dark:text-white">12</div>
+                                <div class="py-2 text-gray-900 dark:text-white">13</div>
+                                <div class="py-2 text-gray-900 dark:text-white">14</div>
                                 <div class="py-2 rounded-lg bg-cyan-500/20 text-cyan-400">15</div>
                                 <div class="py-2 rounded-lg bg-cyan-500/20 text-cyan-400">16</div>
-                                <div class="py-2 text-white">17</div>
-                                <div class="py-2 text-white">18</div>
+                                <div class="py-2 text-gray-900 dark:text-white">17</div>
+                                <div class="py-2 text-gray-900 dark:text-white">18</div>
                             </div>
-                            <div class="flex items-center gap-4 mt-4 pt-4 border-t border-white/10 text-xs">
+                            <div class="flex items-center gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-white/10 text-xs">
                                 <div class="flex items-center gap-2">
                                     <div class="w-3 h-3 rounded bg-red-500/20 border border-red-500/40"></div>
-                                    <span class="text-gray-400">Unavailable</span>
+                                    <span class="text-gray-500 dark:text-gray-400">Unavailable</span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <div class="w-3 h-3 rounded bg-cyan-500/20 border border-cyan-500/40"></div>
-                                    <span class="text-gray-400">Event scheduled</span>
+                                    <span class="text-gray-500 dark:text-gray-400">Event scheduled</span>
                                 </div>
                             </div>
                         </div>
@@ -387,7 +387,7 @@
     </section>
 
     <!-- Next Feature -->
-    <section class="relative bg-[#0a0a0f] py-20 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
         <!-- Animated background blobs matching Sub-schedules page's colors -->
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-rose-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
@@ -396,12 +396,12 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/sub-schedules') }}" class="group block">
-                <div class="bg-gradient-to-br from-rose-900/50 to-pink-900/50 rounded-3xl border border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-rose-900/50 to-pink-900/50 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <!-- Text content -->
                         <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-rose-300 transition-colors">Sub-schedules</h3>
-                            <p class="text-gray-400 text-lg mb-4">Organize events by room, stage, or series. Visitors can filter to find exactly what they need.</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-rose-300 transition-colors">Sub-schedules</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Organize events by room, stage, or series. Visitors can filter to find exactly what they need.</p>
                             <span class="inline-flex items-center text-rose-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -412,24 +412,24 @@
 
                         <!-- Mini mockup: Nested list with colored dots -->
                         <div class="flex-shrink-0">
-                            <div class="bg-black/30 rounded-xl border border-white/10 p-4 w-48">
+                            <div class="bg-gray-100 dark:bg-black/30 rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
                                 <div class="text-[10px] text-gray-500 mb-3">Sub-schedules</div>
                                 <div class="space-y-2">
                                     <div class="flex items-center gap-2 p-2 rounded-lg bg-rose-500/20 border border-rose-500/30">
                                         <div class="w-2 h-2 rounded-full bg-rose-400"></div>
-                                        <span class="text-white text-xs">Main Stage</span>
+                                        <span class="text-gray-900 dark:text-white text-xs">Main Stage</span>
                                     </div>
-                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
                                         <div class="w-2 h-2 rounded-full bg-pink-400"></div>
-                                        <span class="text-gray-300 text-xs">Acoustic Room</span>
+                                        <span class="text-gray-600 dark:text-gray-300 text-xs">Acoustic Room</span>
                                     </div>
-                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
                                         <div class="w-2 h-2 rounded-full bg-fuchsia-400"></div>
-                                        <span class="text-gray-300 text-xs">Outdoor Patio</span>
+                                        <span class="text-gray-600 dark:text-gray-300 text-xs">Outdoor Patio</span>
                                     </div>
-                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
                                         <div class="w-2 h-2 rounded-full bg-purple-400"></div>
-                                        <span class="text-gray-300 text-xs">Jazz Lounge</span>
+                                        <span class="text-gray-600 dark:text-gray-300 text-xs">Jazz Lounge</span>
                                     </div>
                                 </div>
                             </div>

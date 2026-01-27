@@ -7,7 +7,7 @@
     @include('marketing.docs.partials.styles')
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-16 overflow-hidden border-b border-white/5">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
             <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
@@ -23,33 +23,33 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
                     </svg>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold text-white">SaaS Installation Setup</h1>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">SaaS Installation Setup</h1>
             </div>
-            <p class="text-lg text-gray-400 max-w-3xl">
+            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
                 Configure Event Schedule for SaaS (Software as a Service) deployment, where you host the platform for multiple customers using subdomains.
             </p>
         </div>
     </section>
 
     <!-- Main Content -->
-    <section class="bg-[#0a0a0f] py-12">
+    <section class="bg-white dark:bg-[#0a0a0f] py-12">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row gap-10">
                 <!-- Sidebar Navigation -->
                 <aside class="lg:w-64 flex-shrink-0">
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
-                        <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Overview</a>
-                        <a href="#prerequisites" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Prerequisites</a>
-                        <a href="#environment" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Environment Configuration</a>
-                        <a href="#dns" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">DNS Configuration</a>
-                        <a href="#webserver" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Web Server Configuration</a>
-                        <a href="#stripe" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Stripe Subscription Setup</a>
-                        <a href="#example" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Complete Example</a>
-                        <a href="#verification" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Verification Steps</a>
-                        <a href="#demo" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Demo Mode</a>
-                        <a href="#troubleshooting" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Troubleshooting</a>
-                        <a href="#security" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Security Considerations</a>
+                        <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Overview</a>
+                        <a href="#prerequisites" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Prerequisites</a>
+                        <a href="#environment" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Environment Configuration</a>
+                        <a href="#dns" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">DNS Configuration</a>
+                        <a href="#webserver" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Web Server Configuration</a>
+                        <a href="#stripe" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Stripe Subscription Setup</a>
+                        <a href="#example" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Complete Example</a>
+                        <a href="#verification" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Verification Steps</a>
+                        <a href="#demo" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Demo Mode</a>
+                        <a href="#troubleshooting" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Troubleshooting</a>
+                        <a href="#security" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Security Considerations</a>
                     </nav>
                 </aside>
 
@@ -59,7 +59,7 @@
                         <!-- Overview -->
                         <section id="overview" class="doc-section">
                             <h2 class="doc-heading">Overview</h2>
-                            <p class="text-gray-300 mb-6">Event Schedule supports two deployment modes:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule supports two deployment modes:</p>
 
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
@@ -72,12 +72,12 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Self-hosted</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Self-hosted</span></td>
                                             <td>Path-based <code class="doc-inline-code">/schedule-name/...</code></td>
                                             <td>Single organization or personal use</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">SaaS/Hosted</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">SaaS/Hosted</span></td>
                                             <td>Subdomain-based <code class="doc-inline-code">schedule-name.yourdomain.com</code></td>
                                             <td>Multi-tenant platform for multiple customers</td>
                                         </tr>
@@ -85,7 +85,7 @@
                                 </table>
                             </div>
 
-                            <p class="text-gray-300">In SaaS mode, each customer (schedule/role) gets their own subdomain, and the main domain can display marketing pages to attract new signups.</p>
+                            <p class="text-gray-600 dark:text-gray-300">In SaaS mode, each customer (schedule/role) gets their own subdomain, and the main domain can display marketing pages to attract new signups.</p>
                         </section>
 
                         <!-- Prerequisites -->
@@ -102,9 +102,9 @@
                         <!-- Environment Configuration -->
                         <section id="environment" class="doc-section">
                             <h2 class="doc-heading">Environment Configuration</h2>
-                            <p class="text-gray-300 mb-6">Add the following variables to your <code class="doc-inline-code">.env</code> file to enable SaaS mode:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add the following variables to your <code class="doc-inline-code">.env</code> file to enable SaaS mode:</p>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Core SaaS Settings</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Core SaaS Settings</h3>
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>.env</span>
@@ -157,7 +157,7 @@
                                 </table>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Branding Customization</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Branding Customization</h3>
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>.env</span>
@@ -205,7 +205,7 @@
                                 </ul>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4 mt-8">Support Configuration</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Support Configuration</h3>
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>.env</span>
@@ -234,7 +234,7 @@
                                 </table>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4 mt-8">Pricing and Trial Configuration</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Pricing and Trial Configuration</h3>
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>.env</span>
@@ -276,10 +276,10 @@
                         <!-- DNS Configuration -->
                         <section id="dns" class="doc-section">
                             <h2 class="doc-heading">DNS Configuration</h2>
-                            <p class="text-gray-300 mb-6">For SaaS mode to work, you need to configure wildcard DNS records.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">For SaaS mode to work, you need to configure wildcard DNS records.</p>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">DNS Records</h3>
-                            <p class="text-gray-300 mb-4">Add the following DNS records to your domain:</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">DNS Records</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Add the following DNS records to your domain:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -293,7 +293,7 @@ yourdomain.com.    A    YOUR_SERVER_IP
 *.yourdomain.com.  A    YOUR_SERVER_IP</code></pre>
                             </div>
 
-                            <p class="text-gray-300 mb-4">Or if using a CNAME:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Or if using a CNAME:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -307,8 +307,8 @@ yourdomain.com.    CNAME    your-server.hosting.com.
 *.yourdomain.com.  CNAME    your-server.hosting.com.</code></pre>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4 mt-8">SSL Certificate</h3>
-                            <p class="text-gray-300 mb-4">You'll need a wildcard SSL certificate that covers both the main domain and all subdomains:</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">SSL Certificate</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">You'll need a wildcard SSL certificate that covers both the main domain and all subdomains:</p>
                             <ul class="doc-list">
                                 <li>Certificate should cover: <code class="doc-inline-code">yourdomain.com</code> and <code class="doc-inline-code">*.yourdomain.com</code></li>
                                 <li>Let's Encrypt supports wildcard certificates via DNS-01 challenge</li>
@@ -320,7 +320,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                         <section id="webserver" class="doc-section">
                             <h2 class="doc-heading">Web Server Configuration</h2>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Nginx Example</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Nginx Example</h3>
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>nginx.conf</span>
@@ -348,7 +348,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
 }</code></pre>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4 mt-8">Apache Example</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Apache Example</h3>
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>apache.conf</span>
@@ -375,11 +375,11 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                         <!-- Stripe Subscription Setup -->
                         <section id="stripe" class="doc-section">
                             <h2 class="doc-heading">Stripe Subscription Setup (Pro Plans)</h2>
-                            <p class="text-gray-300 mb-6">To enable paid Pro plans for your customers, configure Stripe subscription billing.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">To enable paid Pro plans for your customers, configure Stripe subscription billing.</p>
 
-                            <p class="text-gray-300 mb-6">See <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="text-blue-400 hover:text-blue-300 underline">Stripe Integration Documentation</a> for detailed Stripe configuration instructions.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">See <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="text-blue-400 hover:text-blue-300 underline">Stripe Integration Documentation</a> for detailed Stripe configuration instructions.</p>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Required Environment Variables</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Required Environment Variables</h3>
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>.env</span>
@@ -393,7 +393,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
 <span class="code-variable">STRIPE_PRICE_YEARLY</span>=<span class="code-string">price_yearly_price_id</span></code></pre>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4 mt-8">How Subscriptions Work</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">How Subscriptions Work</h3>
                             <ol class="doc-list doc-list-numbered">
                                 <li>Customers create a schedule (gets a free plan by default)</li>
                                 <li>Customers can upgrade to Pro from their schedule's admin page</li>
@@ -405,7 +405,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                         <!-- Complete Example Configuration -->
                         <section id="example" class="doc-section">
                             <h2 class="doc-heading">Complete Example Configuration</h2>
-                            <p class="text-gray-300 mb-6">Here's a complete <code class="doc-inline-code">.env</code> configuration for a SaaS deployment:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Here's a complete <code class="doc-inline-code">.env</code> configuration for a SaaS deployment:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -468,12 +468,12 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                         <!-- Verification Steps -->
                         <section id="verification" class="doc-section">
                             <h2 class="doc-heading">Verification Steps</h2>
-                            <p class="text-gray-300 mb-6">After completing the configuration, verify your setup:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">After completing the configuration, verify your setup:</p>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">1. Test Main Domain</h3>
-                            <p class="text-gray-300 mb-6">Visit <code class="doc-inline-code">https://yourdomain.com</code> - you should see the marketing/landing page.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">1. Test Main Domain</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Visit <code class="doc-inline-code">https://yourdomain.com</code> - you should see the marketing/landing page.</p>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">2. Test Subdomain Routing</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">2. Test Subdomain Routing</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Create a new account and schedule</li>
                                 <li>Note the schedule's subdomain (e.g., <code class="doc-inline-code">my-schedule</code>)</li>
@@ -481,14 +481,14 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                                 <li>The schedule's public page should load</li>
                             </ol>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">3. Test SSL Certificate</h3>
-                            <p class="text-gray-300 mb-2">Verify SSL works for both:</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">3. Test SSL Certificate</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-2">Verify SSL works for both:</p>
                             <ul class="doc-list mb-6">
                                 <li>Main domain: <code class="doc-inline-code">https://yourdomain.com</code></li>
                                 <li>Any subdomain: <code class="doc-inline-code">https://test.yourdomain.com</code></li>
                             </ul>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">4. Test Subscription Flow (if configured)</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">4. Test Subscription Flow (if configured)</h3>
                             <ol class="doc-list doc-list-numbered">
                                 <li>Go to a schedule's admin page</li>
                                 <li>Click "Upgrade to Pro"</li>
@@ -500,9 +500,9 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                         <!-- Demo Mode -->
                         <section id="demo" class="doc-section">
                             <h2 class="doc-heading">Demo Mode (Optional)</h2>
-                            <p class="text-gray-300 mb-6">Demo mode lets potential customers try your platform without signing up. Visitors to <code class="doc-inline-code">demo.yourdomain.com</code> are automatically logged in to a demo account with sample data.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Demo mode lets potential customers try your platform without signing up. Visitors to <code class="doc-inline-code">demo.yourdomain.com</code> are automatically logged in to a demo account with sample data.</p>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">How It Works</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">How It Works</h3>
                             <ul class="doc-list mb-6">
                                 <li>A special subdomain (<code class="doc-inline-code">demo.yourdomain.com</code>) triggers auto-login</li>
                                 <li>Visitors are redirected to a pre-populated schedule with sample events, tickets, groups, and sales</li>
@@ -510,8 +510,8 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                                 <li>Demo data can be reset periodically to stay fresh</li>
                             </ul>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Setting Up Demo Mode</h3>
-                            <p class="text-gray-300 mb-4">Run the setup command to create the demo account and sample data:</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Setting Up Demo Mode</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Run the setup command to create the demo account and sample data:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -521,10 +521,10 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                                 <pre><code>php artisan app:setup-demo</code></pre>
                             </div>
 
-                            <p class="text-gray-300 mb-6 mt-4">This creates a demo user, a schedule called <code class="doc-inline-code">thenightowls</code>, and populates it with sample events, tickets, groups, and sales data.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6 mt-4">This creates a demo user, a schedule called <code class="doc-inline-code">thenightowls</code>, and populates it with sample events, tickets, groups, and sales data.</p>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Resetting Demo Data</h3>
-                            <p class="text-gray-300 mb-4">Running the setup command again will automatically reset the demo data:</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Resetting Demo Data</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Running the setup command again will automatically reset the demo data:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -534,8 +534,8 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                                 <pre><code>php artisan app:setup-demo</code></pre>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4 mt-8">Scheduling Automatic Resets (Optional)</h3>
-                            <p class="text-gray-300 mb-4">To keep demo data fresh, you can schedule hourly resets by adding this to your cron:</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Scheduling Automatic Resets (Optional)</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">To keep demo data fresh, you can schedule hourly resets by adding this to your cron:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -555,11 +555,11 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                         <section id="troubleshooting" class="doc-section">
                             <h2 class="doc-heading">Troubleshooting</h2>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Common Issues</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Common Issues</h3>
 
                             <div class="space-y-4 mb-8">
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Subdomains show 404 or wrong page</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Subdomains show 404 or wrong page</h4>
                                     <ul class="doc-list text-sm">
                                         <li>Check that <code class="doc-inline-code">IS_HOSTED=true</code> is set</li>
                                         <li>Verify wildcard DNS is configured correctly</li>
@@ -567,24 +567,24 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                                     </ul>
                                 </div>
 
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">"Session domain mismatch" or login issues across subdomains</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Session domain mismatch" or login issues across subdomains</h4>
                                     <ul class="doc-list text-sm">
                                         <li>Set <code class="doc-inline-code">SESSION_DOMAIN=.yourdomain.com</code> (with leading dot)</li>
                                         <li>Clear browser cookies and try again</li>
                                     </ul>
                                 </div>
 
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">SSL certificate errors on subdomains</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">SSL certificate errors on subdomains</h4>
                                     <ul class="doc-list text-sm">
                                         <li>Verify wildcard certificate covers <code class="doc-inline-code">*.yourdomain.com</code></li>
                                         <li>Check certificate is properly installed in web server</li>
                                     </ul>
                                 </div>
 
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Logo not displaying</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Logo not displaying</h4>
                                     <ul class="doc-list text-sm">
                                         <li>Verify logo files exist in <code class="doc-inline-code">public/images/</code></li>
                                         <li>Check file permissions are readable</li>
@@ -593,8 +593,8 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                                 </div>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Logs</h3>
-                            <p class="text-gray-300 mb-4">Check the application logs for errors:</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Logs</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Check the application logs for errors:</p>
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>bash</span>
@@ -608,11 +608,11 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                         <section id="security" class="doc-section">
                             <h2 class="doc-heading">Security Considerations</h2>
                             <ol class="doc-list doc-list-numbered">
-                                <li><span class="font-semibold text-white">Environment File:</span> Never expose <code class="doc-inline-code">.env</code> file publicly</li>
-                                <li><span class="font-semibold text-white">HTTPS Required:</span> Always use HTTPS in production</li>
-                                <li><span class="font-semibold text-white">API Keys:</span> Keep all API keys and secrets secure</li>
-                                <li><span class="font-semibold text-white">Database:</span> Use strong database passwords and restrict access</li>
-                                <li><span class="font-semibold text-white">File Permissions:</span> Ensure proper file permissions on the server</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Environment File:</span> Never expose <code class="doc-inline-code">.env</code> file publicly</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">HTTPS Required:</span> Always use HTTPS in production</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">API Keys:</span> Keep all API keys and secrets secure</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Database:</span> Use strong database passwords and restrict access</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">File Permissions:</span> Ensure proper file permissions on the server</li>
                             </ol>
                         </section>
                     </div>

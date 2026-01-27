@@ -7,7 +7,7 @@
     @include('marketing.docs.partials.styles')
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-16 overflow-hidden border-b border-white/5">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-rose-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
             <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-pink-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
@@ -23,31 +23,31 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold text-white">Event Graphics</h1>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Event Graphics</h1>
             </div>
-            <p class="text-lg text-gray-400 max-w-3xl">
+            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
                 Generate shareable images and formatted text for your upcoming events. Perfect for social media, messaging apps, and newsletters.
             </p>
         </div>
     </section>
 
     <!-- Main Content -->
-    <section class="bg-[#0a0a0f] py-12">
+    <section class="bg-white dark:bg-[#0a0a0f] py-12">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row gap-10">
                 <!-- Sidebar Navigation -->
                 <aside class="lg:w-64 flex-shrink-0">
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
-                        <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Overview</a>
-                        <a href="#text-template" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Text Template</a>
-                        <a href="#quick-reference" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Quick Reference</a>
-                        <a href="#variables" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">All Variables</a>
-                        <a href="#ai-prompt" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">AI Text Prompt</a>
-                        <a href="#link-options" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Link Options</a>
-                        <a href="#screen-capture" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Screen Capture</a>
-                        <a href="#email-scheduling" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Email Scheduling</a>
-                        <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">See Also</a>
+                        <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Overview</a>
+                        <a href="#text-template" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Text Template</a>
+                        <a href="#quick-reference" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Quick Reference</a>
+                        <a href="#variables" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">All Variables</a>
+                        <a href="#ai-prompt" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">AI Text Prompt</a>
+                        <a href="#link-options" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Link Options</a>
+                        <a href="#screen-capture" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Screen Capture</a>
+                        <a href="#email-scheduling" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Email Scheduling</a>
+                        <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
                 </aside>
 
@@ -57,7 +57,7 @@
                         <!-- Overview -->
                         <section id="overview" class="doc-section">
                             <h2 class="doc-heading">Overview</h2>
-                            <p class="text-gray-300 mb-4">
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The Event Graphics feature generates a visual collage of your upcoming events along with formatted text that you can copy and share. It's perfect for:
                             </p>
                             <ul class="doc-list mb-6">
@@ -66,7 +66,7 @@
                                 <li>Email newsletters</li>
                                 <li>Website embeds</li>
                             </ul>
-                            <p class="text-gray-300 mb-4">
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The generated graphic displays up to 10 upcoming events with their flyer images in a grid or list layout. The text output provides event details in a format optimized for copying and pasting.
                             </p>
                         </section>
@@ -74,12 +74,12 @@
                         <!-- Text Template -->
                         <section id="text-template" class="doc-section">
                             <h2 class="doc-heading">Text Template</h2>
-                            <p class="text-gray-300 mb-4">
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The text template defines how each event is formatted in the generated text output. You can customize this template using variables that are automatically replaced with event data.
                             </p>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Default Template</h3>
-                            <p class="text-gray-300 mb-4">If you leave the template blank, the following default format is used:</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Default Template</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">If you leave the template blank, the following default format is used:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -92,7 +92,7 @@
 {url}</code></pre>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Example Output</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Example Output</h3>
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>Generated Text</span>
@@ -112,37 +112,37 @@ https://example.com/event/summer-concert</code></pre>
                         <!-- Quick Reference -->
                         <section id="quick-reference" class="doc-section">
                             <h2 class="doc-heading">Quick Reference</h2>
-                            <p class="text-gray-300 mb-4">
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Most templates only need these essential variables. Copy the ones you need:
                             </p>
 
                             <div class="grid md:grid-cols-2 gap-4 mb-6">
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-3">Event Basics</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Event Basics</h4>
                                     <div class="space-y-2 text-sm">
                                         <div class="flex justify-between"><code class="text-rose-300">{event_name}</code> <span class="text-gray-500">Event title</span></div>
                                         <div class="flex justify-between"><code class="text-rose-300">{url}</code> <span class="text-gray-500">Event link</span></div>
                                         <div class="flex justify-between"><code class="text-rose-300">{description}</code> <span class="text-gray-500">Description</span></div>
                                     </div>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-3">Date & Time</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Date & Time</h4>
                                     <div class="space-y-2 text-sm">
                                         <div class="flex justify-between"><code class="text-rose-300">{day_name}</code> <span class="text-gray-500">Wednesday</span></div>
                                         <div class="flex justify-between"><code class="text-rose-300">{date_dmy}</code> <span class="text-gray-500">15/3</span></div>
                                         <div class="flex justify-between"><code class="text-rose-300">{time}</code> <span class="text-gray-500">20:00</span></div>
                                     </div>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-3">Location</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Location</h4>
                                     <div class="space-y-2 text-sm">
                                         <div class="flex justify-between"><code class="text-rose-300">{venue}</code> <span class="text-gray-500">Venue name</span></div>
                                         <div class="flex justify-between"><code class="text-rose-300">{city}</code> <span class="text-gray-500">City</span></div>
                                         <div class="flex justify-between"><code class="text-rose-300">{address}</code> <span class="text-gray-500">Street</span></div>
                                     </div>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-3">Tickets</h4>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Tickets</h4>
                                     <div class="space-y-2 text-sm">
                                         <div class="flex justify-between"><code class="text-rose-300">{price}</code> <span class="text-gray-500">10 or Free</span></div>
                                         <div class="flex justify-between"><code class="text-rose-300">{currency}</code> <span class="text-gray-500">USD</span></div>
@@ -156,11 +156,11 @@ https://example.com/event/summer-concert</code></pre>
                         <!-- Variables -->
                         <section id="variables" class="doc-section">
                             <h2 class="doc-heading">All Template Variables</h2>
-                            <p class="text-gray-300 mb-4">
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Use these variables in your template. They will be replaced with the actual event data when generating text.
                             </p>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Date & Time</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Date & Time</h3>
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>
@@ -245,7 +245,7 @@ https://example.com/event/summer-concert</code></pre>
                                 </table>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Event Information</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Event Information</h3>
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>
@@ -275,7 +275,7 @@ https://example.com/event/summer-concert</code></pre>
                                 </table>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Venue Information</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Venue Information</h3>
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>
@@ -315,7 +315,7 @@ https://example.com/event/summer-concert</code></pre>
                                 </table>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Ticket Information</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Ticket Information</h3>
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>
@@ -340,8 +340,8 @@ https://example.com/event/summer-concert</code></pre>
                                 </table>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Custom Fields</h3>
-                            <p class="text-gray-300 mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Custom Fields</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 If you have defined <a href="{{ marketing_url('/custom-fields') }}" class="text-rose-400 hover:text-rose-300">Event Custom Fields</a> in your schedule settings, you can include their values in graphics using numbered variables.
                             </p>
 
@@ -419,13 +419,13 @@ https://example.com/event/summer-concert</code></pre>
                         <!-- AI Prompt -->
                         <section id="ai-prompt" class="doc-section">
                             <h2 class="doc-heading">AI Text Prompt</h2>
-                            <p class="text-gray-300 mb-4">
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-500/20 text-rose-300 mr-2">Pro Feature</span>
                                 Use AI to transform the generated text with custom instructions.
                             </p>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">How It Works</h3>
-                            <p class="text-gray-300 mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">How It Works</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 After the text is generated from your template, you can apply AI transformations using the AI Text Prompt field. This allows you to:
                             </p>
                             <ul class="doc-list mb-6">
@@ -435,15 +435,15 @@ https://example.com/event/summer-concert</code></pre>
                                 <li>Add hashtags or mentions</li>
                             </ul>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Example Prompts</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Example Prompts</h3>
                             <div class="space-y-4 mb-6">
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <code class="text-rose-300">Add a calendar emoji before each date and a pin emoji before each venue</code>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <code class="text-rose-300">Translate to Spanish</code>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <code class="text-rose-300">Add relevant hashtags for Instagram</code>
                                 </div>
                             </div>
@@ -452,18 +452,18 @@ https://example.com/event/summer-concert</code></pre>
                         <!-- Link Options -->
                         <section id="link-options" class="doc-section">
                             <h2 class="doc-heading">Link Options</h2>
-                            <p class="text-gray-300 mb-4">
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Choose how event links are generated:
                             </p>
 
                             <div class="space-y-4 mb-6">
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Link to Event Page</h4>
-                                    <p class="text-sm text-gray-400">Links point to the event's page on your schedule where visitors can see full details before taking action.</p>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Link to Event Page</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Links point to the event's page on your schedule where visitors can see full details before taking action.</p>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Link Directly to Registration</h4>
-                                    <p class="text-sm text-gray-400">Links include a trailing slash which triggers the event's registration URL or ticket purchase flow directly.</p>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Link Directly to Registration</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Links include a trailing slash which triggers the event's registration URL or ticket purchase flow directly.</p>
                                 </div>
                             </div>
                         </section>
@@ -471,12 +471,12 @@ https://example.com/event/summer-concert</code></pre>
                         <!-- Screen Capture -->
                         <section id="screen-capture" class="doc-section">
                             <h2 class="doc-heading">Screen Capture Rendering</h2>
-                            <p class="text-gray-300 mb-4">
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-500/20 text-purple-300 mr-2">Enterprise Feature</span>
                                 Use browser-based rendering for the graphic image instead of the default server-side generation.
                             </p>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">When to Use</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">When to Use</h3>
                             <ul class="doc-list mb-6">
                                 <li>Better support for right-to-left (RTL) languages like Hebrew and Arabic</li>
                                 <li>More accurate rendering of special characters and fonts</li>
@@ -492,12 +492,12 @@ https://example.com/event/summer-concert</code></pre>
                         <!-- Email Scheduling -->
                         <section id="email-scheduling" class="doc-section">
                             <h2 class="doc-heading">Email Scheduling</h2>
-                            <p class="text-gray-300 mb-4">
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-500/20 text-purple-300 mr-2">Enterprise Feature</span>
                                 Automatically send event graphics to your email list on a schedule.
                             </p>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Configuration Options</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Configuration Options</h3>
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>
@@ -508,27 +508,27 @@ https://example.com/event/summer-concert</code></pre>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Frequency</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Frequency</span></td>
                                             <td>Daily, Weekly, or Monthly</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Send On</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Send On</span></td>
                                             <td>Day of week (for weekly) or day of month (for monthly)</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Send At</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Send At</span></td>
                                             <td>Hour of day to send the email</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Recipients</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Recipients</span></td>
                                             <td>Comma-separated list of email addresses</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-white mb-4">Test Email</h3>
-                            <p class="text-gray-300 mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Test Email</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Use the "Send Test Email" button to preview exactly what recipients will receive. The test email is sent to your account email address.
                             </p>
                         </section>

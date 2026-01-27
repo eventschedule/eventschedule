@@ -12,7 +12,7 @@
     </section>
 
     <!-- Content -->
-    <section class="py-16">
+    <section class="py-16 bg-white dark:bg-[#0a0a0f]">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="prose prose-lg dark:prose-invert max-w-none">
 

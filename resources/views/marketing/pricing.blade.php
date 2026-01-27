@@ -49,7 +49,7 @@
 
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->
         <div class="absolute inset-0">
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
@@ -60,41 +60,41 @@
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-8">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
                 <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span class="text-sm text-gray-300">No hidden fees</span>
+                <span class="text-sm text-gray-600 dark:text-gray-300">No hidden fees</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
                 Simple, transparent<br>
                 <span class="text-gradient">pricing</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto">
                 Start free and upgrade when you need more. No surprises.
             </p>
         </div>
     </section>
 
     <!-- Pricing Cards -->
-    <section class="bg-[#0a0a0f] py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
                 <!-- Free Plan -->
-                <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-white/10 p-8 lg:p-10 flex flex-col">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-500/20 text-gray-300 text-sm font-medium mb-6 self-start">
+                <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10 flex flex-col">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-500/20 text-gray-600 dark:text-gray-300 text-sm font-medium mb-6 self-start">
                         Forever Free
                     </div>
 
                     <div class="mb-8">
                         <div class="flex items-baseline gap-2 mb-2">
-                            <span class="text-6xl font-bold text-white">$0</span>
-                            <span class="text-gray-400">/month</span>
+                            <span class="text-6xl font-bold text-gray-900 dark:text-white">$0</span>
+                            <span class="text-gray-500 dark:text-gray-400">/month</span>
                         </div>
-                        <p class="text-gray-400">Perfect for getting started</p>
+                        <p class="text-gray-500 dark:text-gray-400">Perfect for getting started</p>
                     </div>
 
                     <ul class="space-y-4 mb-10">
@@ -104,7 +104,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-300">Beautiful event calendars</span>
+                            <span class="text-gray-600 dark:text-gray-300">Beautiful event calendars</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -112,7 +112,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-300">Mobile-optimized design</span>
+                            <span class="text-gray-600 dark:text-gray-300">Mobile-optimized design</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -120,7 +120,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-300">Custom schedule URLs</span>
+                            <span class="text-gray-600 dark:text-gray-300">Custom schedule URLs</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -128,7 +128,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-300">Team member collaboration</span>
+                            <span class="text-gray-600 dark:text-gray-300">Team member collaboration</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -136,7 +136,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-300">Venue location maps</span>
+                            <span class="text-gray-600 dark:text-gray-300">Venue location maps</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -144,11 +144,11 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-300">Google Calendar sync</span>
+                            <span class="text-gray-600 dark:text-gray-300">Google Calendar sync</span>
                         </li>
                     </ul>
 
-                    <a href="{{ route('sign_up') }}" class="mt-auto block w-full text-center px-6 py-4 bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold rounded-2xl transition-all">
+                    <a href="{{ route('sign_up') }}" class="mt-auto block w-full text-center px-6 py-4 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white font-semibold rounded-2xl transition-all">
                         Get Started Free
                     </a>
                 </div>
@@ -163,10 +163,10 @@
 
                     <div class="mb-8">
                         <div class="flex items-baseline gap-2 mb-2">
-                            <span class="text-6xl font-bold text-white">$5</span>
-                            <span class="text-gray-400">/month</span>
+                            <span class="text-6xl font-bold text-gray-900 dark:text-white">$5</span>
+                            <span class="text-gray-500 dark:text-gray-400">/month</span>
                         </div>
-                        <p class="text-gray-400">or $50/year — after your free year</p>
+                        <p class="text-gray-500 dark:text-gray-400">or $50/year — after your free year</p>
                     </div>
 
                     <ul class="space-y-4 mb-10">
@@ -176,7 +176,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-300">Everything in Free</span>
+                            <span class="text-gray-600 dark:text-gray-300">Everything in Free</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -184,7 +184,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-300">Remove Event Schedule branding</span>
+                            <span class="text-gray-600 dark:text-gray-300">Remove Event Schedule branding</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -192,7 +192,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-300">Ticketing & QR code check-ins</span>
+                            <span class="text-gray-600 dark:text-gray-300">Ticketing & QR code check-ins</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -200,7 +200,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-300">Sell online via Stripe</span>
+                            <span class="text-gray-600 dark:text-gray-300">Sell online via Stripe</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -208,7 +208,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-300">Multiple account users</span>
+                            <span class="text-gray-600 dark:text-gray-300">Multiple account users</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -216,7 +216,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-300">Generate event graphics</span>
+                            <span class="text-gray-600 dark:text-gray-300">Generate event graphics</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -224,7 +224,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-300">REST API access</span>
+                            <span class="text-gray-600 dark:text-gray-300">REST API access</span>
                         </li>
                     </ul>
 
@@ -237,25 +237,25 @@
 
             <!-- No fees callout -->
             <div class="mt-12 text-center space-y-4">
-                <div class="inline-flex items-center gap-3 px-6 py-3 rounded-2xl glass border border-white/10">
+                <div class="inline-flex items-center gap-3 px-6 py-3 rounded-2xl glass border border-gray-200 dark:border-white/10">
                     <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span class="text-gray-300">No platform fees on ticket sales. Ever.</span>
+                    <span class="text-gray-600 dark:text-gray-300">No platform fees on ticket sales. Ever.</span>
                 </div>
-                <div class="flex items-center justify-center gap-2 text-gray-400 text-sm">
+                <div class="flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
                     <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                     <span>Secure payments powered by</span>
-                    <span class="font-semibold text-gray-300">Stripe</span>
+                    <span class="font-semibold text-gray-600 dark:text-gray-300">Stripe</span>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- FAQ Section -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-100 dark:bg-black/30 py-24">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
