@@ -966,4 +966,9 @@ return [
 
     // Bot protection
     'turnstile_verification_failed' => 'האימות נכשל. אנא נסה שוב.',
+
+    // Slug pattern
+    'slug_pattern' => 'תבנית כתובת URL של אירוע',
+    'slug_pattern_help' => 'התאם אישית כתובות URL לאירועים חדשים. דוגמה: {event_name}-{date_dmy}. השאר ריק כדי להשתמש בשם האירוע.',
+    'show_available_variables' => 'הצג משתנים זמינים',
 ];

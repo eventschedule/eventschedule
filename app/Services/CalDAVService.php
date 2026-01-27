@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Event;
 use App\Models\Role;
 use App\Repos\EventRepo;
+use App\Utils\SlugPatternUtils;
 use Carbon\Carbon;
 use HTMLPurifier;
 use HTMLPurifier_Config;
@@ -689,12 +690,6 @@ class CalDAVService
             }
             $event->description = $description;
 
-            $event->slug = Str::slug($event->name);
-
-            if (! $event->slug) {
-                $event->slug = strtolower(Str::random(5));
-            }
-
             // Set start time
             if ($eventData['start']) {
                 $event->starts_at = $eventData['start']->format('Y-m-d H:i:s');
@@ -702,6 +697,15 @@ class CalDAVService
 
             // Set duration
             $event->duration = $eventData['duration'] ?: 2;
+
+            // Generate slug AFTER starts_at is set (for date variables)
+            $event->slug = SlugPatternUtils::generateSlug(
+                $role->slug_pattern,
+                $event->name,
+                null,
+                $event,
+                $role
+            );
 
             $event->save();
 

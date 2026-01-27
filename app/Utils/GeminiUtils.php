@@ -539,6 +539,32 @@ class GeminiUtils
                 }
             }
 
+            // Default address fields from role if not parsed
+            if (empty($data[$key]['event_address']) && ! empty($role->address1)) {
+                $data[$key]['event_address'] = $role->address1;
+            }
+            if (empty($data[$key]['event_address_en']) && ! empty($role->address1_en)) {
+                $data[$key]['event_address_en'] = $role->address1_en;
+            }
+            if (empty($data[$key]['event_city']) && ! empty($role->city)) {
+                $data[$key]['event_city'] = $role->city;
+            }
+            if (empty($data[$key]['event_city_en']) && ! empty($role->city_en)) {
+                $data[$key]['event_city_en'] = $role->city_en;
+            }
+            if (empty($data[$key]['event_state']) && ! empty($role->state)) {
+                $data[$key]['event_state'] = $role->state;
+            }
+            if (empty($data[$key]['event_state_en']) && ! empty($role->state_en)) {
+                $data[$key]['event_state_en'] = $role->state_en;
+            }
+            if (empty($data[$key]['event_postal_code']) && ! empty($role->postal_code)) {
+                $data[$key]['event_postal_code'] = $role->postal_code;
+            }
+            if (empty($data[$key]['event_country_code']) && ! empty($role->country_code)) {
+                $data[$key]['event_country_code'] = $role->country_code;
+            }
+
             if ($role->isTalent()) {
                 $data[$key]['talent_id'] = UrlUtils::encodeId($role->id);
             } elseif (! empty($item['performers'])) {

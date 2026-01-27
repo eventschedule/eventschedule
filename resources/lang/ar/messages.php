@@ -974,4 +974,9 @@ return [
 
     // Bot protection
     'turnstile_verification_failed' => 'فشل التحقق. يرجى المحاولة مرة أخرى.',
+
+    // Slug pattern
+    'slug_pattern' => 'نمط عنوان URL للحدث',
+    'slug_pattern_help' => 'تخصيص روابط URL للأحداث الجديدة. مثال: {event_name}-{date_dmy}. اتركه فارغاً لاستخدام اسم الحدث.',
+    'show_available_variables' => 'عرض المتغيرات المتاحة',
 ];

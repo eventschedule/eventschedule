@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
 use App\Repos\EventRepo;
+use App\Utils\SlugPatternUtils;
 use Carbon\Carbon;
 use Google\Client;
 use Google\Service\Calendar;
@@ -618,11 +619,6 @@ class GoogleCalendarService
         $event->creator_role_id = $role->id;
         $event->name = $googleEvent['summary'] ?: __('messages.untitled_event');
         $event->description = $googleEvent['description'] ?: '';
-        $event->slug = \Str::slug($event->name);
-
-        if (! $event->slug) {
-            $event->slug = strtolower(\Str::random(5));
-        }
 
         // Set start time
         if ($googleEvent['start']->getDateTime()) {
@@ -639,6 +635,15 @@ class GoogleCalendarService
         } else {
             $event->duration = 2; // Default 2 hours
         }
+
+        // Generate slug AFTER starts_at is set (for date variables)
+        $event->slug = SlugPatternUtils::generateSlug(
+            $role->slug_pattern,
+            $event->name,
+            null,
+            $event,
+            $role
+        );
 
         $event->save();
 

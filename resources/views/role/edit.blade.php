@@ -1291,6 +1291,27 @@
                             <x-input-error class="mt-2" :messages="$errors->get('use_24_hour_time')" />
                         </div>
 
+                        <div class="mb-6">
+                            <x-input-label for="slug_pattern" :value="__('messages.slug_pattern')" />
+                            <x-text-input id="slug_pattern" name="slug_pattern" type="text" class="mt-1 block w-full"
+                                :value="old('slug_pattern', $role->slug_pattern)"
+                                placeholder="{event_name}-{date_dmy}" />
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.slug_pattern_help') }}</p>
+
+                            <div x-data="{ showVars: false }" class="mt-2">
+                                <button type="button" @click="showVars = !showVars"
+                                    class="text-sm text-[#4E81FA] hover:underline">
+                                    {{ __('messages.show_available_variables') }}
+                                </button>
+                                <div x-show="showVars" x-cloak class="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded text-sm">
+                                    <code>{event_name}</code>, <code>{date_dmy}</code>, <code>{date_mdy}</code>,
+                                    <code>{day}</code>, <code>{month}</code>, <code>{year}</code>,
+                                    <code>{venue}</code>, <code>{city}</code>, <code>{custom_1}</code>-<code>{custom_8}</code>
+                                </div>
+                            </div>
+                            <x-input-error class="mt-2" :messages="$errors->get('slug_pattern')" />
+                        </div>
+
                         @if ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isCurator()))
                         <div class="mb-6">
                             <x-checkbox name="accept_requests"

@@ -23,41 +23,6 @@
         <!-- Star sparkles -->
         <div class="absolute top-32 left-[15%] w-2 h-2 bg-gold rounded-full animate-twinkle"></div>
         <div class="absolute top-48 right-[20%] w-1.5 h-1.5 bg-gold rounded-full animate-twinkle" style="animation-delay: 0.7s;"></div>
-        <div class="absolute top-64 left-[35%] w-1 h-1 bg-ivory rounded-full animate-twinkle" style="animation-delay: 1.2s;"></div>
-        <div class="absolute top-40 right-[40%] w-1.5 h-1.5 bg-gold rounded-full animate-twinkle" style="animation-delay: 0.4s;"></div>
-
-        <!-- Aerialist silhouette on silk -->
-        <div class="hidden lg:block absolute right-[8%] top-24 opacity-[0.12] pointer-events-none">
-            <svg class="w-48 h-96" viewBox="0 0 100 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Silk fabric -->
-                <path d="M50 0 L50 200" stroke="#FFD700" stroke-width="3" class="animate-silk-sway" style="transform-origin: 50px 0;"/>
-                <path d="M48 0 C45 60, 55 80, 48 140 C42 160, 52 180, 48 200" stroke="#DC143C" stroke-width="2" opacity="0.6" class="animate-silk-sway" style="animation-delay: 0.2s; transform-origin: 48px 0;"/>
-                <!-- Aerialist figure wrapped in silk -->
-                <circle cx="50" cy="55" r="6" fill="#FFD700"/> <!-- Head -->
-                <path d="M50 61 L50 85" stroke="#FFD700" stroke-width="2.5" stroke-linecap="round"/> <!-- Torso -->
-                <path d="M50 65 Q35 75, 30 90" stroke="#FFD700" stroke-width="2" stroke-linecap="round"/> <!-- Left arm reaching up to silk -->
-                <path d="M50 65 Q60 70, 55 50" stroke="#FFD700" stroke-width="2" stroke-linecap="round"/> <!-- Right arm holding silk -->
-                <path d="M50 85 Q55 100, 65 115" stroke="#FFD700" stroke-width="2" stroke-linecap="round"/> <!-- Left leg extended -->
-                <path d="M50 85 Q45 95, 48 110" stroke="#FFD700" stroke-width="2" stroke-linecap="round"/> <!-- Right leg wrapped -->
-                <!-- Silk wrap around body -->
-                <path d="M52 50 C58 60, 45 70, 52 85 C56 95, 44 105, 50 115" stroke="#DC143C" stroke-width="1.5" opacity="0.5"/>
-            </svg>
-        </div>
-
-        <!-- Left side aerialist silhouette (mirrored, different pose) -->
-        <div class="hidden lg:block absolute left-[8%] top-32 opacity-[0.08] pointer-events-none">
-            <svg class="w-40 h-80" viewBox="0 0 100 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Silk fabric -->
-                <path d="M50 0 L50 200" stroke="#FFD700" stroke-width="2" class="animate-silk-sway" style="transform-origin: 50px 0; animation-delay: 0.5s;"/>
-                <!-- Aerialist in splits pose -->
-                <circle cx="50" cy="70" r="5" fill="#FFD700"/> <!-- Head -->
-                <path d="M50 75 L50 95" stroke="#FFD700" stroke-width="2" stroke-linecap="round"/> <!-- Torso -->
-                <path d="M50 80 Q45 65, 50 55" stroke="#FFD700" stroke-width="1.5" stroke-linecap="round"/> <!-- Arms up to silk -->
-                <path d="M50 80 Q55 65, 50 55" stroke="#FFD700" stroke-width="1.5" stroke-linecap="round"/>
-                <path d="M50 95 Q30 100, 20 95" stroke="#FFD700" stroke-width="1.5" stroke-linecap="round"/> <!-- Leg left (splits) -->
-                <path d="M50 95 Q70 100, 80 95" stroke="#FFD700" stroke-width="1.5" stroke-linecap="round"/> <!-- Leg right (splits) -->
-            </svg>
-        </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <!-- "Now Performing" marquee badge -->
@@ -77,7 +42,7 @@
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-gray-900 bg-gradient-to-r from-gold to-amber-400 rounded-sm hover:scale-105 transition-all shadow-lg shadow-gold/25 marquee-button">
+                <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-gray-900 rounded-sm hover:scale-105 transition-all shadow-lg shadow-gold/25 marquee-button" style="background: linear-gradient(to right, #FFD700, #fbbf24);">
                     Create your performance schedule
                     <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -86,13 +51,13 @@
             </div>
 
             <!-- Performance tags -->
-            <div class="mt-12 flex flex-wrap justify-center gap-2">
-                <span class="px-3 py-1 rounded-sm bg-crimson/25 text-crimson-light text-xs font-medium border border-crimson/40">Aerial</span>
-                <span class="px-3 py-1 rounded-sm bg-orange-500/25 text-orange-200 text-xs font-medium border border-orange-500/40">Fire</span>
-                <span class="px-3 py-1 rounded-sm bg-gold/25 text-gold text-xs font-medium border border-gold/40">Acrobatics</span>
-                <span class="px-3 py-1 rounded-sm bg-amber-500/25 text-amber-200 text-xs font-medium border border-amber-500/40">Juggling</span>
-                <span class="px-3 py-1 rounded-sm bg-rose-500/25 text-rose-200 text-xs font-medium border border-rose-500/40">Stilt Walking</span>
-                <span class="px-3 py-1 rounded-sm bg-red-500/25 text-red-200 text-xs font-medium border border-red-500/40">Contortion</span>
+            <div class="mt-12 flex flex-wrap justify-center gap-3">
+                <span class="px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Aerial</span>
+                <span class="px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Fire</span>
+                <span class="px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Acrobatics</span>
+                <span class="px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Juggling</span>
+                <span class="px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Stilt Walking</span>
+                <span class="px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Contortion</span>
             </div>
         </div>
     </section>
@@ -740,7 +705,7 @@
             <p class="text-xl text-ivory/80 mb-10 max-w-2xl mx-auto">
                 Your art deserves an audience. Free forever.
             </p>
-            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-900 bg-gold hover:bg-amber-400 rounded-sm hover:scale-105 transition-all shadow-xl">
+            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-900 hover:bg-amber-400 rounded-sm hover:scale-105 transition-all shadow-xl" style="background-color: #FFD700;">
                 Get Started Free
                 <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -795,10 +760,22 @@
         .text-ivory { color: #FFFFF0; }
         .border-crimson { border-color: #DC143C; }
         .border-gold { border-color: #FFD700; }
-        .from-crimson { --tw-gradient-from: #DC143C; }
-        .to-crimson { --tw-gradient-to: #DC143C; }
-        .from-gold { --tw-gradient-from: #FFD700; }
-        .to-gold { --tw-gradient-to: #FFD700; }
+        .from-crimson {
+            --tw-gradient-from: #DC143C var(--tw-gradient-from-position);
+            --tw-gradient-to: rgb(220 20 60 / 0) var(--tw-gradient-to-position);
+            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+        }
+        .to-crimson {
+            --tw-gradient-to: #DC143C var(--tw-gradient-to-position);
+        }
+        .from-gold {
+            --tw-gradient-from: #FFD700 var(--tw-gradient-from-position);
+            --tw-gradient-to: rgb(255 215 0 / 0) var(--tw-gradient-to-position);
+            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+        }
+        .to-gold {
+            --tw-gradient-to: #FFD700 var(--tw-gradient-to-position);
+        }
 
         .text-gradient-circus {
             background: linear-gradient(135deg, #FFD700, #FFA500, #DC143C);
