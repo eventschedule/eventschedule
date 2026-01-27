@@ -24,6 +24,11 @@ class GridDesign extends AbstractEventDesign
 
     protected const TEXT_BOTTOM_MARGIN = 80; // Space for QR code
 
+    // Date bar configuration
+    protected const DATE_BAR_HEIGHT = 32;
+
+    protected const DATE_OVERLAY_HEIGHT = 36;
+
     // Grid configuration - now dynamic
     protected int $gridCols;
 
@@ -36,7 +41,14 @@ class GridDesign extends AbstractEventDesign
 
         // Calculate total dimensions based on dynamic grid
         $this->totalWidth = (self::FLYER_WIDTH * $this->gridCols) + (self::MARGIN * ($this->gridCols + 1));
-        $this->totalHeight = (self::FLYER_HEIGHT * $this->gridRows) + (self::MARGIN * ($this->gridRows + 1));
+
+        // Calculate flyer cell height (includes date bar if position is "above")
+        $flyerCellHeight = self::FLYER_HEIGHT;
+        if ($this->getOption('date_position') === 'above') {
+            $flyerCellHeight += self::DATE_BAR_HEIGHT;
+        }
+
+        $this->totalHeight = ($flyerCellHeight * $this->gridRows) + (self::MARGIN * ($this->gridRows + 1));
     }
 
     protected function generateEventLayout(): void
@@ -55,17 +67,34 @@ class GridDesign extends AbstractEventDesign
 
     protected function generateSingleFlyer(Event $event, int $row, int $col): void
     {
+        $datePosition = $this->getOption('date_position');
+
+        // Calculate flyer cell height (includes date bar if position is "above")
+        $flyerCellHeight = self::FLYER_HEIGHT;
+        if ($datePosition === 'above') {
+            $flyerCellHeight += self::DATE_BAR_HEIGHT;
+        }
+
         $x = self::MARGIN + ($col * (self::FLYER_WIDTH + self::MARGIN));
-        $y = self::MARGIN + ($row * (self::FLYER_HEIGHT + self::MARGIN));
+        $y = self::MARGIN + ($row * ($flyerCellHeight + self::MARGIN));
+
+        // If date is above, add date bar first and offset the flyer
+        $flyerY = $y;
+        if ($datePosition === 'above') {
+            $this->addDateAbove($event, $x, $y);
+            $flyerY = $y + self::DATE_BAR_HEIGHT;
+        }
 
         // Get the event flyer image
-        $this->addEventFlyerImage($event, $x, $y);
+        $this->addEventFlyerImage($event, $x, $flyerY);
 
-        // Remove text overlay - just show the flyers
-        // $this->addEventTextOverlay($event, $x, $y);
+        // Add date overlay on top of flyer if requested
+        if ($datePosition === 'overlay') {
+            $this->addDateOverlay($event, $x, $flyerY);
+        }
 
         // Add QR code to the bottom left corner of the flyer
-        $this->addEventQRCode($event, $x, $y);
+        $this->addEventQRCode($event, $x, $flyerY);
     }
 
     /**
@@ -143,6 +172,66 @@ class GridDesign extends AbstractEventDesign
         } catch (\Exception $e) {
             return 'Date TBD';
         }
+    }
+
+    /**
+     * Add date overlay on top of the flyer image
+     * Semi-transparent dark background with white text
+     */
+    protected function addDateOverlay(Event $event, int $x, int $y): void
+    {
+        $dateText = $this->formatEventDate($event);
+
+        // Create semi-transparent dark background at top of flyer
+        $bgColor = imagecolorallocatealpha($this->im, 0, 0, 0, 50); // ~60% opacity
+        imagefilledrectangle(
+            $this->im,
+            $x,
+            $y,
+            $x + self::FLYER_WIDTH,
+            $y + self::DATE_OVERLAY_HEIGHT,
+            $bgColor
+        );
+
+        // Calculate text position (centered)
+        $fontPath = $this->getFontPath('bold');
+        $fontSize = self::DATE_FONT_SIZE;
+        $textWidth = $this->getTextWidth($dateText, $fontSize, $fontPath);
+        $textX = $x + (self::FLYER_WIDTH - $textWidth) / 2;
+        $textY = $y + 10; // Padding from top
+
+        // Add white text
+        $this->addText($dateText, (int) $textX, $textY, $fontSize, $this->c['white'], 'bold');
+    }
+
+    /**
+     * Add date bar above the flyer (separate from flyer image)
+     * Solid dark background with white text
+     */
+    protected function addDateAbove(Event $event, int $x, int $y): void
+    {
+        $dateText = $this->formatEventDate($event);
+
+        // Create solid dark background
+        $bgColor = imagecolorallocate($this->im, 51, 51, 51); // #333333
+        imagefilledrectangle(
+            $this->im,
+            $x,
+            $y,
+            $x + self::FLYER_WIDTH,
+            $y + self::DATE_BAR_HEIGHT,
+            $bgColor
+        );
+
+        // Calculate text position (centered)
+        $fontPath = $this->getFontPath('bold');
+        $fontSize = self::DATE_FONT_SIZE;
+        $textWidth = $this->getTextWidth($dateText, $fontSize, $fontPath);
+        $textX = $x + (self::FLYER_WIDTH - $textWidth) / 2;
+        $textY = $y + 8; // Padding from top
+
+        // Add white text
+        $this->addText($dateText, (int) $textX, $textY, $fontSize, $this->c['white'], 'bold');
     }
 
     /**

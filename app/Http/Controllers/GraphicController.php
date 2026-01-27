@@ -17,7 +17,7 @@ class GraphicController extends Controller
         $layout = $request->get('layout', 'grid');
 
         // Validate layout parameter
-        if (! in_array($layout, ['grid', 'list'])) {
+        if (! in_array($layout, ['grid', 'list', 'row'])) {
             $layout = 'grid';
         }
 
@@ -26,7 +26,15 @@ class GraphicController extends Controller
         $graphicSettings = $role->graphic_settings;
         $hasRecurringEvents = $role->events()->whereNotNull('days_of_week')->exists();
 
-        return view('graphic.show', compact('role', 'layout', 'isPro', 'isEnterprise', 'graphicSettings', 'hasRecurringEvents'));
+        // Get the count of available events for the event count selector
+        $maxEvents = Event::whereHas('roles', function ($query) use ($role) {
+            $query->where('role_id', $role->id)->where('is_accepted', true);
+        })
+            ->where('starts_at', '>=', now())
+            ->where('flyer_image_url', '!=', null)
+            ->count();
+
+        return view('graphic.show', compact('role', 'layout', 'isPro', 'isEnterprise', 'graphicSettings', 'hasRecurringEvents', 'maxEvents'));
     }
 
     public function getSettings($subdomain)
@@ -50,12 +58,14 @@ class GraphicController extends Controller
             'ai_prompt' => 'nullable|string|max:500',
             'text_template' => 'nullable|string|max:2000',
             'link_type' => 'in:schedule,registration',
-            'layout' => 'in:grid,list',
+            'layout' => 'in:grid,list,row',
             'send_day' => 'integer|min:0|max:31',
             'send_hour' => 'integer|min:0|max:23',
             'use_screen_capture' => 'boolean',
             'recipient_emails' => 'nullable|string|max:1000',
             'exclude_recurring' => 'boolean',
+            'date_position' => 'nullable|in:overlay,above',
+            'event_count' => 'nullable|integer|min:1',
         ]);
 
         // Merge with existing settings to preserve defaults
@@ -114,15 +124,28 @@ class GraphicController extends Controller
     public function generateGraphicData(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
-        $layout = $request->get('layout', 'grid');
+        $graphicSettings = $role->graphic_settings;
+
+        // Use request parameters if provided, otherwise fall back to saved settings
+        $layout = $request->get('layout', $graphicSettings['layout'] ?? 'grid');
         $directRegistration = $request->boolean('direct');
 
         // Validate layout parameter
-        if (! in_array($layout, ['grid', 'list'])) {
+        if (! in_array($layout, ['grid', 'list', 'row'])) {
             $layout = 'grid';
         }
 
-        // Get the next 10 events
+        // Get date_position from request or settings (only applies to grid layout)
+        $datePosition = $request->get('date_position', $graphicSettings['date_position'] ?? null);
+        if ($layout !== 'grid') {
+            $datePosition = null; // Date position only applies to grid layout
+        }
+
+        // Get event_count from request or settings
+        $eventCountSetting = $request->get('event_count', $graphicSettings['event_count'] ?? null);
+        $eventLimit = $eventCountSetting ? (int) $eventCountSetting : 20; // Default max is 20
+
+        // Build the events query
         $query = Event::with(['roles', 'tickets', 'venue'])
             ->whereHas('roles', function ($query) use ($role) {
                 $query->where('role_id', $role->id)->where('is_accepted', true);
@@ -136,14 +159,12 @@ class GraphicController extends Controller
         }
 
         $events = $query->orderBy('starts_at')
-            ->limit(10)
+            ->limit($eventLimit)
             ->get();
 
         if ($events->isEmpty()) {
             return response()->json(['error' => __('messages.no_events_found')], 404);
         }
-
-        $graphicSettings = $role->graphic_settings;
 
         // Use request parameters if provided, otherwise fall back to saved settings
         $useScreenCapture = $request->has('use_screen_capture')
@@ -192,8 +213,13 @@ class GraphicController extends Controller
                 return redirect()->back()->with('error', 'Failed to generate graphic: Empty response');
             }
         } else {
-            // Use the service to generate the graphic with the specified layout
-            $generator = new EventGraphicGenerator($role, $events, $layout, $directRegistration);
+            // Build options array for the generator
+            $options = [
+                'date_position' => $datePosition,
+            ];
+
+            // Use the service to generate the graphic with the specified layout and options
+            $generator = new EventGraphicGenerator($role, $events, $layout, $directRegistration, $options);
             $imageData = $generator->generate();
         }
 
@@ -230,17 +256,26 @@ class GraphicController extends Controller
     public function downloadGraphic(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
+        $graphicSettings = $role->graphic_settings;
 
-        $layout = $request->get('layout', 'grid');
+        $layout = $request->get('layout', $graphicSettings['layout'] ?? 'grid');
         $directRegistration = $request->boolean('direct');
 
         // Validate layout parameter
-        if (! in_array($layout, ['grid', 'list'])) {
+        if (! in_array($layout, ['grid', 'list', 'row'])) {
             $layout = 'grid';
         }
 
-        // Get the next 10 events
-        $graphicSettings = $role->graphic_settings;
+        // Get date_position from settings (only applies to grid layout)
+        $datePosition = $graphicSettings['date_position'] ?? null;
+        if ($layout !== 'grid') {
+            $datePosition = null;
+        }
+
+        // Get event_count from settings
+        $eventCountSetting = $graphicSettings['event_count'] ?? null;
+        $eventLimit = $eventCountSetting ? (int) $eventCountSetting : 20;
+
         $excludeRecurring = $graphicSettings['exclude_recurring'] ?? false;
 
         $query = Event::with(['roles', 'tickets', 'venue'])
@@ -256,7 +291,7 @@ class GraphicController extends Controller
         }
 
         $events = $query->orderBy('starts_at')
-            ->limit(10)
+            ->limit($eventLimit)
             ->get();
 
         if ($events->isEmpty()) {
@@ -307,8 +342,13 @@ class GraphicController extends Controller
                 return redirect()->back()->with('error', 'Failed to generate graphic: Empty response');
             }
         } else {
-            // Use the service to generate the graphic with the specified layout
-            $generator = new EventGraphicGenerator($role, $events, $layout, $directRegistration);
+            // Build options array for the generator
+            $options = [
+                'date_position' => $datePosition,
+            ];
+
+            // Use the service to generate the graphic with the specified layout and options
+            $generator = new EventGraphicGenerator($role, $events, $layout, $directRegistration, $options);
             $imageData = $generator->generate();
         }
 

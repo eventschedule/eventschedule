@@ -50,7 +50,10 @@ abstract class AbstractEventDesign
     // Direct registration option
     protected bool $directRegistration;
 
-    public function __construct(Role $role, Collection $events, bool $directRegistration = false)
+    // Options array for customization
+    protected array $options = [];
+
+    public function __construct(Role $role, Collection $events, bool $directRegistration = false, array $options = [])
     {
         // Check if GD extension is available
         if (! extension_loaded('gd')) {
@@ -58,8 +61,9 @@ abstract class AbstractEventDesign
         }
 
         $this->role = $role;
-        $this->events = $events->take(self::MAX_EVENTS)->values();
+        $this->events = $events->values();
         $this->directRegistration = $directRegistration;
+        $this->options = $options;
 
         // Language code only affects RTL layout direction, not font selection
         // Fonts are automatically selected based on text content
@@ -133,6 +137,14 @@ abstract class AbstractEventDesign
     public function getEventCount(): int
     {
         return $this->events->count();
+    }
+
+    /**
+     * Get an option value with optional default
+     */
+    protected function getOption(string $key, $default = null)
+    {
+        return $this->options[$key] ?? $default;
     }
 
     /**

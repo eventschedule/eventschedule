@@ -215,10 +215,16 @@
     <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
       {{ $title }}
     </h2>
-    
-    @if ($event->exists)
-    {{-- Actions dropdown --}}
-    <div class="mt-2 md:ml-3">
+
+    <div class="flex items-center gap-3">
+        {{-- Cancel button --}}
+        <a href="{{ route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']) }}"
+           class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+            {{ __('messages.cancel') }}
+        </a>
+
+        @if ($event->exists)
+        {{-- Actions dropdown --}}
         <div class="relative inline-block text-left">
             <button type="button" onclick="onPopUpClick('event-actions-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700" id="event-actions-menu-button" aria-expanded="true" aria-haspopup="true">
                 {{ __('messages.actions') }}
@@ -256,8 +262,8 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
-    @endif
   </div>
 
   <form method="POST"
@@ -277,7 +283,7 @@
         <x-text-input name="venue_city" type="hidden" v-model="venueCity" />                                                                
         <x-text-input name="venue_state" type="hidden" v-model="venueState" />                                                                
         <x-text-input name="venue_postal_code" type="hidden" v-model="venuePostalCode" />                                                                
-        <x-text-input name="venue_country_code" type="hidden" v-model="venueCountryCode" />                                                                
+        <x-text-input name="venue_country_code" type="hidden" v-model="venueCountryCode" />
 
         <div class="py-5">
             <!-- Mobile section dropdown (visible on small screens, hidden on lg+) -->
@@ -387,6 +393,12 @@
                             </a>
                             @endif
                         </nav>
+                        <!-- Sidebar Save Button -->
+                        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <x-primary-button class="w-full justify-center">
+                                {{ __('messages.save') }}
+                            </x-primary-button>
+                        </div>
                     </div>
                 </div>
 
@@ -1602,11 +1614,19 @@
                 @endif
             </p>
 
-            <div class="flex gap-4 items-center justify-between">
-                <div class="flex gap-4">
-                    <x-primary-button>{{ __('messages.save') }}</x-primary-button>                    
-                    <x-cancel-button></x-cancel-button>
-                </div>
+        </div>
+
+        <!-- Spacer for mobile fixed buttons -->
+        <div class="lg:hidden h-24"></div>
+
+        <!-- Mobile Fixed Save Bar -->
+        <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 z-40 shadow-lg"
+             style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
+            <div class="flex gap-3 justify-center max-w-lg mx-auto">
+                <x-primary-button class="flex-1 justify-center">
+                    {{ __('messages.save') }}
+                </x-primary-button>
+                <x-cancel-button class="flex-1 justify-center" />
             </div>
         </div>
 
