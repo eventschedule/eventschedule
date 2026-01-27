@@ -301,7 +301,7 @@
     </section>
 
     <!-- Perfect For Section -->
-    <section class="bg-gray-50 py-24">
+    <section id="perfect-for" class="bg-gray-50 py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -314,92 +314,92 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Musicians & Bands -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-violet-200 transition-all">
+                <a href="{{ route('marketing.for_musicians') }}" class="block bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-violet-200 transition-all">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-100 mb-4">
                         <svg class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Musicians & Bands</h3>
-                    <p class="text-gray-600 text-sm mb-3">Share your tour dates and let fans know where you're playing next.</p>
-                    <a href="{{ route('marketing.for_musicians') }}" class="inline-flex items-center text-sm font-medium text-violet-600 hover:text-violet-700">
+                    <p class="text-gray-600 text-sm">Share your tour dates and let fans know where you're playing next.</p>
+                    <span class="inline-flex items-center text-violet-600 font-medium mt-3 text-sm">
                         Learn more
                         <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
-                    </a>
-                </div>
+                    </span>
+                </a>
 
                 <!-- DJs -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-indigo-200 transition-all">
+                <a href="{{ route('marketing.for_djs') }}" class="block bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-indigo-200 transition-all">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-100 mb-4">
                         <svg class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">DJs</h3>
-                    <p class="text-gray-600 text-sm mb-3">List your residencies and guest spots across multiple venues.</p>
-                    <a href="{{ route('marketing.for_djs') }}" class="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-700">
+                    <p class="text-gray-600 text-sm">List your residencies and guest spots across multiple venues.</p>
+                    <span class="inline-flex items-center text-indigo-600 font-medium mt-3 text-sm">
                         Learn more
                         <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
-                    </a>
-                </div>
+                    </span>
+                </a>
 
                 <!-- Comedians -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-fuchsia-200 transition-all">
+                <a href="{{ route('marketing.for_comedians') }}" class="block bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-fuchsia-200 transition-all">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-fuchsia-100 mb-4">
                         <svg class="w-6 h-6 text-fuchsia-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Comedians</h3>
-                    <p class="text-gray-600 text-sm mb-3">Promote your stand-up shows and open mic appearances.</p>
-                    <a href="{{ route('marketing.for_comedians') }}" class="inline-flex items-center text-sm font-medium text-fuchsia-600 hover:text-fuchsia-700">
+                    <p class="text-gray-600 text-sm">Promote your stand-up shows and open mic appearances.</p>
+                    <span class="inline-flex items-center text-fuchsia-600 font-medium mt-3 text-sm">
                         Learn more
                         <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
-                    </a>
-                </div>
+                    </span>
+                </a>
 
                 <!-- Circus & Acrobatics -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-pink-200 transition-all">
+                <a href="{{ route('marketing.for_circus_acrobatics') }}" class="block bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-pink-200 transition-all">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-pink-100 mb-4">
                         <svg class="w-6 h-6 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Circus & Acrobatics</h3>
-                    <p class="text-gray-600 text-sm mb-3">Share your aerial shows, circus acts, and acrobatic performances.</p>
-                    <a href="{{ route('marketing.for_circus_acrobatics') }}" class="inline-flex items-center text-sm font-medium text-pink-600 hover:text-pink-700">
+                    <p class="text-gray-600 text-sm">Share your aerial shows, circus acts, and acrobatic performances.</p>
+                    <span class="inline-flex items-center text-pink-600 font-medium mt-3 text-sm">
                         Learn more
                         <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
-                    </a>
-                </div>
+                    </span>
+                </a>
 
                 <!-- Magicians & Variety -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-purple-200 transition-all">
+                <a href="{{ route('marketing.for_magicians') }}" class="block bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-purple-200 transition-all">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-purple-100 mb-4">
                         <svg class="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Magicians & Variety</h3>
-                    <p class="text-gray-600 text-sm mb-3">Book more gigs by showing your availability to event planners.</p>
-                    <a href="{{ route('marketing.for_magicians') }}" class="inline-flex items-center text-sm font-medium text-purple-600 hover:text-purple-700">
+                    <p class="text-gray-600 text-sm">Book more gigs by showing your availability to event planners.</p>
+                    <span class="inline-flex items-center text-purple-600 font-medium mt-3 text-sm">
                         Learn more
                         <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
-                    </a>
-                </div>
+                    </span>
+                </a>
 
                 <!-- Spoken Word & Poetry -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-rose-200 transition-all">
+                <a href="{{ route('marketing.for_spoken_word') }}" class="block bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-rose-200 transition-all">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-rose-100 mb-4">
                         <svg class="w-6 h-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -407,10 +407,16 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Spoken Word & Poetry</h3>
                     <p class="text-gray-600 text-sm">Share your readings and open mic nights with your audience.</p>
-                </div>
+                    <span class="inline-flex items-center text-rose-600 font-medium mt-3 text-sm">
+                        Learn more
+                        <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </span>
+                </a>
 
                 <!-- Dance Groups -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-cyan-200 transition-all">
+                <a href="{{ route('marketing.for_dance_groups') }}" class="block bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-cyan-200 transition-all">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-100 mb-4">
                         <svg class="w-6 h-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -418,10 +424,16 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Dance Groups</h3>
                     <p class="text-gray-600 text-sm">Coordinate performances and rehearsals across your ensemble.</p>
-                </div>
+                    <span class="inline-flex items-center text-cyan-600 font-medium mt-3 text-sm">
+                        Learn more
+                        <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </span>
+                </a>
 
                 <!-- Theater Performers -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-amber-200 transition-all">
+                <a href="{{ route('marketing.for_theater_performers') }}" class="block bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-amber-200 transition-all">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 mb-4">
                         <svg class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
@@ -429,10 +441,16 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Theater Performers</h3>
                     <p class="text-gray-600 text-sm">List your show runs and auditions for fans and casting directors.</p>
-                </div>
+                    <span class="inline-flex items-center text-amber-600 font-medium mt-3 text-sm">
+                        Learn more
+                        <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </span>
+                </a>
 
                 <!-- Food Trucks & Vendors -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-emerald-200 transition-all">
+                <a href="{{ route('marketing.for_food_trucks_and_vendors') }}" class="block bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-emerald-200 transition-all">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100 mb-4">
                         <svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -441,32 +459,42 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Food Trucks & Vendors</h3>
                     <p class="text-gray-600 text-sm">Let customers know where to find you at markets and events.</p>
-                </div>
+                    <span class="inline-flex items-center text-emerald-600 font-medium mt-3 text-sm">
+                        Learn more
+                        <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </span>
+                </a>
             </div>
         </div>
     </section>
 
     <!-- Stream to the World Section -->
-    <section class="bg-gray-100 py-20">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section class="relative bg-[#0a0a0f] py-20 overflow-hidden">
+        <div class="absolute inset-0">
+            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+        </div>
+        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/online-events') }}" class="group block">
-                <div class="bg-white rounded-3xl border border-gray-200 shadow-lg p-8 lg:p-10 hover:shadow-xl hover:border-indigo-200 transition-all duration-300">
+                <div class="bg-gradient-to-br from-indigo-900/50 to-violet-900/50 rounded-3xl border border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-600 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
                                 Online Events
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors">Stream to the world</h3>
-                            <p class="text-gray-600 text-lg mb-4">Share live performances with fans worldwide. Add your streaming URL and sell tickets to viewers anywhere—no venue required.</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-indigo-300 transition-colors">Stream to the world</h3>
+                            <p class="text-gray-400 text-lg mb-4">Share live performances with fans worldwide. Add your streaming URL and sell tickets to viewers anywhere—no venue required.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm">Live streaming</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm">Global ticket sales</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm">Any platform</span>
+                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Live streaming</span>
+                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Global ticket sales</span>
+                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Any platform</span>
                             </div>
-                            <span class="inline-flex items-center text-indigo-600 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -474,25 +502,25 @@
                             </span>
                         </div>
                         <div class="flex-shrink-0">
-                            <div class="bg-gradient-to-br from-indigo-50 to-violet-50 rounded-2xl border border-indigo-100 p-6 w-52">
+                            <div class="bg-black/30 rounded-2xl border border-white/10 p-6 w-52">
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="text-gray-600 text-xs">Online Event</span>
+                                    <span class="text-gray-300 text-xs">Online Event</span>
                                     <div class="w-10 h-5 bg-indigo-500 rounded-full relative">
                                         <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full"></div>
                                     </div>
                                 </div>
                                 <div class="space-y-2">
-                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white rounded-lg border border-gray-100">
+                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-blue-500"></div>
-                                        <span class="text-gray-700 text-xs">Zoom</span>
+                                        <span class="text-gray-300 text-xs">Zoom</span>
                                     </div>
-                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white rounded-lg border border-gray-100">
+                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                                        <span class="text-gray-700 text-xs">YouTube Live</span>
+                                        <span class="text-gray-300 text-xs">YouTube Live</span>
                                     </div>
-                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white rounded-lg border border-gray-100">
+                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-purple-500"></div>
-                                        <span class="text-gray-700 text-xs">Twitch</span>
+                                        <span class="text-gray-300 text-xs">Twitch</span>
                                     </div>
                                 </div>
                             </div>

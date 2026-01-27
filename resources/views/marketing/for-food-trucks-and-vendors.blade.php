@@ -1,0 +1,626 @@
+<x-marketing-layout>
+    <x-slot name="title">Event Schedule for Food Trucks | Location Sharing & Bookings</x-slot>
+    <x-slot name="description">Tell customers where to find your food truck today. Share your weekly rotation, build an email list of regulars, and take catering bookings with zero platform fees.</x-slot>
+    <x-slot name="keywords">food truck schedule, food truck locator, mobile kitchen calendar, food truck booking, where is the food truck, food truck locations, food vendor schedule, taco truck finder, food truck events</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
+
+    <!-- Hero Section -->
+    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+        <!-- Animated background -->
+        <div class="absolute inset-0">
+            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-orange-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+        </div>
+
+        <!-- Grid -->
+        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+
+        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-8">
+                <svg class="w-4 h-4 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="text-sm text-gray-300">For Food Trucks, Vendors & Mobile Kitchens</span>
+            </div>
+
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+                Tell hungry customers<br>
+                <span class="text-gradient-food">where to find you</span>
+            </h1>
+
+            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
+                Share your daily locations, build a following, and let regulars know where you're parking next.
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-orange-600 to-amber-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-orange-500/25">
+                    Create your schedule
+                    <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Food truck type tags -->
+            <div class="mt-12 flex flex-wrap justify-center gap-2">
+                <span class="px-3 py-1 rounded-full bg-orange-500/20 text-orange-300 text-xs font-medium border border-orange-500/30">Food Trucks</span>
+                <span class="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-xs font-medium border border-yellow-500/30">Taco Trucks</span>
+                <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-medium border border-amber-500/30">Coffee Carts</span>
+                <span class="px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-xs font-medium border border-red-500/30">BBQ</span>
+                <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-medium border border-emerald-500/30">Pop-ups</span>
+                <span class="px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-xs font-medium border border-teal-500/30">Catering</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- "The Problem" Section - UNIQUE TO FOOD TRUCKS -->
+    <section class="bg-[#0a0a0f] py-20 border-b border-white/5">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-10">
+                <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">Sound familiar?</h2>
+            </div>
+
+            <!-- Facebook comments mockup -->
+            <div class="bg-white/5 rounded-2xl border border-white/10 p-6 mb-8 max-w-lg mx-auto">
+                <div class="flex items-center gap-3 mb-4 pb-4 border-b border-white/10">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold text-sm">TT</div>
+                    <div>
+                        <div class="text-white font-medium text-sm">Taco Truck Tony</div>
+                        <div class="text-gray-500 text-xs">Posted a photo</div>
+                    </div>
+                </div>
+
+                <!-- Repeated comments asking where -->
+                <div class="space-y-3">
+                    <div class="flex gap-2 items-start">
+                        <div class="w-6 h-6 rounded-full bg-blue-500/30 flex-shrink-0"></div>
+                        <div class="bg-white/10 rounded-xl px-3 py-2">
+                            <span class="text-gray-300 text-sm">Where are you today?</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 items-start">
+                        <div class="w-6 h-6 rounded-full bg-pink-500/30 flex-shrink-0"></div>
+                        <div class="bg-white/10 rounded-xl px-3 py-2">
+                            <span class="text-gray-300 text-sm">Where are you guys today??</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 items-start">
+                        <div class="w-6 h-6 rounded-full bg-green-500/30 flex-shrink-0"></div>
+                        <div class="bg-white/10 rounded-xl px-3 py-2">
+                            <span class="text-gray-300 text-sm">Location???</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 items-start">
+                        <div class="w-6 h-6 rounded-full bg-purple-500/30 flex-shrink-0"></div>
+                        <div class="bg-white/10 rounded-xl px-3 py-2">
+                            <span class="text-gray-300 text-sm">Where will you be tomorrow?</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 items-start">
+                        <div class="w-6 h-6 rounded-full bg-yellow-500/30 flex-shrink-0"></div>
+                        <div class="bg-white/10 rounded-xl px-3 py-2">
+                            <span class="text-gray-300 text-sm">Are you at the food park today?</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <p class="text-gray-400 text-lg mb-2">You post once. Get asked 47 times.</p>
+                <p class="text-gray-500">Facebook shows your posts to 3% of followers. Your regulars can't find you.</p>
+                <p class="text-orange-400 font-medium mt-6 text-lg">There's a better way.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- "Your Weekly Route" Section - UNIQUE TO FOOD TRUCKS -->
+    <section class="bg-[#0f0f14] py-24">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                    Your weekly route, always up to date
+                </h2>
+                <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                    Post your rotation once. Customers see where you are now and where you'll be next.
+                </p>
+            </div>
+
+            <!-- Route visualization -->
+            <div class="bg-gradient-to-br from-orange-900/30 to-amber-900/30 rounded-3xl border border-white/10 p-6 md:p-8">
+                <div class="flex items-center gap-2 mb-6 text-sm text-gray-400">
+                    <svg class="w-4 h-4 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    </svg>
+                    <span>This week's rotation</span>
+                </div>
+
+                <!-- Route stops -->
+                <div class="space-y-4">
+                    <!-- Monday -->
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 text-right">
+                            <span class="text-gray-500 text-sm font-medium">Mon</span>
+                        </div>
+                        <div class="relative">
+                            <div class="w-4 h-4 rounded-full bg-gray-600 border-2 border-gray-500"></div>
+                            <div class="absolute top-4 left-1.5 w-0.5 h-8 bg-gray-600"></div>
+                        </div>
+                        <div class="flex-1 bg-white/5 rounded-xl p-3">
+                            <span class="text-gray-400 text-sm">Downtown Food Park</span>
+                            <span class="text-gray-600 text-xs block">11am - 2pm</span>
+                        </div>
+                    </div>
+
+                    <!-- Tuesday - TODAY (highlighted) -->
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 text-right">
+                            <span class="text-emerald-400 text-sm font-bold">TODAY</span>
+                        </div>
+                        <div class="relative">
+                            <div class="w-4 h-4 rounded-full bg-emerald-500 border-2 border-emerald-400 animate-pulse"></div>
+                            <div class="absolute top-4 left-1.5 w-0.5 h-8 bg-gradient-to-b from-emerald-500 to-orange-500"></div>
+                        </div>
+                        <div class="flex-1 bg-emerald-500/20 rounded-xl p-3 border border-emerald-400/30">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="text-emerald-300 text-sm font-medium">Tech Campus - Building A</span>
+                                    <span class="text-emerald-400/70 text-xs block">11am - 2pm</span>
+                                </div>
+                                <div class="flex items-center gap-1 px-2 py-1 bg-emerald-500/30 rounded-full">
+                                    <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                                    <span class="text-emerald-300 text-xs font-medium">Now serving</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wednesday -->
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 text-right">
+                            <span class="text-gray-500 text-sm font-medium">Wed</span>
+                        </div>
+                        <div class="relative">
+                            <div class="w-4 h-4 rounded-full bg-orange-500/50 border-2 border-orange-400/50"></div>
+                            <div class="absolute top-4 left-1.5 w-0.5 h-8 bg-orange-500/30"></div>
+                        </div>
+                        <div class="flex-1 bg-white/5 rounded-xl p-3">
+                            <span class="text-gray-400 text-sm">Farmers Market</span>
+                            <span class="text-gray-600 text-xs block">8am - 1pm</span>
+                        </div>
+                    </div>
+
+                    <!-- Thursday -->
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 text-right">
+                            <span class="text-gray-500 text-sm font-medium">Thu</span>
+                        </div>
+                        <div class="relative">
+                            <div class="w-4 h-4 rounded-full bg-amber-500/30 border-2 border-amber-400/30"></div>
+                            <div class="absolute top-4 left-1.5 w-0.5 h-8 bg-amber-500/20"></div>
+                        </div>
+                        <div class="flex-1 bg-white/5 rounded-xl p-3 border border-dashed border-white/10">
+                            <span class="text-gray-500 text-sm italic">Private event (not shown publicly)</span>
+                        </div>
+                    </div>
+
+                    <!-- Friday -->
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 text-right">
+                            <span class="text-gray-500 text-sm font-medium">Fri</span>
+                        </div>
+                        <div class="relative">
+                            <div class="w-4 h-4 rounded-full bg-yellow-500/30 border-2 border-yellow-400/30"></div>
+                        </div>
+                        <div class="flex-1 bg-white/5 rounded-xl p-3">
+                            <span class="text-gray-400 text-sm">Brewery District Food Truck Rally</span>
+                            <span class="text-gray-600 text-xs block">5pm - 10pm</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- "Put This On Your Truck" Section - UNIQUE TO FOOD TRUCKS -->
+    <section class="bg-[#0a0a0f] py-24">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                        </svg>
+                        QR Code
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+                        Put this on your truck
+                    </h2>
+                    <p class="text-gray-400 text-lg mb-6">
+                        Print the QR code and stick it on your window. Customers scan once, follow your truck forever. No app download needed.
+                    </p>
+                    <ul class="space-y-3 text-gray-400">
+                        <li class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>They follow once, never miss you again</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>Build an audience that's YOURS, not Facebook's</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>Get notified when they book catering</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- QR code on truck window mockup -->
+                <div class="flex justify-center">
+                    <div class="relative">
+                        <!-- Truck window frame -->
+                        <div class="w-64 h-80 bg-gradient-to-b from-gray-700 to-gray-800 rounded-t-3xl border-4 border-gray-600 relative overflow-hidden">
+                            <!-- Window reflection -->
+                            <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent"></div>
+
+                            <!-- QR sticker -->
+                            <div class="absolute top-8 left-1/2 -translate-x-1/2 bg-white rounded-xl p-3 shadow-2xl">
+                                <div class="w-28 h-28 bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2029%2029%22%3E%3Cpath%20d%3D%22M0%200h7v7H0zm2%202v3h3V2zm8%200h1v1h1v1h-1v1h-1V3h-1V2h1zm4%200h1v4h-1V4h-1V3h1V2zm4%200h3v1h-2v1h-1V2zm5%200h7v7h-7zm2%202v3h3V4zM2%2010h1v1h1v1H2v-1H1v-1h1zm4%200h1v1H5v1H4v-1h1v-1h1zm3%200h1v3h1v1h-1v-1H9v-1h1v-1H9v-1zm5%200h1v2h1v-2h1v3h-1v1h-1v-1h-1v-1h-1v-1h1v-1zm5%200h1v1h-1v1h-1v-1h1v-1zm3%200h1v2h1v-1h1v3h-1v-1h-1v2h-1v-3h-1v-1h1v-1zM0%2014h1v1h1v-1h2v1h-1v1h1v2H3v-2H2v-1H0v-1zm4%200h1v1H4v-1zm9%200h1v1h-1v-1zm8%200h2v1h-2v-1zm0%202v1h1v1h1v1h-1v1h1v1h-2v-2h-1v-1h1v-1h-1v-1h1zm4%200h1v1h-1v-1zM0%2018h1v1H0v-1zm2%200h2v1h1v2H4v-1H3v1H2v-2h1v-1H2v-1zm5%200h3v1h1v2h-1v1h-1v-2H8v1H7v-1H6v-1h1v-1zm6%200h2v1h1v-1h1v2h-2v1h-1v-2h-1v-1zm-5%202h1v1H8v-1zM0%2022h7v7H0zm2%202v3h3v-3zm9-2h1v1h-1v-1zm2%200h1v1h1v2h-2v-1h-1v-1h1v-1zm3%200h3v1h-2v2h2v1h2v2h-1v1h-2v-1h-1v1h-2v-2h1v-2h-1v-2h1v-1zm7%200h1v1h1v1h-1v3h1v-2h1v3h1v-1h1v2h-2v1h-1v-1h-1v-1h-1v1h-2v-1h1v-2h1v-1h-1v-2h1v-1zm-9%202h1v1h-1v-1zm-2%202h1v1h-1v-1zm7%200h1v1h-1v-1zm-5%202h1v1h-1v-1zm2%200h2v1h-2v-1z%22%2F%3E%3C%2Fsvg%3E')] bg-contain"></div>
+                                <div class="text-center mt-2">
+                                    <div class="text-gray-800 text-xs font-bold">SCAN TO FOLLOW</div>
+                                    <div class="text-orange-600 text-[10px] font-medium">tacotrucktony.eventschedule.com</div>
+                                </div>
+                            </div>
+
+                            <!-- Truck interior hint -->
+                            <div class="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-gray-900/80 to-transparent"></div>
+                        </div>
+
+                        <!-- Truck body hint -->
+                        <div class="w-72 h-4 bg-gradient-to-b from-orange-600 to-orange-700 -mt-1 mx-auto rounded-b-sm"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter & Features Grid -->
+    <section class="bg-[#0a0a0f] py-24 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Newsletter - HERO FEATURE -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-900/50 to-amber-900/50 border border-white/10 p-8 lg:p-10">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 text-orange-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        Newsletter
+                    </div>
+                    <h3 class="text-2xl lg:text-3xl font-bold text-white mb-4">Announce your week's spots in one click</h3>
+                    <p class="text-gray-400 text-lg mb-6">No algorithm. 100% of your followers see it. Send your Monday-Friday locations every Sunday night.</p>
+
+                    <div class="bg-black/30 rounded-xl p-4 border border-orange-500/20">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-white font-medium">This Week's Spots</div>
+                                <div class="text-orange-300 text-sm">Sending to 1,247 hungry fans...</div>
+                            </div>
+                        </div>
+                        <div class="space-y-1 text-sm">
+                            <div class="flex gap-2 text-gray-400"><span class="text-orange-400">Mon:</span> Downtown Food Park</div>
+                            <div class="flex gap-2 text-gray-400"><span class="text-orange-400">Tue:</span> Tech Campus</div>
+                            <div class="flex gap-2 text-gray-400"><span class="text-orange-400">Wed:</span> Farmers Market</div>
+                            <div class="flex gap-2 text-gray-400"><span class="text-orange-400">Fri:</span> Brewery District</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instant Notifications -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        Notifications
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Customers get pinged instantly</h3>
+                    <p class="text-gray-400 mb-6">Post a new location, your followers get notified. Last-minute spot change? They know immediately.</p>
+
+                    <!-- Phone notification mockup -->
+                    <div class="bg-black/40 rounded-2xl p-4 max-w-xs mx-auto border border-white/10">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <span class="text-white text-xs font-bold">TT</span>
+                            </div>
+                            <div>
+                                <div class="text-white text-sm font-medium">Taco Truck Tony</div>
+                                <div class="text-emerald-400 text-xs">New location posted!</div>
+                                <div class="text-gray-400 text-xs mt-1">Tech Campus - Building A</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Promo Graphics -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-900/50 to-pink-900/50 border border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Promo Graphics
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">"Find us today" posts, ready to share</h3>
+                    <p class="text-gray-400 mb-6">Auto-generate Instagram-ready graphics with your location. One click to download and post.</p>
+
+                    <div class="flex justify-center">
+                        <div class="relative w-32 h-32 bg-gradient-to-br from-fuchsia-500/30 to-pink-500/30 rounded-xl border border-fuchsia-400/30 p-2">
+                            <div class="w-full h-full bg-gradient-to-br from-orange-600/40 to-amber-600/40 rounded-lg flex flex-col items-center justify-center">
+                                <svg class="w-8 h-8 text-white mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                </svg>
+                                <div class="text-white text-xs font-semibold">FIND US TODAY</div>
+                                <div class="text-fuchsia-300 text-[10px] mt-0.5">Downtown Food Park</div>
+                            </div>
+                            <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-fuchsia-500 rounded-full flex items-center justify-center shadow-lg">
+                                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Catering & Private Events -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-yellow-900/50 border border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        Bookings
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Take catering inquiries</h3>
+                    <p class="text-gray-400 mb-6">Corporate lunches, weddings, private parties. Customers can request bookings right from your page. Zero platform fees.</p>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-white/10">
+                            <div>
+                                <span class="text-white text-sm">Corporate Lunch</span>
+                                <span class="text-gray-500 text-xs block">50 people, March 15</span>
+                            </div>
+                            <span class="text-amber-400 text-sm font-medium">$650</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-amber-500/20 border border-amber-400/30">
+                            <div>
+                                <span class="text-white text-sm">Wedding Catering</span>
+                                <span class="text-amber-300/70 text-xs block">150 people, June 22</span>
+                            </div>
+                            <span class="text-amber-300 text-sm font-medium">$3,200</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Perfect For Section -->
+    <section class="bg-gray-50 py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Built for every kitchen on wheels
+                </h2>
+                <p class="text-xl text-gray-500">
+                    From taco trucks to coffee carts, Event Schedule helps mobile vendors connect with customers.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Food Trucks -->
+                <x-sub-audience-card
+                    name="Food Trucks"
+                    description="Tacos, burgers, gourmet cuisine - share your daily spots and build a loyal following of hungry fans."
+                    icon-color="orange"
+                    blog-slug="for-food-trucks"
+                >
+                    <x-slot:icon>
+                        <svg class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <!-- Coffee & Beverage Carts -->
+                <x-sub-audience-card
+                    name="Coffee & Beverage Carts"
+                    description="Mobile espresso, smoothies, juice bars - let caffeine seekers find their morning fix."
+                    icon-color="amber"
+                    blog-slug="for-coffee-beverage-carts"
+                >
+                    <x-slot:icon>
+                        <svg class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <!-- BBQ & Smoker Trucks -->
+                <x-sub-audience-card
+                    name="BBQ & Smoker Trucks"
+                    description="Low and slow on the go. Share when the brisket's ready and where fans can find it."
+                    icon-color="red"
+                    blog-slug="for-bbq-smoker-trucks"
+                >
+                    <x-slot:icon>
+                        <svg class="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <!-- Catering Businesses -->
+                <x-sub-audience-card
+                    name="Catering Businesses"
+                    description="Private events and corporate lunches. Take bookings and manage your catering calendar in one place."
+                    icon-color="emerald"
+                    blog-slug="for-mobile-catering-businesses"
+                >
+                    <x-slot:icon>
+                        <svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <!-- Pop-up Kitchens -->
+                <x-sub-audience-card
+                    name="Pop-up Kitchens"
+                    description="Temporary restaurant experiences. Announce your next pop-up and build anticipation."
+                    icon-color="violet"
+                    blog-slug="for-popup-kitchens"
+                >
+                    <x-slot:icon>
+                        <svg class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <!-- Market Vendors -->
+                <x-sub-audience-card
+                    name="Market Vendors"
+                    description="Farmers markets, craft fairs, festivals - share which markets you'll be at this week."
+                    icon-color="teal"
+                    blog-slug="for-market-vendors"
+                >
+                    <x-slot:icon>
+                        <svg class="w-6 h-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it Works -->
+    <section class="bg-gray-50 py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    How it works
+                </h2>
+                <p class="text-xl text-gray-500">
+                    Get your schedule online in three steps.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-amber-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/25">
+                        1
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Add Your Spots</h3>
+                    <p class="text-gray-600 text-sm">
+                        Enter your weekly rotation or daily locations. Add addresses so customers can find you.
+                    </p>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-amber-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/25">
+                        2
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Share Your Link</h3>
+                    <p class="text-gray-600 text-sm">
+                        One URL for all your locations. Put it in your bio, on your truck, everywhere.
+                    </p>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-amber-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/25">
+                        3
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Feed Your Fans</h3>
+                    <p class="text-gray-600 text-sm">
+                        Customers follow and get notified of new locations. They find you, you feed them.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="relative bg-gradient-to-br from-orange-600 to-amber-700 py-24 overflow-hidden">
+        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+
+        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+                Stop answering "Where are you today?"
+            </h2>
+            <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
+                Let your regulars find you. Free forever.
+            </p>
+            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-orange-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
+                Get Started Free
+                <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Food Trucks & Vendors",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Food Truck Location Management Software",
+        "operatingSystem": "Web",
+        "description": "Tell customers where to find your food truck today. Share your weekly rotation, build an email list of regulars, and take catering bookings with zero platform fees.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Daily and weekly location schedule with route visualization",
+            "Direct newsletter to regulars - no algorithm middleman",
+            "QR code for truck window - customers scan to follow",
+            "Instant notifications when you post new locations",
+            "Share-ready promotional graphics for social media",
+            "Zero-fee catering and private event bookings"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
+
+    <style>
+        .text-gradient-food {
+            background: linear-gradient(135deg, #f97316, #eab308);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</x-marketing-layout>

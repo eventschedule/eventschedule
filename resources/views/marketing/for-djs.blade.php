@@ -382,70 +382,88 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Resident DJs -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-indigo-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-100 mb-4">
+                <x-sub-audience-card
+                    name="Resident DJs"
+                    description="Track your weekly slots and build loyal locals who know exactly where to find you."
+                    icon-color="indigo"
+                    blog-slug="for-resident-djs"
+                >
+                    <x-slot:icon>
                         <svg class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Resident DJs</h3>
-                    <p class="text-gray-600 text-sm">Track your weekly slots and build loyal locals who know exactly where to find you.</p>
-                </div>
+                    </x-slot:icon>
+                </x-sub-audience-card>
 
                 <!-- Touring DJs -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-purple-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-purple-100 mb-4">
+                <x-sub-audience-card
+                    name="Touring DJs"
+                    description="Share your international dates with fans worldwide. They'll know when you're in their city."
+                    icon-color="purple"
+                    blog-slug="for-touring-djs"
+                >
+                    <x-slot:icon>
                         <svg class="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Touring DJs</h3>
-                    <p class="text-gray-600 text-sm">Share your international dates with fans worldwide. They'll know when you're in their city.</p>
-                </div>
+                    </x-slot:icon>
+                </x-sub-audience-card>
 
                 <!-- B2B Partners -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-fuchsia-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-fuchsia-100 mb-4">
+                <x-sub-audience-card
+                    name="B2B Partners"
+                    description="Show joint sets and collaborations. Both schedules stay synced automatically."
+                    icon-color="fuchsia"
+                    blog-slug="for-b2b-djs"
+                >
+                    <x-slot:icon>
                         <svg class="w-6 h-6 text-fuchsia-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">B2B Partners</h3>
-                    <p class="text-gray-600 text-sm">Show joint sets and collaborations. Both schedules stay synced automatically.</p>
-                </div>
+                    </x-slot:icon>
+                </x-sub-audience-card>
 
                 <!-- Underground DJs -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-violet-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-100 mb-4">
+                <x-sub-audience-card
+                    name="Underground DJs"
+                    description="Warehouse parties, afters, secret locations. Share with your inner circle only."
+                    icon-color="violet"
+                    blog-slug="for-underground-djs"
+                >
+                    <x-slot:icon>
                         <svg class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Underground DJs</h3>
-                    <p class="text-gray-600 text-sm">Warehouse parties, afters, secret locations. Share with your inner circle only.</p>
-                </div>
+                    </x-slot:icon>
+                </x-sub-audience-card>
 
                 <!-- Open Format DJs -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-pink-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-pink-100 mb-4">
+                <x-sub-audience-card
+                    name="Open Format DJs"
+                    description="Weddings, corporate gigs, private events. Keep your public and private bookings organized."
+                    icon-color="pink"
+                    blog-slug="for-open-format-djs"
+                >
+                    <x-slot:icon>
                         <svg class="w-6 h-6 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Open Format DJs</h3>
-                    <p class="text-gray-600 text-sm">Weddings, corporate gigs, private events. Keep your public and private bookings organized.</p>
-                </div>
+                    </x-slot:icon>
+                </x-sub-audience-card>
 
                 <!-- Producers -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-amber-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 mb-4">
+                <x-sub-audience-card
+                    name="Producers"
+                    description="Live sets, album launches, listening parties. Show fans where to hear your music live."
+                    icon-color="amber"
+                    blog-slug="for-dj-producers"
+                >
+                    <x-slot:icon>
                         <svg class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                         </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Producers</h3>
-                    <p class="text-gray-600 text-sm">Live sets, album launches, listening parties. Show fans where to hear your music live.</p>
-                </div>
+                    </x-slot:icon>
+                </x-sub-audience-card>
             </div>
         </div>
     </section>
