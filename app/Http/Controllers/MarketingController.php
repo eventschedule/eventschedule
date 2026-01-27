@@ -44,6 +44,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * FAQ page
+     */
+    public function faq()
+    {
+        return view('marketing.faq');
+    }
+
+    /**
      * Ticketing page
      */
     public function ticketing()

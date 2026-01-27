@@ -96,10 +96,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/settings', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/stripe/link', [StripeController::class, 'link'])->name('stripe.link');
-    Route::get('/stripe/unlink', [StripeController::class, 'unlink'])->name('stripe.unlink');
+    Route::post('/stripe/unlink', [StripeController::class, 'unlink'])->name('stripe.unlink');
     Route::get('/stripe/complete', [StripeController::class, 'complete'])->name('stripe.complete');
-    Route::get('/invoiceninja/unlink', [InvoiceNinjaController::class, 'unlink'])->name('invoiceninja.unlink');
-    Route::get('/payment_url/unlink', [ProfileController::class, 'unlinkPaymentUrl'])->name('profile.unlink_payment_url');
+    Route::post('/invoiceninja/unlink', [InvoiceNinjaController::class, 'unlink'])->name('invoiceninja.unlink');
+    Route::post('/payment_url/unlink', [ProfileController::class, 'unlinkPaymentUrl'])->name('profile.unlink_payment_url');
 
     // Google Calendar routes
     Route::get('/google-calendar/redirect', [GoogleCalendarController::class, 'redirect'])->name('google.calendar.redirect');
@@ -134,8 +134,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/unfollow', [RoleController::class, 'unfollow'])->name('role.unfollow');
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
     Route::post('/{subdomain}/test-email', [RoleController::class, 'testEmail'])->name('role.test_email');
-    Route::get('/{subdomain}/delete', [RoleController::class, 'delete'])->name('role.delete');
-    Route::get('/{subdomain}/delete-image', [RoleController::class, 'deleteImage'])->name('role.delete_image');
+    Route::delete('/{subdomain}/delete', [RoleController::class, 'delete'])->name('role.delete');
+    Route::delete('/{subdomain}/delete-image', [RoleController::class, 'deleteImage'])->name('role.delete_image');
     Route::get('/{subdomain}/add-event', [EventController::class, 'create'])->name('event.create');
     Route::get('/{subdomain}/verify/{hash}', [RoleController::class, 'verify'])->name('role.verification.verify');
     Route::get('/{subdomain}/resend', [RoleController::class, 'resendVerify'])->name('role.verification.resend');
@@ -143,9 +143,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/{subdomain}/store-event', [EventController::class, 'store'])->name('event.store');
     Route::get('/{subdomain}/edit-event/{hash}', [EventController::class, 'edit'])->name('event.edit');
     Route::get('/{subdomain}/clone-event/{hash}', [EventController::class, 'clone'])->name('event.clone');
-    Route::get('/{subdomain}/delete-event/{hash}', [EventController::class, 'delete'])->name('event.delete');
+    Route::delete('/{subdomain}/delete-event/{hash}', [EventController::class, 'delete'])->name('event.delete');
     Route::put('/{subdomain}/update-event/{hash}', [EventController::class, 'update'])->name('event.update');
-    Route::get('/{subdomain}/delete-event-image', [EventController::class, 'deleteImage'])->name('event.delete_image');
+    Route::delete('/{subdomain}/delete-event-image', [EventController::class, 'deleteImage'])->name('event.delete_image');
     Route::get('/{subdomain}/events-graphic', [GraphicController::class, 'generateGraphic'])->name('event.generate_graphic');
     Route::get('/{subdomain}/events-graphic/data', [GraphicController::class, 'generateGraphicData'])->name('event.generate_graphic_data');
     Route::get('/{subdomain}/events-graphic/download', [GraphicController::class, 'downloadGraphic'])->name('event.download_graphic');
@@ -236,6 +236,7 @@ if (config('app.is_nexus')) {
         Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
         Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
         Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
+        Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
         Route::get('/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
         Route::get('/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
         Route::get('/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
@@ -308,6 +309,7 @@ if (config('app.is_nexus')) {
             Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
             Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
             Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
+            Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
             Route::get('/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
             Route::get('/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
             Route::get('/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
@@ -380,6 +382,7 @@ if (config('app.is_nexus')) {
             Route::get('/features', fn () => redirect('https://eventschedule.com/features', 301));
             Route::get('/pricing', fn () => redirect('https://eventschedule.com/pricing', 301));
             Route::get('/about', fn () => redirect('https://eventschedule.com/about', 301));
+            Route::get('/faq', fn () => redirect('https://eventschedule.com/faq', 301));
             Route::get('/ticketing', fn () => redirect('https://eventschedule.com/ticketing', 301));
             Route::get('/ai', fn () => redirect('https://eventschedule.com/ai', 301));
             Route::get('/calendar-sync', fn () => redirect('https://eventschedule.com/calendar-sync', 301));
@@ -453,6 +456,7 @@ if (config('app.is_nexus')) {
     Route::get('/features', fn () => redirect()->route('home'));
     Route::get('/pricing', fn () => redirect()->route('home'));
     Route::get('/about', fn () => redirect()->route('home'));
+    Route::get('/faq', fn () => redirect()->route('home'));
     Route::get('/ticketing', fn () => redirect()->route('home'));
     Route::get('/ai', fn () => redirect()->route('home'));
     Route::get('/calendar-sync', fn () => redirect()->route('home'));

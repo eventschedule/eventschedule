@@ -44,7 +44,10 @@
                     @endif
                     <x-text-input type="text" class="mt-1 block w-full" :value="$user->stripe_company_name ? $user->stripe_company_name : $user->stripe_account_id" readonly/>
                     <div class="text-xs pt-1">
-                        <a href="#" onclick="return confirm('{{ __('messages.are_you_sure') }}') ? window.location.href='{{ route('stripe.unlink') }}' : false" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</a>
+                        <form method="POST" action="{{ route('stripe.unlink') }}" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                            @csrf
+                            <button type="submit" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</button>
+                        </form>
                     </div>
                 </div>
             @endif
@@ -105,7 +108,10 @@
             <div class="mt-4">
                 <x-text-input type="text" class="mt-1 block w-full" :value="$user->invoiceninja_company_name" readonly/>
                 <div class="text-xs pt-1">
-                    <a href="#" onclick="return confirm('{{ __('messages.are_you_sure') }}') ? window.location.href='{{ route('invoiceninja.unlink') }}' : false" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</a>
+                    <form method="POST" action="{{ route('invoiceninja.unlink') }}" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                        @csrf
+                        <button type="submit" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</button>
+                    </form>
                 </div>
             </div>
         @else
@@ -163,7 +169,10 @@
             <div class="mt-4">
                 <x-text-input type="text" class="mt-1 block w-full" :value="$user->payment_url" readonly/>
                 <div class="text-xs pt-1">
-                    <a href="#" onclick="return confirm('{{ __('messages.are_you_sure') }}') ? window.location.href='{{ route('profile.unlink_payment_url') }}' : false" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</a>
+                    <form method="POST" action="{{ route('profile.unlink_payment_url') }}" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                        @csrf
+                        <button type="submit" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</button>
+                    </form>
                 </div>
             </div>
         @else

@@ -105,6 +105,11 @@
                             Sign In
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ marketing_url('/faq') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                            FAQ
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>

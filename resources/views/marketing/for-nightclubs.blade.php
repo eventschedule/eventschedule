@@ -16,32 +16,6 @@
         <!-- Grid -->
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
 
-        <!-- Animated disco ball -->
-        <div class="absolute top-12 right-8 md:right-16 hidden sm:block">
-            <div class="relative">
-                <!-- Disco ball sphere -->
-                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-gray-300 via-white to-gray-400 animate-spin-slow shadow-lg relative overflow-hidden">
-                    <!-- Facet pattern overlay -->
-                    <div class="absolute inset-0 disco-facets opacity-60"></div>
-                    <!-- Shine effect -->
-                    <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent"></div>
-                </div>
-                <!-- Light rays -->
-                <div class="absolute -inset-8 animate-pulse-slow">
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-20 bg-gradient-to-b from-pink-500/60 via-pink-500/20 to-transparent rotate-[30deg] blur-sm"></div>
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-16 bg-gradient-to-b from-cyan-500/60 via-cyan-500/20 to-transparent rotate-[75deg] blur-sm"></div>
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-18 bg-gradient-to-b from-violet-500/60 via-violet-500/20 to-transparent rotate-[120deg] blur-sm"></div>
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-14 bg-gradient-to-b from-fuchsia-500/60 via-fuchsia-500/20 to-transparent rotate-[165deg] blur-sm"></div>
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-20 bg-gradient-to-b from-pink-500/60 via-pink-500/20 to-transparent rotate-[210deg] blur-sm"></div>
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-16 bg-gradient-to-b from-cyan-500/60 via-cyan-500/20 to-transparent rotate-[255deg] blur-sm"></div>
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-18 bg-gradient-to-b from-violet-500/60 via-violet-500/20 to-transparent rotate-[300deg] blur-sm"></div>
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-14 bg-gradient-to-b from-fuchsia-500/60 via-fuchsia-500/20 to-transparent rotate-[345deg] blur-sm"></div>
-                </div>
-                <!-- Hanging wire -->
-                <div class="absolute -top-8 left-1/2 -translate-x-1/2 w-0.5 h-8 bg-gradient-to-b from-gray-600 to-gray-400"></div>
-            </div>
-        </div>
-
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <!-- Left: Main hero content -->
@@ -397,7 +371,7 @@
 
                     <div class="flex items-center gap-3">
                         <div class="flex-1 bg-rose-500/20 rounded-xl border border-rose-400/30 p-3">
-                            <div class="text-[10px] text-rose-300 font-semibold mb-1">NYE 2025</div>
+                            <div class="text-[10px] text-rose-300 font-semibold mb-1">NYE {{ date('Y') + 1 }}</div>
                             <div class="flex items-center gap-2">
                                 <span class="text-white text-sm font-bold">342</span>
                                 <span class="text-gray-400 text-xs">tickets sold</span>
@@ -782,24 +756,5 @@
             background-clip: text;
         }
 
-        /* Disco ball facet pattern */
-        .disco-facets {
-            background-image:
-                repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.3) 3px, rgba(255,255,255,0.3) 4px),
-                repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(255,255,255,0.3) 3px, rgba(255,255,255,0.3) 4px);
-        }
-
-        @keyframes spin-slow {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .animate-spin-slow {
-            animation: spin-slow 8s linear infinite;
-        }
     </style>
 </x-marketing-layout>
