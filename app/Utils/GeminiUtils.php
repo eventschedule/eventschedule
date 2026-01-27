@@ -257,6 +257,27 @@ class GeminiUtils
             'category_name' => 'Choose the most appropriate category from: '.implode(', ', $categoryNames),
         ];
 
+        // Add custom fields defined at the schedule level
+        $eventCustomFields = $role->getEventCustomFields();
+        $customFieldKeys = [];
+        foreach ($eventCustomFields as $fieldKey => $fieldConfig) {
+            $customFieldKey = 'custom_field_'.$fieldKey;
+            $customFieldKeys[$customFieldKey] = $fieldKey;
+            $fieldType = $fieldConfig['type'] ?? 'string';
+            $fieldName = $fieldConfig['name'] ?? $fieldKey;
+            $typeHint = '';
+
+            if ($fieldType === 'switch') {
+                $typeHint = 'yes or no';
+            } elseif ($fieldType === 'date') {
+                $typeHint = 'YYYY-MM-DD format';
+            } elseif ($fieldType === 'dropdown' && ! empty($fieldConfig['options'])) {
+                $typeHint = 'Choose from: '.$fieldConfig['options'];
+            }
+
+            $fields[$customFieldKey] = $fieldName.($typeHint ? " ({$typeHint})" : '');
+        }
+
         // Build prompt from fields
         $prompt = 'Parse the event details from this '.($imageData ? 'image and ' : '')."message to the following fields, take your time and do the best job possible:\n";
         foreach ($fields as $field => $note) {
@@ -374,6 +395,30 @@ class GeminiUtils
                 unset($data[$key]['performer_name_en']);
                 unset($data[$key]['performer_email']);
                 unset($data[$key]['performer_website']);
+            }
+
+            // Process custom fields and convert to custom_field_values format
+            if (! empty($customFieldKeys)) {
+                $customFieldValues = [];
+                foreach ($customFieldKeys as $customFieldKey => $originalKey) {
+                    if (isset($item[$customFieldKey]) && $item[$customFieldKey] !== '') {
+                        $value = $item[$customFieldKey];
+                        $fieldConfig = $eventCustomFields[$originalKey] ?? [];
+
+                        // Normalize switch values to 1/0
+                        if (($fieldConfig['type'] ?? '') === 'switch') {
+                            $value = in_array(strtolower($value), ['yes', 'true', '1', 'on']) ? '1' : '0';
+                        }
+
+                        $customFieldValues[$originalKey] = $value;
+                    }
+                    // Remove the raw custom_field_* key from the data
+                    unset($data[$key][$customFieldKey]);
+                }
+
+                if (! empty($customFieldValues)) {
+                    $data[$key]['custom_field_values'] = $customFieldValues;
+                }
             }
         }
 

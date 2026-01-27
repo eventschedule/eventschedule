@@ -36,11 +36,13 @@ class Event extends Model
         'recurring_end_type',
         'recurring_end_value',
         'custom_fields',
+        'custom_field_values',
     ];
 
     protected $casts = [
         'duration' => 'float',
         'custom_fields' => 'array',
+        'custom_field_values' => 'array',
     ];
 
     /**
@@ -1330,5 +1332,33 @@ class Event extends Model
         });
 
         return $role && $role->hasCalDAVSettings() && $role->syncsToCalDAV();
+    }
+
+    /**
+     * Get custom field values
+     */
+    public function getCustomFieldValues(): array
+    {
+        return $this->custom_field_values ?? [];
+    }
+
+    /**
+     * Get a specific custom field value by key
+     */
+    public function getCustomFieldValue(string $key): ?string
+    {
+        $values = $this->getCustomFieldValues();
+
+        return $values[$key] ?? null;
+    }
+
+    /**
+     * Set a specific custom field value
+     */
+    public function setCustomFieldValue(string $key, ?string $value): void
+    {
+        $values = $this->getCustomFieldValues();
+        $values[$key] = $value;
+        $this->custom_field_values = $values;
     }
 }

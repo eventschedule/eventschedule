@@ -150,6 +150,30 @@ class MarketingController extends Controller
     }
 
     /**
+     * For Talent page
+     */
+    public function forTalent()
+    {
+        return view('marketing.for-talent');
+    }
+
+    /**
+     * For Venues page
+     */
+    public function forVenues()
+    {
+        return view('marketing.for-venues');
+    }
+
+    /**
+     * For Curators page
+     */
+    public function forCurators()
+    {
+        return view('marketing.for-curators');
+    }
+
+    /**
      * Integrations page
      */
     public function integrations()

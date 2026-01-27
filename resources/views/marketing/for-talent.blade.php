@@ -1,0 +1,516 @@
+<x-marketing-layout>
+    <x-slot name="title">Event Schedule for Musicians & Performers | Share Your Shows</x-slot>
+    <x-slot name="description">Share your upcoming shows with fans. Sync with Google Calendar, sell tickets direct, and let venues add you to their schedule. Built for musicians, DJs, and performers.</x-slot>
+    <x-slot name="keywords">musician schedule, performer calendar, DJ events, band schedule app, artist gig calendar, share shows with fans, musician booking, performer availability</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
+
+    <!-- Hero Section -->
+    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+        <!-- Animated background -->
+        <div class="absolute inset-0">
+            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+        </div>
+
+        <!-- Grid -->
+        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+
+        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-8">
+                <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>
+                <span class="text-sm text-gray-300">For Musicians, DJs & Performers</span>
+            </div>
+
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+                Share your shows<br>
+                <span class="text-gradient">with fans</span>
+            </h1>
+
+            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
+                One link. Every gig. Let your audience know where you're playing next.
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-violet-500/25">
+                    Create your schedule
+                    <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bento Grid Features -->
+    <section class="bg-[#0a0a0f] py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Share Your Schedule (spans 2 cols) -->
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border border-white/10 p-8 lg:p-10">
+                    <div class="flex flex-col lg:flex-row gap-8 items-center">
+                        <div class="flex-1">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                </svg>
+                                Share Everywhere
+                            </div>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">One link for all your gigs</h3>
+                            <p class="text-gray-400 text-lg mb-6">Get a custom URL for your schedule. Share it on social media, your website, or anywhere else. Fans can see all your upcoming shows in one place.</p>
+                            <div class="flex flex-wrap gap-3">
+                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Custom URL</span>
+                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Website embed</span>
+                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Social sharing</span>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0 w-full lg:w-auto">
+                            <div class="relative animate-float">
+                                <div class="bg-gradient-to-br from-violet-500/20 to-indigo-500/20 rounded-2xl border border-violet-400/30 p-4 max-w-xs">
+                                    <div class="flex items-center gap-2 mb-4 bg-black/30 rounded-lg px-3 py-2">
+                                        <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
+                                        </svg>
+                                        <span class="text-sm text-gray-300 font-mono">eventschedule.com/yourband</span>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-white/10">
+                                            <div class="w-2 h-2 rounded-full bg-violet-400"></div>
+                                            <span class="text-white text-sm">Fri Mar 15 - Blue Note</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
+                                            <div class="w-2 h-2 rounded-full bg-indigo-400"></div>
+                                            <span class="text-gray-300 text-sm">Sat Mar 22 - The Roxy</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
+                                            <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+                                            <span class="text-gray-300 text-sm">Fri Mar 29 - Jazz Club</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Play at Multiple Venues -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-blue-900/50 border border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        Venues
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Play at multiple venues</h3>
+                    <p class="text-gray-400 mb-6">Link your schedule to venue calendars. When they post your show, it appears on your schedule automatically.</p>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-500/20 border border-indigo-400/30">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-500/30 flex items-center justify-center">
+                                <span class="text-indigo-300 text-xs font-bold">BN</span>
+                            </div>
+                            <div>
+                                <div class="text-white text-sm font-medium">Blue Note</div>
+                                <div class="text-indigo-300 text-xs">Linked</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5">
+                            <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                                <span class="text-gray-400 text-xs font-bold">TR</span>
+                            </div>
+                            <div>
+                                <div class="text-gray-300 text-sm font-medium">The Roxy</div>
+                                <div class="text-gray-500 text-xs">Linked</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Google Calendar Sync -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-cyan-900/50 border border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Calendar Sync
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Two-way Google sync</h3>
+                    <p class="text-gray-400 mb-6">Connect your Google Calendar. Changes sync both ways automatically via real-time webhooks.</p>
+
+                    <div class="flex items-center justify-center gap-3">
+                        <div class="bg-blue-500/20 rounded-xl border border-blue-400/30 p-3 w-20">
+                            <div class="text-[10px] text-blue-300 mb-1 text-center">Schedule</div>
+                            <div class="space-y-1">
+                                <div class="h-1.5 bg-white/20 rounded"></div>
+                                <div class="h-1.5 bg-white/20 rounded w-3/4"></div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center gap-0.5">
+                            <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                            <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                        </div>
+                        <div class="bg-white/10 rounded-xl border border-white/20 p-3 w-20">
+                            <div class="text-[10px] text-gray-300 mb-1 text-center">Google</div>
+                            <div class="space-y-1">
+                                <div class="h-1.5 bg-blue-400/40 rounded"></div>
+                                <div class="h-1.5 bg-green-400/40 rounded w-3/4"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sell Tickets (spans 2 cols) -->
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-900/50 to-pink-900/50 border border-white/10 p-8 lg:p-10">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 text-sm font-medium mb-4">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                                </svg>
+                                Ticketing
+                            </div>
+                            <h3 class="text-3xl font-bold text-white mb-4">Sell tickets direct</h3>
+                            <p class="text-gray-400 text-lg">No middleman. Accept payments via Stripe with zero platform fees. You keep what you earn.</p>
+                        </div>
+                        <div class="bg-black/30 rounded-2xl p-5 border border-white/10">
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/10">
+                                    <div>
+                                        <div class="text-white font-medium">Early Bird</div>
+                                        <div class="text-emerald-400 text-xs">50 remaining</div>
+                                    </div>
+                                    <div class="text-xl font-bold text-white">$15</div>
+                                </div>
+                                <div class="flex items-center justify-between p-3 rounded-xl bg-fuchsia-500/20 border border-fuchsia-400/30">
+                                    <div>
+                                        <div class="text-white font-medium">VIP Meet & Greet</div>
+                                        <div class="text-fuchsia-300 text-xs">10 remaining</div>
+                                    </div>
+                                    <div class="text-xl font-bold text-white">$75</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Track Availability -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Availability
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Track availability</h3>
+                    <p class="text-gray-400 mb-6">Block off dates when you're unavailable. Venues can see when you're free before reaching out.</p>
+
+                    <div class="grid grid-cols-7 gap-1 text-center text-xs">
+                        <div class="text-gray-500">M</div>
+                        <div class="text-gray-500">T</div>
+                        <div class="text-gray-500">W</div>
+                        <div class="text-gray-500">T</div>
+                        <div class="text-gray-500">F</div>
+                        <div class="text-gray-500">S</div>
+                        <div class="text-gray-500">S</div>
+                        <div class="p-1 rounded bg-emerald-500/30 text-emerald-300">1</div>
+                        <div class="p-1 rounded bg-emerald-500/30 text-emerald-300">2</div>
+                        <div class="p-1 rounded bg-red-500/30 text-red-300">3</div>
+                        <div class="p-1 rounded bg-emerald-500/30 text-emerald-300">4</div>
+                        <div class="p-1 rounded bg-violet-500/30 text-violet-300">5</div>
+                        <div class="p-1 rounded bg-violet-500/30 text-violet-300">6</div>
+                        <div class="p-1 rounded bg-emerald-500/30 text-emerald-300">7</div>
+                    </div>
+                    <div class="flex gap-4 mt-4 text-xs">
+                        <div class="flex items-center gap-1"><div class="w-2 h-2 rounded bg-emerald-500"></div><span class="text-gray-400">Available</span></div>
+                        <div class="flex items-center gap-1"><div class="w-2 h-2 rounded bg-violet-500"></div><span class="text-gray-400">Booked</span></div>
+                        <div class="flex items-center gap-1"><div class="w-2 h-2 rounded bg-red-500"></div><span class="text-gray-400">Blocked</span></div>
+                    </div>
+                </div>
+
+                <!-- Team Collaboration -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-900/50 to-violet-900/50 border border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        Team
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Band collaboration</h3>
+                    <p class="text-gray-400 mb-6">Invite band members to manage the schedule together. Everyone stays in sync.</p>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
+                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-violet-500 flex items-center justify-center text-white text-xs font-semibold">JD</div>
+                            <div class="flex-1">
+                                <div class="text-white text-sm">Jake</div>
+                            </div>
+                            <span class="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px]">Owner</span>
+                        </div>
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-xs font-semibold">MK</div>
+                            <div class="flex-1">
+                                <div class="text-gray-300 text-sm">Maya</div>
+                            </div>
+                            <span class="px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 text-[10px]">Admin</span>
+                        </div>
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">SR</div>
+                            <div class="flex-1">
+                                <div class="text-gray-300 text-sm">Sam</div>
+                            </div>
+                            <span class="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px]">Member</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Graphics -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Graphics
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Event graphics</h3>
+                    <p class="text-gray-400 mb-6">Auto-generate promotional images for social media. Perfect for Instagram and Facebook posts.</p>
+
+                    <div class="flex justify-center">
+                        <div class="relative w-32 h-32 bg-gradient-to-br from-amber-500/30 to-orange-500/30 rounded-xl border border-amber-400/30 p-2">
+                            <div class="w-full h-full bg-gradient-to-br from-violet-600/40 to-indigo-600/40 rounded-lg flex flex-col items-center justify-center">
+                                <div class="text-white text-[10px] font-semibold mb-1">LIVE TONIGHT</div>
+                                <div class="text-amber-300 text-xs font-bold">The Jazz Trio</div>
+                                <div class="text-gray-400 text-[8px] mt-1">Blue Note • 8PM</div>
+                            </div>
+                            <div class="absolute -bottom-2 -right-2 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
+                                <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Perfect For Section -->
+    <section class="bg-gray-50 py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Perfect for all types of performers
+                </h2>
+                <p class="text-xl text-gray-500">
+                    Whether you're a solo act or a full ensemble, Event Schedule works for you.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Musicians & Bands -->
+                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-violet-200 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-100 mb-4">
+                        <svg class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Musicians & Bands</h3>
+                    <p class="text-gray-600 text-sm">Share your tour dates and let fans know where you're playing next.</p>
+                </div>
+
+                <!-- DJs -->
+                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-indigo-200 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-100 mb-4">
+                        <svg class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">DJs</h3>
+                    <p class="text-gray-600 text-sm">List your residencies and guest spots across multiple venues.</p>
+                </div>
+
+                <!-- Comedians -->
+                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-fuchsia-200 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-fuchsia-100 mb-4">
+                        <svg class="w-6 h-6 text-fuchsia-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Comedians</h3>
+                    <p class="text-gray-600 text-sm">Promote your stand-up shows and open mic appearances.</p>
+                </div>
+
+                <!-- Drag Performers -->
+                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-pink-200 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-pink-100 mb-4">
+                        <svg class="w-6 h-6 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Drag Performers</h3>
+                    <p class="text-gray-600 text-sm">Showcase your weekly shows, brunches, and special events.</p>
+                </div>
+
+                <!-- Magicians & Variety -->
+                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-purple-200 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-purple-100 mb-4">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Magicians & Variety</h3>
+                    <p class="text-gray-600 text-sm">Book more gigs by showing your availability to event planners.</p>
+                </div>
+
+                <!-- Spoken Word & Poetry -->
+                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-rose-200 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-rose-100 mb-4">
+                        <svg class="w-6 h-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Spoken Word & Poetry</h3>
+                    <p class="text-gray-600 text-sm">Share your readings and open mic nights with your audience.</p>
+                </div>
+
+                <!-- Dance Groups -->
+                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-cyan-200 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-100 mb-4">
+                        <svg class="w-6 h-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Dance Groups</h3>
+                    <p class="text-gray-600 text-sm">Coordinate performances and rehearsals across your ensemble.</p>
+                </div>
+
+                <!-- Theater Performers -->
+                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-amber-200 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 mb-4">
+                        <svg class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Theater Performers</h3>
+                    <p class="text-gray-600 text-sm">List your show runs and auditions for fans and casting directors.</p>
+                </div>
+
+                <!-- Food Trucks & Vendors -->
+                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-emerald-200 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100 mb-4">
+                        <svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Food Trucks & Vendors</h3>
+                    <p class="text-gray-600 text-sm">Let customers know where to find you at markets and events.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it Works -->
+    <section class="bg-gray-50 py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    How it works
+                </h2>
+                <p class="text-xl text-gray-500">
+                    Get your schedule online in three steps.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-violet-500 to-indigo-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/25">
+                        1
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Create Your Schedule</h3>
+                    <p class="text-gray-600 text-sm">
+                        Sign up and add your upcoming shows. Import from Google Calendar or add them manually.
+                    </p>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-violet-500 to-indigo-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/25">
+                        2
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Share Your Link</h3>
+                    <p class="text-gray-600 text-sm">
+                        Get a custom URL for your schedule. Add it to your bio, website, or social profiles.
+                    </p>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-violet-500 to-indigo-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/25">
+                        3
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Build Your Audience</h3>
+                    <p class="text-gray-600 text-sm">
+                        Fans can follow your schedule and get notified about new shows automatically.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="relative bg-gradient-to-br from-violet-600 to-indigo-700 py-24 overflow-hidden">
+        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+
+        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+                Let fans know where you're playing
+            </h2>
+            <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
+                Create your schedule in minutes. Free forever.
+            </p>
+            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-violet-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
+                Get Started Free
+                <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Musicians & Performers",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Event Management Software",
+        "operatingSystem": "Web",
+        "description": "Share your upcoming shows with fans. Sync with Google Calendar, sell tickets direct, and let venues add you to their schedule.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Custom schedule URL",
+            "Google Calendar sync",
+            "Direct ticket sales",
+            "Venue linking",
+            "Availability tracking",
+            "Team collaboration"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
+</x-marketing-layout>

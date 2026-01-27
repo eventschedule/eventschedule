@@ -340,6 +340,47 @@ https://example.com/event/summer-concert</code></pre>
                                 </table>
                             </div>
 
+                            <h3 class="text-lg font-semibold text-white mb-4">Custom Fields</h3>
+                            <p class="text-gray-300 mb-4">
+                                If you have defined <a href="{{ marketing_url('/custom-fields') }}" class="text-rose-400 hover:text-rose-300">Event Custom Fields</a> in your schedule settings, you can include their values in graphics using numbered variables.
+                            </p>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{custom_1}</code></td>
+                                            <td>Value of the 1st custom field</td>
+                                            <td>John Smith</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{custom_2}</code></td>
+                                            <td>Value of the 2nd custom field</td>
+                                            <td>Room 101</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{custom_3}</code></td>
+                                            <td>Value of the 3rd custom field</td>
+                                            <td>Workshop</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3" class="text-gray-400 text-sm">...up to {custom_8}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="doc-callout doc-callout-tip mb-6">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>Custom field variables correspond to the order your fields are defined in schedule settings. For example, if your first custom field is "Speaker Name", then <code class="doc-inline-code">{custom_1}</code> will show the speaker's name.</p>
+                            </div>
+
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Localization</div>
                                 <p>Date and time variables like <code class="doc-inline-code">{day_name}</code>, <code class="doc-inline-code">{month_name}</code>, and <code class="doc-inline-code">{time}</code> are automatically translated to your schedule's language and respect its 24-hour time setting.</p>

@@ -277,6 +277,18 @@ class EventRepo
             ]);
         }
 
+        // Handle custom_field_values (event metadata fields defined at schedule level)
+        if ($request->has('custom_field_values')) {
+            $customFieldValues = $request->input('custom_field_values', []);
+            // Filter out empty values
+            $customFieldValues = array_filter($customFieldValues, function ($value) {
+                return $value !== null && $value !== '';
+            });
+            $request->merge([
+                'custom_field_values' => ! empty($customFieldValues) ? $customFieldValues : null,
+            ]);
+        }
+
         $event->fill($request->all());
 
         $days_of_week = '';

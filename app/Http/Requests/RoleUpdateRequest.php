@@ -41,6 +41,11 @@ class RoleUpdateRequest extends FormRequest
             'email_settings.from_name' => ['nullable', 'string', 'max:255'],
             'custom_css' => ['nullable', 'string', 'max:10000'],
             'font_family' => ['nullable', 'string', 'max:100'],
+            'event_custom_fields' => ['nullable', 'array', 'max:8'],
+            'event_custom_fields.*.name' => ['required_with:event_custom_fields', 'string', 'max:100'],
+            'event_custom_fields.*.type' => ['required_with:event_custom_fields', 'string', 'in:string,multiline_string,switch,date,dropdown'],
+            'event_custom_fields.*.options' => ['nullable', 'string', 'max:500'],
+            'event_custom_fields.*.required' => ['nullable'],
         ];
     }
 }

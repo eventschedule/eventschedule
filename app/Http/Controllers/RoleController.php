@@ -1189,6 +1189,28 @@ class RoleController extends Controller
             $role->import_config = $importConfig;
         }
 
+        // Handle event custom fields
+        if ($request->has('event_custom_fields')) {
+            $submittedFields = $request->input('event_custom_fields', []);
+            $eventCustomFields = [];
+
+            foreach ($submittedFields as $fieldKey => $fieldData) {
+                // Skip fields without a name
+                if (empty($fieldData['name'])) {
+                    continue;
+                }
+
+                $eventCustomFields[$fieldKey] = [
+                    'name' => $fieldData['name'],
+                    'type' => $fieldData['type'] ?? 'string',
+                    'required' => ! empty($fieldData['required']),
+                    'options' => $fieldData['options'] ?? '',
+                ];
+            }
+
+            $role->event_custom_fields = ! empty($eventCustomFields) ? $eventCustomFields : null;
+        }
+
         // Handle email settings
         if ($request->filled('email_settings')) {
             $submittedSettings = $request->input('email_settings', []);

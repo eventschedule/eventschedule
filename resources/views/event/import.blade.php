@@ -435,6 +435,69 @@
                             </div>
                         </div>
 
+                        <!-- Custom Fields Section -->
+                        @if (count($role->getEventCustomFields()) > 0)
+                        <div class="mt-6">
+                            <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.custom_fields') }}</h4>
+                            @php
+                                $eventCustomFields = $role->getEventCustomFields();
+                            @endphp
+                            @foreach($eventCustomFields as $fieldKey => $field)
+                            <div class="mt-4">
+                                <x-input-label for="custom_field_{{ $fieldKey }}_@{{ idx }}" :value="$field['name'] . (!empty($field['required']) ? ' *' : '')" />
+
+                                @if(($field['type'] ?? 'string') === 'string')
+                                <x-text-input
+                                    id="custom_field_{{ $fieldKey }}_@{{ idx }}"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    v-model="preview.parsed[idx].custom_field_values.{{ $fieldKey }}"
+                                    v-bind:readonly="savedEvents[idx]"
+                                    autocomplete="off" />
+                                @elseif(($field['type'] ?? '') === 'multiline_string')
+                                <textarea
+                                    id="custom_field_{{ $fieldKey }}_@{{ idx }}"
+                                    rows="2"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                    v-model="preview.parsed[idx].custom_field_values.{{ $fieldKey }}"
+                                    v-bind:readonly="savedEvents[idx]"></textarea>
+                                @elseif(($field['type'] ?? '') === 'switch')
+                                <div class="mt-2">
+                                    <input type="checkbox"
+                                        id="custom_field_{{ $fieldKey }}_@{{ idx }}"
+                                        v-model="preview.parsed[idx].custom_field_values.{{ $fieldKey }}"
+                                        true-value="1"
+                                        false-value="0"
+                                        class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
+                                        v-bind:disabled="savedEvents[idx]" />
+                                </div>
+                                @elseif(($field['type'] ?? '') === 'date')
+                                <x-text-input
+                                    id="custom_field_{{ $fieldKey }}_@{{ idx }}"
+                                    type="date"
+                                    class="mt-1 block w-full"
+                                    v-model="preview.parsed[idx].custom_field_values.{{ $fieldKey }}"
+                                    v-bind:readonly="savedEvents[idx]" />
+                                @elseif(($field['type'] ?? '') === 'dropdown')
+                                <select
+                                    id="custom_field_{{ $fieldKey }}_@{{ idx }}"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                    v-model="preview.parsed[idx].custom_field_values.{{ $fieldKey }}"
+                                    v-bind:disabled="savedEvents[idx]">
+                                    <option value="">{{ __('messages.select') }}...</option>
+                                    @foreach(explode(',', $field['options'] ?? '') as $option)
+                                        @php $option = trim($option); @endphp
+                                        @if($option)
+                                        <option value="{{ $option }}">{{ $option }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                                @endif
+                            </div>
+                            @endforeach
+                        </div>
+                        @endif
+
                         <!-- Account creation checkbox for guest users -->
                         @if (isset($isGuest) && $isGuest && ! auth()->check())
                         <div class="flex items-center">
@@ -1020,6 +1083,18 @@
 
                     // Initialize video properties for performers and automatically search for videos
                     this.preview.parsed.forEach((event, eventIdx) => {
+                        // Initialize custom_field_values object if not present
+                        if (!event.custom_field_values) {
+                            event.custom_field_values = {};
+                        }
+                        // Ensure all custom fields have at least empty values for Vue reactivity
+                        const roleCustomFields = @json($role->getEventCustomFields());
+                        Object.keys(roleCustomFields).forEach(fieldKey => {
+                            if (event.custom_field_values[fieldKey] === undefined) {
+                                event.custom_field_values[fieldKey] = '';
+                            }
+                        });
+
                         if (event.performers && Array.isArray(event.performers)) {
                             event.performers.forEach((performer, performerIdx) => {
                                 // Initialize video-related properties using Object.assign for reactivity
@@ -1029,7 +1104,7 @@
                                     searching: false,
                                     error: null
                                 });
-                                
+
                                 // Only search for videos for the first performer when there are multiple performers
                                 if (performerIdx === 0 && ! performer.talent_id) {
                                     this.$nextTick(() => {
@@ -1229,6 +1304,7 @@
                             description: this.eventDetails ? this.eventDetails : parsed.event_details,
                             social_image: parsed.social_image,
                             registration_url: parsed.registration_url,
+                            custom_field_values: parsed.custom_field_values || {},
                             @if ($role->isCurator() && !isset($isGuest))
                                 curators: ['{{ \App\Utils\UrlUtils::encodeId($role->id) }}'],
                             @endif
