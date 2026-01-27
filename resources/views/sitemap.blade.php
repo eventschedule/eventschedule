@@ -158,6 +158,12 @@
         <priority>0.8</priority>
     </url>
     <url>
+        <loc>{{ url('/for-circus-acrobatics') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
         <loc>{{ url('/docs') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>

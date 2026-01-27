@@ -477,8 +477,9 @@ class GeminiUtils
 
                 // First: Try stricter matching (requires city + country + name/address)
                 if (! empty($item['event_city'])) {
+                    $eventCountry = $item['event_country_code'] ?? $role->country_code;
                     $venue = Role::where('is_deleted', false)
-                        ->where('country_code', $role->country_code)
+                        ->where('country_code', $eventCountry)
                         ->where('city', $item['event_city'])
                         ->where(function ($query) use ($item) {
                             // Match by name OR by address
