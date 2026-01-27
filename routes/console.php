@@ -38,3 +38,9 @@ Schedule::call(function () {
         Artisan::call('app:setup-demo');
     }
 })->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
+    if (config('app.hosted')) {
+        Artisan::call('app:generate-sub-audience-blog');
+    }
+})->daily()->at('03:00')->appendOutputTo(storage_path('logs/sub-audience-blog.log'));

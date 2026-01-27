@@ -214,6 +214,110 @@ class MarketingController extends Controller
     }
 
     /**
+     * For Spoken Word & Poetry page
+     */
+    public function forSpokenWord()
+    {
+        return view('marketing.for-spoken-word');
+    }
+
+    /**
+     * For Bars & Pubs page
+     */
+    public function forBars()
+    {
+        return view('marketing.for-bars');
+    }
+
+    /**
+     * For Nightclubs page
+     */
+    public function forNightclubs()
+    {
+        return view('marketing.for-nightclubs');
+    }
+
+    /**
+     * For Music Venues page
+     */
+    public function forMusicVenues()
+    {
+        return view('marketing.for-music-venues');
+    }
+
+    /**
+     * For Theaters page
+     */
+    public function forTheaters()
+    {
+        return view('marketing.for-theaters');
+    }
+
+    /**
+     * For Dance Groups page
+     */
+    public function forDanceGroups()
+    {
+        return view('marketing.for-dance-groups');
+    }
+
+    /**
+     * For Theater Performers page
+     */
+    public function forTheaterPerformers()
+    {
+        return view('marketing.for-theater-performers');
+    }
+
+    /**
+     * For Food Trucks and Vendors page
+     */
+    public function forFoodTrucksAndVendors()
+    {
+        return view('marketing.for-food-trucks-and-vendors');
+    }
+
+    /**
+     * For Comedy Clubs page
+     */
+    public function forComedyClubs()
+    {
+        return view('marketing.for-comedy-clubs');
+    }
+
+    /**
+     * For Restaurants page
+     */
+    public function forRestaurants()
+    {
+        return view('marketing.for-restaurants');
+    }
+
+    /**
+     * For Breweries & Wineries page
+     */
+    public function forBreweriesAndWineries()
+    {
+        return view('marketing.for-breweries-and-wineries');
+    }
+
+    /**
+     * For Art Galleries & Studios page
+     */
+    public function forArtGalleries()
+    {
+        return view('marketing.for-art-galleries');
+    }
+
+    /**
+     * For Community Centers page
+     */
+    public function forCommunityCenters()
+    {
+        return view('marketing.for-community-centers');
+    }
+
+    /**
      * Integrations page
      */
     public function integrations()

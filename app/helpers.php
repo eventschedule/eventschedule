@@ -222,3 +222,25 @@ if (! function_exists('accent_contrast_color')) {
         return \App\Utils\ColorUtils::getContrastColor($color);
     }
 }
+
+if (! function_exists('get_sub_audience_blog')) {
+    /**
+     * Get a blog post for a sub-audience by slug
+     * Returns null if no matching blog post exists
+     *
+     * @param  string  $slug  The blog post slug (e.g., 'for-solo-artists')
+     */
+    function get_sub_audience_blog(string $slug): ?\App\Models\BlogPost
+    {
+        // Cache for 5 minutes to avoid repeated queries
+        return \Illuminate\Support\Facades\Cache::remember(
+            'sub_audience_blog_'.$slug,
+            300,
+            function () use ($slug) {
+                return \App\Models\BlogPost::published()
+                    ->where('slug', $slug)
+                    ->first();
+            }
+        );
+    }
+}

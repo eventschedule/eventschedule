@@ -416,70 +416,88 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Stand-Up Comics -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-rose-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-rose-100 mb-4">
+                <x-sub-audience-card
+                    name="Stand-Up Comics"
+                    description="Share your sets and build a following. One link shows fans everywhere you're performing."
+                    icon-color="rose"
+                    blog-slug="for-stand-up-comics"
+                >
+                    <x-slot:icon>
                         <svg class="w-6 h-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                         </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Stand-Up Comics</h3>
-                    <p class="text-gray-600 text-sm">Share your sets and build a following. One link shows fans everywhere you're performing.</p>
-                </div>
+                    </x-slot:icon>
+                </x-sub-audience-card>
 
                 <!-- Improv Performers -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-pink-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-pink-100 mb-4">
+                <x-sub-audience-card
+                    name="Improv Performers"
+                    description="Promote weekly shows with your troupe. Coordinate Harold nights and jam sessions."
+                    icon-color="pink"
+                    blog-slug="for-improv-performers"
+                >
+                    <x-slot:icon>
                         <svg class="w-6 h-6 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Improv Performers</h3>
-                    <p class="text-gray-600 text-sm">Promote weekly shows with your troupe. Coordinate Harold nights and jam sessions.</p>
-                </div>
+                    </x-slot:icon>
+                </x-sub-audience-card>
 
                 <!-- Sketch Comedy Groups -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-fuchsia-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-fuchsia-100 mb-4">
+                <x-sub-audience-card
+                    name="Sketch Comedy Groups"
+                    description="Coordinate ensemble schedules and share show runs. Everyone knows when the next performance is."
+                    icon-color="fuchsia"
+                    blog-slug="for-sketch-comedy-groups"
+                >
+                    <x-slot:icon>
                         <svg class="w-6 h-6 text-fuchsia-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
                         </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Sketch Comedy Groups</h3>
-                    <p class="text-gray-600 text-sm">Coordinate ensemble schedules and share show runs. Everyone knows when the next performance is.</p>
-                </div>
+                    </x-slot:icon>
+                </x-sub-audience-card>
 
                 <!-- Open Mic Regulars -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-purple-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-purple-100 mb-4">
+                <x-sub-audience-card
+                    name="Open Mic Regulars"
+                    description="Track spots across multiple venues. Never double-book a mic night again."
+                    icon-color="purple"
+                    blog-slug="for-open-mic-comics"
+                >
+                    <x-slot:icon>
                         <svg class="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Open Mic Regulars</h3>
-                    <p class="text-gray-600 text-sm">Track spots across multiple venues. Never double-book a mic night again.</p>
-                </div>
+                    </x-slot:icon>
+                </x-sub-audience-card>
 
                 <!-- Touring Headliners -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-violet-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-100 mb-4">
+                <x-sub-audience-card
+                    name="Touring Headliners"
+                    description="Share tour dates with fans across the country. One link for your entire run."
+                    icon-color="violet"
+                    blog-slug="for-touring-comedians"
+                >
+                    <x-slot:icon>
                         <svg class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Touring Headliners</h3>
-                    <p class="text-gray-600 text-sm">Share tour dates with fans across the country. One link for your entire run.</p>
-                </div>
+                    </x-slot:icon>
+                </x-sub-audience-card>
 
                 <!-- Comedy Hosts & MCs -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-amber-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 mb-4">
+                <x-sub-audience-card
+                    name="Comedy Hosts & MCs"
+                    description="Showcase hosting gigs and show bookers your availability. Build your reputation as the go-to host."
+                    icon-color="amber"
+                    blog-slug="for-comedy-podcasters"
+                >
+                    <x-slot:icon>
                         <svg class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                         </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Comedy Hosts & MCs</h3>
-                    <p class="text-gray-600 text-sm">Showcase hosting gigs and show bookers your availability. Build your reputation as the go-to host.</p>
-                </div>
+                    </x-slot:icon>
+                </x-sub-audience-card>
             </div>
         </div>
     </section>
