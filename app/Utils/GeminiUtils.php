@@ -325,17 +325,6 @@ class GeminiUtils
                 }
             }
 
-            // Handle special case for address
-            if (empty($item['event_address'])) {
-                if (! empty($item['event_city'])) {
-                    $data[$key]['event_address'] = $item['event_city'];
-                    unset($data[$key]['event_city']);
-                } elseif (! empty($item['event_state'])) {
-                    $data[$key]['event_address'] = $item['event_state'];
-                    unset($data[$key]['event_state']);
-                }
-            }
-
             // Convert category name to category ID
             if (! empty($item['category_name'])) {
                 $categoryName = trim($item['category_name']);

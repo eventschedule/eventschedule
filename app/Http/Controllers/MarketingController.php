@@ -206,6 +206,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * For Magicians page
+     */
+    public function forMagicians()
+    {
+        return view('marketing.for-magicians');
+    }
+
+    /**
      * Integrations page
      */
     public function integrations()
