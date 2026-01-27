@@ -19,7 +19,7 @@ use Laravel\Cashier\Subscription;
 class AdminController extends Controller
 {
     /**
-     * Display the admin dashboard.
+     * Display the admin dashboard (overview/highlights).
      */
     public function dashboard(Request $request)
     {
@@ -105,6 +105,95 @@ class AdminController extends Controller
             ->where('email', '!=', DemoService::DEMO_EMAIL)
             ->where('updated_at', '>=', now()->subDays(30))->count();
 
+        // Average events per schedule
+        $avgEventsPerSchedule = $totalSchedules > 0 ? round($totalEvents / $totalSchedules, 1) : 0;
+
+        // Recent schedules (only claimed, excluding demo roles) - reduced to 5
+        $recentSchedules = Role::whereNotNull('user_id')
+            ->where(function ($query) {
+                $query->whereNotNull('email_verified_at')
+                    ->orWhereNotNull('phone_verified_at');
+            })
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Recent events (excluding demo events) - reduced to 5
+        $recentEvents = Event::with('roles')
+            ->whereDoesntHave('roles', function ($query) {
+                $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
+                    ->orWhere('subdomain', 'like', 'demo-%');
+            })
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Trends data - users, schedules, events over time
+        $trendData = $this->getTrendData($startDate, $endDate);
+
+        return view('admin.dashboard', compact(
+            'totalUsers',
+            'totalSchedules',
+            'totalEvents',
+            'usersInPeriod',
+            'usersChangePercent',
+            'schedulesInPeriod',
+            'schedulesChangePercent',
+            'eventsInPeriod',
+            'eventsChangePercent',
+            'activeUsers7Days',
+            'activeUsers30Days',
+            'avgEventsPerSchedule',
+            'recentSchedules',
+            'recentEvents',
+            'trendData',
+            'range'
+        ));
+    }
+
+    /**
+     * Display the admin users page.
+     */
+    public function users(Request $request)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // Get date range
+        $range = $request->input('range', 'last_30_days');
+        $dates = $this->getDateRange($range);
+        $startDate = $dates['start'];
+        $endDate = $dates['end'];
+        $previousStartDate = $dates['previous_start'];
+        $previousEndDate = $dates['previous_end'];
+
+        // Total users
+        $totalUsers = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->count();
+
+        // Users in current period
+        $usersInPeriod = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereBetween('created_at', [$startDate, $endDate])->count();
+        $usersInPreviousPeriod = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
+        $usersChangePercent = $usersInPreviousPeriod > 0
+            ? round((($usersInPeriod - $usersInPreviousPeriod) / $usersInPreviousPeriod) * 100, 1)
+            : ($usersInPeriod > 0 ? 100 : 0);
+
+        // Active users
+        $activeUsers7Days = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->where('updated_at', '>=', now()->subDays(7))->count();
+        $activeUsers30Days = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->where('updated_at', '>=', now()->subDays(30))->count();
+
         // User signup method breakdown (all time)
         $emailUsers = User::whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
@@ -146,12 +235,42 @@ class AdminController extends Controller
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
-        // Average events per schedule
-        $avgEventsPerSchedule = $totalSchedules > 0 ? round($totalEvents / $totalSchedules, 1) : 0;
+        // Trends data for signup methods
+        $trendData = $this->getTrendData($startDate, $endDate);
 
-        // ==========================================
+        return view('admin.users', compact(
+            'totalUsers',
+            'usersInPeriod',
+            'usersChangePercent',
+            'activeUsers7Days',
+            'activeUsers30Days',
+            'emailUsers',
+            'googleUsers',
+            'hybridUsers',
+            'emailUsersInPeriod',
+            'googleUsersInPeriod',
+            'hybridUsersInPeriod',
+            'trendData',
+            'range'
+        ));
+    }
+
+    /**
+     * Display the admin revenue page.
+     */
+    public function revenue(Request $request)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // Get date range
+        $range = $request->input('range', 'last_30_days');
+        $dates = $this->getDateRange($range);
+        $startDate = $dates['start'];
+        $endDate = $dates['end'];
+
         // Revenue & Sales Metrics
-        // ==========================================
         $totalRevenue = Sale::where('status', 'completed')->sum('payment_amount');
         $revenueInPeriod = Sale::where('status', 'completed')
             ->whereBetween('created_at', [$startDate, $endDate])
@@ -168,54 +287,7 @@ class AdminController extends Controller
         $pendingSales = Sale::where('status', 'pending')->count();
         $pendingRevenue = Sale::where('status', 'pending')->sum('payment_amount');
 
-        // ==========================================
-        // Traffic & Analytics
-        // ==========================================
-        $totalViews = AnalyticsDaily::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-            ->selectRaw('SUM(desktop_views) as desktop, SUM(mobile_views) as mobile, SUM(tablet_views) as tablet, SUM(unknown_views) as unknown')
-            ->first();
-
-        $desktopViews = $totalViews->desktop ?? 0;
-        $mobileViews = $totalViews->mobile ?? 0;
-        $tabletViews = $totalViews->tablet ?? 0;
-        $totalPageViews = $desktopViews + $mobileViews + $tabletViews + ($totalViews->unknown ?? 0);
-
-        $trafficSources = AnalyticsReferrersDaily::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-            ->selectRaw('source, SUM(views) as views')
-            ->groupBy('source')
-            ->pluck('views', 'source')
-            ->toArray();
-
-        $directViews = $trafficSources['direct'] ?? 0;
-        $searchViews = $trafficSources['search'] ?? 0;
-        $socialViews = $trafficSources['social'] ?? 0;
-        $emailViews = $trafficSources['email'] ?? 0;
-        $otherViews = $trafficSources['other'] ?? 0;
-
-        // ==========================================
-        // Feature Adoption
-        // ==========================================
-        $baseRoleQuery = Role::whereNotNull('user_id')
-            ->where(function ($query) {
-                $query->whereNotNull('email_verified_at')
-                    ->orWhereNotNull('phone_verified_at');
-            })
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%');
-
-        $googleCalendarEnabled = (clone $baseRoleQuery)->whereNotNull('google_calendar_id')->count();
-        $stripeEnabled = (clone $baseRoleQuery)->whereNotNull('stripe_id')->count();
-        $customDomainEnabled = (clone $baseRoleQuery)->whereNotNull('custom_domain')->count();
-        $customCssEnabled = (clone $baseRoleQuery)->whereNotNull('custom_css')->where('custom_css', '!=', '')->count();
-
-        $googleCalendarPercent = $totalSchedules > 0 ? round(($googleCalendarEnabled / $totalSchedules) * 100, 1) : 0;
-        $stripePercent = $totalSchedules > 0 ? round(($stripeEnabled / $totalSchedules) * 100, 1) : 0;
-        $customDomainPercent = $totalSchedules > 0 ? round(($customDomainEnabled / $totalSchedules) * 100, 1) : 0;
-        $customCssPercent = $totalSchedules > 0 ? round(($customCssEnabled / $totalSchedules) * 100, 1) : 0;
-
-        // ==========================================
         // Subscription Health (for hosted mode)
-        // ==========================================
         $activeSubscriptions = 0;
         $trialingSubscriptions = 0;
         $canceledSubscriptions = 0;
@@ -262,6 +334,94 @@ class AdminController extends Controller
                 ->count();
         }
 
+        // Revenue trends
+        $trendData = $this->getTrendData($startDate, $endDate);
+
+        return view('admin.revenue', compact(
+            'totalRevenue',
+            'revenueInPeriod',
+            'totalSales',
+            'salesInPeriod',
+            'refundRate',
+            'pendingSales',
+            'pendingRevenue',
+            'activeSubscriptions',
+            'trialingSubscriptions',
+            'canceledSubscriptions',
+            'pastDueSubscriptions',
+            'rolesOnTrial',
+            'convertedFromTrial',
+            'expiredTrialsNoSub',
+            'trendData',
+            'range'
+        ));
+    }
+
+    /**
+     * Display the admin analytics page.
+     */
+    public function analytics(Request $request)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // Get date range
+        $range = $request->input('range', 'last_30_days');
+        $dates = $this->getDateRange($range);
+        $startDate = $dates['start'];
+        $endDate = $dates['end'];
+
+        // Traffic & Analytics
+        $totalViews = AnalyticsDaily::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->selectRaw('SUM(desktop_views) as desktop, SUM(mobile_views) as mobile, SUM(tablet_views) as tablet, SUM(unknown_views) as unknown')
+            ->first();
+
+        $desktopViews = $totalViews->desktop ?? 0;
+        $mobileViews = $totalViews->mobile ?? 0;
+        $tabletViews = $totalViews->tablet ?? 0;
+        $totalPageViews = $desktopViews + $mobileViews + $tabletViews + ($totalViews->unknown ?? 0);
+
+        $trafficSources = AnalyticsReferrersDaily::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->selectRaw('source, SUM(views) as views')
+            ->groupBy('source')
+            ->pluck('views', 'source')
+            ->toArray();
+
+        $directViews = $trafficSources['direct'] ?? 0;
+        $searchViews = $trafficSources['search'] ?? 0;
+        $socialViews = $trafficSources['social'] ?? 0;
+        $emailViews = $trafficSources['email'] ?? 0;
+        $otherViews = $trafficSources['other'] ?? 0;
+
+        // Feature Adoption
+        $totalSchedules = Role::whereNotNull('user_id')
+            ->where(function ($query) {
+                $query->whereNotNull('email_verified_at')
+                    ->orWhereNotNull('phone_verified_at');
+            })
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
+            ->count();
+
+        $baseRoleQuery = Role::whereNotNull('user_id')
+            ->where(function ($query) {
+                $query->whereNotNull('email_verified_at')
+                    ->orWhereNotNull('phone_verified_at');
+            })
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%');
+
+        $googleCalendarEnabled = (clone $baseRoleQuery)->whereNotNull('google_calendar_id')->count();
+        $stripeEnabled = (clone $baseRoleQuery)->whereNotNull('stripe_id')->count();
+        $customDomainEnabled = (clone $baseRoleQuery)->whereNotNull('custom_domain')->count();
+        $customCssEnabled = (clone $baseRoleQuery)->whereNotNull('custom_css')->where('custom_css', '!=', '')->count();
+
+        $googleCalendarPercent = $totalSchedules > 0 ? round(($googleCalendarEnabled / $totalSchedules) * 100, 1) : 0;
+        $stripePercent = $totalSchedules > 0 ? round(($stripeEnabled / $totalSchedules) * 100, 1) : 0;
+        $customDomainPercent = $totalSchedules > 0 ? round(($customDomainEnabled / $totalSchedules) * 100, 1) : 0;
+        $customCssPercent = $totalSchedules > 0 ? round(($customCssEnabled / $totalSchedules) * 100, 1) : 0;
+
         // Top schedules by event count (excluding demo roles)
         $topSchedulesByEvents = Role::withCount('events')
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
@@ -270,71 +430,7 @@ class AdminController extends Controller
             ->limit(10)
             ->get();
 
-        // Recent schedules (only claimed, excluding demo roles)
-        $recentSchedules = Role::whereNotNull('user_id')
-            ->where(function ($query) {
-                $query->whereNotNull('email_verified_at')
-                    ->orWhereNotNull('phone_verified_at');
-            })
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get();
-
-        // Recent events (excluding demo events)
-        $recentEvents = Event::with('roles')
-            ->whereDoesntHave('roles', function ($query) {
-                $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
-                    ->orWhere('subdomain', 'like', 'demo-%');
-            })
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get();
-
-        // Trends data - users, schedules, events over time
-        $trendData = $this->getTrendData($startDate, $endDate);
-
-        // Last updated timestamp
-        $lastUpdated = now();
-
-        return view('admin.dashboard', compact(
-            'totalUsers',
-            'totalSchedules',
-            'totalEvents',
-            'usersInPeriod',
-            'usersInPreviousPeriod',
-            'usersChangePercent',
-            'schedulesInPeriod',
-            'schedulesInPreviousPeriod',
-            'schedulesChangePercent',
-            'eventsInPeriod',
-            'eventsInPreviousPeriod',
-            'eventsChangePercent',
-            'activeUsers7Days',
-            'activeUsers30Days',
-            'emailUsers',
-            'googleUsers',
-            'hybridUsers',
-            'emailUsersInPeriod',
-            'googleUsersInPeriod',
-            'hybridUsersInPeriod',
-            'avgEventsPerSchedule',
-            'topSchedulesByEvents',
-            'recentSchedules',
-            'recentEvents',
-            'trendData',
-            'range',
-            'lastUpdated',
-            // Revenue & Sales
-            'totalRevenue',
-            'revenueInPeriod',
-            'totalSales',
-            'salesInPeriod',
-            'refundRate',
-            'pendingSales',
-            'pendingRevenue',
-            // Traffic & Analytics
+        return view('admin.analytics', compact(
             'totalPageViews',
             'desktopViews',
             'mobileViews',
@@ -344,7 +440,6 @@ class AdminController extends Controller
             'socialViews',
             'emailViews',
             'otherViews',
-            // Feature Adoption
             'googleCalendarEnabled',
             'stripeEnabled',
             'customDomainEnabled',
@@ -353,14 +448,9 @@ class AdminController extends Controller
             'stripePercent',
             'customDomainPercent',
             'customCssPercent',
-            // Subscription Health
-            'activeSubscriptions',
-            'trialingSubscriptions',
-            'canceledSubscriptions',
-            'pastDueSubscriptions',
-            'rolesOnTrial',
-            'convertedFromTrial',
-            'expiredTrialsNoSub'
+            'topSchedulesByEvents',
+            'totalSchedules',
+            'range'
         ));
     }
 
