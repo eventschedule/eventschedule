@@ -385,4 +385,36 @@
             </a>
         </div>
     </section>
+
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule Ticketing",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Event Ticketing Software",
+        "operatingSystem": "Web",
+        "description": "Sell tickets directly through your event schedule with QR codes, multiple ticket types, and secure Stripe payment processing. Zero platform fees.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free with Pro plan"
+        },
+        "featureList": [
+            "Zero platform fees",
+            "QR code tickets",
+            "Multiple ticket types",
+            "Stripe payment processing",
+            "Mobile check-in",
+            "Automatic confirmation emails"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
 </x-marketing-layout>

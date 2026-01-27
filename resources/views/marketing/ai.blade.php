@@ -380,4 +380,36 @@
             </a>
         </div>
     </section>
+
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule AI Import",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "AI Event Management Software",
+        "operatingSystem": "Web",
+        "description": "Smart event import with AI. Paste text or drop an image and AI extracts all the details automatically. Includes instant translation.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Included free"
+        },
+        "featureList": [
+            "AI-powered text parsing",
+            "Image and flyer import",
+            "Automatic event extraction",
+            "Instant translation",
+            "Bulk import support",
+            "Google Gemini powered"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
 </x-marketing-layout>

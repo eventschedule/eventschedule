@@ -256,6 +256,8 @@ if (config('app.is_nexus')) {
         // User Guide (at root level)
         Route::get('/docs/getting-started', [MarketingController::class, 'docsGettingStarted'])->name('marketing.docs.getting_started');
         Route::get('/docs/creating-schedules', [MarketingController::class, 'docsCreatingSchedules'])->name('marketing.docs.creating_schedules');
+        Route::get('/docs/schedule-basics', [MarketingController::class, 'docsScheduleBasics'])->name('marketing.docs.schedule_basics');
+        Route::get('/docs/schedule-styling', [MarketingController::class, 'docsScheduleStyling'])->name('marketing.docs.schedule_styling');
         Route::get('/docs/creating-events', [MarketingController::class, 'docsCreatingEvents'])->name('marketing.docs.creating_events');
         Route::get('/docs/sharing', [MarketingController::class, 'docsSharing'])->name('marketing.docs.sharing');
         Route::get('/docs/tickets', [MarketingController::class, 'docsTickets'])->name('marketing.docs.tickets');
@@ -305,6 +307,8 @@ if (config('app.is_nexus')) {
             // User Guide (at root level)
             Route::get('/docs/getting-started', [MarketingController::class, 'docsGettingStarted'])->name('marketing.docs.getting_started');
             Route::get('/docs/creating-schedules', [MarketingController::class, 'docsCreatingSchedules'])->name('marketing.docs.creating_schedules');
+            Route::get('/docs/schedule-basics', [MarketingController::class, 'docsScheduleBasics'])->name('marketing.docs.schedule_basics');
+            Route::get('/docs/schedule-styling', [MarketingController::class, 'docsScheduleStyling'])->name('marketing.docs.schedule_styling');
             Route::get('/docs/creating-events', [MarketingController::class, 'docsCreatingEvents'])->name('marketing.docs.creating_events');
             Route::get('/docs/sharing', [MarketingController::class, 'docsSharing'])->name('marketing.docs.sharing');
             Route::get('/docs/tickets', [MarketingController::class, 'docsTickets'])->name('marketing.docs.tickets');
@@ -355,6 +359,8 @@ if (config('app.is_nexus')) {
             // User Guide
             Route::get('/docs/getting-started', fn () => redirect('https://eventschedule.com/docs/getting-started', 301));
             Route::get('/docs/creating-schedules', fn () => redirect('https://eventschedule.com/docs/creating-schedules', 301));
+            Route::get('/docs/schedule-basics', fn () => redirect('https://eventschedule.com/docs/schedule-basics', 301));
+            Route::get('/docs/schedule-styling', fn () => redirect('https://eventschedule.com/docs/schedule-styling', 301));
             Route::get('/docs/creating-events', fn () => redirect('https://eventschedule.com/docs/creating-events', 301));
             Route::get('/docs/sharing', fn () => redirect('https://eventschedule.com/docs/sharing', 301));
             Route::get('/docs/tickets', fn () => redirect('https://eventschedule.com/docs/tickets', 301));
@@ -400,6 +406,8 @@ if (config('app.is_nexus')) {
     // User Guide
     Route::get('/docs/getting-started', fn () => redirect()->route('home'));
     Route::get('/docs/creating-schedules', fn () => redirect()->route('home'));
+    Route::get('/docs/schedule-basics', fn () => redirect()->route('home'));
+    Route::get('/docs/schedule-styling', fn () => redirect()->route('home'));
     Route::get('/docs/creating-events', fn () => redirect()->route('home'));
     Route::get('/docs/sharing', fn () => redirect()->route('home'));
     Route::get('/docs/tickets', fn () => redirect()->route('home'));

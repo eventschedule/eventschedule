@@ -381,4 +381,36 @@
             </a>
         </div>
     </section>
+
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule Analytics",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Event Analytics Software",
+        "operatingSystem": "Web",
+        "description": "Privacy-first event analytics. Track page views, device breakdown, traffic sources, and conversion rates with no external services required.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Included free"
+        },
+        "featureList": [
+            "Page view tracking",
+            "Device breakdown",
+            "Traffic source analysis",
+            "Conversion tracking",
+            "Privacy-first approach",
+            "No external services"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
 </x-marketing-layout>

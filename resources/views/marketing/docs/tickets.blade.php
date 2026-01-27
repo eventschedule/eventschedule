@@ -46,6 +46,8 @@
                         <a href="#managing-sales" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Managing Sales</a>
                         <a href="#check-in" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Check-in at the Door</a>
                         <a href="#free-events" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Free Events & RSVPs</a>
+                        <a href="#financial" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Financial Information</a>
+                        <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
                 </aside>
 
@@ -99,7 +101,7 @@
 
                             <h3 class="text-lg font-semibold text-white mb-4">Connecting Stripe</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to <strong class="text-white">Settings</strong> → <strong class="text-white">Payment Methods</strong></li>
+                                <li>Go to <strong class="text-white">Admin Panel &rarr; Plan</strong></li>
                                 <li>Click <strong class="text-white">"Connect Stripe"</strong></li>
                                 <li>Complete the Stripe onboarding process</li>
                                 <li>Once connected, Stripe will be available as a payment option</li>
@@ -183,7 +185,7 @@
                         <!-- Managing Sales -->
                         <section id="managing-sales" class="doc-section">
                             <h2 class="doc-heading">Managing Sales</h2>
-                            <p class="text-gray-300 mb-6">Track and manage your ticket sales from the <strong class="text-white">Sales</strong> page.</p>
+                            <p class="text-gray-300 mb-6">Track and manage your ticket sales from <strong class="text-white">Admin Panel &rarr; Sales</strong>.</p>
 
                             <h3 class="text-lg font-semibold text-white mb-4">What You Can See</h3>
                             <ul class="doc-list mb-6">
@@ -207,7 +209,7 @@
                             <p class="text-gray-300 mb-6">Use your phone to scan tickets at the door. No special hardware needed.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to the <strong class="text-white">Sales</strong> page on your phone</li>
+                                <li>Go to <strong class="text-white">Admin Panel &rarr; Sales</strong> on your phone</li>
                                 <li>Click <strong class="text-white">"Scan Tickets"</strong></li>
                                 <li>Point your camera at the QR code on the ticket</li>
                                 <li>The app shows the ticket details and marks it as checked in</li>
@@ -241,6 +243,50 @@
                                 <p>This is great for capacity management, even for free events. You'll know exactly how many people to expect.</p>
                             </div>
                         </section>
+
+                        <!-- Financial Information -->
+                        <section id="financial" class="doc-section">
+                            <h2 class="doc-heading">Financial Information</h2>
+                            <p class="text-gray-300 mb-6">Important information about payments, refunds, and taxes.</p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Refunds</h4>
+                                    <p class="text-sm text-gray-400">Refunds are handled through your payment provider (Stripe or Invoice Ninja). Event Schedule marks the sale as cancelled, but you must process the actual refund in your Stripe Dashboard or Invoice Ninja account. Stripe refunds appear on customer statements within 5-10 business days.</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Taxes</h4>
+                                    <p class="text-sm text-gray-400">Event Schedule does not automatically calculate or collect sales tax. Set your ticket prices inclusive of any applicable taxes. For tax reporting, export your sales data from the Sales page. Consult a tax professional for your specific obligations.</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Payment Processing Fees</h4>
+                                    <p class="text-sm text-gray-400">Stripe charges their standard processing fees (typically 2.9% + $0.30 per transaction in the US). These fees are deducted from your payouts. Event Schedule does not charge additional fees for ticketing.</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Cancelled or Deleted Events</h4>
+                                    <p class="text-sm text-gray-400">If you delete an event with sold tickets, ticket holders are <strong class="text-white">not</strong> automatically notified or refunded. Before deleting, you should: (1) contact ticket holders about the cancellation, (2) process refunds through your payment provider, and (3) then delete the event. Sales data is preserved even after event deletion.</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Payout Schedule</h4>
+                                    <p class="text-sm text-gray-400">Stripe pays out on a rolling basis (typically 2 business days in the US, varies by country). View your payout schedule and history in your Stripe Dashboard. Invoice Ninja follows your configured payment terms.</p>
+                                </div>
+                            </div>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Record Keeping</div>
+                                <p>Export your sales data regularly from <strong class="text-white">Admin Panel &rarr; Sales</strong> for your records. This includes buyer information, ticket types, and payment status.</p>
+                            </div>
+                        </section>
+
+                        <!-- See Also -->
+                        <section id="see-also" class="doc-section">
+                            <h2 class="doc-heading">See Also</h2>
+                            <ul class="doc-list">
+                                <li><a href="{{ route('marketing.docs.creating_events') }}" class="text-cyan-400 hover:text-cyan-300">Creating Events</a> - Add events to sell tickets for</li>
+                                <li><a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">Sharing Your Schedule</a> - Promote your events</li>
+                                <li><a href="{{ route('marketing.docs.event_graphics') }}" class="text-cyan-400 hover:text-cyan-300">Event Graphics</a> - Create promotional images</li>
+                            </ul>
+                        </section>
                     </div>
                 </div>
             </div>
@@ -248,4 +294,41 @@
     </section>
 
     @include('marketing.docs.partials.scripts')
+
+    <!-- HowTo Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Sell Tickets with Event Schedule",
+        "description": "Set up ticketing for your events with payment processing, ticket types, and QR code check-ins.",
+        "totalTime": "PT10M",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "name": "Connect Stripe",
+                "text": "Go to Admin Panel, then Plan, and click Connect Stripe. Complete the Stripe onboarding process.",
+                "url": "{{ url(route('marketing.docs.tickets')) }}#payment-setup"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Create Ticket Types",
+                "text": "Edit your event, scroll to Tickets section, click Add Ticket Type. Enter name, price, quantity, and description.",
+                "url": "{{ url(route('marketing.docs.tickets')) }}#create-tickets"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Manage Sales",
+                "text": "View all purchases, payment status, and check-in status from Admin Panel, then Sales.",
+                "url": "{{ url(route('marketing.docs.tickets')) }}#managing-sales"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Check In Attendees",
+                "text": "Go to Admin Panel, then Sales on your phone, click Scan Tickets, and point your camera at the QR code.",
+                "url": "{{ url(route('marketing.docs.tickets')) }}#check-in"
+            }
+        ]
+    }
+    </script>
 </x-marketing-layout>

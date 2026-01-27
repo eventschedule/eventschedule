@@ -43,6 +43,7 @@
                         <a href="#create-schedule" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Create Your Schedule</a>
                         <a href="#schedule-types" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Schedule Types</a>
                         <a href="#customize" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Customize Your Schedule</a>
+                        <a href="#faq" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">FAQ</a>
                         <a href="#next-steps" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Next Steps</a>
                     </nav>
                 </aside>
@@ -53,18 +54,18 @@
                         <!-- Create Account -->
                         <section id="create-account" class="doc-section">
                             <h2 class="doc-heading">Create Your Account</h2>
-                            <p class="text-gray-300 mb-6">Getting started with Event Schedule is quick and free. You can create an account using your email or sign in with Google or Facebook.</p>
+                            <p class="text-gray-300 mb-6">Getting started with Event Schedule is quick and free. You can create an account using your email or sign in with Google.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Visit <a href="{{ route('sign_up') }}" class="text-cyan-400 hover:text-cyan-300">the registration page</a></li>
-                                <li>Enter your name, email, and create a password (or use Google/Facebook)</li>
+                                <li>Enter your name, email, and create a password (or use Google)</li>
                                 <li>Verify your email address by clicking the link we send you</li>
                                 <li>You're ready to create your first schedule</li>
                             </ol>
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
-                                <p>Using Google or Facebook login is the fastest way to get started - no email verification required.</p>
+                                <p>Using Google login is the fastest way to get started - no email verification required.</p>
                             </div>
                         </section>
 
@@ -117,11 +118,6 @@
                                             <td>Promoters, bloggers, community organizers</td>
                                             <td>A local music blog listing concerts in the area</td>
                                         </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-white">Vendor</span></td>
-                                            <td>Food trucks, market vendors, mobile businesses</td>
-                                            <td>A food truck listing where they'll be each day</td>
-                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -148,8 +144,8 @@
                                     <p class="text-sm text-gray-400">Choose your timezone, date format, and language preferences.</p>
                                 </div>
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Categories</h4>
-                                    <p class="text-sm text-gray-400">Create custom categories to organize your events (e.g., "Live Music", "DJ Nights", "Comedy").</p>
+                                    <h4 class="font-semibold text-white mb-2">Subschedules</h4>
+                                    <p class="text-sm text-gray-400">Create subschedules to organize your events (e.g., "Live Music", "DJ Nights", "Comedy").</p>
                                 </div>
                             </div>
 
@@ -159,16 +155,45 @@
                             </div>
                         </section>
 
+                        <!-- FAQ -->
+                        <section id="faq" class="doc-section">
+                            <h2 class="doc-heading">Frequently Asked Questions</h2>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Can I have multiple schedules?</h4>
+                                    <p class="text-sm text-gray-400">Yes, you can create unlimited schedules under one account. This is useful if you manage multiple venues, bands, or organizations.</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">How do I change my schedule URL?</h4>
+                                    <p class="text-sm text-gray-400">Go to <strong class="text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and update the URL/subdomain field. Note that changing your URL may break existing links.</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">What's the difference between schedule types?</h4>
+                                    <p class="text-sm text-gray-400"><strong class="text-white">Talent</strong> schedules show where you'll be performing. <strong class="text-white">Venue</strong> schedules show what's happening at your location (with full address support). <strong class="text-white">Curator</strong> schedules aggregate events from multiple sources. You can change your type anytime.</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Can I import events from my existing calendar?</h4>
+                                    <p class="text-sm text-gray-400">Yes! Event Schedule supports Google Calendar and CalDAV sync. Connect your calendar in <strong class="text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> under Calendar Sync. You can also import events using AI from text or images.</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Is Event Schedule free?</h4>
+                                    <p class="text-sm text-gray-400">Yes! The free plan includes unlimited events, a custom subdomain, and all core features. Pro features like custom domains, branding removal, and custom CSS are available with a paid plan.</p>
+                                </div>
+                            </div>
+                        </section>
+
                         <!-- Next Steps -->
                         <section id="next-steps" class="doc-section">
                             <h2 class="doc-heading">Next Steps</h2>
                             <p class="text-gray-300 mb-6">Now that your schedule is set up, here's what to do next:</p>
 
                             <ul class="doc-list">
+                                <li><a href="{{ route('marketing.docs.schedule_basics') }}" class="text-cyan-400 hover:text-cyan-300">Configure schedule basics</a> - Set up name, location, contact info, and settings</li>
+                                <li><a href="{{ route('marketing.docs.schedule_styling') }}" class="text-cyan-400 hover:text-cyan-300">Style your schedule</a> - Customize colors, fonts, and backgrounds</li>
                                 <li><a href="{{ route('marketing.docs.creating_events') }}" class="text-cyan-400 hover:text-cyan-300">Add your first events</a> - Learn how to create and import events</li>
                                 <li><a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">Share your schedule</a> - Embed on your website and share on social media</li>
                                 <li><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Set up ticketing</a> - Start selling tickets for your events</li>
-                                <li><a href="{{ route('marketing.docs.event_graphics') }}" class="text-cyan-400 hover:text-cyan-300">Generate event graphics</a> - Create shareable images for social media</li>
                             </ul>
                         </section>
                     </div>
@@ -178,4 +203,41 @@
     </section>
 
     @include('marketing.docs.partials.scripts')
+
+    <!-- HowTo Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "Getting Started with Event Schedule",
+        "description": "Learn how to create your account, set up your first schedule, and start sharing events with Event Schedule.",
+        "totalTime": "PT5M",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "name": "Create Your Account",
+                "text": "Visit the registration page, enter your name, email, and password (or use Google login), then verify your email address.",
+                "url": "{{ url(route('marketing.docs.getting_started')) }}#create-account"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Create Your Schedule",
+                "text": "Click 'New Schedule' from your dashboard, choose a schedule type, enter your schedule name and pick a unique URL, then click Create.",
+                "url": "{{ url(route('marketing.docs.getting_started')) }}#create-schedule"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Choose Your Schedule Type",
+                "text": "Select the appropriate schedule type: Talent for performers, Venue for event spaces, or Curator for promoters and organizers.",
+                "url": "{{ url(route('marketing.docs.getting_started')) }}#schedule-types"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Customize Your Schedule",
+                "text": "Add your logo, description, location, and configure display settings to make your schedule your own.",
+                "url": "{{ url(route('marketing.docs.getting_started')) }}#customize"
+            }
+        ]
+    }
+    </script>
 </x-marketing-layout>

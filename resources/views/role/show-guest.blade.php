@@ -18,7 +18,7 @@
 
   <main>
     <div>
-      <div class="container mx-auto pt-7 pb-10 px-5">
+      <div class="container mx-auto pt-10 md:pt-7 pb-10 px-5 md:mt-0 relative z-10">
         <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-xl mb-6 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }}">
           <div
             class="relative overflow-hidden rounded-t-xl before:block before:absolute before:bg-[#00000033] before:-inset-0 before:rounded-t-xl"
@@ -462,8 +462,8 @@
         @endif
         @endif
 
-      <div 
-        class="bg-[#F5F9FE] dark:bg-gray-800 rounded-none sm:rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6 -mx-5 sm:mx-0"
+      <div
+        class="bg-[#F5F9FE] dark:bg-gray-800 rounded-none lg:rounded-lg px-5 lg:px-16 py-6 flex flex-col gap-6 mb-6 lg:mx-0 max-lg:w-screen max-lg:relative max-lg:left-1/2 max-lg:-translate-x-1/2"
       >  
         @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule')])
       </div>

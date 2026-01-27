@@ -108,6 +108,21 @@
    Reduced Motion Support
    ======================================== */
 
+/* ========================================
+   Focus States for Keyboard Navigation
+   ======================================== */
+
+a.feature-card:focus-visible,
+a.bento-card:focus-visible,
+a.persona-card:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+}
+
+/* ========================================
+   Reduced Motion Support
+   ======================================== */
+
 @media (prefers-reduced-motion: reduce) {
     .animate-pulse-slow,
     .animate-float,

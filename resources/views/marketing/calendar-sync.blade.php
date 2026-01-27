@@ -523,4 +523,36 @@
             </a>
         </div>
     </section>
+
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule Calendar Sync",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Calendar Synchronization Software",
+        "operatingSystem": "Web",
+        "description": "Two-way sync with Google Calendar and CalDAV. Real-time webhook updates. Let attendees add events to Apple, Google, or Outlook calendars instantly.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Included free"
+        },
+        "featureList": [
+            "Google Calendar two-way sync",
+            "CalDAV server support",
+            "Real-time webhook updates",
+            "Add-to-calendar buttons",
+            "Apple Calendar support",
+            "Outlook integration"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
 </x-marketing-layout>

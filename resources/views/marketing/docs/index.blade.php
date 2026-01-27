@@ -93,15 +93,15 @@
                     </div>
                 </a>
 
-                <a href="{{ route('marketing.docs.creating_schedules') }}" class="doc-card block">
+                <a href="{{ route('marketing.docs.schedule_basics') }}" class="doc-card block">
                     <div class="rounded-xl border border-white/10 p-5 h-full bg-gradient-to-br from-teal-900/30 to-blue-900/30 hover:border-teal-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
                             <svg class="w-5 h-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                             </svg>
-                            <h3 class="font-semibold text-white">Creating Schedules</h3>
+                            <h3 class="font-semibold text-white">Schedule Setup</h3>
                         </div>
-                        <p class="text-gray-400 text-sm">Set up your schedule and customize its appearance.</p>
+                        <p class="text-gray-400 text-sm">Configure name, type, location, styling, and settings.</p>
                     </div>
                 </a>
 
@@ -258,6 +258,50 @@
                         </div>
                     </div>
                 </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Glossary Section -->
+    <section class="bg-[#0a0a0f] py-16 border-t border-white/5">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-500/20">
+                    <svg class="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Glossary</h2>
+                    <p class="text-gray-400 text-sm">Key terms used throughout Event Schedule</p>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                    <h3 class="font-semibold text-white mb-2">Schedule</h3>
+                    <p class="text-sm text-gray-400">Your event calendar with its own unique URL and branding. Each schedule can contain unlimited events.</p>
+                </div>
+                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                    <h3 class="font-semibold text-white mb-2">Event</h3>
+                    <p class="text-sm text-gray-400">A single occurrence with a date, time, location, and details. Events belong to a schedule.</p>
+                </div>
+                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                    <h3 class="font-semibold text-white mb-2">Subschedule</h3>
+                    <p class="text-sm text-gray-400">A category to organize events within your schedule (e.g., "Live Music", "Comedy", "Workshops").</p>
+                </div>
+                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                    <h3 class="font-semibold text-white mb-2">Ticket</h3>
+                    <p class="text-sm text-gray-400">A purchasable item for event attendance. Events can have multiple ticket types (e.g., General, VIP).</p>
+                </div>
+                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                    <h3 class="font-semibold text-white mb-2">Follower</h3>
+                    <p class="text-sm text-gray-400">Someone who follows your schedule to receive updates about new events.</p>
+                </div>
+                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                    <h3 class="font-semibold text-white mb-2">Admin Panel</h3>
+                    <p class="text-sm text-gray-400">The management interface where you configure your schedule, add events, and view analytics.</p>
+                </div>
             </div>
         </div>
     </section>

@@ -43,8 +43,9 @@
                         <a href="#embed" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Embedding on Your Website</a>
                         <a href="#social" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Social Media Sharing</a>
                         <a href="#followers" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Building Followers</a>
-                        <a href="#feeds" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">iCal and RSS Feeds</a>
                         <a href="#qr-code" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">QR Codes</a>
+                        <a href="#troubleshooting" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Embed Troubleshooting</a>
+                        <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
                 </aside>
 
@@ -141,12 +142,12 @@
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Visitors click <strong class="text-white">"Follow"</strong> on your schedule</li>
                                 <li>They enter their email address</li>
-                                <li>They receive email notifications when you add new events</li>
-                                <li>They can unsubscribe at any time</li>
+                                <li>Your schedule appears on their dashboard for easy access</li>
+                                <li>They can unfollow at any time</li>
                             </ol>
 
                             <h3 class="text-lg font-semibold text-white mb-4">Managing Followers</h3>
-                            <p class="text-gray-300 mb-4">View and manage your followers from the <strong class="text-white">Followers</strong> tab in your schedule admin. You can:</p>
+                            <p class="text-gray-300 mb-4">View and manage your followers from <strong class="text-white">Admin Panel &rarr; Followers</strong>. You can:</p>
                             <ul class="doc-list">
                                 <li>See how many followers you have</li>
                                 <li>View follower growth over time</li>
@@ -159,43 +160,67 @@
                             </div>
                         </section>
 
-                        <!-- Feeds -->
-                        <section id="feeds" class="doc-section">
-                            <h2 class="doc-heading">iCal and RSS Feeds</h2>
-                            <p class="text-gray-300 mb-6">Your schedule automatically provides standard feeds that work with calendar apps and feed readers.</p>
-
-                            <h3 class="text-lg font-semibold text-white mb-4">iCal Feed</h3>
-                            <p class="text-gray-300 mb-4">Subscribe to your schedule in any calendar app (Google Calendar, Apple Calendar, Outlook, etc.) using the iCal feed URL.</p>
-                            <div class="bg-white/5 rounded-xl p-4 border border-white/10 mb-6">
-                                <code class="text-violet-400 text-sm">{{ config('app.url') }}/your-schedule-name/ical</code>
-                            </div>
-
-                            <h3 class="text-lg font-semibold text-white mb-4">RSS Feed</h3>
-                            <p class="text-gray-300 mb-4">Subscribe to your schedule in any RSS reader to get updates when new events are added.</p>
-                            <div class="bg-white/5 rounded-xl p-4 border border-white/10 mb-6">
-                                <code class="text-violet-400 text-sm">{{ config('app.url') }}/your-schedule-name/rss</code>
-                            </div>
-
-                            <h3 class="text-lg font-semibold text-white mb-4">JSON Feed</h3>
-                            <p class="text-gray-300 mb-4">For developers, a JSON feed is also available for programmatic access.</p>
-                            <div class="bg-white/5 rounded-xl p-4 border border-white/10 mb-6">
-                                <code class="text-violet-400 text-sm">{{ config('app.url') }}/your-schedule-name/json</code>
-                            </div>
-                        </section>
-
                         <!-- QR Codes -->
                         <section id="qr-code" class="doc-section">
                             <h2 class="doc-heading">QR Codes</h2>
                             <p class="text-gray-300 mb-6">Generate a QR code for your schedule to use in printed materials, posters, or at your venue.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to your schedule's <strong class="text-white">Followers</strong> tab</li>
+                                <li>Go to <strong class="text-white">Admin Panel &rarr; Followers</strong></li>
                                 <li>Click <strong class="text-white">"QR Code"</strong></li>
                                 <li>Download the QR code image</li>
                                 <li>Use it on flyers, posters, table tents, or anywhere else</li>
                             </ol>
 
                             <p class="text-gray-300">When scanned, the QR code takes people directly to your schedule where they can view events and follow you.</p>
+                        </section>
+
+                        <!-- Embed Troubleshooting -->
+                        <section id="troubleshooting" class="doc-section">
+                            <h2 class="doc-heading">Embed Troubleshooting</h2>
+                            <p class="text-gray-300 mb-6">Common issues when embedding your schedule and how to fix them.</p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Embed appears too small or cut off</h4>
+                                    <p class="text-sm text-gray-400">The embed iframe needs explicit height. Set a minimum height of 600px for comfortable viewing. Example: <code class="doc-inline-code">height="800"</code> or <code class="doc-inline-code">style="height: 800px;"</code></p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Embed doesn't resize on mobile</h4>
+                                    <p class="text-sm text-gray-400">Set the width to 100% and wrap the iframe in a responsive container. Example: <code class="doc-inline-code">width="100%"</code> and put it inside a <code class="doc-inline-code">&lt;div style="max-width: 100%;"&gt;</code></p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Scrollbars appear on the embed</h4>
+                                    <p class="text-sm text-gray-400">Increase the height of your iframe. The content may be taller than the container. For schedules with many events, try <code class="doc-inline-code">height="1000"</code> or higher.</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Embed blocked by browser</h4>
+                                    <p class="text-sm text-gray-400">Some browsers or extensions block iframes for security. This is rare but can happen with strict privacy settings. Test in an incognito/private window to verify.</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-2">Embed shows wrong theme</h4>
+                                    <p class="text-sm text-gray-400">Check the embed code parameters. Add <code class="doc-inline-code">?theme=dark</code> or <code class="doc-inline-code">?theme=light</code> to the URL to force a specific theme.</p>
+                                </div>
+                            </div>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Responsive Embed Code</div>
+                                <pre class="text-xs text-gray-300 mt-2 overflow-x-auto"><code>&lt;div style="position: relative; padding-bottom: 75%; height: 0; overflow: hidden;"&gt;
+  &lt;iframe src="YOUR_SCHEDULE_URL/embed"
+    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+    frameborder="0"&gt;&lt;/iframe&gt;
+&lt;/div&gt;</code></pre>
+                            </div>
+                        </section>
+
+                        <!-- See Also -->
+                        <section id="see-also" class="doc-section">
+                            <h2 class="doc-heading">See Also</h2>
+                            <ul class="doc-list">
+                                <li><a href="{{ route('marketing.docs.event_graphics') }}" class="text-cyan-400 hover:text-cyan-300">Event Graphics</a> - Generate shareable images for social media</li>
+                                <li><a href="{{ route('marketing.docs.creating_events') }}" class="text-cyan-400 hover:text-cyan-300">Creating Events</a> - Add events to your schedule</li>
+                                <li><a href="{{ route('marketing.docs.schedule_styling') }}" class="text-cyan-400 hover:text-cyan-300">Schedule Styling</a> - Customize your schedule's look before sharing</li>
+                            </ul>
                         </section>
                     </div>
                 </div>

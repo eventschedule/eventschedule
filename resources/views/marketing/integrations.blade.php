@@ -18,7 +18,7 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-8">
-                <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
                 <span class="text-sm text-gray-300">Connect your tools</span>
@@ -36,7 +36,7 @@
             <div class="flex flex-wrap justify-center gap-4">
                 <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
                     Get started free
-                    <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -50,7 +50,7 @@
             <!-- Section Header -->
             <div class="text-center mb-12">
                 <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-6">
-                    <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <span class="text-sm text-gray-300">Calendar Integrations</span>
@@ -59,7 +59,7 @@
                 <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-4">Sync across all your calendars automatically</p>
                 <a href="{{ marketing_url('/calendar-sync') }}" class="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
                     Learn about all calendar options
-                    <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -68,14 +68,14 @@
             <!-- Calendar Cards Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Google Calendar -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-white/10 p-8 h-full flex flex-col">
+                <a href="{{ marketing_url('/google-calendar') }}" class="bento-card group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-white/10 p-8 h-full flex flex-col hover:border-blue-500/30 transition-all" aria-label="Learn more about Google Calendar integration">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium mb-4 w-fit">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Calendar Sync
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Google Calendar</h3>
+                    <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-blue-300 transition-colors">Google Calendar</h3>
 
                     <div class="flex-grow">
                         <p class="text-gray-400 mb-6">Two-way sync with Google Calendar. Import events automatically or push your schedule to Google. Changes sync in real-time.</p>
@@ -113,24 +113,24 @@
                             <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Auto import</span>
                             <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Real-time updates</span>
                         </div>
-                        <a href="{{ marketing_url('/google-calendar') }}" class="inline-flex items-center text-blue-300 hover:text-blue-200 text-sm font-medium transition-colors">
+                        <span class="inline-flex items-center text-blue-300 group-hover:text-blue-200 text-sm font-medium transition-colors group-hover:gap-2 gap-1 transition-all">
                             Learn more
-                            <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
-                        </a>
+                        </span>
                     </div>
-                </div>
+                </a>
 
                 <!-- CalDAV -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900/50 to-cyan-900/50 border border-white/10 p-8 h-full flex flex-col">
+                <a href="{{ marketing_url('/caldav') }}" class="bento-card group relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900/50 to-cyan-900/50 border border-white/10 p-8 h-full flex flex-col hover:border-teal-500/30 transition-all" aria-label="Learn more about CalDAV integration">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm font-medium mb-4 w-fit">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Calendar Sync
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">CalDAV</h3>
+                    <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-teal-300 transition-colors">CalDAV</h3>
 
                     <div class="flex-grow">
                         <p class="text-gray-400 mb-6">Sync with any CalDAV server—Nextcloud, Radicale, Fastmail, and more. Two-way sync keeps events in harmony.</p>
@@ -138,17 +138,17 @@
                         <div class="bg-black/30 rounded-xl p-4 border border-white/10 mb-6">
                             <div class="flex items-center gap-3 mb-3">
                                 <div class="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center">
-                                    <svg class="w-4 h-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="w-4 h-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" />
                                     </svg>
                                 </div>
                                 <div class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-                                    <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </div>
                                 <div class="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center">
-                                    <svg class="w-4 h-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="w-4 h-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m7-7l-7 7 7 7" />
                                     </svg>
                                 </div>
@@ -162,14 +162,14 @@
                             <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Two-way sync</span>
                             <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Selfhosted friendly</span>
                         </div>
-                        <a href="{{ marketing_url('/caldav') }}" class="inline-flex items-center text-teal-300 hover:text-teal-200 text-sm font-medium transition-colors">
+                        <span class="inline-flex items-center text-teal-300 group-hover:text-teal-200 text-sm font-medium transition-colors group-hover:gap-2 gap-1 transition-all">
                             Learn more
-                            <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
-                        </a>
+                        </span>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
     </section>
@@ -180,7 +180,7 @@
             <!-- Section Header -->
             <div class="text-center mb-12">
                 <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-6">
-                    <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
                     <span class="text-sm text-gray-300">Payment Integrations</span>
@@ -192,14 +192,14 @@
             <!-- Payment Cards Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Stripe -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border border-white/10 p-8 h-full flex flex-col">
+                <a href="{{ marketing_url('/stripe') }}" class="bento-card group relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border border-white/10 p-8 h-full flex flex-col hover:border-violet-500/30 transition-all" aria-label="Learn more about Stripe payment integration">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4 w-fit">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                         </svg>
                         Payments
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Stripe</h3>
+                    <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-violet-300 transition-colors">Stripe</h3>
 
                     <div class="flex-grow">
                         <p class="text-gray-400 mb-6">Accept credit cards, Apple Pay, and Google Pay. Payments go directly to your Stripe account.</p>
@@ -217,24 +217,24 @@
                             <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Apple Pay</span>
                             <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Google Pay</span>
                         </div>
-                        <a href="{{ marketing_url('/stripe') }}" class="inline-flex items-center text-violet-300 hover:text-violet-200 text-sm font-medium transition-colors">
+                        <span class="inline-flex items-center text-violet-300 group-hover:text-violet-200 text-sm font-medium transition-colors group-hover:gap-2 gap-1 transition-all">
                             Learn more
-                            <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
-                        </a>
+                        </span>
                     </div>
-                </div>
+                </a>
 
                 <!-- Invoice Ninja -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-white/10 p-8 h-full flex flex-col">
+                <a href="{{ marketing_url('/invoiceninja') }}" class="bento-card group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-white/10 p-8 h-full flex flex-col hover:border-emerald-500/30 transition-all" aria-label="Learn more about Invoice Ninja integration">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4 w-fit">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         Invoicing
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Invoice Ninja</h3>
+                    <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-emerald-300 transition-colors">Invoice Ninja</h3>
 
                     <div class="flex-grow">
                         <p class="text-gray-400 mb-6">Generate professional invoices for ticket purchases. Perfect for corporate events and B2B sales.</p>
@@ -254,14 +254,14 @@
 
                     <div class="mt-auto">
                         <div class="min-h-[40px] mb-4"></div>
-                        <a href="{{ marketing_url('/invoiceninja') }}" class="inline-flex items-center text-emerald-300 hover:text-emerald-200 text-sm font-medium transition-colors">
+                        <span class="inline-flex items-center text-emerald-300 group-hover:text-emerald-200 text-sm font-medium transition-colors group-hover:gap-2 gap-1 transition-all">
                             Learn more
-                            <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
-                        </a>
+                        </span>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
     </section>
@@ -281,7 +281,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm">
                     <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-7 h-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                     </div>
@@ -293,7 +293,7 @@
 
                 <div class="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm">
                     <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-7 h-7 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                     </div>
@@ -305,7 +305,7 @@
 
                 <div class="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm">
                     <div class="w-14 h-14 bg-violet-100 rounded-2xl flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-7 h-7 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </div>
@@ -331,7 +331,7 @@
             </p>
             <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                 Get Started Free
-                <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
             </a>
