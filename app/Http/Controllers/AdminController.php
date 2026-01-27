@@ -108,6 +108,40 @@ class AdminController extends Controller
         // Average events per schedule
         $avgEventsPerSchedule = $totalSchedules > 0 ? round($totalEvents / $totalSchedules, 1) : 0;
 
+        // Upcoming online events (events with event_url but no venue)
+        $upcomingOnlineEvents = Event::whereNotNull('event_url')
+            ->where('event_url', '!=', '')
+            ->where('starts_at', '>', now())
+            ->whereDoesntHave('roles', function ($query) {
+                $query->where('roles.type', 'venue');
+            })
+            ->whereDoesntHave('roles', function ($query) {
+                $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
+                    ->orWhere('subdomain', 'like', 'demo-%');
+            })
+            ->count();
+
+        // Events by country (from venue's country_code)
+        $eventsByCountry = Event::where('starts_at', '>', now())
+            ->whereDoesntHave('roles', function ($query) {
+                $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
+                    ->orWhere('subdomain', 'like', 'demo-%');
+            })
+            ->whereHas('roles', function ($query) {
+                $query->where('roles.type', 'venue')
+                    ->whereNotNull('country_code')
+                    ->where('country_code', '!=', '');
+            })
+            ->join('event_role', 'events.id', '=', 'event_role.event_id')
+            ->join('roles', 'event_role.role_id', '=', 'roles.id')
+            ->where('roles.type', 'venue')
+            ->whereNotNull('roles.country_code')
+            ->select('roles.country_code', DB::raw('COUNT(DISTINCT events.id) as count'))
+            ->groupBy('roles.country_code')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get();
+
         // Recent schedules (only claimed, excluding demo roles) - reduced to 5
         $recentSchedules = Role::whereNotNull('user_id')
             ->where(function ($query) {
@@ -146,6 +180,8 @@ class AdminController extends Controller
             'activeUsers7Days',
             'activeUsers30Days',
             'avgEventsPerSchedule',
+            'upcomingOnlineEvents',
+            'eventsByCountry',
             'recentSchedules',
             'recentEvents',
             'trendData',

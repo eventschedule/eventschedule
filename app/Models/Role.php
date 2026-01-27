@@ -72,6 +72,7 @@ class Role extends Model implements MustVerifyEmail
         'last_notified_request_count',
         'email_settings',
         'custom_css',
+        'event_custom_fields',
         'graphic_settings',
         'caldav_settings',
         'caldav_sync_direction',
@@ -88,6 +89,7 @@ class Role extends Model implements MustVerifyEmail
         'google_webhook_expires_at' => 'datetime',
         'trial_ends_at' => 'datetime',
         'caldav_last_sync_at' => 'datetime',
+        'event_custom_fields' => 'array',
     ];
 
     /**
@@ -856,6 +858,14 @@ class Role extends Model implements MustVerifyEmail
     public function groups()
     {
         return $this->hasMany(\App\Models\Group::class);
+    }
+
+    /**
+     * Get event custom fields definition
+     */
+    public function getEventCustomFields(): array
+    {
+        return $this->event_custom_fields ?? [];
     }
 
     /**

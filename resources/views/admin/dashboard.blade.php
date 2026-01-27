@@ -84,7 +84,7 @@
         </div>
 
         {{-- Activity Stats --}}
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Users (7 days)</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers7Days) }}</p>
@@ -97,7 +97,44 @@
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Avg Events per Schedule</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ $avgEventsPerSchedule }}</p>
             </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="w-5 h-5 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <p class="ml-2 text-sm font-medium text-gray-500 dark:text-gray-400">Upcoming Online Events</p>
+                </div>
+                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($upcomingOnlineEvents) }}</p>
+            </div>
         </div>
+
+        {{-- Events by Country --}}
+        @if($eventsByCountry->count() > 0)
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Upcoming Events by Country</h3>
+            <div class="space-y-3">
+                @foreach($eventsByCountry as $country)
+                    <div class="flex items-center">
+                        <div class="w-24 flex-shrink-0">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {{ strtoupper($country->country_code) }}
+                            </span>
+                        </div>
+                        <div class="flex-1 mx-4">
+                            <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
+                                <div class="bg-indigo-500 h-4 rounded-full" style="width: {{ min(100, ($country->count / $eventsByCountry->max('count')) * 100) }}%"></div>
+                            </div>
+                        </div>
+                        <div class="w-16 text-right">
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($country->count) }}</span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
 
         {{-- Growth Trends Chart --}}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">

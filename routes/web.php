@@ -250,6 +250,9 @@ if (config('app.is_nexus')) {
         Route::get('/sub-schedules', [MarketingController::class, 'subSchedules'])->name('marketing.sub_schedules');
         Route::get('/online-events', [MarketingController::class, 'onlineEvents'])->name('marketing.online_events');
         Route::get('/open-source', [MarketingController::class, 'openSource'])->name('marketing.open_source');
+        Route::get('/for-talent', [MarketingController::class, 'forTalent'])->name('marketing.for_talent');
+        Route::get('/for-venues', [MarketingController::class, 'forVenues'])->name('marketing.for_venues');
+        Route::get('/for-curators', [MarketingController::class, 'forCurators'])->name('marketing.for_curators');
         Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
         Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
         Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
@@ -301,6 +304,9 @@ if (config('app.is_nexus')) {
             Route::get('/sub-schedules', [MarketingController::class, 'subSchedules'])->name('marketing.sub_schedules');
             Route::get('/online-events', [MarketingController::class, 'onlineEvents'])->name('marketing.online_events');
             Route::get('/open-source', [MarketingController::class, 'openSource'])->name('marketing.open_source');
+            Route::get('/for-talent', [MarketingController::class, 'forTalent'])->name('marketing.for_talent');
+            Route::get('/for-venues', [MarketingController::class, 'forVenues'])->name('marketing.for_venues');
+            Route::get('/for-curators', [MarketingController::class, 'forCurators'])->name('marketing.for_curators');
             Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
             Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
             Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
@@ -353,6 +359,9 @@ if (config('app.is_nexus')) {
             Route::get('/sub-schedules', fn () => redirect('https://eventschedule.com/sub-schedules', 301));
             Route::get('/online-events', fn () => redirect('https://eventschedule.com/online-events', 301));
             Route::get('/open-source', fn () => redirect('https://eventschedule.com/open-source', 301));
+            Route::get('/for-talent', fn () => redirect('https://eventschedule.com/for-talent', 301));
+            Route::get('/for-venues', fn () => redirect('https://eventschedule.com/for-venues', 301));
+            Route::get('/for-curators', fn () => redirect('https://eventschedule.com/for-curators', 301));
             Route::get('/privacy', fn () => redirect('https://eventschedule.com/privacy', 301));
             Route::get('/terms-of-service', fn () => redirect('https://eventschedule.com/terms-of-service', 301));
             Route::get('/self-hosting-terms-of-service', fn () => redirect('https://eventschedule.com/self-hosting-terms-of-service', 301));
@@ -403,6 +412,9 @@ if (config('app.is_nexus')) {
     Route::get('/team-scheduling', fn () => redirect()->route('home'));
     Route::get('/sub-schedules', fn () => redirect()->route('home'));
     Route::get('/online-events', fn () => redirect()->route('home'));
+    Route::get('/for-talent', fn () => redirect()->route('home'));
+    Route::get('/for-venues', fn () => redirect()->route('home'));
+    Route::get('/for-curators', fn () => redirect()->route('home'));
     Route::get('/selfhost', fn () => redirect()->route('home'));
     Route::get('/saas', fn () => redirect()->route('home'));
     Route::get('/docs', fn () => redirect()->route('home'));

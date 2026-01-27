@@ -1,7 +1,7 @@
 <x-marketing-layout>
-    <x-slot name="title">Custom Ticket Forms | Collect Attendee Information - Event Schedule</x-slot>
-    <x-slot name="description">Collect additional information from ticket buyers with flexible form fields including text, dropdown, date, and yes/no options.</x-slot>
-    <x-slot name="keywords">custom fields, ticket forms, event registration, attendee information, form builder, dropdown fields, date picker, event data collection</x-slot>
+    <x-slot name="title">Custom Fields | Event Metadata &amp; Attendee Forms - Event Schedule</x-slot>
+    <x-slot name="description">Define custom event metadata fields and collect attendee information with flexible form fields including text, dropdown, date, and yes/no options.</x-slot>
+    <x-slot name="keywords">custom fields, event metadata, ticket forms, event registration, attendee information, form builder, dropdown fields, date picker, event data collection</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
 
     <style>
@@ -221,15 +221,100 @@
         </div>
     </section>
 
-    <!-- Use Cases Section -->
+    <!-- Event Metadata Fields Section -->
+    <section class="bg-gradient-to-b from-[#0a0a0f] to-gray-900 py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-8">
+                    <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                    </svg>
+                    <span class="text-sm text-gray-300">Event Metadata</span>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                    Event Custom Fields
+                </h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                    Define custom metadata fields at the schedule level that appear when creating or editing events. Perfect for tracking speaker names, room numbers, session types, and more.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- How It Works -->
+                <div class="bg-gradient-to-br from-amber-900/30 to-orange-900/30 rounded-3xl border border-white/10 p-8">
+                    <h3 class="text-2xl font-bold text-white mb-6">How it works</h3>
+                    <div class="space-y-6">
+                        <div class="flex gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold">1</div>
+                            <div>
+                                <h4 class="text-white font-medium mb-1">Define fields in schedule settings</h4>
+                                <p class="text-gray-400 text-sm">Add up to 8 custom fields with names, types, and validation rules.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold">2</div>
+                            <div>
+                                <h4 class="text-white font-medium mb-1">Fill values when creating events</h4>
+                                <p class="text-gray-400 text-sm">Fields appear automatically in the event edit form for your team to complete.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold">3</div>
+                            <div>
+                                <h4 class="text-white font-medium mb-1">Use in graphics &amp; exports</h4>
+                                <p class="text-gray-400 text-sm">Display values in event graphics using template variables like {custom_1}, {custom_2}, etc.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Use Cases -->
+                <div class="bg-gradient-to-br from-orange-900/30 to-red-900/30 rounded-3xl border border-white/10 p-8">
+                    <h3 class="text-2xl font-bold text-white mb-6">Common uses</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+                            <div class="text-amber-400 text-sm font-medium mb-1">Conferences</div>
+                            <p class="text-gray-400 text-xs">Speaker name, Topic, Session type</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+                            <div class="text-amber-400 text-sm font-medium mb-1">Venues</div>
+                            <p class="text-gray-400 text-xs">Room number, Capacity, A/V setup</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+                            <div class="text-amber-400 text-sm font-medium mb-1">Festivals</div>
+                            <p class="text-gray-400 text-xs">Stage, Genre, Age restriction</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+                            <div class="text-amber-400 text-sm font-medium mb-1">Workshops</div>
+                            <p class="text-gray-400 text-xs">Skill level, Materials, Instructor</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-amber-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <div class="text-amber-300 text-sm font-medium mb-1">AI-Powered Import</div>
+                                <p class="text-gray-400 text-xs">When importing events, AI automatically extracts custom field values from text and images.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ticket Custom Fields Use Cases Section -->
     <section class="bg-gray-50 py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                    Common use cases
+                    Ticket custom fields use cases
                 </h2>
                 <p class="text-xl text-gray-500">
-                    Collect the right information for any type of event.
+                    Collect the right information from attendees during checkout.
                 </p>
             </div>
 

@@ -403,6 +403,24 @@ class GraphicController extends Controller
             '{price}' => $this->getPrice($event),
         ];
 
+        // Add custom field replacements
+        $customFieldValues = $event->custom_field_values ?? [];
+        $roleCustomFields = $role->event_custom_fields ?? [];
+        $fieldIndex = 1;
+        foreach ($roleCustomFields as $fieldKey => $fieldConfig) {
+            $value = $customFieldValues[$fieldKey] ?? '';
+            // Convert boolean values to Yes/No for switch type
+            if (($fieldConfig['type'] ?? '') === 'switch') {
+                $value = ($value === '1' || $value === 1 || $value === true) ? __('messages.yes') : __('messages.no');
+            }
+            $replacements['{custom_'.$fieldIndex.'}'] = $value;
+            $fieldIndex++;
+        }
+        // Fill remaining with empty strings (up to 8 custom fields)
+        for ($i = $fieldIndex; $i <= 8; $i++) {
+            $replacements['{custom_'.$i.'}'] = '';
+        }
+
         return str_replace(array_keys($replacements), array_values($replacements), $template);
     }
 

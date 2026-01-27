@@ -624,6 +624,13 @@
                                 </svg>
                                 {{ __('messages.schedule_settings') }}
                             </a>
+                            <a href="#section-event-custom-fields" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-event-custom-fields">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                                </svg>
+                                {{ __('messages.event_custom_fields') }}
+                            </a>
                             <a href="#section-subschedules" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-subschedules">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 004.5 9v.878m13.5-3A2.25 2.25 0 0119.5 9v.878m0 0a2.25 2.25 0 01-2.25 2.25h-4.5A2.25 2.25 0 0113.5 9.878m-4.5 0a2.25 2.25 0 00-2.25 2.25v6a2.25 2.25 0 002.25 2.25h10.5A2.25 2.25 0 0021.75 18v-6a2.25 2.25 0 00-2.25-2.25h-4.5m-4.5 0V9a2.25 2.25 0 012.25-2.25h4.5m0 0V6a2.25 2.25 0 00-2.25-2.25h-4.5A2.25 2.25 0 009 6v.878" />
@@ -1315,7 +1322,85 @@
                         </div>
                         -->
 
-                        
+
+                    </div>
+                </div>
+
+                <div id="section-event-custom-fields" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                    <div class="max-w-xl">
+
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                            </svg>
+                            {{ __('messages.event_custom_fields') }}
+                        </h2>
+
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                            {{ __('messages.event_custom_fields_help') }}
+                        </p>
+
+                        <div id="event-custom-fields-container">
+                            @php
+                                $eventCustomFields = $role->event_custom_fields ?? [];
+                                $fieldIndex = 0;
+                            @endphp
+                            @foreach($eventCustomFields as $fieldKey => $field)
+                            <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-custom-field-item" data-field-key="{{ $fieldKey }}">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <x-input-label :value="__('messages.field_name') . ' *'" class="text-sm" />
+                                        <x-text-input type="text" name="event_custom_fields[{{ $fieldKey }}][name]"
+                                            value="{{ $field['name'] ?? '' }}"
+                                            class="mt-1 block w-full" required />
+                                    </div>
+                                    <div>
+                                        <x-input-label :value="__('messages.field_type')" class="text-sm" />
+                                        <select name="event_custom_fields[{{ $fieldKey }}][type]"
+                                            onchange="toggleEventFieldOptions(this)"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                            <option value="string" {{ ($field['type'] ?? 'string') === 'string' ? 'selected' : '' }}>{{ __('messages.type_string') }}</option>
+                                            <option value="multiline_string" {{ ($field['type'] ?? '') === 'multiline_string' ? 'selected' : '' }}>{{ __('messages.type_multiline_string') }}</option>
+                                            <option value="switch" {{ ($field['type'] ?? '') === 'switch' ? 'selected' : '' }}>{{ __('messages.type_switch') }}</option>
+                                            <option value="date" {{ ($field['type'] ?? '') === 'date' ? 'selected' : '' }}>{{ __('messages.type_date') }}</option>
+                                            <option value="dropdown" {{ ($field['type'] ?? '') === 'dropdown' ? 'selected' : '' }}>{{ __('messages.type_dropdown') }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-3 event-field-options-container" style="{{ ($field['type'] ?? '') === 'dropdown' ? '' : 'display: none;' }}">
+                                    <x-input-label :value="__('messages.field_options')" class="text-sm" />
+                                    <x-text-input type="text" name="event_custom_fields[{{ $fieldKey }}][options]"
+                                        value="{{ $field['options'] ?? '' }}"
+                                        class="mt-1 block w-full"
+                                        :placeholder="__('messages.options_placeholder')" />
+                                </div>
+                                <div class="mt-3 flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" name="event_custom_fields[{{ $fieldKey }}][required]"
+                                            id="event_field_required_{{ $fieldKey }}"
+                                            value="1"
+                                            {{ !empty($field['required']) ? 'checked' : '' }}
+                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                        <label for="event_field_required_{{ $fieldKey }}" class="ml-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
+                                    </div>
+                                    <x-secondary-button type="button" onclick="removeEventCustomField(this)" class="text-xs py-1 px-2">
+                                        {{ __('messages.remove') }}
+                                    </x-secondary-button>
+                                </div>
+                            </div>
+                            @php $fieldIndex++; @endphp
+                            @endforeach
+                        </div>
+
+                        <x-secondary-button type="button" onclick="addEventCustomField()" id="add-event-custom-field-btn" class="{{ count($eventCustomFields) >= 8 ? 'hidden' : '' }}">
+                            {{ __('messages.add_field') }}
+                        </x-secondary-button>
+
+                        <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                            {{ __('messages.event_custom_fields_graphic_help') }}
+                        </p>
+
                     </div>
                 </div>
 
@@ -2937,4 +3022,93 @@ document.addEventListener('DOMContentLoaded', function() {
         caldavTestResult.classList.remove('hidden');
     }
 });
+
+// Event Custom Fields Management
+let eventCustomFieldCounter = {{ count($role->event_custom_fields ?? []) }};
+
+function addEventCustomField() {
+    const container = document.getElementById('event-custom-fields-container');
+    const currentCount = container.querySelectorAll('.event-custom-field-item').length;
+
+    if (currentCount >= 8) {
+        return;
+    }
+
+    const fieldKey = 'new_' + eventCustomFieldCounter;
+    eventCustomFieldCounter++;
+
+    const fieldHtml = `
+        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-custom-field-item" data-field-key="${fieldKey}">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_name') !!} *</label>
+                    <input type="text" name="event_custom_fields[${fieldKey}][name]"
+                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" required />
+                </div>
+                <div>
+                    <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_type') !!}</label>
+                    <select name="event_custom_fields[${fieldKey}][type]"
+                        onchange="toggleEventFieldOptions(this)"
+                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                        <option value="string">{!! __('messages.type_string') !!}</option>
+                        <option value="multiline_string">{!! __('messages.type_multiline_string') !!}</option>
+                        <option value="switch">{!! __('messages.type_switch') !!}</option>
+                        <option value="date">{!! __('messages.type_date') !!}</option>
+                        <option value="dropdown">{!! __('messages.type_dropdown') !!}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-3 event-field-options-container" style="display: none;">
+                <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_options') !!}</label>
+                <input type="text" name="event_custom_fields[${fieldKey}][options]"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                    placeholder="{!! __('messages.options_placeholder') !!}" />
+            </div>
+            <div class="mt-3 flex items-center justify-between">
+                <div class="flex items-center">
+                    <input type="checkbox" name="event_custom_fields[${fieldKey}][required]"
+                        id="event_field_required_${fieldKey}"
+                        value="1"
+                        class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                    <label for="event_field_required_${fieldKey}" class="ml-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{!! __('messages.field_required') !!}</label>
+                </div>
+                <button type="button" onclick="removeEventCustomField(this)" class="inline-flex items-center px-2 py-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
+                    {!! __('messages.remove') !!}
+                </button>
+            </div>
+        </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', fieldHtml);
+    updateEventCustomFieldButton();
+}
+
+function removeEventCustomField(button) {
+    const fieldItem = button.closest('.event-custom-field-item');
+    if (fieldItem) {
+        fieldItem.remove();
+        updateEventCustomFieldButton();
+    }
+}
+
+function toggleEventFieldOptions(selectElement) {
+    const fieldItem = selectElement.closest('.event-custom-field-item');
+    const optionsContainer = fieldItem.querySelector('.event-field-options-container');
+    if (selectElement.value === 'dropdown') {
+        optionsContainer.style.display = 'block';
+    } else {
+        optionsContainer.style.display = 'none';
+    }
+}
+
+function updateEventCustomFieldButton() {
+    const container = document.getElementById('event-custom-fields-container');
+    const currentCount = container.querySelectorAll('.event-custom-field-item').length;
+    const addButton = document.getElementById('add-event-custom-field-btn');
+    if (currentCount >= 8) {
+        addButton.classList.add('hidden');
+    } else {
+        addButton.classList.remove('hidden');
+    }
+}
 </script>

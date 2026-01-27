@@ -285,6 +285,9 @@
                     <option value="section-details">{{ __('messages.details') }}</option>
                     @endif
                     <option value="section-venue">{{ __('messages.venue') }}</option>
+                    @if (count($role->getEventCustomFields()) > 0)
+                    <option value="section-custom-fields">{{ __('messages.custom_fields') }}</option>
+                    @endif
                     <option value="section-participants">{{ __('messages.participants') }}</option>
                     @if (! $role->isCurator())
                     <option value="section-recurring">{{ __('messages.recurring') }}</option>
@@ -326,6 +329,15 @@
                                 </svg>
                                 {{ __('messages.venue') }}
                             </a>
+                            @if (count($role->getEventCustomFields()) > 0)
+                            <a href="#section-custom-fields" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-custom-fields">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                                </svg>
+                                {{ __('messages.custom_fields') }}
+                            </a>
+                            @endif
                             <a href="#section-participants" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-participants">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
@@ -711,6 +723,83 @@
                     </div>
                 </div>
 
+                @if (count($role->getEventCustomFields()) > 0)
+                <div id="section-custom-fields" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                    <div class="max-w-xl">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                            </svg>
+                            {{ __('messages.custom_fields') }}
+                        </h2>
+
+                        @php
+                            $eventCustomFields = $role->getEventCustomFields();
+                            $customFieldValues = $event->getCustomFieldValues();
+                        @endphp
+
+                        @foreach($eventCustomFields as $fieldKey => $field)
+                        <div class="mb-6">
+                            <x-input-label for="custom_field_{{ $fieldKey }}" :value="$field['name'] . (!empty($field['required']) ? ' *' : '')" />
+
+                            @if(($field['type'] ?? 'string') === 'string')
+                            <x-text-input
+                                id="custom_field_{{ $fieldKey }}"
+                                name="custom_field_values[{{ $fieldKey }}]"
+                                type="text"
+                                class="mt-1 block w-full"
+                                :value="old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '')"
+                                :required="!empty($field['required'])" />
+                            @elseif(($field['type'] ?? '') === 'multiline_string')
+                            <textarea
+                                id="custom_field_{{ $fieldKey }}"
+                                name="custom_field_values[{{ $fieldKey }}]"
+                                rows="3"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                {{ !empty($field['required']) ? 'required' : '' }}>{{ old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '') }}</textarea>
+                            @elseif(($field['type'] ?? '') === 'switch')
+                            <div class="mt-2">
+                                <input type="hidden" name="custom_field_values[{{ $fieldKey }}]" value="0" />
+                                <input type="checkbox"
+                                    id="custom_field_{{ $fieldKey }}"
+                                    name="custom_field_values[{{ $fieldKey }}]"
+                                    value="1"
+                                    class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
+                                    {{ old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '') ? 'checked' : '' }} />
+                            </div>
+                            @elseif(($field['type'] ?? '') === 'date')
+                            <x-text-input
+                                id="custom_field_{{ $fieldKey }}"
+                                name="custom_field_values[{{ $fieldKey }}]"
+                                type="date"
+                                class="mt-1 block w-full"
+                                :value="old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '')"
+                                :required="!empty($field['required'])" />
+                            @elseif(($field['type'] ?? '') === 'dropdown')
+                            <select
+                                id="custom_field_{{ $fieldKey }}"
+                                name="custom_field_values[{{ $fieldKey }}]"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                {{ !empty($field['required']) ? 'required' : '' }}>
+                                <option value="">{{ __('messages.select') }}...</option>
+                                @foreach(explode(',', $field['options'] ?? '') as $option)
+                                    @php $option = trim($option); @endphp
+                                    @if($option)
+                                    <option value="{{ $option }}" {{ old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '') === $option ? 'selected' : '' }}>
+                                        {{ $option }}
+                                    </option>
+                                    @endif
+                                @endforeach
+                            </select>
+                            @endif
+
+                            <x-input-error class="mt-2" :messages="$errors->get('custom_field_values.' . $fieldKey)" />
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
 
                 <div id="section-participants" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">                                                
