@@ -36,6 +36,7 @@ return [
     'log_in' => 'Inloggen',
     'name' => 'Naam',
     'english_name' => 'Engelse Naam',
+    'auto_translated_placeholder' => 'Automatisch vertaald indien leeg gelaten',
     'confirm_password' => 'Bevestig Wachtwoord',
     'terms_of_service' => 'Gebruiksvoorwaarden',
     'privacy_policy' => 'Privacybeleid',

@@ -321,7 +321,13 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Musicians & Bands</h3>
-                    <p class="text-gray-600 text-sm">Share your tour dates and let fans know where you're playing next.</p>
+                    <p class="text-gray-600 text-sm mb-3">Share your tour dates and let fans know where you're playing next.</p>
+                    <a href="{{ route('marketing.for_musicians') }}" class="inline-flex items-center text-sm font-medium text-violet-600 hover:text-violet-700">
+                        Learn more
+                        <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
                 </div>
 
                 <!-- DJs -->
@@ -332,7 +338,13 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">DJs</h3>
-                    <p class="text-gray-600 text-sm">List your residencies and guest spots across multiple venues.</p>
+                    <p class="text-gray-600 text-sm mb-3">List your residencies and guest spots across multiple venues.</p>
+                    <a href="{{ route('marketing.for_djs') }}" class="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-700">
+                        Learn more
+                        <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
                 </div>
 
                 <!-- Comedians -->
@@ -343,7 +355,13 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Comedians</h3>
-                    <p class="text-gray-600 text-sm">Promote your stand-up shows and open mic appearances.</p>
+                    <p class="text-gray-600 text-sm mb-3">Promote your stand-up shows and open mic appearances.</p>
+                    <a href="{{ route('marketing.for_comedians') }}" class="inline-flex items-center text-sm font-medium text-fuchsia-600 hover:text-fuchsia-700">
+                        Learn more
+                        <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
                 </div>
 
                 <!-- Drag Performers -->

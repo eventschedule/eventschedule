@@ -36,6 +36,7 @@ return [
     'log_in' => 'Se connecter',
     'name' => 'Nom',
     'english_name' => 'Nom en Anglais',
+    'auto_translated_placeholder' => 'Traduit automatiquement si laissé vide',
     'confirm_password' => 'Confirmer le Mot de Passe',
     'terms_of_service' => 'Conditions d\'Utilisation',
     'privacy_policy' => 'Politique de Confidentialité',

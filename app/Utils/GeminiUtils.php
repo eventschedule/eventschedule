@@ -264,7 +264,8 @@ class GeminiUtils
             $customFieldKey = 'custom_field_'.$fieldKey;
             $customFieldKeys[$customFieldKey] = $fieldKey;
             $fieldType = $fieldConfig['type'] ?? 'string';
-            $fieldName = $fieldConfig['name'] ?? $fieldKey;
+            // Use English name for AI prompts if available
+            $fieldName = $fieldConfig['name_en'] ?? $fieldConfig['name'] ?? $fieldKey;
             $typeHint = '';
 
             if ($fieldType === 'switch') {
@@ -741,6 +742,43 @@ class GeminiUtils
             }
         } catch (\Exception $e) {
             \Log::error('Group name translation failed: '.$e->getMessage());
+        }
+
+        // Fallback: return empty translations if API fails
+        return [];
+    }
+
+    /**
+     * Batch translate custom field names to English using Gemini API
+     */
+    public static function translateCustomFieldNames($fieldNames, $fromLanguage = 'auto')
+    {
+        if (empty($fieldNames)) {
+            return [];
+        }
+
+        // Create a single prompt for batch translation
+        $prompt = "Translate these form field names from {$fromLanguage} to English. Return a JSON object where each key is the original name and the value is the English translation:\n";
+        $prompt .= json_encode($fieldNames);
+
+        try {
+            $response = self::sendRequest($prompt);
+
+            // Handle quota exceeded or other errors gracefully
+            if ($response === null || empty($response)) {
+                return [];
+            }
+
+            // sendRequest returns an array, get the first item
+            if (! empty($response) && is_array($response)) {
+                $translations = $response[0];
+
+                if (is_array($translations)) {
+                    return $translations;
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Custom field name translation failed: '.$e->getMessage());
         }
 
         // Fallback: return empty translations if API fails

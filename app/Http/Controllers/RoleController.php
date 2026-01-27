@@ -1192,7 +1192,9 @@ class RoleController extends Controller
         // Handle event custom fields
         if ($request->has('event_custom_fields')) {
             $submittedFields = $request->input('event_custom_fields', []);
+            $existingCustomFields = $role->event_custom_fields ?? [];
             $eventCustomFields = [];
+            $fieldsNeedingTranslation = [];
 
             foreach ($submittedFields as $fieldKey => $fieldData) {
                 // Skip fields without a name
@@ -1206,6 +1208,44 @@ class RoleController extends Controller
                     'required' => ! empty($fieldData['required']),
                     'options' => $fieldData['options'] ?? '',
                 ];
+
+                // Handle name_en - preserve manually entered value or check if translation needed
+                if (! empty($fieldData['name_en'])) {
+                    // User provided a manual English name
+                    $eventCustomFields[$fieldKey]['name_en'] = $fieldData['name_en'];
+                } elseif ($role->language_code !== 'en') {
+                    // Check if name changed or name_en is missing
+                    $existingField = $existingCustomFields[$fieldKey] ?? null;
+                    $existingName = $existingField['name'] ?? null;
+                    $existingNameEn = $existingField['name_en'] ?? null;
+
+                    if ($existingNameEn && $existingName === $fieldData['name']) {
+                        // Name unchanged, keep existing translation
+                        $eventCustomFields[$fieldKey]['name_en'] = $existingNameEn;
+                    } else {
+                        // Name changed or no translation exists - mark for translation
+                        $fieldsNeedingTranslation[$fieldKey] = $fieldData['name'];
+                    }
+                }
+            }
+
+            // Batch translate field names that need translation
+            if (! empty($fieldsNeedingTranslation)) {
+                try {
+                    $translations = GeminiUtils::translateCustomFieldNames(
+                        array_values($fieldsNeedingTranslation),
+                        $role->language_code
+                    );
+
+                    foreach ($fieldsNeedingTranslation as $fieldKey => $fieldName) {
+                        if (isset($translations[$fieldName])) {
+                            $eventCustomFields[$fieldKey]['name_en'] = $translations[$fieldName];
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Failed to translate custom field names: '.$e->getMessage());
+                    // Continue without translations if API fails
+                }
             }
 
             $role->event_custom_fields = ! empty($eventCustomFields) ? $eventCustomFields : null;

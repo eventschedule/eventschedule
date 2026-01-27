@@ -272,8 +272,57 @@ class EventRepo
 
         // Decode event-level custom_fields from JSON string
         if ($request->has('custom_fields')) {
+            $customFields = json_decode($request->input('custom_fields'), true);
+
+            // Handle name_en for event-level custom fields
+            if (! empty($customFields) && $currentRole && $currentRole->language_code !== 'en') {
+                $existingCustomFields = $event && $event->custom_fields ? $event->custom_fields : [];
+                $fieldsNeedingTranslation = [];
+
+                foreach ($customFields as $fieldKey => $fieldData) {
+                    if (empty($fieldData['name'])) {
+                        continue;
+                    }
+
+                    if (! empty($fieldData['name_en'])) {
+                        // User provided a manual English name - already set
+                    } else {
+                        // Check if name changed or name_en is missing
+                        $existingField = $existingCustomFields[$fieldKey] ?? null;
+                        $existingName = $existingField['name'] ?? null;
+                        $existingNameEn = $existingField['name_en'] ?? null;
+
+                        if ($existingNameEn && $existingName === $fieldData['name']) {
+                            // Name unchanged, keep existing translation
+                            $customFields[$fieldKey]['name_en'] = $existingNameEn;
+                        } else {
+                            // Name changed or no translation exists - mark for translation
+                            $fieldsNeedingTranslation[$fieldKey] = $fieldData['name'];
+                        }
+                    }
+                }
+
+                // Batch translate field names that need translation
+                if (! empty($fieldsNeedingTranslation)) {
+                    try {
+                        $translations = GeminiUtils::translateCustomFieldNames(
+                            array_values($fieldsNeedingTranslation),
+                            $currentRole->language_code
+                        );
+
+                        foreach ($fieldsNeedingTranslation as $fieldKey => $fieldName) {
+                            if (isset($translations[$fieldName])) {
+                                $customFields[$fieldKey]['name_en'] = $translations[$fieldName];
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Failed to translate event custom field names: '.$e->getMessage());
+                    }
+                }
+            }
+
             $request->merge([
-                'custom_fields' => json_decode($request->input('custom_fields'), true),
+                'custom_fields' => $customFields,
             ]);
         }
 
@@ -455,6 +504,50 @@ class EventRepo
             $ticketIds = [];
 
             foreach ($ticketData as $data) {
+                // Process custom_fields with name_en translation
+                $ticketCustomFields = isset($data['custom_fields']) ? json_decode($data['custom_fields'], true) : null;
+
+                if (! empty($ticketCustomFields) && $currentRole && $currentRole->language_code !== 'en') {
+                    $existingTicket = ! empty($data['id']) ? Ticket::find($data['id']) : null;
+                    $existingCustomFields = $existingTicket && $existingTicket->custom_fields ? $existingTicket->custom_fields : [];
+                    $fieldsNeedingTranslation = [];
+
+                    foreach ($ticketCustomFields as $fieldKey => $fieldData) {
+                        if (empty($fieldData['name'])) {
+                            continue;
+                        }
+
+                        if (empty($fieldData['name_en'])) {
+                            $existingField = $existingCustomFields[$fieldKey] ?? null;
+                            $existingName = $existingField['name'] ?? null;
+                            $existingNameEn = $existingField['name_en'] ?? null;
+
+                            if ($existingNameEn && $existingName === $fieldData['name']) {
+                                $ticketCustomFields[$fieldKey]['name_en'] = $existingNameEn;
+                            } else {
+                                $fieldsNeedingTranslation[$fieldKey] = $fieldData['name'];
+                            }
+                        }
+                    }
+
+                    if (! empty($fieldsNeedingTranslation)) {
+                        try {
+                            $translations = GeminiUtils::translateCustomFieldNames(
+                                array_values($fieldsNeedingTranslation),
+                                $currentRole->language_code
+                            );
+
+                            foreach ($fieldsNeedingTranslation as $fieldKey => $fieldName) {
+                                if (isset($translations[$fieldName])) {
+                                    $ticketCustomFields[$fieldKey]['name_en'] = $translations[$fieldName];
+                                }
+                            }
+                        } catch (\Exception $e) {
+                            \Log::error('Failed to translate ticket custom field names: '.$e->getMessage());
+                        }
+                    }
+                }
+
                 if (! empty($data['id'])) {
                     $ticket = Ticket::find($data['id']);
                     $ticketIds[] = $ticket->id;
@@ -464,7 +557,7 @@ class EventRepo
                             'quantity' => $data['quantity'] ?? null,
                             'price' => $data['price'] ?? null,
                             'description' => $data['description'] ?? null,
-                            'custom_fields' => isset($data['custom_fields']) ? json_decode($data['custom_fields'], true) : null,
+                            'custom_fields' => $ticketCustomFields,
                         ]);
                     }
                 } else {
@@ -474,7 +567,7 @@ class EventRepo
                         'quantity' => $data['quantity'] ?? null,
                         'price' => $data['price'] ?? null,
                         'description' => $data['description'] ?? null,
-                        'custom_fields' => isset($data['custom_fields']) ? json_decode($data['custom_fields'], true) : null,
+                        'custom_fields' => $ticketCustomFields,
                     ]);
                     $ticketIds[] = $ticket->id;
                 }
