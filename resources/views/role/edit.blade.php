@@ -221,19 +221,19 @@
                     // Preset header selected
                     headerImageUrl = "{{ asset('images/headers/thumbs') }}" + '/' + headerImageUrl + '.jpg';
                     $('#header_image_preview').attr('src', headerImageUrl).show();
-                    $('#delete_header_image').hide();
+                    $('#delete_header_image_form').hide();
                 } else if (headerImageUrl === '') {
                     // Custom option selected - show existing custom image if available
                     var existingCustomUrl = '{{ $role->header_image_url }}';
                     if (existingCustomUrl) {
                         $('#header_image_preview').attr('src', existingCustomUrl).show();
-                        $('#delete_header_image').show();
+                        $('#delete_header_image_form').show();
                     }
                     // Don't hide preview - let file upload handler manage it
                 } else {
                     // 'none' selected
                     $('#header_image_preview').hide();
-                    $('#delete_header_image').hide();
+                    $('#delete_header_image_form').hide();
                 }
             });
 
@@ -888,11 +888,13 @@
 
                                 @if ($role->profile_image_url)
                                 <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="pt-3" />
-                                <a href="#"
-                                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}'; }"
-                                    class="hover:underline text-gray-900 dark:text-gray-100">
-                                    {{ __('messages.delete_image') }}
-                                </a>
+                                <form method="POST" action="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="hover:underline text-gray-900 dark:text-gray-100">
+                                        {{ __('messages.delete_image') }}
+                                    </button>
+                                </form>
                                 @endif
                             </div>
 
@@ -948,11 +950,13 @@
                                     class="pt-3" />
 
                                 @if ($role->header_image_url)
-                                <a href="#" id="delete_header_image" style="display: {{ $role->header_image ? 'none' : 'block' }};"
-                                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}'; }"
-                                    class="hover:underline text-gray-900 dark:text-gray-100">
-                                    {{ __('messages.delete_image') }}
-                                </a>
+                                <form method="POST" action="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}" id="delete_header_image_form" style="display: {{ $role->header_image ? 'none' : 'block' }};" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="hover:underline text-gray-900 dark:text-gray-100">
+                                        {{ __('messages.delete_image') }}
+                                    </button>
+                                </form>
                                 @endif
 
                             </div>
@@ -1034,11 +1038,13 @@
 
                                     @if ($role->background_image_url)
                                     <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
-                                    <a href="#"
-                                        onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}'; } return false;"
-                                        class="hover:underline text-gray-900 dark:text-gray-100">
-                                        {{ __('messages.delete_image') }}
-                                    </a>
+                                    <form method="POST" action="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="hover:underline text-gray-900 dark:text-gray-100">
+                                            {{ __('messages.delete_image') }}
+                                        </button>
+                                    </form>
                                     @endif
                                 </div>
                             </div>

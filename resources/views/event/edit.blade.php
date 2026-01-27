@@ -240,14 +240,18 @@
                     <div class="py-2" role="none">
                         <div class="border-t border-gray-100 dark:border-gray-700"></div>
                     </div>
-                    <a href="#" onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.delete', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}'; } return false;" class="group flex items-center px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300 focus:bg-red-50 dark:focus:bg-red-900/20 focus:text-red-700 dark:focus:text-red-300 focus:outline-none transition-colors" role="menuitem" tabindex="0">
-                        <svg class="mr-3 h-5 w-5 text-red-400 group-hover:text-red-500 dark:group-hover:text-red-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
-                        </svg>
-                        <div>
-                            {{ __('messages.delete') }}
-                        </div>
-                    </a>
+                    <form method="POST" action="{{ route('event.delete', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')" class="block">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="w-full group flex items-center px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300 focus:bg-red-50 dark:focus:bg-red-900/20 focus:text-red-700 dark:focus:text-red-300 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                            <svg class="mr-3 h-5 w-5 text-red-400 group-hover:text-red-500 dark:group-hover:text-red-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+                            </svg>
+                            <div>
+                                {{ __('messages.delete') }}
+                            </div>
+                        </button>
+                    </form>
                     @endif
                 </div>
             </div>
@@ -500,11 +504,13 @@
 
                             @if ($event->flyer_image_url)
                             <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="pt-3" />
-                            <a href="#"
-                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.delete_image', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id), 'image_type' => 'flyer']) }}'; }"
-                                class="hover:underline text-gray-900 dark:text-gray-100">
-                                {{ __('messages.delete_image') }}
-                            </a>
+                            <form method="POST" action="{{ route('event.delete_image', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id), 'image_type' => 'flyer']) }}" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="hover:underline text-gray-900 dark:text-gray-100">
+                                    {{ __('messages.delete_image') }}
+                                </button>
+                            </form>
                             @endif
                         </div>
 

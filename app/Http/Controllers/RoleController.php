@@ -1059,6 +1059,10 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        if (! auth()->user()->isMember($subdomain)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
         $role = Role::with('groups')->subdomain($subdomain)->firstOrFail();
 
         // Header images
