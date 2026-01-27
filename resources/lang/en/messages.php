@@ -933,6 +933,20 @@ return [
     'enable_screen_capture' => 'Use screen capture for graphic generation',
     'screen_capture_help' => 'Uses browser-based rendering for better RTL language support',
 
+    // Event graphic layout and options
+    'layout_type' => 'Layout Type',
+    'grid_layout' => 'Grid',
+    'row_layout' => 'Row',
+    'list_layout' => 'List',
+    'show_date' => 'Show Date',
+    'date_position_none' => 'None',
+    'date_position_overlay' => 'Overlay (on flyer image)',
+    'date_position_above' => 'Above (separate from flyer)',
+    'date_position_help' => 'Display the event date on each flyer',
+    'event_count' => 'Number of Events',
+    'all_available' => 'All available',
+    'event_count_help' => 'Choose how many upcoming events to include',
+
     // CalDAV Calendar Integration
     'caldav_calendar' => 'CalDAV Calendar',
     'caldav_description' => 'Sync events with CalDAV-compatible calendars like iCloud, Nextcloud, Fastmail, and others.',

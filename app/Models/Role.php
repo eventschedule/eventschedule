@@ -930,6 +930,8 @@ class Role extends Model implements MustVerifyEmail
             'send_hour' => 9,
             'last_sent_at' => null,
             'recipient_emails' => '',
+            'date_position' => null,
+            'event_count' => null,
         ];
 
         if (! $value) {

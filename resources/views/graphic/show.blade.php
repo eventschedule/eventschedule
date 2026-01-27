@@ -7,6 +7,8 @@
             const isEnterprise = {{ $isEnterprise ? 'true' : 'false' }};
             const currentUserEmail = '{{ auth()->user()->email }}';
             const hasRecurringEvents = @json($hasRecurringEvents);
+            const maxEvents = {{ $maxEvents ?? 20 }};
+            let currentLayout = '{{ $layout }}';
 
             function copyToClipboard(text, buttonId) {
                 navigator.clipboard.writeText(text).then(function() {
@@ -62,13 +64,22 @@
                                          document.getElementById('use_screen_capture_mobile')?.checked || false;
                 const excludeRecurring = document.getElementById('exclude_recurring')?.checked ||
                                          document.getElementById('exclude_recurring_mobile')?.checked || false;
+                const layout = document.querySelector('input[name="layout"]:checked')?.value ||
+                               document.querySelector('input[name="layout_mobile"]:checked')?.value || 'grid';
+                const datePosition = document.getElementById('date_position')?.value ||
+                                     document.getElementById('date_position_mobile')?.value || '';
+                const eventCount = document.getElementById('event_count')?.value ||
+                                   document.getElementById('event_count_mobile')?.value || '';
 
                 return {
                     link_type: linkType,
                     ai_prompt: aiPrompt,
                     text_template: textTemplate,
                     use_screen_capture: useScreenCapture,
-                    exclude_recurring: excludeRecurring
+                    exclude_recurring: excludeRecurring,
+                    layout: layout,
+                    date_position: datePosition,
+                    event_count: eventCount
                 };
             }
 
@@ -153,6 +164,30 @@
                 if (recipientEmailsDesktop && recipientEmailsMobile) {
                     recipientEmailsMobile.value = recipientEmailsDesktop.value;
                 }
+
+                // Sync layout
+                const layoutDesktop = document.querySelector('input[name="layout"]:checked');
+                const layoutMobile = document.querySelector('input[name="layout_mobile"]:checked');
+                if (layoutDesktop && layoutMobile) {
+                    if (layoutDesktop.value !== layoutMobile.value) {
+                        const mobileRadio = document.querySelector(`input[name="layout_mobile"][value="${layoutDesktop.value}"]`);
+                        if (mobileRadio) mobileRadio.checked = true;
+                    }
+                }
+
+                // Sync date position
+                const datePositionDesktop = document.getElementById('date_position');
+                const datePositionMobile = document.getElementById('date_position_mobile');
+                if (datePositionDesktop && datePositionMobile) {
+                    datePositionMobile.value = datePositionDesktop.value;
+                }
+
+                // Sync event count
+                const eventCountDesktop = document.getElementById('event_count');
+                const eventCountMobile = document.getElementById('event_count_mobile');
+                if (eventCountDesktop && eventCountMobile) {
+                    eventCountMobile.value = eventCountDesktop.value;
+                }
             }
 
             function loadGraphic() {
@@ -173,13 +208,16 @@
 
                 // Get current form values instead of saved settings
                 const formSettings = getFormSettings();
+                const layoutParam = '?layout=' + encodeURIComponent(formSettings.layout);
                 const directParam = formSettings.link_type === 'registration' ? '&direct=1' : '';
                 const screenCaptureParam = formSettings.use_screen_capture ? '&use_screen_capture=1' : '';
                 const aiPromptParam = formSettings.ai_prompt ? '&ai_prompt=' + encodeURIComponent(formSettings.ai_prompt) : '';
                 const textTemplateParam = formSettings.text_template ? '&text_template=' + encodeURIComponent(formSettings.text_template) : '';
                 const excludeRecurringParam = formSettings.exclude_recurring ? '&exclude_recurring=1' : '';
+                const datePositionParam = formSettings.date_position ? '&date_position=' + encodeURIComponent(formSettings.date_position) : '';
+                const eventCountParam = formSettings.event_count ? '&event_count=' + encodeURIComponent(formSettings.event_count) : '';
 
-                fetch('{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain, "layout" => $layout]) }}' + directParam + screenCaptureParam + aiPromptParam + textTemplateParam + excludeRecurringParam)
+                fetch('{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + screenCaptureParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam)
                     .then(response => {
                         if (!response.ok) {
                             if (response.status === 404) {
@@ -316,6 +354,51 @@
                         recipientEmails.value = currentSettings.recipient_emails || '';
                     }
                 });
+
+                // Update layout radio buttons (desktop and mobile)
+                const layout = currentSettings.layout || 'grid';
+                ['layout', 'layout_mobile'].forEach(name => {
+                    const radioToCheck = document.querySelector(`input[name="${name}"][value="${layout}"]`);
+                    if (radioToCheck) {
+                        radioToCheck.checked = true;
+                    }
+                });
+                currentLayout = layout;
+                toggleDatePositionVisibility();
+
+                // Update date position selects
+                ['date_position', 'date_position_mobile'].forEach(id => {
+                    const datePosition = document.getElementById(id);
+                    if (datePosition) {
+                        datePosition.value = currentSettings.date_position || '';
+                    }
+                });
+
+                // Update event count selects
+                ['event_count', 'event_count_mobile'].forEach(id => {
+                    const eventCount = document.getElementById(id);
+                    if (eventCount) {
+                        eventCount.value = currentSettings.event_count || '';
+                    }
+                });
+            }
+
+            function toggleDatePositionVisibility() {
+                const layout = document.querySelector('input[name="layout"]:checked')?.value ||
+                               document.querySelector('input[name="layout_mobile"]:checked')?.value || 'grid';
+                currentLayout = layout;
+
+                // Show date position only for grid layout
+                ['date_position_container', 'date_position_container_mobile'].forEach(id => {
+                    const container = document.getElementById(id);
+                    if (container) {
+                        if (layout === 'grid') {
+                            container.classList.remove('hidden');
+                        } else {
+                            container.classList.add('hidden');
+                        }
+                    }
+                });
             }
 
             function toggleScreenCapture() {
@@ -433,6 +516,16 @@
                 const linkTypeChecked = document.querySelector('input[name="link_type"]:checked') ||
                                         document.querySelector('input[name="link_type_mobile"]:checked');
 
+                // Get layout from desktop or mobile
+                const layoutChecked = document.querySelector('input[name="layout"]:checked') ||
+                                      document.querySelector('input[name="layout_mobile"]:checked');
+
+                // Get date position
+                const datePosition = document.getElementById('date_position') || document.getElementById('date_position_mobile');
+
+                // Get event count
+                const eventCount = document.getElementById('event_count') || document.getElementById('event_count_mobile');
+
                 const settings = {
                     enabled: emailEnabled ? emailEnabled.checked : false,
                     frequency: frequency,
@@ -441,10 +534,12 @@
                     ai_prompt: aiPrompt ? aiPrompt.value : '',
                     text_template: textTemplate ? textTemplate.value : '',
                     link_type: linkTypeChecked ? linkTypeChecked.value : 'schedule',
-                    layout: '{{ $layout }}',
+                    layout: layoutChecked ? layoutChecked.value : 'grid',
                     use_screen_capture: useScreenCapture ? useScreenCapture.checked : false,
                     exclude_recurring: excludeRecurring ? excludeRecurring.checked : false,
-                    recipient_emails: recipientEmails ? recipientEmails.value : ''
+                    recipient_emails: recipientEmails ? recipientEmails.value : '',
+                    date_position: datePosition ? datePosition.value || null : null,
+                    event_count: eventCount && eventCount.value ? parseInt(eventCount.value) : null
                 };
 
                 fetch('{{ route("event.save_graphic_settings", ["subdomain" => $role->subdomain]) }}', {
@@ -625,6 +720,42 @@
                     }
                 });
 
+                // Add change listeners for layout radio buttons
+                document.querySelectorAll('input[name="layout"], input[name="layout_mobile"]').forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        currentLayout = this.value;
+                        // Sync to other form
+                        const otherName = this.name === 'layout' ? 'layout_mobile' : 'layout';
+                        const otherRadio = document.querySelector(`input[name="${otherName}"][value="${this.value}"]`);
+                        if (otherRadio) otherRadio.checked = true;
+                        toggleDatePositionVisibility();
+                    });
+                });
+
+                // Add change listeners for date position selects
+                ['date_position', 'date_position_mobile'].forEach(id => {
+                    const select = document.getElementById(id);
+                    if (select) {
+                        select.addEventListener('change', function() {
+                            const otherId = id === 'date_position' ? 'date_position_mobile' : 'date_position';
+                            const otherSelect = document.getElementById(otherId);
+                            if (otherSelect) otherSelect.value = this.value;
+                        });
+                    }
+                });
+
+                // Add change listeners for event count selects
+                ['event_count', 'event_count_mobile'].forEach(id => {
+                    const select = document.getElementById(id);
+                    if (select) {
+                        select.addEventListener('change', function() {
+                            const otherId = id === 'event_count' ? 'event_count_mobile' : 'event_count';
+                            const otherSelect = document.getElementById(otherId);
+                            if (otherSelect) otherSelect.value = this.value;
+                        });
+                    }
+                });
+
                 loadGraphic();
             });
         </script>
@@ -718,6 +849,48 @@
                      x-transition:leave-start="opacity-100 translate-y-0"
                      x-transition:leave-end="opacity-0 -translate-y-2"
                      class="p-4 bg-gray-50 dark:bg-gray-900/50">
+                    <!-- Layout Type -->
+                    <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                        <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.layout_type') }}</h4>
+                        <div class="flex flex-col gap-2">
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="radio" name="layout_mobile" value="grid" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" checked>
+                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.grid_layout') }}</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="radio" name="layout_mobile" value="row" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.row_layout') }}</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="radio" name="layout_mobile" value="list" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.list_layout') }}</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Date Position (only for grid layout) -->
+                    <div id="date_position_container_mobile" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                        <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.show_date') }}</h4>
+                        <select id="date_position_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                            <option value="">{{ __('messages.date_position_none') }}</option>
+                            <option value="overlay">{{ __('messages.date_position_overlay') }}</option>
+                            <option value="above">{{ __('messages.date_position_above') }}</option>
+                        </select>
+                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.date_position_help') }}</p>
+                    </div>
+
+                    <!-- Event Count -->
+                    <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                        <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.event_count') }}</h4>
+                        <select id="event_count_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                            <option value="">{{ __('messages.all_available') }}</option>
+                            @for ($i = 1; $i <= min($maxEvents ?? 20, 20); $i++)
+                                <option value="{{ $i }}">{{ $i }}</option>
+                            @endfor
+                        </select>
+                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.event_count_help') }}</p>
+                    </div>
+
                     <!-- Text Template -->
                     <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                         <div class="flex items-center justify-between mb-3">
@@ -918,6 +1091,48 @@
                         <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.settings') }}</h3>
                     </div>
                     <div class="p-4 bg-gray-50 dark:bg-gray-900/50">
+                        <!-- Layout Type -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.layout_type') }}</h4>
+                            <div class="flex flex-col gap-2">
+                                <label class="flex items-center cursor-pointer group">
+                                    <input type="radio" name="layout" value="grid" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" checked>
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.grid_layout') }}</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer group">
+                                    <input type="radio" name="layout" value="row" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.row_layout') }}</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer group">
+                                    <input type="radio" name="layout" value="list" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.list_layout') }}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Date Position (only for grid layout) -->
+                        <div id="date_position_container" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.show_date') }}</h4>
+                            <select id="date_position" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                <option value="">{{ __('messages.date_position_none') }}</option>
+                                <option value="overlay">{{ __('messages.date_position_overlay') }}</option>
+                                <option value="above">{{ __('messages.date_position_above') }}</option>
+                            </select>
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.date_position_help') }}</p>
+                        </div>
+
+                        <!-- Event Count -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.event_count') }}</h4>
+                            <select id="event_count" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                <option value="">{{ __('messages.all_available') }}</option>
+                                @for ($i = 1; $i <= min($maxEvents ?? 20, 20); $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.event_count_help') }}</p>
+                        </div>
+
                         <!-- Text Template -->
                         <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                             <div class="flex items-center justify-between mb-3">

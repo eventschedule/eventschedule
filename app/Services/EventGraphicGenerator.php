@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Role;
 use App\Services\designs\GridDesign;
 use App\Services\designs\ListDesign;
+use App\Services\designs\RowDesign;
 use Illuminate\Support\Collection;
 
 class EventGraphicGenerator
@@ -17,14 +18,17 @@ class EventGraphicGenerator
 
     protected bool $directRegistration;
 
+    protected array $options;
+
     protected AbstractEventDesign $design;
 
-    public function __construct(Role $role, Collection $events, string $layout = 'grid', bool $directRegistration = false)
+    public function __construct(Role $role, Collection $events, string $layout = 'grid', bool $directRegistration = false, array $options = [])
     {
         $this->role = $role;
         $this->events = $events;
         $this->layout = $layout;
         $this->directRegistration = $directRegistration;
+        $this->options = $options;
 
         // Create the appropriate design based on layout
         $this->design = $this->createDesign();
@@ -34,10 +38,12 @@ class EventGraphicGenerator
     {
         switch (strtolower($this->layout)) {
             case 'list':
-                return new ListDesign($this->role, $this->events, $this->directRegistration);
+                return new ListDesign($this->role, $this->events, $this->directRegistration, $this->options);
+            case 'row':
+                return new RowDesign($this->role, $this->events, $this->directRegistration, $this->options);
             case 'grid':
             default:
-                return new GridDesign($this->role, $this->events, $this->directRegistration);
+                return new GridDesign($this->role, $this->events, $this->directRegistration, $this->options);
         }
     }
 
@@ -141,6 +147,8 @@ class EventGraphicGenerator
         // Add layout-specific information
         if ($this->design instanceof GridDesign) {
             $info['grid_info'] = $this->design->getGridInfo();
+        } elseif ($this->design instanceof RowDesign) {
+            $info['row_info'] = $this->design->getRowInfo();
         } elseif ($this->design instanceof ListDesign) {
             $info['list_info'] = $this->design->getListInfo();
         }
@@ -156,12 +164,16 @@ class EventGraphicGenerator
         switch ($feature) {
             case 'grid_layout':
                 return $this->design instanceof GridDesign;
+            case 'row_layout':
+                return $this->design instanceof RowDesign;
             case 'list_layout':
                 return $this->design instanceof ListDesign;
             case 'qr_codes':
-                return true; // Both designs support QR codes
+                return true; // All designs support QR codes
             case 'rounded_corners':
-                return true; // Both designs support rounded corners
+                return true; // All designs support rounded corners
+            case 'date_display':
+                return $this->design instanceof GridDesign; // Only grid supports date display
             default:
                 return false;
         }
@@ -176,7 +188,12 @@ class EventGraphicGenerator
             'grid' => [
                 'name' => 'Grid Layout',
                 'description' => 'Display events in a grid format with flyer images',
-                'features' => ['flyer_images', 'qr_codes', 'rounded_corners', 'dynamic_grid'],
+                'features' => ['flyer_images', 'qr_codes', 'rounded_corners', 'dynamic_grid', 'date_display'],
+            ],
+            'row' => [
+                'name' => 'Row Layout',
+                'description' => 'Display events in a horizontal row with original aspect ratios',
+                'features' => ['flyer_images', 'qr_codes', 'rounded_corners', 'original_aspect_ratios'],
             ],
             'list' => [
                 'name' => 'List Layout',
@@ -191,7 +208,26 @@ class EventGraphicGenerator
      */
     public function withLayout(string $layout): self
     {
-        return new self($this->role, $this->events, $layout, $this->directRegistration);
+        return new self($this->role, $this->events, $layout, $this->directRegistration, $this->options);
+    }
+
+    // Row-specific methods (delegated to RowDesign if available)
+    public function getRowInfo(): ?array
+    {
+        if ($this->design instanceof RowDesign) {
+            return $this->design->getRowInfo();
+        }
+
+        return null;
+    }
+
+    public function getCurrentRowLayout(): ?array
+    {
+        if ($this->design instanceof RowDesign) {
+            return $this->design->getCurrentRowLayout();
+        }
+
+        return null;
     }
 
     /**
