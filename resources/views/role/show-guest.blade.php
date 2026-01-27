@@ -18,7 +18,7 @@
 
   <main>
     <div>
-      <div class="container mx-auto pt-6 md:pt-4 pb-10 px-5 md:mt-0 relative z-10">
+      <div class="container mx-auto pt-6 md:pt-4 pb-6 md:pb-10 px-5 md:mt-0 relative z-10">
         {{-- Mobile background wrapper - covers header and carousel only --}}
         @php
             $mobileBannerUrl = null;
@@ -33,7 +33,7 @@
             <div class="absolute -top-40 bottom-0 left-1/2 -translate-x-1/2 w-screen bg-cover bg-no-repeat bg-top md:hidden -z-10"
                  style="background-image: url('{{ $mobileBannerUrl }}');"></div>
         @endif
-        <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-xl mb-6 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }}">
+        <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-xl mb-0 md:mb-6 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }}">
           <div
             class="relative overflow-hidden rounded-t-xl before:block before:absolute before:bg-[#00000033] before:-inset-0 before:rounded-t-xl"
           >
