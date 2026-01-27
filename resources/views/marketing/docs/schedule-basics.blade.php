@@ -46,6 +46,7 @@
                         <a href="#location" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Location & Address</a>
                         <a href="#contact" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Contact Information</a>
                         <a href="#settings" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Schedule Settings</a>
+                        <a href="#slug-variables" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">URL Pattern Variables</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
                 </aside>
@@ -230,6 +231,254 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Unlisted Schedule</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Make your schedule private - it won't appear in search results or public listings. Only people with the direct link can access it.</p>
                                 </div>
+                            </div>
+                        </section>
+
+                        <!-- URL Pattern Variables -->
+                        <section id="slug-variables" class="doc-section">
+                            <h2 class="doc-heading">URL Pattern Variables</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Use these variables in your Event URL Pattern. All values are automatically converted to URL-safe format (lowercase, spaces become dashes).
+                            </p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Date & Time</h3>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{day_name}</code></td>
+                                            <td>Full day name (translated)</td>
+                                            <td>wednesday</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{day_short}</code></td>
+                                            <td>Short day name (translated)</td>
+                                            <td>wed</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{date_dmy}</code></td>
+                                            <td>Day-month format</td>
+                                            <td>15-3</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{date_mdy}</code></td>
+                                            <td>Month-day format</td>
+                                            <td>3-15</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{date_full_dmy}</code></td>
+                                            <td>Full date (day-month-year)</td>
+                                            <td>15-03-2025</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{date_full_mdy}</code></td>
+                                            <td>Full date (month-day-year)</td>
+                                            <td>03-15-2025</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{month}</code></td>
+                                            <td>Month number</td>
+                                            <td>3</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{month_name}</code></td>
+                                            <td>Full month name (translated)</td>
+                                            <td>march</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{month_short}</code></td>
+                                            <td>Short month name (translated)</td>
+                                            <td>mar</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{day}</code></td>
+                                            <td>Day of month</td>
+                                            <td>15</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{year}</code></td>
+                                            <td>Year</td>
+                                            <td>2025</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{time}</code></td>
+                                            <td>Start time</td>
+                                            <td>20-00 or 8-00-pm</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{end_time}</code></td>
+                                            <td>End time</td>
+                                            <td>22-00 or 10-00-pm</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{duration}</code></td>
+                                            <td>Duration in hours</td>
+                                            <td>2</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Event Information</h3>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{event_name}</code></td>
+                                            <td>Event name (uses English name if available)</td>
+                                            <td>summer-concert</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Venue Information</h3>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{venue}</code></td>
+                                            <td>Venue name (translated)</td>
+                                            <td>central-park</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{city}</code></td>
+                                            <td>City</td>
+                                            <td>new-york</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{address}</code></td>
+                                            <td>Street address</td>
+                                            <td>123-main-st</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{state}</code></td>
+                                            <td>State/Province</td>
+                                            <td>ny</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{country}</code></td>
+                                            <td>Country</td>
+                                            <td>us</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Ticket Information</h3>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{currency}</code></td>
+                                            <td>Currency code</td>
+                                            <td>usd</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{price}</code></td>
+                                            <td>Lowest ticket price (or price range)</td>
+                                            <td>10 or 10-25</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Custom Fields</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                If you have defined <a href="{{ marketing_url('/custom-fields') }}" class="text-cyan-400 hover:text-cyan-300">Event Custom Fields</a> in your schedule settings, you can include their values using numbered variables.
+                            </p>
+
+                            @if (!empty($customFieldsData))
+                                {{-- Dynamic: Show user's actual custom fields --}}
+                                @foreach ($customFieldsData as $scheduleData)
+                                    <h4 class="text-md font-medium text-gray-200 mb-2">{{ $scheduleData['role_name'] }}</h4>
+                                    <div class="overflow-x-auto mb-6">
+                                        <table class="doc-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Variable</th>
+                                                    <th>Field Name</th>
+                                                    <th>Type</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($scheduleData['fields'] as $index => $field)
+                                                <tr>
+                                                    <td><code class="doc-inline-code">{custom_{{ $loop->iteration }}}</code></td>
+                                                    <td>{{ $field['name'] }}</td>
+                                                    <td>{{ ucfirst(str_replace('_', ' ', $field['type'] ?? 'string')) }}</td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endforeach
+                            @else
+                                {{-- Static: Generic documentation for logged-out users or users without custom fields --}}
+                                <div class="overflow-x-auto mb-6">
+                                    <table class="doc-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Variable</th>
+                                                <th>Description</th>
+                                                <th>Example</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><code class="doc-inline-code">{custom_1}</code></td>
+                                                <td>Value of the 1st custom field</td>
+                                                <td>john-smith</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code class="doc-inline-code">{custom_2}</code></td>
+                                                <td>Value of the 2nd custom field</td>
+                                                <td>room-101</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code class="doc-inline-code">{custom_3}</code></td>
+                                                <td>Value of the 3rd custom field</td>
+                                                <td>workshop</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="3" class="text-gray-400 text-sm">...up to {custom_8}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">URL-Safe Formatting</div>
+                                <p>All variable values are automatically converted to URL-safe slugs: lowercase letters, numbers, and dashes only. For example, "Summer Concert" becomes "summer-concert" and "New York" becomes "new-york".</p>
                             </div>
                         </section>
 
