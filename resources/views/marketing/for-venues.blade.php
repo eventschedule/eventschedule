@@ -414,6 +414,63 @@
         </div>
     </section>
 
+    <!-- Stream to the World Section -->
+    <section class="bg-gray-100 py-20">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <a href="{{ marketing_url('/online-events') }}" class="group block">
+                <div class="bg-white rounded-3xl border border-gray-200 shadow-lg p-8 lg:p-10 hover:shadow-xl hover:border-indigo-200 transition-all duration-300">
+                    <div class="flex flex-col lg:flex-row gap-8 items-center">
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-600 text-sm font-medium mb-4">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                                Online Events
+                            </div>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors">Stream to the world</h3>
+                            <p class="text-gray-600 text-lg mb-4">Share live performances with fans worldwide. Add your streaming URL and sell tickets to viewers anywhere—no venue required.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
+                                <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm">Live streaming</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm">Global ticket sales</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm">Any platform</span>
+                            </div>
+                            <span class="inline-flex items-center text-indigo-600 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-gradient-to-br from-indigo-50 to-violet-50 rounded-2xl border border-indigo-100 p-6 w-52">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="text-gray-600 text-xs">Online Event</span>
+                                    <div class="w-10 h-5 bg-indigo-500 rounded-full relative">
+                                        <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white rounded-lg border border-gray-100">
+                                        <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                        <span class="text-gray-700 text-xs">Zoom</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white rounded-lg border border-gray-100">
+                                        <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                                        <span class="text-gray-700 text-xs">YouTube Live</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white rounded-lg border border-gray-100">
+                                        <div class="w-2 h-2 rounded-full bg-purple-500"></div>
+                                        <span class="text-gray-700 text-xs">Twitch</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </section>
+
     <!-- How it Works -->
     <section class="bg-gray-50 py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
