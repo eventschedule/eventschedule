@@ -69,6 +69,8 @@ class Event extends Model
             $model->payment_instructions_html = MarkdownUtils::convertToHtml($model->payment_instructions);
 
             if ($model->isDirty('starts_at') && ! $model->days_of_week) {
+                $model->load(['tickets', 'sales']);
+
                 $model->tickets->each(function ($ticket) use ($model) {
                     if ($ticket->sold) {
                         $sold = json_decode($ticket->sold, true);
@@ -112,9 +114,14 @@ class Event extends Model
         });
 
         static::deleting(function ($event) {
+            // Eager load roles with events count and user relationship
+            $event->load(['roles' => function ($query) {
+                $query->withCount('events')->with('user');
+            }]);
+
             foreach ($event->roles as $role) {
                 if (($role->isTalent() || $role->isVenue()) && ! $role->isRegistered()) {
-                    if ($role->events->count() == 1) {
+                    if ($role->events_count == 1) {
                         $role->delete();
                     }
                 }

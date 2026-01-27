@@ -265,7 +265,7 @@ class RoleController extends Controller
         $user = auth()->user();
         $curatorRoles = $user ? $user->curators() : collect();
 
-        $role = Role::subdomain($subdomain)->first();
+        $role = Role::subdomain($subdomain)->with('groups')->first();
 
         if (! $role || ! $role->isClaimed()) {
             return redirect(config('app.url'));
