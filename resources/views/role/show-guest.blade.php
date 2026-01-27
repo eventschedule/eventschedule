@@ -29,7 +29,7 @@
             }
         @endphp
         @if ($mobileBannerUrl)
-        <div class="relative -mt-10 pt-10 pb-6 md:m-0 md:p-0">
+        <div class="relative -mt-10 pt-10 pb-1 md:m-0 md:p-0">
             <div class="absolute -top-40 bottom-0 left-1/2 -translate-x-1/2 w-screen bg-cover bg-no-repeat bg-top md:hidden -z-10"
                  style="background-image: url('{{ $mobileBannerUrl }}');"></div>
         @endif
