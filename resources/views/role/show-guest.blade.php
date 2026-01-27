@@ -19,6 +19,20 @@
   <main>
     <div>
       <div class="container mx-auto pt-10 md:pt-7 pb-10 px-5 md:mt-0 relative z-10">
+        {{-- Mobile background wrapper - covers header and carousel only --}}
+        @php
+            $mobileBannerUrl = null;
+            if ($role->background == 'image' && !request()->embed) {
+                $mobileBannerUrl = $role->background_image
+                    ? asset('images/backgrounds/' . $role->background_image . '.png')
+                    : $role->background_image_url;
+            }
+        @endphp
+        @if ($mobileBannerUrl)
+        <div class="relative -mt-10 pt-10 pb-6 md:m-0 md:p-0">
+            <div class="absolute -top-40 bottom-0 left-1/2 -translate-x-1/2 w-screen bg-cover bg-no-repeat bg-top md:hidden -z-10"
+                 style="background-image: url('{{ $mobileBannerUrl }}');"></div>
+        @endif
         <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-xl mb-6 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }}">
           <div
             class="relative overflow-hidden rounded-t-xl before:block before:absolute before:bg-[#00000033] before:-inset-0 before:rounded-t-xl"
@@ -460,6 +474,9 @@
           </div>
         </div>
         @endif
+        @endif
+        @if ($mobileBannerUrl)
+        </div>
         @endif
 
       <div
