@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AnalyticsDaily;
+use App\Models\AnalyticsEventsDaily;
+use App\Models\AnalyticsReferrersDaily;
 use App\Models\Event;
 use App\Models\Role;
+use App\Models\Sale;
 use App\Models\User;
 use App\Services\DemoService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Laravel\Cashier\Subscription;
 
 class AdminController extends Controller
 {
@@ -100,8 +105,162 @@ class AdminController extends Controller
             ->where('email', '!=', DemoService::DEMO_EMAIL)
             ->where('updated_at', '>=', now()->subDays(30))->count();
 
+        // User signup method breakdown (all time)
+        $emailUsers = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('password')
+            ->whereNull('google_oauth_id')
+            ->count();
+
+        $googleUsers = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('google_oauth_id')
+            ->whereNull('password')
+            ->count();
+
+        $hybridUsers = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('password')
+            ->whereNotNull('google_oauth_id')
+            ->count();
+
+        // User signup method breakdown for selected period
+        $emailUsersInPeriod = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('password')
+            ->whereNull('google_oauth_id')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        $googleUsersInPeriod = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('google_oauth_id')
+            ->whereNull('password')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        $hybridUsersInPeriod = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('password')
+            ->whereNotNull('google_oauth_id')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
         // Average events per schedule
         $avgEventsPerSchedule = $totalSchedules > 0 ? round($totalEvents / $totalSchedules, 1) : 0;
+
+        // ==========================================
+        // Revenue & Sales Metrics
+        // ==========================================
+        $totalRevenue = Sale::where('status', 'completed')->sum('payment_amount');
+        $revenueInPeriod = Sale::where('status', 'completed')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('payment_amount');
+
+        $totalSales = Sale::where('status', 'completed')->count();
+        $salesInPeriod = Sale::where('status', 'completed')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        $refundedSales = Sale::where('status', 'refunded')->count();
+        $refundRate = $totalSales > 0 ? round(($refundedSales / ($totalSales + $refundedSales)) * 100, 1) : 0;
+
+        $pendingSales = Sale::where('status', 'pending')->count();
+        $pendingRevenue = Sale::where('status', 'pending')->sum('payment_amount');
+
+        // ==========================================
+        // Traffic & Analytics
+        // ==========================================
+        $totalViews = AnalyticsDaily::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->selectRaw('SUM(desktop_views) as desktop, SUM(mobile_views) as mobile, SUM(tablet_views) as tablet, SUM(unknown_views) as unknown')
+            ->first();
+
+        $desktopViews = $totalViews->desktop ?? 0;
+        $mobileViews = $totalViews->mobile ?? 0;
+        $tabletViews = $totalViews->tablet ?? 0;
+        $totalPageViews = $desktopViews + $mobileViews + $tabletViews + ($totalViews->unknown ?? 0);
+
+        $trafficSources = AnalyticsReferrersDaily::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->selectRaw('source, SUM(views) as views')
+            ->groupBy('source')
+            ->pluck('views', 'source')
+            ->toArray();
+
+        $directViews = $trafficSources['direct'] ?? 0;
+        $searchViews = $trafficSources['search'] ?? 0;
+        $socialViews = $trafficSources['social'] ?? 0;
+        $emailViews = $trafficSources['email'] ?? 0;
+        $otherViews = $trafficSources['other'] ?? 0;
+
+        // ==========================================
+        // Feature Adoption
+        // ==========================================
+        $baseRoleQuery = Role::whereNotNull('user_id')
+            ->where(function ($query) {
+                $query->whereNotNull('email_verified_at')
+                    ->orWhereNotNull('phone_verified_at');
+            })
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%');
+
+        $googleCalendarEnabled = (clone $baseRoleQuery)->whereNotNull('google_calendar_id')->count();
+        $stripeEnabled = (clone $baseRoleQuery)->whereNotNull('stripe_id')->count();
+        $customDomainEnabled = (clone $baseRoleQuery)->whereNotNull('custom_domain')->count();
+        $customCssEnabled = (clone $baseRoleQuery)->whereNotNull('custom_css')->where('custom_css', '!=', '')->count();
+
+        $googleCalendarPercent = $totalSchedules > 0 ? round(($googleCalendarEnabled / $totalSchedules) * 100, 1) : 0;
+        $stripePercent = $totalSchedules > 0 ? round(($stripeEnabled / $totalSchedules) * 100, 1) : 0;
+        $customDomainPercent = $totalSchedules > 0 ? round(($customDomainEnabled / $totalSchedules) * 100, 1) : 0;
+        $customCssPercent = $totalSchedules > 0 ? round(($customCssEnabled / $totalSchedules) * 100, 1) : 0;
+
+        // ==========================================
+        // Subscription Health (for hosted mode)
+        // ==========================================
+        $activeSubscriptions = 0;
+        $trialingSubscriptions = 0;
+        $canceledSubscriptions = 0;
+        $pastDueSubscriptions = 0;
+        $rolesOnTrial = 0;
+        $convertedFromTrial = 0;
+        $expiredTrialsNoSub = 0;
+
+        if (config('app.hosted')) {
+            $subscriptionStats = Subscription::selectRaw('stripe_status, COUNT(*) as count')
+                ->groupBy('stripe_status')
+                ->pluck('count', 'stripe_status')
+                ->toArray();
+
+            $activeSubscriptions = $subscriptionStats['active'] ?? 0;
+            $trialingSubscriptions = $subscriptionStats['trialing'] ?? 0;
+            $canceledSubscriptions = $subscriptionStats['canceled'] ?? 0;
+            $pastDueSubscriptions = $subscriptionStats['past_due'] ?? 0;
+
+            $rolesOnTrial = Role::whereNotNull('user_id')
+                ->whereNotNull('trial_ends_at')
+                ->where('trial_ends_at', '>', now())
+                ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+                ->where('subdomain', 'not like', 'demo-%')
+                ->count();
+
+            $convertedFromTrial = Role::whereNotNull('user_id')
+                ->whereNotNull('trial_ends_at')
+                ->whereHas('subscriptions', function ($q) {
+                    $q->where('stripe_status', 'active');
+                })
+                ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+                ->where('subdomain', 'not like', 'demo-%')
+                ->count();
+
+            $expiredTrialsNoSub = Role::whereNotNull('user_id')
+                ->whereNotNull('trial_ends_at')
+                ->where('trial_ends_at', '<', now())
+                ->whereDoesntHave('subscriptions', function ($q) {
+                    $q->where('stripe_status', 'active');
+                })
+                ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+                ->where('subdomain', 'not like', 'demo-%')
+                ->count();
+        }
 
         // Top schedules by event count (excluding demo roles)
         $topSchedulesByEvents = Role::withCount('events')
@@ -154,13 +313,54 @@ class AdminController extends Controller
             'eventsChangePercent',
             'activeUsers7Days',
             'activeUsers30Days',
+            'emailUsers',
+            'googleUsers',
+            'hybridUsers',
+            'emailUsersInPeriod',
+            'googleUsersInPeriod',
+            'hybridUsersInPeriod',
             'avgEventsPerSchedule',
             'topSchedulesByEvents',
             'recentSchedules',
             'recentEvents',
             'trendData',
             'range',
-            'lastUpdated'
+            'lastUpdated',
+            // Revenue & Sales
+            'totalRevenue',
+            'revenueInPeriod',
+            'totalSales',
+            'salesInPeriod',
+            'refundRate',
+            'pendingSales',
+            'pendingRevenue',
+            // Traffic & Analytics
+            'totalPageViews',
+            'desktopViews',
+            'mobileViews',
+            'tabletViews',
+            'directViews',
+            'searchViews',
+            'socialViews',
+            'emailViews',
+            'otherViews',
+            // Feature Adoption
+            'googleCalendarEnabled',
+            'stripeEnabled',
+            'customDomainEnabled',
+            'customCssEnabled',
+            'googleCalendarPercent',
+            'stripePercent',
+            'customDomainPercent',
+            'customCssPercent',
+            // Subscription Health
+            'activeSubscriptions',
+            'trialingSubscriptions',
+            'canceledSubscriptions',
+            'pastDueSubscriptions',
+            'rolesOnTrial',
+            'convertedFromTrial',
+            'expiredTrialsNoSub'
         ));
     }
 
@@ -254,6 +454,56 @@ class AdminController extends Controller
             ->orderBy('period')
             ->get();
 
+        // Email users trend (users with password, no google_oauth_id)
+        $emailUsersTrend = User::select(
+            $dateFormatExpr,
+            DB::raw('COUNT(*) as count')
+        )
+            ->whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('password')
+            ->whereNull('google_oauth_id')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get();
+
+        // Google users trend (users with google_oauth_id, no password)
+        $googleUsersTrend = User::select(
+            match ($formatKey) {
+                'daily' => DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as period"),
+                'weekly' => DB::raw("DATE_FORMAT(created_at, '%Y-%u') as period"),
+                'monthly' => DB::raw("DATE_FORMAT(created_at, '%Y-%m') as period"),
+            },
+            DB::raw('COUNT(*) as count')
+        )
+            ->whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('google_oauth_id')
+            ->whereNull('password')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get();
+
+        // Hybrid users trend (users with both password and google_oauth_id)
+        $hybridUsersTrend = User::select(
+            match ($formatKey) {
+                'daily' => DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as period"),
+                'weekly' => DB::raw("DATE_FORMAT(created_at, '%Y-%u') as period"),
+                'monthly' => DB::raw("DATE_FORMAT(created_at, '%Y-%m') as period"),
+            },
+            DB::raw('COUNT(*) as count')
+        )
+            ->whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('password')
+            ->whereNotNull('google_oauth_id')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get();
+
         // Schedules trend (only claimed, excluding demo roles)
         $schedulesTrend = Role::select(
             match ($formatKey) {
@@ -293,6 +543,20 @@ class AdminController extends Controller
             ->orderBy('period')
             ->get();
 
+        // Revenue trend (from analytics_events_daily)
+        $revenueTrend = AnalyticsEventsDaily::select(
+            match ($formatKey) {
+                'daily' => DB::raw("DATE_FORMAT(date, '%Y-%m-%d') as period"),
+                'weekly' => DB::raw("DATE_FORMAT(date, '%Y-%u') as period"),
+                'monthly' => DB::raw("DATE_FORMAT(date, '%Y-%m') as period"),
+            },
+            DB::raw('SUM(revenue) as total')
+        )
+            ->whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get();
+
         // Build unified labels
         $allPeriods = collect()
             ->merge($usersTrend->pluck('period'))
@@ -320,12 +584,21 @@ class AdminController extends Controller
         $usersData = $allPeriods->map(fn ($period) => $usersTrend->firstWhere('period', $period)?->count ?? 0)->toArray();
         $schedulesData = $allPeriods->map(fn ($period) => $schedulesTrend->firstWhere('period', $period)?->count ?? 0)->toArray();
         $eventsData = $allPeriods->map(fn ($period) => $eventsTrend->firstWhere('period', $period)?->count ?? 0)->toArray();
+        $emailUsersData = $allPeriods->map(fn ($period) => $emailUsersTrend->firstWhere('period', $period)?->count ?? 0)->toArray();
+        $googleUsersData = $allPeriods->map(fn ($period) => $googleUsersTrend->firstWhere('period', $period)?->count ?? 0)->toArray();
+        $hybridUsersData = $allPeriods->map(fn ($period) => $hybridUsersTrend->firstWhere('period', $period)?->count ?? 0)->toArray();
+
+        $revenueData = $allPeriods->map(fn ($period) => (float) ($revenueTrend->firstWhere('period', $period)?->total ?? 0))->toArray();
 
         return [
             'labels' => $labels,
             'users' => $usersData,
             'schedules' => $schedulesData,
             'events' => $eventsData,
+            'emailUsers' => $emailUsersData,
+            'googleUsers' => $googleUsersData,
+            'hybridUsers' => $hybridUsersData,
+            'revenue' => $revenueData,
         ];
     }
 

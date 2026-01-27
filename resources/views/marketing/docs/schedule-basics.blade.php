@@ -64,7 +64,7 @@
                         <!-- Schedule Types -->
                         <section id="schedule-types" class="doc-section">
                             <h2 class="doc-heading">Schedule Types</h2>
-                            <p class="text-gray-300 mb-6">Event Schedule supports three types of schedules, each designed for different use cases:</p>
+                            <p class="text-gray-300 mb-6">Event Schedule supports four types of schedules, each designed for different use cases:</p>
 
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
@@ -90,6 +90,11 @@
                                             <td><span class="font-semibold text-white">Curator</span></td>
                                             <td>Promoters, bloggers, community organizers</td>
                                             <td>Aggregate events from multiple sources</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-white">Vendor</span></td>
+                                            <td>Food trucks, mobile businesses, pop-up shops</td>
+                                            <td>Location-focused for mobile operations</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -201,15 +206,20 @@
                                 </div>
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
                                     <h4 class="font-semibold text-white mb-2">Accept Event Requests</h4>
-                                    <p class="text-sm text-gray-400">Allow others to submit events to your schedule. Great for venues accepting booking requests or curators accepting submissions.</p>
+                                    <p class="text-sm text-gray-400 mb-2">Allow others to submit events to your schedule. Perfect for:</p>
+                                    <ul class="text-sm text-gray-400 list-disc list-inside space-y-1">
+                                        <li><strong class="text-white">Venues:</strong> Accept booking requests from bands and performers</li>
+                                        <li><strong class="text-white">Curators:</strong> Let the community submit local events</li>
+                                        <li><strong class="text-white">Organizations:</strong> Collect event submissions from members</li>
+                                    </ul>
                                 </div>
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
                                     <h4 class="font-semibold text-white mb-2">Require Approval</h4>
-                                    <p class="text-sm text-gray-400">When enabled, submitted events go to a pending queue for your approval before appearing publicly.</p>
+                                    <p class="text-sm text-gray-400">When enabled, submitted events go to a pending queue for your approval before appearing publicly. Review requests in <strong class="text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong>.</p>
                                 </div>
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
                                     <h4 class="font-semibold text-white mb-2">Request Terms</h4>
-                                    <p class="text-sm text-gray-400">Add custom terms or guidelines that submitters must agree to when requesting events.</p>
+                                    <p class="text-sm text-gray-400">Add custom terms or guidelines that submitters must agree to when requesting events. Use this to set expectations about your booking policies, technical requirements, or submission guidelines.</p>
                                 </div>
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
                                     <h4 class="font-semibold text-white mb-2">Unlisted Schedule</h4>

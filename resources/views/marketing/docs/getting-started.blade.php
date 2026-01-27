@@ -26,7 +26,7 @@
                 <h1 class="text-3xl md:text-4xl font-bold text-white">Getting Started</h1>
             </div>
             <p class="text-lg text-gray-400 max-w-3xl">
-                Create your account and set up your first schedule in just a few minutes. This guide walks you through the basics.
+                Go from zero to a live event calendar in under 5 minutes. No credit card required - it's free forever.
             </p>
         </div>
     </section>
@@ -53,8 +53,8 @@
                     <div class="prose-dark">
                         <!-- Create Account -->
                         <section id="create-account" class="doc-section">
-                            <h2 class="doc-heading">Create Your Account</h2>
-                            <p class="text-gray-300 mb-6">Getting started with Event Schedule is quick and free. You can create an account using your email or sign in with Google.</p>
+                            <h2 class="doc-heading">Create Your Account in Seconds</h2>
+                            <p class="text-gray-300 mb-6">Event Schedule is free forever - no trials, no credit card, no catch. Create an account using your email or sign in with Google.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Visit <a href="{{ route('sign_up') }}" class="text-cyan-400 hover:text-cyan-300">the registration page</a></li>
@@ -65,7 +65,7 @@
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
-                                <p>Using Google login is the fastest way to get started - no email verification required.</p>
+                                <p>Using Google login is the fastest way to get started - no email verification required. Your data is yours - we never share or sell your information.</p>
                             </div>
                         </section>
 
@@ -118,11 +118,16 @@
                                             <td>Promoters, bloggers, community organizers</td>
                                             <td>A local music blog listing concerts in the area</td>
                                         </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-white">Vendor</span></td>
+                                            <td>Food trucks, mobile businesses, pop-up shops</td>
+                                            <td>A food truck listing where they'll be parked</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
 
-                            <p class="text-gray-300">The schedule type affects how your events are displayed and what information is shown. You can change this later in your schedule settings.</p>
+                            <p class="text-gray-300">The schedule type affects how your events are displayed and what information is shown. <strong class="text-white">Talent</strong> schedules emphasize where you'll be performing. <strong class="text-white">Venue</strong> schedules show your full address with map integration. You can change this later in your schedule settings.</p>
                         </section>
 
                         <!-- Customize -->
@@ -170,7 +175,7 @@
                                 </div>
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
                                     <h4 class="font-semibold text-white mb-2">What's the difference between schedule types?</h4>
-                                    <p class="text-sm text-gray-400"><strong class="text-white">Talent</strong> schedules show where you'll be performing. <strong class="text-white">Venue</strong> schedules show what's happening at your location (with full address support). <strong class="text-white">Curator</strong> schedules aggregate events from multiple sources. You can change your type anytime.</p>
+                                    <p class="text-sm text-gray-400"><strong class="text-white">Talent</strong> schedules show where you'll be performing. <strong class="text-white">Venue</strong> schedules show what's happening at your location (with full address support). <strong class="text-white">Curator</strong> schedules aggregate events from multiple sources. <strong class="text-white">Vendor</strong> schedules are for mobile businesses like food trucks. You can change your type anytime.</p>
                                 </div>
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
                                     <h4 class="font-semibold text-white mb-2">Can I import events from my existing calendar?</h4>
@@ -178,7 +183,7 @@
                                 </div>
                                 <div class="bg-white/5 rounded-xl p-4 border border-white/10">
                                     <h4 class="font-semibold text-white mb-2">Is Event Schedule free?</h4>
-                                    <p class="text-sm text-gray-400">Yes! The free plan includes unlimited events, a custom subdomain, and all core features. Pro features like custom domains, branding removal, and custom CSS are available with a paid plan.</p>
+                                    <p class="text-sm text-gray-400">Yes - free forever! The free plan includes unlimited events, unlimited schedules, a custom subdomain, and all core features. No trials, no credit card required. Pro features like custom domains, branding removal, and ticketing are available for just $5/month after the first year free.</p>
                                 </div>
                             </div>
                         </section>
