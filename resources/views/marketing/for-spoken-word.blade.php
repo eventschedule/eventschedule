@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
 
     <!-- Hero Section - Typewriter/Literary Theme -->
-    <section class="relative bg-[#0f0e0c] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0f0e0c] py-32 overflow-hidden">
         <!-- Paper texture overlay -->
         <div class="absolute inset-0 opacity-[0.03]" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;100&quot; height=&quot;100&quot; viewBox=&quot;0 0 100 100&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cfilter id=&quot;noise&quot;%3E%3CfeTurbulence type=&quot;fractalNoise&quot; baseFrequency=&quot;0.8&quot; numOctaves=&quot;4&quot; stitchTiles=&quot;stitch&quot;/%3E%3C/filter%3E%3Crect width=&quot;100%25&quot; height=&quot;100%25&quot; filter=&quot;url(%23noise)&quot;/%3E%3C/svg%3E');"></div>
 
@@ -34,12 +34,12 @@
             </div>
 
             <!-- Poetic headline with line breaks -->
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-serif text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-serif text-gray-900 dark:text-white mb-8 leading-tight">
                 <span class="block">Your words</span>
                 <span class="block text-amber-200/90 italic">deserve witnesses.</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-stone-400 max-w-2xl mx-auto mb-4 font-light">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-stone-400 max-w-2xl mx-auto mb-4 font-light">
                 Not followers. Not subscribers. Not engagement metrics.
             </p>
             <p class="text-lg text-stone-500 max-w-2xl mx-auto mb-12">
@@ -68,7 +68,7 @@
     </section>
 
     <!-- The Reality Section - Speaks to poet struggles -->
-    <section class="bg-[#0f0e0c] py-16 border-t border-stone-800/50">
+    <section class="bg-white dark:bg-[#0f0e0c] py-16 border-t border-gray-200 dark:border-stone-800/50">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-3 gap-8 text-center">
                 <div>
@@ -88,12 +88,12 @@
     </section>
 
     <!-- Bento Grid Features - Literary themed -->
-    <section class="bg-[#0f0e0c] py-24">
+    <section class="bg-white dark:bg-[#0f0e0c] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- The Sign-Up Sheet (spans 2 cols) - Unique to poetry -->
-                <div class="lg:col-span-2 relative overflow-hidden rounded-2xl bg-stone-900/50 border border-stone-800 p-8 lg:p-10">
+                <div class="lg:col-span-2 relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-300/80 text-sm font-medium mb-4 border border-amber-500/20">
@@ -102,13 +102,13 @@
                                 </svg>
                                 Your Schedule
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-serif text-white mb-4">Every reading. One place.</h3>
-                            <p class="text-stone-400 text-lg mb-6">Coffee shops on Tuesdays. The bar series on Thursdays. That bookstore feature next month. Stop telling people to check your Instagram - give them one link that's always current.</p>
+                            <h3 class="text-3xl lg:text-4xl font-serif text-gray-900 dark:text-white mb-4">Every reading. One place.</h3>
+                            <p class="text-gray-500 dark:text-stone-400 text-lg mb-6">Coffee shops on Tuesdays. The bar series on Thursdays. That bookstore feature next month. Stop telling people to check your Instagram - give them one link that's always current.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-stone-800 text-stone-400 text-sm border border-stone-700">Open mics</span>
-                                <span class="px-3 py-1 rounded-full bg-stone-800 text-stone-400 text-sm border border-stone-700">Features</span>
-                                <span class="px-3 py-1 rounded-full bg-stone-800 text-stone-400 text-sm border border-stone-700">Slams</span>
-                                <span class="px-3 py-1 rounded-full bg-stone-800 text-stone-400 text-sm border border-stone-700">Book events</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-stone-800 text-gray-500 dark:text-stone-400 text-sm border border-gray-300 dark:border-stone-700">Open mics</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-stone-800 text-gray-500 dark:text-stone-400 text-sm border border-gray-300 dark:border-stone-700">Features</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-stone-800 text-gray-500 dark:text-stone-400 text-sm border border-gray-300 dark:border-stone-700">Slams</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-stone-800 text-gray-500 dark:text-stone-400 text-sm border border-gray-300 dark:border-stone-700">Book events</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -138,15 +138,15 @@
                 </div>
 
                 <!-- Email Your Readers -->
-                <div class="relative overflow-hidden rounded-2xl bg-stone-900/50 border border-stone-800 p-8">
+                <div class="relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-300/80 text-sm font-medium mb-4 border border-rose-500/20">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         Newsletter
                     </div>
-                    <h3 class="text-2xl font-serif text-white mb-3">Your readers, your list</h3>
-                    <p class="text-stone-400 mb-6">New chapbook? Upcoming feature? Email the people who actually want to hear from you. No algorithm deciding who sees it.</p>
+                    <h3 class="text-2xl font-serif text-gray-900 dark:text-white mb-3">Your readers, your list</h3>
+                    <p class="text-gray-500 dark:text-stone-400 mb-6">New chapbook? Upcoming feature? Email the people who actually want to hear from you. No algorithm deciding who sees it.</p>
 
                     <!-- Mini email mockup -->
                     <div class="bg-stone-950 rounded-lg border border-stone-800 p-4">
@@ -164,15 +164,15 @@
                 </div>
 
                 <!-- Workshop Income - Unique to poets -->
-                <div class="relative overflow-hidden rounded-2xl bg-stone-900/50 border border-stone-800 p-8">
+                <div class="relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-300/80 text-sm font-medium mb-4 border border-emerald-500/20">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
                         Workshops
                     </div>
-                    <h3 class="text-2xl font-serif text-white mb-3">Fill your workshops</h3>
-                    <p class="text-stone-400 mb-6">Teaching pays. List your writing workshops, craft classes, and generative sessions. Let students find and register easily.</p>
+                    <h3 class="text-2xl font-serif text-gray-900 dark:text-white mb-3">Fill your workshops</h3>
+                    <p class="text-gray-500 dark:text-stone-400 mb-6">Teaching pays. List your writing workshops, craft classes, and generative sessions. Let students find and register easily.</p>
 
                     <div class="space-y-2">
                         <div class="flex justify-between items-center p-2 rounded bg-emerald-500/10 border border-emerald-500/20">
@@ -187,7 +187,7 @@
                 </div>
 
                 <!-- Sell Tickets + Chapbooks (spans 2 cols) -->
-                <div class="lg:col-span-2 relative overflow-hidden rounded-2xl bg-stone-900/50 border border-stone-800 p-8 lg:p-10">
+                <div class="lg:col-span-2 relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-300/80 text-sm font-medium mb-4 border border-amber-500/20">
@@ -196,8 +196,8 @@
                                 </svg>
                                 Tickets & Books
                             </div>
-                            <h3 class="text-3xl font-serif text-white mb-4">Keep what you earn</h3>
-                            <p class="text-stone-400 text-lg">Sell tickets to your readings. Bundle with your chapbook. Zero platform fees - because poetry doesn't pay enough to give away a percentage.</p>
+                            <h3 class="text-3xl font-serif text-gray-900 dark:text-white mb-4">Keep what you earn</h3>
+                            <p class="text-gray-500 dark:text-stone-400 text-lg">Sell tickets to your readings. Bundle with your chapbook. Zero platform fees - because poetry doesn't pay enough to give away a percentage.</p>
                         </div>
                         <div class="bg-stone-950 rounded-xl border border-stone-800 p-5">
                             <div class="space-y-3">
@@ -224,15 +224,15 @@
                 </div>
 
                 <!-- Virtual Readings -->
-                <a href="{{ marketing_url('/online-events') }}" class="group relative overflow-hidden rounded-2xl bg-stone-900/50 border border-stone-800 p-8 hover:border-stone-700 transition-all">
+                <a href="{{ marketing_url('/online-events') }}" class="group relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8 hover:border-gray-300 dark:hover:border-stone-700 transition-all">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300/80 text-sm font-medium mb-4 border border-indigo-500/20">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                         Online
                     </div>
-                    <h3 class="text-2xl font-serif text-white mb-3 group-hover:text-indigo-200 transition-colors">Read to anywhere</h3>
-                    <p class="text-stone-400 mb-4">Host virtual readings and workshops. Your audience isn't just local - poetry travels well over Zoom.</p>
+                    <h3 class="text-2xl font-serif text-gray-900 dark:text-white mb-3 group-hover:text-indigo-200 transition-colors">Read to anywhere</h3>
+                    <p class="text-gray-500 dark:text-stone-400 mb-4">Host virtual readings and workshops. Your audience isn't just local - poetry travels well over Zoom.</p>
 
                     <span class="inline-flex items-center text-indigo-400/80 text-sm font-medium group-hover:gap-2 gap-1 transition-all">
                         Learn more
@@ -243,15 +243,15 @@
                 </a>
 
                 <!-- Google Calendar Sync -->
-                <div class="relative overflow-hidden rounded-2xl bg-stone-900/50 border border-stone-800 p-8">
+                <div class="relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-300/80 text-sm font-medium mb-4 border border-blue-500/20">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Sync
                     </div>
-                    <h3 class="text-2xl font-serif text-white mb-3">Google Calendar sync</h3>
-                    <p class="text-stone-400 mb-6">Two-way sync. Add a reading to your personal calendar, it shows up on your public schedule.</p>
+                    <h3 class="text-2xl font-serif text-gray-900 dark:text-white mb-3">Google Calendar sync</h3>
+                    <p class="text-gray-500 dark:text-stone-400 mb-6">Two-way sync. Add a reading to your personal calendar, it shows up on your public schedule.</p>
 
                     <div class="flex items-center justify-center gap-3">
                         <div class="bg-stone-800 rounded-lg border border-stone-700 p-2 w-16 text-center">
@@ -271,15 +271,15 @@
                 </div>
 
                 <!-- Promo Graphics -->
-                <div class="relative overflow-hidden rounded-2xl bg-stone-900/50 border border-stone-800 p-8">
+                <div class="relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 text-orange-300/80 text-sm font-medium mb-4 border border-orange-500/20">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Graphics
                     </div>
-                    <h3 class="text-2xl font-serif text-white mb-3">Post-ready images</h3>
-                    <p class="text-stone-400 mb-6">Auto-generate promo graphics. Share to Instagram without opening Canva.</p>
+                    <h3 class="text-2xl font-serif text-gray-900 dark:text-white mb-3">Post-ready images</h3>
+                    <p class="text-gray-500 dark:text-stone-400 mb-6">Auto-generate promo graphics. Share to Instagram without opening Canva.</p>
 
                     <div class="flex justify-center">
                         <div class="relative">
@@ -302,10 +302,10 @@
     </section>
 
     <!-- Where Poets Read - Literary Venues -->
-    <section class="bg-[#0f0e0c] py-24 border-t border-stone-800/50">
+    <section class="bg-white dark:bg-[#0f0e0c] py-24 border-t border-gray-200 dark:border-stone-800/50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-serif text-white mb-4">
+                <h2 class="text-3xl md:text-4xl font-serif text-gray-900 dark:text-white mb-4">
                     Where poetry happens
                 </h2>
                 <p class="text-lg text-stone-500">
@@ -315,64 +315,64 @@
 
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <!-- Coffee Shops -->
-                <div class="group text-center p-6 rounded-xl bg-stone-900/30 border border-stone-800 hover:border-amber-800/50 transition-all">
+                <div class="group text-center p-6 rounded-xl bg-gray-100 dark:bg-stone-900/30 border border-gray-200 dark:border-stone-800 hover:border-amber-800/50 transition-all">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
                         <svg class="w-5 h-5 text-amber-500/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <h3 class="text-sm text-stone-300">Coffee Shops</h3>
+                    <h3 class="text-sm text-gray-600 dark:text-stone-300">Coffee Shops</h3>
                 </div>
 
                 <!-- Bookstores -->
-                <div class="group text-center p-6 rounded-xl bg-stone-900/30 border border-stone-800 hover:border-rose-800/50 transition-all">
+                <div class="group text-center p-6 rounded-xl bg-gray-100 dark:bg-stone-900/30 border border-gray-200 dark:border-stone-800 hover:border-rose-800/50 transition-all">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-rose-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
                         <svg class="w-5 h-5 text-rose-500/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
                     </div>
-                    <h3 class="text-sm text-stone-300">Bookstores</h3>
+                    <h3 class="text-sm text-gray-600 dark:text-stone-300">Bookstores</h3>
                 </div>
 
                 <!-- Bars & Lounges -->
-                <div class="group text-center p-6 rounded-xl bg-stone-900/30 border border-stone-800 hover:border-purple-800/50 transition-all">
+                <div class="group text-center p-6 rounded-xl bg-gray-100 dark:bg-stone-900/30 border border-gray-200 dark:border-stone-800 hover:border-purple-800/50 transition-all">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
                         <svg class="w-5 h-5 text-purple-500/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />
                         </svg>
                     </div>
-                    <h3 class="text-sm text-stone-300">Bars & Lounges</h3>
+                    <h3 class="text-sm text-gray-600 dark:text-stone-300">Bars & Lounges</h3>
                 </div>
 
                 <!-- Universities -->
-                <div class="group text-center p-6 rounded-xl bg-stone-900/30 border border-stone-800 hover:border-blue-800/50 transition-all">
+                <div class="group text-center p-6 rounded-xl bg-gray-100 dark:bg-stone-900/30 border border-gray-200 dark:border-stone-800 hover:border-blue-800/50 transition-all">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
                         <svg class="w-5 h-5 text-blue-500/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                         </svg>
                     </div>
-                    <h3 class="text-sm text-stone-300">Universities</h3>
+                    <h3 class="text-sm text-gray-600 dark:text-stone-300">Universities</h3>
                 </div>
 
                 <!-- Festivals -->
-                <div class="group text-center p-6 rounded-xl bg-stone-900/30 border border-stone-800 hover:border-orange-800/50 transition-all">
+                <div class="group text-center p-6 rounded-xl bg-gray-100 dark:bg-stone-900/30 border border-gray-200 dark:border-stone-800 hover:border-orange-800/50 transition-all">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-orange-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
                         <svg class="w-5 h-5 text-orange-500/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                         </svg>
                     </div>
-                    <h3 class="text-sm text-stone-300">Lit Festivals</h3>
+                    <h3 class="text-sm text-gray-600 dark:text-stone-300">Lit Festivals</h3>
                 </div>
 
                 <!-- Virtual -->
-                <div class="group text-center p-6 rounded-xl bg-stone-900/30 border border-stone-800 hover:border-indigo-800/50 transition-all">
+                <div class="group text-center p-6 rounded-xl bg-gray-100 dark:bg-stone-900/30 border border-gray-200 dark:border-stone-800 hover:border-indigo-800/50 transition-all">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-indigo-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
                         <svg class="w-5 h-5 text-indigo-500/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <h3 class="text-sm text-stone-300">Virtual</h3>
+                    <h3 class="text-sm text-gray-600 dark:text-stone-300">Virtual</h3>
                 </div>
             </div>
         </div>

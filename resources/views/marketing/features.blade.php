@@ -29,7 +29,7 @@
     </style>
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->
         <div class="absolute inset-0">
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3"></div>
@@ -41,20 +41,20 @@
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-8">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
                 <span class="relative flex h-2 w-2">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span class="text-sm text-gray-300">Everything you need</span>
+                <span class="text-sm text-gray-600 dark:text-gray-300">Everything you need</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
                 Built for people who<br>
                 <span class="text-gradient">run events</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
                 One simple tool for calendars, tickets, and check-ins.
             </p>
 
@@ -65,7 +65,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
-                <a href="#features" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white glass border border-white/10 rounded-2xl hover:bg-white/10 transition-all">
+                <a href="#features" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-gray-900 dark:text-white glass border border-gray-200 dark:border-white/10 rounded-2xl hover:bg-white/10 transition-all">
                     Explore features
                     <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -76,7 +76,7 @@
     </section>
 
     <!-- Feature Banners -->
-    <div id="features" class="bg-[#0a0a0f]">
+    <div id="features" class="bg-white dark:bg-[#0a0a0f]">
 
         <!-- Banner 1: Ticketing (Text Left, Visual Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
@@ -97,12 +97,12 @@
                                 </svg>
                                 Ticketing
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-white mb-4 group-hover:text-fuchsia-300 transition-colors">Sell tickets online</h2>
-                            <p class="text-gray-400 text-lg mb-6">Multiple ticket types, limits, and reservations. Accept payments with Stripe. Zero platform fees.</p>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-fuchsia-300 transition-colors">Sell tickets online</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Multiple ticket types, limits, and reservations. Accept payments with Stripe. Zero platform fees.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Zero fees</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">QR check-ins</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Stripe payments</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Zero fees</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">QR check-ins</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Stripe payments</span>
                             </div>
                             <span class="inline-flex items-center text-fuchsia-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -117,26 +117,26 @@
                             <div class="animate-float">
                                 <div class="bg-gradient-to-br from-fuchsia-900/50 to-pink-900/50 rounded-2xl border border-fuchsia-500/30 p-6 w-72 shadow-2xl shadow-fuchsia-500/10">
                                     <div class="space-y-3">
-                                        <div class="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/10">
+                                        <div class="flex items-center justify-between p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
                                             <div>
-                                                <div class="text-white font-medium">Early Bird</div>
+                                                <div class="text-gray-900 dark:text-white font-medium">Early Bird</div>
                                                 <div class="text-emerald-400 text-xs">50 remaining</div>
                                             </div>
-                                            <div class="text-xl font-bold text-white">$15</div>
+                                            <div class="text-xl font-bold text-gray-900 dark:text-white">$15</div>
                                         </div>
-                                        <div class="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/10">
+                                        <div class="flex items-center justify-between p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
                                             <div>
-                                                <div class="text-white font-medium">General</div>
-                                                <div class="text-gray-400 text-xs">142 sold</div>
+                                                <div class="text-gray-900 dark:text-white font-medium">General</div>
+                                                <div class="text-gray-500 dark:text-gray-400 text-xs">142 sold</div>
                                             </div>
-                                            <div class="text-xl font-bold text-white">$25</div>
+                                            <div class="text-xl font-bold text-gray-900 dark:text-white">$25</div>
                                         </div>
                                         <div class="flex items-center justify-between p-3 rounded-xl bg-fuchsia-500/20 border border-fuchsia-400/30">
                                             <div>
-                                                <div class="text-white font-medium">VIP</div>
+                                                <div class="text-gray-900 dark:text-white font-medium">VIP</div>
                                                 <div class="text-fuchsia-300 text-xs">38 sold</div>
                                             </div>
-                                            <div class="text-xl font-bold text-white">$75</div>
+                                            <div class="text-xl font-bold text-gray-900 dark:text-white">$75</div>
                                         </div>
                                     </div>
                                 </div>
@@ -166,11 +166,11 @@
                                 </svg>
                                 AI-Powered
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-white mb-4 group-hover:text-violet-300 transition-colors">Smart event import</h2>
-                            <p class="text-gray-400 text-lg mb-6">Paste text or drop an image. AI extracts title, date, time, venue, and description automatically.</p>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-violet-300 transition-colors">Smart event import</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Paste text or drop an image. AI extracts title, date, time, venue, and description automatically.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Parse any format</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Instant translation</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Parse any format</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Instant translation</span>
                             </div>
                             <span class="inline-flex items-center text-violet-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -185,9 +185,9 @@
                             <div class="animate-float" style="animation-delay: 0.5s;">
                                 <div class="flex flex-col items-center gap-2">
                                     <!-- Input -->
-                                    <div class="bg-black/40 rounded-xl border border-white/10 p-4 w-56">
-                                        <div class="text-xs text-gray-500 mb-2">Paste or drop</div>
-                                        <div class="text-sm text-gray-300 font-mono leading-relaxed">
+                                    <div class="bg-gray-200 dark:bg-black/40 rounded-xl border border-gray-200 dark:border-white/10 p-4 w-56">
+                                        <div class="text-xs text-gray-400 dark:text-gray-500 mb-2">Paste or drop</div>
+                                        <div class="text-sm text-gray-600 dark:text-gray-300 font-mono leading-relaxed">
                                             Jazz Night at Blue Note<br>
                                             Friday, March 15 at 8pm<br>
                                             Tickets: $25
@@ -201,9 +201,9 @@
                                     <div class="bg-gradient-to-br from-violet-500/20 to-indigo-500/20 rounded-xl border border-violet-400/30 p-4 w-56">
                                         <div class="text-xs text-violet-300 mb-2">Extracted</div>
                                         <div class="space-y-1.5 text-sm">
-                                            <div class="flex justify-between"><span class="text-gray-400">Name:</span><span class="text-white">Jazz Night</span></div>
-                                            <div class="flex justify-between"><span class="text-gray-400">Date:</span><span class="text-white">Mar 15, 8 PM</span></div>
-                                            <div class="flex justify-between"><span class="text-gray-400">Venue:</span><span class="text-white">Blue Note</span></div>
+                                            <div class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Name:</span><span class="text-gray-900 dark:text-white">Jazz Night</span></div>
+                                            <div class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Date:</span><span class="text-gray-900 dark:text-white">Mar 15, 8 PM</span></div>
+                                            <div class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Venue:</span><span class="text-gray-900 dark:text-white">Blue Note</span></div>
                                         </div>
                                     </div>
                                 </div>
@@ -233,11 +233,11 @@
                                 </svg>
                                 Calendar Sync
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-white mb-4 group-hover:text-blue-300 transition-colors">Two-way sync</h2>
-                            <p class="text-gray-400 text-lg mb-6">Sync with Google Calendar automatically. Changes flow in both directions via real-time webhooks.</p>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-blue-300 transition-colors">Two-way sync</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Sync with Google Calendar automatically. Changes flow in both directions via real-time webhooks.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Two-way sync</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Real-time updates</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Two-way sync</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Real-time updates</span>
                             </div>
                             <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -270,8 +270,8 @@
                                         </svg>
                                     </div>
                                     <!-- Google Calendar box -->
-                                    <div class="bg-white/10 rounded-xl border border-white/20 p-4 w-28">
-                                        <div class="text-xs text-gray-300 mb-2 text-center">Google Calendar</div>
+                                    <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-4 w-28">
+                                        <div class="text-xs text-gray-600 dark:text-gray-300 mb-2 text-center">Google Calendar</div>
                                         <div class="space-y-1.5">
                                             <div class="h-2 bg-blue-400/40 rounded"></div>
                                             <div class="h-2 bg-green-400/40 rounded w-3/4"></div>
@@ -305,11 +305,11 @@
                                 </svg>
                                 Analytics
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-white mb-4 group-hover:text-emerald-300 transition-colors">Know your audience</h2>
-                            <p class="text-gray-400 text-lg mb-6">Track page views, device breakdown, and traffic sources. Privacy-first with no external services.</p>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-emerald-300 transition-colors">Know your audience</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Track page views, device breakdown, and traffic sources. Privacy-first with no external services.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Privacy-first</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">No external services</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Privacy-first</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">No external services</span>
                             </div>
                             <span class="inline-flex items-center text-emerald-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -323,7 +323,7 @@
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.3s;">
                                 <div class="bg-gradient-to-br from-emerald-900/50 to-teal-900/50 rounded-xl border border-emerald-500/30 p-5 w-64">
-                                    <div class="text-xs text-gray-500 mb-3">Views this week</div>
+                                    <div class="text-xs text-gray-400 dark:text-gray-500 mb-3">Views this week</div>
                                     <div class="flex items-end justify-between h-24 gap-2">
                                         <div class="w-6 bg-emerald-500/40 rounded-t" style="height: 40%"></div>
                                         <div class="w-6 bg-emerald-500/50 rounded-t" style="height: 55%"></div>
@@ -333,7 +333,7 @@
                                         <div class="w-6 bg-emerald-500/90 rounded-t" style="height: 85%"></div>
                                         <div class="w-6 bg-emerald-500 rounded-t" style="height: 100%"></div>
                                     </div>
-                                    <div class="flex justify-between mt-2 text-xs text-gray-500">
+                                    <div class="flex justify-between mt-2 text-xs text-gray-400 dark:text-gray-500">
                                         <span>M</span>
                                         <span>T</span>
                                         <span>W</span>
@@ -369,11 +369,11 @@
                                 </svg>
                                 Custom Fields
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-white mb-4 group-hover:text-amber-300 transition-colors">Collect buyer info</h2>
-                            <p class="text-gray-400 text-lg mb-6">Gather dietary preferences, t-shirt sizes, or any info you need from ticket buyers with flexible form fields.</p>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-amber-300 transition-colors">Collect buyer info</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Gather dietary preferences, t-shirt sizes, or any info you need from ticket buyers with flexible form fields.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Multiple field types</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Required or optional</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Multiple field types</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Required or optional</span>
                             </div>
                             <span class="inline-flex items-center text-amber-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -389,20 +389,20 @@
                                 <div class="bg-gradient-to-br from-amber-900/50 to-orange-900/50 rounded-xl border border-amber-500/30 p-5 w-56 space-y-3">
                                     <!-- Text field -->
                                     <div>
-                                        <div class="text-[10px] text-gray-500 mb-1">Company Name</div>
-                                        <div class="bg-white/10 rounded-lg px-3 py-2 text-white text-sm border border-white/10">Acme Corp</div>
+                                        <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">Company Name</div>
+                                        <div class="bg-gray-200 dark:bg-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm border border-gray-200 dark:border-white/10">Acme Corp</div>
                                     </div>
                                     <!-- Dropdown field -->
                                     <div>
-                                        <div class="text-[10px] text-gray-500 mb-1">T-Shirt Size</div>
-                                        <div class="bg-white/10 rounded-lg px-3 py-2 text-white text-sm border border-white/10 flex items-center justify-between">
+                                        <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">T-Shirt Size</div>
+                                        <div class="bg-gray-200 dark:bg-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm border border-gray-200 dark:border-white/10 flex items-center justify-between">
                                             <span>Large</span>
-                                            <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                                         </div>
                                     </div>
                                     <!-- Yes/No field -->
                                     <div>
-                                        <div class="text-[10px] text-gray-500 mb-1">Vegetarian?</div>
+                                        <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">Vegetarian?</div>
                                         <div class="bg-amber-500/20 rounded-lg px-3 py-2 text-amber-300 text-sm border border-amber-400/30 flex items-center justify-between">
                                             <span>Yes</span>
                                             <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
@@ -435,11 +435,11 @@
                                 </svg>
                                 Team Scheduling
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-white mb-4 group-hover:text-cyan-300 transition-colors">Collaborate together</h2>
-                            <p class="text-gray-400 text-lg mb-6">Invite team members via email, assign roles, and manage events together seamlessly.</p>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-cyan-300 transition-colors">Collaborate together</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Invite team members via email, assign roles, and manage events together seamlessly.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Invite members</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Custom permissions</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Invite members</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Custom permissions</span>
                             </div>
                             <span class="inline-flex items-center text-cyan-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -454,26 +454,26 @@
                             <div class="animate-float" style="animation-delay: 1.2s;">
                                 <div class="bg-gradient-to-br from-cyan-900/50 to-teal-900/50 rounded-xl border border-cyan-500/30 p-4 w-56 space-y-2">
                                     <!-- Team member 1 -->
-                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
                                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center text-white text-xs font-semibold">JD</div>
                                         <div class="flex-1 min-w-0">
-                                            <div class="text-white text-sm font-medium truncate">John Doe</div>
+                                            <div class="text-gray-900 dark:text-white text-sm font-medium truncate">John Doe</div>
                                         </div>
                                         <span class="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px]">Owner</span>
                                     </div>
                                     <!-- Team member 2 -->
-                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center text-white text-xs font-semibold">AS</div>
                                         <div class="flex-1 min-w-0">
-                                            <div class="text-gray-300 text-sm font-medium truncate">Alice Smith</div>
+                                            <div class="text-gray-600 dark:text-gray-300 text-sm font-medium truncate">Alice Smith</div>
                                         </div>
                                         <span class="px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 text-[10px]">Admin</span>
                                     </div>
                                     <!-- Team member 3 -->
-                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center text-white text-xs font-semibold">BJ</div>
                                         <div class="flex-1 min-w-0">
-                                            <div class="text-gray-300 text-sm font-medium truncate">Bob Jones</div>
+                                            <div class="text-gray-600 dark:text-gray-300 text-sm font-medium truncate">Bob Jones</div>
                                         </div>
                                         <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">Follower</span>
                                     </div>
@@ -504,11 +504,11 @@
                                 </svg>
                                 Sub-schedules
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-white mb-4 group-hover:text-rose-300 transition-colors">Organize your events</h2>
-                            <p class="text-gray-400 text-lg mb-6">Create sub-schedules to categorize events by room, stage, series, or any way you like.</p>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-rose-300 transition-colors">Organize your events</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Create sub-schedules to categorize events by room, stage, series, or any way you like.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Multiple rooms</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Event categories</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Multiple rooms</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Event categories</span>
                             </div>
                             <span class="inline-flex items-center text-rose-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -522,23 +522,23 @@
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.4s;">
                                 <div class="bg-gradient-to-br from-rose-900/50 to-pink-900/50 rounded-xl border border-rose-500/30 p-4 w-56">
-                                    <div class="text-xs text-gray-500 mb-3">Sub-schedules</div>
+                                    <div class="text-xs text-gray-400 dark:text-gray-500 mb-3">Sub-schedules</div>
                                     <div class="space-y-2">
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-rose-500/20 border border-rose-500/30">
                                             <div class="w-2 h-2 rounded-full bg-rose-400"></div>
-                                            <span class="text-white text-sm">Main Stage</span>
+                                            <span class="text-gray-900 dark:text-white text-sm">Main Stage</span>
                                         </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                             <div class="w-2 h-2 rounded-full bg-pink-400"></div>
-                                            <span class="text-gray-300 text-sm">Acoustic Room</span>
+                                            <span class="text-gray-600 dark:text-gray-300 text-sm">Acoustic Room</span>
                                         </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                             <div class="w-2 h-2 rounded-full bg-fuchsia-400"></div>
-                                            <span class="text-gray-300 text-sm">Outdoor Patio</span>
+                                            <span class="text-gray-600 dark:text-gray-300 text-sm">Outdoor Patio</span>
                                         </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                             <div class="w-2 h-2 rounded-full bg-purple-400"></div>
-                                            <span class="text-gray-300 text-sm">Jazz Lounge</span>
+                                            <span class="text-gray-600 dark:text-gray-300 text-sm">Jazz Lounge</span>
                                         </div>
                                     </div>
                                 </div>
@@ -568,11 +568,11 @@
                                 </svg>
                                 Online Events
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-white mb-4 group-hover:text-indigo-300 transition-colors">Go live, anywhere</h2>
-                            <p class="text-gray-400 text-lg mb-6">Toggle any event to online and add your streaming URL. Works with Zoom, YouTube, or any platform.</p>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-indigo-300 transition-colors">Go live, anywhere</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Toggle any event to online and add your streaming URL. Works with Zoom, YouTube, or any platform.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Virtual events</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Any streaming platform</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Virtual events</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Any streaming platform</span>
                             </div>
                             <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -588,14 +588,14 @@
                                 <div class="bg-gradient-to-br from-indigo-900/50 to-violet-900/50 rounded-xl border border-indigo-500/30 p-4 w-56">
                                     <!-- Toggle switch -->
                                     <div class="flex items-center justify-between mb-4">
-                                        <span class="text-gray-300 text-sm">Online Event</span>
+                                        <span class="text-gray-600 dark:text-gray-300 text-sm">Online Event</span>
                                         <div class="w-10 h-5 bg-indigo-500 rounded-full relative">
                                             <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow"></div>
                                         </div>
                                     </div>
                                     <!-- URL field -->
                                     <div>
-                                        <div class="text-[10px] text-gray-500 mb-1">Streaming URL</div>
+                                        <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">Streaming URL</div>
                                         <div class="bg-indigo-500/20 rounded-lg px-3 py-2 text-indigo-300 text-sm border border-indigo-400/30 flex items-center gap-2">
                                             <svg class="w-4 h-4 text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
@@ -624,19 +624,19 @@
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-500/20 text-gray-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-500/20 text-gray-600 dark:text-gray-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                                 </svg>
                                 Open Source
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-white mb-4 group-hover:text-gray-300 transition-colors">Free and open source</h2>
-                            <p class="text-gray-400 text-lg mb-6">100% open source under the AAL license. Self-host on your own server or integrate with our REST API.</p>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-gray-300 transition-colors">Free and open source</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">100% open source under the AAL license. Self-host on your own server or integrate with our REST API.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Self-host</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">REST API</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Self-host</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">REST API</span>
                             </div>
-                            <span class="inline-flex items-center text-gray-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center text-gray-500 dark:text-gray-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -647,21 +647,21 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.6s;">
-                                <div class="bg-black/50 rounded-xl border border-white/20 overflow-hidden w-60">
+                                <div class="bg-gray-200 dark:bg-black/50 rounded-xl border border-gray-300 dark:border-white/20 overflow-hidden w-60">
                                     <!-- Terminal header -->
-                                    <div class="flex items-center gap-1.5 px-3 py-2 bg-white/5 border-b border-white/10">
+                                    <div class="flex items-center gap-1.5 px-3 py-2 bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
                                         <div class="w-2.5 h-2.5 rounded-full bg-red-500/70"></div>
                                         <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/70"></div>
                                         <div class="w-2.5 h-2.5 rounded-full bg-green-500/70"></div>
                                     </div>
                                     <!-- Terminal content -->
                                     <div class="p-4 font-mono text-xs space-y-1">
-                                        <div class="text-gray-500">$ git clone</div>
+                                        <div class="text-gray-400 dark:text-gray-500">$ git clone</div>
                                         <div class="text-cyan-400 break-all leading-tight">github.com/eventschedule</div>
-                                        <div class="text-gray-500 pt-2">$ composer install</div>
+                                        <div class="text-gray-400 dark:text-gray-500 pt-2">$ composer install</div>
                                         <div class="text-green-400">Done!</div>
-                                        <div class="text-gray-500">$ php artisan serve</div>
-                                        <div class="text-gray-400">Server running...</div>
+                                        <div class="text-gray-400 dark:text-gray-500">$ php artisan serve</div>
+                                        <div class="text-gray-500 dark:text-gray-400">Server running...</div>
                                     </div>
                                 </div>
                             </div>

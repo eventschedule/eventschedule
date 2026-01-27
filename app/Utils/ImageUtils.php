@@ -81,6 +81,9 @@ class ImageUtils
 
     /**
      * Create UploadedFile from image data
+     *
+     * Note: The caller is responsible for cleaning up the temporary file after use.
+     * Use cleanupUploadedFile() method after the file has been processed.
      */
     public static function createUploadedFileFromImageData(string $imageData, string $imageUrl, string $tempPrefix = 'event_image_'): \Illuminate\Http\UploadedFile
     {
@@ -113,15 +116,22 @@ class ImageUtils
         $tempFile = tempnam(sys_get_temp_dir(), 'event_'.uniqid().'_');
         file_put_contents($tempFile, $imageData);
 
-        // Determine file extension based on detected format
-        $format = self::detectImageFormat($imageData, $imageUrl);
-        $extension = self::getImageExtension($format);
-        $filename = strtolower($filenamePrefix.\Illuminate\Support\Str::random(32).'.'.$extension);
+        try {
+            // Determine file extension based on detected format
+            $format = self::detectImageFormat($imageData, $imageUrl);
+            $extension = self::getImageExtension($format);
+            $filename = strtolower($filenamePrefix.\Illuminate\Support\Str::random(32).'.'.$extension);
 
-        $file = new \Illuminate\Http\UploadedFile($tempFile, $filenamePrefix.'.'.$extension);
-        $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+            $file = new \Illuminate\Http\UploadedFile($tempFile, $filenamePrefix.'.'.$extension);
+            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
-        return $filename;
+            return $filename;
+        } finally {
+            // Clean up temporary file
+            if (file_exists($tempFile)) {
+                @unlink($tempFile);
+            }
+        }
     }
 
     /**
@@ -253,5 +263,18 @@ class ImageUtils
         imagedestroy($destImage);
 
         return $result;
+    }
+
+    /**
+     * Clean up temporary file from an UploadedFile object
+     *
+     * @param  \Illuminate\Http\UploadedFile  $file  The uploaded file to clean up
+     */
+    public static function cleanupUploadedFile(\Illuminate\Http\UploadedFile $file): void
+    {
+        $path = $file->getRealPath();
+        if ($path && file_exists($path)) {
+            @unlink($path);
+        }
     }
 }

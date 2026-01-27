@@ -14,7 +14,7 @@
     </style>
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->
         <div class="absolute inset-0">
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
@@ -25,19 +25,19 @@
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-8">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
                 <div class="bg-white rounded px-2 py-0.5">
                     <span class="text-sm font-bold" style="color: #635BFF;">stripe</span>
                 </div>
-                <span class="text-sm text-gray-300">Payment Processing</span>
+                <span class="text-sm text-gray-600 dark:text-gray-300">Payment Processing</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
                 Accept payments with<br>
                 <span class="text-gradient">Stripe</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
                 Credit cards, Apple Pay, Google Pay. Secure checkout with direct payouts to your account.
             </p>
 
@@ -53,22 +53,22 @@
     </section>
 
     <!-- Bento Grid Features -->
-    <section class="bg-[#0a0a0f] py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Stripe Checkout -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                         </svg>
                         Checkout
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Stripe Checkout</h3>
-                    <p class="text-gray-400 mb-6">Hosted payment page handles everything. Customers complete payment on Stripe's secure checkout.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Stripe Checkout</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Hosted payment page handles everything. Customers complete payment on Stripe's secure checkout.</p>
 
-                    <div class="bg-black/30 rounded-xl p-4 border border-white/10">
+                    <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-3 mb-3">
                             <div class="flex -space-x-2">
                                 <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
@@ -76,7 +76,7 @@
                                         <path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                                     </svg>
                                 </div>
-                                <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center border border-white/20">
+                                <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center border border-gray-300 dark:border-white/20">
                                     <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M17.05 11.97c-.02-1.99 1.63-2.96 1.7-3-.93-1.35-2.37-1.54-2.88-1.56-1.22-.12-2.39.72-3.01.72-.62 0-1.58-.7-2.6-.68-1.34.02-2.57.78-3.26 1.97-1.4 2.41-.36 5.98.99 7.94.66.96 1.45 2.03 2.49 1.99 1-.04 1.37-.64 2.58-.64 1.2 0 1.54.64 2.59.62 1.08-.02 1.76-.97 2.41-1.93.76-1.11 1.07-2.18 1.09-2.24-.02-.01-2.09-.8-2.1-3.19z"/>
                                     </svg>
@@ -90,43 +90,43 @@
                                     </svg>
                                 </div>
                             </div>
-                            <span class="text-gray-300 text-sm">All major payment methods</span>
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">All major payment methods</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Multiple Currencies -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-cyan-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-cyan-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Global
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">135+ currencies</h3>
-                    <p class="text-gray-400 mb-4">Sell tickets in your local currency. Stripe handles conversion and international payments.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">135+ currencies</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-4">Sell tickets in your local currency. Stripe handles conversion and international payments.</p>
 
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-2 py-1 rounded bg-white/10 text-gray-300 text-sm">USD</span>
-                        <span class="px-2 py-1 rounded bg-white/10 text-gray-300 text-sm">EUR</span>
-                        <span class="px-2 py-1 rounded bg-white/10 text-gray-300 text-sm">GBP</span>
-                        <span class="px-2 py-1 rounded bg-white/10 text-gray-300 text-sm">CAD</span>
+                        <span class="px-2 py-1 rounded bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">USD</span>
+                        <span class="px-2 py-1 rounded bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">EUR</span>
+                        <span class="px-2 py-1 rounded bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">GBP</span>
+                        <span class="px-2 py-1 rounded bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">CAD</span>
                         <span class="px-2 py-1 rounded bg-blue-500/20 text-blue-300 text-sm">+130 more</span>
                     </div>
                 </div>
 
                 <!-- Webhook Integration -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                         Real-time
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Instant confirmation</h3>
-                    <p class="text-gray-400 mb-4">Webhooks notify us the moment payment completes. Tickets are delivered instantly via email.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Instant confirmation</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-4">Webhooks notify us the moment payment completes. Tickets are delivered instantly via email.</p>
 
-                    <div class="bg-black/30 rounded-xl p-3 border border-white/10">
+                    <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-3 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-2">
                             <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
                             <span class="text-emerald-300 text-xs font-mono">payment_intent.succeeded</span>
@@ -135,7 +135,7 @@
                 </div>
 
                 <!-- Stripe Connect (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-violet-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-violet-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
@@ -144,19 +144,19 @@
                                 </svg>
                                 SaaS Mode
                             </div>
-                            <h3 class="text-3xl font-bold text-white mb-4">Stripe Connect</h3>
-                            <p class="text-gray-400 text-lg">On our hosted platform, event creators connect their own Stripe accounts. Payments go directly to them—we never hold your money.</p>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Stripe Connect</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg">On our hosted platform, event creators connect their own Stripe accounts. Payments go directly to them—we never hold your money.</p>
                         </div>
                         <div class="space-y-3">
-                            <div class="flex items-center gap-3 p-3 rounded-xl bg-white/10 border border-white/10">
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
                                 <div class="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center">
                                     <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <div class="text-white font-medium">Event creator</div>
-                                    <div class="text-gray-400 text-sm">Connects Stripe account</div>
+                                    <div class="text-gray-900 dark:text-white font-medium">Event creator</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-sm">Connects Stripe account</div>
                                 </div>
                             </div>
                             <div class="flex justify-center">
@@ -171,7 +171,7 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <div class="text-white font-medium">Direct payout</div>
+                                    <div class="text-gray-900 dark:text-white font-medium">Direct payout</div>
                                     <div class="text-indigo-300 text-sm">Funds go to creator's account</div>
                                 </div>
                             </div>
@@ -180,7 +180,7 @@
                 </div>
 
                 <!-- Billing Portal -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -188,12 +188,12 @@
                         </svg>
                         Self-service
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Billing portal</h3>
-                    <p class="text-gray-400 mb-4">Customers manage their own payment methods, view invoices, and update billing details through Stripe's portal.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Billing portal</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-4">Customers manage their own payment methods, view invoices, and update billing details through Stripe's portal.</p>
 
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Update card</span>
-                        <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">View invoices</span>
+                        <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Update card</span>
+                        <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">View invoices</span>
                     </div>
                 </div>
 
@@ -258,50 +258,50 @@
     </section>
 
     <!-- Benefits Section -->
-    <section class="bg-[#0a0a0f] py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Why Stripe?
                 </h2>
-                <p class="text-xl text-gray-400">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     The trusted choice for online payments worldwide.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-white/5 rounded-2xl p-8 border border-white/10">
+                <div class="bg-gray-100 dark:bg-white/5 rounded-2xl p-8 border border-gray-200 dark:border-white/10">
                     <div class="w-14 h-14 bg-violet-500/20 rounded-2xl flex items-center justify-center mb-6">
                         <svg class="w-7 h-7 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-white mb-3">PCI Compliant</h3>
-                    <p class="text-gray-400">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">PCI Compliant</h3>
+                    <p class="text-gray-500 dark:text-gray-400">
                         Stripe handles all sensitive card data. We never see or store payment details.
                     </p>
                 </div>
 
-                <div class="bg-white/5 rounded-2xl p-8 border border-white/10">
+                <div class="bg-gray-100 dark:bg-white/5 rounded-2xl p-8 border border-gray-200 dark:border-white/10">
                     <div class="w-14 h-14 bg-emerald-500/20 rounded-2xl flex items-center justify-center mb-6">
                         <svg class="w-7 h-7 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-white mb-3">No Platform Fees</h3>
-                    <p class="text-gray-400">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">No Platform Fees</h3>
+                    <p class="text-gray-500 dark:text-gray-400">
                         We don't take a cut. You only pay Stripe's standard processing fees (typically 2.9% + $0.30).
                     </p>
                 </div>
 
-                <div class="bg-white/5 rounded-2xl p-8 border border-white/10">
+                <div class="bg-gray-100 dark:bg-white/5 rounded-2xl p-8 border border-gray-200 dark:border-white/10">
                     <div class="w-14 h-14 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-6">
                         <svg class="w-7 h-7 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-white mb-3">Global Reach</h3>
-                    <p class="text-gray-400">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Global Reach</h3>
+                    <p class="text-gray-500 dark:text-gray-400">
                         Accept payments from customers worldwide. Available in 46+ countries.
                     </p>
                 </div>
@@ -310,10 +310,10 @@
     </section>
 
     <!-- Stripe Link -->
-    <section class="bg-[#0a0a0f] py-16">
+    <section class="bg-white dark:bg-[#0a0a0f] py-16">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <a href="https://stripe.com" target="_blank" rel="noopener" class="group block">
-                <div class="bg-gradient-to-br from-violet-900/30 to-indigo-900/30 rounded-3xl border border-white/10 p-8 hover:border-white/20 transition-all">
+                <div class="bg-gradient-to-br from-violet-900/30 to-indigo-900/30 rounded-3xl border border-gray-200 dark:border-white/10 p-8 hover:border-gray-300 dark:hover:border-white/20 transition-all">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -325,8 +325,8 @@
                             <span class="text-2xl font-bold" style="color: #635BFF;">stripe</span>
                         </div>
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-gray-200 transition-colors">Learn more about Stripe</h3>
-                    <p class="text-gray-400 mb-4">Explore Stripe's documentation, features, and developer resources for payment processing.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">Learn more about Stripe</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-4">Explore Stripe's documentation, features, and developer resources for payment processing.</p>
                     <span class="inline-flex items-center text-violet-300 font-medium group-hover:gap-3 gap-2 transition-all">
                         Visit stripe.com
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -339,19 +339,19 @@
     </section>
 
     <!-- Explore More Integrations -->
-    <section class="bg-[#0a0a0f] py-16">
+    <section class="bg-white dark:bg-[#0a0a0f] py-16">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <a href="{{ marketing_url('/integrations') }}" class="group block">
-                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-3xl border border-white/10 p-8 hover:border-white/20 transition-all">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-gray-300 text-sm font-medium mb-4">
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-3xl border border-gray-200 dark:border-white/10 p-8 hover:border-gray-300 dark:hover:border-white/20 transition-all">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-gray-600 dark:text-gray-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                         </svg>
                         Payments
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-gray-200 transition-colors">Explore more integrations</h3>
-                    <p class="text-gray-400 mb-4">Discover all the ways Event Schedule connects with your favorite tools.</p>
-                    <span class="inline-flex items-center text-gray-300 font-medium group-hover:gap-3 gap-2 transition-all">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">Explore more integrations</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-4">Discover all the ways Event Schedule connects with your favorite tools.</p>
+                    <span class="inline-flex items-center text-gray-600 dark:text-gray-300 font-medium group-hover:gap-3 gap-2 transition-all">
                         View all integrations
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

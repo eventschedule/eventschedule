@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
 
     <!-- Hero Section - Comedy Club Stage Vibe -->
-    <section class="relative bg-[#0f0808] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0f0808] py-32 overflow-hidden">
         <!-- Brick wall texture overlay -->
         <div class="absolute inset-0 opacity-[0.03]" style="background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"60\" height=\"30\"><rect width=\"60\" height=\"30\" fill=\"none\" stroke=\"%23fff\" stroke-width=\"0.5\"/><line x1=\"30\" y1=\"0\" x2=\"30\" y2=\"15\" stroke=\"%23fff\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"15\" x2=\"60\" y2=\"15\" stroke=\"%23fff\" stroke-width=\"0.5\"/><line x1=\"15\" y1=\"15\" x2=\"15\" y2=\"30\" stroke=\"%23fff\" stroke-width=\"0.5\"/><line x1=\"45\" y1=\"15\" x2=\"45\" y2=\"30\" stroke=\"%23fff\" stroke-width=\"0.5\"/></svg>');"></div>
 
@@ -31,12 +31,12 @@
                 <span class="text-sm text-amber-200/90 font-medium tracking-wide">Built for Comics</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
                 The grind is real.<br>
                 <span class="neon-text">One link for every set.</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
                 Open mic Monday. Barking Tuesday. Guest set Wednesday. Headlining Friday. One link shows fans every set - yours, not the algorithm's.
             </p>
 
@@ -73,27 +73,27 @@
     </section>
 
     <!-- The Problem Section - Unique to Comedy -->
-    <section class="bg-[#0f0808] py-16 border-t border-white/5">
+    <section class="bg-white dark:bg-[#0f0808] py-16 border-t border-gray-200 dark:border-white/5">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-3 gap-6 text-center">
                 <div class="p-6">
                     <div class="text-4xl font-bold text-red-400 mb-2">7</div>
-                    <div class="text-gray-400 text-sm">mics a week just to stay sharp</div>
+                    <div class="text-gray-500 dark:text-gray-400 text-sm">mics a week just to stay sharp</div>
                 </div>
                 <div class="p-6 border-x border-white/5">
                     <div class="text-4xl font-bold text-amber-400 mb-2">5</div>
-                    <div class="text-gray-400 text-sm">clubs where you're trying to get regular</div>
+                    <div class="text-gray-500 dark:text-gray-400 text-sm">clubs where you're trying to get regular</div>
                 </div>
                 <div class="p-6">
                     <div class="text-4xl font-bold text-rose-400 mb-2">~3%</div>
-                    <div class="text-gray-400 text-sm">of your followers actually see your show posts</div>
+                    <div class="text-gray-500 dark:text-gray-400 text-sm">of your followers actually see your show posts</div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Features - Comedy Club Style Cards -->
-    <section class="bg-[#0a0606] py-24">
+    <section class="bg-gray-50 dark:bg-[#0a0606] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             <!-- Main Feature: The Weekly Grind Tracker -->
@@ -109,8 +109,8 @@
                             </svg>
                             Your Weekly Lineup
                         </div>
-                        <h2 class="text-3xl lg:text-4xl font-bold text-white mb-6">See your whole week.<br>Never double-book again.</h2>
-                        <p class="text-gray-400 text-lg mb-6">Running between clubs? Texting yourself set times? One calendar shows every mic, every guest set, every headline - plus your total stage time for the week.</p>
+                        <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-6">See your whole week.<br>Never double-book again.</h2>
+                        <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Running between clubs? Texting yourself set times? One calendar shows every mic, every guest set, every headline - plus your total stage time for the week.</p>
                         <ul class="space-y-3 text-gray-300">
                             <li class="flex items-center gap-3">
                                 <svg class="w-5 h-5 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -148,7 +148,7 @@
                                     </div>
                                     <div class="flex-1">
                                         <div class="text-white font-semibold">Stand Up NY</div>
-                                        <div class="text-gray-400 text-sm">Open mic · 7 PM signup</div>
+                                        <div class="text-gray-500 dark:text-gray-400 text-sm">Open mic · 7 PM signup</div>
                                     </div>
                                     <div class="px-2 py-1 rounded bg-red-900/40 text-red-300 text-xs font-medium">5 min</div>
                                 </div>
@@ -159,7 +159,7 @@
                                     </div>
                                     <div class="flex-1">
                                         <div class="text-white font-semibold">Comedy Cellar</div>
-                                        <div class="text-gray-400 text-sm">Guest set · 9:30 PM</div>
+                                        <div class="text-gray-500 dark:text-gray-400 text-sm">Guest set · 9:30 PM</div>
                                     </div>
                                     <div class="px-2 py-1 rounded bg-amber-900/40 text-amber-300 text-xs font-medium">12 min</div>
                                 </div>
@@ -170,7 +170,7 @@
                                     </div>
                                     <div class="flex-1">
                                         <div class="text-white font-semibold">Gotham Comedy</div>
-                                        <div class="text-gray-400 text-sm">Late show · 11 PM</div>
+                                        <div class="text-gray-500 dark:text-gray-400 text-sm">Late show · 11 PM</div>
                                     </div>
                                     <div class="px-2 py-1 rounded bg-orange-900/40 text-orange-300 text-xs font-medium">10 min</div>
                                 </div>
@@ -181,7 +181,7 @@
                                     </div>
                                     <div class="flex-1">
                                         <div class="text-white font-semibold">Carolines</div>
-                                        <div class="text-gray-400 text-sm">Two shows: 8 PM & 10:30 PM</div>
+                                        <div class="text-gray-500 dark:text-gray-400 text-sm">Two shows: 8 PM & 10:30 PM</div>
                                     </div>
                                     <div class="px-2 py-1 rounded bg-gradient-to-r from-rose-600/60 to-amber-600/60 text-white text-xs font-bold">Headlining</div>
                                 </div>
@@ -203,10 +203,10 @@
                             </svg>
                             Direct to Fans
                         </div>
-                        <h3 class="text-2xl font-bold text-white mb-4">Instagram buried your post.<br>Email won't.</h3>
-                        <p class="text-gray-400 mb-6">You posted about your show. 3% of your followers saw it. The rest saw ads. With email, everyone who signed up actually gets notified. No algorithm deciding who deserves to see it.</p>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Instagram buried your post.<br>Email won't.</h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-6">You posted about your show. 3% of your followers saw it. The rest saw ads. With email, everyone who signed up actually gets notified. No algorithm deciding who deserves to see it.</p>
 
-                        <div class="bg-black/40 rounded-xl border border-white/10 p-4">
+                        <div class="bg-gray-200 dark:bg-black/40 rounded-xl border border-gray-200 dark:border-white/10 p-4">
                             <div class="flex items-center gap-3 mb-3">
                                 <div class="w-8 h-8 rounded-full bg-rose-500/20 flex items-center justify-center">
                                     <svg class="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -236,16 +236,16 @@
                             </svg>
                             Sell Tickets
                         </div>
-                        <h3 class="text-2xl font-bold text-white mb-4">Your show, your money.<br>Zero platform fees.</h3>
-                        <p class="text-gray-400 mb-6">Producing your own show? Sell tickets directly. Money goes straight to your Stripe - we don't take a cut. Your hustle, your earnings.</p>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Your show, your money.<br>Zero platform fees.</h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-6">Producing your own show? Sell tickets directly. Money goes straight to your Stripe - we don't take a cut. Your hustle, your earnings.</p>
 
-                        <div class="bg-black/40 rounded-xl border border-white/10 p-4">
+                        <div class="bg-gray-200 dark:bg-black/40 rounded-xl border border-gray-200 dark:border-white/10 p-4">
                             <div class="flex items-center justify-between mb-4">
                                 <span class="text-gray-400 text-sm">Saturday Late Show</span>
                                 <span class="text-emerald-400 text-sm font-semibold">73 sold</span>
                             </div>
                             <div class="space-y-2">
-                                <div class="flex justify-between items-center p-2 rounded-lg bg-white/5">
+                                <div class="flex justify-between items-center p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                     <span class="text-white text-sm">General Admission</span>
                                     <span class="text-white font-medium">$20</span>
                                 </div>
@@ -254,7 +254,7 @@
                                     <span class="text-white font-medium">$50</span>
                                 </div>
                             </div>
-                            <div class="mt-4 pt-3 border-t border-white/10 flex justify-between">
+                            <div class="mt-4 pt-3 border-t border-gray-200 dark:border-white/10 flex justify-between">
                                 <span class="text-gray-400 text-sm">Platform fee</span>
                                 <span class="text-emerald-400 font-bold">$0</span>
                             </div>
@@ -272,8 +272,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-white mb-2">Built for late nights</h3>
-                    <p class="text-gray-400 text-sm mb-4">10:30 show? Midnight mic that runs until 2? We get it. No more calendar apps showing tomorrow's date for tonight's set.</p>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Built for late nights</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">10:30 show? Midnight mic that runs until 2? We get it. No more calendar apps showing tomorrow's date for tonight's set.</p>
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-violet-900/30 border border-violet-800/30">
                         <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -289,8 +289,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-white mb-2">Booked by a club? It shows up automatically.</h3>
-                    <p class="text-gray-400 text-sm mb-4">When a club adds you to their lineup, your schedule updates. No copy-paste. No 'wait, what time did they say?'</p>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Booked by a club? It shows up automatically.</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">When a club adds you to their lineup, your schedule updates. No copy-paste. No 'wait, what time did they say?'</p>
                     <div class="flex items-center gap-2">
                         <div class="w-6 h-6 rounded bg-amber-900/40 flex items-center justify-center text-amber-300 text-[10px] font-bold">CC</div>
                         <div class="w-6 h-6 rounded bg-rose-900/40 flex items-center justify-center text-rose-300 text-[10px] font-bold">GC</div>
@@ -306,8 +306,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-white mb-2">Show graphics in one click</h3>
-                    <p class="text-gray-400 text-sm mb-4">Download Instagram-ready flyers for any set. Stop begging your friend who 'knows Canva.'</p>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Show graphics in one click</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Download Instagram-ready flyers for any set. Stop begging your friend who 'knows Canva.'</p>
                     <div class="flex justify-center">
                         <div class="w-16 h-20 rounded-lg bg-gradient-to-br from-orange-600/40 to-rose-600/40 border border-orange-500/30 flex items-center justify-center">
                             <svg class="w-6 h-6 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -321,13 +321,13 @@
     </section>
 
     <!-- The Journey Section -->
-    <section class="bg-[#0f0808] py-24 border-t border-white/5">
+    <section class="bg-white dark:bg-[#0f0808] py-24 border-t border-gray-200 dark:border-white/5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     From open mic to headliner
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Event Schedule grows with your career
                 </p>
             </div>
@@ -340,8 +340,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Grinding the mics</h3>
-                    <p class="text-gray-400 text-sm">Track your spots across every open mic in the city. Know where you're signed up tonight.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Grinding the mics</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Track your spots across every open mic in the city. Know where you're signed up tonight.</p>
                 </div>
 
                 <!-- Working Comics -->
@@ -351,8 +351,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Getting regular</h3>
-                    <p class="text-gray-400 text-sm">Guest spots coming in? Track which rooms you're regular at and build your schedule.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Getting regular</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Guest spots coming in? Track which rooms you're regular at and build your schedule.</p>
                 </div>
 
                 <!-- Feature Acts -->
@@ -362,8 +362,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Featuring</h3>
-                    <p class="text-gray-400 text-sm">20-30 minute sets opening for headliners. Start selling tickets to your own fans.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Featuring</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">20-30 minute sets opening for headliners. Start selling tickets to your own fans.</p>
                 </div>
 
                 <!-- Headliners -->
@@ -373,8 +373,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Headlining</h3>
-                    <p class="text-gray-400 text-sm">Your name on the marquee. Email your fans directly and sell out your shows.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Headlining</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Your name on the marquee. Email your fans directly and sell out your shows.</p>
                 </div>
 
                 <!-- Touring Comics -->
@@ -384,8 +384,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">On the road</h3>
-                    <p class="text-gray-400 text-sm">Touring clubs across the country? One link shows fans in every city when you're coming through.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">On the road</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Touring clubs across the country? One link shows fans in every city when you're coming through.</p>
                 </div>
 
                 <!-- Improv & Sketch -->
@@ -395,21 +395,21 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Improv & Sketch</h3>
-                    <p class="text-gray-400 text-sm">Coordinate your troupe's schedule. Everyone knows when the next Harold night is.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Improv & Sketch</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Coordinate your troupe's schedule. Everyone knows when the next Harold night is.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Perfect For Section -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Perfect for all types of comedy
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Whether you're doing tight fives or touring theaters, we've got you covered.
                 </p>
             </div>
@@ -503,10 +503,10 @@
     </section>
 
     <!-- How it Works - Simplified -->
-    <section class="bg-[#0a0606] py-24 border-t border-white/5">
+    <section class="bg-gray-50 dark:bg-[#0a0606] py-24 border-t border-gray-200 dark:border-white/5">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Three steps. More butts in seats.
                 </h2>
             </div>
@@ -516,8 +516,8 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-red-600 to-red-700 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-red-600/25">
                         1
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Add your sets</h3>
-                    <p class="text-gray-400 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Add your sets</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">
                         Import from Google Calendar or add your mics, guest sets, and headlining gigs.
                     </p>
                 </div>
@@ -526,8 +526,8 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-amber-600 to-amber-700 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-amber-600/25">
                         2
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Share one link</h3>
-                    <p class="text-gray-400 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Share one link</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">
                         Drop it in your bio. Fans see all your upcoming shows in one place.
                     </p>
                 </div>
@@ -536,8 +536,8 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-rose-600 to-rose-700 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-rose-600/25">
                         3
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Fill the room</h3>
-                    <p class="text-gray-400 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Fill the room</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">
                         Fans follow you and get notified. No more posting into the algorithm void.
                     </p>
                 </div>

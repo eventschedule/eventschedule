@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->
         <div class="absolute inset-0">
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
@@ -50,12 +50,12 @@
                 <span class="text-sm text-gray-300">For Magicians, Mentalists & Variety Artists</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
                 <span class="text-gradient-purple">Make your bookings appear.</span><br>
                 Like magic.
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
+            <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-12">
                 One link for all your shows. Event planners find your availability, fans follow your performances, no algorithm makes you invisible.
             </p>
 
@@ -81,7 +81,7 @@
     </section>
 
     <!-- Bento Grid Features -->
-    <section class="bg-[#0a0a0f] py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
@@ -312,13 +312,13 @@
     </section>
 
     <!-- Where Magic Happens -->
-    <section class="bg-[#0a0a0f] py-24 border-t border-white/5">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Where magic happens
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-600 dark:text-gray-500">
                     One schedule for every venue and event type
                 </p>
             </div>
@@ -388,95 +388,95 @@
     </section>
 
     <!-- Perfect For Section -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Perfect for all types of magic performers
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Whether you're doing close-up magic or grand illusions, Event Schedule works for you.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Close-Up Magicians -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-violet-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-100 mb-4">
-                        <svg class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-violet-200 dark:hover:border-violet-500/30 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-500/20 mb-4">
+                        <svg class="w-6 h-6 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Close-Up Magicians</h3>
-                    <p class="text-gray-600 text-sm">Card tricks, coin magic, sleight of hand for intimate gatherings and table-hopping at events.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Close-Up Magicians</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Card tricks, coin magic, sleight of hand for intimate gatherings and table-hopping at events.</p>
                 </div>
 
                 <!-- Stage Illusionists -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-purple-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-purple-100 mb-4">
-                        <svg class="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-purple-200 dark:hover:border-purple-500/30 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 mb-4">
+                        <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Stage Illusionists</h3>
-                    <p class="text-gray-600 text-sm">Large-scale illusions and theatrical magic shows that fill theaters and wow audiences.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Stage Illusionists</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Large-scale illusions and theatrical magic shows that fill theaters and wow audiences.</p>
                 </div>
 
                 <!-- Mentalists -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-indigo-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-100 mb-4">
-                        <svg class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 mb-4">
+                        <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Mentalists</h3>
-                    <p class="text-gray-600 text-sm">Mind reading, predictions, and psychological entertainment that leaves audiences amazed.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Mentalists</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Mind reading, predictions, and psychological entertainment that leaves audiences amazed.</p>
                 </div>
 
                 <!-- Children's Entertainers -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-pink-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-pink-100 mb-4">
-                        <svg class="w-6 h-6 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-pink-200 dark:hover:border-pink-500/30 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-pink-100 dark:bg-pink-500/20 mb-4">
+                        <svg class="w-6 h-6 text-pink-600 dark:text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Children's Entertainers</h3>
-                    <p class="text-gray-600 text-sm">Birthday parties, school shows, and family events with fun, interactive magic for kids.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Children's Entertainers</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Birthday parties, school shows, and family events with fun, interactive magic for kids.</p>
                 </div>
 
                 <!-- Corporate Magicians -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-amber-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 mb-4">
-                        <svg class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-amber-200 dark:hover:border-amber-500/30 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 mb-4">
+                        <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Corporate Magicians</h3>
-                    <p class="text-gray-600 text-sm">Trade shows, conferences, and product launches with customized magic presentations.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Corporate Magicians</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Trade shows, conferences, and product launches with customized magic presentations.</p>
                 </div>
 
                 <!-- Variety Artists -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-fuchsia-200 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-fuchsia-100 mb-4">
-                        <svg class="w-6 h-6 text-fuchsia-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-fuchsia-200 dark:hover:border-fuchsia-500/30 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-fuchsia-100 dark:bg-fuchsia-500/20 mb-4">
+                        <svg class="w-6 h-6 text-fuchsia-600 dark:text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Variety Artists</h3>
-                    <p class="text-gray-600 text-sm">Ventriloquists, escape artists, hypnotists, and specialty acts that defy categorization.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Variety Artists</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Ventriloquists, escape artists, hypnotists, and specialty acts that defy categorization.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- How it Works -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     How it works
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Get your performance schedule online in three steps.
                 </p>
             </div>
@@ -486,8 +486,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/25">
                         1
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Add your shows</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Add your shows</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Performances, private bookings, recurring gigs. Import from Google Calendar or add manually.
                     </p>
                 </div>
@@ -496,8 +496,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/25">
                         2
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Share one link</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Share one link</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Add to your website, social bios, and EPK. Planners see your availability instantly.
                     </p>
                 </div>
@@ -506,8 +506,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/25">
                         3
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Build your audience</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Build your audience</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Fans follow your schedule and get notified about shows near them.
                     </p>
                 </div>
@@ -516,7 +516,7 @@
     </section>
 
     <!-- Online Events Section -->
-    <section class="relative bg-[#0a0a0f] py-20 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
             <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>

@@ -82,14 +82,14 @@
 
         /* Glass effect */
         .glass {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.05);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.1);
         }
         .dark .glass {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         /* Gradient text */
@@ -142,7 +142,7 @@
     </style>
 
     <!-- Hero Section - Side by side with carousel -->
-    <section class="relative min-h-screen flex items-center overflow-hidden bg-[#0a0a0f] noise">
+    <section class="relative min-h-screen flex items-center overflow-hidden bg-white dark:bg-[#0a0a0f] noise">
         <!-- Animated gradient orbs -->
         <div class="absolute inset-0 overflow-hidden">
             <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-violet-600/30 to-indigo-600/30 rounded-full blur-[100px] animate-pulse-slow"></div>
@@ -163,17 +163,17 @@
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                         </span>
-                        <span class="text-sm text-gray-300">Free forever. No credit card.</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-300">Free forever. No credit card.</span>
                     </div>
 
                     <!-- Main headline -->
                     <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 animate-reveal delay-100">
-                        <span class="block text-white">Plan, Promote &</span>
+                        <span class="block text-gray-900 dark:text-white">Plan, Promote &</span>
                         <span class="block text-gradient">Share Event Calendars</span>
                     </h1>
 
                     <!-- Subheadline -->
-                    <p class="text-xl md:text-2xl text-gray-400 max-w-xl mb-12 animate-reveal delay-200">
+                    <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-xl mb-12 animate-reveal delay-200">
                         Event calendars, ticketing, and check-ins for venues, performers, and communities.
                     </p>
 
@@ -189,7 +189,7 @@
                             <div class="absolute inset-0 animate-shimmer"></div>
                         </a>
                         @if (!Auth::check() || \App\Services\DemoService::isDemoUser(Auth::user()))
-                        <a href="https://demo.eventschedule.com" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white glass rounded-2xl hover:bg-white/10 transition-all">
+                        <a href="https://demo.eventschedule.com" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-900 dark:text-white glass rounded-2xl hover:bg-gray-200 dark:hover:bg-white/10 transition-all">
                             View demo
                         </a>
                         @endif
@@ -197,7 +197,7 @@
                 </div>
 
                 <!-- Right side - Screenshot carousel -->
-                <div class="relative screenshot-carousel overflow-hidden rounded-2xl shadow-2xl shadow-black/50 ring-1 ring-white/10 lg:col-span-2">
+                <div class="relative screenshot-carousel overflow-hidden rounded-2xl shadow-2xl shadow-black/50 ring-1 ring-gray-200 dark:ring-white/10 lg:col-span-2">
                     <div class="flex animate-scroll-step">
                         @php
                         $screenshots = [
@@ -424,49 +424,49 @@
     </section>
 
     <!-- Why Free Section -->
-    <section class="relative bg-[#0a0a0f] py-20">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-20">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Free and open source. Forever.
                 </h2>
-                <p class="text-lg text-gray-400 max-w-2xl mx-auto">
+                <p class="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
                     No hidden fees. No per-ticket charges. Keep 100% of your ticket sales.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Free Plan -->
-                <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+                <div class="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 text-center">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 mb-4">
                         <svg class="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
-                    <div class="text-2xl font-bold text-white mb-1">Free forever</div>
-                    <p class="text-gray-400 text-sm">Unlimited events and schedules on our free plan</p>
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Free forever</div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Unlimited events and schedules on our free plan</p>
                 </div>
 
                 <!-- No Platform Fees -->
-                <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+                <div class="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 text-center">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-violet-500/20 mb-4">
                         <svg class="w-6 h-6 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <div class="text-2xl font-bold text-white mb-1">0% platform fees</div>
-                    <p class="text-gray-400 text-sm">We don't take a cut of your ticket sales</p>
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">0% platform fees</div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">We don't take a cut of your ticket sales</p>
                 </div>
 
                 <!-- Open Source -->
-                <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+                <div class="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 text-center">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-fuchsia-500/20 mb-4">
                         <svg class="w-6 h-6 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                         </svg>
                     </div>
-                    <div class="text-2xl font-bold text-white mb-1">Open source</div>
-                    <p class="text-gray-400 text-sm">Self-host on your own server. AAL licensed.</p>
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Open source</div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Self-host on your own server. AAL licensed.</p>
                 </div>
             </div>
         </div>
@@ -619,18 +619,18 @@
     </section>
 
     <!-- Final CTA - Full impact -->
-    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Background effects -->
         <div class="absolute inset-0">
             <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-violet-600/20 to-transparent rounded-full blur-[100px]"></div>
         </div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-8">
+            <h2 class="text-4xl md:text-5xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8">
                 Ready to share<br>
                 <span class="text-gradient">your schedule?</span>
             </h2>
-            <p class="text-xl text-gray-400 mb-12 max-w-2xl mx-auto">
+            <p class="text-xl text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
                 Join musicians, venues, and organizers who use Event Schedule to connect with their audience.
             </p>
             <a href="{{ route('sign_up') }}" class="group relative inline-flex items-center justify-center px-12 py-6 text-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl overflow-hidden transition-all hover:scale-105 hover:shadow-2xl hover:shadow-violet-500/30">
@@ -642,7 +642,7 @@
                 </span>
                 <div class="absolute inset-0 animate-shimmer"></div>
             </a>
-            <p class="mt-6 text-gray-500 text-sm">No credit card required. Free forever.</p>
+            <p class="mt-6 text-gray-500 dark:text-gray-500 text-sm">No credit card required. Free forever.</p>
         </div>
     </section>
 </x-marketing-layout>

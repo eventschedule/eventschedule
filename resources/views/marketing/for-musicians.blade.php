@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
 
     <!-- Hero Section - Mesh Gradient -->
-    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Mesh gradient background -->
         <div class="absolute inset-0">
             <div class="absolute bottom-0 left-[-20%] w-[70%] h-[70%] bg-cyan-600/20 rounded-full blur-[120px]"></div>
@@ -27,12 +27,12 @@
                 <span class="text-sm text-cyan-200/90 font-medium tracking-wide">For Musicians, Bands & Solo Artists</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
                 Your gigs. Your fans.<br>
                 <span class="stage-glow-text">No middleman.</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
                 From coffee shop open mics to sold-out tours. One link for all your shows. Reach fans directly - no algorithm burying your posts.
             </p>
 
@@ -58,32 +58,32 @@
     </section>
 
     <!-- The Struggle Stats Section -->
-    <section class="bg-[#0a0a0f] py-16 border-t border-white/5">
+    <section class="bg-white dark:bg-[#0a0a0f] py-16 border-t border-gray-200 dark:border-white/5">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-3 gap-6 text-center">
                 <div class="p-6">
                     <div class="text-4xl font-bold text-cyan-400 mb-2">3%</div>
-                    <div class="text-gray-400 text-sm">of Instagram followers see your show posts</div>
+                    <div class="text-gray-500 dark:text-gray-400 text-sm">of Instagram followers see your show posts</div>
                 </div>
-                <div class="p-6 border-x border-white/5">
+                <div class="p-6 border-x border-gray-200 dark:border-white/5">
                     <div class="text-4xl font-bold text-amber-400 mb-2">47%</div>
-                    <div class="text-gray-400 text-sm">of fans discover tours too late</div>
+                    <div class="text-gray-500 dark:text-gray-400 text-sm">of fans discover tours too late</div>
                 </div>
                 <div class="p-6">
                     <div class="text-4xl font-bold text-fuchsia-400 mb-2">10-20%</div>
-                    <div class="text-gray-400 text-sm">lost to ticketing platform fees</div>
+                    <div class="text-gray-500 dark:text-gray-400 text-sm">lost to ticketing platform fees</div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Features Bento Grid -->
-    <section class="bg-[#0a0a0f] py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Newsletter - Tour Announcements (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-teal-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-teal-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <!-- Subtle stage light glow -->
                     <div class="absolute top-0 right-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-[100px]"></div>
 
@@ -95,12 +95,12 @@
                                 </svg>
                                 Direct to Fans
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Announce tours directly to fans</h3>
-                            <p class="text-gray-400 text-lg mb-6">New album dropping? Going on tour? Send beautiful show graphics directly to your fans' inbox. No algorithm gatekeeping. Your music, your audience.</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Announce tours directly to fans</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">New album dropping? Going on tour? Send beautiful show graphics directly to your fans' inbox. No algorithm gatekeeping. Your music, your audience.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Tour announcements</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Album releases</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Show reminders</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Tour announcements</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Album releases</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Show reminders</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -109,20 +109,20 @@
                                     <div class="flex items-center gap-3 mb-3">
                                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center text-white text-sm font-semibold">MH</div>
                                         <div>
-                                            <div class="text-white font-semibold text-sm">The Midnight Hour</div>
+                                            <div class="text-gray-900 dark:text-white font-semibold text-sm">The Midnight Hour</div>
                                             <div class="text-cyan-300 text-xs">Summer Tour 2025!</div>
                                         </div>
                                     </div>
                                     <div class="bg-gradient-to-br from-cyan-600/30 to-teal-600/30 rounded-xl p-3 border border-cyan-400/20">
                                         <div class="text-center">
-                                            <div class="text-white text-xs font-semibold mb-1">THIS SATURDAY</div>
+                                            <div class="text-gray-900 dark:text-white text-xs font-semibold mb-1">THIS SATURDAY</div>
                                             <div class="text-cyan-300 text-sm font-bold">Live at The Roxy</div>
-                                            <div class="text-gray-400 text-[10px] mt-1">Doors 7 PM - $25</div>
+                                            <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Doors 7 PM - $25</div>
                                         </div>
                                     </div>
                                     <div class="mt-3 flex gap-4 text-xs">
-                                        <div class="text-gray-400"><span class="text-emerald-400 font-semibold">72%</span> opened</div>
-                                        <div class="text-gray-400"><span class="text-amber-400 font-semibold">31%</span> clicked</div>
+                                        <div class="text-gray-500 dark:text-gray-400"><span class="text-emerald-400 font-semibold">72%</span> opened</div>
+                                        <div class="text-gray-500 dark:text-gray-400"><span class="text-amber-400 font-semibold">31%</span> clicked</div>
                                     </div>
                                 </div>
                             </div>
@@ -131,7 +131,7 @@
                 </div>
 
                 <!-- Zero Platform Fees -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-green-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-green-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="absolute bottom-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px]"></div>
                     <div class="relative">
                         <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-900/40 text-emerald-300 text-sm font-medium mb-5 border border-emerald-800/30">
@@ -140,18 +140,18 @@
                             </svg>
                             Ticketing
                         </div>
-                        <h3 class="text-2xl font-bold text-white mb-3">Zero platform fees on tickets</h3>
-                        <p class="text-gray-400 mb-6">Pre-sales and door sales. 100% of Stripe payments go to you. QR check-in at the venue.</p>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Zero platform fees on tickets</h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-6">Pre-sales and door sales. 100% of Stripe payments go to you. QR check-in at the venue.</p>
 
                         <div class="bg-emerald-500/20 rounded-xl border border-emerald-400/30 p-4">
                             <div class="text-center mb-3">
                                 <div class="text-emerald-300 text-xs">You keep</div>
-                                <div class="text-white text-3xl font-bold">100%</div>
-                                <div class="text-gray-400 text-xs">of ticket sales</div>
+                                <div class="text-gray-900 dark:text-white text-3xl font-bold">100%</div>
+                                <div class="text-gray-500 dark:text-gray-400 text-xs">of ticket sales</div>
                             </div>
                             <div class="border-t border-emerald-400/20 pt-3">
                                 <div class="flex justify-between text-xs">
-                                    <span class="text-gray-400">Platform fee</span>
+                                    <span class="text-gray-500 dark:text-gray-400">Platform fee</span>
                                     <span class="text-emerald-400 font-semibold">$0</span>
                                 </div>
                             </div>
@@ -160,33 +160,33 @@
                 </div>
 
                 <!-- One Link for Everything -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-blue-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-blue-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-900/40 text-indigo-300 text-sm font-medium mb-5 border border-indigo-800/30">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                         </svg>
                         Share Link
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">One link for Spotify, Bandcamp & EPK</h3>
-                    <p class="text-gray-400 mb-6">Put it in your Spotify bio, Bandcamp page, EPK, or website. All your gigs in one place.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">One link for Spotify, Bandcamp & EPK</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Put it in your Spotify bio, Bandcamp page, EPK, or website. All your gigs in one place.</p>
 
-                    <div class="bg-black/30 rounded-xl p-4 border border-white/10">
+                    <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-indigo-500/20 border border-indigo-400/30 mb-3">
                             <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                             </svg>
-                            <span class="text-white text-xs font-mono">eventschedule.com/yourband</span>
+                            <span class="text-gray-900 dark:text-white text-xs font-mono">eventschedule.com/yourband</span>
                         </div>
                         <div class="grid grid-cols-3 gap-1 text-center">
-                            <div class="p-1.5 rounded bg-white/5 text-indigo-300 text-[10px]">Spotify</div>
-                            <div class="p-1.5 rounded bg-white/5 text-indigo-300 text-[10px]">Bandcamp</div>
-                            <div class="p-1.5 rounded bg-white/5 text-indigo-300 text-[10px]">EPK</div>
+                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-indigo-300 text-[10px]">Spotify</div>
+                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-indigo-300 text-[10px]">Bandcamp</div>
+                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-indigo-300 text-[10px]">EPK</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Venue Sync (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-purple-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-purple-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
                             <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-900/40 text-violet-300 text-sm font-medium mb-5 border border-violet-800/30">
@@ -195,8 +195,8 @@
                                 </svg>
                                 Venue Sync
                             </div>
-                            <h3 class="text-3xl font-bold text-white mb-4">Venues book you, it auto-appears</h3>
-                            <p class="text-gray-400 text-lg">When venues add your show to their calendar, it automatically appears on yours. One booking, both schedules updated.</p>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Venues book you, it auto-appears</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg">When venues add your show to their calendar, it automatically appears on yours. One booking, both schedules updated.</p>
                         </div>
                         <div class="flex items-center justify-center">
                             <div class="flex items-center gap-4">
@@ -217,15 +217,15 @@
                                     </svg>
                                     <span class="text-violet-400 text-[10px]">auto-sync</span>
                                 </div>
-                                <div class="bg-white/10 rounded-xl border border-white/20 p-4 w-32">
-                                    <div class="text-gray-300 text-xs text-center mb-2 font-semibold">You</div>
+                                <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-4 w-32">
+                                    <div class="text-gray-600 dark:text-gray-300 text-xs text-center mb-2 font-semibold">You</div>
                                     <div class="space-y-1.5">
                                         <div class="h-2 bg-white/20 rounded"></div>
                                         <div class="h-2 bg-cyan-400/40 rounded w-3/4"></div>
                                         <div class="h-2 bg-white/10 rounded w-1/2"></div>
                                     </div>
                                     <div class="mt-3 p-2 rounded-lg bg-cyan-400/20 border border-cyan-400/30">
-                                        <div class="text-[10px] text-white text-center font-medium">New gig!</div>
+                                        <div class="text-[10px] text-gray-900 dark:text-white text-center font-medium">New gig!</div>
                                     </div>
                                 </div>
                             </div>
@@ -234,35 +234,35 @@
                 </div>
 
                 <!-- Team Collaboration -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-900/40 text-amber-300 text-sm font-medium mb-5 border border-amber-800/30">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
                         Team
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Band, manager & agent access</h3>
-                    <p class="text-gray-400 mb-6">Invite band members, your manager, or booking agent. Everyone can add gigs and see what's coming up.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Band, manager & agent access</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Invite band members, your manager, or booking agent. Everyone can add gigs and see what's coming up.</p>
 
                     <div class="space-y-2">
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white text-xs font-semibold">JM</div>
                             <div class="flex-1">
-                                <div class="text-white text-sm">Jamie</div>
+                                <div class="text-gray-900 dark:text-white text-sm">Jamie</div>
                             </div>
                             <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">Lead</span>
                         </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white text-xs font-semibold">MK</div>
                             <div class="flex-1">
-                                <div class="text-gray-300 text-sm">Mike</div>
+                                <div class="text-gray-600 dark:text-gray-300 text-sm">Mike</div>
                             </div>
                             <span class="px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-300 text-[10px]">Manager</span>
                         </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-yellow-500 to-amber-500 flex items-center justify-center text-white text-xs font-semibold">SA</div>
                             <div class="flex-1">
-                                <div class="text-gray-300 text-sm">Sarah</div>
+                                <div class="text-gray-600 dark:text-gray-300 text-sm">Sarah</div>
                             </div>
                             <span class="px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-300 text-[10px]">Agent</span>
                         </div>
@@ -270,15 +270,15 @@
                 </div>
 
                 <!-- Google Calendar Sync -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-900/40 text-blue-300 text-sm font-medium mb-5 border border-blue-800/30">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Calendar Sync
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Google Calendar for gigs & rehearsals</h3>
-                    <p class="text-gray-400 mb-6">Two-way sync. Gigs, rehearsals, recording sessions, soundchecks - all in one place.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Google Calendar for gigs & rehearsals</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Two-way sync. Gigs, rehearsals, recording sessions, soundchecks - all in one place.</p>
 
                     <div class="flex items-center justify-center gap-3">
                         <div class="bg-blue-500/20 rounded-xl border border-blue-400/30 p-3 w-20">
@@ -296,8 +296,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
                         </div>
-                        <div class="bg-white/10 rounded-xl border border-white/20 p-3 w-20">
-                            <div class="text-[10px] text-gray-300 mb-1 text-center">Google</div>
+                        <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-3 w-20">
+                            <div class="text-[10px] text-gray-600 dark:text-gray-300 mb-1 text-center">Google</div>
                             <div class="space-y-1">
                                 <div class="h-1.5 bg-blue-400/40 rounded"></div>
                                 <div class="h-1.5 bg-green-400/40 rounded"></div>
@@ -307,15 +307,15 @@
                 </div>
 
                 <!-- Fans Follow Your Tour -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-900/50 to-rose-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-900/50 to-rose-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-pink-900/40 text-pink-300 text-sm font-medium mb-5 border border-pink-800/30">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
                         Followers
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Fans follow your tour</h3>
-                    <p class="text-gray-400 mb-6">Location-based notifications. When you add a show near them, they get notified automatically.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Fans follow your tour</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Location-based notifications. When you add a show near them, they get notified automatically.</p>
 
                     <div class="flex items-center justify-center">
                         <div class="flex -space-x-2">
@@ -333,10 +333,10 @@
     </section>
 
     <!-- Career Journey Section - Tour Focused -->
-    <section class="bg-[#0a0a0f] py-24 border-t border-white/5">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     From open mics to headlining tours
                 </h2>
                 <p class="text-xl text-gray-500">
@@ -352,8 +352,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Open mic nights</h3>
-                    <p class="text-gray-400 text-sm">Playing coffee shops and local bars. Track your spots and let friends know where to catch you.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Open mic nights</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Playing coffee shops and local bars. Track your spots and let friends know where to catch you.</p>
                 </div>
 
                 <!-- Local Gigging -->
@@ -364,8 +364,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Local gigging</h3>
-                    <p class="text-gray-400 text-sm">Regular slots at venues in your city. Build a local following and start selling your own tickets.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Local gigging</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Regular slots at venues in your city. Build a local following and start selling your own tickets.</p>
                 </div>
 
                 <!-- Regional Tours -->
@@ -375,8 +375,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Regional tours</h3>
-                    <p class="text-gray-400 text-sm">Weekend runs and opening slots. Fans in neighboring cities follow to know when you're coming through.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Regional tours</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Weekend runs and opening slots. Fans in neighboring cities follow to know when you're coming through.</p>
                 </div>
 
                 <!-- Headlining -->
@@ -386,8 +386,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Headlining</h3>
-                    <p class="text-gray-400 text-sm">Your name on the marquee. Email your fans directly and sell out your own shows.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Headlining</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Your name on the marquee. Email your fans directly and sell out your own shows.</p>
                 </div>
 
                 <!-- Touring -->
@@ -397,8 +397,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">National tours</h3>
-                    <p class="text-gray-400 text-sm">Multi-city runs across the country. One link shows fans everywhere when you're hitting their town.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">National tours</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Multi-city runs across the country. One link shows fans everywhere when you're hitting their town.</p>
                 </div>
 
                 <!-- Festivals -->
@@ -408,8 +408,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Festivals & special events</h3>
-                    <p class="text-gray-400 text-sm">Festival slots, album release shows, and special performances all in one professional calendar.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Festivals & special events</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Festival slots, album release shows, and special performances all in one professional calendar.</p>
                 </div>
             </div>
         </div>
@@ -516,10 +516,10 @@
     </section>
 
     <!-- How it Works -->
-    <section class="bg-[#0a0a0f] py-24 border-t border-white/5">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/5">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Three steps to packed shows
                 </h2>
             </div>
@@ -529,8 +529,8 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-cyan-600 to-teal-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-cyan-600/25">
                         1
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Add your gigs</h3>
-                    <p class="text-gray-400 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Add your gigs</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">
                         Import from Google Calendar or add tour dates manually. Set up ticket sales if you want.
                     </p>
                 </div>
@@ -539,8 +539,8 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-cyan-600 to-teal-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-cyan-600/25">
                         2
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Share your link</h3>
-                    <p class="text-gray-400 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Share your link</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">
                         Add it to your Spotify bio, Bandcamp, EPK, or anywhere fans find you.
                     </p>
                 </div>
@@ -549,8 +549,8 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-cyan-600 to-teal-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-cyan-600/25">
                         3
                     </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">Grow your fanbase</h3>
-                    <p class="text-gray-400 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Grow your fanbase</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">
                         Fans follow your schedule and get notified about shows near them. Build your audience on your terms.
                     </p>
                 </div>
@@ -559,7 +559,7 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="relative bg-[#0a0a0f] py-24 overflow-hidden border-t border-cyan-900/20">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-24 overflow-hidden border-t border-cyan-200 dark:border-cyan-900/20">
         <!-- Mesh gradient background -->
         <div class="absolute inset-0">
             <div class="absolute top-0 left-[-10%] w-[50%] h-[60%] bg-cyan-600/15 rounded-full blur-[120px]"></div>
@@ -567,10 +567,10 @@
         </div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
                 Your music. Your fans. No gatekeepers.
             </h2>
-            <p class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
+            <p class="text-xl text-gray-500 dark:text-gray-400 mb-10 max-w-2xl mx-auto">
                 Stop posting into the void. Fill your shows.<br class="hidden md:block">Free forever.
             </p>
             <a href="{{ route('sign_up') }}" class="group inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-cyan-600 to-teal-600 rounded-2xl hover:scale-105 transition-transform duration-150 will-change-transform shadow-xl shadow-cyan-500/20">

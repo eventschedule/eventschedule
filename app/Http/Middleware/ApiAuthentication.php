@@ -6,6 +6,7 @@ use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class ApiAuthentication
@@ -41,7 +42,21 @@ class ApiAuthentication
             return response()->json(['error' => 'API key temporarily blocked'], 423);
         }
 
-        $user = User::where('api_key', $apiKey)->first();
+        // Find user using prefix-based lookup for efficiency
+        // api_key column stores first 8 chars of SHA256(raw_key) as an index
+        $keyPrefix = substr(hash('sha256', $apiKey), 0, 8);
+        $candidates = User::where('api_key', $keyPrefix)
+            ->whereNotNull('api_key_hash')
+            ->get();
+
+        $user = null;
+        foreach ($candidates as $candidate) {
+            // Verify full API key against bcrypt hash
+            if (Hash::check($apiKey, $candidate->api_key_hash)) {
+                $user = $candidate;
+                break;
+            }
+        }
 
         if (! $user) {
             // Increment failed attempts

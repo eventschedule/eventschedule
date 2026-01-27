@@ -538,6 +538,8 @@ return [
     'category' => 'Category',
     'all_categories' => 'All Categories',
     'subschedules' => 'Subschedules',
+    'subschedules_help' => 'Create subschedules to organize events into categories. Each subschedule gets its own URL.',
+    'add_subschedule' => 'Add Subschedule',
     'slug' => 'Slug',
     'all_schedules' => 'All Schedules',
     'filters' => 'Filters',

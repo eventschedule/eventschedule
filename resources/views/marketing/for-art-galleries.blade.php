@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background with purple/violet and gold tones -->
         <div class="absolute inset-0">
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-purple-700/20 rounded-full blur-[120px] animate-pulse-slow"></div>
@@ -17,19 +17,19 @@
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-8">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
                 <svg class="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span class="text-sm text-gray-300">For Art Galleries & Studios</span>
+                <span class="text-sm text-gray-600 dark:text-gray-300">For Art Galleries & Studios</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
                 Every opening night<br>
                 <span class="text-gradient-gallery">deserves an audience.</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
                 New exhibition opening? Your collectors know first. Build your email list and reach them directly - no paying Instagram to show your art to people who already follow you.
             </p>
 
@@ -55,13 +55,13 @@
     </section>
 
     <!-- The Gallery Year Section - UNIQUE TO ART GALLERIES -->
-    <section class="bg-[#0f0f14] py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     The gallery year
                 </h2>
-                <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
                     Exhibitions follow seasons. Spring solo shows, summer group exhibitions, fall art walks, and holiday markets. Your collectors want to know what's coming next.
                 </p>
             </div>
@@ -75,11 +75,11 @@
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
-                            <span class="text-white text-sm font-medium">New Year Group Show</span>
+                            <span class="text-gray-900 dark:text-white text-sm font-medium">New Year Group Show</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
-                            <span class="text-gray-300 text-sm">Emerging Artists</span>
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">Emerging Artists</span>
                         </div>
                     </div>
                 </div>
@@ -91,11 +91,11 @@
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                            <span class="text-white text-sm font-medium">Solo Exhibitions</span>
+                            <span class="text-gray-900 dark:text-white text-sm font-medium">Solo Exhibitions</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-teal-400"></div>
-                            <span class="text-gray-300 text-sm">Art Walk Season</span>
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">Art Walk Season</span>
                         </div>
                     </div>
                 </div>
@@ -107,11 +107,11 @@
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-                            <span class="text-white text-sm font-medium">Summer Group Show</span>
+                            <span class="text-gray-900 dark:text-white text-sm font-medium">Summer Group Show</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>
-                            <span class="text-gray-300 text-sm">Artist Residencies</span>
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">Artist Residencies</span>
                         </div>
                     </div>
                 </div>
@@ -123,11 +123,11 @@
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
-                            <span class="text-white text-sm font-medium">Fall Solo Shows</span>
+                            <span class="text-gray-900 dark:text-white text-sm font-medium">Fall Solo Shows</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-red-400"></div>
-                            <span class="text-gray-300 text-sm">Open Studios</span>
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">Open Studios</span>
                         </div>
                     </div>
                 </div>
@@ -139,11 +139,11 @@
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-purple-400"></div>
-                            <span class="text-white text-sm font-medium">Holiday Art Market</span>
+                            <span class="text-gray-900 dark:text-white text-sm font-medium">Holiday Art Market</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-rose-400"></div>
-                            <span class="text-gray-300 text-sm">Collector Events</span>
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">Collector Events</span>
                         </div>
                     </div>
                 </div>
@@ -151,23 +151,23 @@
 
             <!-- First Fridays note -->
             <div class="mt-8 text-center">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
                     <svg class="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <span class="text-gray-400 text-sm">Plus First Fridays, Art Walks, and recurring artist talks</span>
+                    <span class="text-gray-500 dark:text-gray-400 text-sm">Plus First Fridays, Art Walks, and recurring artist talks</span>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Bento Grid Features -->
-    <section class="bg-[#0a0a0f] py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Exhibition Announcements - HERO FEATURE (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-900/50 to-violet-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-900/50 to-violet-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-sm font-medium mb-4">
@@ -176,11 +176,11 @@
                                 </svg>
                                 Newsletter
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">New show opening? Your collectors know first.</h3>
-                            <p class="text-gray-400 text-lg mb-6">Stop hoping your Instagram post gets seen. One click sends your exhibition announcement, opening reception invite, or artist talk straight to everyone who wants to know.</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">New show opening? Your collectors know first.</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Stop hoping your Instagram post gets seen. One click sends your exhibition announcement, opening reception invite, or artist talk straight to everyone who wants to know.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Skip the algorithm</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Your list, your reach</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Skip the algorithm</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Your list, your reach</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -193,22 +193,22 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <div class="text-white text-sm font-medium">Opening Reception</div>
+                                            <div class="text-gray-900 dark:text-white text-sm font-medium">Opening Reception</div>
                                             <div class="text-purple-300 text-xs">Sending to 1,847 collectors...</div>
                                         </div>
                                     </div>
                                     <div class="space-y-2">
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
                                             <div class="w-2 h-2 rounded-full bg-purple-400"></div>
-                                            <span class="text-gray-300 text-xs">Sarah Chen: New Works</span>
+                                            <span class="text-gray-600 dark:text-gray-300 text-xs">Sarah Chen: New Works</span>
                                         </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
                                             <div class="w-2 h-2 rounded-full bg-amber-400"></div>
-                                            <span class="text-gray-300 text-xs">Friday, 6-9 PM</span>
+                                            <span class="text-gray-600 dark:text-gray-300 text-xs">Friday, 6-9 PM</span>
                                         </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
                                             <div class="w-2 h-2 rounded-full bg-fuchsia-400"></div>
-                                            <span class="text-gray-300 text-xs">Artist in attendance</span>
+                                            <span class="text-gray-600 dark:text-gray-300 text-xs">Artist in attendance</span>
                                         </div>
                                     </div>
                                 </div>
@@ -218,15 +218,15 @@
                 </div>
 
                 <!-- Opening Night Tickets -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-yellow-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-yellow-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                         </svg>
                         Ticketing
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Exclusive receptions that sell out</h3>
-                    <p class="text-gray-400 mb-6">VIP previews, opening night receptions, collector dinners. Sell tickets, limit capacity, scan at the door.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Exclusive receptions that sell out</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">VIP previews, opening night receptions, collector dinners. Sell tickets, limit capacity, scan at the door.</p>
 
                     <!-- Elegant ticket visual -->
                     <div class="flex justify-center">
@@ -246,38 +246,38 @@
                 </div>
 
                 <!-- Art Classes & Workshops -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-900/50 to-pink-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-900/50 to-pink-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Recurring Events
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Painting. Pottery. Photography.</h3>
-                    <p class="text-gray-400 mb-6">Workshops and classes that repeat weekly. Set it once, your students always know when to show up.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Painting. Pottery. Photography.</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Workshops and classes that repeat weekly. Set it once, your students always know when to show up.</p>
 
                     <!-- Class schedule visual -->
                     <div class="space-y-2">
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-fuchsia-500/20 border border-fuchsia-500/30">
                             <div class="w-2 h-2 rounded-full bg-fuchsia-400"></div>
-                            <span class="text-white text-sm">Life Drawing</span>
+                            <span class="text-gray-900 dark:text-white text-sm">Life Drawing</span>
                             <span class="ml-auto text-fuchsia-300 text-xs">Tuesdays</span>
                         </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-pink-400"></div>
-                            <span class="text-gray-300 text-sm">Ceramics Studio</span>
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">Ceramics Studio</span>
                             <span class="ml-auto text-gray-500 text-xs">Saturdays</span>
                         </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-rose-400"></div>
-                            <span class="text-gray-300 text-sm">Intro to Oils</span>
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">Intro to Oils</span>
                             <span class="ml-auto text-gray-500 text-xs">Thursdays</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Artist Submissions (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-blue-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-blue-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
@@ -286,21 +286,21 @@
                                 </svg>
                                 Booking Inbox
                             </div>
-                            <h3 class="text-3xl font-bold text-white mb-4">Artists come to you</h3>
-                            <p class="text-gray-400 text-lg mb-4">Artists can submit exhibition proposals right from your calendar page. Review portfolios, approve or decline. No more scattered emails.</p>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Artists come to you</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Artists can submit exhibition proposals right from your calendar page. Review portfolios, approve or decline. No more scattered emails.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Portfolio links</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Exhibition proposals</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">One-click approve</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Portfolio links</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Exhibition proposals</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">One-click approve</span>
                             </div>
                         </div>
-                        <div class="bg-black/30 rounded-2xl p-5 border border-white/10">
+                        <div class="bg-gray-100 dark:bg-black/30 rounded-2xl p-5 border border-gray-200 dark:border-white/10">
                             <div class="text-xs text-gray-500 mb-3">Artist Submissions</div>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-500/20 border border-indigo-400/30">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">MK</div>
                                     <div class="flex-1">
-                                        <div class="text-white text-sm font-medium">Maya Kim - Solo Show</div>
+                                        <div class="text-gray-900 dark:text-white text-sm font-medium">Maya Kim - Solo Show</div>
                                         <div class="text-indigo-300 text-xs">Mixed media &bull; Spring 2025</div>
                                     </div>
                                     <div class="flex gap-1">
@@ -312,10 +312,10 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5">
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/5">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold">JR</div>
                                     <div class="flex-1">
-                                        <div class="text-gray-300 text-sm font-medium">James Rivera</div>
+                                        <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">James Rivera</div>
                                         <div class="text-gray-500 text-xs">Photography &bull; Group show</div>
                                     </div>
                                 </div>
@@ -325,55 +325,55 @@
                 </div>
 
                 <!-- Multiple Gallery Spaces -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                         Spaces
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Main gallery. Project room. Sculpture garden.</h3>
-                    <p class="text-gray-400 mb-6">Separate calendars for each space. Visitors see what's showing where.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Main gallery. Project room. Sculpture garden.</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Separate calendars for each space. Visitors see what's showing where.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
                             <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
-                            <span class="text-white text-sm">Main Gallery</span>
+                            <span class="text-gray-900 dark:text-white text-sm">Main Gallery</span>
                             <span class="ml-auto text-emerald-300 text-xs">2 shows</span>
                         </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-teal-400"></div>
-                            <span class="text-gray-300 text-sm">Project Room</span>
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">Project Room</span>
                             <span class="ml-auto text-gray-500 text-xs">1 show</span>
                         </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
-                            <span class="text-gray-300 text-sm">Sculpture Garden</span>
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">Sculpture Garden</span>
                             <span class="ml-auto text-gray-500 text-xs">3 events</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Virtual Gallery Tours -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-purple-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-purple-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                         Online Events
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Tour the world from their screen</h3>
-                    <p class="text-gray-400 mb-6">Virtual exhibition tours, online artist talks. Sell tickets to viewers anywhere on earth.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Tour the world from their screen</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Virtual exhibition tours, online artist talks. Sell tickets to viewers anywhere on earth.</p>
 
-                    <div class="bg-black/30 rounded-xl border border-white/10 p-4">
+                    <div class="bg-gray-100 dark:bg-black/30 rounded-xl border border-gray-200 dark:border-white/10 p-4">
                         <div class="flex items-center justify-between mb-3">
-                            <span class="text-gray-300 text-xs">Virtual Tour</span>
+                            <span class="text-gray-600 dark:text-gray-300 text-xs">Virtual Tour</span>
                             <div class="flex items-center gap-1">
                                 <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
                                 <span class="text-red-400 text-[10px]">LIVE</span>
                             </div>
                         </div>
-                        <div class="flex items-center justify-center gap-2 text-gray-400 text-xs">
+                        <div class="flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400 text-xs">
                             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
@@ -383,22 +383,22 @@
                 </div>
 
                 <!-- Exhibition Graphics - BOTTOM RIGHT -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-900/50 to-pink-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-900/50 to-pink-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Graphics
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Ready for Instagram</h3>
-                    <p class="text-gray-400 mb-6">Auto-generate promotional graphics for exhibitions. Download and post in seconds.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Ready for Instagram</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Auto-generate promotional graphics for exhibitions. Download and post in seconds.</p>
 
                     <div class="flex justify-center">
                         <div class="relative w-32 h-32 bg-gradient-to-br from-purple-500/30 to-violet-500/30 rounded-xl border border-purple-400/30 p-2">
                             <div class="w-full h-full bg-gradient-to-br from-purple-600/40 to-fuchsia-700/40 rounded-lg flex flex-col items-center justify-center">
-                                <div class="text-white text-[10px] font-semibold mb-1">NOW SHOWING</div>
+                                <div class="text-gray-900 dark:text-white text-[10px] font-semibold mb-1">NOW SHOWING</div>
                                 <div class="text-amber-200 text-xs font-bold">New Works</div>
-                                <div class="text-gray-400 text-[8px] mt-1">Through April 30</div>
+                                <div class="text-gray-500 dark:text-gray-400 text-[8px] mt-1">Through April 30</div>
                             </div>
                             <div class="absolute -bottom-2 -right-2 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center">
                                 <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -414,14 +414,14 @@
     </section>
 
     <!-- Virtual Tours Section -->
-    <section class="relative bg-[#0a0a0f] py-20 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
             <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-purple-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-violet-900/50 to-purple-900/50 rounded-3xl border border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-violet-900/50 to-purple-900/50 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
@@ -430,12 +430,12 @@
                                 </svg>
                                 Global Reach
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-violet-300 transition-colors">Take your gallery global</h3>
-                            <p class="text-gray-400 text-lg mb-4">Virtual exhibition tours let collectors anywhere experience your shows. Online art classes reach students worldwide. Sell tickets to viewers who can't visit in person.</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-violet-300 transition-colors">Take your gallery global</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Virtual exhibition tours let collectors anywhere experience your shows. Online art classes reach students worldwide. Sell tickets to viewers who can't visit in person.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Virtual tours</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Online classes</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Artist talks</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Virtual tours</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Online classes</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Artist talks</span>
                             </div>
                             <span class="inline-flex items-center text-violet-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more about online events
@@ -445,9 +445,9 @@
                             </span>
                         </div>
                         <div class="flex-shrink-0">
-                            <div class="bg-black/30 rounded-2xl border border-white/10 p-6 w-52">
+                            <div class="bg-gray-100 dark:bg-black/30 rounded-2xl border border-gray-200 dark:border-white/10 p-6 w-52">
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="text-gray-300 text-xs">Virtual Tour</span>
+                                    <span class="text-gray-600 dark:text-gray-300 text-xs">Virtual Tour</span>
                                     <div class="flex items-center gap-1">
                                         <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
                                         <span class="text-red-400 text-[10px]">LIVE</span>
@@ -455,10 +455,10 @@
                                 </div>
                                 <div class="bg-gradient-to-br from-purple-600/30 to-violet-600/30 rounded-lg p-4 text-center mb-3">
                                     <div class="text-2xl mb-1">&#127912;</div>
-                                    <div class="text-white text-sm font-medium">Gallery Walkthrough</div>
-                                    <div class="text-gray-400 text-xs">with Curator Lisa Park</div>
+                                    <div class="text-gray-900 dark:text-white text-sm font-medium">Gallery Walkthrough</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-xs">with Curator Lisa Park</div>
                                 </div>
-                                <div class="flex items-center justify-center gap-2 text-gray-400 text-xs">
+                                <div class="flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400 text-xs">
                                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
@@ -473,7 +473,7 @@
     </section>
 
     <!-- Perfect For Section -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-gray-50 py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -575,7 +575,7 @@
     </section>
 
     <!-- How it Works -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-gray-50 py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">

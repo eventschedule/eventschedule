@@ -15,6 +15,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Use "selfhost" not "self-host"** - Always write "selfhost" and "selfhosted" (no hyphen)
 - **Keep the sitemap up-to-date** - When adding new pages, add them to `resources/views/sitemap.blade.php`
 - **Complete bento grids** - When using bento grids, ensure all cells are filled (especially the bottom right corner)
+- **Support light and dark mode** - Always consider both light mode and dark mode when working on UI
 
 ## Terminology
 

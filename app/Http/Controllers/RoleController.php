@@ -987,6 +987,16 @@ class RoleController extends Controller
         $user->roles()->attach($role->id, ['created_at' => now(), 'level' => 'owner']);
 
         if ($request->hasFile('profile_image')) {
+            $file = $request->file('profile_image');
+
+            // Validate file extension and MIME type
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $extension = strtolower($file->getClientOriginalExtension());
+            if (! in_array($extension, $allowedExtensions) || ! in_array($file->getMimeType(), $allowedMimeTypes)) {
+                return back()->withErrors(['profile_image' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp']);
+            }
+
             if ($role->profile_image_url) {
                 $path = $role->getAttributes()['profile_image_url'];
                 if (config('filesystems.default') == 'local') {
@@ -995,8 +1005,7 @@ class RoleController extends Controller
                 Storage::delete($path);
             }
 
-            $file = $request->file('profile_image');
-            $filename = strtolower('profile_'.Str::random(32).'.'.$file->getClientOriginalExtension());
+            $filename = strtolower('profile_'.Str::random(32).'.'.$extension);
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->profile_image_url = $filename;
@@ -1004,6 +1013,16 @@ class RoleController extends Controller
         }
 
         if ($request->hasFile('header_image')) {
+            $file = $request->file('header_image');
+
+            // Validate file extension and MIME type
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $extension = strtolower($file->getClientOriginalExtension());
+            if (! in_array($extension, $allowedExtensions) || ! in_array($file->getMimeType(), $allowedMimeTypes)) {
+                return back()->withErrors(['header_image' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp']);
+            }
+
             if ($role->header_image_url) {
                 $path = $role->getAttributes()['header_image_url'];
                 if (config('filesystems.default') == 'local') {
@@ -1012,8 +1031,7 @@ class RoleController extends Controller
                 Storage::delete($path);
             }
 
-            $file = $request->file('header_image');
-            $filename = strtolower('header_'.Str::random(32).'.'.$file->getClientOriginalExtension());
+            $filename = strtolower('header_'.Str::random(32).'.'.$extension);
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->header_image_url = $filename;
@@ -1024,6 +1042,16 @@ class RoleController extends Controller
             $role->background_image = $request->background_image;
             $role->save();
         } elseif ($role->background == 'image' && $request->hasFile('background_image_url')) {
+            $file = $request->file('background_image_url');
+
+            // Validate file extension and MIME type
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $extension = strtolower($file->getClientOriginalExtension());
+            if (! in_array($extension, $allowedExtensions) || ! in_array($file->getMimeType(), $allowedMimeTypes)) {
+                return back()->withErrors(['background_image_url' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp']);
+            }
+
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
                 if (config('filesystems.default') == 'local') {
@@ -1032,8 +1060,7 @@ class RoleController extends Controller
                 Storage::delete($path);
             }
 
-            $file = $request->file('background_image_url');
-            $filename = strtolower('background_'.Str::random(32).'.'.$file->getClientOriginalExtension());
+            $filename = strtolower('background_'.Str::random(32).'.'.$extension);
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->background_image_url = $filename;
@@ -1353,6 +1380,16 @@ class RoleController extends Controller
         }
 
         if ($request->hasFile('profile_image')) {
+            $file = $request->file('profile_image');
+
+            // Validate file extension and MIME type
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $extension = strtolower($file->getClientOriginalExtension());
+            if (! in_array($extension, $allowedExtensions) || ! in_array($file->getMimeType(), $allowedMimeTypes)) {
+                return back()->withErrors(['profile_image' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp']);
+            }
+
             if ($role->profile_image_url) {
                 $path = $role->getAttributes()['profile_image_url'];
                 if (config('filesystems.default') == 'local') {
@@ -1361,8 +1398,7 @@ class RoleController extends Controller
                 Storage::delete($path);
             }
 
-            $file = $request->file('profile_image');
-            $filename = strtolower('profile_'.Str::random(32).'.'.$file->getClientOriginalExtension());
+            $filename = strtolower('profile_'.Str::random(32).'.'.$extension);
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->profile_image_url = $filename;
@@ -1370,6 +1406,16 @@ class RoleController extends Controller
         }
 
         if ($request->hasFile('header_image_url')) {
+            $file = $request->file('header_image_url');
+
+            // Validate file extension and MIME type
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $extension = strtolower($file->getClientOriginalExtension());
+            if (! in_array($extension, $allowedExtensions) || ! in_array($file->getMimeType(), $allowedMimeTypes)) {
+                return back()->withErrors(['header_image_url' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp']);
+            }
+
             if ($role->header_image_url) {
                 $path = $role->getAttributes()['header_image_url'];
                 if (config('filesystems.default') == 'local') {
@@ -1378,8 +1424,7 @@ class RoleController extends Controller
                 Storage::delete($path);
             }
 
-            $file = $request->file('header_image_url');
-            $filename = strtolower('header_'.Str::random(32).'.'.$file->getClientOriginalExtension());
+            $filename = strtolower('header_'.Str::random(32).'.'.$extension);
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->header_image_url = $filename;
@@ -1390,6 +1435,16 @@ class RoleController extends Controller
             $role->background_image = $request->background_image;
             $role->save();
         } elseif ($role->background == 'image' && $request->hasFile('background_image_url')) {
+            $file = $request->file('background_image_url');
+
+            // Validate file extension and MIME type
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $extension = strtolower($file->getClientOriginalExtension());
+            if (! in_array($extension, $allowedExtensions) || ! in_array($file->getMimeType(), $allowedMimeTypes)) {
+                return back()->withErrors(['background_image_url' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp']);
+            }
+
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
                 if (config('filesystems.default') == 'local') {
@@ -1398,8 +1453,7 @@ class RoleController extends Controller
                 Storage::delete($path);
             }
 
-            $file = $request->file('background_image_url');
-            $filename = strtolower('background_'.Str::random(32).'.'.$file->getClientOriginalExtension());
+            $filename = strtolower('background_'.Str::random(32).'.'.$extension);
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->background_image_url = $filename;

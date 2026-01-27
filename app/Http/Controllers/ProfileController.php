@@ -70,6 +70,16 @@ class ProfileController extends Controller
 
         if ($request->hasFile('profile_image')) {
             $user = $request->user();
+            $file = $request->file('profile_image');
+
+            // Validate file extension and MIME type
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $extension = strtolower($file->getClientOriginalExtension());
+            if (! in_array($extension, $allowedExtensions) || ! in_array($file->getMimeType(), $allowedMimeTypes)) {
+                return Redirect::to(route('profile.edit').'#section-profile')
+                    ->withErrors(['profile_image' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp']);
+            }
 
             if ($user->profile_image_url) {
                 $path = $user->getAttributes()['profile_image_url'];
@@ -79,8 +89,7 @@ class ProfileController extends Controller
                 Storage::delete($path);
             }
 
-            $file = $request->file('profile_image');
-            $filename = strtolower('profile_'.Str::random(32).'.'.$file->getClientOriginalExtension());
+            $filename = strtolower('profile_'.Str::random(32).'.'.$extension);
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $user->profile_image_url = $filename;

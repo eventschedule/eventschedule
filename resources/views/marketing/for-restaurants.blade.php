@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background with warm burgundy tones -->
         <div class="absolute inset-0">
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-rose-700/20 rounded-full blur-[120px] animate-pulse-slow"></div>
@@ -69,12 +69,12 @@
                 <span class="text-sm text-gray-300">For Restaurants & Dining Experiences</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
                 Turn first-time diners<br>
                 <span class="text-gradient-burgundy">into regulars.</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
+            <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-12">
                 Stop paying Facebook to reach people who already love your food. Build your list, announce your seasonal menus, and fill every seat at your next wine dinner.
             </p>
 
@@ -100,13 +100,13 @@
     </section>
 
     <!-- The Dining Year Section - UNIQUE TO RESTAURANTS -->
-    <section class="bg-[#0f0f14] py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     The dining year, planned
                 </h2>
-                <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
                     Restaurants run on seasons and occasions. Valentine's Day, Mother's Day, harvest menus, NYE galas - set up your annual calendar once, remind your fans every year.
                 </p>
             </div>
@@ -207,7 +207,7 @@
     </section>
 
     <!-- Bento Grid Features -->
-    <section class="bg-[#0a0a0f] py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
@@ -460,13 +460,13 @@
     </section>
 
     <!-- Customer Journey Section - From First Visit to Regular -->
-    <section class="bg-[#0f0f14] py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     From first visit to regular
                 </h2>
-                <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
                     Every diner can become a fan. Here's how Event Schedule helps you build lasting relationships.
                 </p>
             </div>
@@ -537,7 +537,7 @@
     </section>
 
     <!-- Virtual Cooking Classes Section -->
-    <section class="relative bg-[#0a0a0f] py-20 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
             <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
@@ -596,13 +596,13 @@
     </section>
 
     <!-- Perfect For Section -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Perfect for all types of restaurants
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     From fine dining to casual bistros, Event Schedule fits your style.
                 </p>
             </div>

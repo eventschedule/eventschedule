@@ -7,7 +7,7 @@
     @include('marketing.docs.partials.styles')
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-16 overflow-hidden border-b border-white/5">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-cyan-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
             <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
@@ -23,28 +23,28 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold text-white">Getting Started</h1>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Getting Started</h1>
             </div>
-            <p class="text-lg text-gray-400 max-w-3xl">
+            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
                 Go from zero to a live event calendar in under 5 minutes. No credit card required - it's free forever.
             </p>
         </div>
     </section>
 
     <!-- Main Content -->
-    <section class="bg-[#0a0a0f] py-12">
+    <section class="bg-white dark:bg-[#0a0a0f] py-12">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row gap-10">
                 <!-- Sidebar Navigation -->
                 <aside class="lg:w-64 flex-shrink-0">
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
-                        <a href="#create-account" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Create Your Account</a>
-                        <a href="#create-schedule" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Create Your Schedule</a>
-                        <a href="#schedule-types" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Schedule Types</a>
-                        <a href="#customize" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Customize Your Schedule</a>
-                        <a href="#faq" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">FAQ</a>
-                        <a href="#next-steps" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Next Steps</a>
+                        <a href="#create-account" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Create Your Account</a>
+                        <a href="#create-schedule" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Create Your Schedule</a>
+                        <a href="#schedule-types" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Schedule Types</a>
+                        <a href="#customize" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Customize Your Schedule</a>
+                        <a href="#faq" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">FAQ</a>
+                        <a href="#next-steps" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Next Steps</a>
                     </nav>
                 </aside>
 
@@ -54,7 +54,7 @@
                         <!-- Create Account -->
                         <section id="create-account" class="doc-section">
                             <h2 class="doc-heading">Create Your Account in Seconds</h2>
-                            <p class="text-gray-300 mb-6">Event Schedule is free forever - no trials, no credit card, no catch. Create an account using your email or sign in with Google.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule is free forever - no trials, no credit card, no catch. Create an account using your email or sign in with Google.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Visit <a href="{{ route('sign_up') }}" class="text-cyan-400 hover:text-cyan-300">the registration page</a></li>
@@ -72,14 +72,14 @@
                         <!-- Create Schedule -->
                         <section id="create-schedule" class="doc-section">
                             <h2 class="doc-heading">Create Your Schedule</h2>
-                            <p class="text-gray-300 mb-6">A schedule is your event calendar - it's where all your events live. Each schedule gets its own unique URL that you can share with your audience.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">A schedule is your event calendar - it's where all your events live. Each schedule gets its own unique URL that you can share with your audience.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>After logging in, click <strong class="text-white">"New Schedule"</strong> from your dashboard</li>
+                                <li>After logging in, click <strong class="text-gray-900 dark:text-white">"New Schedule"</strong> from your dashboard</li>
                                 <li>Choose a schedule type (see below)</li>
                                 <li>Enter your schedule name and pick a unique URL</li>
                                 <li>Add optional details like location, description, and logo</li>
-                                <li>Click <strong class="text-white">"Create"</strong> to finish</li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">"Create"</strong> to finish</li>
                             </ol>
 
                             <div class="doc-callout doc-callout-info">
@@ -91,7 +91,7 @@
                         <!-- Schedule Types -->
                         <section id="schedule-types" class="doc-section">
                             <h2 class="doc-heading">Schedule Types</h2>
-                            <p class="text-gray-300 mb-6">Event Schedule supports different types of schedules to match your needs:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule supports different types of schedules to match your needs:</p>
 
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
@@ -104,22 +104,22 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Talent</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Talent</span></td>
                                             <td>Musicians, DJs, performers, speakers</td>
                                             <td>A band listing their upcoming shows</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Venue</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Venue</span></td>
                                             <td>Bars, clubs, theaters, event spaces</td>
                                             <td>A club listing all their events</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Curator</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Curator</span></td>
                                             <td>Promoters, bloggers, community organizers</td>
                                             <td>A local music blog listing concerts in the area</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Vendor</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Vendor</span></td>
                                             <td>Food trucks, mobile businesses, pop-up shops</td>
                                             <td>A food truck listing where they'll be parked</td>
                                         </tr>
@@ -127,30 +127,30 @@
                                 </table>
                             </div>
 
-                            <p class="text-gray-300">The schedule type affects how your events are displayed and what information is shown. <strong class="text-white">Talent</strong> schedules emphasize where you'll be performing. <strong class="text-white">Venue</strong> schedules show your full address with map integration. You can change this later in your schedule settings.</p>
+                            <p class="text-gray-600 dark:text-gray-300">The schedule type affects how your events are displayed and what information is shown. <strong class="text-gray-900 dark:text-white">Talent</strong> schedules emphasize where you'll be performing. <strong class="text-gray-900 dark:text-white">Venue</strong> schedules show your full address with map integration. You can change this later in your schedule settings.</p>
                         </section>
 
                         <!-- Customize -->
                         <section id="customize" class="doc-section">
                             <h2 class="doc-heading">Customize Your Schedule</h2>
-                            <p class="text-gray-300 mb-6">Make your schedule your own with customization options:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Make your schedule your own with customization options:</p>
 
                             <div class="space-y-4 mb-6">
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Profile Information</h4>
-                                    <p class="text-sm text-gray-400">Add your logo, description, website, and social links so visitors know who you are.</p>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Profile Information</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Add your logo, description, website, and social links so visitors know who you are.</p>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Location</h4>
-                                    <p class="text-sm text-gray-400">For venues, add your address. This helps visitors find you and enables map integration.</p>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Location</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">For venues, add your address. This helps visitors find you and enables map integration.</p>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Display Settings</h4>
-                                    <p class="text-sm text-gray-400">Choose your timezone, date format, and language preferences.</p>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Display Settings</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose your timezone, date format, and language preferences.</p>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Subschedules</h4>
-                                    <p class="text-sm text-gray-400">Create subschedules to organize your events (e.g., "Live Music", "DJ Nights", "Comedy").</p>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Subschedules</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Create subschedules to organize your events (e.g., "Live Music", "DJ Nights", "Comedy").</p>
                                 </div>
                             </div>
 
@@ -165,25 +165,25 @@
                             <h2 class="doc-heading">Frequently Asked Questions</h2>
 
                             <div class="space-y-4 mb-6">
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Can I have multiple schedules?</h4>
-                                    <p class="text-sm text-gray-400">Yes, you can create unlimited schedules under one account. This is useful if you manage multiple venues, bands, or organizations.</p>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Can I have multiple schedules?</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Yes, you can create unlimited schedules under one account. This is useful if you manage multiple venues, bands, or organizations.</p>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">How do I change my schedule URL?</h4>
-                                    <p class="text-sm text-gray-400">Go to <strong class="text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and update the URL/subdomain field. Note that changing your URL may break existing links.</p>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How do I change my schedule URL?</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and update the URL/subdomain field. Note that changing your URL may break existing links.</p>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">What's the difference between schedule types?</h4>
-                                    <p class="text-sm text-gray-400"><strong class="text-white">Talent</strong> schedules show where you'll be performing. <strong class="text-white">Venue</strong> schedules show what's happening at your location (with full address support). <strong class="text-white">Curator</strong> schedules aggregate events from multiple sources. <strong class="text-white">Vendor</strong> schedules are for mobile businesses like food trucks. You can change your type anytime.</p>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">What's the difference between schedule types?</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Talent</strong> schedules show where you'll be performing. <strong class="text-gray-900 dark:text-white">Venue</strong> schedules show what's happening at your location (with full address support). <strong class="text-gray-900 dark:text-white">Curator</strong> schedules aggregate events from multiple sources. <strong class="text-gray-900 dark:text-white">Vendor</strong> schedules are for mobile businesses like food trucks. You can change your type anytime.</p>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Can I import events from my existing calendar?</h4>
-                                    <p class="text-sm text-gray-400">Yes! Event Schedule supports Google Calendar and CalDAV sync. Connect your calendar in <strong class="text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> under Calendar Sync. You can also import events using AI from text or images.</p>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Can I import events from my existing calendar?</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Yes! Event Schedule supports Google Calendar and CalDAV sync. Connect your calendar in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> under Calendar Sync. You can also import events using AI from text or images.</p>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 class="font-semibold text-white mb-2">Is Event Schedule free?</h4>
-                                    <p class="text-sm text-gray-400">Yes - free forever! The free plan includes unlimited events, unlimited schedules, a custom subdomain, and all core features. No trials, no credit card required. Pro features like custom domains, branding removal, and ticketing are available for just $5/month after the first year free.</p>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Is Event Schedule free?</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Yes - free forever! The free plan includes unlimited events, unlimited schedules, a custom subdomain, and all core features. No trials, no credit card required. Pro features like custom domains, branding removal, and ticketing are available for just $5/month after the first year free.</p>
                                 </div>
                             </div>
                         </section>
@@ -191,7 +191,7 @@
                         <!-- Next Steps -->
                         <section id="next-steps" class="doc-section">
                             <h2 class="doc-heading">Next Steps</h2>
-                            <p class="text-gray-300 mb-6">Now that your schedule is set up, here's what to do next:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Now that your schedule is set up, here's what to do next:</p>
 
                             <ul class="doc-list">
                                 <li><a href="{{ route('marketing.docs.schedule_basics') }}" class="text-cyan-400 hover:text-cyan-300">Configure schedule basics</a> - Set up name, location, contact info, and settings</li>

@@ -690,6 +690,49 @@
                                 class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">{{ old('description', $role->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
+
+                        <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+                            <x-input-label for="language_code" :value="__('messages.language') " />
+                            <select name="language_code" id="language_code" required {{ is_demo_mode() ? 'disabled' : '' }}
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                @foreach([
+                                'ar' => 'arabic',
+                                'en' => 'english',
+                                'nl' => 'dutch',
+                                'fr' => 'french',
+                                'de' => 'german',
+                                'he' => 'hebrew',
+                                'it' => 'italian',
+                                'pt' => 'portuguese',
+                                'es' => 'spanish',
+                                ] as $key => $value)
+                                <option value="{{ $key }}" {{ $role->language_code == $key ? 'SELECTED' : '' }}>
+                                    {{ __('messages.' . $value) }}
+                                </option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('language_code')" />
+                        </div>
+
+                        <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+                            <x-input-label for="timezone" :value="__('messages.timezone')" />
+                            <select name="timezone" id="timezone" required {{ is_demo_mode() ? 'disabled' : '' }}
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
+                                <option value="{{ $timezone }}" {{ $role->timezone == $timezone ? 'SELECTED' : '' }}>
+                                    {{ $timezone }}
+                                </option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('timezone')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-checkbox name="use_24_hour_time" label="{{ __('messages.use_24_hour_time_format') }}"
+                                checked="{{ old('use_24_hour_time', $role->use_24_hour_time) }}"
+                                data-custom-attribute="value" />
+                            <x-input-error class="mt-2" :messages="$errors->get('use_24_hour_time')" />
+                        </div>
                     </div>
                 </div>
 
@@ -1227,12 +1270,11 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                                     </svg>
                                 </button>
-                                <button type="button" onclick="toggleSubdomainEdit()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 ml-2" title="{{ __('messages.edit_url') }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                                    </svg>
                                 </button>
                             </p>
+                            <x-secondary-button type="button" onclick="toggleSubdomainEdit()" class="mt-3">
+                                {{ __('messages.edit') }}
+                            </x-secondary-button>
                         </div>
                         @if (!is_demo_mode())
                         <div class="hidden" id="subdomain-edit">
@@ -1244,58 +1286,19 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('new_subdomain')" />
                             </div>
 
-                            <div class="mb-6">
+                            <div>
                                 <x-input-label for="custom_domain" :value="__('messages.custom_domain')" />
                                 <x-text-input id="custom_domain" name="custom_domain" type="url" class="mt-1 block w-full"
                                     :value="old('custom_domain', $role->custom_domain)" />
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_domain')" />
                             </div>
+
+                            <x-secondary-button type="button" onclick="toggleSubdomainEdit()" class="mt-3 mb-6">
+                                {{ __('messages.cancel') }}
+                            </x-secondary-button>
                         </div>
                         @endif
                         @endif
-
-                        <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
-                            <x-input-label for="language_code" :value="__('messages.language') " />
-                            <select name="language_code" id="language_code" required {{ is_demo_mode() ? 'disabled' : '' }}
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                @foreach([
-                                'ar' => 'arabic',
-                                'en' => 'english',
-                                'nl' => 'dutch',
-                                'fr' => 'french',
-                                'de' => 'german',
-                                'he' => 'hebrew',
-                                'it' => 'italian',
-                                'pt' => 'portuguese',
-                                'es' => 'spanish',
-                                ] as $key => $value)
-                                <option value="{{ $key }}" {{ $role->language_code == $key ? 'SELECTED' : '' }}>
-                                    {{ __('messages.' . $value) }}
-                                </option>
-                                @endforeach
-                            </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('language_code')" />
-                        </div>
-
-                        <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
-                            <x-input-label for="timezone" :value="__('messages.timezone')" />
-                            <select name="timezone" id="timezone" required {{ is_demo_mode() ? 'disabled' : '' }}
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
-                                <option value="{{ $timezone }}" {{ $role->timezone == $timezone ? 'SELECTED' : '' }}>
-                                    {{ $timezone }}
-                                </option>
-                                @endforeach
-                            </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('timezone')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-checkbox name="use_24_hour_time" label="{{ __('messages.use_24_hour_time_format') }}"
-                                checked="{{ old('use_24_hour_time', $role->use_24_hour_time) }}"
-                                data-custom-attribute="value" />
-                            <x-input-error class="mt-2" :messages="$errors->get('use_24_hour_time')" />
-                        </div>
 
                         <div class="mb-6">
                             <x-input-label for="slug_pattern" :value="__('messages.slug_pattern')" />
@@ -1435,6 +1438,7 @@
 
                         <!-- Tab Content: Subschedules -->
                         <div id="settings-tab-subschedules" class="settings-tab-content hidden">
+                        <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.subschedules_help') }}</p>
                         <div class="mb-6">
                             <div id="groups-list">
                                 @php $groups = $role->groups ?? []; @endphp
@@ -1442,7 +1446,7 @@
                                     @foreach(old('groups', $groups) as $i => $group)
                                         <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                                             <div class="mb-4">
-                                                <x-input-label for="group_name_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.name')" />
+                                                <x-input-label for="group_name_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.name') . ' *'" />
                                                 <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name : $group['name'] ?? ''" />
                                             </div>
                                             @if($role->language_code !== 'en' || app()->getLocale() !== 'en')
@@ -1468,21 +1472,23 @@
                                                 <x-input-label for="group_slug_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.slug')" />
                                                 <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][slug]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->slug : $group['slug'] ?? ''" />
                                             </div>
-                                            <div class="flex gap-4 items-center">
-                                                <x-secondary-button type="button" onclick="toggleGroupSlugEdit('{{ is_object($group) ? $group->id : $i }}')" id="edit-button-{{ is_object($group) ? $group->id : $i }}">
-                                                    {{ __('messages.edit') }}
-                                                </x-secondary-button>
-                                                @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
-                                                <x-secondary-button type="button" onclick="toggleGroupSlugEdit('{{ is_object($group) ? $group->id : $i }}')" class="hidden" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
-                                                    {{ __('messages.cancel') }}
-                                                </x-secondary-button>
-                                                @endif
+                                            <div class="flex gap-4 items-center justify-between">
+                                                <div class="flex gap-4 items-center">
+                                                    <x-secondary-button type="button" onclick="toggleGroupSlugEdit('{{ is_object($group) ? $group->id : $i }}')" id="edit-button-{{ is_object($group) ? $group->id : $i }}">
+                                                        {{ __('messages.edit') }}
+                                                    </x-secondary-button>
+                                                    @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
+                                                    <x-secondary-button type="button" onclick="toggleGroupSlugEdit('{{ is_object($group) ? $group->id : $i }}')" class="hidden" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
+                                                        {{ __('messages.cancel') }}
+                                                    </x-secondary-button>
+                                                    @endif
+                                                </div>
                                                 <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
                                                     {{ __('messages.remove') }}
                                                 </x-secondary-button>
                                             </div>
                                             @else
-                                            <div class="flex gap-4 items-center">
+                                            <div class="flex gap-4 items-center justify-end">
                                                 <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
                                                     {{ __('messages.remove') }}
                                                 </x-secondary-button>
@@ -1492,7 +1498,7 @@
                                     @endforeach
                                 </div>
                                 <x-secondary-button type="button" onclick="addGroupField()">
-                                    {{ __('messages.add') }}
+                                    {{ __('messages.add_subschedule') }}
                                 </x-secondary-button>
                             </div>
                             <x-input-error class="mt-2" :messages="$errors->get('groups')" />
@@ -2032,7 +2038,7 @@ function addGroupField() {
     div.className = 'mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg';
     div.innerHTML = `
         <div class="mb-4">
-            <label for="group_name_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.name') }}</label>
+            <label for="group_name_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.name') }} *</label>
             <input name="groups[new_${idx}][name]" type="text" id="group_name_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
         </div>
         @if($role->language_code !== 'en' || app()->getLocale() !== 'en')
@@ -2041,7 +2047,7 @@ function addGroupField() {
             <input name="groups[new_${idx}][name_en]" type="text" id="group_name_en_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
         </div>
         @endif
-        <div class="flex gap-4 items-center">
+        <div class="flex gap-4 items-center justify-end">
             <button type="button" class="inline-flex items-center justify-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.parentElement.remove()">
                 {{ __('messages.remove') }}
             </button>

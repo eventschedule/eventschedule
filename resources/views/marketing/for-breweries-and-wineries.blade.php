@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
 
     <!-- Hero Section with Floating Release Card -->
-    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background with copper/amber and purple tones -->
         <div class="absolute inset-0">
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-amber-700/20 rounded-full blur-[120px] animate-pulse-slow"></div>
@@ -19,19 +19,19 @@
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row items-center gap-12">
                 <div class="flex-1 text-center lg:text-left">
-                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-8">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
                         <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                         </svg>
-                        <span class="text-sm text-gray-300">For Breweries, Wineries & Tasting Rooms</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-300">For Breweries, Wineries & Tasting Rooms</span>
                     </div>
 
-                    <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+                    <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
                         Every pour<br>
                         <span class="text-gradient-copper">deserves an audience.</span>
                     </h1>
 
-                    <p class="text-xl md:text-2xl text-gray-400 max-w-xl mb-12">
+                    <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-xl mb-12">
                         New release hitting taps? Hosting a tasting this weekend? Email your fans directly - no paying Facebook to reach people who already love your craft.
                     </p>
 
@@ -94,13 +94,13 @@
     </section>
 
     <!-- The Release Cycle - UNIQUE TO PRODUCERS -->
-    <section class="bg-[#0f0f14] py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     From grain to glass, vine to bottle
                 </h2>
-                <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
                     You don't just serve drinks - you create them. Your fans want to follow the journey, from first brew day to release party.
                 </p>
             </div>
@@ -117,7 +117,7 @@
                         <div class="text-center lg:pt-6">
                             <div class="text-3xl mb-3">&#127806;</div>
                             <div class="text-amber-300 text-sm font-semibold tracking-wider uppercase mb-2">The Craft</div>
-                            <p class="text-gray-400 text-sm">Share behind-the-scenes: harvest updates, brew day photos, barrel selection. Build anticipation from day one.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">Share behind-the-scenes: harvest updates, brew day photos, barrel selection. Build anticipation from day one.</p>
                         </div>
                     </div>
 
@@ -127,7 +127,7 @@
                         <div class="text-center lg:pt-6">
                             <div class="text-3xl mb-3">&#127866;</div>
                             <div class="text-purple-300 text-sm font-semibold tracking-wider uppercase mb-2">The Wait</div>
-                            <p class="text-gray-400 text-sm">Aging in barrels, fermenting in tanks. Tease your members with early samples and first-access previews.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">Aging in barrels, fermenting in tanks. Tease your members with early samples and first-access previews.</p>
                         </div>
                     </div>
 
@@ -137,7 +137,7 @@
                         <div class="text-center lg:pt-6">
                             <div class="text-3xl mb-3">&#127881;</div>
                             <div class="text-rose-300 text-sm font-semibold tracking-wider uppercase mb-2">The Release</div>
-                            <p class="text-gray-400 text-sm">The moment arrives. Email blast, release party, allocations ship. Your fans showed up because you told them first.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">The moment arrives. Email blast, release party, allocations ship. Your fans showed up because you told them first.</p>
                         </div>
                     </div>
 
@@ -147,7 +147,7 @@
                         <div class="text-center lg:pt-6">
                             <div class="text-3xl mb-3">&#129346;</div>
                             <div class="text-emerald-300 text-sm font-semibold tracking-wider uppercase mb-2">The Community</div>
-                            <p class="text-gray-400 text-sm">Taproom visits, club events, share nights. The relationship continues until the next release.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">Taproom visits, club events, share nights. The relationship continues until the next release.</p>
                         </div>
                     </div>
                 </div>
@@ -155,23 +155,23 @@
 
             <!-- Producer focus note -->
             <div class="mt-10 text-center">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
                     <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    <span class="text-gray-400 text-sm">You make what you sell. That story is worth sharing.</span>
+                    <span class="text-gray-500 dark:text-gray-400 text-sm">You make what you sell. That story is worth sharing.</span>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Bento Grid Features -->
-    <section class="bg-[#0a0a0f] py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Release Announcements - HERO FEATURE (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
@@ -180,11 +180,11 @@
                                 </svg>
                                 Release Announcements
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Limited release? Your fans know first.</h3>
-                            <p class="text-gray-400 text-lg mb-6">That bourbon barrel stout you've been aging for 18 months? The reserve Pinot from the best vintage in a decade? One click sends it straight to everyone who wants to know - before it's gone.</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Limited release? Your fans know first.</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">That bourbon barrel stout you've been aging for 18 months? The reserve Pinot from the best vintage in a decade? One click sends it straight to everyone who wants to know - before it's gone.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Skip the algorithm</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Straight from the source</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Skip the algorithm</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Straight from the source</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -225,18 +225,18 @@
                 </div>
 
                 <!-- Club Members First / Allocation -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-900/50 to-pink-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-900/50 to-pink-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                         </svg>
                         First Access
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Club members get first dibs</h3>
-                    <p class="text-gray-400 mb-6">Limited releases sell out fast. Your loyal fans - mug club, wine club, email list - get the heads up before anyone else.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Club members get first dibs</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Limited releases sell out fast. Your loyal fans - mug club, wine club, email list - get the heads up before anyone else.</p>
 
                     <!-- Waitlist visual -->
-                    <div class="bg-black/30 rounded-xl p-4 border border-white/10">
+                    <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center justify-between mb-3">
                             <span class="text-gray-400 text-xs">2024 Reserve Allocation</span>
                             <span class="text-rose-300 text-xs font-medium">47 spots left</span>
@@ -257,15 +257,15 @@
                 </div>
 
                 <!-- Ticketed Tastings -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-900/50 to-violet-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-900/50 to-violet-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                         </svg>
                         Ticketing
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Tastings worth paying for</h3>
-                    <p class="text-gray-400 mb-6">Barrel room tours, vertical tastings, winemaker dinners. Sell tickets, limit capacity, scan at the door.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Tastings worth paying for</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Barrel room tours, vertical tastings, winemaker dinners. Sell tickets, limit capacity, scan at the door.</p>
 
                     <!-- Ticket card visual -->
                     <div class="flex justify-center">
@@ -282,7 +282,7 @@
                 </div>
 
                 <!-- Private Events & Tours (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-blue-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-blue-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
@@ -291,15 +291,15 @@
                                 </svg>
                                 Booking Inbox
                             </div>
-                            <h3 class="text-3xl font-bold text-white mb-4">Tours and private events come to you</h3>
-                            <p class="text-gray-400 text-lg mb-4">Corporate team outings, bachelorette parties, private tastings. They submit the request, you approve. No email ping-pong.</p>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Tours and private events come to you</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Corporate team outings, bachelorette parties, private tastings. They submit the request, you approve. No email ping-pong.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Group tours</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Private parties</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Buyouts</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Group tours</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Private parties</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Buyouts</span>
                             </div>
                         </div>
-                        <div class="bg-black/30 rounded-2xl p-5 border border-white/10">
+                        <div class="bg-gray-100 dark:bg-black/30 rounded-2xl p-5 border border-gray-200 dark:border-white/10">
                             <div class="text-xs text-gray-500 mb-3">Booking Requests</div>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-500/20 border border-indigo-400/30">
@@ -317,10 +317,10 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5">
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/5">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white text-xs font-semibold">JM</div>
                                     <div class="flex-1">
-                                        <div class="text-gray-300 text-sm font-medium">Jamie's Bachelorette</div>
+                                        <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Jamie's Bachelorette</div>
                                         <div class="text-gray-500 text-xs">Oct 28 &bull; 12 people</div>
                                     </div>
                                 </div>
@@ -330,15 +330,15 @@
                 </div>
 
                 <!-- Multiple Spaces -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                         Spaces
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Taproom. Patio. Barrel room.</h3>
-                    <p class="text-gray-400 mb-6">Separate calendars for each space. Visitors see what's happening where.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Taproom. Patio. Barrel room.</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Separate calendars for each space. Visitors see what's happening where.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
@@ -346,29 +346,29 @@
                             <span class="text-white text-sm">Taproom</span>
                             <span class="ml-auto text-emerald-300 text-xs">6 events</span>
                         </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-amber-400"></div>
-                            <span class="text-gray-300 text-sm">Patio & Beer Garden</span>
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">Patio & Beer Garden</span>
                             <span class="ml-auto text-gray-500 text-xs">4 events</span>
                         </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-purple-400"></div>
-                            <span class="text-gray-300 text-sm">Barrel Room</span>
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">Barrel Room</span>
                             <span class="ml-auto text-gray-500 text-xs">2 events</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- What's Pouring Today - QR Code Feature -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-900/50 to-red-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-900/50 to-red-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 text-orange-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h2m10 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                         </svg>
                         Live Menu
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">What's pouring today</h3>
-                    <p class="text-gray-400 mb-6">QR code for your current tap list. Visitors scan, you update. No printed menus to change.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">What's pouring today</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">QR code for your current tap list. Visitors scan, you update. No printed menus to change.</p>
 
                     <!-- QR code visual -->
                     <div class="flex justify-center">
@@ -411,15 +411,15 @@
                 </div>
 
                 <!-- Event Graphics - BOTTOM RIGHT -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-teal-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-teal-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Graphics
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Ready for social</h3>
-                    <p class="text-gray-400 mb-6">Auto-generate promo graphics for release parties. Download and post in seconds.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Ready for social</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Auto-generate promo graphics for release parties. Download and post in seconds.</p>
 
                     <div class="flex justify-center">
                         <div class="relative w-32 h-32 bg-gradient-to-br from-amber-500/30 to-orange-500/30 rounded-xl border border-amber-400/30 p-2">
@@ -442,14 +442,14 @@
     </section>
 
     <!-- Virtual Tastings Section -->
-    <section class="relative bg-[#0a0a0f] py-20 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
             <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-indigo-900/50 to-violet-900/50 rounded-3xl border border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-indigo-900/50 to-violet-900/50 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
@@ -458,12 +458,12 @@
                                 </svg>
                                 Online Events
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-indigo-300 transition-colors">Virtual tastings go global</h3>
-                            <p class="text-gray-400 text-lg mb-4">Ship your product, host a live tasting. Fans anywhere can join, pay, and taste along. Turn your taproom into a worldwide experience.</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-300 transition-colors">Virtual tastings go global</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Ship your product, host a live tasting. Fans anywhere can join, pay, and taste along. Turn your taproom into a worldwide experience.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Live tastings</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Sell tickets worldwide</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Any platform</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Live tastings</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Sell tickets worldwide</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Any platform</span>
                             </div>
                             <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -473,9 +473,9 @@
                             </span>
                         </div>
                         <div class="flex-shrink-0">
-                            <div class="bg-black/30 rounded-2xl border border-white/10 p-6 w-52">
+                            <div class="bg-gray-100 dark:bg-black/30 rounded-2xl border border-gray-200 dark:border-white/10 p-6 w-52">
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="text-gray-300 text-xs">Virtual Tasting</span>
+                                    <span class="text-gray-600 dark:text-gray-300 text-xs">Virtual Tasting</span>
                                     <div class="flex items-center gap-1">
                                         <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
                                         <span class="text-red-400 text-[10px]">LIVE</span>
@@ -501,13 +501,13 @@
     </section>
 
     <!-- Perfect For Section -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Perfect for all types of craft beverage makers
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     From small-batch breweries to estate wineries, Event Schedule fits your operation.
                 </p>
             </div>
@@ -601,13 +601,13 @@
     </section>
 
     <!-- How it Works -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     How it works
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Get your tasting room calendar online in three steps.
                 </p>
             </div>
@@ -617,8 +617,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-amber-600 to-amber-800 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/25">
                         1
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Add your brewery or winery</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Add your brewery or winery</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Upload your logo, add your spaces (taproom, patio, barrel room), and customize your branding.
                     </p>
                 </div>
@@ -627,8 +627,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-amber-600 to-amber-800 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/25">
                         2
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Post your events</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Post your events</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Release parties, tastings, live music. Add tickets if needed. Set recurring events once and forget about them.
                     </p>
                 </div>
@@ -637,8 +637,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-amber-600 to-amber-800 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/25">
                         3
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Build your fan list</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Build your fan list</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Visitors follow your calendar. When you post a new release, it goes straight to their inbox. No middleman.
                     </p>
                 </div>

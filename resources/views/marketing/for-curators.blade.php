@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->
         <div class="absolute inset-0">
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-amber-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
@@ -23,12 +23,12 @@
                 <span class="text-sm text-gray-300">For Bloggers, Community Orgs & Aggregators</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
                 Build the ultimate<br>
                 <span class="text-gradient">local guide</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
+            <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-12">
                 Aggregate events from everywhere. Curate what's happening in your city or niche.
             </p>
 
@@ -44,7 +44,7 @@
     </section>
 
     <!-- Bento Grid Features -->
-    <section class="bg-[#0a0a0f] py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
@@ -312,7 +312,7 @@
     </section>
 
     <!-- Stream to the World Section -->
-    <section class="relative bg-[#0a0a0f] py-20 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
             <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
@@ -374,13 +374,13 @@
     </section>
 
     <!-- How it Works -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     How it works
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Start curating events in three steps.
                 </p>
             </div>
@@ -390,8 +390,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/25">
                         1
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Create Your Guide</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Create Your Guide</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Sign up and set up your local guide. Choose your city, niche, or theme.
                     </p>
                 </div>
@@ -400,8 +400,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/25">
                         2
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Import Events</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Import Events</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Use AI import, city search, or aggregate from venues and performers.
                     </p>
                 </div>
@@ -410,8 +410,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/25">
                         3
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Grow Your Audience</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Grow Your Audience</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Share your guide. Followers get notified when you add new events.
                     </p>
                 </div>

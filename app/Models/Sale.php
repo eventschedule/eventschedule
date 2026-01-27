@@ -84,7 +84,13 @@ class Sale extends Model
         $data->payment_method = $this->payment_method;
         $data->payment_amount = (float) $this->payment_amount;
         $data->transaction_reference = $this->transaction_reference;
-        $data->secret = $this->secret;
+
+        // Only expose secret if the authenticated user is the event owner or the sale's user
+        $authUser = auth()->user();
+        if ($authUser && ($authUser->id === $this->user_id || $authUser->id === $this->event?->user_id)) {
+            $data->secret = $this->secret;
+        }
+
         $data->created_at = $this->created_at ? $this->created_at->toISOString() : null;
         $data->updated_at = $this->updated_at ? $this->updated_at->toISOString() : null;
 

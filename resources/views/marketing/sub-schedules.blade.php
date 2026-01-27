@@ -15,7 +15,7 @@
     </style>
 
     <!-- Hero Section -->
-    <section class="relative bg-[#0a0a0f] py-32 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->
         <div class="absolute inset-0">
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-rose-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
@@ -26,19 +26,19 @@
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-8">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
                 <svg class="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
-                <span class="text-sm text-gray-300">Sub-schedules</span>
+                <span class="text-sm text-gray-600 dark:text-gray-300">Sub-schedules</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
                 Organize your<br>
                 <span class="text-gradient">events</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
                 Create sub-schedules to categorize events by room, stage, series, or any way you like. Visitors can filter to find exactly what they're looking for.
             </p>
 
@@ -54,12 +54,12 @@
     </section>
 
     <!-- Bento Grid Features -->
-    <section class="bg-[#0a0a0f] py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Unlimited Sub-schedules (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-900/50 to-pink-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-900/50 to-pink-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-sm font-medium mb-4">
@@ -68,36 +68,36 @@
                                 </svg>
                                 Unlimited
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Create as many as you need</h3>
-                            <p class="text-gray-400 text-lg mb-6">Add unlimited sub-schedules to organize your events. Perfect for venues with multiple rooms, stages, or different event series running simultaneously.</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Create as many as you need</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Add unlimited sub-schedules to organize your events. Perfect for venues with multiple rooms, stages, or different event series running simultaneously.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Main Stage</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Lounge</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Rooftop</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">VIP Room</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Main Stage</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Lounge</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Rooftop</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">VIP Room</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
                                 <!-- Sub-schedule mockup -->
-                                <div class="bg-black/30 rounded-2xl border border-white/10 p-4 w-64">
+                                <div class="bg-gray-100 dark:bg-black/30 rounded-2xl border border-gray-200 dark:border-white/10 p-4 w-64">
                                     <div class="text-xs text-gray-500 mb-3">Sub-schedules</div>
                                     <div class="space-y-2">
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-rose-500/20 border border-rose-500/30">
                                             <div class="w-2 h-2 rounded-full bg-rose-400"></div>
-                                            <span class="text-white text-sm">Main Stage</span>
+                                            <span class="text-gray-900 dark:text-white text-sm">Main Stage</span>
                                         </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
                                             <div class="w-2 h-2 rounded-full bg-pink-400"></div>
-                                            <span class="text-gray-300 text-sm">Acoustic Room</span>
+                                            <span class="text-gray-600 dark:text-gray-300 text-sm">Acoustic Room</span>
                                         </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
                                             <div class="w-2 h-2 rounded-full bg-fuchsia-400"></div>
-                                            <span class="text-gray-300 text-sm">Outdoor Patio</span>
+                                            <span class="text-gray-600 dark:text-gray-300 text-sm">Outdoor Patio</span>
                                         </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
                                             <div class="w-2 h-2 rounded-full bg-purple-400"></div>
-                                            <span class="text-gray-300 text-sm">Jazz Lounge</span>
+                                            <span class="text-gray-600 dark:text-gray-300 text-sm">Jazz Lounge</span>
                                         </div>
                                     </div>
                                 </div>
@@ -107,19 +107,19 @@
                 </div>
 
                 <!-- Calendar Filtering -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-900/50 to-fuchsia-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-900/50 to-fuchsia-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                         </svg>
                         Filtering
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Easy filtering for visitors</h3>
-                    <p class="text-gray-400 mb-6">When you have multiple sub-schedules, visitors see a dropdown filter on your calendar. They can quickly find events in the room or series they care about.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Easy filtering for visitors</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">When you have multiple sub-schedules, visitors see a dropdown filter on your calendar. They can quickly find events in the room or series they care about.</p>
 
-                    <div class="bg-black/30 rounded-xl border border-white/10 p-3">
-                        <div class="flex items-center justify-between p-2 bg-white/5 rounded-lg">
-                            <span class="text-gray-300 text-sm">Filter by schedule</span>
+                    <div class="bg-gray-100 dark:bg-black/30 rounded-xl border border-gray-200 dark:border-white/10 p-3">
+                        <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-white/5 rounded-lg">
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">Filter by schedule</span>
                             <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
@@ -128,15 +128,15 @@
                 </div>
 
                 <!-- Direct Links -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-900/50 to-purple-900/50 border border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-900/50 to-purple-900/50 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                         </svg>
                         Direct Links
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Shareable URLs</h3>
-                    <p class="text-gray-400 mb-6">Each sub-schedule gets its own URL. Share links directly to specific rooms or event series. Visitors land on exactly what they want to see.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Shareable URLs</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Each sub-schedule gets its own URL. Share links directly to specific rooms or event series. Visitors land on exactly what they want to see.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center gap-2 text-sm">
@@ -155,7 +155,7 @@
                 </div>
 
                 <!-- API Integration (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-900/50 to-violet-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-900/50 to-violet-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-sm font-medium mb-4">
@@ -164,17 +164,17 @@
                                 </svg>
                                 API Support
                             </div>
-                            <h3 class="text-3xl font-bold text-white mb-4">Automate with the API</h3>
-                            <p class="text-gray-400 text-lg">Create events programmatically and assign them to sub-schedules using the API. Pass the <code class="text-purple-300 bg-purple-500/20 px-1 rounded">schedule</code> parameter when creating events.</p>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Automate with the API</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg">Create events programmatically and assign them to sub-schedules using the API. Pass the <code class="text-purple-300 bg-purple-500/20 px-1 rounded">schedule</code> parameter when creating events.</p>
                         </div>
-                        <div class="bg-black/30 rounded-xl border border-white/10 p-4 font-mono text-sm">
+                        <div class="bg-gray-100 dark:bg-black/30 rounded-xl border border-gray-200 dark:border-white/10 p-4 font-mono text-sm">
                             <div class="text-gray-500 mb-2">// Create event via API</div>
                             <div class="text-purple-300">POST /api/events</div>
-                            <div class="text-gray-400 mt-2">{</div>
-                            <div class="text-gray-400 pl-4">"name": "Jazz Night",</div>
-                            <div class="text-gray-400 pl-4">"schedule": "<span class="text-purple-300">jazz-lounge</span>",</div>
-                            <div class="text-gray-400 pl-4">...</div>
-                            <div class="text-gray-400">}</div>
+                            <div class="text-gray-500 dark:text-gray-400 mt-2">{</div>
+                            <div class="text-gray-500 dark:text-gray-400 pl-4">"name": "Jazz Night",</div>
+                            <div class="text-gray-500 dark:text-gray-400 pl-4">"schedule": "<span class="text-purple-300">jazz-lounge</span>",</div>
+                            <div class="text-gray-500 dark:text-gray-400 pl-4">...</div>
+                            <div class="text-gray-500 dark:text-gray-400">}</div>
                         </div>
                     </div>
                 </div>
@@ -266,7 +266,7 @@
     </section>
 
     <!-- Next Feature -->
-    <section class="relative bg-[#0a0a0f] py-20 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
         <!-- Animated background blobs matching Online Events page's colors -->
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
@@ -275,12 +275,12 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-indigo-900/50 to-violet-900/50 rounded-3xl border border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-indigo-900/50 to-violet-900/50 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <!-- Text content -->
                         <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-indigo-300 transition-colors">Online Events</h3>
-                            <p class="text-gray-400 text-lg mb-4">Toggle any event to online and add your streaming URL. Works with Zoom, YouTube, or any platform.</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-300 transition-colors">Online Events</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Toggle any event to online and add your streaming URL. Works with Zoom, YouTube, or any platform.</p>
                             <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -291,10 +291,10 @@
 
                         <!-- Mini mockup: Toggle switch with streaming URL field -->
                         <div class="flex-shrink-0">
-                            <div class="bg-black/30 rounded-xl border border-white/10 p-4 w-48">
+                            <div class="bg-gray-100 dark:bg-black/30 rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
                                 <!-- Toggle switch -->
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="text-gray-300 text-xs">Online Event</span>
+                                    <span class="text-gray-600 dark:text-gray-300 text-xs">Online Event</span>
                                     <div class="w-10 h-5 bg-indigo-500 rounded-full relative">
                                         <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow"></div>
                                     </div>
