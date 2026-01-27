@@ -226,6 +226,22 @@ class MarketingController extends Controller
     }
 
     /**
+     * Schedule Basics documentation page
+     */
+    public function docsScheduleBasics()
+    {
+        return view('marketing.docs.schedule-basics');
+    }
+
+    /**
+     * Schedule Styling documentation page
+     */
+    public function docsScheduleStyling()
+    {
+        return view('marketing.docs.schedule-styling');
+    }
+
+    /**
      * Creating Events documentation page
      */
     public function docsCreatingEvents()

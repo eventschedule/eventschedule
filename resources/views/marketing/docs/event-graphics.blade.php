@@ -41,11 +41,13 @@
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
                         <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Overview</a>
                         <a href="#text-template" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Text Template</a>
-                        <a href="#variables" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Template Variables</a>
+                        <a href="#quick-reference" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Quick Reference</a>
+                        <a href="#variables" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">All Variables</a>
                         <a href="#ai-prompt" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">AI Text Prompt</a>
                         <a href="#link-options" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Link Options</a>
                         <a href="#screen-capture" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Screen Capture</a>
                         <a href="#email-scheduling" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Email Scheduling</a>
+                        <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
                 </aside>
 
@@ -107,9 +109,53 @@ https://example.com/event/summer-concert</code></pre>
                             </div>
                         </section>
 
+                        <!-- Quick Reference -->
+                        <section id="quick-reference" class="doc-section">
+                            <h2 class="doc-heading">Quick Reference</h2>
+                            <p class="text-gray-300 mb-4">
+                                Most templates only need these essential variables. Copy the ones you need:
+                            </p>
+
+                            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-3">Event Basics</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between"><code class="text-rose-300">{event_name}</code> <span class="text-gray-500">Event title</span></div>
+                                        <div class="flex justify-between"><code class="text-rose-300">{url}</code> <span class="text-gray-500">Event link</span></div>
+                                        <div class="flex justify-between"><code class="text-rose-300">{description}</code> <span class="text-gray-500">Description</span></div>
+                                    </div>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-3">Date & Time</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between"><code class="text-rose-300">{day_name}</code> <span class="text-gray-500">Wednesday</span></div>
+                                        <div class="flex justify-between"><code class="text-rose-300">{date_dmy}</code> <span class="text-gray-500">15/3</span></div>
+                                        <div class="flex justify-between"><code class="text-rose-300">{time}</code> <span class="text-gray-500">20:00</span></div>
+                                    </div>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-3">Location</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between"><code class="text-rose-300">{venue}</code> <span class="text-gray-500">Venue name</span></div>
+                                        <div class="flex justify-between"><code class="text-rose-300">{city}</code> <span class="text-gray-500">City</span></div>
+                                        <div class="flex justify-between"><code class="text-rose-300">{address}</code> <span class="text-gray-500">Street</span></div>
+                                    </div>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 class="font-semibold text-white mb-3">Tickets</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between"><code class="text-rose-300">{price}</code> <span class="text-gray-500">10 or Free</span></div>
+                                        <div class="flex justify-between"><code class="text-rose-300">{currency}</code> <span class="text-gray-500">USD</span></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p class="text-gray-400 text-sm">See <a href="#variables" class="text-rose-400 hover:text-rose-300">All Variables</a> below for the complete list including date formats, end times, and more.</p>
+                        </section>
+
                         <!-- Variables -->
                         <section id="variables" class="doc-section">
-                            <h2 class="doc-heading">Template Variables</h2>
+                            <h2 class="doc-heading">All Template Variables</h2>
                             <p class="text-gray-300 mb-4">
                                 Use these variables in your template. They will be replaced with the actual event data when generating text.
                             </p>
@@ -415,6 +461,16 @@ https://example.com/event/summer-concert</code></pre>
                             <p class="text-gray-300 mb-4">
                                 Use the "Send Test Email" button to preview exactly what recipients will receive. The test email is sent to your account email address.
                             </p>
+                        </section>
+
+                        <!-- See Also -->
+                        <section id="see-also" class="doc-section">
+                            <h2 class="doc-heading">See Also</h2>
+                            <ul class="doc-list">
+                                <li><a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">Sharing Your Schedule</a> - More ways to share your events</li>
+                                <li><a href="{{ route('marketing.docs.creating_events') }}" class="text-cyan-400 hover:text-cyan-300">Creating Events</a> - Add events to generate graphics for</li>
+                                <li><a href="{{ route('marketing.docs.schedule_styling') }}" class="text-cyan-400 hover:text-cyan-300">Schedule Styling</a> - Customize your schedule's appearance</li>
+                            </ul>
                         </section>
                     </div>
                 </div>

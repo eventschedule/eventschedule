@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">About Event Schedule | Open Source Event Management Platform</x-slot>
-    <x-slot name="description">Event Schedule helps performers, venues, and organizers share events and sell tickets. Open source, privacy-focused, and community-driven.</x-slot>
+    <x-slot name="description">Event Schedule helps talent, venues, and organizers share events and sell tickets. Open source, privacy-focused, and community-driven.</x-slot>
     <x-slot name="keywords">about event schedule, event management platform, open source event calendar, performer schedule app, venue calendar software, event curator tools</x-slot>
     <x-slot name="socialImage">social/about.png</x-slot>
 
@@ -89,55 +89,54 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                <div class="persona-card bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <a href="{{ marketing_url('/features') }}" class="persona-card group block bg-white rounded-3xl p-8 border border-gray-200 shadow-sm hover:shadow-lg hover:border-violet-200 transition-all">
                     <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center mb-6 shadow-lg shadow-violet-500/25">
                         <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3">For Performers</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-violet-600 transition-colors">For Talent</h3>
                     <p class="text-gray-600 leading-relaxed">
-                        Create a schedule of your shows and share one link that always shows your upcoming performances. Fans can follow you and get notified about new events.
+                        Share your upcoming shows, appearances, and locations with fans. Perfect for musicians, DJs, artists, food trucks, and anyone who wants their audience to know where to find them.
                     </p>
-                </div>
+                    <span class="inline-flex items-center mt-4 text-sm font-medium text-violet-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Learn more
+                        <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                    </span>
+                </a>
 
-                <div class="persona-card bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+                <a href="{{ marketing_url('/features') }}" class="persona-card group block bg-white rounded-3xl p-8 border border-gray-200 shadow-sm hover:shadow-lg hover:border-fuchsia-200 transition-all">
                     <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-pink-500 flex items-center justify-center mb-6 shadow-lg shadow-fuchsia-500/25">
                         <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3">For Venues</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-fuchsia-600 transition-colors">For Venues</h3>
                     <p class="text-gray-600 leading-relaxed">
                         Keep your event calendar updated and easily accessible. Let visitors see what's coming up and sell tickets directly through your schedule.
                     </p>
-                </div>
+                    <span class="inline-flex items-center mt-4 text-sm font-medium text-fuchsia-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Learn more
+                        <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                    </span>
+                </a>
 
-                <div class="persona-card bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+                <a href="{{ marketing_url('/features') }}" class="persona-card group block bg-white rounded-3xl p-8 border border-gray-200 shadow-sm hover:shadow-lg hover:border-amber-200 transition-all">
                     <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mb-6 shadow-lg shadow-amber-500/25">
                         <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3">For Curators</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-amber-600 transition-colors">For Curators</h3>
                     <p class="text-gray-600 leading-relaxed">
                         Aggregate events from multiple sources and create a comprehensive guide to what's happening in your area or niche.
                     </p>
-                </div>
-
-                <div class="persona-card bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mb-6 shadow-lg shadow-emerald-500/25">
-                        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3">For Vendors</h3>
-                    <p class="text-gray-600 leading-relaxed">
-                        Let customers know where they can find you. Perfect for food trucks, market vendors, and mobile businesses.
-                    </p>
-                </div>
+                    <span class="inline-flex items-center mt-4 text-sm font-medium text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Learn more
+                        <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                    </span>
+                </a>
             </div>
         </div>
     </section>

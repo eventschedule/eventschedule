@@ -9,14 +9,30 @@
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}">
 
+    <!-- Preconnect to external resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    @if (config('services.google.analytics'))
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    @endif
+
     @if (config('app.hosted') || config('app.report_errors'))
         <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous"></script>
     @endif
 
     <!-- SEO Meta Tags -->
     <link rel="canonical" href="{{ url()->current() }}">
-    <link rel="alternate" hreflang="en" href="{{ url()->current() }}">
+    <!-- Hreflang tags for all supported languages -->
     <link rel="alternate" hreflang="x-default" href="{{ url()->current() }}">
+    <link rel="alternate" hreflang="en" href="{{ url()->current() }}?lang=en">
+    <link rel="alternate" hreflang="es" href="{{ url()->current() }}?lang=es">
+    <link rel="alternate" hreflang="de" href="{{ url()->current() }}?lang=de">
+    <link rel="alternate" hreflang="fr" href="{{ url()->current() }}?lang=fr">
+    <link rel="alternate" hreflang="it" href="{{ url()->current() }}?lang=it">
+    <link rel="alternate" hreflang="pt" href="{{ url()->current() }}?lang=pt">
+    <link rel="alternate" hreflang="he" href="{{ url()->current() }}?lang=he">
+    <link rel="alternate" hreflang="nl" href="{{ url()->current() }}?lang=nl">
+    <link rel="alternate" hreflang="ar" href="{{ url()->current() }}?lang=ar">
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
     <meta name="robots" content="index, follow">
     <meta name="author" content="Event Schedule">
@@ -99,6 +115,30 @@
     </script>
 
     {{ $structuredData ?? '' }}
+
+    @if (!request()->is('/') && !request()->is(''))
+    <!-- BreadcrumbList Schema for subpages -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "{{ config('app.url') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "{{ $breadcrumbTitle ?? $title ?? 'Page' }}",
+                "item": "{{ url()->current() }}"
+            }
+        ]
+    }
+    </script>
+    @endif
 
     @if (config('services.google.analytics') && (! auth()->user() || ! auth()->user()->isAdmin()))
     <!-- Google tag (gtag.js) -->

@@ -273,7 +273,7 @@
         $isRtl = $role->isRtl();
     @endphp
 
-    <div class="flex-grow">
+    <div class="flex-grow relative">
         @php
             $showMobileBanner = false;
             $mobileBannerUrl = '';
@@ -293,7 +293,7 @@
 
         @if ($showMobileBanner && $mobileBannerUrl)
         <div
-            class="block md:hidden h-[240px] w-full bg-cover bg-center flex-shrink-0"
+            class="block md:hidden absolute top-0 left-0 right-0 h-[600px] bg-repeat bg-center z-0"
             style="background-image: url('{{ $mobileBannerUrl }}');"
         ></div>
         @endif

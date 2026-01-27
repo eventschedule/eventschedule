@@ -46,6 +46,7 @@
                         <a href="#calendar-sync" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Calendar Sync</a>
                         <a href="#recurring" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Recurring Events</a>
                         <a href="#event-details" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Event Details</a>
+                        <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
                 </aside>
 
@@ -58,7 +59,7 @@
                             <p class="text-gray-300 mb-6">The simplest way to add an event is to create it manually from your schedule's admin page.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to your schedule's <strong class="text-white">Schedule</strong> tab</li>
+                                <li>Go to <strong class="text-white">Admin Panel &rarr; Schedule</strong></li>
                                 <li>Click <strong class="text-white">"Add Event"</strong></li>
                                 <li>Fill in the event details:
                                     <ul class="doc-list mt-2 mb-2">
@@ -91,7 +92,7 @@
                             <p class="text-gray-300 mb-6">Copy and paste event information from any source - emails, websites, social media posts - and AI will extract the event details.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Click <strong class="text-white">"Import"</strong> from your schedule page</li>
+                                <li>Go to <strong class="text-white">Admin Panel &rarr; Schedule</strong> and click <strong class="text-white">"Import"</strong></li>
                                 <li>Paste your event text into the text box</li>
                                 <li>Click <strong class="text-white">"Parse Events"</strong></li>
                                 <li>Review the extracted events and make any corrections</li>
@@ -118,7 +119,7 @@
                             <p class="text-gray-300 mb-6">Upload an event flyer or poster and AI will read the text and extract event information.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Click <strong class="text-white">"Import"</strong> from your schedule page</li>
+                                <li>Go to <strong class="text-white">Admin Panel &rarr; Schedule</strong> and click <strong class="text-white">"Import"</strong></li>
                                 <li>Upload an image file (JPG, PNG, etc.)</li>
                                 <li>Click <strong class="text-white">"Parse Events"</strong></li>
                                 <li>Review the extracted events</li>
@@ -148,7 +149,7 @@
                                 </div>
                             </div>
 
-                            <p class="text-gray-300">To set up calendar sync, go to <strong class="text-white">Settings</strong> and connect your preferred calendar service.</p>
+                            <p class="text-gray-300">To set up calendar sync, go to <strong class="text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and scroll to the Calendar Sync section.</p>
                         </section>
 
                         <!-- Recurring Events -->
@@ -207,8 +208,8 @@
                                             <td>A flyer or photo for the event</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-white">Category</span></td>
-                                            <td>Organize events by type</td>
+                                            <td><span class="font-semibold text-white">Subschedule</span></td>
+                                            <td>Organize events by type (e.g., "Live Music", "Comedy")</td>
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-white">Registration URL</span></td>
@@ -222,6 +223,17 @@
                                 </table>
                             </div>
                         </section>
+
+                        <!-- See Also -->
+                        <section id="see-also" class="doc-section">
+                            <h2 class="doc-heading">See Also</h2>
+                            <ul class="doc-list">
+                                <li><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Selling Tickets</a> - Add tickets to your events</li>
+                                <li><a href="{{ route('marketing.docs.event_graphics') }}" class="text-cyan-400 hover:text-cyan-300">Event Graphics</a> - Create promotional images</li>
+                                <li><a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">Sharing Your Schedule</a> - Share and embed your events</li>
+                                <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="text-cyan-400 hover:text-cyan-300">Advanced Schedule Settings</a> - Subschedules, auto-import, and calendar sync</li>
+                            </ul>
+                        </section>
                     </div>
                 </div>
             </div>
@@ -229,4 +241,41 @@
     </section>
 
     @include('marketing.docs.partials.scripts')
+
+    <!-- HowTo Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Create Events in Event Schedule",
+        "description": "Learn how to add events to your schedule manually, import from text or images using AI, or sync from external calendars.",
+        "totalTime": "PT3M",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "name": "Access the Admin Panel",
+                "text": "Go to Admin Panel and then Schedule to view your events.",
+                "url": "{{ url(route('marketing.docs.creating_events')) }}#manual"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Click Add Event",
+                "text": "Click the 'Add Event' button to open the event creation form.",
+                "url": "{{ url(route('marketing.docs.creating_events')) }}#manual"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Fill in Event Details",
+                "text": "Enter the event name, date and time, duration, venue/location, description, and upload an event image.",
+                "url": "{{ url(route('marketing.docs.creating_events')) }}#event-details"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Save the Event",
+                "text": "Click Save to publish the event to your schedule.",
+                "url": "{{ url(route('marketing.docs.creating_events')) }}#manual"
+            }
+        ]
+    }
+    </script>
 </x-marketing-layout>
