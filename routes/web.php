@@ -220,7 +220,7 @@ Route::get('/tmp/event-image/{filename?}', function ($filename = null) {
         abort(404);
     }
 
-    $path = '/tmp/'.$filename;
+    $path = storage_path('app/temp/'.$filename);
 
     if (file_exists($path)) {
         return response()->file($path);
@@ -257,6 +257,7 @@ if (config('app.is_nexus')) {
         Route::get('/for-djs', [MarketingController::class, 'forDJs'])->name('marketing.for_djs');
         Route::get('/for-comedians', [MarketingController::class, 'forComedians'])->name('marketing.for_comedians');
         Route::get('/for-circus-acrobatics', [MarketingController::class, 'forCircusAcrobatics'])->name('marketing.for_circus_acrobatics');
+        Route::get('/for-magicians', [MarketingController::class, 'forMagicians'])->name('marketing.for_magicians');
         Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
         Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
         Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
@@ -315,6 +316,7 @@ if (config('app.is_nexus')) {
             Route::get('/for-djs', [MarketingController::class, 'forDJs'])->name('marketing.for_djs');
             Route::get('/for-comedians', [MarketingController::class, 'forComedians'])->name('marketing.for_comedians');
             Route::get('/for-circus-acrobatics', [MarketingController::class, 'forCircusAcrobatics'])->name('marketing.for_circus_acrobatics');
+            Route::get('/for-magicians', [MarketingController::class, 'forMagicians'])->name('marketing.for_magicians');
             Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
             Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
             Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
