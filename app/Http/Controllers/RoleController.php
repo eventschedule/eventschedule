@@ -473,7 +473,9 @@ class RoleController extends Controller
 
         $fonts = [];
         if ($event) {
-            $fonts[] = $event->venue->font_family;
+            if ($event->venue) {
+                $fonts[] = $event->venue->font_family;
+            }
             foreach ($event->roles as $each) {
                 if ($each->isClaimed() && $each->isTalent()) {
                     $fonts[] = $each->font_family;
