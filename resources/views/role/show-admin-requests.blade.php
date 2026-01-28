@@ -79,10 +79,15 @@
                 @endif
             </dl>
 
-            {{-- View Event Button --}}
-            <a href="{{ $event->getGuestUrl() }}" target="_blank" class="inline-block mt-4 px-4 py-2 bg-blue-500 text-white text-sm font-semibold rounded hover:bg-blue-600 transition">
-                {{ __('messages.view_event') }}
-            </a>
+            {{-- View and Edit Buttons --}}
+            <div class="flex gap-2 mt-4">
+                <a href="{{ $event->getGuestUrl() }}" target="_blank" class="px-4 py-2 bg-blue-500 text-white text-sm font-semibold rounded hover:bg-blue-600 transition">
+                    {{ __('messages.view') }}
+                </a>
+                <a href="{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}" class="px-4 py-2 bg-gray-500 text-white text-sm font-semibold rounded hover:bg-gray-600 transition">
+                    {{ __('messages.edit') }}
+                </a>
+            </div>
         </div>
         <div>
             <div class="-mt-px flex divide-x divide-gray-200 dark:divide-gray-700">

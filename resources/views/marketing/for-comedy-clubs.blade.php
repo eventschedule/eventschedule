@@ -27,8 +27,8 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <!-- Neon sign style badge -->
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-200 dark:bg-[#0f0f14] border border-amber-400/50 mb-8 shadow-[0_0_15px_rgba(251,191,36,0.3)]">
-                <span class="text-sm text-amber-300 font-medium tracking-wide">For Comedy Clubs & Improv Theaters</span>
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-200 dark:bg-[#0f0f14] border border-gray-200 dark:border-white/10 mb-8 shadow-[0_0_15px_rgba(251,191,36,0.3)]">
+                <span class="text-sm text-gray-600 dark:text-gray-300 font-medium tracking-wide">For Comedy Clubs & Improv Theaters</span>
             </div>
 
             <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">

@@ -18,13 +18,13 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <!-- Badge with music note -->
-            <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-black/60 border border-cyan-500/30 mb-8 backdrop-blur-sm">
+            <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 backdrop-blur-sm">
                 <div class="relative">
-                    <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                     </svg>
                 </div>
-                <span class="text-sm text-cyan-200/90 font-medium tracking-wide">For Musicians, Bands & Solo Artists</span>
+                <span class="text-sm text-gray-600 dark:text-gray-300 font-medium tracking-wide">For Musicians, Bands & Solo Artists</span>
             </div>
 
             <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
