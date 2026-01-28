@@ -15,9 +15,9 @@
 
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 mb-6">
-                    <div class="w-2 h-2 rounded-full bg-violet-400 animate-pulse"></div>
-                    <span class="text-sm text-violet-300">For Concert Halls & Live Music Venues</span>
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-gray-200 dark:border-white/10 mb-6">
+                    <div class="w-2 h-2 rounded-full bg-violet-600 dark:bg-violet-400 animate-pulse"></div>
+                    <span class="text-sm text-gray-600 dark:text-gray-300">For Concert Halls & Live Music Venues</span>
                 </div>
 
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">

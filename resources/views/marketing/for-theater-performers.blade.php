@@ -24,8 +24,8 @@
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-amber-500/30 mb-8 backdrop-blur-sm">
-                <span class="text-sm text-amber-200/90">For Actors, Companies & Productions</span>
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 backdrop-blur-sm">
+                <span class="text-sm text-gray-600 dark:text-gray-300">For Actors, Companies & Productions</span>
             </div>
 
             <h1 class="text-5xl md:text-6xl lg:text-7xl font-light text-gray-900 dark:text-white mb-6 leading-tight tracking-tight">
