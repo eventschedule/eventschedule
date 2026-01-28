@@ -133,12 +133,3 @@ cp .env .env.dusk.local
 # Run all browser tests
 php artisan dusk
 ```
-
-## Contributing
-
-This project is developed using AI-assisted coding. Instead of traditional pull requests, we prefer contributions in the form of **AI prompts**—detailed descriptions of the changes you'd like to see.
-
-**How to contribute:**
-- Open a [GitHub Discussion](https://github.com/eventschedule/eventschedule/discussions) describing the feature or fix you'd like
-- We'll review and implement it using AI-assisted development
-- No coding experience required—just describe what you want in plain English
