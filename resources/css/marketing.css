@@ -55,10 +55,10 @@ html {
    ======================================== */
 
 .glass {
-    background: rgba(0, 0, 0, 0.03);
+    background: rgba(0, 0, 0, 0.05);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 .dark .glass {
@@ -72,8 +72,8 @@ html {
 
 .grid-pattern {
     background-image:
-        linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+        linear-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
     background-size: 50px 50px;
 }
 
@@ -106,7 +106,7 @@ html {
    ======================================== */
 
 .hero-gradient {
-    background: linear-gradient(135deg, rgba(78, 129, 250, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+    background: linear-gradient(135deg, rgba(78, 129, 250, 0.15) 0%, rgba(124, 58, 237, 0.15) 100%);
 }
 
 .dark .hero-gradient {

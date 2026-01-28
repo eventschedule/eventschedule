@@ -124,7 +124,7 @@
                     </div>
                 </div>
             </div>
-            <p class="text-center text-gray-500 dark:text-gray-500 text-sm mt-4">Recurring events auto-populate your calendar. One setup, endless shows.</p>
+            <p class="text-center text-gray-600 dark:text-gray-500 text-sm mt-4">Recurring events auto-populate your calendar. One setup, endless shows.</p>
         </div>
     </section>
 
@@ -168,14 +168,14 @@
                                             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white text-xs font-bold">MR</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Mike Rodriguez</div>
-                                                <div class="text-gray-500 dark:text-gray-500 text-xs">Feature - 20 min</div>
+                                                <div class="text-gray-600 dark:text-gray-500 text-xs">Feature - 20 min</div>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center text-white text-xs font-bold">TK</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Tony Kim</div>
-                                                <div class="text-gray-500 dark:text-gray-500 text-xs">MC / Host</div>
+                                                <div class="text-gray-600 dark:text-gray-500 text-xs">MC / Host</div>
                                             </div>
                                         </div>
                                     </div>
@@ -278,21 +278,21 @@
                                         <span class="text-gray-900 dark:text-white font-medium">General Admission</span>
                                         <span class="text-green-300 font-bold">$20</span>
                                     </div>
-                                    <div class="text-gray-500 dark:text-gray-500 text-xs">Standard seating</div>
+                                    <div class="text-gray-600 dark:text-gray-500 text-xs">Standard seating</div>
                                 </div>
                                 <div class="bg-gradient-to-r from-amber-950 to-yellow-950 rounded-xl p-4 border border-amber-500/30">
                                     <div class="flex items-center justify-between mb-1">
                                         <span class="text-gray-900 dark:text-white font-medium">VIP Front Row</span>
                                         <span class="text-amber-300 font-bold">$35</span>
                                     </div>
-                                    <div class="text-gray-500 dark:text-gray-500 text-xs">Best seats + drink voucher</div>
+                                    <div class="text-gray-600 dark:text-gray-500 text-xs">Best seats + drink voucher</div>
                                 </div>
                                 <div class="bg-gradient-to-r from-purple-950 to-pink-950 rounded-xl p-4 border border-purple-500/30">
                                     <div class="flex items-center justify-between mb-1">
                                         <span class="text-gray-900 dark:text-white font-medium">Recording Night</span>
                                         <span class="text-purple-300 font-bold">$40</span>
                                     </div>
-                                    <div class="text-gray-500 dark:text-gray-500 text-xs">Special taping event</div>
+                                    <div class="text-gray-600 dark:text-gray-500 text-xs">Special taping event</div>
                                 </div>
                             </div>
                         </div>
@@ -388,12 +388,12 @@
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-teal-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">The Basement</span>
-                            <span class="ml-auto text-gray-500 dark:text-gray-500 text-xs">5 shows</span>
+                            <span class="ml-auto text-gray-600 dark:text-gray-500 text-xs">5 shows</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-purple-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Podcast Studio</span>
-                            <span class="ml-auto text-gray-500 dark:text-gray-500 text-xs">3 shows</span>
+                            <span class="ml-auto text-gray-600 dark:text-gray-500 text-xs">3 shows</span>
                         </div>
                     </div>
                 </div>

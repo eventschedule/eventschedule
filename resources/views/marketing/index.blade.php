@@ -213,7 +213,7 @@
                         @endphp
                         @foreach($screenshots as $screenshot)
                         <div class="flex-shrink-0 w-full overflow-hidden">
-                            <img src="{{ url($screenshot[0]) }}" alt="{{ $screenshot[1] }}" class="block w-full h-auto scale-[1.02]" loading="lazy" />
+                            <img src="{{ url($screenshot[0]) }}" alt="{{ $screenshot[1] }}" class="block w-full h-auto scale-[1.05]" loading="lazy" />
                         </div>
                         @endforeach
                     </div>
@@ -643,7 +643,7 @@
                 </span>
                 <div class="absolute inset-0 animate-shimmer"></div>
             </a>
-            <p class="mt-6 text-gray-500 dark:text-gray-500 text-sm">No credit card required. Free forever.</p>
+            <p class="mt-6 text-gray-600 dark:text-gray-500 text-sm">No credit card required. Free forever.</p>
         </div>
     </section>
 </x-marketing-layout>

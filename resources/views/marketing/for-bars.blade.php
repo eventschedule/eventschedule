@@ -333,18 +333,18 @@
                 <div class="grid grid-cols-7 gap-2 md:gap-4">
                     <!-- Monday -->
                     <div class="text-center">
-                        <div class="text-gray-500 dark:text-gray-500 text-xs md:text-sm font-medium mb-2 md:mb-3">Mon</div>
+                        <div class="text-gray-600 dark:text-gray-500 text-xs md:text-sm font-medium mb-2 md:mb-3">Mon</div>
                         <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-2 md:p-3 min-h-[80px] md:min-h-[100px]">
                             <div class="text-amber-400 text-[10px] md:text-xs font-medium">Industry Night</div>
-                            <div class="text-gray-500 dark:text-gray-500 text-[9px] md:text-[10px] mt-1">50% off for service workers</div>
+                            <div class="text-gray-600 dark:text-gray-500 text-[9px] md:text-[10px] mt-1">50% off for service workers</div>
                         </div>
                     </div>
                     <!-- Tuesday -->
                     <div class="text-center">
-                        <div class="text-gray-500 dark:text-gray-500 text-xs md:text-sm font-medium mb-2 md:mb-3">Tue</div>
+                        <div class="text-gray-600 dark:text-gray-500 text-xs md:text-sm font-medium mb-2 md:mb-3">Tue</div>
                         <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-2 md:p-3 min-h-[80px] md:min-h-[100px]">
                             <div class="text-orange-400 text-[10px] md:text-xs font-medium">Taco Tuesday</div>
-                            <div class="text-gray-500 dark:text-gray-500 text-[9px] md:text-[10px] mt-1">$2 tacos all night</div>
+                            <div class="text-gray-600 dark:text-gray-500 text-[9px] md:text-[10px] mt-1">$2 tacos all night</div>
                         </div>
                     </div>
                     <!-- Wednesday - Highlighted -->
@@ -358,10 +358,10 @@
                     </div>
                     <!-- Thursday -->
                     <div class="text-center">
-                        <div class="text-gray-500 dark:text-gray-500 text-xs md:text-sm font-medium mb-2 md:mb-3">Thu</div>
+                        <div class="text-gray-600 dark:text-gray-500 text-xs md:text-sm font-medium mb-2 md:mb-3">Thu</div>
                         <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-2 md:p-3 min-h-[80px] md:min-h-[100px]">
                             <div class="text-violet-400 text-[10px] md:text-xs font-medium">Open Mic</div>
-                            <div class="text-gray-500 dark:text-gray-500 text-[9px] md:text-[10px] mt-1">Sign up 6pm</div>
+                            <div class="text-gray-600 dark:text-gray-500 text-[9px] md:text-[10px] mt-1">Sign up 6pm</div>
                         </div>
                     </div>
                     <!-- Friday -->
@@ -382,10 +382,10 @@
                     </div>
                     <!-- Sunday -->
                     <div class="text-center">
-                        <div class="text-gray-500 dark:text-gray-500 text-xs md:text-sm font-medium mb-2 md:mb-3">Sun</div>
+                        <div class="text-gray-600 dark:text-gray-500 text-xs md:text-sm font-medium mb-2 md:mb-3">Sun</div>
                         <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-2 md:p-3 min-h-[80px] md:min-h-[100px]">
                             <div class="text-yellow-400 text-[10px] md:text-xs font-medium">Brunch</div>
-                            <div class="text-gray-500 dark:text-gray-500 text-[9px] md:text-[10px] mt-1">Bloody Mary bar</div>
+                            <div class="text-gray-600 dark:text-gray-500 text-[9px] md:text-[10px] mt-1">Bloody Mary bar</div>
                         </div>
                     </div>
                 </div>
