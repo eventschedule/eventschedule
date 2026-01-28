@@ -523,14 +523,12 @@
                             </div>
 
                             @if ($event->flyer_image_url)
-                            <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="pt-3" />
-                            <form method="POST" action="{{ route('event.delete_image', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id), 'image_type' => 'flyer']) }}" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="hover:underline text-gray-900 dark:text-gray-100">
-                                    {{ __('messages.delete_image') }}
-                                </button>
-                            </form>
+                            <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="pt-3" id="flyer_preview" />
+                            <button type="button"
+                                onclick="deleteFlyer('{{ route('event.delete_image', ['subdomain' => $subdomain]) }}', '{{ \App\Utils\UrlUtils::encodeId($event->id) }}', '{{ csrf_token() }}')"
+                                class="hover:underline text-gray-900 dark:text-gray-100">
+                                {{ __('messages.delete_image') }}
+                            </button>
                             @endif
                         </div>
 
@@ -2653,6 +2651,27 @@ window.addEventListener('load', function() {
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     }, 0);
 });
+
+function deleteFlyer(url, hash, token) {
+    if (!confirm('{{ __('messages.are_you_sure') }}')) {
+        return;
+    }
+
+    fetch(url + '?hash=' + hash + '&image_type=flyer', {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': token,
+            'Accept': 'application/json'
+        }
+    }).then(response => {
+        if (response.ok) {
+            document.getElementById('flyer_preview').remove();
+            event.target.remove();
+        } else {
+            alert('Failed to delete image');
+        }
+    });
+}
 </script>
 
 </x-app-admin-layout>
