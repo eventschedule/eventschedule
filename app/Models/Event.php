@@ -672,7 +672,12 @@ class Event extends Model
             $timezone = $this->creatorRole->timezone;
         }
 
-        $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
+        if (strlen($this->starts_at) === 10) {
+            // Date-only format (Y-m-d), assume midnight
+            $startAt = Carbon::createFromFormat('Y-m-d', $this->starts_at, 'UTC')->startOfDay();
+        } else {
+            $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
+        }
 
         if ($date) {
             $customDate = Carbon::createFromFormat('Y-m-d', $date);
