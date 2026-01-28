@@ -76,7 +76,7 @@
                                 Newsletter
                             </div>
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Tell your regulars what's on</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">No algorithm. No pay-to-play. Wednesday trivia's back? New band this Friday? One click sends the week's lineup straight to everyone who wants to know.</p>
+                            <p class="text-gray-500 dark:text-white/80 text-lg mb-6">No algorithm. No pay-to-play. Wednesday trivia's back? New band this Friday? One click sends the week's lineup straight to everyone who wants to know.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Skip the algorithm</span>
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Your crowd, your reach</span>
@@ -125,16 +125,16 @@
                         Recurring Events
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Trivia Wednesdays. Jazz Fridays.</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Bars run on weekly rhythms. Set up recurring events once, they show automatically.</p>
+                    <p class="text-gray-500 dark:text-white/80 mb-6">Bars run on weekly rhythms. Set up recurring events once, they show automatically.</p>
 
                     <!-- Mini week view -->
                     <div class="grid grid-cols-7 gap-1">
                         <div class="text-center">
-                            <div class="text-gray-500 dark:text-gray-500 text-[10px] mb-1">M</div>
+                            <div class="text-gray-500 dark:text-white/70 text-[10px] mb-1">M</div>
                             <div class="w-6 h-6 rounded-full bg-gray-100 dark:bg-white/5 mx-auto"></div>
                         </div>
                         <div class="text-center">
-                            <div class="text-gray-500 dark:text-gray-500 text-[10px] mb-1">T</div>
+                            <div class="text-gray-500 dark:text-white/70 text-[10px] mb-1">T</div>
                             <div class="w-6 h-6 rounded-full bg-amber-500/30 border border-amber-400/50 mx-auto"></div>
                         </div>
                         <div class="text-center">
@@ -142,7 +142,7 @@
                             <div class="w-6 h-6 rounded-full bg-orange-500 mx-auto"></div>
                         </div>
                         <div class="text-center">
-                            <div class="text-gray-500 dark:text-gray-500 text-[10px] mb-1">T</div>
+                            <div class="text-gray-500 dark:text-white/70 text-[10px] mb-1">T</div>
                             <div class="w-6 h-6 rounded-full bg-amber-500/30 border border-amber-400/50 mx-auto"></div>
                         </div>
                         <div class="text-center">
@@ -154,11 +154,11 @@
                             <div class="w-6 h-6 rounded-full bg-orange-500 mx-auto"></div>
                         </div>
                         <div class="text-center">
-                            <div class="text-gray-500 dark:text-gray-500 text-[10px] mb-1">S</div>
+                            <div class="text-gray-500 dark:text-white/70 text-[10px] mb-1">S</div>
                             <div class="w-6 h-6 rounded-full bg-amber-500/30 border border-amber-400/50 mx-auto"></div>
                         </div>
                     </div>
-                    <div class="text-center mt-3 text-gray-500 dark:text-gray-500 text-xs">Weekly events auto-repeat</div>
+                    <div class="text-center mt-3 text-gray-500 dark:text-white/70 text-xs">Weekly events auto-repeat</div>
                 </div>
 
                 <!-- Tap Takeovers & Specials -->
@@ -170,7 +170,7 @@
                         Specials
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Announce what's pouring</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">New keg? Brewery collab? Whiskey tasting? Let your crowd know what's special this week.</p>
+                    <p class="text-gray-500 dark:text-white/80 mb-6">New keg? Brewery collab? Whiskey tasting? Let your crowd know what's special this week.</p>
 
                     <!-- Tap handles visual -->
                     <div class="flex justify-center gap-3">
@@ -198,7 +198,7 @@
                                 Watch Parties
                             </div>
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Game on the big screen</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">NFL Sundays, UFC fight nights, World Cup matches. Your sports fans follow to know what's showing and when.</p>
+                            <p class="text-gray-500 dark:text-white/80 text-lg mb-4">NFL Sundays, UFC fight nights, World Cup matches. Your sports fans follow to know what's showing and when.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live sports</span>
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Watch parties</span>
@@ -211,7 +211,7 @@
                                 <div class="bg-gradient-to-br from-green-600/30 to-emerald-600/30 rounded-lg p-3 text-center">
                                     <div class="text-3xl mb-1">&#9917;</div>
                                     <div class="text-green-300 text-sm font-bold">LIVE</div>
-                                    <div class="text-gray-500 dark:text-gray-400 text-xs">Sunday 4pm</div>
+                                    <div class="text-gray-500 dark:text-white/70 text-xs">Sunday 4pm</div>
                                 </div>
                                 <div class="flex justify-center gap-1 mt-2">
                                     <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
@@ -232,7 +232,7 @@
                         Ticketing
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Charge at the door</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Comedy night? Special tasting? Sell tickets, scan QR codes at entry. Zero platform fees.</p>
+                    <p class="text-gray-500 dark:text-white/80 mb-6">Comedy night? Special tasting? Sell tickets, scan QR codes at entry. Zero platform fees.</p>
 
                     <div class="flex justify-center">
                         <div class="w-20 h-20 bg-white rounded-xl p-2 relative">
@@ -240,7 +240,7 @@
                             <div class="absolute inset-x-0 top-2 h-0.5 bg-gradient-to-r from-rose-500 to-pink-500 animate-pulse"></div>
                         </div>
                     </div>
-                    <div class="text-center mt-3 text-gray-500 dark:text-gray-400 text-xs">Scan to check in</div>
+                    <div class="text-center mt-3 text-gray-500 dark:text-white/70 text-xs">Scan to check in</div>
                 </div>
 
                 <!-- Performers Request to Play -->
@@ -252,7 +252,7 @@
                         Booking Inbox
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Bands come to you</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Musicians and DJs request to play. Review, approve, book - without the back-and-forth.</p>
+                    <p class="text-gray-500 dark:text-white/80 mb-6">Musicians and DJs request to play. Review, approve, book - without the back-and-forth.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-500/20 border border-indigo-400/30">
@@ -282,11 +282,11 @@
                         Analytics
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">See what fills seats</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Which nights draw crowds? What events get shares? Know what's working.</p>
+                    <p class="text-gray-500 dark:text-white/80 mb-6">Which nights draw crowds? What events get shares? Know what's working.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
-                            <span class="text-gray-500 dark:text-gray-400 text-xs">Trivia</span>
+                            <span class="text-gray-500 dark:text-white/70 text-xs">Trivia</span>
                             <div class="flex items-center gap-2">
                                 <div class="w-20 h-2 bg-cyan-500/30 rounded-full overflow-hidden">
                                     <div class="w-[90%] h-full bg-cyan-400 rounded-full"></div>
@@ -294,7 +294,7 @@
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-gray-500 dark:text-gray-400 text-xs">Live Music</span>
+                            <span class="text-gray-500 dark:text-white/70 text-xs">Live Music</span>
                             <div class="flex items-center gap-2">
                                 <div class="w-20 h-2 bg-cyan-500/30 rounded-full overflow-hidden">
                                     <div class="w-[65%] h-full bg-cyan-400 rounded-full"></div>
@@ -302,7 +302,7 @@
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-gray-500 dark:text-gray-400 text-xs">Karaoke</span>
+                            <span class="text-gray-500 dark:text-white/70 text-xs">Karaoke</span>
                             <div class="flex items-center gap-2">
                                 <div class="w-20 h-2 bg-cyan-500/30 rounded-full overflow-hidden">
                                     <div class="w-[45%] h-full bg-cyan-400 rounded-full"></div>

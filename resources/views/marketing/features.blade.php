@@ -323,7 +323,7 @@
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.3s;">
                                 <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-emerald-900/50 dark:to-teal-900/50 rounded-xl border border-gray-200 dark:border-emerald-500/30 p-5 w-64">
-                                    <div class="text-xs text-gray-500 mb-3">Views this week</div>
+                                    <div class="text-xs text-gray-500 dark:text-white/70 mb-3">Views this week</div>
                                     <div class="flex items-end justify-between h-24 gap-2">
                                         <div class="w-6 bg-emerald-500/40 rounded-t" style="height: 40%"></div>
                                         <div class="w-6 bg-emerald-500/50 rounded-t" style="height: 55%"></div>
@@ -333,7 +333,7 @@
                                         <div class="w-6 bg-emerald-500/90 rounded-t" style="height: 85%"></div>
                                         <div class="w-6 bg-emerald-500 rounded-t" style="height: 100%"></div>
                                     </div>
-                                    <div class="flex justify-between mt-2 text-xs text-gray-500">
+                                    <div class="flex justify-between mt-2 text-xs text-gray-500 dark:text-white/70">
                                         <span>M</span>
                                         <span>T</span>
                                         <span>W</span>
@@ -389,12 +389,12 @@
                                 <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-amber-900/50 dark:to-orange-900/50 rounded-xl border border-gray-200 dark:border-amber-500/30 p-5 w-56 space-y-3">
                                     <!-- Text field -->
                                     <div>
-                                        <div class="text-[10px] text-gray-500 mb-1">Company Name</div>
+                                        <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">Company Name</div>
                                         <div class="bg-white dark:bg-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm border border-gray-200 dark:border-white/10">Acme Corp</div>
                                     </div>
                                     <!-- Dropdown field -->
                                     <div>
-                                        <div class="text-[10px] text-gray-500 mb-1">T-Shirt Size</div>
+                                        <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">T-Shirt Size</div>
                                         <div class="bg-white dark:bg-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm border border-gray-200 dark:border-white/10 flex items-center justify-between">
                                             <span>Large</span>
                                             <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
@@ -402,7 +402,7 @@
                                     </div>
                                     <!-- Yes/No field -->
                                     <div>
-                                        <div class="text-[10px] text-gray-500 mb-1">Vegetarian?</div>
+                                        <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">Vegetarian?</div>
                                         <div class="bg-amber-100 dark:bg-amber-500/20 rounded-lg px-3 py-2 text-amber-700 dark:text-amber-300 text-sm border border-amber-200 dark:border-amber-400/30 flex items-center justify-between">
                                             <span>Yes</span>
                                             <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
@@ -522,7 +522,7 @@
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.4s;">
                                 <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-rose-900/50 dark:to-pink-900/50 rounded-xl border border-gray-200 dark:border-rose-500/30 p-4 w-56">
-                                    <div class="text-xs text-gray-500 mb-3">Sub-schedules</div>
+                                    <div class="text-xs text-gray-500 dark:text-white/70 mb-3">Sub-schedules</div>
                                     <div class="space-y-2">
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-rose-100 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/30">
                                             <div class="w-2 h-2 rounded-full bg-rose-400"></div>
@@ -595,7 +595,7 @@
                                     </div>
                                     <!-- URL field -->
                                     <div>
-                                        <div class="text-[10px] text-gray-500 mb-1">Streaming URL</div>
+                                        <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">Streaming URL</div>
                                         <div class="bg-indigo-100 dark:bg-indigo-500/20 rounded-lg px-3 py-2 text-indigo-600 dark:text-indigo-300 text-sm border border-indigo-200 dark:border-indigo-400/30 flex items-center gap-2">
                                             <svg class="w-4 h-4 text-indigo-500 dark:text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />

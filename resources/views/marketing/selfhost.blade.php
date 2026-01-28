@@ -95,23 +95,23 @@
                             <p class="text-white">One-click installer</p>
                         </div>
                     </div>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">
+                    <p class="text-white/80 mb-6">
                         Available on most cPanel hosting providers. Install Event Schedule with a single click - no command line required.
                     </p>
                     <ul class="space-y-3 mb-8 flex-grow">
-                        <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                        <li class="flex items-center gap-3 text-white/90">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Automatic database setup
                         </li>
-                        <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                        <li class="flex items-center gap-3 text-white/90">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Auto-configured environment
                         </li>
-                        <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                        <li class="flex items-center gap-3 text-white/90">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
@@ -139,23 +139,23 @@
                             <p class="text-white">Containerized deployment</p>
                         </div>
                     </div>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">
+                    <p class="text-white/80 mb-6">
                         Deploy with Docker Compose for a consistent, isolated environment. Perfect for VPS, cloud servers, or local development.
                     </p>
                     <ul class="space-y-3 mb-8 flex-grow">
-                        <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                        <li class="flex items-center gap-3 text-white/90">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Isolated environment
                         </li>
-                        <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                        <li class="flex items-center gap-3 text-white/90">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Easy scaling and backups
                         </li>
-                        <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                        <li class="flex items-center gap-3 text-white/90">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
@@ -233,7 +233,7 @@
                                 </div>
                                 <div>
                                     <div class="text-gray-900 dark:text-white font-semibold">Event Schedule</div>
-                                    <div class="text-gray-500 dark:text-gray-400 text-sm">v2.4.1 installed</div>
+                                    <div class="text-white/70 text-sm">v2.4.1 installed</div>
                                 </div>
                             </div>
                             <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-medium">
@@ -245,7 +245,7 @@
                                 <span class="text-gray-600 dark:text-gray-300">New version:</span>
                                 <span class="text-gray-900 dark:text-white font-medium">v2.5.0</span>
                             </div>
-                            <div class="text-gray-500 dark:text-gray-400 text-sm">
+                            <div class="text-white/70 text-sm">
                                 New features, bug fixes, and security updates
                             </div>
                         </div>
@@ -287,7 +287,7 @@
                         Auto Import
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Automatic event importing</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">
+                    <p class="text-white/80 mb-6">
                         Automatically pull events from external websites into your schedule. Our intelligent system extracts event details from any webpage using AI-powered parsing.
                     </p>
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 mb-6">
@@ -297,11 +297,11 @@
                             </svg>
                             <span class="text-gray-900 dark:text-white font-medium">Respects robots.txt</span>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">
+                        <p class="text-white/70 text-sm">
                             We check each website's robots.txt file before importing to ensure we only access content that site owners have permitted for automated access.
                         </p>
                     </div>
-                    <ul class="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
+                    <ul class="space-y-2 text-white/90 text-sm">
                         <li class="flex items-center gap-2">
                             <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -332,7 +332,7 @@
                         AI-Powered Blog
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Automated content for SEO</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">
+                    <p class="text-white/80 mb-6">
                         Generate relevant blog content automatically to drive organic traffic to your event schedule. Our AI creates engaging posts tailored to your events and audience.
                     </p>
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 mb-6">
@@ -345,7 +345,7 @@
                                 </div>
                                 <div class="flex-1">
                                     <div class="text-gray-900 dark:text-white text-sm font-medium">Best Jazz Venues in Your City</div>
-                                    <div class="text-gray-500 text-xs">Generated 2 hours ago</div>
+                                    <div class="text-white/60 text-xs">Generated 2 hours ago</div>
                                 </div>
                             </div>
                             <div class="flex items-center gap-3">
@@ -356,12 +356,12 @@
                                 </div>
                                 <div class="flex-1">
                                     <div class="text-gray-900 dark:text-white text-sm font-medium">This Week's Must-See Events</div>
-                                    <div class="text-gray-500 text-xs">Scheduled for tomorrow</div>
+                                    <div class="text-white/60 text-xs">Scheduled for tomorrow</div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <ul class="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
+                    <ul class="space-y-2 text-white/90 text-sm">
                         <li class="flex items-center gap-2">
                             <svg class="w-4 h-4 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -454,29 +454,29 @@
                         <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                             Build your own SaaS business
                         </h2>
-                        <p class="text-xl text-gray-600 dark:text-gray-300 mb-6">
+                        <p class="text-xl text-white/80 mb-6">
                             Turn Event Schedule into your own white-label SaaS platform. Offer event scheduling as a service to your customers under your own brand.
                         </p>
                         <ul class="space-y-3 mb-8">
-                            <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                            <li class="flex items-center gap-3 text-white/90">
                                 <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Multi-tenant architecture built-in
                             </li>
-                            <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                            <li class="flex items-center gap-3 text-white/90">
                                 <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Stripe integration for subscriptions
                             </li>
-                            <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                            <li class="flex items-center gap-3 text-white/90">
                                 <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Full white-label customization
                             </li>
-                            <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                            <li class="flex items-center gap-3 text-white/90">
                                 <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
