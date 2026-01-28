@@ -268,7 +268,7 @@
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Events sync automatically when created, updated, or deleted. No manual work required.</p>
                         </div>
                         <div class="flex-shrink-0">
-                            <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10 space-y-2">
+                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 space-y-2">
                                 <div class="flex items-center gap-3">
                                     <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center animate-sync">
                                         <svg class="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -476,7 +476,7 @@
 
                         <!-- Mini mockup: Bar chart visualization -->
                         <div class="flex-shrink-0">
-                            <div class="bg-gray-100 dark:bg-black/30 rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
+                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
                                 <div class="text-[10px] text-gray-500 mb-3">Views this week</div>
                                 <div class="flex items-end justify-between h-20 gap-1.5">
                                     <div class="w-4 bg-emerald-500/40 rounded-t" style="height: 40%"></div>

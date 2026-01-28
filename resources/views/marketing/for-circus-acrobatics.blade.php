@@ -444,13 +444,13 @@
     </section>
 
     <!-- Perfect For Section -->
-    <section class="bg-gray-50 dark:bg-ivory py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Perfect for all types of circus performers
                 </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Whether you're a solo aerialist or a touring troupe, Event Schedule works for you.
                 </p>
             </div>
@@ -590,13 +590,13 @@
     </section>
 
     <!-- How it Works -->
-    <section class="bg-gray-50 dark:bg-ivory py-24 border-t border-gray-200">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24 border-t border-gray-200 dark:border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     How it works
                 </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Get your performance schedule online in three steps.
                 </p>
             </div>

@@ -66,6 +66,8 @@ class GraphicController extends Controller
             'exclude_recurring' => 'boolean',
             'date_position' => 'nullable|in:overlay,above',
             'event_count' => 'nullable|integer|min:1',
+            'max_per_row' => 'nullable|integer|min:1|max:20',
+            'overlay_text' => 'nullable|string|max:200',
         ]);
 
         // Merge with existing settings to preserve defaults
@@ -137,9 +139,18 @@ class GraphicController extends Controller
 
         // Get date_position from request or settings (applies to grid and row layouts)
         $datePosition = $request->get('date_position', $graphicSettings['date_position'] ?? null);
-        if (!in_array($layout, ['grid', 'row'])) {
+        if (! in_array($layout, ['grid', 'row'])) {
             $datePosition = null; // Date position only applies to grid and row layouts
         }
+
+        // Get max_per_row from request or settings (applies to row layout only)
+        $maxPerRow = $request->get('max_per_row', $graphicSettings['max_per_row'] ?? null);
+        if ($layout !== 'row') {
+            $maxPerRow = null; // Max per row only applies to row layout
+        }
+
+        // Get overlay_text from request or settings (for custom text on flyers)
+        $overlayText = $request->get('overlay_text', $graphicSettings['overlay_text'] ?? '');
 
         // Get event_count from request or settings
         $eventCountSetting = $request->get('event_count', $graphicSettings['event_count'] ?? null);
@@ -216,6 +227,8 @@ class GraphicController extends Controller
             // Build options array for the generator
             $options = [
                 'date_position' => $datePosition,
+                'max_per_row' => $maxPerRow,
+                'overlay_text' => $overlayText,
             ];
 
             // Use the service to generate the graphic with the specified layout and options
@@ -268,9 +281,18 @@ class GraphicController extends Controller
 
         // Get date_position from settings (applies to grid and row layouts)
         $datePosition = $graphicSettings['date_position'] ?? null;
-        if (!in_array($layout, ['grid', 'row'])) {
+        if (! in_array($layout, ['grid', 'row'])) {
             $datePosition = null;
         }
+
+        // Get max_per_row from settings (applies to row layout only)
+        $maxPerRow = $graphicSettings['max_per_row'] ?? null;
+        if ($layout !== 'row') {
+            $maxPerRow = null;
+        }
+
+        // Get overlay_text from settings (for custom text on flyers)
+        $overlayText = $graphicSettings['overlay_text'] ?? '';
 
         // Get event_count from settings
         $eventCountSetting = $graphicSettings['event_count'] ?? null;
@@ -345,6 +367,8 @@ class GraphicController extends Controller
             // Build options array for the generator
             $options = [
                 'date_position' => $datePosition,
+                'max_per_row' => $maxPerRow,
+                'overlay_text' => $overlayText,
             ];
 
             // Use the service to generate the graphic with the specified layout and options
@@ -468,6 +492,7 @@ class GraphicController extends Controller
         $filteredLines = array_filter($lines, function ($line) {
             // Remove formatting characters and whitespace to check if line has real content
             $stripped = preg_replace('/[\s\*\|\:\-\,\.]+/', '', $line);
+
             return $stripped !== '';
         });
 

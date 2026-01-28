@@ -58,7 +58,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- QR Tickets (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-900/50 to-pink-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-100 to-pink-100 dark:from-fuchsia-900/50 dark:to-pink-900/50 border border-fuchsia-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 text-sm font-medium mb-4">
@@ -94,7 +94,7 @@
                 </div>
 
                 <!-- Multiple Ticket Types -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border border-gray-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/50 dark:to-indigo-900/50 border border-violet-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -130,7 +130,7 @@
                 </div>
 
                 <!-- Payment Integration -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-blue-900/50 border border-gray-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900/50 dark:to-blue-900/50 border border-indigo-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -154,7 +154,7 @@
                 </div>
 
                 <!-- Reservations (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/50 dark:to-teal-900/50 border border-emerald-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
@@ -166,7 +166,7 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Hold now, pay later</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Let customers reserve tickets without paying upfront. Set expiration times and automatic reminders.</p>
                         </div>
-                        <div class="bg-gray-100 dark:bg-black/30 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
+                        <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-6 border border-gray-200 dark:border-white/10">
                             <div class="flex items-center gap-3 mb-4">
                                 <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
                                     <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -193,13 +193,13 @@
     </section>
 
     <!-- How it Works -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Start selling in minutes
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Four simple steps to your first ticket sale.
                 </p>
             </div>
@@ -209,8 +209,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-fuchsia-500 to-violet-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-fuchsia-500/25">
                         1
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Connect Payments</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Connect Payments</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Link Stripe or Invoice Ninja to receive payments directly.
                     </p>
                 </div>
@@ -219,8 +219,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-fuchsia-500 to-violet-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-fuchsia-500/25">
                         2
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Add Tickets</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Add Tickets</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Create ticket types with prices and quantities for your event.
                     </p>
                 </div>
@@ -229,8 +229,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-fuchsia-500 to-violet-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-fuchsia-500/25">
                         3
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Share Your Event</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Share Your Event</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Visitors can purchase tickets directly from your schedule.
                     </p>
                 </div>
@@ -239,8 +239,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-fuchsia-500 to-violet-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-fuchsia-500/25">
                         4
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Scan at Door</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Scan at Door</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Use your phone to scan QR codes and check in attendees.
                     </p>
                 </div>
@@ -319,7 +319,7 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/ai') }}" class="group block">
-                <div class="bg-gradient-to-br from-violet-900/50 to-indigo-900/50 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/50 dark:to-indigo-900/50 rounded-3xl border border-violet-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <!-- Text content -->
                         <div class="flex-1 text-center lg:text-left">
@@ -337,7 +337,7 @@
                         <div class="flex-shrink-0">
                             <div class="flex flex-col items-center gap-2">
                                 <!-- Input -->
-                                <div class="bg-gray-200 dark:bg-black/40 rounded-xl border border-gray-200 dark:border-white/10 p-3 w-48">
+                                <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3 w-48">
                                     <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">Raw text</div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400 font-mono leading-relaxed">
                                         Jazz Night<br>

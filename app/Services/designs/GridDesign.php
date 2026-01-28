@@ -59,7 +59,10 @@ class GridDesign extends AbstractEventDesign
             for ($col = 0; $col < $this->gridCols && $eventIndex < $this->events->count(); $col++) {
                 $event = $this->events[$eventIndex];
 
-                $this->generateSingleFlyer($event, $row, $col);
+                // For RTL languages, position flyers from right to left
+                $displayCol = $this->rtl ? ($this->gridCols - 1 - $col) : $col;
+
+                $this->generateSingleFlyer($event, $row, $displayCol);
                 $eventIndex++;
             }
         }
@@ -148,11 +151,12 @@ class GridDesign extends AbstractEventDesign
     }
 
     /**
-     * Format event date for display
+     * Format event date for display with localized month names
      */
     protected function formatEventDate(Event $event): string
     {
         try {
+            Carbon::setLocale($this->lang);
             $startDate = Carbon::parse($event->start_date);
 
             if ($event->end_date) {
@@ -160,14 +164,14 @@ class GridDesign extends AbstractEventDesign
 
                 if ($startDate->isSameDay($endDate)) {
                     // Same day event
-                    return $startDate->format('M j, Y');
+                    return $startDate->translatedFormat('M j, Y');
                 } else {
                     // Multi-day event
-                    return $startDate->format('M j').' - '.$endDate->format('M j, Y');
+                    return $startDate->translatedFormat('M j').' - '.$endDate->translatedFormat('M j, Y');
                 }
             } else {
                 // Single date event
-                return $startDate->format('M j, Y');
+                return $startDate->translatedFormat('M j, Y');
             }
         } catch (\Exception $e) {
             return 'Date TBD';
@@ -180,7 +184,7 @@ class GridDesign extends AbstractEventDesign
      */
     protected function addDateOverlay(Event $event, int $x, int $y): void
     {
-        $dateText = $this->formatEventDate($event);
+        $text = $this->getOverlayText($event);
 
         // Create semi-transparent dark background at top of flyer
         $bgColor = imagecolorallocatealpha($this->im, 0, 0, 0, 50); // ~60% opacity
@@ -196,12 +200,13 @@ class GridDesign extends AbstractEventDesign
         // Calculate text position (centered)
         $fontPath = $this->getFontPath('bold');
         $fontSize = self::DATE_FONT_SIZE;
-        $textWidth = $this->getTextWidth($dateText, $fontSize, $fontPath);
-        $textX = $x + (self::FLYER_WIDTH - $textWidth) / 2;
+        $textWidth = $this->getTextWidth($text, $fontSize, $fontPath);
+        $leftOffset = $this->getTextLeftOffset($text, $fontSize, $fontPath);
+        $textX = $x + (self::FLYER_WIDTH - $textWidth) / 2 - $leftOffset;
         $textY = $y + 10; // Padding from top
 
         // Add white text
-        $this->addText($dateText, (int) $textX, $textY, $fontSize, $this->c['white'], 'bold');
+        $this->addText($text, (int) $textX, $textY, $fontSize, $this->c['white'], 'bold');
     }
 
     /**
@@ -210,7 +215,7 @@ class GridDesign extends AbstractEventDesign
      */
     protected function addDateAbove(Event $event, int $x, int $y): void
     {
-        $dateText = $this->formatEventDate($event);
+        $text = $this->getOverlayText($event);
 
         // Create solid dark background
         $bgColor = imagecolorallocate($this->im, 51, 51, 51); // #333333
@@ -226,12 +231,71 @@ class GridDesign extends AbstractEventDesign
         // Calculate text position (centered)
         $fontPath = $this->getFontPath('bold');
         $fontSize = self::DATE_FONT_SIZE;
-        $textWidth = $this->getTextWidth($dateText, $fontSize, $fontPath);
-        $textX = $x + (self::FLYER_WIDTH - $textWidth) / 2;
+        $textWidth = $this->getTextWidth($text, $fontSize, $fontPath);
+        $leftOffset = $this->getTextLeftOffset($text, $fontSize, $fontPath);
+        $textX = $x + (self::FLYER_WIDTH - $textWidth) / 2 - $leftOffset;
         $textY = $y + 8; // Padding from top
 
         // Add white text
-        $this->addText($dateText, (int) $textX, $textY, $fontSize, $this->c['white'], 'bold');
+        $this->addText($text, (int) $textX, $textY, $fontSize, $this->c['white'], 'bold');
+    }
+
+    /**
+     * Get the overlay text for an event, parsing variables if a template is provided
+     */
+    protected function getOverlayText(Event $event): string
+    {
+        $template = $this->getOption('overlay_text');
+
+        // If no custom template, use default date format
+        if (empty($template)) {
+            return $this->formatEventDate($event);
+        }
+
+        return $this->parseOverlayText($template, $event);
+    }
+
+    /**
+     * Parse overlay text template with event variables
+     */
+    protected function parseOverlayText(string $template, Event $event): string
+    {
+        try {
+            Carbon::setLocale($this->lang);
+            $startDate = Carbon::parse($event->start_date);
+            $endDate = $event->end_date ? Carbon::parse($event->end_date) : null;
+
+            // Determine time format based on role's 24h setting
+            $timeFormat = $this->role->use_24_hour_time ? 'H:i' : 'g:i A';
+
+            $replacements = [
+                // Date variables
+                '{date_mdy}' => $startDate->format('n/j'),
+                '{date_dmy}' => $startDate->format('j/n'),
+                '{date_full_mdy}' => $startDate->format('m/d/Y'),
+                '{date_full_dmy}' => $startDate->format('d/m/Y'),
+                '{day_name}' => $startDate->translatedFormat('l'),
+                '{day_short}' => $startDate->translatedFormat('D'),
+                '{month}' => $startDate->format('n'),
+                '{month_name}' => $startDate->translatedFormat('F'),
+                '{month_short}' => $startDate->translatedFormat('M'),
+                '{day}' => $startDate->format('j'),
+                '{year}' => $startDate->format('Y'),
+                '{time}' => $startDate->format($timeFormat),
+                '{end_time}' => $endDate ? $endDate->format($timeFormat) : '',
+
+                // Event variables
+                '{event_name}' => $event->translatedName() ?? $event->name ?? '',
+
+                // Venue variables
+                '{venue}' => $event->venue ? ($event->venue->translatedName() ?? '') : '',
+                '{city}' => $event->venue ? ($event->venue->translatedCity() ?? '') : '',
+            ];
+
+            return str_replace(array_keys($replacements), array_values($replacements), $template);
+        } catch (\Exception $e) {
+            return $template;
+        }
     }
 
     /**

@@ -540,20 +540,9 @@ class ListDesign extends AbstractEventDesign
             error_log("Rendering Hebrew/Arabic text: '{$title}' at ({$textStartX}, {$textStartY})");
         }
 
-        // Handle multibyte text reversal for title
-        if (mb_strlen($title) > 0) {
-            $truncate = false;
-            if (mb_strlen($title) > 35) {
-                $title = mb_substr($title, 0, 35);
-                $truncate = true;
-            }
-
-            $chars = preg_split('//u', $title, -1, PREG_SPLIT_NO_EMPTY);
-            $title = implode('', array_reverse($chars));
-
-            if ($truncate) {
-                $title = '...'.$title;
-            }
+        // Truncate long titles
+        if (mb_strlen($title) > 35) {
+            $title = mb_substr($title, 0, 35) . '...';
         }
 
         $this->addText($title, $textStartX, $textStartY, self::TITLE_FONT_SIZE, $this->c['black'], 'bold');
@@ -678,6 +667,7 @@ class ListDesign extends AbstractEventDesign
     protected function formatEventDateTime(Event $event): string
     {
         try {
+            Carbon::setLocale($this->lang);
             $startDate = Carbon::parse($event->start_date);
 
             if ($event->end_date) {
@@ -685,14 +675,14 @@ class ListDesign extends AbstractEventDesign
 
                 if ($startDate->isSameDay($endDate)) {
                     // Same day event
-                    return $startDate->format('M j, Y').' at '.$startDate->format('g:i A').' - '.$endDate->format('g:i A');
+                    return $startDate->translatedFormat('M j, Y').' at '.$startDate->format('g:i A').' - '.$endDate->format('g:i A');
                 } else {
                     // Multi-day event
-                    return $startDate->format('M j, Y').' - '.$endDate->format('M j, Y');
+                    return $startDate->translatedFormat('M j, Y').' - '.$endDate->translatedFormat('M j, Y');
                 }
             } else {
                 // Single date event
-                return $startDate->format('M j, Y').' at '.$startDate->format('g:i A');
+                return $startDate->translatedFormat('M j, Y').' at '.$startDate->format('g:i A');
             }
         } catch (\Exception $e) {
             return 'Date TBD';

@@ -135,7 +135,7 @@
                     <div class="flex-grow">
                         <p class="text-gray-500 dark:text-gray-400 mb-6">Sync with any CalDAV server—Nextcloud, Radicale, Fastmail, and more. Two-way sync keeps events in harmony.</p>
 
-                        <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
+                        <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
                             <div class="flex items-center gap-3 mb-3">
                                 <div class="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center">
                                     <svg class="w-4 h-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -239,7 +239,7 @@
                     <div class="flex-grow">
                         <p class="text-gray-500 dark:text-gray-400 mb-6">Generate professional invoices for ticket purchases. Perfect for corporate events and B2B sales.</p>
 
-                        <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
+                        <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
                             <div class="flex items-center justify-between mb-3">
                                 <span class="text-emerald-400 text-xs font-medium">INVOICE #1042</span>
                                 <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-xs">Paid</span>

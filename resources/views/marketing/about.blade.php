@@ -46,7 +46,7 @@
     <!-- Mission Section -->
     <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/30 to-indigo-900/30 border border-gray-200 dark:border-white/10 p-8 lg:p-12">
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/30 dark:to-indigo-900/30 border border-violet-200 dark:border-white/10 p-8 lg:p-12">
                 <div class="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-[80px]"></div>
 
                 <div class="relative">
@@ -78,61 +78,61 @@
     </section>
 
     <!-- Who It's For -->
-    <section class="bg-gray-100 dark:bg-black/30 py-24">
+    <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Built for everyone with events
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     No matter how you share your time, we've got you covered.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                <a href="{{ marketing_url('/for-talent') }}" class="persona-card group block bg-white rounded-3xl p-8 border border-gray-200 shadow-sm hover:shadow-lg hover:border-violet-200 transition-all">
+                <a href="{{ marketing_url('/for-talent') }}" class="persona-card group block bg-white dark:bg-white/5 rounded-3xl p-8 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-violet-200 dark:hover:border-violet-500/30 transition-all">
                     <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center mb-6 shadow-lg shadow-violet-500/25">
                         <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-violet-600 transition-colors">For Talent</h3>
-                    <p class="text-gray-600 leading-relaxed">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">For Talent</h3>
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
                         Share your upcoming shows, appearances, and locations with fans. Perfect for musicians, DJs, artists, food trucks, and anyone who wants their audience to know where to find them.
                     </p>
-                    <span class="inline-flex items-center mt-4 text-sm font-medium text-violet-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span class="inline-flex items-center mt-4 text-sm font-medium text-violet-600 dark:text-violet-400 opacity-0 group-hover:opacity-100 transition-opacity">
                         Learn more
                         <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
                 </a>
 
-                <a href="{{ marketing_url('/for-venues') }}" class="persona-card group block bg-white rounded-3xl p-8 border border-gray-200 shadow-sm hover:shadow-lg hover:border-fuchsia-200 transition-all">
+                <a href="{{ marketing_url('/for-venues') }}" class="persona-card group block bg-white dark:bg-white/5 rounded-3xl p-8 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-fuchsia-200 dark:hover:border-fuchsia-500/30 transition-all">
                     <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-pink-500 flex items-center justify-center mb-6 shadow-lg shadow-fuchsia-500/25">
                         <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-fuchsia-600 transition-colors">For Venues</h3>
-                    <p class="text-gray-600 leading-relaxed">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">For Venues</h3>
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
                         Keep your event calendar updated and easily accessible. Let visitors see what's coming up and sell tickets directly through your schedule.
                     </p>
-                    <span class="inline-flex items-center mt-4 text-sm font-medium text-fuchsia-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span class="inline-flex items-center mt-4 text-sm font-medium text-fuchsia-600 dark:text-fuchsia-400 opacity-0 group-hover:opacity-100 transition-opacity">
                         Learn more
                         <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
                 </a>
 
-                <a href="{{ marketing_url('/for-curators') }}" class="persona-card group block bg-white rounded-3xl p-8 border border-gray-200 shadow-sm hover:shadow-lg hover:border-amber-200 transition-all">
+                <a href="{{ marketing_url('/for-curators') }}" class="persona-card group block bg-white dark:bg-white/5 rounded-3xl p-8 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-amber-200 dark:hover:border-amber-500/30 transition-all">
                     <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mb-6 shadow-lg shadow-amber-500/25">
                         <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-amber-600 transition-colors">For Curators</h3>
-                    <p class="text-gray-600 leading-relaxed">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">For Curators</h3>
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
                         Aggregate events from multiple sources and create a comprehensive guide to what's happening in your area or niche.
                     </p>
-                    <span class="inline-flex items-center mt-4 text-sm font-medium text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span class="inline-flex items-center mt-4 text-sm font-medium text-amber-600 dark:text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity">
                         Learn more
                         <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
@@ -176,47 +176,47 @@
     </section>
 
     <!-- Values Section -->
-    <section class="bg-gray-100 dark:bg-black/30 py-24">
+    <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     What we believe in
                 </h2>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                 <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-violet-100 to-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <svg class="w-8 h-8 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="w-16 h-16 bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-500/20 dark:to-indigo-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Free Forever</h3>
-                    <p class="text-gray-600">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Free Forever</h3>
+                    <p class="text-gray-600 dark:text-gray-400">
                         Core features will always be free. No tricks, no bait-and-switch. If you can selfhost, it's 100% free.
                     </p>
                 </div>
 
                 <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-fuchsia-100 to-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <svg class="w-8 h-8 text-fuchsia-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="w-16 h-16 bg-gradient-to-br from-fuchsia-100 to-pink-100 dark:from-fuchsia-500/20 dark:to-pink-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-fuchsia-600 dark:text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Privacy First</h3>
-                    <p class="text-gray-600">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Privacy First</h3>
+                    <p class="text-gray-600 dark:text-gray-400">
                         Your data is yours. We don't sell it, share it, or use it for advertising. Selfhost for complete control.
                     </p>
                 </div>
 
                 <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <svg class="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-500/20 dark:to-teal-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Simple by Design</h3>
-                    <p class="text-gray-600">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Simple by Design</h3>
+                    <p class="text-gray-600 dark:text-gray-400">
                         No bloat, no complexity. We focus on the features that matter and make them work beautifully.
                     </p>
                 </div>
@@ -227,7 +227,7 @@
     <!-- Built By Section -->
     <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/30 to-indigo-900/30 border border-gray-200 dark:border-white/10 p-8 lg:p-12">
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-200 dark:border-white/10 p-8 lg:p-12">
                 <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px]"></div>
 
                 <div class="relative text-center">

@@ -320,7 +320,7 @@
                             </div>
                         </div>
 
-                        <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-3 mb-4">
+                        <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-3 mb-4">
                             <div class="text-xs text-gray-500 mb-2">Latest track</div>
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
@@ -693,13 +693,13 @@
     </section>
 
     <!-- Perfect For Section -->
-    <section class="bg-white dark:bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Built for every kind of music room
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     50 seats or 5,000 - if you book live music, this is for you.
                 </p>
             </div>

@@ -80,7 +80,7 @@
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
                                 <!-- Sub-schedule mockup -->
-                                <div class="bg-gray-100 dark:bg-black/30 rounded-2xl border border-gray-200 dark:border-white/10 p-4 w-64">
+                                <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl border border-gray-200 dark:border-white/10 p-4 w-64">
                                     <div class="text-xs text-gray-500 mb-3">Sub-schedules</div>
                                     <div class="space-y-2">
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-rose-500/20 border border-rose-500/30">
@@ -117,7 +117,7 @@
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Easy filtering for visitors</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">When you have multiple sub-schedules, visitors see a dropdown filter on your calendar. They can quickly find events in the room or series they care about.</p>
 
-                    <div class="bg-gray-100 dark:bg-black/30 rounded-xl border border-gray-200 dark:border-white/10 p-3">
+                    <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3">
                         <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-white/5 rounded-lg">
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Filter by schedule</span>
                             <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -167,7 +167,7 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Automate with the API</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Create events programmatically and assign them to sub-schedules using the API. Pass the <code class="text-purple-300 bg-purple-500/20 px-1 rounded">schedule</code> parameter when creating events.</p>
                         </div>
-                        <div class="bg-gray-100 dark:bg-black/30 rounded-xl border border-gray-200 dark:border-white/10 p-4 font-mono text-sm">
+                        <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 font-mono text-sm">
                             <div class="text-gray-500 mb-2">// Create event via API</div>
                             <div class="text-purple-300">POST /api/events</div>
                             <div class="text-gray-500 dark:text-gray-400 mt-2">{</div>
@@ -291,7 +291,7 @@
 
                         <!-- Mini mockup: Toggle switch with streaming URL field -->
                         <div class="flex-shrink-0">
-                            <div class="bg-gray-100 dark:bg-black/30 rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
+                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
                                 <!-- Toggle switch -->
                                 <div class="flex items-center justify-between mb-4">
                                     <span class="text-gray-600 dark:text-gray-300 text-xs">Online Event</span>

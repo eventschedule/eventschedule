@@ -160,7 +160,7 @@
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Build integrations</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Programmatically manage schedules and events. Create custom workflows and automations.</p>
 
-                    <div class="bg-gray-200 dark:bg-black/30 rounded-xl p-4 code-block text-xs">
+                    <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 code-block text-xs">
                         <div class="text-gray-500 mb-2"># Create an event</div>
                         <div class="text-violet-400">POST <span class="text-gray-600 dark:text-gray-300">/api/events/myschedule</span></div>
                         <div class="text-gray-500 mt-2">X-API-Key: your_api_key</div>
@@ -181,19 +181,19 @@
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Manage your schedules, events, and ticket sales programmatically. API access requires a Pro subscription.</p>
                         </div>
                         <div class="space-y-3">
-                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-black/30 border border-gray-100 dark:border-white/5">
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-[#0f0f14] border border-gray-100 dark:border-white/5">
                                 <span class="px-2 py-1 rounded bg-emerald-500/30 text-emerald-300 text-xs font-mono">GET</span>
                                 <span class="text-gray-600 dark:text-gray-300 text-sm font-mono">/api/schedules</span>
                             </div>
-                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-black/30 border border-gray-100 dark:border-white/5">
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-[#0f0f14] border border-gray-100 dark:border-white/5">
                                 <span class="px-2 py-1 rounded bg-emerald-500/30 text-emerald-300 text-xs font-mono">GET</span>
                                 <span class="text-gray-600 dark:text-gray-300 text-sm font-mono">/api/events</span>
                             </div>
-                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-black/30 border border-gray-100 dark:border-white/5">
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-[#0f0f14] border border-gray-100 dark:border-white/5">
                                 <span class="px-2 py-1 rounded bg-blue-500/30 text-blue-300 text-xs font-mono">POST</span>
                                 <span class="text-gray-600 dark:text-gray-300 text-sm font-mono">/api/events/{'{subdomain}'}</span>
                             </div>
-                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-black/30 border border-gray-100 dark:border-white/5">
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-[#0f0f14] border border-gray-100 dark:border-white/5">
                                 <span class="px-2 py-1 rounded bg-blue-500/30 text-blue-300 text-xs font-mono">POST</span>
                                 <span class="text-gray-600 dark:text-gray-300 text-sm font-mono">/api/sales</span>
                             </div>
@@ -206,7 +206,7 @@
     </section>
 
     <!-- API Features Section -->
-    <section class="bg-gray-100 dark:bg-black/30 py-24">
+    <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -315,7 +315,7 @@
     </section>
 
     <!-- Pricing Note -->
-    <section class="bg-gray-100 dark:bg-black/30 py-24">
+    <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
                 <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-violet-100 mb-8">

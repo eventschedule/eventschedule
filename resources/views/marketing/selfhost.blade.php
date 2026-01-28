@@ -240,7 +240,7 @@
                                 Update Available
                             </span>
                         </div>
-                        <div class="bg-gray-200 dark:bg-black/30 rounded-xl p-4 mb-4">
+                        <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 mb-4">
                             <div class="flex items-center justify-between mb-2">
                                 <span class="text-gray-600 dark:text-gray-300">New version:</span>
                                 <span class="text-gray-900 dark:text-white font-medium">v2.5.0</span>
@@ -290,7 +290,7 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-6">
                         Automatically pull events from external websites into your schedule. Our intelligent system extracts event details from any webpage using AI-powered parsing.
                     </p>
-                    <div class="bg-gray-200 dark:bg-black/30 rounded-xl p-4 mb-6">
+                    <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 mb-6">
                         <div class="flex items-center gap-3 mb-3">
                             <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -335,7 +335,7 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-6">
                         Generate relevant blog content automatically to drive organic traffic to your event schedule. Our AI creates engaging posts tailored to your events and audience.
                     </p>
-                    <div class="bg-gray-200 dark:bg-black/30 rounded-xl p-4 mb-6">
+                    <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 mb-6">
                         <div class="space-y-3">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-lg bg-fuchsia-500/30 flex items-center justify-center">
@@ -493,7 +493,7 @@
 
                     <!-- Visual mockup -->
                     <div class="relative">
-                        <div class="bg-gray-200 dark:bg-black/30 rounded-2xl border border-gray-200 dark:border-white/10 p-6">
+                        <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
                             <div class="flex items-center gap-3 mb-6">
                                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
                                     <span class="text-white font-bold text-sm">YB</span>

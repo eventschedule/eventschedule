@@ -128,7 +128,7 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-6">
                         Control how long your customers can try the platform before subscribing. Set the trial length via a simple environment variable.
                     </p>
-                    <div class="bg-gray-200 dark:bg-black/30 rounded-xl p-4 mb-4">
+                    <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 mb-4">
                         <code class="text-sm text-gray-600 dark:text-gray-300">
                             <span class="text-violet-400">TRIAL_DAYS</span>=<span class="text-green-400">14</span>
                         </code>
@@ -336,7 +336,7 @@
                             </div>
                         </div>
                         <div class="space-y-3">
-                            <div class="bg-gray-200 dark:bg-black/30 rounded-xl p-3 flex items-center gap-3">
+                            <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-3 flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-lg bg-blue-500/30 flex items-center justify-center">
                                     <svg class="w-4 h-4 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -347,7 +347,7 @@
                                     <div class="text-gray-500 text-xs">Pro Plan</div>
                                 </div>
                             </div>
-                            <div class="bg-gray-200 dark:bg-black/30 rounded-xl p-3 flex items-center gap-3">
+                            <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-3 flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-lg bg-emerald-500/30 flex items-center justify-center">
                                     <svg class="w-4 h-4 text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -358,7 +358,7 @@
                                     <div class="text-gray-500 text-xs">Free Plan</div>
                                 </div>
                             </div>
-                            <div class="bg-gray-200 dark:bg-black/30 rounded-xl p-3 flex items-center gap-3">
+                            <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-3 flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-lg bg-violet-500/30 flex items-center justify-center">
                                     <svg class="w-4 h-4 text-violet-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -426,7 +426,7 @@
                             <p class="text-gray-500 dark:text-gray-400 mb-6">
                                 When everyone participates, everyone benefits. More events means more users, which means a better platform for all.
                             </p>
-                            <div class="bg-gray-200 dark:bg-black/30 rounded-xl p-4">
+                            <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4">
                                 <div class="flex items-center gap-3 mb-3">
                                     <div class="w-8 h-8 rounded-lg bg-fuchsia-500/30 flex items-center justify-center">
                                         <svg class="w-4 h-4 text-fuchsia-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">

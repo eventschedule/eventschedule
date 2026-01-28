@@ -78,7 +78,7 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="animate-float">
-                                <div class="bg-gray-100 dark:bg-black/30 rounded-2xl p-5 border border-gray-200 dark:border-white/10 space-y-3 max-w-xs">
+                                <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10 space-y-3 max-w-xs">
                                     <!-- Team member 1 -->
                                     <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
                                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center text-white font-semibold text-sm">JD</div>
@@ -166,7 +166,7 @@
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Shared editing</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">All team members with the right permissions can create and edit events on your schedule.</p>
 
-                    <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                    <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center justify-between mb-3">
                             <span class="text-gray-900 dark:text-white text-sm font-medium">Team Workshop</span>
                             <span class="text-gray-500 dark:text-gray-400 text-xs">Edited 2m ago</span>
@@ -192,7 +192,7 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Track member availability</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Team members can mark dates when they're unavailable, helping you coordinate schedules and plan events when everyone can participate.</p>
                         </div>
-                        <div class="bg-gray-100 dark:bg-black/30 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
+                        <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-6 border border-gray-200 dark:border-white/10">
                             <div class="text-gray-500 dark:text-gray-400 text-sm mb-4">January 2025</div>
                             <div class="grid grid-cols-7 gap-1 text-center text-xs">
                                 <div class="text-gray-500 py-1">S</div>
@@ -412,7 +412,7 @@
 
                         <!-- Mini mockup: Nested list with colored dots -->
                         <div class="flex-shrink-0">
-                            <div class="bg-gray-100 dark:bg-black/30 rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
+                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
                                 <div class="text-[10px] text-gray-500 mb-3">Sub-schedules</div>
                                 <div class="space-y-2">
                                     <div class="flex items-center gap-2 p-2 rounded-lg bg-rose-500/20 border border-rose-500/30">

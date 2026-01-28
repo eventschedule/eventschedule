@@ -487,6 +487,22 @@ abstract class AbstractEventDesign
     }
 
     /**
+     * Get the left offset of text bounding box (bbox[0])
+     * This offset needs to be subtracted when centering text
+     */
+    protected function getTextLeftOffset(string $text, int $fontSize, string $fontPath): int
+    {
+        if (function_exists('imagettfbbox') && file_exists($fontPath)) {
+            $bbox = imagettfbbox($fontSize, 0, $fontPath, $text);
+            if ($bbox !== false) {
+                return $bbox[0];
+            }
+        }
+
+        return 0;
+    }
+
+    /**
      * Get text height for a given font and size
      */
     protected function getTextHeight(string $text, int $fontSize, string $fontPath): int
@@ -969,13 +985,15 @@ abstract class AbstractEventDesign
 
             foreach ($lines as $line) {
                 $lineWidth = $this->getTextWidth($line, $fontSize, $fontPath);
-                $lineX = $centerX - ($lineWidth / 2);
+                $lineLeftOffset = $this->getTextLeftOffset($line, $fontSize, $fontPath);
+                $lineX = $centerX - ($lineWidth / 2) - $lineLeftOffset;
                 $this->addText($line, $lineX, $startY, $fontSize, $color, $weight);
                 $startY += $fontSize * self::DEFAULT_LINE_HEIGHT;
             }
         } else {
             // Single line centered text
-            $x = $centerX - ($textWidth / 2);
+            $leftOffset = $this->getTextLeftOffset($text, $fontSize, $fontPath);
+            $x = $centerX - ($textWidth / 2) - $leftOffset;
             $this->addText($text, $x, $y, $fontSize, $color, $weight);
         }
     }

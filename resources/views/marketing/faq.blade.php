@@ -43,7 +43,7 @@
     </section>
 
     <!-- FAQ Content -->
-    <section class="bg-gray-100 dark:bg-black/30 py-24">
+    <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
             <!-- Getting Started -->

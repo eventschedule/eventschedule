@@ -132,7 +132,7 @@
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Universal protocol</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-4">CalDAV is an open internet standard. No vendor lock-in. Works with any compliant server.</p>
 
-                    <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-3 border border-gray-200 dark:border-white/10">
+                    <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-3 border border-gray-200 dark:border-white/10">
                         <code class="text-teal-300 text-xs font-mono">RFC 4791 - CalDAV</code>
                     </div>
                 </div>
@@ -202,7 +202,7 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Automatic calendar discovery</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Enter your server URL and we'll find all your calendars automatically. No manual configuration needed.</p>
                         </div>
-                        <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                        <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                             <div class="text-xs text-gray-500 mb-3 font-mono">PROPFIND Response</div>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-2 p-2 rounded-lg bg-violet-500/20 border border-violet-400/30">
@@ -265,7 +265,7 @@
                             </div>
                         </div>
                         <div class="flex-shrink-0 animate-float">
-                            <div class="bg-gray-100 dark:bg-black/30 rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
+                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
                                 <div class="flex items-center gap-2 mb-3">
                                     <div class="w-8 h-8 rounded-lg bg-rose-500/20 flex items-center justify-center">
                                         <svg class="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

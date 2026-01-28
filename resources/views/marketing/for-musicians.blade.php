@@ -47,12 +47,12 @@
 
             <!-- Genre tags -->
             <div class="mt-14 flex flex-wrap justify-center gap-2">
-                <span class="px-3 py-1.5 rounded-lg bg-cyan-900/40 text-cyan-300 text-xs font-medium border border-cyan-800/50">Rock</span>
-                <span class="px-3 py-1.5 rounded-lg bg-teal-900/40 text-teal-300 text-xs font-medium border border-teal-800/50">Jazz</span>
-                <span class="px-3 py-1.5 rounded-lg bg-emerald-900/40 text-emerald-300 text-xs font-medium border border-emerald-800/50">Folk</span>
-                <span class="px-3 py-1.5 rounded-lg bg-blue-900/40 text-blue-300 text-xs font-medium border border-blue-800/50">Blues</span>
-                <span class="px-3 py-1.5 rounded-lg bg-indigo-900/40 text-indigo-300 text-xs font-medium border border-indigo-800/50">Classical</span>
-                <span class="px-3 py-1.5 rounded-lg bg-violet-900/40 text-violet-300 text-xs font-medium border border-violet-800/50">Country</span>
+                <span class="px-3 py-1.5 rounded-lg bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300 text-xs font-medium border border-cyan-200 dark:border-cyan-800/50">Rock</span>
+                <span class="px-3 py-1.5 rounded-lg bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300 text-xs font-medium border border-teal-200 dark:border-teal-800/50">Jazz</span>
+                <span class="px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 text-xs font-medium border border-emerald-200 dark:border-emerald-800/50">Folk</span>
+                <span class="px-3 py-1.5 rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-xs font-medium border border-blue-200 dark:border-blue-800/50">Blues</span>
+                <span class="px-3 py-1.5 rounded-lg bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 text-xs font-medium border border-indigo-200 dark:border-indigo-800/50">Classical</span>
+                <span class="px-3 py-1.5 rounded-lg bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-800/50">Country</span>
             </div>
         </div>
     </section>
@@ -83,7 +83,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Newsletter - Tour Announcements (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-teal-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900/50 dark:to-teal-900/50 border border-cyan-200 dark:border-white/10 p-8 lg:p-10">
                     <!-- Subtle stage light glow -->
                     <div class="absolute top-0 right-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-[100px]"></div>
 
@@ -131,7 +131,7 @@
                 </div>
 
                 <!-- Zero Platform Fees -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-green-900/50 border border-gray-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/50 dark:to-green-900/50 border border-emerald-200 dark:border-white/10 p-8">
                     <div class="absolute bottom-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px]"></div>
                     <div class="relative">
                         <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-900/40 text-emerald-300 text-sm font-medium mb-5 border border-emerald-800/30">
@@ -160,7 +160,7 @@
                 </div>
 
                 <!-- One Link for Everything -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-blue-900/50 border border-gray-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900/50 dark:to-blue-900/50 border border-indigo-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-900/40 text-indigo-300 text-sm font-medium mb-5 border border-indigo-800/30">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -170,7 +170,7 @@
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">One link for Spotify, Bandcamp & EPK</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Put it in your Spotify bio, Bandcamp page, EPK, or website. All your gigs in one place.</p>
 
-                    <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                    <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-indigo-500/20 border border-indigo-400/30 mb-3">
                             <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -186,7 +186,7 @@
                 </div>
 
                 <!-- Venue Sync (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-purple-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/50 dark:to-purple-900/50 border border-violet-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
                             <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-900/40 text-violet-300 text-sm font-medium mb-5 border border-violet-800/30">
@@ -234,7 +234,7 @@
                 </div>
 
                 <!-- Team Collaboration -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-gray-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50 border border-amber-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-900/40 text-amber-300 text-sm font-medium mb-5 border border-amber-800/30">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -270,7 +270,7 @@
                 </div>
 
                 <!-- Google Calendar Sync -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-gray-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50 border border-blue-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-900/40 text-blue-300 text-sm font-medium mb-5 border border-blue-800/30">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -307,7 +307,7 @@
                 </div>
 
                 <!-- Fans Follow Your Tour -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-900/50 to-rose-900/50 border border-gray-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-900/50 dark:to-rose-900/50 border border-pink-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-pink-900/40 text-pink-300 text-sm font-medium mb-5 border border-pink-800/30">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -346,7 +346,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Open Mics -->
-                <div class="bg-gradient-to-br from-[#0f1a1a] to-[#0a0a0f] rounded-2xl p-6 border border-cyan-900/20 hover:border-cyan-800/40 transition-colors">
+                <div class="bg-gradient-to-br from-cyan-100 to-cyan-50 dark:from-[#0f1a1a] dark:to-[#0a0a0f] rounded-2xl p-6 border border-cyan-200 dark:border-cyan-900/20 hover:border-cyan-300 dark:hover:border-cyan-800/40 transition-colors">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-900/30 mb-4">
                         <svg class="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
@@ -357,7 +357,7 @@
                 </div>
 
                 <!-- Local Gigging -->
-                <div class="bg-gradient-to-br from-[#0f1a17] to-[#0a0a0f] rounded-2xl p-6 border border-teal-900/20 hover:border-teal-800/40 transition-colors">
+                <div class="bg-gradient-to-br from-teal-100 to-teal-50 dark:from-[#0f1a17] dark:to-[#0a0a0f] rounded-2xl p-6 border border-teal-200 dark:border-teal-900/20 hover:border-teal-300 dark:hover:border-teal-800/40 transition-colors">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-900/30 mb-4">
                         <svg class="w-6 h-6 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -369,7 +369,7 @@
                 </div>
 
                 <!-- Regional Tours -->
-                <div class="bg-gradient-to-br from-[#0f1520] to-[#0a0a0f] rounded-2xl p-6 border border-blue-900/20 hover:border-blue-800/40 transition-colors">
+                <div class="bg-gradient-to-br from-blue-100 to-blue-50 dark:from-[#0f1520] dark:to-[#0a0a0f] rounded-2xl p-6 border border-blue-200 dark:border-blue-900/20 hover:border-blue-300 dark:hover:border-blue-800/40 transition-colors">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-900/30 mb-4">
                         <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
@@ -380,7 +380,7 @@
                 </div>
 
                 <!-- Headlining -->
-                <div class="bg-gradient-to-br from-[#12101a] to-[#0a0a0f] rounded-2xl p-6 border border-indigo-900/20 hover:border-indigo-800/40 transition-colors">
+                <div class="bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-[#12101a] dark:to-[#0a0a0f] rounded-2xl p-6 border border-indigo-200 dark:border-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-800/40 transition-colors">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-900/30 mb-4">
                         <svg class="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
@@ -391,7 +391,7 @@
                 </div>
 
                 <!-- Touring -->
-                <div class="bg-gradient-to-br from-[#15101a] to-[#0a0a0f] rounded-2xl p-6 border border-violet-900/20 hover:border-violet-800/40 transition-colors">
+                <div class="bg-gradient-to-br from-violet-100 to-violet-200 dark:from-[#15101a] dark:to-[#0a0a0f] rounded-2xl p-6 border border-violet-200 dark:border-violet-900/20 hover:border-violet-300 dark:hover:border-violet-800/40 transition-colors">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-900/30 mb-4">
                         <svg class="w-6 h-6 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -402,7 +402,7 @@
                 </div>
 
                 <!-- Festivals -->
-                <div class="bg-gradient-to-br from-[#1a1510] to-[#0a0a0f] rounded-2xl p-6 border border-amber-900/20 hover:border-amber-800/40 transition-colors">
+                <div class="bg-gradient-to-br from-amber-100 to-amber-50 dark:from-[#1a1510] dark:to-[#0a0a0f] rounded-2xl p-6 border border-amber-200 dark:border-amber-900/20 hover:border-amber-300 dark:hover:border-amber-800/40 transition-colors">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-900/30 mb-4">
                         <svg class="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
@@ -416,13 +416,13 @@
     </section>
 
     <!-- Perfect For Section -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Perfect for all types of musicians
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Whether you're a solo artist or a touring band, Event Schedule works for you.
                 </p>
             </div>

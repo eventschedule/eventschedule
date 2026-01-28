@@ -70,6 +70,10 @@
                                      document.getElementById('date_position_mobile')?.value || '';
                 const eventCount = document.getElementById('event_count')?.value ||
                                    document.getElementById('event_count_mobile')?.value || '';
+                const maxPerRow = document.getElementById('max_per_row')?.value ||
+                                  document.getElementById('max_per_row_mobile')?.value || '';
+                const overlayText = document.getElementById('overlay_text')?.value ||
+                                    document.getElementById('overlay_text_mobile')?.value || '';
 
                 return {
                     link_type: linkType,
@@ -79,7 +83,9 @@
                     exclude_recurring: excludeRecurring,
                     layout: layout,
                     date_position: datePosition,
-                    event_count: eventCount
+                    event_count: eventCount,
+                    max_per_row: maxPerRow,
+                    overlay_text: overlayText
                 };
             }
 
@@ -188,6 +194,20 @@
                 if (eventCountDesktop && eventCountMobile) {
                     eventCountMobile.value = eventCountDesktop.value;
                 }
+
+                // Sync max per row
+                const maxPerRowDesktop = document.getElementById('max_per_row');
+                const maxPerRowMobile = document.getElementById('max_per_row_mobile');
+                if (maxPerRowDesktop && maxPerRowMobile) {
+                    maxPerRowMobile.value = maxPerRowDesktop.value;
+                }
+
+                // Sync overlay text
+                const overlayTextDesktop = document.getElementById('overlay_text');
+                const overlayTextMobile = document.getElementById('overlay_text_mobile');
+                if (overlayTextDesktop && overlayTextMobile) {
+                    overlayTextMobile.value = overlayTextDesktop.value;
+                }
             }
 
             function loadGraphic() {
@@ -216,8 +236,10 @@
                 const excludeRecurringParam = formSettings.exclude_recurring ? '&exclude_recurring=1' : '';
                 const datePositionParam = formSettings.date_position ? '&date_position=' + encodeURIComponent(formSettings.date_position) : '';
                 const eventCountParam = formSettings.event_count ? '&event_count=' + encodeURIComponent(formSettings.event_count) : '';
+                const maxPerRowParam = formSettings.max_per_row ? '&max_per_row=' + encodeURIComponent(formSettings.max_per_row) : '';
+                const overlayTextParam = formSettings.overlay_text ? '&overlay_text=' + encodeURIComponent(formSettings.overlay_text) : '';
 
-                fetch('{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + screenCaptureParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam)
+                fetch('{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + screenCaptureParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam)
                     .then(response => {
                         if (!response.ok) {
                             if (response.status === 404) {
@@ -365,6 +387,7 @@
                 });
                 currentLayout = layout;
                 toggleDatePositionVisibility();
+                toggleMaxPerRowVisibility();
 
                 // Update date position selects
                 ['date_position', 'date_position_mobile'].forEach(id => {
@@ -381,6 +404,24 @@
                         eventCount.value = currentSettings.event_count || '';
                     }
                 });
+
+                // Update max per row selects
+                ['max_per_row', 'max_per_row_mobile'].forEach(id => {
+                    const maxPerRow = document.getElementById(id);
+                    if (maxPerRow) {
+                        maxPerRow.value = currentSettings.max_per_row || '';
+                    }
+                });
+                toggleMaxPerRowVisibility();
+
+                // Update overlay text inputs
+                ['overlay_text', 'overlay_text_mobile'].forEach(id => {
+                    const overlayText = document.getElementById(id);
+                    if (overlayText) {
+                        overlayText.value = currentSettings.overlay_text || '';
+                    }
+                });
+                toggleOverlayTextVisibility();
             }
 
             function toggleDatePositionVisibility() {
@@ -401,8 +442,65 @@
                 });
             }
 
+            function toggleMaxPerRowVisibility() {
+                const layout = document.querySelector('input[name="layout"]:checked')?.value ||
+                               document.querySelector('input[name="layout_mobile"]:checked')?.value || 'grid';
+
+                // Show max per row only for row layout
+                ['max_per_row_container', 'max_per_row_container_mobile'].forEach(id => {
+                    const container = document.getElementById(id);
+                    if (container) {
+                        if (layout === 'row') {
+                            container.classList.remove('hidden');
+                        } else {
+                            container.classList.add('hidden');
+                        }
+                    }
+                });
+            }
+
+            function toggleOverlayTextVisibility() {
+                // Show overlay text input when date position is overlay or above
+                ['', '_mobile'].forEach(suffix => {
+                    const datePosition = document.getElementById('date_position' + suffix);
+                    const overlayTextContainer = document.getElementById('overlay_text_container' + suffix);
+                    if (datePosition && overlayTextContainer) {
+                        if (datePosition.value === 'overlay' || datePosition.value === 'above') {
+                            overlayTextContainer.classList.remove('hidden');
+                        } else {
+                            overlayTextContainer.classList.add('hidden');
+                        }
+                    }
+                });
+            }
+
             function toggleScreenCapture() {
-                // Placeholder for any screen capture toggle logic if needed
+                const useScreenCapture = document.getElementById('use_screen_capture')?.checked ||
+                                         document.getElementById('use_screen_capture_mobile')?.checked || false;
+
+                // Elements to hide when screen capture is enabled
+                const containerIds = [
+                    'layout_type_container', 'layout_type_container_mobile',
+                    'date_position_container', 'date_position_container_mobile',
+                    'max_per_row_container', 'max_per_row_container_mobile'
+                ];
+
+                containerIds.forEach(id => {
+                    const container = document.getElementById(id);
+                    if (container) {
+                        if (useScreenCapture) {
+                            container.classList.add('hidden');
+                        } else {
+                            container.classList.remove('hidden');
+                        }
+                    }
+                });
+
+                // Re-apply layout visibility rules when turning off screen capture
+                if (!useScreenCapture) {
+                    toggleDatePositionVisibility();
+                    toggleMaxPerRowVisibility();
+                }
             }
 
             function updateDaySelector() {
@@ -526,6 +624,12 @@
                 // Get event count
                 const eventCount = document.getElementById('event_count') || document.getElementById('event_count_mobile');
 
+                // Get max per row
+                const maxPerRow = document.getElementById('max_per_row') || document.getElementById('max_per_row_mobile');
+
+                // Get overlay text
+                const overlayText = document.getElementById('overlay_text') || document.getElementById('overlay_text_mobile');
+
                 const settings = {
                     enabled: emailEnabled ? emailEnabled.checked : false,
                     frequency: frequency,
@@ -539,7 +643,9 @@
                     exclude_recurring: excludeRecurring ? excludeRecurring.checked : false,
                     recipient_emails: recipientEmails ? recipientEmails.value : '',
                     date_position: datePosition ? datePosition.value || null : null,
-                    event_count: eventCount && eventCount.value ? parseInt(eventCount.value) : null
+                    event_count: eventCount && eventCount.value ? parseInt(eventCount.value) : null,
+                    max_per_row: maxPerRow && maxPerRow.value ? parseInt(maxPerRow.value) : null,
+                    overlay_text: overlayText ? overlayText.value : ''
                 };
 
                 fetch('{{ route("event.save_graphic_settings", ["subdomain" => $role->subdomain]) }}', {
@@ -729,6 +835,7 @@
                         const otherRadio = document.querySelector(`input[name="${otherName}"][value="${this.value}"]`);
                         if (otherRadio) otherRadio.checked = true;
                         toggleDatePositionVisibility();
+                        toggleMaxPerRowVisibility();
                     });
                 });
 
@@ -740,6 +847,19 @@
                             const otherId = id === 'date_position' ? 'date_position_mobile' : 'date_position';
                             const otherSelect = document.getElementById(otherId);
                             if (otherSelect) otherSelect.value = this.value;
+                            toggleOverlayTextVisibility();
+                        });
+                    }
+                });
+
+                // Add change listeners for overlay text inputs
+                ['overlay_text', 'overlay_text_mobile'].forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) {
+                        input.addEventListener('input', function() {
+                            const otherId = id === 'overlay_text' ? 'overlay_text_mobile' : 'overlay_text';
+                            const otherInput = document.getElementById(otherId);
+                            if (otherInput) otherInput.value = this.value;
                         });
                     }
                 });
@@ -755,6 +875,21 @@
                         });
                     }
                 });
+
+                // Add change listeners for max per row selects
+                ['max_per_row', 'max_per_row_mobile'].forEach(id => {
+                    const select = document.getElementById(id);
+                    if (select) {
+                        select.addEventListener('change', function() {
+                            const otherId = id === 'max_per_row' ? 'max_per_row_mobile' : 'max_per_row';
+                            const otherSelect = document.getElementById(otherId);
+                            if (otherSelect) otherSelect.value = this.value;
+                        });
+                    }
+                });
+
+                // Apply initial screen capture visibility state
+                toggleScreenCapture();
 
                 loadGraphic();
             });
@@ -882,9 +1017,9 @@
                     <!-- Graphic Tab Content -->
                     <div x-show="settingsTab === 'graphic'" x-cloak>
                         <!-- Layout Type -->
-                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                        <div id="layout_type_container_mobile" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.layout_type') }}</h4>
-                            <div class="flex flex-col gap-2">
+                            <div class="flex flex-row flex-wrap gap-x-4 gap-y-2">
                                 <label class="flex items-center cursor-pointer group">
                                     <input type="radio" name="layout_mobile" value="grid" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" checked>
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.grid_layout') }}</span>
@@ -900,15 +1035,35 @@
                             </div>
                         </div>
 
-                        <!-- Date Position (only for grid layout) -->
+                        <!-- Show Text (only for grid and row layouts) -->
                         <div id="date_position_container_mobile" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.show_date') }}</h4>
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.show_text') }}</h4>
                             <select id="date_position_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
                                 <option value="">{{ __('messages.date_position_none') }}</option>
                                 <option value="overlay">{{ __('messages.date_position_overlay') }}</option>
                                 <option value="above">{{ __('messages.date_position_above') }}</option>
                             </select>
-                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.date_position_help') }}</p>
+
+                            <!-- Overlay Text Input (shown when overlay/above selected) -->
+                            <div id="overlay_text_container_mobile" class="mt-3 hidden">
+                                <input type="text" id="overlay_text_mobile" placeholder="{{ __('messages.overlay_text_placeholder') }}" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                    {{ __('messages.overlay_text_help') }}
+                                    <a href="/docs/event-graphics#variables" target="_blank" class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.view_variables') }}</a>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Max Per Row (only for row layout) -->
+                        <div id="max_per_row_container_mobile" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700 hidden">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.max_per_row') }}</h4>
+                            <select id="max_per_row_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                <option value="">{{ __('messages.no_limit') }}</option>
+                                @for ($i = 2; $i <= 10; $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.max_per_row_help') }}</p>
                         </div>
 
                         <!-- Event Count -->
@@ -1165,9 +1320,9 @@
                         <!-- Graphic Tab Content -->
                         <div x-show="settingsTab === 'graphic'" x-cloak>
                             <!-- Layout Type -->
-                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <div id="layout_type_container" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.layout_type') }}</h4>
-                                <div class="flex flex-col gap-2">
+                                <div class="flex flex-row flex-wrap gap-x-4 gap-y-2">
                                     <label class="flex items-center cursor-pointer group">
                                         <input type="radio" name="layout" value="grid" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" checked>
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.grid_layout') }}</span>
@@ -1183,15 +1338,35 @@
                                 </div>
                             </div>
 
-                            <!-- Date Position (only for grid layout) -->
+                            <!-- Show Text (only for grid and row layouts) -->
                             <div id="date_position_container" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.show_date') }}</h4>
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.show_text') }}</h4>
                                 <select id="date_position" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
                                     <option value="">{{ __('messages.date_position_none') }}</option>
                                     <option value="overlay">{{ __('messages.date_position_overlay') }}</option>
                                     <option value="above">{{ __('messages.date_position_above') }}</option>
                                 </select>
-                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.date_position_help') }}</p>
+
+                                <!-- Overlay Text Input (shown when overlay/above selected) -->
+                                <div id="overlay_text_container" class="mt-3 hidden">
+                                    <input type="text" id="overlay_text" placeholder="{{ __('messages.overlay_text_placeholder') }}" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                        {{ __('messages.overlay_text_help') }}
+                                        <a href="/docs/event-graphics#variables" target="_blank" class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.view_variables') }}</a>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Max Per Row (only for row layout) -->
+                            <div id="max_per_row_container" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700 hidden">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.max_per_row') }}</h4>
+                                <select id="max_per_row" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                    <option value="">{{ __('messages.no_limit') }}</option>
+                                    @for ($i = 2; $i <= 10; $i++)
+                                        <option value="{{ $i }}">{{ $i }}</option>
+                                    @endfor
+                                </select>
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.max_per_row_help') }}</p>
                             </div>
 
                             <!-- Event Count -->

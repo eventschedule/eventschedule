@@ -70,12 +70,12 @@
 
             <!-- Performance tags -->
             <div class="mt-12 flex flex-wrap justify-center gap-2">
-                <span class="px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-xs font-medium border border-violet-500/30">Close-up</span>
-                <span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-medium border border-purple-500/30">Stage</span>
-                <span class="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-medium border border-indigo-500/30">Mentalism</span>
-                <span class="px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 text-xs font-medium border border-fuchsia-500/30">Illusion</span>
-                <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-medium border border-amber-500/30">Corporate</span>
-                <span class="px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-xs font-medium border border-pink-500/30">Kids Shows</span>
+                <span class="px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-500/30">Close-up</span>
+                <span class="px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-xs font-medium border border-purple-200 dark:border-purple-500/30">Stage</span>
+                <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-xs font-medium border border-indigo-200 dark:border-indigo-500/30">Mentalism</span>
+                <span class="px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/20 dark:text-fuchsia-300 text-xs font-medium border border-fuchsia-200 dark:border-fuchsia-500/30">Illusion</span>
+                <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-xs font-medium border border-amber-200 dark:border-amber-500/30">Corporate</span>
+                <span class="px-3 py-1 rounded-full bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300 text-xs font-medium border border-pink-200 dark:border-pink-500/30">Kids Shows</span>
             </div>
         </div>
     </section>
@@ -86,17 +86,17 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Private Event Bookings (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-purple-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/50 dark:to-purple-900/50 border border-violet-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                                 Bookings
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">One link for event planners</h3>
-                            <p class="text-gray-400 text-lg mb-6">Wedding planners, corporate event coordinators, and party hosts find your availability, videos, and rates. Professional booking made simple.</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">One link for event planners</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-lg mb-6">Wedding planners, corporate event coordinators, and party hosts find your availability, videos, and rates. Professional booking made simple.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Corporate events</span>
                                 <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Weddings</span>
@@ -130,15 +130,15 @@
                 </div>
 
                 <!-- Newsletter -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-900/50 to-fuchsia-900/50 border border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-100 to-fuchsia-100 dark:from-pink-900/50 dark:to-fuchsia-900/50 border border-pink-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         Newsletter
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Reach fans directly</h3>
-                    <p class="text-gray-400 mb-6">New show? Email your audience directly. No paying Facebook to reach your own followers.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Reach fans directly</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">New show? Email your audience directly. No paying Facebook to reach your own followers.</p>
 
                     <div class="flex justify-center">
                         <div class="relative">
@@ -155,15 +155,15 @@
                 </div>
 
                 <!-- Virtual Shows -->
-                <a href="{{ marketing_url('/online-events') }}" class="bento-card group relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-blue-900/50 border border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
+                <a href="{{ marketing_url('/online-events') }}" class="bento-card group relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900/50 dark:to-blue-900/50 border border-indigo-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                         Virtual Magic
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-indigo-300 transition-colors">Stream shows worldwide</h3>
-                    <p class="text-gray-400 mb-6">Perform for audiences anywhere. Sell tickets globally for your virtual magic shows.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Stream shows worldwide</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">Perform for audiences anywhere. Sell tickets globally for your virtual magic shows.</p>
 
                     <div class="flex justify-center">
                         <div class="w-12 h-12 bg-gradient-to-br from-indigo-500/30 to-blue-500/30 rounded-xl flex items-center justify-center border border-indigo-400/30">
@@ -181,17 +181,17 @@
                 </a>
 
                 <!-- Sell Tickets (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-green-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/50 dark:to-green-900/50 border border-emerald-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                                 </svg>
                                 Ticketing
                             </div>
-                            <h3 class="text-3xl font-bold text-white mb-4">Keep 100% of ticket sales</h3>
-                            <p class="text-gray-400 text-lg">Your show, your revenue. Zero platform fees. Stripe goes directly to you. QR tickets for easy check-in.</p>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Keep 100% of ticket sales</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-lg">Your show, your revenue. Zero platform fees. Stripe goes directly to you. QR tickets for easy check-in.</p>
                         </div>
                         <div class="bg-black/30 rounded-2xl p-5 border border-white/10">
                             <div class="space-y-3">
@@ -215,15 +215,15 @@
                 </div>
 
                 <!-- Calendar Sync -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-cyan-900/50 border border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/50 dark:to-cyan-900/50 border border-blue-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Calendar
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Sync with Google Calendar</h3>
-                    <p class="text-gray-400 mb-6">Two-way sync keeps everything updated. Add a show anywhere, see it everywhere.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sync with Google Calendar</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">Two-way sync keeps everything updated. Add a show anywhere, see it everywhere.</p>
 
                     <div class="flex items-center justify-center gap-3">
                         <div class="bg-blue-500/20 rounded-xl border border-blue-400/30 p-3 w-20">
@@ -252,15 +252,15 @@
                 </div>
 
                 <!-- Team Coordination -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-900/50 to-violet-900/50 border border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-900/50 dark:to-violet-900/50 border border-purple-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
                         Team
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Coordinate your crew</h3>
-                    <p class="text-gray-400 mb-6">Assistants, agents, technicians - everyone sees the schedule. No double-bookings.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Coordinate your crew</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">Assistants, agents, technicians - everyone sees the schedule. No double-bookings.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
@@ -281,15 +281,15 @@
                 </div>
 
                 <!-- Promo Graphics -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50 border border-amber-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Graphics
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Share-ready images</h3>
-                    <p class="text-gray-400 mb-6">Auto-generate promotional graphics for social media. Perfect for Instagram and Facebook.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Share-ready images</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">Auto-generate promotional graphics for social media. Perfect for Instagram and Facebook.</p>
 
                     <div class="flex justify-center">
                         <div class="relative w-32 h-32 bg-gradient-to-br from-amber-500/30 to-orange-500/30 rounded-xl border border-amber-400/30 p-2">

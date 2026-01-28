@@ -84,8 +84,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
                 <!-- Free Plan -->
-                <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10 flex flex-col">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-500/20 text-gray-600 dark:text-gray-300 text-sm font-medium mb-6 self-start">
+                <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800/50 dark:to-gray-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10 flex flex-col">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-500/20 text-gray-600 dark:text-gray-300 text-sm font-medium mb-6 self-start">
                         Forever Free
                     </div>
 
@@ -154,7 +154,7 @@
                 </div>
 
                 <!-- Pro Plan -->
-                <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border-2 border-violet-500/50 p-8 lg:p-10 flex flex-col">
+                <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/50 dark:to-indigo-900/50 border-2 border-violet-300 dark:border-violet-500/50 p-8 lg:p-10 flex flex-col">
                     <!-- First Year Free Banner -->
                     <div class="bg-gradient-to-r from-violet-500 to-indigo-500 text-white text-center py-3 px-4 -mx-8 lg:-mx-10 -mt-8 lg:-mt-10 mb-8">
                         <div class="text-lg font-bold">First Year FREE</div>
@@ -258,47 +258,47 @@
     <section class="bg-gray-100 dark:bg-black/30 py-24">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Frequently asked questions
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Everything you need to know about pricing.
                 </p>
             </div>
 
             <div class="space-y-6">
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                         Is there really a free plan?
                     </h3>
-                    <p class="text-gray-600">
+                    <p class="text-gray-600 dark:text-gray-400">
                         Yes! The free plan includes unlimited events and all core features. You only need to upgrade if you want custom domains or want to remove branding.
                     </p>
                 </div>
 
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                         What does "first year free" mean?
                     </h3>
-                    <p class="text-gray-600">
+                    <p class="text-gray-600 dark:text-gray-400">
                         When you sign up for Pro, your first year is completely free. After that, it's $5/month billed yearly. You can cancel anytime.
                     </p>
                 </div>
 
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                         Can I cancel anytime?
                     </h3>
-                    <p class="text-gray-600">
+                    <p class="text-gray-600 dark:text-gray-400">
                         Absolutely. You can cancel your Pro subscription at any time and you'll keep access until the end of your billing period.
                     </p>
                 </div>
 
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                         Do you take a cut of ticket sales?
                     </h3>
-                    <p class="text-gray-600">
+                    <p class="text-gray-600 dark:text-gray-400">
                         No! We don't charge any fees on ticket sales. You only pay the standard Stripe processing fees (typically 2.9% + $0.30 per transaction).
                     </p>
                 </div>

@@ -26,11 +26,11 @@
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-900/30 border border-amber-700/30 mb-8">
-                <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700/30 mb-8">
+                <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
-                <span class="text-sm text-amber-200/80">For Poets, Spoken Word Artists & Writers</span>
+                <span class="text-sm text-amber-700 dark:text-amber-200/80">For Poets, Spoken Word Artists & Writers</span>
             </div>
 
             <!-- Poetic headline with line breaks -->
@@ -57,12 +57,12 @@
 
             <!-- Poetry-specific tags styled like typewriter labels -->
             <div class="mt-12 flex flex-wrap justify-center gap-3">
-                <span class="px-3 py-1.5 bg-stone-800/50 text-stone-400 text-xs font-mono tracking-wide border border-stone-700/50">SLAM</span>
-                <span class="px-3 py-1.5 bg-stone-800/50 text-stone-400 text-xs font-mono tracking-wide border border-stone-700/50">OPEN MIC</span>
-                <span class="px-3 py-1.5 bg-stone-800/50 text-stone-400 text-xs font-mono tracking-wide border border-stone-700/50">FEATURED READING</span>
-                <span class="px-3 py-1.5 bg-stone-800/50 text-stone-400 text-xs font-mono tracking-wide border border-stone-700/50">WORKSHOP</span>
-                <span class="px-3 py-1.5 bg-stone-800/50 text-stone-400 text-xs font-mono tracking-wide border border-stone-700/50">BOOK LAUNCH</span>
-                <span class="px-3 py-1.5 bg-stone-800/50 text-stone-400 text-xs font-mono tracking-wide border border-stone-700/50">LIT FEST</span>
+                <span class="px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">SLAM</span>
+                <span class="px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">OPEN MIC</span>
+                <span class="px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">FEATURED READING</span>
+                <span class="px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">WORKSHOP</span>
+                <span class="px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">BOOK LAUNCH</span>
+                <span class="px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">LIT FEST</span>
             </div>
         </div>
     </section>
@@ -72,16 +72,16 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-3 gap-8 text-center">
                 <div>
-                    <div class="text-3xl font-serif text-amber-200/80 mb-2">3 venues</div>
-                    <div class="text-stone-500 text-sm">Different open mics. Different nights. One schedule.</div>
+                    <div class="text-3xl font-serif text-amber-600 dark:text-amber-200/80 mb-2">3 venues</div>
+                    <div class="text-stone-500 dark:text-stone-500 text-sm">Different open mics. Different nights. One schedule.</div>
                 </div>
                 <div>
-                    <div class="text-3xl font-serif text-amber-200/80 mb-2">0 fees</div>
-                    <div class="text-stone-500 text-sm">Keep every dollar from ticket sales. Poetry doesn't pay enough to share.</div>
+                    <div class="text-3xl font-serif text-amber-600 dark:text-amber-200/80 mb-2">0 fees</div>
+                    <div class="text-stone-500 dark:text-stone-500 text-sm">Keep every dollar from ticket sales. Poetry doesn't pay enough to share.</div>
                 </div>
                 <div>
-                    <div class="text-3xl font-serif text-amber-200/80 mb-2">Your list</div>
-                    <div class="text-stone-500 text-sm">Email readers directly. No algorithm between you and your audience.</div>
+                    <div class="text-3xl font-serif text-amber-600 dark:text-amber-200/80 mb-2">Your list</div>
+                    <div class="text-stone-500 dark:text-stone-500 text-sm">Email readers directly. No algorithm between you and your audience.</div>
                 </div>
             </div>
         </div>
@@ -96,7 +96,7 @@
                 <div class="lg:col-span-2 relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-300/80 text-sm font-medium mb-4 border border-amber-500/20">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300/80 text-sm font-medium mb-4 border border-amber-200 dark:border-amber-500/20">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
@@ -139,7 +139,7 @@
 
                 <!-- Email Your Readers -->
                 <div class="relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-300/80 text-sm font-medium mb-4 border border-rose-500/20">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300/80 text-sm font-medium mb-4 border border-rose-200 dark:border-rose-500/20">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
@@ -165,7 +165,7 @@
 
                 <!-- Workshop Income - Unique to poets -->
                 <div class="relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-300/80 text-sm font-medium mb-4 border border-emerald-500/20">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300/80 text-sm font-medium mb-4 border border-emerald-200 dark:border-emerald-500/20">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
@@ -190,7 +190,7 @@
                 <div class="lg:col-span-2 relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-300/80 text-sm font-medium mb-4 border border-amber-500/20">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300/80 text-sm font-medium mb-4 border border-amber-200 dark:border-amber-500/20">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                                 </svg>
@@ -225,7 +225,7 @@
 
                 <!-- Virtual Readings -->
                 <a href="{{ marketing_url('/online-events') }}" class="group relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8 hover:border-gray-300 dark:hover:border-stone-700 transition-all">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300/80 text-sm font-medium mb-4 border border-indigo-500/20">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300/80 text-sm font-medium mb-4 border border-indigo-200 dark:border-indigo-500/20">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
@@ -244,7 +244,7 @@
 
                 <!-- Google Calendar Sync -->
                 <div class="relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-300/80 text-sm font-medium mb-4 border border-blue-500/20">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300/80 text-sm font-medium mb-4 border border-blue-200 dark:border-blue-500/20">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -272,7 +272,7 @@
 
                 <!-- Promo Graphics -->
                 <div class="relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 text-orange-300/80 text-sm font-medium mb-4 border border-orange-500/20">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-300/80 text-sm font-medium mb-4 border border-orange-200 dark:border-orange-500/20">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -379,13 +379,13 @@
     </section>
 
     <!-- Perfect For Section - 6 Sub-types -->
-    <section class="bg-stone-50 py-24">
+    <section class="bg-stone-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-serif text-stone-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-serif text-stone-900 dark:text-white mb-4">
                     Built for how poets actually work
                 </h2>
-                <p class="text-lg text-stone-500">
+                <p class="text-lg text-stone-500 dark:text-gray-400">
                     Whether you're on the slam circuit or launching a collection
                 </p>
             </div>
@@ -479,10 +479,10 @@
     </section>
 
     <!-- How it Works - Simple, poetic -->
-    <section class="bg-white py-24 border-t border-stone-100">
+    <section class="bg-white dark:bg-[#0f0e0c] py-24 border-t border-stone-100 dark:border-stone-800/50">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-serif text-stone-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-serif text-stone-900 dark:text-white mb-4">
                     Three steps
                 </h2>
             </div>
@@ -492,8 +492,8 @@
                     <div class="w-12 h-12 bg-stone-900 text-amber-200 text-xl font-serif rounded-full flex items-center justify-center mx-auto mb-6">
                         1
                     </div>
-                    <h3 class="text-lg font-medium text-stone-900 mb-2">Add your readings</h3>
-                    <p class="text-stone-500 text-sm">
+                    <h3 class="text-lg font-medium text-stone-900 dark:text-white mb-2">Add your readings</h3>
+                    <p class="text-stone-500 dark:text-gray-400 text-sm">
                         Open mics, features, workshops, launches. Import from Google Calendar or add them yourself.
                     </p>
                 </div>
@@ -502,8 +502,8 @@
                     <div class="w-12 h-12 bg-stone-900 text-amber-200 text-xl font-serif rounded-full flex items-center justify-center mx-auto mb-6">
                         2
                     </div>
-                    <h3 class="text-lg font-medium text-stone-900 mb-2">Share one link</h3>
-                    <p class="text-stone-500 text-sm">
+                    <h3 class="text-lg font-medium text-stone-900 dark:text-white mb-2">Share one link</h3>
+                    <p class="text-stone-500 dark:text-gray-400 text-sm">
                         Put it in your bio. Your website. The back of your chapbook. Done.
                     </p>
                 </div>
@@ -512,8 +512,8 @@
                     <div class="w-12 h-12 bg-stone-900 text-amber-200 text-xl font-serif rounded-full flex items-center justify-center mx-auto mb-6">
                         3
                     </div>
-                    <h3 class="text-lg font-medium text-stone-900 mb-2">Build your audience</h3>
-                    <p class="text-stone-500 text-sm">
+                    <h3 class="text-lg font-medium text-stone-900 dark:text-white mb-2">Build your audience</h3>
+                    <p class="text-stone-500 dark:text-gray-400 text-sm">
                         Readers follow you. They get notified when you're reading near them.
                     </p>
                 </div>

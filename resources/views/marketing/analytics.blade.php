@@ -90,7 +90,7 @@
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
                                 <!-- Chart mockup -->
-                                <div class="bg-gray-100 dark:bg-black/30 rounded-2xl border border-gray-200 dark:border-white/10 p-4 w-64">
+                                <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl border border-gray-200 dark:border-white/10 p-4 w-64">
                                     <div class="flex items-end justify-between h-32 gap-2">
                                         <div class="w-6 bg-emerald-500/40 rounded-t" style="height: 40%"></div>
                                         <div class="w-6 bg-emerald-500/50 rounded-t" style="height: 55%"></div>
@@ -195,19 +195,19 @@
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Track revenue per event, conversion rates, and revenue per view. See which events perform best.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
+                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
                                 <div class="text-3xl font-bold text-gray-900 dark:text-white mb-1">4.2%</div>
                                 <div class="text-amber-400 text-sm">Conversion Rate</div>
                             </div>
-                            <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
+                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
                                 <div class="text-3xl font-bold text-gray-900 dark:text-white mb-1">$2.40</div>
                                 <div class="text-amber-400 text-sm">Revenue/View</div>
                             </div>
-                            <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
+                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
                                 <div class="text-3xl font-bold text-gray-900 dark:text-white mb-1">$1,248</div>
                                 <div class="text-amber-400 text-sm">Total Revenue</div>
                             </div>
-                            <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
+                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
                                 <div class="text-3xl font-bold text-gray-900 dark:text-white mb-1">52</div>
                                 <div class="text-amber-400 text-sm">Tickets Sold</div>
                             </div>
@@ -332,7 +332,7 @@
 
                         <!-- Mini mockup: Form with dropdown/text fields -->
                         <div class="flex-shrink-0">
-                            <div class="bg-gray-100 dark:bg-black/30 rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48 space-y-3">
+                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48 space-y-3">
                                 <!-- Text field -->
                                 <div>
                                     <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">Company Name</div>
