@@ -61,9 +61,9 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Smart event import</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-6">Paste a URL, drop an image, or copy text from anywhere. AI extracts event details automatically. No more manual data entry.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">URL parsing</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Image recognition</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Any language</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">URL parsing</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Image recognition</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any language</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -71,7 +71,7 @@
                                 <!-- Input side -->
                                 <div class="bg-black/40 rounded-2xl border border-white/10 p-4 mb-3 max-w-xs">
                                     <div class="text-xs text-gray-500 mb-2">Paste URL or text</div>
-                                    <div class="text-sm text-gray-300 font-mono leading-relaxed">
+                                    <div class="text-sm text-gray-700 dark:text-gray-300 font-mono leading-relaxed">
                                         eventbrite.com/e/jazz...<br>
                                         <span class="text-amber-400">Parsing...</span>
                                     </div>
@@ -126,10 +126,10 @@
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
                             <div class="flex-1">
-                                <div class="text-gray-300 text-sm">Live Music @ Stubbs</div>
+                                <div class="text-gray-700 dark:text-gray-300 text-sm">Live Music @ Stubbs</div>
                                 <div class="text-gray-500 text-xs">Red River District</div>
                             </div>
-                            <button class="px-2 py-1 rounded bg-white/10 text-gray-300 text-xs">Add</button>
+                            <button class="px-2 py-1 rounded bg-white/10 text-gray-700 dark:text-gray-300 text-xs">Add</button>
                         </div>
                     </div>
                 </div>
@@ -162,7 +162,7 @@
                         </div>
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5">
                             <div class="flex-1">
-                                <div class="text-gray-300 text-sm font-medium">Comedy Show @ The Roxy</div>
+                                <div class="text-gray-700 dark:text-gray-300 text-sm font-medium">Comedy Show @ The Roxy</div>
                                 <div class="text-gray-500 text-xs">Pending review</div>
                             </div>
                         </div>
@@ -199,7 +199,7 @@
                                         <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13" /></svg>
                                     </div>
                                     <div class="flex-1">
-                                        <div class="text-gray-300 text-sm">Sarah Johnson Trio</div>
+                                        <div class="text-gray-700 dark:text-gray-300 text-sm">Sarah Johnson Trio</div>
                                     </div>
                                     <span class="text-gray-500 text-xs">8 events</span>
                                 </div>
@@ -208,7 +208,7 @@
                                         <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2" /></svg>
                                     </div>
                                     <div class="flex-1">
-                                        <div class="text-gray-300 text-sm">Austin Music Blog</div>
+                                        <div class="text-gray-700 dark:text-gray-300 text-sm">Austin Music Blog</div>
                                     </div>
                                     <span class="text-gray-500 text-xs">24 events</span>
                                 </div>
@@ -298,7 +298,7 @@
                             </svg>
                         </div>
                         <div class="bg-white/10 rounded-xl border border-white/20 p-3 w-20">
-                            <div class="text-[10px] text-gray-300 mb-1 text-center">Google</div>
+                            <div class="text-[10px] text-gray-600 dark:text-gray-300 mb-1 text-center">Google</div>
                             <div class="space-y-1">
                                 <div class="h-1.5 bg-blue-400/40 rounded"></div>
                                 <div class="h-1.5 bg-green-400/40 rounded w-3/4"></div>
@@ -470,9 +470,9 @@
                             <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Stream to the world</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">Share live performances with fans worldwide. Add your streaming URL and sell tickets to viewers anywhere—no venue required.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Live streaming</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Global ticket sales</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Any platform</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live streaming</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Global ticket sales</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any platform</span>
                             </div>
                             <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -484,7 +484,7 @@
                         <div class="flex-shrink-0">
                             <div class="bg-black/30 rounded-2xl border border-white/10 p-6 w-52">
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="text-gray-300 text-xs">Online Event</span>
+                                    <span class="text-gray-700 dark:text-gray-300 text-xs">Online Event</span>
                                     <div class="w-10 h-5 bg-indigo-500 rounded-full relative">
                                         <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full"></div>
                                     </div>
@@ -492,15 +492,15 @@
                                 <div class="space-y-2">
                                     <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-blue-400"></div>
-                                        <span class="text-gray-300 text-xs">Zoom</span>
+                                        <span class="text-gray-700 dark:text-gray-300 text-xs">Zoom</span>
                                     </div>
                                     <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-red-400"></div>
-                                        <span class="text-gray-300 text-xs">YouTube Live</span>
+                                        <span class="text-gray-700 dark:text-gray-300 text-xs">YouTube Live</span>
                                     </div>
                                     <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-purple-400"></div>
-                                        <span class="text-gray-300 text-xs">Twitch</span>
+                                        <span class="text-gray-700 dark:text-gray-300 text-xs">Twitch</span>
                                     </div>
                                 </div>
                             </div>

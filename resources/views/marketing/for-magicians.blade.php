@@ -98,9 +98,9 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">One link for event planners</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-6">Wedding planners, corporate event coordinators, and party hosts find your availability, videos, and rates. Professional booking made simple.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Corporate events</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Weddings</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Private parties</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Corporate events</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Weddings</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Private parties</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -118,7 +118,7 @@
                                         <div class="p-3 rounded-lg bg-white/5">
                                             <div class="flex items-center gap-2 mb-1">
                                                 <div class="w-2 h-2 rounded-full bg-pink-400"></div>
-                                                <span class="text-gray-300 text-sm font-medium">Wedding Reception</span>
+                                                <span class="text-gray-700 dark:text-gray-300 text-sm font-medium">Wedding Reception</span>
                                             </div>
                                             <div class="text-gray-500 text-xs">Jan 8 - Private Venue</div>
                                         </div>
@@ -242,7 +242,7 @@
                             </svg>
                         </div>
                         <div class="bg-white/10 rounded-xl border border-white/20 p-3 w-20">
-                            <div class="text-[10px] text-gray-300 mb-1 text-center">Google</div>
+                            <div class="text-[10px] text-gray-600 dark:text-gray-300 mb-1 text-center">Google</div>
                             <div class="space-y-1">
                                 <div class="h-1.5 bg-blue-400/40 rounded"></div>
                                 <div class="h-1.5 bg-green-400/40 rounded w-3/4"></div>
@@ -273,7 +273,7 @@
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-xs font-semibold">SK</div>
                             <div class="flex-1">
-                                <div class="text-gray-300 text-sm">Sarah</div>
+                                <div class="text-gray-700 dark:text-gray-300 text-sm">Sarah</div>
                             </div>
                             <span class="px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 text-[10px]">Assistant</span>
                         </div>
@@ -536,9 +536,9 @@
                             <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-indigo-300 transition-colors">Stream to audiences worldwide</h3>
                             <p class="text-gray-400 text-lg mb-4">Sell tickets to viewers anywhere. Virtual magic became huge and stays relevant - reach fans who can't make it to your live shows.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Zoom shows</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Global ticket sales</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Interactive magic</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Zoom shows</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Global ticket sales</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Interactive magic</span>
                             </div>
                             <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more about online events
@@ -550,7 +550,7 @@
                         <div class="flex-shrink-0">
                             <div class="bg-black/30 rounded-2xl border border-white/10 p-6 w-52">
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="text-gray-300 text-xs">Online Event</span>
+                                    <span class="text-gray-700 dark:text-gray-300 text-xs">Online Event</span>
                                     <div class="w-10 h-5 bg-indigo-500 rounded-full relative">
                                         <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full"></div>
                                     </div>
@@ -558,15 +558,15 @@
                                 <div class="space-y-2">
                                     <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-blue-400"></div>
-                                        <span class="text-gray-300 text-xs">Zoom</span>
+                                        <span class="text-gray-700 dark:text-gray-300 text-xs">Zoom</span>
                                     </div>
                                     <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-red-400"></div>
-                                        <span class="text-gray-300 text-xs">YouTube Live</span>
+                                        <span class="text-gray-700 dark:text-gray-300 text-xs">YouTube Live</span>
                                     </div>
                                     <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-purple-400"></div>
-                                        <span class="text-gray-300 text-xs">Twitch</span>
+                                        <span class="text-gray-700 dark:text-gray-300 text-xs">Twitch</span>
                                     </div>
                                 </div>
                             </div>

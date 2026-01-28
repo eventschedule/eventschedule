@@ -92,14 +92,14 @@
                                 <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-[10px] font-semibold">MX</div>
                                     <div class="flex-1">
-                                        <div class="text-gray-300 text-sm font-medium">Max Luna</div>
+                                        <div class="text-gray-700 dark:text-gray-300 text-sm font-medium">Max Luna</div>
                                         <div class="text-gray-500 text-[10px]">12am - 2am</div>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-[10px] font-semibold">KR</div>
                                     <div class="flex-1">
-                                        <div class="text-gray-300 text-sm font-medium">Kira B2B Echo</div>
+                                        <div class="text-gray-700 dark:text-gray-300 text-sm font-medium">Kira B2B Echo</div>
                                         <div class="text-gray-500 text-[10px]">10pm - 12am</div>
                                     </div>
                                 </div>
@@ -138,8 +138,8 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Drop your weekend lineup</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-6">Thursday rolls around, you blast out the weekend's DJs to everyone on your list. No algorithm. No pay-to-play. Just your crowd, hyped and ready.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">One-click send</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Your list, your reach</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">One-click send</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Your list, your reach</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -159,15 +159,15 @@
                                     <div class="space-y-2">
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
                                             <div class="w-2 h-2 rounded-full bg-fuchsia-400"></div>
-                                            <span class="text-gray-300 text-xs">Thu - Industry Night (free entry)</span>
+                                            <span class="text-gray-700 dark:text-gray-300 text-xs">Thu - Industry Night (free entry)</span>
                                         </div>
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
                                             <div class="w-2 h-2 rounded-full bg-pink-400"></div>
-                                            <span class="text-gray-300 text-xs">Fri - DJ Nova (House)</span>
+                                            <span class="text-gray-700 dark:text-gray-300 text-xs">Fri - DJ Nova (House)</span>
                                         </div>
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
                                             <div class="w-2 h-2 rounded-full bg-violet-400"></div>
-                                            <span class="text-gray-300 text-xs">Sat - Latin Nights with DJ Fuego</span>
+                                            <span class="text-gray-700 dark:text-gray-300 text-xs">Sat - Latin Nights with DJ Fuego</span>
                                         </div>
                                     </div>
                                 </div>
@@ -198,7 +198,7 @@
                         <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-[10px] font-semibold">SK</div>
                             <div class="flex-1">
-                                <div class="text-gray-300 text-sm">Sarah K. +1</div>
+                                <div class="text-gray-700 dark:text-gray-300 text-sm">Sarah K. +1</div>
                             </div>
                             <span class="px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-300 text-[10px] font-medium">Confirmed</span>
                         </div>
@@ -263,9 +263,9 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Table bookings, handled</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg">VIP table requests, bottle service inquiries, birthday packages - all in one inbox. See party size, minimum spend, special requests. Your biggest revenue driver, organized.</p>
                             <div class="flex flex-wrap gap-3 mt-4">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Table reservations</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Bottle service</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Birthday packages</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Table reservations</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Bottle service</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Birthday packages</span>
                             </div>
                         </div>
                         <div class="bg-black/30 rounded-2xl p-5 border border-white/10">
@@ -282,7 +282,7 @@
                                 <div class="flex items-center gap-3 p-3 rounded-lg bg-white/5">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white text-[10px] font-semibold">JT</div>
                                     <div class="flex-1">
-                                        <div class="text-gray-300 text-sm font-medium">James T.</div>
+                                        <div class="text-gray-700 dark:text-gray-300 text-sm font-medium">James T.</div>
                                         <div class="text-gray-500 text-xs">Birthday party &bull; 12 guests</div>
                                     </div>
                                     <span class="px-2 py-0.5 rounded bg-pink-500/30 text-pink-300 text-[10px] font-medium">BDAY</span>
@@ -607,9 +607,9 @@
                             <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-pink-300 transition-colors">Stream to the world</h3>
                             <p class="text-gray-400 text-lg mb-4">Broadcast your DJ sets worldwide. Sell tickets to viewers anywhere - no capacity limits.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Twitch</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">YouTube Live</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Zoom</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Twitch</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">YouTube Live</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Zoom</span>
                             </div>
                             <span class="inline-flex items-center text-pink-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -621,7 +621,7 @@
                         <div class="flex-shrink-0">
                             <div class="bg-black/30 rounded-2xl border border-white/10 p-6 w-52">
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="text-gray-300 text-xs">Live Stream</span>
+                                    <span class="text-gray-700 dark:text-gray-300 text-xs">Live Stream</span>
                                     <div class="flex items-center gap-1">
                                         <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
                                         <span class="text-red-500 text-xs font-medium">LIVE</span>
@@ -630,11 +630,11 @@
                                 <div class="space-y-2">
                                     <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-purple-500"></div>
-                                        <span class="text-gray-300 text-xs">2,341 watching</span>
+                                        <span class="text-gray-700 dark:text-gray-300 text-xs">2,341 watching</span>
                                     </div>
                                     <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                                        <span class="text-gray-300 text-xs">Global audience</span>
+                                        <span class="text-gray-700 dark:text-gray-300 text-xs">Global audience</span>
                                     </div>
                                 </div>
                             </div>
