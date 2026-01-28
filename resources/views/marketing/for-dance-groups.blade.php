@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Dance Groups | Share Performances & Sell Tickets</x-slot>
-    <x-slot name="description">Share your dance performances with fans worldwide. Build your email list and sell tickets to recitals and workshops with zero fees. Free forever.</x-slot>
+    <x-slot name="description">Share your dance performances with fans worldwide. Email your fans directly and sell tickets to recitals and workshops with zero fees. Free forever.</x-slot>
     <x-slot name="keywords">dance group schedule, dance company calendar, dance performance tickets, dance recital software, dance studio events, dance ensemble scheduling, dance troupe calendar, dance workshop tickets</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
 
@@ -61,7 +61,7 @@
                 </div>
                 <div class="p-6">
                     <div class="text-4xl mb-3">📧</div>
-                    <div class="text-stone-500 dark:text-stone-400 text-sm">Build your email list, own your audience</div>
+                    <div class="text-stone-500 dark:text-stone-400 text-sm">Email your fans directly, own the relationship</div>
                 </div>
                 <div class="p-6">
                     <div class="text-4xl mb-3">🎓</div>
@@ -254,8 +254,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <h3 class="text-gray-900 dark:text-white font-medium mb-2">Build your email list</h3>
-                    <p class="text-stone-500 dark:text-stone-400 text-sm">Fans subscribe directly. You own the relationship, not a platform.</p>
+                    <h3 class="text-gray-900 dark:text-white font-medium mb-2">Email your fans directly</h3>
+                    <p class="text-stone-500 dark:text-stone-400 text-sm">Fans follow your schedule. You email them directly - no algorithm in the way.</p>
                 </div>
                 <div class="bg-gray-100 dark:bg-stone-800/50 rounded-2xl p-6 border border-gray-200 dark:border-stone-700">
                     <div class="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-4">
@@ -619,7 +619,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Dance Performance Scheduling Software",
         "operatingSystem": "Web",
-        "description": "Share your dance performances with fans worldwide. Build your email list to reach audiences directly. Sell tickets to recitals, workshops, and showcases with zero platform fees.",
+        "description": "Share your dance performances with fans worldwide. Email your audience directly - no algorithm. Sell tickets to recitals, workshops, and showcases with zero platform fees.",
         "offers": {
             "@type": "Offer",
             "price": "0",

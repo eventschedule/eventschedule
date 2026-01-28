@@ -494,7 +494,7 @@ https://example.com/event/summer-concert</code></pre>
                             <h2 class="doc-heading">Email Scheduling</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-500/20 text-purple-300 mr-2">Enterprise Feature</span>
-                                Automatically send event graphics to your email list on a schedule.
+                                Automatically send event graphics to your followers on a schedule.
                             </p>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Configuration Options</h3>

@@ -80,7 +80,7 @@
                     <div class="text-stone-500 dark:text-stone-500 text-sm">Keep every dollar from ticket sales. Poetry doesn't pay enough to share.</div>
                 </div>
                 <div>
-                    <div class="text-3xl font-serif text-amber-600 dark:text-amber-200/80 mb-2">Your list</div>
+                    <div class="text-3xl font-serif text-amber-600 dark:text-amber-200/80 mb-2">Your fans</div>
                     <div class="text-stone-500 dark:text-stone-500 text-sm">Email readers directly. No algorithm between you and your audience.</div>
                 </div>
             </div>
@@ -145,7 +145,7 @@
                         </svg>
                         Newsletter
                     </div>
-                    <h3 class="text-2xl font-serif text-gray-900 dark:text-white mb-3">Your readers, your list</h3>
+                    <h3 class="text-2xl font-serif text-gray-900 dark:text-white mb-3">Your readers, direct reach</h3>
                     <p class="text-gray-500 dark:text-stone-400 mb-6">New chapbook? Upcoming feature? Email the people who actually want to hear from you. No algorithm deciding who sees it.</p>
 
                     <!-- Mini email mockup -->

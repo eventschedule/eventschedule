@@ -97,7 +97,7 @@
                                 </svg>
                                 Ticketing
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-fuchsia-300 transition-colors">Sell tickets online</h2>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-300 transition-colors">Sell tickets online</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Multiple ticket types, limits, and reservations. Accept payments with Stripe. Zero platform fees.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Zero fees</span>
@@ -166,7 +166,7 @@
                                 </svg>
                                 AI-Powered
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-violet-300 transition-colors">Smart event import</h2>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-colors">Smart event import</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Paste text or drop an image. AI extracts title, date, time, venue, and description automatically.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Parse any format</span>
@@ -233,7 +233,7 @@
                                 </svg>
                                 Calendar Sync
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-blue-300 transition-colors">Two-way sync</h2>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Two-way sync</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Sync with Google Calendar automatically. Changes flow in both directions via real-time webhooks.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Two-way sync</span>
@@ -305,7 +305,7 @@
                                 </svg>
                                 Analytics
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-emerald-300 transition-colors">Know your audience</h2>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">Know your audience</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Track page views, device breakdown, and traffic sources. Privacy-first with no external services.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Privacy-first</span>
@@ -369,7 +369,7 @@
                                 </svg>
                                 Custom Fields
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-amber-300 transition-colors">Collect buyer info</h2>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">Collect buyer info</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Gather dietary preferences, t-shirt sizes, or any info you need from ticket buyers with flexible form fields.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple field types</span>
@@ -435,7 +435,7 @@
                                 </svg>
                                 Team Scheduling
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-cyan-300 transition-colors">Collaborate together</h2>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors">Collaborate together</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Invite team members via email, assign roles, and manage events together seamlessly.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Invite members</span>
@@ -504,7 +504,7 @@
                                 </svg>
                                 Sub-schedules
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-rose-300 transition-colors">Organize your events</h2>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-rose-600 dark:group-hover:text-rose-300 transition-colors">Organize your events</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Create sub-schedules to categorize events by room, stage, series, or any way you like.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple rooms</span>
@@ -568,7 +568,7 @@
                                 </svg>
                                 Online Events
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-indigo-300 transition-colors">Go live, anywhere</h2>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Go live, anywhere</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Toggle any event to online and add your streaming URL. Works with Zoom, YouTube, or any platform.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Virtual events</span>
@@ -630,7 +630,7 @@
                                 </svg>
                                 Open Source
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-gray-300 transition-colors">Free and open source</h2>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-gray-500 dark:group-hover:text-gray-300 transition-colors">Free and open source</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">100% open source under the AAL license. Self-host on your own server or integrate with our REST API.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Self-host</span>

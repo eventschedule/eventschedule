@@ -367,7 +367,7 @@
                 <!-- Community Theaters -->
                 <x-sub-audience-card
                     name="Community Theaters"
-                    description="Local productions, volunteer casts, and beloved classics. Build your subscriber base in your hometown."
+                    description="Local productions, volunteer casts, and beloved classics. Reach your audience directly in your hometown."
                     icon-color="rose"
                     blog-slug="for-community-theaters"
                 >

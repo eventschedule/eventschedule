@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Bars & Pubs | Fill Your Event Calendar</x-slot>
-    <x-slot name="description">Fill your bar's calendar with great events. Build your email list and reach regulars directly. Sell tickets, accept booking requests. Free forever.</x-slot>
+    <x-slot name="description">Fill your bar's calendar with great events. Email your regulars directly - no algorithm. Sell tickets, accept booking requests. Free forever.</x-slot>
     <x-slot name="keywords">bar event calendar, pub events, bar booking system, craft beer bar events, wine bar calendar, sports bar events, bar newsletter, bar email marketing, trivia night software</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
 
@@ -36,7 +36,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-                Stop paying to reach your own regulars. Build your email list, announce what's on, and fill your bar - without begging the algorithm.
+                Stop paying to reach your own regulars. Email your regulars directly, announce what's on, and fill your bar - without begging the algorithm.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
@@ -549,7 +549,7 @@
                 Stop paying to reach your own regulars
             </h2>
             <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                Build your email list. Fill your bar. Free forever.
+                Email your regulars directly. Fill your bar. Free forever.
             </p>
             <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-amber-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                 Get Started Free
@@ -569,7 +569,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Bar Event Management Software",
         "operatingSystem": "Web",
-        "description": "Fill your bar's calendar with great events. Build your own email list - reach regulars directly without paying for Facebook ads. Sell tickets with QR check-in, accept booking requests from performers.",
+        "description": "Fill your bar's calendar with great events. Email your regulars directly - no paying for Facebook ads. Sell tickets with QR check-in, accept booking requests from performers.",
         "offers": {
             "@type": "Offer",
             "price": "0",
