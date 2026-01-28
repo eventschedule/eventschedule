@@ -70,8 +70,8 @@
 
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center justify-between mb-3">
-                            <span class="text-emerald-400 text-xs font-medium">INVOICE #1042</span>
-                            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-xs">Sent</span>
+                            <span class="text-emerald-600 dark:text-emerald-400 text-xs font-medium">INVOICE #1042</span>
+                            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs">Sent</span>
                         </div>
                         <div class="text-gray-900 dark:text-white font-semibold mb-1">Jazz Night VIP</div>
                         <div class="flex justify-between items-center">
@@ -95,16 +95,16 @@
                     <div class="space-y-2">
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
                             <div class="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center">
-                                <span class="text-teal-300 text-xs font-bold">JD</span>
+                                <span class="text-teal-600 dark:text-teal-300 text-xs font-bold">JD</span>
                             </div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">john@company.com</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-teal-500/20 border border-teal-400/30">
                             <div class="w-8 h-8 rounded-full bg-teal-500/30 flex items-center justify-center">
-                                <span class="text-teal-200 text-xs font-bold">AS</span>
+                                <span class="text-teal-700 dark:text-teal-200 text-xs font-bold">AS</span>
                             </div>
-                            <span class="text-teal-200 text-sm">alice@startup.io</span>
-                            <span class="ml-auto text-teal-300 text-xs">New</span>
+                            <span class="text-teal-700 dark:text-teal-200 text-sm">alice@startup.io</span>
+                            <span class="ml-auto text-teal-600 dark:text-teal-300 text-xs">New</span>
                         </div>
                     </div>
                 </div>
@@ -279,7 +279,7 @@
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-3 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-2">
                             <div class="w-2 h-2 rounded-full bg-violet-400 animate-pulse"></div>
-                            <span class="text-violet-300 text-xs font-mono">invoice.paid</span>
+                            <span class="text-violet-600 dark:text-violet-300 text-xs font-mono">invoice.paid</span>
                         </div>
                     </div>
                 </div>
@@ -299,7 +299,7 @@
                         <span class="px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">USD</span>
                         <span class="px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">EUR</span>
                         <span class="px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">GBP</span>
-                        <span class="px-2 py-1 rounded bg-amber-500/20 text-amber-300 text-sm">+100 more</span>
+                        <span class="px-2 py-1 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 text-sm">+100 more</span>
                     </div>
                 </div>
 
