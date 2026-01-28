@@ -145,7 +145,7 @@
                     </button>
                   </a>
                   @endif
-                  @if (! auth()->user() || ! auth()->user()->isConnected($role->subdomain))
+                  @if ((! auth()->user() || ! auth()->user()->isConnected($role->subdomain)) && ! is_demo_mode())
                   <a
                     href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
                     class="inline-flex items-center justify-center"
@@ -281,7 +281,7 @@
                     </button>
                   </a>
                   @endif
-                  @if (! auth()->user() || ! auth()->user()->isConnected($role->subdomain))
+                  @if ((! auth()->user() || ! auth()->user()->isConnected($role->subdomain)) && ! is_demo_mode())
                   <a
                     href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
                     class="inline-flex items-center justify-center flex-shrink-0"

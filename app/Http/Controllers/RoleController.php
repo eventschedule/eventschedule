@@ -17,6 +17,7 @@ use App\Notifications\AddedMemberNotification;
 use App\Notifications\DeletedRoleNotification;
 use App\Repos\EventRepo;
 use App\Services\AnalyticsService;
+use App\Services\DemoService;
 use App\Services\EmailService;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
@@ -190,6 +191,12 @@ class RoleController extends Controller
         }
 
         $user = $request->user();
+
+        // Prevent demo account from following other roles
+        if (DemoService::isDemoUser($user)) {
+            return redirect($mainDomain.route('following', [], false))
+                ->with('error', __('messages.demo_mode_restriction'));
+        }
 
         if (! $user->isConnected($role->subdomain)) {
             $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
@@ -1645,7 +1652,8 @@ class RoleController extends Controller
 
         $user = auth()->user();
 
-        if (! $user->isConnected($subdomain)) {
+        // Prevent demo account from following other roles
+        if (! DemoService::isDemoUser($user) && ! $user->isConnected($subdomain)) {
             $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
         }
 
