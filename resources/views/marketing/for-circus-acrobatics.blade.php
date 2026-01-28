@@ -284,10 +284,10 @@
                                         <div class="flex-1 text-ivory text-sm">Intro to Silks</div>
                                         <span class="text-teal-400 text-xs">10am</span>
                                     </div>
-                                    <div class="flex items-center gap-2 p-2 rounded-sm bg-white/5 border border-white/10">
-                                        <div class="text-slate-400 text-xs font-mono w-8">SUN</div>
-                                        <div class="flex-1 text-slate-300 text-sm">Fire Safety</div>
-                                        <span class="text-slate-500 text-xs">2pm</span>
+                                    <div class="flex items-center gap-2 p-2 rounded-sm bg-gray-200/50 dark:bg-white/5 border border-gray-300/50 dark:border-white/10">
+                                        <div class="text-gray-500 dark:text-slate-400 text-xs font-mono w-8">SUN</div>
+                                        <div class="flex-1 text-gray-600 dark:text-slate-300 text-sm">Fire Safety</div>
+                                        <span class="text-gray-500 dark:text-slate-500 text-xs">2pm</span>
                                     </div>
                                 </div>
                             </div>
