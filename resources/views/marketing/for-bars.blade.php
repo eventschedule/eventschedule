@@ -84,7 +84,7 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-amber-950 to-orange-950 rounded-2xl border border-amber-400/30 p-4 max-w-xs">
+                                <div class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-950 dark:to-orange-950 rounded-2xl border border-amber-300 dark:border-amber-400/30 p-4 max-w-xs">
                                     <div class="flex items-center gap-3 mb-4">
                                         <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
                                             <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -93,7 +93,7 @@
                                         </div>
                                         <div>
                                             <div class="text-gray-900 dark:text-white text-sm font-medium">This Week at The Tap Room</div>
-                                            <div class="text-amber-300 text-xs">Sending to 847 followers...</div>
+                                            <div class="text-amber-600 dark:text-amber-300 text-xs">Sending to 847 followers...</div>
                                         </div>
                                     </div>
                                     <div class="space-y-2">

@@ -69,11 +69,11 @@
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
                                 <!-- Input side -->
-                                <div class="bg-gray-900 rounded-2xl border border-white/10 p-4 mb-3 max-w-xs">
+                                <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-white/10 p-4 mb-3 max-w-xs">
                                     <div class="text-xs text-gray-500 mb-2">Paste URL or text</div>
-                                    <div class="text-sm text-gray-300 font-mono leading-relaxed">
+                                    <div class="text-sm text-gray-600 dark:text-gray-300 font-mono leading-relaxed">
                                         eventbrite.com/e/jazz...<br>
-                                        <span class="text-amber-400">Parsing...</span>
+                                        <span class="text-amber-500 dark:text-amber-400">Parsing...</span>
                                     </div>
                                 </div>
                                 <!-- Arrow -->
@@ -83,13 +83,13 @@
                                     </svg>
                                 </div>
                                 <!-- Output side -->
-                                <div class="bg-gradient-to-br from-amber-950 to-orange-950 rounded-2xl border border-amber-400/30 p-4 max-w-xs">
-                                    <div class="text-xs text-amber-300 mb-2">Extracted</div>
+                                <div class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-950 dark:to-orange-950 rounded-2xl border border-amber-300 dark:border-amber-400/30 p-4 max-w-xs">
+                                    <div class="text-xs text-amber-600 dark:text-amber-300 mb-2">Extracted</div>
                                     <div class="space-y-2 text-sm">
-                                        <div class="flex justify-between"><span class="text-gray-400">Name:</span><span class="text-white">Jazz Night</span></div>
-                                        <div class="flex justify-between"><span class="text-gray-400">Date:</span><span class="text-white">Mar 15, 8:00 PM</span></div>
-                                        <div class="flex justify-between"><span class="text-gray-400">Venue:</span><span class="text-white">Blue Note</span></div>
-                                        <div class="flex justify-between"><span class="text-gray-400">Price:</span><span class="text-white">$25</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Name:</span><span class="text-gray-900 dark:text-white">Jazz Night</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Date:</span><span class="text-gray-900 dark:text-white">Mar 15, 8:00 PM</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Venue:</span><span class="text-gray-900 dark:text-white">Blue Note</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Price:</span><span class="text-gray-900 dark:text-white">$25</span></div>
                                     </div>
                                 </div>
                             </div>
@@ -108,28 +108,28 @@
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Discover local events</h3>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Search for events by city. Import what you find directly to your schedule with one click.</p>
 
-                    <div class="bg-gray-900 rounded-xl p-3 border border-white/10 mb-3">
+                    <div class="bg-white dark:bg-gray-900 rounded-xl p-3 border border-gray-200 dark:border-white/10 mb-3">
                         <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-4 h-4 text-cyan-500 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             </svg>
-                            <span class="text-white text-sm">Austin, TX</span>
+                            <span class="text-gray-900 dark:text-white text-sm">Austin, TX</span>
                         </div>
                     </div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-cyan-500/20 border border-cyan-400/30">
                             <div class="flex-1">
-                                <div class="text-white text-sm">SXSW Panel</div>
-                                <div class="text-cyan-300 text-xs">Convention Center</div>
+                                <div class="text-gray-900 dark:text-white text-sm">SXSW Panel</div>
+                                <div class="text-cyan-600 dark:text-cyan-300 text-xs">Convention Center</div>
                             </div>
-                            <button class="px-2 py-1 rounded bg-cyan-500/30 text-cyan-200 text-xs">Add</button>
+                            <button class="px-2 py-1 rounded bg-cyan-500/30 text-cyan-700 dark:text-cyan-200 text-xs">Add</button>
                         </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="flex-1">
-                                <div class="text-gray-300 text-sm">Live Music @ Stubbs</div>
+                                <div class="text-gray-600 dark:text-gray-300 text-sm">Live Music @ Stubbs</div>
                                 <div class="text-gray-500 text-xs">Red River District</div>
                             </div>
-                            <button class="px-2 py-1 rounded bg-white/10 text-gray-300 text-xs">Add</button>
+                            <button class="px-2 py-1 rounded bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Add</button>
                         </div>
                     </div>
                 </div>
@@ -182,33 +182,33 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Unified calendar</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg">Pull events from venues, performers, and other curators. Display everything in one beautiful, searchable calendar.</p>
                         </div>
-                        <div class="bg-gray-900 rounded-2xl p-5 border border-white/10">
+                        <div class="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-200 dark:border-white/10">
                             <div class="text-xs text-gray-500 mb-3">Sources</div>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-3 p-2 rounded-lg bg-rose-500/20 border border-rose-500/30">
                                     <div class="w-8 h-8 rounded-lg bg-rose-500/30 flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-rose-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" /></svg>
+                                        <svg class="w-4 h-4 text-rose-600 dark:text-rose-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" /></svg>
                                     </div>
                                     <div class="flex-1">
-                                        <div class="text-white text-sm">Blue Note Jazz Club</div>
+                                        <div class="text-gray-900 dark:text-white text-sm">Blue Note Jazz Club</div>
                                     </div>
-                                    <span class="text-rose-300 text-xs">12 events</span>
+                                    <span class="text-rose-600 dark:text-rose-300 text-xs">12 events</span>
                                 </div>
-                                <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
-                                    <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                                <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
+                                    <div class="w-8 h-8 rounded-lg bg-gray-200 dark:bg-white/10 flex items-center justify-center">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13" /></svg>
                                     </div>
                                     <div class="flex-1">
-                                        <div class="text-gray-300 text-sm">Sarah Johnson Trio</div>
+                                        <div class="text-gray-600 dark:text-gray-300 text-sm">Sarah Johnson Trio</div>
                                     </div>
                                     <span class="text-gray-500 text-xs">8 events</span>
                                 </div>
-                                <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
-                                    <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                                <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
+                                    <div class="w-8 h-8 rounded-lg bg-gray-200 dark:bg-white/10 flex items-center justify-center">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2" /></svg>
                                     </div>
                                     <div class="flex-1">
-                                        <div class="text-gray-300 text-sm">Austin Music Blog</div>
+                                        <div class="text-gray-600 dark:text-gray-300 text-sm">Austin Music Blog</div>
                                     </div>
                                     <span class="text-gray-500 text-xs">24 events</span>
                                 </div>
@@ -228,20 +228,20 @@
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Email schedule graphics</h3>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Generate shareable graphics of your weekly or monthly schedule. Perfect for newsletters and social media.</p>
 
-                    <div class="bg-gradient-to-br from-purple-950 to-violet-950 rounded-xl border border-purple-400/30 p-3">
-                        <div class="text-center text-xs text-purple-300 mb-2">This Week in Austin</div>
+                    <div class="bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-950 dark:to-violet-950 rounded-xl border border-purple-300 dark:border-purple-400/30 p-3">
+                        <div class="text-center text-xs text-purple-600 dark:text-purple-300 mb-2">This Week in Austin</div>
                         <div class="space-y-1">
                             <div class="flex items-center gap-2 text-xs">
-                                <span class="text-gray-400 w-8">Fri</span>
-                                <span class="text-white">Jazz @ Blue Note</span>
+                                <span class="text-gray-500 dark:text-gray-400 w-8">Fri</span>
+                                <span class="text-gray-900 dark:text-white">Jazz @ Blue Note</span>
                             </div>
                             <div class="flex items-center gap-2 text-xs">
-                                <span class="text-gray-400 w-8">Sat</span>
-                                <span class="text-white">Comedy @ Roxy</span>
+                                <span class="text-gray-500 dark:text-gray-400 w-8">Sat</span>
+                                <span class="text-gray-900 dark:text-white">Comedy @ Roxy</span>
                             </div>
                             <div class="flex items-center gap-2 text-xs">
-                                <span class="text-gray-400 w-8">Sun</span>
-                                <span class="text-white">Art Walk</span>
+                                <span class="text-gray-500 dark:text-gray-400 w-8">Sun</span>
+                                <span class="text-gray-900 dark:text-white">Art Walk</span>
                             </div>
                         </div>
                     </div>
@@ -482,25 +482,25 @@
                             </span>
                         </div>
                         <div class="flex-shrink-0">
-                            <div class="bg-gray-900 rounded-2xl border border-white/10 p-6 w-52">
+                            <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-white/10 p-6 w-52">
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="text-gray-300 text-xs">Online Event</span>
+                                    <span class="text-gray-600 dark:text-gray-300 text-xs">Online Event</span>
                                     <div class="w-10 h-5 bg-indigo-500 rounded-full relative">
                                         <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full"></div>
                                     </div>
                                 </div>
                                 <div class="space-y-2">
-                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
+                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-gray-100 dark:bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-blue-400"></div>
-                                        <span class="text-gray-300 text-xs">Zoom</span>
+                                        <span class="text-gray-600 dark:text-gray-300 text-xs">Zoom</span>
                                     </div>
-                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
+                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-gray-100 dark:bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-red-400"></div>
-                                        <span class="text-gray-300 text-xs">YouTube Live</span>
+                                        <span class="text-gray-600 dark:text-gray-300 text-xs">YouTube Live</span>
                                     </div>
-                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
+                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-gray-100 dark:bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-purple-400"></div>
-                                        <span class="text-gray-300 text-xs">Twitch</span>
+                                        <span class="text-gray-600 dark:text-gray-300 text-xs">Twitch</span>
                                     </div>
                                 </div>
                             </div>

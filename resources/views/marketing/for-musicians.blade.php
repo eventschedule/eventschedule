@@ -105,24 +105,24 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-cyan-950 to-teal-950 rounded-2xl border border-cyan-400/30 p-4 max-w-xs">
+                                <div class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-950 dark:to-teal-950 rounded-2xl border border-cyan-300 dark:border-cyan-400/30 p-4 max-w-xs">
                                     <div class="flex items-center gap-3 mb-3">
                                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center text-white text-sm font-semibold">MH</div>
                                         <div>
                                             <div class="text-gray-900 dark:text-white font-semibold text-sm">The Midnight Hour</div>
-                                            <div class="text-cyan-300 text-xs">Summer Tour 2025!</div>
+                                            <div class="text-cyan-600 dark:text-cyan-300 text-xs">Summer Tour 2025!</div>
                                         </div>
                                     </div>
                                     <div class="bg-gradient-to-br from-cyan-600/30 to-teal-600/30 rounded-xl p-3 border border-cyan-400/20">
                                         <div class="text-center">
                                             <div class="text-gray-900 dark:text-white text-xs font-semibold mb-1">THIS SATURDAY</div>
-                                            <div class="text-cyan-300 text-sm font-bold">Live at The Roxy</div>
+                                            <div class="text-cyan-700 dark:text-cyan-300 text-sm font-bold">Live at The Roxy</div>
                                             <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Doors 7 PM - $25</div>
                                         </div>
                                     </div>
                                     <div class="mt-3 flex gap-4 text-xs">
-                                        <div class="text-gray-500 dark:text-gray-400"><span class="text-emerald-400 font-semibold">72%</span> opened</div>
-                                        <div class="text-gray-500 dark:text-gray-400"><span class="text-amber-400 font-semibold">31%</span> clicked</div>
+                                        <div class="text-gray-500 dark:text-gray-400"><span class="text-emerald-500 dark:text-emerald-400 font-semibold">72%</span> opened</div>
+                                        <div class="text-gray-500 dark:text-gray-400"><span class="text-amber-500 dark:text-amber-400 font-semibold">31%</span> clicked</div>
                                     </div>
                                 </div>
                             </div>

@@ -59,19 +59,19 @@
                 <!-- Right: Tonight's Lineup Card -->
                 <div class="hidden lg:block">
                     <div class="relative animate-float">
-                        <div class="bg-gradient-to-br from-pink-950 to-fuchsia-950 rounded-2xl border border-pink-400/30 p-6 max-w-sm mx-auto backdrop-blur-sm">
+                        <div class="bg-gradient-to-br from-pink-100 to-fuchsia-100 dark:from-pink-950 dark:to-fuchsia-950 rounded-2xl border border-pink-300 dark:border-pink-400/30 p-6 max-w-sm mx-auto backdrop-blur-sm">
                             <!-- Header with "Tonight" badge -->
                             <div class="flex items-center justify-between mb-5">
                                 <div>
                                     <div class="flex items-center gap-2 mb-1">
                                         <span class="px-2 py-0.5 rounded bg-pink-500 text-white text-[10px] font-bold uppercase tracking-wide">Tonight</span>
                                     </div>
-                                    <div class="text-white text-lg font-bold">Club Vortex</div>
-                                    <div class="text-gray-400 text-xs">Saturday, Jan 25</div>
+                                    <div class="text-gray-900 dark:text-white text-lg font-bold">Club Vortex</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-xs">Saturday, Jan 25</div>
                                 </div>
                                 <div class="text-right">
                                     <div class="text-gray-500 text-[10px] uppercase tracking-wide">Doors</div>
-                                    <div class="text-white text-sm font-medium">10pm</div>
+                                    <div class="text-gray-900 dark:text-white text-sm font-medium">10pm</div>
                                 </div>
                             </div>
 
@@ -80,36 +80,36 @@
                                 <div class="flex items-center gap-3">
                                     <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-fuchsia-500 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-pink-500/30">DN</div>
                                     <div class="flex-1">
-                                        <div class="text-[10px] text-pink-300 uppercase tracking-wide font-semibold">Headliner</div>
-                                        <div class="text-white font-bold">DJ Nova</div>
-                                        <div class="text-gray-400 text-xs">Deep House / Tech House</div>
+                                        <div class="text-[10px] text-pink-600 dark:text-pink-300 uppercase tracking-wide font-semibold">Headliner</div>
+                                        <div class="text-gray-900 dark:text-white font-bold">DJ Nova</div>
+                                        <div class="text-gray-500 dark:text-gray-400 text-xs">Deep House / Tech House</div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Support DJs -->
                             <div class="space-y-2 mb-4">
-                                <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
+                                <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-[10px] font-semibold">MX</div>
                                     <div class="flex-1">
-                                        <div class="text-gray-300 text-sm font-medium">Max Luna</div>
+                                        <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Max Luna</div>
                                         <div class="text-gray-500 text-[10px]">12am - 2am</div>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
+                                <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-[10px] font-semibold">KR</div>
                                     <div class="flex-1">
-                                        <div class="text-gray-300 text-sm font-medium">Kira B2B Echo</div>
+                                        <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Kira B2B Echo</div>
                                         <div class="text-gray-500 text-[10px]">10pm - 12am</div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Guest list status -->
-                            <div class="flex items-center justify-between pt-3 border-t border-white/10">
+                            <div class="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-white/10">
                                 <div class="flex items-center gap-2">
                                     <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                                    <span class="text-emerald-400 text-xs font-medium">Guest List Open</span>
+                                    <span class="text-emerald-600 dark:text-emerald-400 text-xs font-medium">Guest List Open</span>
                                 </div>
                                 <span class="text-gray-500 text-xs">Free before 11pm</span>
                             </div>
@@ -144,7 +144,7 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-pink-950 to-fuchsia-950 rounded-2xl border border-pink-400/30 p-4 max-w-xs">
+                                <div class="bg-gradient-to-br from-pink-100 to-fuchsia-100 dark:from-pink-950 dark:to-fuchsia-950 rounded-2xl border border-pink-300 dark:border-pink-400/30 p-4 max-w-xs">
                                     <div class="flex items-center gap-3 mb-4">
                                         <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-fuchsia-500 rounded-xl flex items-center justify-center">
                                             <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -152,22 +152,22 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <div class="text-white text-sm font-medium">This Weekend at Vortex</div>
-                                            <div class="text-pink-300 text-xs">Sending to 2,341 followers...</div>
+                                            <div class="text-gray-900 dark:text-white text-sm font-medium">This Weekend at Vortex</div>
+                                            <div class="text-pink-600 dark:text-pink-300 text-xs">Sending to 2,341 followers...</div>
                                         </div>
                                     </div>
                                     <div class="space-y-2">
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
-                                            <div class="w-2 h-2 rounded-full bg-fuchsia-400"></div>
-                                            <span class="text-gray-300 text-xs">Thu - Industry Night (free entry)</span>
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-pink-200 dark:bg-white/10">
+                                            <div class="w-2 h-2 rounded-full bg-fuchsia-500 dark:bg-fuchsia-400"></div>
+                                            <span class="text-gray-600 dark:text-gray-300 text-xs">Thu - Industry Night (free entry)</span>
                                         </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
-                                            <div class="w-2 h-2 rounded-full bg-pink-400"></div>
-                                            <span class="text-gray-300 text-xs">Fri - DJ Nova (House)</span>
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-pink-200 dark:bg-white/10">
+                                            <div class="w-2 h-2 rounded-full bg-pink-500 dark:bg-pink-400"></div>
+                                            <span class="text-gray-600 dark:text-gray-300 text-xs">Fri - DJ Nova (House)</span>
                                         </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
-                                            <div class="w-2 h-2 rounded-full bg-violet-400"></div>
-                                            <span class="text-gray-300 text-xs">Sat - Latin Nights with DJ Fuego</span>
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-pink-200 dark:bg-white/10">
+                                            <div class="w-2 h-2 rounded-full bg-violet-500 dark:bg-violet-400"></div>
+                                            <span class="text-gray-600 dark:text-gray-300 text-xs">Sat - Latin Nights with DJ Fuego</span>
                                         </div>
                                     </div>
                                 </div>
@@ -268,24 +268,24 @@
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Birthday packages</span>
                             </div>
                         </div>
-                        <div class="bg-gray-900 rounded-2xl p-5 border border-white/10">
+                        <div class="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-200 dark:border-white/10">
                             <div class="text-xs text-gray-500 mb-3">VIP Requests - Saturday</div>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-3 p-3 rounded-lg bg-amber-500/20 border border-amber-400/30">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white text-[10px] font-semibold">MR</div>
                                     <div class="flex-1">
-                                        <div class="text-white text-sm font-medium">Marco R.</div>
-                                        <div class="text-amber-300 text-xs">Table for 8 &bull; $500 min</div>
+                                        <div class="text-gray-900 dark:text-white text-sm font-medium">Marco R.</div>
+                                        <div class="text-amber-600 dark:text-amber-300 text-xs">Table for 8 &bull; $500 min</div>
                                     </div>
-                                    <span class="px-2 py-0.5 rounded bg-amber-500/30 text-amber-300 text-[10px] font-medium">VIP</span>
+                                    <span class="px-2 py-0.5 rounded bg-amber-500/30 text-amber-600 dark:text-amber-300 text-[10px] font-medium">VIP</span>
                                 </div>
-                                <div class="flex items-center gap-3 p-3 rounded-lg bg-white/5">
+                                <div class="flex items-center gap-3 p-3 rounded-lg bg-gray-100 dark:bg-white/5">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white text-[10px] font-semibold">JT</div>
                                     <div class="flex-1">
-                                        <div class="text-gray-300 text-sm font-medium">James T.</div>
+                                        <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">James T.</div>
                                         <div class="text-gray-500 text-xs">Birthday party &bull; 12 guests</div>
                                     </div>
-                                    <span class="px-2 py-0.5 rounded bg-pink-500/30 text-pink-300 text-[10px] font-medium">BDAY</span>
+                                    <span class="px-2 py-0.5 rounded bg-pink-500/30 text-pink-600 dark:text-pink-300 text-[10px] font-medium">BDAY</span>
                                 </div>
                             </div>
                         </div>
@@ -619,22 +619,22 @@
                             </span>
                         </div>
                         <div class="flex-shrink-0">
-                            <div class="bg-gray-900 rounded-2xl border border-white/10 p-6 w-52">
+                            <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-white/10 p-6 w-52">
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="text-gray-300 text-xs">Live Stream</span>
+                                    <span class="text-gray-600 dark:text-gray-300 text-xs">Live Stream</span>
                                     <div class="flex items-center gap-1">
                                         <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
                                         <span class="text-red-500 text-xs font-medium">LIVE</span>
                                     </div>
                                 </div>
                                 <div class="space-y-2">
-                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
+                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-gray-100 dark:bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-purple-500"></div>
-                                        <span class="text-gray-300 text-xs">2,341 watching</span>
+                                        <span class="text-gray-600 dark:text-gray-300 text-xs">2,341 watching</span>
                                     </div>
-                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
+                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-gray-100 dark:bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                                        <span class="text-gray-300 text-xs">Global audience</span>
+                                        <span class="text-gray-600 dark:text-gray-300 text-xs">Global audience</span>
                                     </div>
                                 </div>
                             </div>

@@ -88,9 +88,9 @@
             <!-- Animated spinning vinyl badge -->
             <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
                 <div class="relative w-6 h-6 animate-spin-slow">
-                    <div class="absolute inset-0 rounded-full bg-gradient-to-br from-gray-900 to-black border-2 border-gray-300 dark:border-gray-700">
+                    <div class="absolute inset-0 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 dark:from-gray-900 dark:to-black border-2 border-gray-300 dark:border-gray-700">
                         <div class="absolute inset-1 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600"></div>
-                        <div class="absolute inset-[40%] rounded-full bg-gray-900"></div>
+                        <div class="absolute inset-[40%] rounded-full bg-gray-300 dark:bg-gray-900"></div>
                     </div>
                 </div>
                 <span class="text-sm text-gray-600 dark:text-gray-300">For DJs & Electronic Producers</span>
@@ -150,25 +150,25 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-indigo-950 to-purple-950 rounded-2xl border border-indigo-400/30 p-4 max-w-xs">
-                                    <div class="text-xs text-indigo-300 mb-3 font-semibold">DECEMBER</div>
+                                <div class="bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-950 dark:to-purple-950 rounded-2xl border border-indigo-300 dark:border-indigo-400/30 p-4 max-w-xs">
+                                    <div class="text-xs text-indigo-600 dark:text-indigo-300 mb-3 font-semibold">DECEMBER</div>
                                     <div class="space-y-2">
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-indigo-500/20 border border-indigo-400/20">
-                                            <div class="text-indigo-300 text-xs font-bold w-12">FRI 6</div>
+                                            <div class="text-indigo-600 dark:text-indigo-300 text-xs font-bold w-12">FRI 6</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-900 dark:text-white text-sm font-semibold">Fabric</div>
                                                 <div class="text-gray-500 dark:text-gray-400 text-[10px]">Every Friday</div>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-purple-500/20 border border-purple-400/20">
-                                            <div class="text-purple-300 text-xs font-bold w-12">SAT 14</div>
+                                            <div class="text-purple-600 dark:text-purple-300 text-xs font-bold w-12">SAT 14</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-900 dark:text-white text-sm font-semibold">Berghain</div>
                                                 <div class="text-gray-500 dark:text-gray-400 text-[10px]">Guest spot</div>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-indigo-500/20 border border-indigo-400/20">
-                                            <div class="text-indigo-300 text-xs font-bold w-12">FRI 20</div>
+                                            <div class="text-indigo-600 dark:text-indigo-300 text-xs font-bold w-12">FRI 20</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-900 dark:text-white text-sm font-semibold">Fabric</div>
                                                 <div class="text-gray-500 dark:text-gray-400 text-[10px]">Every Friday</div>
