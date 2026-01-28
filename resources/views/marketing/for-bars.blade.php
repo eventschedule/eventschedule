@@ -207,7 +207,7 @@
                         </div>
                         <div class="flex justify-center">
                             <!-- TV screen visual -->
-                            <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border-4 border-gray-700 p-4 w-48">
+                            <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border-4 border-gray-300 dark:border-gray-700 p-4 w-48">
                                 <div class="bg-gradient-to-br from-green-600/30 to-emerald-600/30 rounded-lg p-3 text-center">
                                     <div class="text-3xl mb-1">&#9917;</div>
                                     <div class="text-green-600 dark:text-green-300 text-sm font-bold">LIVE</div>

@@ -172,9 +172,9 @@
                             <span class="text-gray-500 dark:text-gray-400 text-xs">Edited 2m ago</span>
                         </div>
                         <div class="flex -space-x-2">
-                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 border-2 border-[#0a0a0f] flex items-center justify-center text-white text-xs font-semibold">J</div>
-                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 border-2 border-[#0a0a0f] flex items-center justify-center text-white text-xs font-semibold">A</div>
-                            <div class="w-7 h-7 rounded-full bg-gray-600 border-2 border-[#0a0a0f] flex items-center justify-center text-white text-xs">+2</div>
+                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs font-semibold">J</div>
+                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs font-semibold">A</div>
+                            <div class="w-7 h-7 rounded-full bg-gray-600 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">+2</div>
                         </div>
                     </div>
                 </div>
