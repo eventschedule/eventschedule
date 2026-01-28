@@ -1231,7 +1231,7 @@
                                 <!-- Enable Toggle -->
                                 <div class="flex items-center gap-3 mb-4">
                                     <label class="flex items-center cursor-pointer">
-                                        <input type="checkbox" id="email_enabled_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="toggleEmailOptions()">
+                                        <input type="checkbox" id="email_enabled_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_scheduled_emails') }}</span>
                                     </label>
                                 </div>
@@ -1555,7 +1555,7 @@
                                     <!-- Enable Toggle -->
                                     <div class="flex items-center gap-3 mb-4">
                                         <label class="flex items-center cursor-pointer">
-                                            <input type="checkbox" id="email_enabled" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="toggleEmailOptions()">
+                                            <input type="checkbox" id="email_enabled" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
                                             <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_scheduled_emails') }}</span>
                                         </label>
                                     </div>

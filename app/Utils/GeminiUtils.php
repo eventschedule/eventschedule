@@ -206,7 +206,13 @@ class GeminiUtils
                 } else {
                     // Generate secure filename with correct extension
                     $extension = ImageUtils::getImageExtension($detectedFormat);
-                    $filename = '/tmp/event_'.strtolower(\Str::random(32)).'.'.$extension;
+
+                    // Use Laravel's storage directory instead of /tmp for security
+                    $tempDir = storage_path('app/temp');
+                    if (! is_dir($tempDir)) {
+                        mkdir($tempDir, 0700, true);
+                    }
+                    $filename = $tempDir.'/event_'.strtolower(\Str::random(32)).'.'.$extension;
 
                     // Use move_uploaded_file for security
                     if (! move_uploaded_file($file->getRealPath(), $filename)) {
