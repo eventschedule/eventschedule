@@ -68,12 +68,12 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-violet-500/20 to-indigo-500/20 rounded-2xl border border-violet-400/30 p-4 max-w-xs">
-                                    <div class="flex items-center gap-2 mb-4 bg-black/30 rounded-lg px-3 py-2">
+                                <div class="bg-gradient-to-br from-violet-950 to-indigo-950 rounded-2xl border border-violet-400/30 p-4 max-w-xs">
+                                    <div class="flex items-center gap-2 mb-4 bg-gray-900 rounded-lg px-3 py-2">
                                         <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
                                         </svg>
-                                        <span class="text-sm text-gray-700 dark:text-gray-300 font-mono">eventschedule.com/yourband</span>
+                                        <span class="text-sm text-gray-300 font-mono">eventschedule.com/yourband</span>
                                     </div>
                                     <div class="space-y-2">
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-white/10">
@@ -82,11 +82,11 @@
                                         </div>
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
                                             <div class="w-2 h-2 rounded-full bg-indigo-400"></div>
-                                            <span class="text-gray-700 dark:text-gray-300 text-sm">Sat Mar 22 - The Roxy</span>
+                                            <span class="text-gray-300 text-sm">Sat Mar 22 - The Roxy</span>
                                         </div>
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
                                             <div class="w-2 h-2 rounded-full bg-purple-400"></div>
-                                            <span class="text-gray-700 dark:text-gray-300 text-sm">Fri Mar 29 - Jazz Club</span>
+                                            <span class="text-gray-300 text-sm">Fri Mar 29 - Jazz Club</span>
                                         </div>
                                     </div>
                                 </div>
@@ -178,7 +178,7 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Sell tickets direct</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg">No middleman. Accept payments via Stripe with zero platform fees. You keep what you earn.</p>
                         </div>
-                        <div class="bg-black/30 rounded-2xl p-5 border border-white/10">
+                        <div class="bg-gray-900 rounded-2xl p-5 border border-white/10">
                             <div class="space-y-3">
                                 <div class="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/10">
                                     <div>
@@ -502,9 +502,9 @@
                             </span>
                         </div>
                         <div class="flex-shrink-0">
-                            <div class="bg-black/30 rounded-2xl border border-white/10 p-6 w-52">
+                            <div class="bg-gray-900 rounded-2xl border border-white/10 p-6 w-52">
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="text-gray-700 dark:text-gray-300 text-xs">Online Event</span>
+                                    <span class="text-gray-300 text-xs">Online Event</span>
                                     <div class="w-10 h-5 bg-indigo-500 rounded-full relative">
                                         <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full"></div>
                                     </div>
@@ -512,15 +512,15 @@
                                 <div class="space-y-2">
                                     <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-blue-500"></div>
-                                        <span class="text-gray-700 dark:text-gray-300 text-xs">Zoom</span>
+                                        <span class="text-gray-300 text-xs">Zoom</span>
                                     </div>
                                     <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                                        <span class="text-gray-700 dark:text-gray-300 text-xs">YouTube Live</span>
+                                        <span class="text-gray-300 text-xs">YouTube Live</span>
                                     </div>
                                     <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-purple-500"></div>
-                                        <span class="text-gray-700 dark:text-gray-300 text-xs">Twitch</span>
+                                        <span class="text-gray-300 text-xs">Twitch</span>
                                     </div>
                                 </div>
                             </div>

@@ -105,7 +105,7 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-violet-500/20 to-purple-500/20 rounded-2xl border border-violet-400/30 p-4 max-w-xs">
+                                <div class="bg-gradient-to-br from-violet-950 to-purple-950 rounded-2xl border border-violet-400/30 p-4 max-w-xs">
                                     <div class="text-xs text-violet-300 font-semibold mb-3 uppercase tracking-wide">Booking Inquiry</div>
                                     <div class="space-y-3">
                                         <div class="p-3 rounded-lg bg-white/10 border border-white/10">
@@ -118,7 +118,7 @@
                                         <div class="p-3 rounded-lg bg-white/5">
                                             <div class="flex items-center gap-2 mb-1">
                                                 <div class="w-2 h-2 rounded-full bg-pink-400"></div>
-                                                <span class="text-gray-700 dark:text-gray-300 text-sm font-medium">Wedding Reception</span>
+                                                <span class="text-gray-300 text-sm font-medium">Wedding Reception</span>
                                             </div>
                                             <div class="text-gray-500 text-xs">Jan 8 - Private Venue</div>
                                         </div>
@@ -193,7 +193,7 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Keep 100% of ticket sales</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg">Your show, your revenue. Zero platform fees. Stripe goes directly to you. QR tickets for easy check-in.</p>
                         </div>
-                        <div class="bg-black/30 rounded-2xl p-5 border border-white/10">
+                        <div class="bg-gray-900 rounded-2xl p-5 border border-white/10">
                             <div class="space-y-3">
                                 <div class="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/10">
                                     <div>
@@ -273,7 +273,7 @@
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-xs font-semibold">SK</div>
                             <div class="flex-1">
-                                <div class="text-gray-700 dark:text-gray-300 text-sm">Sarah</div>
+                                <div class="text-gray-300 text-sm">Sarah</div>
                             </div>
                             <span class="px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 text-[10px]">Assistant</span>
                         </div>
@@ -536,9 +536,9 @@
                             <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-indigo-300 transition-colors">Stream to audiences worldwide</h3>
                             <p class="text-gray-400 text-lg mb-4">Sell tickets to viewers anywhere. Virtual magic became huge and stays relevant - reach fans who can't make it to your live shows.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Zoom shows</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Global ticket sales</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Interactive magic</span>
+                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Zoom shows</span>
+                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Global ticket sales</span>
+                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Interactive magic</span>
                             </div>
                             <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more about online events
@@ -548,9 +548,9 @@
                             </span>
                         </div>
                         <div class="flex-shrink-0">
-                            <div class="bg-black/30 rounded-2xl border border-white/10 p-6 w-52">
+                            <div class="bg-gray-900 rounded-2xl border border-white/10 p-6 w-52">
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="text-gray-700 dark:text-gray-300 text-xs">Online Event</span>
+                                    <span class="text-gray-300 text-xs">Online Event</span>
                                     <div class="w-10 h-5 bg-indigo-500 rounded-full relative">
                                         <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full"></div>
                                     </div>
@@ -558,15 +558,15 @@
                                 <div class="space-y-2">
                                     <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-blue-400"></div>
-                                        <span class="text-gray-700 dark:text-gray-300 text-xs">Zoom</span>
+                                        <span class="text-gray-300 text-xs">Zoom</span>
                                     </div>
                                     <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-red-400"></div>
-                                        <span class="text-gray-700 dark:text-gray-300 text-xs">YouTube Live</span>
+                                        <span class="text-gray-300 text-xs">YouTube Live</span>
                                     </div>
                                     <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-purple-400"></div>
-                                        <span class="text-gray-700 dark:text-gray-300 text-xs">Twitch</span>
+                                        <span class="text-gray-300 text-xs">Twitch</span>
                                     </div>
                                 </div>
                             </div>

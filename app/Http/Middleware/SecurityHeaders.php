@@ -26,7 +26,12 @@ class SecurityHeaders
 
         // Only allow embedding on specific embeddable routes (e.g., public calendar views)
         // The embed parameter must be present AND the route must be in the allowed list
-        $embeddableRoutes = ['role.view', 'role.events', 'role.calendar'];
+        $embeddableRoutes = [
+            'role.view_guest',           // Selfhosted guest view
+            'event.view_guest',          // Hosted guest view (slug only)
+            'event.view_guest_with_id',  // Hosted guest view (slug + id)
+            'event.view_guest_full',     // Hosted guest view (slug + id + date)
+        ];
         $currentRouteName = $request->route()?->getName();
         $isEmbeddable = $request->has('embed')
             && ($request->embed === 'true' || $request->embed === '1')

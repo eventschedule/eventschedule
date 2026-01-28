@@ -84,7 +84,7 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-2xl border border-amber-400/30 p-4 max-w-xs">
+                                <div class="bg-gradient-to-br from-amber-950 to-orange-950 rounded-2xl border border-amber-400/30 p-4 max-w-xs">
                                     <div class="flex items-center gap-3 mb-4">
                                         <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
                                             <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -367,7 +367,7 @@
                     <!-- Friday -->
                     <div class="text-center">
                         <div class="text-orange-300 text-xs md:text-sm font-bold mb-2 md:mb-3">Fri</div>
-                        <div class="bg-gradient-to-br from-orange-500/20 to-rose-500/20 rounded-xl p-2 md:p-3 min-h-[80px] md:min-h-[100px] border border-orange-500/30">
+                        <div class="bg-gradient-to-br from-orange-950 to-rose-950 rounded-xl p-2 md:p-3 min-h-[80px] md:min-h-[100px] border border-orange-500/30">
                             <div class="text-orange-300 text-[10px] md:text-xs font-semibold">Live Music</div>
                             <div class="text-orange-200/70 text-[9px] md:text-[10px] mt-1">9pm-12am</div>
                         </div>
@@ -375,7 +375,7 @@
                     <!-- Saturday -->
                     <div class="text-center">
                         <div class="text-orange-300 text-xs md:text-sm font-bold mb-2 md:mb-3">Sat</div>
-                        <div class="bg-gradient-to-br from-rose-500/20 to-pink-500/20 rounded-xl p-2 md:p-3 min-h-[80px] md:min-h-[100px] border border-rose-500/30">
+                        <div class="bg-gradient-to-br from-rose-950 to-pink-950 rounded-xl p-2 md:p-3 min-h-[80px] md:min-h-[100px] border border-rose-500/30">
                             <div class="text-rose-300 text-[10px] md:text-xs font-semibold">DJ Night</div>
                             <div class="text-rose-200/70 text-[9px] md:text-[10px] mt-1">10pm-2am</div>
                         </div>

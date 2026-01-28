@@ -268,7 +268,7 @@
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Birthday packages</span>
                             </div>
                         </div>
-                        <div class="bg-black/30 rounded-2xl p-5 border border-white/10">
+                        <div class="bg-gray-900 rounded-2xl p-5 border border-white/10">
                             <div class="text-xs text-gray-500 mb-3">VIP Requests - Saturday</div>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-3 p-3 rounded-lg bg-amber-500/20 border border-amber-400/30">
@@ -282,7 +282,7 @@
                                 <div class="flex items-center gap-3 p-3 rounded-lg bg-white/5">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white text-[10px] font-semibold">JT</div>
                                     <div class="flex-1">
-                                        <div class="text-gray-700 dark:text-gray-300 text-sm font-medium">James T.</div>
+                                        <div class="text-gray-300 text-sm font-medium">James T.</div>
                                         <div class="text-gray-500 text-xs">Birthday party &bull; 12 guests</div>
                                     </div>
                                     <span class="px-2 py-0.5 rounded bg-pink-500/30 text-pink-300 text-[10px] font-medium">BDAY</span>
@@ -607,9 +607,9 @@
                             <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-pink-300 transition-colors">Stream to the world</h3>
                             <p class="text-gray-400 text-lg mb-4">Broadcast your DJ sets worldwide. Sell tickets to viewers anywhere - no capacity limits.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Twitch</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">YouTube Live</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Zoom</span>
+                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Twitch</span>
+                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">YouTube Live</span>
+                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Zoom</span>
                             </div>
                             <span class="inline-flex items-center text-pink-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -619,9 +619,9 @@
                             </span>
                         </div>
                         <div class="flex-shrink-0">
-                            <div class="bg-black/30 rounded-2xl border border-white/10 p-6 w-52">
+                            <div class="bg-gray-900 rounded-2xl border border-white/10 p-6 w-52">
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="text-gray-700 dark:text-gray-300 text-xs">Live Stream</span>
+                                    <span class="text-gray-300 text-xs">Live Stream</span>
                                     <div class="flex items-center gap-1">
                                         <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
                                         <span class="text-red-500 text-xs font-medium">LIVE</span>
@@ -630,11 +630,11 @@
                                 <div class="space-y-2">
                                     <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-purple-500"></div>
-                                        <span class="text-gray-700 dark:text-gray-300 text-xs">2,341 watching</span>
+                                        <span class="text-gray-300 text-xs">2,341 watching</span>
                                     </div>
                                     <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                                        <span class="text-gray-700 dark:text-gray-300 text-xs">Global audience</span>
+                                        <span class="text-gray-300 text-xs">Global audience</span>
                                     </div>
                                 </div>
                             </div>
