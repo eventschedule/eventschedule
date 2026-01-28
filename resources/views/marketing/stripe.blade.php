@@ -342,15 +342,15 @@
     <section class="bg-white dark:bg-[#0a0a0f] py-16">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <a href="{{ marketing_url('/integrations') }}" class="group block">
-                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 hover:border-gray-300 dark:hover:border-white/20 transition-all">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-gray-600 dark:text-gray-300 text-sm font-medium mb-4">
+                <div class="bg-gradient-to-br from-gray-100 dark:from-gray-800/50 to-gray-200 dark:to-gray-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 hover:border-gray-300 dark:hover:border-white/20 transition-all">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-200 dark:bg-white/15 text-gray-600 dark:text-gray-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                         </svg>
                         Payments
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">Explore more integrations</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-4">Discover all the ways Event Schedule connects with your favorite tools.</p>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Discover all the ways Event Schedule connects with your favorite tools.</p>
                     <span class="inline-flex items-center text-gray-600 dark:text-gray-300 font-medium group-hover:gap-3 gap-2 transition-all">
                         View all integrations
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

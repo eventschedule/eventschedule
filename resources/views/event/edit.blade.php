@@ -1473,19 +1473,6 @@
                                     </div>
                                 </div>
                                 </div>
-
-                                <!-- Save as Default (outside all tabs) -->
-                                @if ($user->isMember($subdomain))
-                                <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                                    <div class="flex items-center">
-                                        <input id="save_default_tickets" name="save_default_tickets" type="checkbox"
-                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                        <label for="save_default_tickets" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
-                                            {{ __('messages.save_as_default') }}
-                                        </label>
-                                    </div>
-                                </div>
-                                @endif
                             </div>
                             @endif
                         </div>

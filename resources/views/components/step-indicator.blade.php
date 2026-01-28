@@ -23,7 +23,7 @@
     }
 @endphp
 
-<div class="step-indicator p-6 relative overflow-hidden">
+<div class="step-indicator p-6 relative overflow-hidden bg-gray-100 dark:bg-gray-900">
 
     <!-- Steps Layout - Always Mobile Style -->
     <div class="flex items-start justify-center space-x-6 relative z-10">
@@ -34,7 +34,7 @@
             <div class="flex flex-col items-center">
                 <!-- Step Circle -->
                 <div class="relative">
-                    <div class="w-14 h-14 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-500 ease-out transform hover:scale-110 {{ $stepNumber < $currentStep ? 'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg ring-4 ring-green-100 dark:ring-green-900' : ($stepNumber == $currentStep ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg ring-4 ring-blue-100 dark:ring-blue-900 animate-pulse' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 border-2 border-gray-200 dark:border-gray-700') }}">
+                    <div class="w-14 h-14 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-500 ease-out transform hover:scale-110 {{ $stepNumber < $currentStep ? 'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg ring-4 ring-green-100 dark:ring-green-900' : ($stepNumber == $currentStep ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg ring-4 ring-blue-100 dark:ring-blue-900 animate-pulse' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-2 border-gray-200 dark:border-gray-700') }}">
                         @if ($stepNumber < $currentStep)
                             <!-- Checkmark for completed steps -->
                             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -74,7 +74,7 @@
                 
                 <!-- Step Content -->
                 <div class="mt-3 text-center max-w-24">
-                    <div class="text-sm font-semibold {{ $stepNumber <= $currentStep ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400' }} transition-colors duration-300 leading-tight">
+                    <div class="text-sm font-semibold {{ $stepNumber <= $currentStep ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400' }} transition-colors duration-300 leading-tight">
                         {{ __($steps[$stepNumber]['title']) }}
                     </div>
                     

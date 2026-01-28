@@ -1,3 +1,29 @@
+@import 'flatpickr/dist/flatpickr.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Flatpickr date picker overrides - reduce excessive padding */
+.flatpickr-months .flatpickr-month {
+    overflow: visible;
+}
+
+.flatpickr-current-month {
+    font-size: 100%;
+    padding-top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+}
+
+.flatpickr-current-month .numInputWrapper {
+    width: 7ch;
+    flex-shrink: 0;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+    font-size: 100%;
+}

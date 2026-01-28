@@ -1,6 +1,6 @@
 <x-auth-layout>
 
-    <x-slot name="head">
+    <x-slot name="abovePage">
         @if(session('pending_request'))
             <x-step-indicator :compact="true" />
         @endif
