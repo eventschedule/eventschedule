@@ -383,7 +383,6 @@
         @endif
 
 
-        @if (! isset($embed) || ! $embed)
         <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">            
             <div v-if="mobileEventsList.length">
                 <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden mb-4 w-full text-center">
@@ -452,7 +451,6 @@
                 </div>
             </div>
         </div>
-        @endif
 
 
 {{-- Mobile Filters Bottom Sheet Drawer --}}
