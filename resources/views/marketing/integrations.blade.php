@@ -69,7 +69,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Google Calendar -->
                 <a href="{{ marketing_url('/google-calendar') }}" class="bento-card group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-gray-200 dark:border-white/10 p-8 h-full flex flex-col hover:border-blue-500/30 transition-all" aria-label="Learn more about Google Calendar integration">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium mb-4 w-fit">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-700 dark:text-blue-300 text-sm font-medium mb-4 w-fit">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -124,7 +124,7 @@
 
                 <!-- CalDAV -->
                 <a href="{{ marketing_url('/caldav') }}" class="bento-card group relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900/50 to-cyan-900/50 border border-gray-200 dark:border-white/10 p-8 h-full flex flex-col hover:border-teal-500/30 transition-all" aria-label="Learn more about CalDAV integration">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm font-medium mb-4 w-fit">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-700 dark:text-teal-300 text-sm font-medium mb-4 w-fit">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -193,7 +193,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Stripe -->
                 <a href="{{ marketing_url('/stripe') }}" class="bento-card group relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border border-gray-200 dark:border-white/10 p-8 h-full flex flex-col hover:border-violet-500/30 transition-all" aria-label="Learn more about Stripe payment integration">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4 w-fit">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-700 dark:text-violet-300 text-sm font-medium mb-4 w-fit">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                         </svg>
@@ -228,7 +228,7 @@
 
                 <!-- Invoice Ninja -->
                 <a href="{{ marketing_url('/invoiceninja') }}" class="bento-card group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-gray-200 dark:border-white/10 p-8 h-full flex flex-col hover:border-emerald-500/30 transition-all" aria-label="Learn more about Invoice Ninja integration">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4 w-fit">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-sm font-medium mb-4 w-fit">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>

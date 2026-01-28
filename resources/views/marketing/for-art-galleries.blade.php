@@ -261,7 +261,7 @@
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-fuchsia-500/20 border border-fuchsia-500/30">
                             <div class="w-2 h-2 rounded-full bg-fuchsia-400"></div>
                             <span class="text-gray-900 dark:text-white text-sm">Life Drawing</span>
-                            <span class="ml-auto text-fuchsia-300 text-xs">Tuesdays</span>
+                            <span class="ml-auto text-fuchsia-700 dark:text-fuchsia-300 text-xs">Tuesdays</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-pink-400"></div>
@@ -339,7 +339,7 @@
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
                             <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
                             <span class="text-gray-900 dark:text-white text-sm">Main Gallery</span>
-                            <span class="ml-auto text-emerald-300 text-xs">2 shows</span>
+                            <span class="ml-auto text-emerald-700 dark:text-emerald-300 text-xs">2 shows</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-teal-400"></div>
