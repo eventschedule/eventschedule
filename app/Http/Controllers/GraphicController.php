@@ -27,11 +27,13 @@ class GraphicController extends Controller
         $hasRecurringEvents = $role->events()->whereNotNull('days_of_week')->exists();
 
         // Get the count of available events for the event count selector
+        // Only count events that have their own flyer image (not relying on role image)
         $maxEvents = Event::whereHas('roles', function ($query) use ($role) {
             $query->where('role_id', $role->id)->where('is_accepted', true);
         })
             ->where('starts_at', '>=', now())
-            ->where('flyer_image_url', '!=', null)
+            ->whereNotNull('flyer_image_url')
+            ->where('flyer_image_url', '!=', '')
             ->count();
 
         return view('graphic.show', compact('role', 'layout', 'isPro', 'isEnterprise', 'graphicSettings', 'hasRecurringEvents', 'maxEvents'));
@@ -159,12 +161,14 @@ class GraphicController extends Controller
         $eventLimit = $eventCountSetting ? (int) $eventCountSetting : 20; // Default max is 20
 
         // Build the events query
+        // Only include events that have their own flyer image (not relying on role image)
         $query = Event::with(['roles', 'tickets', 'venue'])
             ->whereHas('roles', function ($query) use ($role) {
                 $query->where('role_id', $role->id)->where('is_accepted', true);
             })
             ->where('starts_at', '>=', now())
-            ->where('flyer_image_url', '!=', null);
+            ->whereNotNull('flyer_image_url')
+            ->where('flyer_image_url', '!=', '');
 
         // Only exclude recurring events if setting is true
         if ($request->boolean('exclude_recurring', false)) {
@@ -312,12 +316,14 @@ class GraphicController extends Controller
 
         $excludeRecurring = $graphicSettings['exclude_recurring'] ?? false;
 
+        // Only include events that have their own flyer image (not relying on role image)
         $query = Event::with(['roles', 'tickets', 'venue'])
             ->whereHas('roles', function ($query) use ($role) {
                 $query->where('role_id', $role->id)->where('is_accepted', true);
             })
             ->where('starts_at', '>=', now())
-            ->where('flyer_image_url', '!=', null);
+            ->whereNotNull('flyer_image_url')
+            ->where('flyer_image_url', '!=', '');
 
         // Only exclude recurring events if setting is true
         if ($excludeRecurring) {

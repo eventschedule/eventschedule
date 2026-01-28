@@ -972,13 +972,11 @@
 
                                 @if ($role->profile_image_url)
                                 <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="pt-3" />
-                                <form method="POST" action="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="hover:underline text-gray-900 dark:text-gray-100">
-                                        {{ __('messages.delete_image') }}
-                                    </button>
-                                </form>
+                                <button type="button"
+                                    onclick="deleteRoleImage('{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}', '{{ csrf_token() }}')"
+                                    class="hover:underline text-gray-900 dark:text-gray-100">
+                                    {{ __('messages.delete_image') }}
+                                </button>
                                 @endif
                             </div>
 
@@ -1034,13 +1032,12 @@
                                     class="pt-3" />
 
                                 @if ($role->header_image_url)
-                                <form method="POST" action="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}" id="delete_header_image_form" style="display: {{ $role->header_image ? 'none' : 'block' }};" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="hover:underline text-gray-900 dark:text-gray-100">
-                                        {{ __('messages.delete_image') }}
-                                    </button>
-                                </form>
+                                <button type="button" id="delete_header_image_button"
+                                    style="display: {{ $role->header_image ? 'none' : 'block' }};"
+                                    onclick="deleteRoleImage('{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}', '{{ csrf_token() }}')"
+                                    class="hover:underline text-gray-900 dark:text-gray-100">
+                                    {{ __('messages.delete_image') }}
+                                </button>
                                 @endif
 
                             </div>
@@ -1122,13 +1119,11 @@
 
                                     @if ($role->background_image_url)
                                     <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
-                                    <form method="POST" action="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="hover:underline text-gray-900 dark:text-gray-100">
-                                            {{ __('messages.delete_image') }}
-                                        </button>
-                                    </form>
+                                    <button type="button"
+                                        onclick="deleteRoleImage('{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}', '{{ csrf_token() }}')"
+                                        class="hover:underline text-gray-900 dark:text-gray-100">
+                                        {{ __('messages.delete_image') }}
+                                    </button>
                                     @endif
                                 </div>
                             </div>
@@ -3257,5 +3252,25 @@ function updateEventCustomFieldButton() {
     } else {
         addButton.classList.remove('hidden');
     }
+}
+
+function deleteRoleImage(url, token) {
+    if (!confirm({!! json_encode(__('messages.are_you_sure'), JSON_UNESCAPED_UNICODE) !!})) {
+        return;
+    }
+
+    fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': token,
+            'Accept': 'application/json'
+        }
+    }).then(response => {
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Failed to delete image');
+        }
+    });
 }
 </script>
