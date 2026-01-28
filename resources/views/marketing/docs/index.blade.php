@@ -162,42 +162,42 @@
             <div class="grid md:grid-cols-2 gap-6">
                 <!-- Selfhost Section Card -->
                 <a href="{{ route('marketing.docs.selfhost') }}" class="section-card block group">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-8 h-full bg-gradient-to-br from-violet-900 via-purple-900 to-indigo-900 group-hover:border-violet-500/30 transition-colors">
+                    <div class="relative overflow-hidden rounded-2xl border border-violet-200 dark:border-white/10 p-8 h-full bg-gradient-to-br from-violet-100 via-purple-100 to-indigo-100 dark:from-violet-900 dark:via-purple-900 dark:to-indigo-900 group-hover:border-violet-500/30 transition-colors">
                         <!-- Glow effect -->
                         <div class="absolute -top-24 -right-24 w-48 h-48 bg-violet-500/20 rounded-full blur-[60px] group-hover:bg-violet-500/30 transition-colors"></div>
 
                         <div class="relative z-10">
-                            <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-6 bg-violet-500/20">
-                                <svg class="w-7 h-7 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-6 bg-violet-100 dark:bg-violet-500/20">
+                                <svg class="w-7 h-7 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
                                 </svg>
                             </div>
 
-                            <h2 class="text-2xl font-bold text-white mb-3">Selfhost Installation</h2>
-                            <p class="text-gray-300 mb-6">Deploy Event Schedule on your own server. Complete control, full customization.</p>
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Selfhost Installation</h2>
+                            <p class="text-gray-500 dark:text-gray-300 mb-6">Deploy Event Schedule on your own server. Complete control, full customization.</p>
 
                             <div class="space-y-2 mb-6">
-                                <div class="flex items-center gap-2 text-sm text-gray-300">
-                                    <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                    <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
                                     Installation Guide
                                 </div>
-                                <div class="flex items-center gap-2 text-sm text-gray-300">
-                                    <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                    <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
                                     SaaS Multi-tenant Setup
                                 </div>
-                                <div class="flex items-center gap-2 text-sm text-gray-300">
-                                    <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                    <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
                                     Stripe & Google Calendar Integration
                                 </div>
                             </div>
 
-                            <div class="inline-flex items-center text-sm font-medium text-violet-400 group-hover:text-violet-300 transition-colors">
+                            <div class="inline-flex items-center text-sm font-medium text-violet-600 dark:text-violet-400 group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors">
                                 View Selfhost Docs
                                 <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -209,47 +209,47 @@
 
                 <!-- API Reference Card -->
                 <a href="{{ route('marketing.docs.developer.api') }}" class="section-card block group">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-8 h-full bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 group-hover:border-emerald-500/30 transition-colors">
+                    <div class="relative overflow-hidden rounded-2xl border border-emerald-200 dark:border-white/10 p-8 h-full bg-gradient-to-br from-emerald-100 via-teal-100 to-cyan-100 dark:from-emerald-900 dark:via-teal-900 dark:to-cyan-900 group-hover:border-emerald-500/30 transition-colors">
                         <!-- Glow effect -->
                         <div class="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/20 rounded-full blur-[60px] group-hover:bg-emerald-500/30 transition-colors"></div>
 
                         <div class="relative z-10">
-                            <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-6 bg-emerald-500/20">
-                                <svg class="w-7 h-7 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-6 bg-emerald-100 dark:bg-emerald-500/20">
+                                <svg class="w-7 h-7 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                                 </svg>
                             </div>
 
                             <div class="flex items-center gap-2 mb-3">
-                                <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                                <span class="text-sm font-medium text-emerald-300">REST API</span>
+                                <div class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></div>
+                                <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">REST API</span>
                             </div>
 
-                            <h2 class="text-2xl font-bold text-white mb-3">API Reference</h2>
-                            <p class="text-gray-300 mb-6">Complete REST API documentation with authentication, endpoints, request/response examples, and error handling.</p>
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">API Reference</h2>
+                            <p class="text-gray-500 dark:text-gray-300 mb-6">Complete REST API documentation with authentication, endpoints, request/response examples, and error handling.</p>
 
                             <div class="flex flex-wrap items-center gap-4 mb-6">
-                                <div class="flex items-center gap-2 text-sm text-gray-300">
-                                    <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                    <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     JSON responses
                                 </div>
-                                <div class="flex items-center gap-2 text-sm text-gray-300">
-                                    <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                    <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     API key auth
                                 </div>
-                                <div class="flex items-center gap-2 text-sm text-gray-300">
-                                    <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                    <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     Full CRUD
                                 </div>
                             </div>
 
-                            <div class="inline-flex items-center text-sm font-medium text-emerald-400 group-hover:text-emerald-300 transition-colors">
+                            <div class="inline-flex items-center text-sm font-medium text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">
                                 Explore the API
                                 <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
