@@ -101,7 +101,9 @@
                 @elseif ($otherRole->background == 'solid')
                     background-color: {{ $otherRole->background_color }} !important;
                 @elseif ($otherRole->background == 'image')
+                    @if (!$showMobileBackground)
                     @media (min-width: 768px) {
+                    @endif
                         @if ($otherRole->background_image)
                             background-image: url("{{ asset('images/backgrounds/' . $otherRole->background_image . '.png') }}");
                         @else
@@ -111,7 +113,9 @@
                         background-position: center;
                         height: 100%;
                         margin: 0;
+                    @if (!$showMobileBackground)
                     }
+                    @endif
                 @endif
             @else
                 @if ($role->background == 'gradient')
@@ -119,7 +123,9 @@
                 @elseif ($role->background == 'solid')
                     background-color: {{ $role->background_color }} !important;
                 @elseif ($role->background == 'image')
+                    @if (!$showMobileBackground)
                     @media (min-width: 768px) {
+                    @endif
                         @if ($role->background_image)
                             background-image:
                                 @if (request()->graphic)
@@ -137,7 +143,9 @@
                         background-position: center;
                         height: 100%;
                         margin: 0;
+                    @if (!$showMobileBackground)
                     }
+                    @endif
                 @endif
             @endif
         }

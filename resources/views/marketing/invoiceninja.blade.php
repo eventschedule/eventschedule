@@ -296,9 +296,9 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-4">Invoice in any currency supported by Invoice Ninja. Perfect for international events and clients.</p>
 
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-2 py-1 rounded bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">USD</span>
-                        <span class="px-2 py-1 rounded bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">EUR</span>
-                        <span class="px-2 py-1 rounded bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">GBP</span>
+                        <span class="px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">USD</span>
+                        <span class="px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">EUR</span>
+                        <span class="px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">GBP</span>
                         <span class="px-2 py-1 rounded bg-amber-500/20 text-amber-300 text-sm">+100 more</span>
                     </div>
                 </div>

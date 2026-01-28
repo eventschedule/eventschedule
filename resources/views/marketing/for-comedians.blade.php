@@ -103,7 +103,7 @@
 
                 <div class="relative grid lg:grid-cols-2 gap-10 items-center">
                     <div>
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-900/40 text-red-300 text-sm font-medium mb-6 border border-red-800/30">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-sm font-medium mb-6 border border-red-200 dark:border-red-800/30">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                             </svg>
@@ -150,7 +150,7 @@
                                         <div class="text-white font-semibold">Stand Up NY</div>
                                         <div class="text-gray-500 dark:text-gray-400 text-sm">Open mic · 7 PM signup</div>
                                     </div>
-                                    <div class="px-2 py-1 rounded bg-red-900/40 text-red-300 text-xs font-medium">5 min</div>
+                                    <div class="px-2 py-1 rounded bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-medium">5 min</div>
                                 </div>
                                 <div class="flex items-center gap-4 p-3 rounded-xl bg-amber-900/20 border border-amber-800/30">
                                     <div class="w-12 text-center">
@@ -161,7 +161,7 @@
                                         <div class="text-white font-semibold">Comedy Cellar</div>
                                         <div class="text-gray-500 dark:text-gray-400 text-sm">Guest set · 9:30 PM</div>
                                     </div>
-                                    <div class="px-2 py-1 rounded bg-amber-900/40 text-amber-300 text-xs font-medium">12 min</div>
+                                    <div class="px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-medium">12 min</div>
                                 </div>
                                 <div class="flex items-center gap-4 p-3 rounded-xl bg-orange-900/20 border border-orange-800/30">
                                     <div class="w-12 text-center">
@@ -172,7 +172,7 @@
                                         <div class="text-white font-semibold">Gotham Comedy</div>
                                         <div class="text-gray-500 dark:text-gray-400 text-sm">Late show · 11 PM</div>
                                     </div>
-                                    <div class="px-2 py-1 rounded bg-orange-900/40 text-orange-300 text-xs font-medium">10 min</div>
+                                    <div class="px-2 py-1 rounded bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 text-xs font-medium">10 min</div>
                                 </div>
                                 <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-rose-900/30 to-amber-900/30 border border-rose-700/40">
                                     <div class="w-12 text-center">
@@ -197,7 +197,7 @@
                 <div class="relative rounded-3xl bg-gradient-to-br from-[#1a0f10] to-[#0f0808] border border-rose-900/30 p-8 overflow-hidden">
                     <div class="absolute bottom-0 right-0 w-64 h-64 bg-rose-500/5 rounded-full blur-[80px]"></div>
                     <div class="relative">
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-900/40 text-rose-300 text-sm font-medium mb-5 border border-rose-800/30">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 text-sm font-medium mb-5 border border-rose-200 dark:border-rose-800/30">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
@@ -230,7 +230,7 @@
                 <div class="relative rounded-3xl bg-gradient-to-br from-[#101a0f] to-[#0f0808] border border-emerald-900/30 p-8 overflow-hidden">
                     <div class="absolute bottom-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px]"></div>
                     <div class="relative">
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-900/40 text-emerald-300 text-sm font-medium mb-5 border border-emerald-800/30">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-sm font-medium mb-5 border border-emerald-200 dark:border-emerald-800/30">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                             </svg>

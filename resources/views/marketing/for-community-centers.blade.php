@@ -205,8 +205,8 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">New program? Your members are first to know.</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Summer camp registration, new fitness classes, special events - one click emails everyone who signed up. No algorithm decides who sees your announcements.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Your list, your reach</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">No middleman</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Your list, your reach</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">No middleman</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -220,7 +220,7 @@
                                         </div>
                                         <div>
                                             <div class="text-gray-900 dark:text-white text-sm font-medium">Summer Camp Registration</div>
-                                            <div class="text-teal-300 text-xs">Sending to 2,341 members...</div>
+                                            <div class="text-teal-700 dark:text-teal-300 text-xs">Sending to 2,341 members...</div>
                                         </div>
                                     </div>
                                     <div class="space-y-2">
@@ -259,7 +259,7 @@
                             <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white text-xs font-semibold">PTA</div>
                             <div class="flex-1">
                                 <div class="text-gray-900 dark:text-white text-sm font-medium">Lincoln PTA</div>
-                                <div class="text-indigo-300 text-xs">Meeting Room &bull; Oct 15</div>
+                                <div class="text-indigo-700 dark:text-indigo-300 text-xs">Meeting Room &bull; Oct 15</div>
                             </div>
                             <div class="flex gap-1">
                                 <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
@@ -321,19 +321,19 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Everything happening at your center</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Public events, recurring programs, meetings, and classes - all in one beautiful calendar. Embed on your website or share the link.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Mobile-friendly</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Embeddable</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Custom branding</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Mobile-friendly</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Embeddable</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Custom branding</span>
                             </div>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-4 border border-gray-200 dark:border-white/10">
                             <div class="text-center mb-3">
                                 <div class="text-gray-900 dark:text-white font-semibold">Riverside Community Center</div>
-                                <div class="text-cyan-300 text-sm">October 2024</div>
+                                <div class="text-cyan-700 dark:text-cyan-300 text-sm">October 2024</div>
                             </div>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-3 p-2 rounded-lg bg-cyan-500/20 border border-cyan-400/30">
-                                    <div class="text-cyan-300 text-xs font-mono w-10">Oct 5</div>
+                                    <div class="text-cyan-700 dark:text-cyan-300 text-xs font-mono w-10">Oct 5</div>
                                     <span class="text-gray-900 dark:text-white text-sm">Fall Festival</span>
                                 </div>
                                 <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
@@ -368,7 +368,7 @@
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-amber-500/20 border border-amber-500/30">
                             <div class="w-2 h-2 rounded-full bg-amber-400"></div>
                             <span class="text-gray-900 dark:text-white text-sm">Gymnasium</span>
-                            <span class="ml-auto text-amber-300 text-xs">12 events</span>
+                            <span class="ml-auto text-amber-700 dark:text-amber-300 text-xs">12 events</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-orange-400"></div>
@@ -404,7 +404,7 @@
                             <div class="w-20 h-20 bg-white rounded-xl p-2 mx-auto mb-2">
                                 <div class="w-full h-full bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2029%2029%22%3E%3Cpath%20d%3D%22M0%200h7v7H0zm2%202v3h3V2zm8%200h1v1h1v1h-1v1h-1V3h-1V2h1zm4%200h1v4h-1V4h-1V3h1V2zm4%200h3v1h-2v1h-1V2zm5%200h7v7h-7zm2%202v3h3V4z%22%2F%3E%3C%2Fsvg%3E')] bg-contain"></div>
                             </div>
-                            <div class="text-violet-300 text-xs font-medium">Scan with any smartphone</div>
+                            <div class="text-violet-700 dark:text-violet-300 text-xs font-medium">Scan with any smartphone</div>
                         </div>
                     </div>
                 </div>
@@ -460,9 +460,9 @@
                             <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Reach members who can't come in person</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">Virtual town halls, online fitness classes, livestreamed community events. Members can participate from anywhere.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Virtual meetings</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Online classes</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Livestreams</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Virtual meetings</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Online classes</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Livestreams</span>
                             </div>
                             <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more

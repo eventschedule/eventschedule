@@ -100,9 +100,9 @@
                             <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-fuchsia-300 transition-colors">Sell tickets online</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Multiple ticket types, limits, and reservations. Accept payments with Stripe. Zero platform fees.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Zero fees</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">QR check-ins</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Stripe payments</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Zero fees</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">QR check-ins</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Stripe payments</span>
                             </div>
                             <span class="inline-flex items-center text-fuchsia-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -169,8 +169,8 @@
                             <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-violet-300 transition-colors">Smart event import</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Paste text or drop an image. AI extracts title, date, time, venue, and description automatically.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Parse any format</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Instant translation</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Parse any format</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Instant translation</span>
                             </div>
                             <span class="inline-flex items-center text-violet-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -236,8 +236,8 @@
                             <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-blue-300 transition-colors">Two-way sync</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Sync with Google Calendar automatically. Changes flow in both directions via real-time webhooks.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Two-way sync</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Real-time updates</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Two-way sync</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Real-time updates</span>
                             </div>
                             <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -308,8 +308,8 @@
                             <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-emerald-300 transition-colors">Know your audience</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Track page views, device breakdown, and traffic sources. Privacy-first with no external services.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Privacy-first</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">No external services</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Privacy-first</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">No external services</span>
                             </div>
                             <span class="inline-flex items-center text-emerald-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -372,8 +372,8 @@
                             <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-amber-300 transition-colors">Collect buyer info</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Gather dietary preferences, t-shirt sizes, or any info you need from ticket buyers with flexible form fields.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Multiple field types</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Required or optional</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple field types</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Required or optional</span>
                             </div>
                             <span class="inline-flex items-center text-amber-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -438,8 +438,8 @@
                             <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-cyan-300 transition-colors">Collaborate together</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Invite team members via email, assign roles, and manage events together seamlessly.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Invite members</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Custom permissions</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Invite members</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Custom permissions</span>
                             </div>
                             <span class="inline-flex items-center text-cyan-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -507,8 +507,8 @@
                             <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-rose-300 transition-colors">Organize your events</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Create sub-schedules to categorize events by room, stage, series, or any way you like.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Multiple rooms</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Event categories</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple rooms</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Event categories</span>
                             </div>
                             <span class="inline-flex items-center text-rose-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -571,8 +571,8 @@
                             <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-indigo-300 transition-colors">Go live, anywhere</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Toggle any event to online and add your streaming URL. Works with Zoom, YouTube, or any platform.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Virtual events</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Any streaming platform</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Virtual events</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any streaming platform</span>
                             </div>
                             <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -633,8 +633,8 @@
                             <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-gray-300 transition-colors">Free and open source</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">100% open source under the AAL license. Self-host on your own server or integrate with our REST API.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Self-host</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">REST API</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Self-host</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">REST API</span>
                             </div>
                             <span class="inline-flex items-center text-gray-500 dark:text-gray-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
