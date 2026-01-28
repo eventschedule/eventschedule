@@ -75,9 +75,9 @@
             <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800/30 rounded-2xl border border-gray-200 dark:border-white/10 p-6 overflow-x-auto">
                 <div class="flex gap-3 min-w-[700px]">
                     <!-- Monday -->
-                    <div class="flex-1 text-center p-4 rounded-xl bg-gray-800/30 border border-gray-700/30">
+                    <div class="flex-1 text-center p-4 rounded-xl bg-gray-200/50 dark:bg-gray-800/30 border border-gray-300/30 dark:border-gray-700/30">
                         <div class="text-gray-500 text-xs font-semibold mb-2">MON</div>
-                        <div class="w-3 h-3 rounded-full bg-gray-700 mx-auto mb-2"></div>
+                        <div class="w-3 h-3 rounded-full bg-gray-400 dark:bg-gray-700 mx-auto mb-2"></div>
                         <div class="text-gray-600 text-xs">Dark</div>
                     </div>
                     <!-- Tuesday -->

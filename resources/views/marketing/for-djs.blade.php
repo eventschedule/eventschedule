@@ -88,7 +88,7 @@
             <!-- Animated spinning vinyl badge -->
             <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
                 <div class="relative w-6 h-6 animate-spin-slow">
-                    <div class="absolute inset-0 rounded-full bg-gradient-to-br from-gray-900 to-black border-2 border-gray-700">
+                    <div class="absolute inset-0 rounded-full bg-gradient-to-br from-gray-900 to-black border-2 border-gray-300 dark:border-gray-700">
                         <div class="absolute inset-1 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600"></div>
                         <div class="absolute inset-[40%] rounded-full bg-gray-900"></div>
                     </div>
@@ -292,16 +292,16 @@
                                 <div class="h-1 bg-pink-400/30 rounded w-3/4"></div>
                             </div>
                             <div class="absolute -top-2 -right-2 flex">
-                                <div class="w-4 h-4 rounded-full bg-pink-500 border border-[#0a0a0f] text-[8px] text-white flex items-center justify-center">1</div>
+                                <div class="w-4 h-4 rounded-full bg-pink-500 border border-gray-200 dark:border-[#0a0a0f] text-[8px] text-white flex items-center justify-center">1</div>
                             </div>
                         </div>
                         <svg class="w-4 h-4 text-pink-400 mx-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                         <div class="flex -space-x-1">
-                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 border border-[#0a0a0f]"></div>
-                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-rose-500 to-red-500 border border-[#0a0a0f]"></div>
-                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-red-500 to-orange-500 border border-[#0a0a0f]"></div>
+                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 border border-gray-200 dark:border-[#0a0a0f]"></div>
+                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-rose-500 to-red-500 border border-gray-200 dark:border-[#0a0a0f]"></div>
+                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-red-500 to-orange-500 border border-gray-200 dark:border-[#0a0a0f]"></div>
                         </div>
                     </div>
                 </div>

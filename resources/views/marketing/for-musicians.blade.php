@@ -319,10 +319,10 @@
 
                     <div class="flex items-center justify-center">
                         <div class="flex -space-x-2">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 border-2 border-[#0a0a0f] flex items-center justify-center text-white text-xs">A</div>
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-rose-500 to-red-500 border-2 border-[#0a0a0f] flex items-center justify-center text-white text-xs">B</div>
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-orange-500 border-2 border-[#0a0a0f] flex items-center justify-center text-white text-xs">C</div>
-                            <div class="w-8 h-8 rounded-full bg-white/20 border-2 border-[#0a0a0f] flex items-center justify-center text-white text-xs">+127</div>
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">A</div>
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-rose-500 to-red-500 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">B</div>
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-orange-500 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">C</div>
+                            <div class="w-8 h-8 rounded-full bg-white/20 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">+127</div>
                         </div>
                     </div>
                     <div class="text-center mt-3 text-pink-300 text-xs">130 fans following your tour</div>

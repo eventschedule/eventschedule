@@ -262,10 +262,10 @@
                         <div class="text-4xl font-bold text-emerald-400 mb-1">2,847</div>
                         <div class="text-gray-400 text-sm">followers</div>
                         <div class="flex justify-center mt-3 -space-x-2">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 border-2 border-[#0a0a0f] flex items-center justify-center text-white text-xs">A</div>
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 border-2 border-[#0a0a0f] flex items-center justify-center text-white text-xs">B</div>
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 border-2 border-[#0a0a0f] flex items-center justify-center text-white text-xs">C</div>
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 border-2 border-[#0a0a0f] flex items-center justify-center text-white text-xs">+</div>
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">A</div>
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">B</div>
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">C</div>
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">+</div>
                         </div>
                     </div>
                 </div>

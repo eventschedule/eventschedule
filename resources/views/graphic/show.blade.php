@@ -1093,7 +1093,7 @@
                                 <input type="text" id="overlay_text_mobile" placeholder="{{ __('messages.overlay_text_placeholder') }}" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
                                     {{ __('messages.overlay_text_help') }}
-                                    <a href="/docs/event-graphics#variables" target="_blank" class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.view_variables') }}</a>
+                                    <a href="{{ marketing_url('/docs/event-graphics#variables') }}" target="_blank" class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.view_variables') }}</a>
                                 </p>
                             </div>
                         </div>
@@ -1417,7 +1417,7 @@
                                     <input type="text" id="overlay_text" placeholder="{{ __('messages.overlay_text_placeholder') }}" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
                                     <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
                                         {{ __('messages.overlay_text_help') }}
-                                        <a href="/docs/event-graphics#variables" target="_blank" class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.view_variables') }}</a>
+                                        <a href="{{ marketing_url('/docs/event-graphics#variables') }}" target="_blank" class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.view_variables') }}</a>
                                     </p>
                                 </div>
                             </div>
