@@ -379,7 +379,7 @@
                         <tr class="border-b border-gray-200 dark:border-white/10">
                             <th class="text-left py-4 px-4 text-gray-500 dark:text-gray-400 font-medium">Feature</th>
                             <th class="text-center py-4 px-4">
-                                <div class="flex items-center justify-center gap-2 text-blue-300 font-semibold">
+                                <div class="flex items-center justify-center gap-2 text-blue-700 dark:text-blue-300 font-semibold">
                                     <svg class="w-5 h-5" viewBox="0 0 24 24">
                                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -390,7 +390,7 @@
                                 </div>
                             </th>
                             <th class="text-center py-4 px-4">
-                                <div class="flex items-center justify-center gap-2 text-teal-300 font-semibold">
+                                <div class="flex items-center justify-center gap-2 text-teal-700 dark:text-teal-300 font-semibold">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>

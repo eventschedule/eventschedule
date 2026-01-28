@@ -92,7 +92,7 @@
                         </div>
                         <div>
                             <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Softaculous</h3>
-                            <p class="text-blue-600 dark:text-blue-300">One-click installer</p>
+                            <p class="text-white">One-click installer</p>
                         </div>
                     </div>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">
@@ -136,7 +136,7 @@
                         </div>
                         <div>
                             <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Docker</h3>
-                            <p class="text-cyan-600 dark:text-cyan-300">Containerized deployment</p>
+                            <p class="text-white">Containerized deployment</p>
                         </div>
                     </div>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">

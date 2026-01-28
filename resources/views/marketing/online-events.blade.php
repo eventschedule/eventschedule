@@ -72,7 +72,7 @@
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Toggle any event between in-person and online with a single checkbox. Add your streaming URL and you're ready to go live.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">In-Person</span>
-                                <span class="px-3 py-1 rounded-full bg-indigo-500/30 text-indigo-300 text-sm border border-indigo-400/30">Online</span>
+                                <span class="px-3 py-1 rounded-full bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-sm border border-indigo-400/30">Online</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">

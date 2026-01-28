@@ -259,7 +259,7 @@ class RoleController extends Controller
             ->with('message', str_replace(':count', $count, __('messages.unfollowed_roles_count')));
     }
 
-    public function viewGuest(Request $request, $subdomain, $slug = '')
+    public function viewGuest(Request $request, $subdomain, $slug = '', $id = null, $date = null)
     {
         $translation = null;
         $user = auth()->user();
@@ -299,8 +299,9 @@ class RoleController extends Controller
         $otherRole = null;
         $event = null;
         $selectedGroup = null;
-        $date = $request->date ? date('Y-m-d', strtotime($request->date)) : null;
-        $eventIdParam = $request->id ? UrlUtils::decodeId($request->id) : null;
+        // Support both path params and query params (backwards compatibility)
+        $date = $date ?: ($request->date ? date('Y-m-d', strtotime($request->date)) : null);
+        $eventIdParam = $id ? UrlUtils::decodeId($id) : ($request->id ? UrlUtils::decodeId($request->id) : null);
 
         if ($date && $date != '1970-01-01') {
             $dateObj = Carbon::parse($date);

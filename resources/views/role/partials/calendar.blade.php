@@ -853,59 +853,37 @@ const calendarApp = createApp({
             return true;
         },
         getEventUrl(event, occurrenceDate = null) {
-            let url = event.guest_url;
+            let url = event.guest_url;  // Already has /{subdomain}/{slug}/{id}
             let queryParams = [];
 
-            // Event ID as first parameter for disambiguation when multiple events on same day
-            if (event.id) {
-                queryParams.push('id=' + event.id);
-            }
-
-            // For recurring events, use the occurrence date (the date being viewed)
-            // For mobile view, use occurrenceDate if available (already set for recurring events)
-            // For desktop view, use the passed occurrenceDate parameter
-            // Always ensure we use UTC date
-            let dateToUse = null;
-            
             // Check if this is a recurring event
             const isRecurring = event.days_of_week && event.days_of_week.length > 0;
-            
+
+            // Add date to path only for recurring events
             if (isRecurring) {
                 // For recurring events, prioritize the occurrence date over the original start date
-                const dateStr = occurrenceDate || event.occurrenceDate;
+                const dateStr = occurrenceDate || event.occurrenceDate || event.utc_date;
                 if (dateStr) {
                     // Parse the date string as UTC to ensure it's always UTC
-                    // Date strings in Y-m-d format are treated as UTC dates
                     const [year, month, day] = dateStr.split('-').map(Number);
                     const utcDate = new Date(Date.UTC(year, month - 1, day));
-                    dateToUse = utcDate.toISOString().split('T')[0];
-                } else {
-                    // Fallback to utc_date if occurrence date is not available
-                    dateToUse = event.utc_date;
+                    url += '/' + utcDate.toISOString().split('T')[0];
                 }
-            } else {
-                // For non-recurring events, use utc_date
-                dateToUse = event.utc_date;
             }
-            
-            // Only add date for recurring events (regular events use ID for lookup)
-            if (isRecurring && dateToUse) {
-                queryParams.push('date=' + dateToUse);
-            }
-            
-            // Preserve current filter values
+
+            // Keep filters as query params (these don't affect social sharing)
             if (this.selectedCategory) {
                 queryParams.push('category=' + this.selectedCategory);
             }
-            
+
             if (this.selectedGroup) {
                 queryParams.push('schedule=' + this.selectedGroup);
             }
-            
+
             if (queryParams.length > 0) {
                 url += '?' + queryParams.join('&');
             }
-            
+
             return url;
         },
         navigateToEvent(event, e) {

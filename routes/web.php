@@ -43,6 +43,17 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/checkout/cancel/{sale_id}/{date}', [TicketController::class, 'cancel'])->name('checkout.cancel');
         Route::get('/payment/success/{sale_id}', [TicketController::class, 'paymentUrlSuccess'])->name('payment_url.success');
         Route::get('/payment/cancel/{sale_id}', [TicketController::class, 'paymentUrlCancel'])->name('payment_url.cancel');
+        // Event with ID and date (recurring)
+        Route::get('/{slug}/{id}/{date}', [RoleController::class, 'viewGuest'])
+            ->name('event.view_guest_full')
+            ->where(['date' => '\d{4}-\d{2}-\d{2}', 'id' => '[A-Za-z0-9+/=]+']);
+
+        // Event with ID only
+        Route::get('/{slug}/{id}', [RoleController::class, 'viewGuest'])
+            ->name('event.view_guest_with_id')
+            ->where(['id' => '[A-Za-z0-9+/=]+']);
+
+        // Existing catch-all remains last
         Route::get('/{slug}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
     });
 } else {
@@ -550,6 +561,18 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     Route::get('/{subdomain}/payment/success/{sale_id}', [TicketController::class, 'paymentUrlSuccess'])->name('payment_url.success');
     Route::get('/{subdomain}/payment/cancel/{sale_id}', [TicketController::class, 'paymentUrlCancel'])->name('payment_url.cancel');
     Route::get('/{subdomain}', [RoleController::class, 'viewGuest'])->name('role.view_guest');
+
+    // Event with ID and date (recurring)
+    Route::get('/{subdomain}/{slug}/{id}/{date}', [RoleController::class, 'viewGuest'])
+        ->name('event.view_guest_full')
+        ->where(['date' => '\d{4}-\d{2}-\d{2}', 'id' => '[A-Za-z0-9+/=]+']);
+
+    // Event with ID only
+    Route::get('/{subdomain}/{slug}/{id}', [RoleController::class, 'viewGuest'])
+        ->name('event.view_guest_with_id')
+        ->where(['id' => '[A-Za-z0-9+/=]+']);
+
+    // Existing catch-all remains last
     Route::get('/{subdomain}/{slug}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
 }
 
