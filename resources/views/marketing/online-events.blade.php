@@ -59,17 +59,17 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Easy Toggle (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-violet-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900 to-violet-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                 </svg>
                                 Easy Toggle
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Switch in one click</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Toggle any event between in-person and online with a single checkbox. Add your streaming URL and you're ready to go live.</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Switch in one click</h3>
+                            <p class="text-white/80 text-lg mb-6">Toggle any event between in-person and online with a single checkbox. Add your streaming URL and you're ready to go live.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">In-Person</span>
                                 <span class="px-3 py-1 rounded-full bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-sm border border-indigo-400/30">Online</span>
@@ -98,15 +98,15 @@
                 </div>
 
                 <!-- Any Streaming Platform -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-purple-900/50 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-700 dark:text-violet-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900 to-purple-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                         </svg>
                         Any Platform
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your platform, your choice</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Works with any streaming service. Just paste your URL and attendees will see it on the event page and their ticket.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">Your platform, your choice</h3>
+                    <p class="text-white/80 mb-6">Works with any streaming service. Just paste your URL and attendees will see it on the event page and their ticket.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center gap-3 px-3 py-2 bg-gray-100 dark:bg-white/5 rounded-lg">
@@ -129,15 +129,15 @@
                 </div>
 
                 <!-- Visible on Tickets -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-900/50 to-pink-900/50 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-700 dark:text-fuchsia-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-900 to-pink-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                         </svg>
                         On Your Ticket
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Link on every ticket</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Ticket holders see the streaming URL when they view their ticket. No searching through emails for the link.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">Link on every ticket</h3>
+                    <p class="text-white/80 mb-6">Ticket holders see the streaming URL when they view their ticket. No searching through emails for the link.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-2 mb-3">
@@ -152,17 +152,17 @@
                 </div>
 
                 <!-- Sell Tickets (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900 to-indigo-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-700 dark:text-blue-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 Full Ticketing
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Sell tickets to virtual events</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg">All ticketing features work for online events. Multiple ticket types, QR codes, attendee management, and secure payments with Stripe.</p>
+                            <h3 class="text-3xl font-bold text-white mb-4">Sell tickets to virtual events</h3>
+                            <p class="text-white/80 text-lg">All ticketing features work for online events. Multiple ticket types, QR codes, attendee management, and secure payments with Stripe.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
@@ -290,13 +290,13 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/open-source') }}" class="group block">
-                <div class="bg-gradient-to-br from-gray-900/50 to-slate-900/50 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-gray-900 to-slate-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <!-- Text content -->
                         <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Open Source & API</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">100% open source. Self-host on your own server or integrate with our REST API.</p>
-                            <span class="inline-flex items-center text-gray-500 dark:text-gray-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-gray-300 transition-colors">Open Source & API</h3>
+                            <p class="text-white/80 text-lg mb-4">100% open source. Self-host on your own server or integrate with our REST API.</p>
+                            <span class="inline-flex items-center text-white/80 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

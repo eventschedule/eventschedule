@@ -59,17 +59,17 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Invite Team Members (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-teal-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900 to-teal-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                                 </svg>
                                 Invite Members
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Invite team members via email</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Add teammates by email address. They'll receive an invitation and can join instantly, even if they don't have an account yet.</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Invite team members via email</h3>
+                            <p class="text-white/80 text-lg mb-6">Add teammates by email address. They'll receive an invitation and can join instantly, even if they don't have an account yet.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Email invitations</span>
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Auto-create accounts</span>
@@ -114,15 +114,15 @@
                 </div>
 
                 <!-- Permission Levels -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900/50 to-emerald-900/50 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-700 dark:text-teal-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900 to-emerald-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                         Permissions
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Role-based access</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Assign the right level of access to each team member based on their responsibilities.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">Role-based access</h3>
+                    <p class="text-white/80 mb-6">Assign the right level of access to each team member based on their responsibilities.</p>
 
                     <div class="space-y-3">
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
@@ -156,15 +156,15 @@
                 </div>
 
                 <!-- Shared Event Editing -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-blue-900/50 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900 to-blue-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                         Collaboration
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Shared editing</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">All team members with the right permissions can create and edit events on your schedule.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">Shared editing</h3>
+                    <p class="text-white/80 mb-6">All team members with the right permissions can create and edit events on your schedule.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center justify-between mb-3">
@@ -180,17 +180,17 @@
                 </div>
 
                 <!-- Member Availability (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900/50 to-cyan-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900 to-cyan-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-700 dark:text-teal-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 Availability
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Track member availability</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg">Team members can mark dates when they're unavailable, helping you coordinate schedules and plan events when everyone can participate.</p>
+                            <h3 class="text-3xl font-bold text-white mb-4">Track member availability</h3>
+                            <p class="text-white/80 text-lg">Team members can mark dates when they're unavailable, helping you coordinate schedules and plan events when everyone can participate.</p>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-6 border border-gray-200 dark:border-white/10">
                             <div class="text-gray-500 dark:text-gray-400 text-sm mb-4">January 2025</div>
@@ -396,12 +396,12 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/sub-schedules') }}" class="group block">
-                <div class="bg-gradient-to-br from-rose-900/50 to-pink-900/50 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-rose-900 to-pink-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <!-- Text content -->
                         <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-rose-300 transition-colors">Sub-schedules</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Organize events by room, stage, or series. Visitors can filter to find exactly what they need.</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-rose-300 transition-colors">Sub-schedules</h3>
+                            <p class="text-white/80 text-lg mb-4">Organize events by room, stage, or series. Visitors can filter to find exactly what they need.</p>
                             <span class="inline-flex items-center text-rose-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

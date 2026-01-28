@@ -734,8 +734,6 @@ return [
     'subscribe' => 'Volgen',
     'submit_event' => 'Evenement Indienen',
     'link_type' => 'Link Type',
-    'link_to_event_page' => 'Link naar Evenementpagina',
-    'link_to_registration' => 'Direct naar Registratie',
     'text' => 'Tekst',
     'download' => 'Downloaden',
     'copy' => 'Kopiëren',
@@ -979,4 +977,14 @@ return [
 
     // Graphic settings tabs
     'automation' => 'Automatisering',
+
+    // URL formatting options
+    'link_to' => 'Link naar',
+    'link_to_event_page' => 'Event Schedule',
+    'link_to_event_page_desc' => 'Evenementdetails op Event Schedule',
+    'link_to_registration' => 'Registratie',
+    'link_to_registration_desc' => 'Ticketing- of registratiesite van derden',
+    'url_format' => 'URL-formaat',
+    'url_include_https' => 'HTTPS opnemen',
+    'url_include_id' => 'Evenement-ID opnemen',
 ];

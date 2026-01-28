@@ -735,8 +735,6 @@ return [
     'subscribe' => 'Seguir',
     'submit_event' => 'Enviar Evento',
     'link_type' => 'Tipo de Link',
-    'link_to_event_page' => 'Link para a Página do Evento',
-    'link_to_registration' => 'Link Direto para Registro',
     'text' => 'Texto',
     'download' => 'Baixar',
     'copy' => 'Copiar',
@@ -980,4 +978,14 @@ return [
 
     // Graphic settings tabs
     'automation' => 'Automação',
+
+    // URL formatting options
+    'link_to' => 'Vincular a',
+    'link_to_event_page' => 'Event Schedule',
+    'link_to_event_page_desc' => 'Detalhes do evento no Event Schedule',
+    'link_to_registration' => 'Registro',
+    'link_to_registration_desc' => 'Site de ingressos ou registro de terceiros',
+    'url_format' => 'Formato de URL',
+    'url_include_https' => 'Incluir HTTPS',
+    'url_include_id' => 'Incluir ID do evento',
 ];

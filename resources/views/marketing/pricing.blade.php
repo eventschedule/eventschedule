@@ -84,7 +84,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
                 <!-- Free Plan -->
-                <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800/50 dark:to-gray-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10 flex flex-col">
+                <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800/50 dark:to-gray-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 flex flex-col">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-500/20 text-gray-600 dark:text-gray-300 text-sm font-medium mb-6 self-start">
                         Forever Free
                     </div>
@@ -154,7 +154,7 @@
                 </div>
 
                 <!-- Pro Plan -->
-                <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/50 dark:to-indigo-900/50 border-2 border-violet-300 dark:border-violet-500/50 p-8 lg:p-10 flex flex-col">
+                <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900 dark:to-indigo-900 border-2 border-violet-300 dark:border-violet-500/50 p-8 lg:p-10 flex flex-col">
                     <!-- First Year Free Banner -->
                     <div class="bg-gradient-to-r from-violet-500 to-indigo-500 text-white text-center py-3 px-4 -mx-8 lg:-mx-10 -mt-8 lg:-mt-10 mb-8">
                         <div class="text-lg font-bold">First Year FREE</div>

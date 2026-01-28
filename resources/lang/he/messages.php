@@ -729,8 +729,6 @@ return [
     'subscribe' => 'עקוב',
     'submit_event' => 'שלח אירוע',
     'link_type' => 'סוג קישור',
-    'link_to_event_page' => 'קישור לדף האירוע',
-    'link_to_registration' => 'קישור ישיר להרשמה',
     'text' => 'טקסט',
     'download' => 'הורדה',
     'copy' => 'העתקה',
@@ -974,4 +972,14 @@ return [
 
     // Graphic settings tabs
     'automation' => 'אוטומציה',
+
+    // URL formatting options
+    'link_to' => 'קשר אל',
+    'link_to_event_page' => 'Event Schedule',
+    'link_to_event_page_desc' => 'פרטי אירוע ב-Event Schedule',
+    'link_to_registration' => 'הרשמה',
+    'link_to_registration_desc' => 'אתר כרטוס או הרשמה של צד שלישי',
+    'url_format' => 'פורמט כתובת URL',
+    'url_include_https' => 'כלול HTTPS',
+    'url_include_id' => 'כלול מזהה אירוע',
 ];

@@ -70,17 +70,17 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Views Over Time (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900 to-teal-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
                                 </svg>
                                 Views Over Time
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Track your growth</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">See daily, weekly, or monthly view counts. Choose from 7 time ranges: last 7/30/90 days, this month, last month, this year, or all time.</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Track your growth</h3>
+                            <p class="text-white/80 text-lg mb-6">See daily, weekly, or monthly view counts. Choose from 7 time ranges: last 7/30/90 days, this month, last month, this year, or all time.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Last 7 days</span>
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Last 30 days</span>
@@ -113,45 +113,45 @@
                 </div>
 
                 <!-- Device Breakdown -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-blue-900/50 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900 to-blue-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
                         Device Breakdown
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Know your devices</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">See how visitors access your schedule: desktop, mobile, or tablet. Bot traffic is automatically filtered.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">Know your devices</h3>
+                    <p class="text-white/80 mb-6">See how visitors access your schedule: desktop, mobile, or tablet. Bot traffic is automatically filtered.</p>
 
                     <div class="space-y-3">
                         <div class="flex items-center gap-3">
                             <div class="w-3 h-3 rounded-full bg-cyan-400"></div>
-                            <span class="text-gray-600 dark:text-gray-300 text-sm flex-1">Mobile</span>
-                            <span class="text-gray-900 dark:text-white font-medium">62%</span>
+                            <span class="text-white/80 text-sm flex-1">Mobile</span>
+                            <span class="text-white font-medium">62%</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="w-3 h-3 rounded-full bg-blue-400"></div>
-                            <span class="text-gray-600 dark:text-gray-300 text-sm flex-1">Desktop</span>
-                            <span class="text-gray-900 dark:text-white font-medium">35%</span>
+                            <span class="text-white/80 text-sm flex-1">Desktop</span>
+                            <span class="text-white font-medium">35%</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="w-3 h-3 rounded-full bg-indigo-400"></div>
-                            <span class="text-gray-600 dark:text-gray-300 text-sm flex-1">Tablet</span>
-                            <span class="text-gray-900 dark:text-white font-medium">3%</span>
+                            <span class="text-white/80 text-sm flex-1">Tablet</span>
+                            <span class="text-white font-medium">3%</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Traffic Sources -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-purple-900/50 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-700 dark:text-violet-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900 to-purple-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                         </svg>
                         Traffic Sources
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Where they come from</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Track direct visits, search engines, social media, email campaigns, and referrer domains.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">Where they come from</h3>
+                    <p class="text-white/80 mb-6">Track direct visits, search engines, social media, email campaigns, and referrer domains.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
@@ -182,17 +182,17 @@
                 </div>
 
                 <!-- Conversion Tracking (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900 to-orange-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 Conversion Tracking
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Measure what matters</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg">Track revenue per event, conversion rates, and revenue per view. See which events perform best.</p>
+                            <h3 class="text-3xl font-bold text-white mb-4">Measure what matters</h3>
+                            <p class="text-white/80 text-lg">Track revenue per event, conversion rates, and revenue per view. See which events perform best.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
@@ -316,12 +316,12 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/custom-fields') }}" class="group block">
-                <div class="bg-gradient-to-br from-amber-900/50 to-orange-900/50 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-amber-900 to-orange-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <!-- Text content -->
                         <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-amber-300 transition-colors">Custom Fields</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Collect dietary preferences, t-shirt sizes, or any info you need from ticket buyers.</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-amber-300 transition-colors">Custom Fields</h3>
+                            <p class="text-white/80 text-lg mb-4">Collect dietary preferences, t-shirt sizes, or any info you need from ticket buyers.</p>
                             <span class="inline-flex items-center text-amber-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
