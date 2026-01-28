@@ -16,14 +16,22 @@
     align-items: center;
     justify-content: center;
     height: 34px;
+    width: 85%;
+    left: 7.5%;
 }
 
 .flatpickr-current-month .numInputWrapper {
-    width: 7ch;
+    width: 8ch;
     flex-shrink: 0;
 }
 
-.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    font-size: 100%;
+    padding-left: 0;
+    margin-left: 0;
+}
+
 .flatpickr-current-month input.cur-year {
     font-size: 100%;
+    padding-left: 0.25ch;
 }

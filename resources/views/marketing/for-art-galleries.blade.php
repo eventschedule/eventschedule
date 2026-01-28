@@ -69,7 +69,7 @@
             <!-- Seasonal Exhibition Calendar -->
             <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
                 <!-- Winter -->
-                <div class="bg-gradient-to-br from-indigo-900/40 to-violet-900/40 rounded-2xl border border-indigo-500/20 p-5 relative overflow-hidden group hover:border-indigo-500/40 transition-colors">
+                <div class="bg-gradient-to-br from-indigo-100/60 to-violet-100/60 dark:from-indigo-900/40 dark:to-violet-900/40 rounded-2xl border border-indigo-300/40 dark:border-indigo-500/20 p-5 relative overflow-hidden group hover:border-indigo-500/40 transition-colors">
                     <div class="absolute top-2 right-2 text-indigo-400/30 text-4xl">&#10052;</div>
                     <div class="text-indigo-700 dark:text-indigo-300 text-xs font-semibold tracking-wider uppercase mb-3">Winter</div>
                     <div class="space-y-2">
@@ -79,13 +79,13 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
-                            <span class="text-white/80 text-sm">Emerging Artists</span>
+                            <span class="text-gray-600 dark:text-white/80 text-sm">Emerging Artists</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Spring -->
-                <div class="bg-gradient-to-br from-emerald-900/40 to-teal-900/40 rounded-2xl border border-emerald-500/20 p-5 relative overflow-hidden group hover:border-emerald-500/40 transition-colors">
+                <div class="bg-gradient-to-br from-emerald-100/60 to-teal-100/60 dark:from-emerald-900/40 dark:to-teal-900/40 rounded-2xl border border-emerald-300/40 dark:border-emerald-500/20 p-5 relative overflow-hidden group hover:border-emerald-500/40 transition-colors">
                     <div class="absolute top-2 right-2 text-emerald-400/30 text-4xl">&#127807;</div>
                     <div class="text-emerald-700 dark:text-emerald-300 text-xs font-semibold tracking-wider uppercase mb-3">Spring</div>
                     <div class="space-y-2">
@@ -95,13 +95,13 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-teal-400"></div>
-                            <span class="text-white/80 text-sm">Art Walk Season</span>
+                            <span class="text-gray-600 dark:text-white/80 text-sm">Art Walk Season</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Summer -->
-                <div class="bg-gradient-to-br from-amber-900/40 to-yellow-900/40 rounded-2xl border border-amber-500/20 p-5 relative overflow-hidden group hover:border-amber-500/40 transition-colors">
+                <div class="bg-gradient-to-br from-amber-100/60 to-yellow-100/60 dark:from-amber-900/40 dark:to-yellow-900/40 rounded-2xl border border-amber-300/40 dark:border-amber-500/20 p-5 relative overflow-hidden group hover:border-amber-500/40 transition-colors">
                     <div class="absolute top-2 right-2 text-amber-400/30 text-4xl">&#9728;</div>
                     <div class="text-amber-700 dark:text-amber-300 text-xs font-semibold tracking-wider uppercase mb-3">Summer</div>
                     <div class="space-y-2">
@@ -111,13 +111,13 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>
-                            <span class="text-white/80 text-sm">Artist Residencies</span>
+                            <span class="text-gray-600 dark:text-white/80 text-sm">Artist Residencies</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Fall -->
-                <div class="bg-gradient-to-br from-orange-900/40 to-red-900/40 rounded-2xl border border-orange-500/20 p-5 relative overflow-hidden group hover:border-orange-500/40 transition-colors">
+                <div class="bg-gradient-to-br from-orange-100/60 to-red-100/60 dark:from-orange-900/40 dark:to-red-900/40 rounded-2xl border border-orange-300/40 dark:border-orange-500/20 p-5 relative overflow-hidden group hover:border-orange-500/40 transition-colors">
                     <div class="absolute top-2 right-2 text-orange-400/30 text-4xl">&#127810;</div>
                     <div class="text-orange-700 dark:text-orange-300 text-xs font-semibold tracking-wider uppercase mb-3">Fall</div>
                     <div class="space-y-2">
@@ -127,13 +127,13 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-red-400"></div>
-                            <span class="text-white/80 text-sm">Open Studios</span>
+                            <span class="text-gray-600 dark:text-white/80 text-sm">Open Studios</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Holiday -->
-                <div class="bg-gradient-to-br from-purple-900/40 to-rose-900/40 rounded-2xl border border-purple-500/20 p-5 relative overflow-hidden group hover:border-purple-500/40 transition-colors col-span-2 lg:col-span-1">
+                <div class="bg-gradient-to-br from-purple-100/60 to-rose-100/60 dark:from-purple-900/40 dark:to-rose-900/40 rounded-2xl border border-purple-300/40 dark:border-purple-500/20 p-5 relative overflow-hidden group hover:border-purple-500/40 transition-colors col-span-2 lg:col-span-1">
                     <div class="absolute top-2 right-2 text-purple-400/30 text-4xl">&#127873;</div>
                     <div class="text-purple-700 dark:text-purple-300 text-xs font-semibold tracking-wider uppercase mb-3">Holiday</div>
                     <div class="space-y-2">
@@ -143,7 +143,7 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-rose-400"></div>
-                            <span class="text-white/80 text-sm">Collector Events</span>
+                            <span class="text-gray-600 dark:text-white/80 text-sm">Collector Events</span>
                         </div>
                     </div>
                 </div>
@@ -421,16 +421,16 @@
         </div>
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-violet-900 to-purple-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 rounded-3xl border border-violet-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                                 </svg>
                                 Global Reach
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-violet-300 transition-colors">Take your gallery global</h3>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-colors">Take your gallery global</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Virtual exhibition tours let collectors anywhere experience your shows. Online art classes reach students worldwide. Sell tickets to viewers who can't visit in person.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Virtual tours</span>
