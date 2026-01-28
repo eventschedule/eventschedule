@@ -375,7 +375,7 @@ return [
             'regional-theaters' => [
                 'name' => 'Regional Theaters',
                 'slug' => 'for-regional-theaters',
-                'description' => 'Professional productions, season subscriptions, and touring shows. Grow your subscriber base.',
+                'description' => 'Professional productions, season subscriptions, and touring shows. Reach your audience directly.',
                 'blog_topic' => 'Subscription and single-ticket strategies for regional theaters',
                 'icon_color' => 'purple',
             ],

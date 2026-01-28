@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Breweries & Wineries | Tasting Events</x-slot>
-    <x-slot name="description">Fill your tasting room with fans. Announce releases, host tastings, and sell tickets to brewery events. Build your email list. Free forever.</x-slot>
+    <x-slot name="description">Fill your tasting room with fans. Announce releases, host tastings, and sell tickets to brewery events. Email your fans directly. Free forever.</x-slot>
     <x-slot name="keywords">brewery event calendar, winery events, tasting room software, beer release party, wine tasting tickets, brewery tour booking, taproom events, craft brewery calendar, vineyard event management</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
 
@@ -233,7 +233,7 @@
                         First Access
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Club members get first dibs</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Limited releases sell out fast. Your loyal fans - mug club, wine club, email list - get the heads up before anyone else.</p>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Limited releases sell out fast. Your loyal fans - mug club, wine club, followers - get the heads up before anyone else.</p>
 
                     <!-- Waitlist visual -->
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -637,7 +637,7 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-amber-600 to-amber-800 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/25">
                         3
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Build your fan list</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Grow your following</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Visitors follow your calendar. When you post a new release, it goes straight to their inbox. No middleman.
                     </p>
@@ -654,10 +654,10 @@
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-                Your fans. Your list. No middleman.
+                Your fans. Direct reach. No middleman.
             </h2>
             <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                You make the product. You own the relationship. Build your email list and reach your fans directly.
+                You make the product. You own the relationship. Email your fans directly - no algorithm in the way.
             </p>
             <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-amber-700 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                 Get Started Free
@@ -677,7 +677,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Brewery and Winery Event Management Software",
         "operatingSystem": "Web",
-        "description": "Fill your tasting room with fans. Announce new releases, host tastings, and sell tickets to brewery events. Build your email list and reach your fans directly—no algorithm. Free forever.",
+        "description": "Fill your tasting room with fans. Announce new releases, host tastings, and sell tickets to brewery events. Email your fans directly—no algorithm. Free forever.",
         "offers": {
             "@type": "Offer",
             "price": "0",

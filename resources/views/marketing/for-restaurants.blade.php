@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Restaurants | Turn First-Time Diners into Regulars</x-slot>
-    <x-slot name="description">Build your email list and fill every seat. Announce seasonal menus, sell tickets to wine dinners and prix fixe events, and reach your regulars directly—no algorithm. Free forever.</x-slot>
+    <x-slot name="description">Email your regulars directly and fill every seat. Announce seasonal menus, sell tickets to wine dinners and prix fixe events, and reach your regulars directly—no algorithm. Free forever.</x-slot>
     <x-slot name="keywords">restaurant event calendar, restaurant email marketing, wine dinner tickets, chef's table reservations, restaurant specials software, cooking class tickets, restaurant event management, supper club software, prix fixe ticketing</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
 
@@ -75,7 +75,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-                Stop paying Facebook to reach people who already love your food. Build your list, announce your seasonal menus, and fill every seat at your next wine dinner.
+                Stop paying Facebook to reach people who already love your food. Email your regulars directly, announce your seasonal menus, and fill every seat at your next wine dinner.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
@@ -224,7 +224,7 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">New fall menu? Your fans are first to know.</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-6">Seasonal menu launches deserve an audience. One click emails everyone who signed up - no algorithm decides who sees your new dishes.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Your list, your reach</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Your diners, direct reach</span>
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">No middleman</span>
                             </div>
                         </div>
@@ -409,7 +409,7 @@
                         QR Codes
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Scan at the table, scan at the door</h3>
-                    <p class="text-gray-600 dark:text-gray-400 mb-6">QR codes for digital menus and event check-in. One scan, they're on your list.</p>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">QR codes for digital menus and event check-in. One scan, they follow your schedule.</p>
 
                     <!-- Dual QR visual -->
                     <div class="flex justify-center gap-4">
@@ -707,7 +707,7 @@
                 Stop paying to reach your own fans
             </h2>
             <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                Build your email list. Fill every seat. Free forever.
+                Email your regulars directly. Fill every seat. Free forever.
             </p>
             <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-rose-700 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                 Get Started Free
@@ -727,7 +727,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Restaurant Event Management Software",
         "operatingSystem": "Web",
-        "description": "Build your email list and fill every seat. Announce seasonal menus, sell tickets to wine dinners and prix fixe events, and reach your regulars directly—no algorithm. Free forever.",
+        "description": "Email your regulars directly and fill every seat. Announce seasonal menus, sell tickets to wine dinners and prix fixe events, and reach your regulars directly—no algorithm. Free forever.",
         "offers": {
             "@type": "Offer",
             "price": "0",

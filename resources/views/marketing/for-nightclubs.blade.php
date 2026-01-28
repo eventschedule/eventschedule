@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Nightclubs | DJ Lineup & Event Calendar Software</x-slot>
-    <x-slot name="description">Fill your club with DJ lineups and themed nights. Build your email list and reach your crowd directly. Sell tickets, accept DJ bookings. Free forever.</x-slot>
+    <x-slot name="description">Fill your club with DJ lineups and themed nights. Email your crowd directly - no algorithm. Sell tickets, accept DJ bookings. Free forever.</x-slot>
     <x-slot name="keywords">nightclub event calendar, club DJ lineup software, nightclub booking system, club event management, DJ scheduling software, nightclub newsletter, club promotion, nightclub ticketing</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
 
@@ -33,7 +33,7 @@
                     </h1>
 
                     <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-xl mx-auto lg:mx-0 mb-12">
-                        Stop paying to reach your own followers. Build your email list, announce your lineups, and fill your club - without the algorithm getting in the way.
+                        Stop paying to reach your own followers. Email your crowd directly, announce your lineups, and fill your club - without the algorithm getting in the way.
                     </p>
 
                     <div class="flex flex-wrap justify-center lg:justify-start gap-4">
@@ -59,7 +59,7 @@
                 <!-- Right: Tonight's Lineup Card -->
                 <div class="hidden lg:block">
                     <div class="relative animate-float">
-                        <div class="bg-gradient-to-br from-pink-500/20 to-fuchsia-500/20 rounded-2xl border border-pink-400/30 p-6 max-w-sm mx-auto backdrop-blur-sm">
+                        <div class="bg-gradient-to-br from-pink-950 to-fuchsia-950 rounded-2xl border border-pink-400/30 p-6 max-w-sm mx-auto backdrop-blur-sm">
                             <!-- Header with "Tonight" badge -->
                             <div class="flex items-center justify-between mb-5">
                                 <div>
@@ -92,14 +92,14 @@
                                 <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-[10px] font-semibold">MX</div>
                                     <div class="flex-1">
-                                        <div class="text-gray-700 dark:text-gray-300 text-sm font-medium">Max Luna</div>
+                                        <div class="text-gray-300 text-sm font-medium">Max Luna</div>
                                         <div class="text-gray-500 text-[10px]">12am - 2am</div>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-[10px] font-semibold">KR</div>
                                     <div class="flex-1">
-                                        <div class="text-gray-700 dark:text-gray-300 text-sm font-medium">Kira B2B Echo</div>
+                                        <div class="text-gray-300 text-sm font-medium">Kira B2B Echo</div>
                                         <div class="text-gray-500 text-[10px]">10pm - 12am</div>
                                     </div>
                                 </div>
@@ -136,15 +136,15 @@
                                 Weekly Lineup Blast
                             </div>
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Drop your weekend lineup</h3>
-                            <p class="text-gray-600 dark:text-gray-400 text-lg mb-6">Thursday rolls around, you blast out the weekend's DJs to everyone on your list. No algorithm. No pay-to-play. Just your crowd, hyped and ready.</p>
+                            <p class="text-gray-600 dark:text-gray-400 text-lg mb-6">Thursday rolls around, you blast out the weekend's DJs to everyone who follows you. No algorithm. No pay-to-play. Just your crowd, hyped and ready.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">One-click send</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Your list, your reach</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Your crowd, direct reach</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-pink-500/20 to-fuchsia-500/20 rounded-2xl border border-pink-400/30 p-4 max-w-xs">
+                                <div class="bg-gradient-to-br from-pink-950 to-fuchsia-950 rounded-2xl border border-pink-400/30 p-4 max-w-xs">
                                     <div class="flex items-center gap-3 mb-4">
                                         <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-fuchsia-500 rounded-xl flex items-center justify-center">
                                             <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -159,15 +159,15 @@
                                     <div class="space-y-2">
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
                                             <div class="w-2 h-2 rounded-full bg-fuchsia-400"></div>
-                                            <span class="text-gray-700 dark:text-gray-300 text-xs">Thu - Industry Night (free entry)</span>
+                                            <span class="text-gray-300 text-xs">Thu - Industry Night (free entry)</span>
                                         </div>
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
                                             <div class="w-2 h-2 rounded-full bg-pink-400"></div>
-                                            <span class="text-gray-700 dark:text-gray-300 text-xs">Fri - DJ Nova (House)</span>
+                                            <span class="text-gray-300 text-xs">Fri - DJ Nova (House)</span>
                                         </div>
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
                                             <div class="w-2 h-2 rounded-full bg-violet-400"></div>
-                                            <span class="text-gray-700 dark:text-gray-300 text-xs">Sat - Latin Nights with DJ Fuego</span>
+                                            <span class="text-gray-300 text-xs">Sat - Latin Nights with DJ Fuego</span>
                                         </div>
                                     </div>
                                 </div>
@@ -188,19 +188,19 @@
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Fans sign up for your guest list right from your calendar. Reduced cover before 11pm - the status thing that fills your early crowd.</p>
 
                     <div class="space-y-2">
-                        <div class="flex items-center gap-3 p-2 rounded-lg bg-emerald-500/20 border border-emerald-400/30">
+                        <div class="flex items-center gap-3 p-2 rounded-lg bg-emerald-200 dark:bg-emerald-500/20 border border-emerald-400/30">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white text-[10px] font-semibold">MR</div>
                             <div class="flex-1">
-                                <div class="text-white text-sm">Marco R. +3</div>
+                                <div class="text-gray-900 dark:text-white text-sm">Marco R. +3</div>
                             </div>
-                            <span class="px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-300 text-[10px] font-medium">Confirmed</span>
+                            <span class="px-2 py-0.5 rounded bg-emerald-300 dark:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-[10px] font-medium">Confirmed</span>
                         </div>
                         <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-[10px] font-semibold">SK</div>
                             <div class="flex-1">
                                 <div class="text-gray-700 dark:text-gray-300 text-sm">Sarah K. +1</div>
                             </div>
-                            <span class="px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-300 text-[10px] font-medium">Confirmed</span>
+                            <span class="px-2 py-0.5 rounded bg-emerald-300 dark:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-[10px] font-medium">Confirmed</span>
                         </div>
                     </div>
                 </div>
@@ -220,30 +220,30 @@
                     <div class="grid grid-cols-7 gap-1">
                         <div class="text-center">
                             <div class="text-gray-500 text-[10px] mb-1">M</div>
-                            <div class="w-6 h-6 rounded-full bg-white/5 mx-auto"></div>
+                            <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-white/5 mx-auto"></div>
                         </div>
                         <div class="text-center">
                             <div class="text-gray-500 text-[10px] mb-1">T</div>
-                            <div class="w-6 h-6 rounded-full bg-white/5 mx-auto"></div>
+                            <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-white/5 mx-auto"></div>
                         </div>
                         <div class="text-center">
                             <div class="text-gray-500 text-[10px] mb-1">W</div>
-                            <div class="w-6 h-6 rounded-full bg-white/5 mx-auto"></div>
+                            <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-white/5 mx-auto"></div>
                         </div>
                         <div class="text-center">
-                            <div class="text-fuchsia-300 text-[10px] mb-1 font-medium">T</div>
+                            <div class="text-fuchsia-600 dark:text-fuchsia-300 text-[10px] mb-1 font-medium">T</div>
                             <div class="w-6 h-6 rounded-full bg-fuchsia-500 mx-auto" title="Industry Night"></div>
                         </div>
                         <div class="text-center">
-                            <div class="text-orange-300 text-[10px] mb-1 font-medium">F</div>
+                            <div class="text-orange-600 dark:text-orange-300 text-[10px] mb-1 font-medium">F</div>
                             <div class="w-6 h-6 rounded-full bg-orange-500 mx-auto" title="Latin Fridays"></div>
                         </div>
                         <div class="text-center">
-                            <div class="text-pink-300 text-[10px] mb-1 font-medium">S</div>
+                            <div class="text-pink-600 dark:text-pink-300 text-[10px] mb-1 font-medium">S</div>
                             <div class="w-6 h-6 rounded-full bg-pink-500 mx-auto" title="80s Saturdays"></div>
                         </div>
                         <div class="text-center">
-                            <div class="text-violet-300 text-[10px] mb-1 font-medium">S</div>
+                            <div class="text-violet-600 dark:text-violet-300 text-[10px] mb-1 font-medium">S</div>
                             <div class="w-6 h-6 rounded-full bg-violet-500 mx-auto" title="Techno Sundays"></div>
                         </div>
                     </div>
@@ -304,11 +304,11 @@
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Artists submit to play your club. See their SoundCloud, genre, and past gigs. Accept or pass - no endless email threads.</p>
 
                     <div class="space-y-2">
-                        <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-500/20 border border-indigo-400/30">
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-200 dark:bg-indigo-500/20 border border-indigo-400/30">
                             <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white text-xs font-semibold">KR</div>
                             <div class="flex-1">
-                                <div class="text-white text-sm font-medium">DJ Kira</div>
-                                <div class="text-indigo-300 text-[10px]">Tech House &bull; SoundCloud linked</div>
+                                <div class="text-gray-900 dark:text-white text-sm font-medium">DJ Kira</div>
+                                <div class="text-indigo-600 dark:text-indigo-300 text-[10px]">Tech House &bull; SoundCloud linked</div>
                             </div>
                             <div class="flex gap-1">
                                 <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
@@ -370,16 +370,16 @@
                     <p class="text-gray-600 dark:text-gray-400 mb-6">NYE. Headliner shows. Theme party takeovers. Sell tickets, scan QR codes at the door. Zero platform fees.</p>
 
                     <div class="flex items-center gap-3">
-                        <div class="flex-1 bg-rose-500/20 rounded-xl border border-rose-400/30 p-3">
-                            <div class="text-[10px] text-rose-300 font-semibold mb-1">NYE {{ date('Y') + 1 }}</div>
+                        <div class="flex-1 bg-rose-200 dark:bg-rose-500/20 rounded-xl border border-rose-400/30 p-3">
+                            <div class="text-[10px] text-rose-600 dark:text-rose-300 font-semibold mb-1">NYE {{ date('Y') + 1 }}</div>
                             <div class="flex items-center gap-2">
-                                <span class="text-white text-sm font-bold">342</span>
-                                <span class="text-gray-400 text-xs">tickets sold</span>
+                                <span class="text-gray-900 dark:text-white text-sm font-bold">342</span>
+                                <span class="text-gray-500 dark:text-gray-400 text-xs">tickets sold</span>
                             </div>
                             <div class="w-full h-1.5 bg-rose-500/30 rounded-full mt-2 overflow-hidden">
                                 <div class="w-[85%] h-full bg-gradient-to-r from-rose-500 to-pink-500 rounded-full"></div>
                             </div>
-                            <div class="text-rose-300 text-[10px] mt-1">Almost sold out</div>
+                            <div class="text-rose-600 dark:text-rose-300 text-[10px] mt-1">Almost sold out</div>
                         </div>
                     </div>
                 </div>
@@ -701,10 +701,10 @@
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-                Your crowd. Your list. Pack the floor.
+                Your crowd. Direct reach. Pack the floor.
             </h2>
             <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                Build your email list. Fill your dancefloor. Free forever.
+                Email your crowd directly. Fill your dancefloor. Free forever.
             </p>
             <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-pink-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                 Get Started Free
@@ -724,7 +724,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Nightclub Event Management Software",
         "operatingSystem": "Web",
-        "description": "Fill your club's calendar with DJ lineups and themed nights. Build your own email list - reach your crowd directly without paying for ads. Sell tickets with QR check-in, accept booking requests from DJs.",
+        "description": "Fill your club's calendar with DJ lineups and themed nights. Email your crowd directly - no paying for ads. Sell tickets with QR check-in, accept booking requests from DJs.",
         "offers": {
             "@type": "Offer",
             "price": "0",

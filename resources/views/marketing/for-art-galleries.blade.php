@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Art Galleries & Studios | Exhibition Calendar & Ticketing</x-slot>
-    <x-slot name="description">Fill your gallery with collectors. Announce exhibitions, sell tickets to opening nights, and build your email list. Free forever.</x-slot>
+    <x-slot name="description">Fill your gallery with collectors. Announce exhibitions, sell tickets to opening nights, and email your collectors directly. Free forever.</x-slot>
     <x-slot name="keywords">art gallery event calendar, exhibition management software, gallery opening tickets, art show calendar, artist studio events, gallery newsletter, art walk software, virtual gallery tours</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
 
@@ -30,7 +30,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-                New exhibition opening? Your collectors know first. Build your email list and reach them directly - no paying Instagram to show your art to people who already follow you.
+                New exhibition opening? Your collectors know first. Email them directly - no paying Instagram to show your art to people who already follow you.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
@@ -180,7 +180,7 @@
                             <p class="text-gray-500 dark:text-white/80 text-lg mb-6">Stop hoping your Instagram post gets seen. One click sends your exhibition announcement, opening reception invite, or artist talk straight to everyone who wants to know.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Skip the algorithm</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Your list, your reach</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Your collectors, direct reach</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -611,7 +611,7 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-purple-600 to-violet-700 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/25">
                         3
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Build your collector list</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Reach your collectors</h3>
                     <p class="text-gray-600 text-sm">
                         Visitors follow your calendar. When you post a new exhibition, it goes straight to their inbox.
                     </p>
@@ -631,7 +631,7 @@
                 Stop paying to reach your own collectors
             </h2>
             <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                Build your email list. Fill your gallery. Free forever.
+                Email your collectors directly. Fill your gallery. Free forever.
             </p>
             <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-purple-700 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                 Get Started Free
@@ -651,7 +651,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Art Gallery and Studio Event Management Software",
         "operatingSystem": "Web",
-        "description": "Fill your gallery with collectors. Announce exhibitions, sell tickets to opening nights, and build your email list. Reach your audience directly—no algorithm. Free forever.",
+        "description": "Fill your gallery with collectors. Announce exhibitions, sell tickets to opening nights, and email your collectors directly. Reach your audience—no algorithm. Free forever.",
         "offers": {
             "@type": "Offer",
             "price": "0",
