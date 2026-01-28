@@ -148,7 +148,7 @@
                         </li>
                     </ul>
 
-                    <a href="{{ route('sign_up') }}" class="mt-auto block w-full text-center px-6 py-4 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white font-semibold rounded-2xl transition-all">
+                    <a href="{{ route('sign_up') }}" class="mt-auto block w-full text-center px-6 py-4 bg-gray-300 dark:bg-white/10 hover:bg-gray-400 dark:hover:bg-white/20 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-semibold rounded-2xl transition-all">
                         Get Started Free
                     </a>
                 </div>

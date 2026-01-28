@@ -186,7 +186,7 @@
                                 <div class="flex flex-col items-center gap-2">
                                     <!-- Input -->
                                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-56">
-                                        <div class="text-xs text-gray-500 dark:text-gray-500 mb-2">Paste or drop</div>
+                                        <div class="text-xs text-gray-600 dark:text-gray-500 mb-2">Paste or drop</div>
                                         <div class="text-sm text-gray-600 dark:text-gray-300 font-mono leading-relaxed">
                                             Jazz Night at Blue Note<br>
                                             Friday, March 15 at 8pm<br>

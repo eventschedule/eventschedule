@@ -46,7 +46,7 @@
                             <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-xs font-bold">TE</div>
                             <div>
                                 <div class="text-gray-900 dark:text-white font-semibold text-sm">The Echo</div>
-                                <div class="text-gray-500 dark:text-gray-500 text-xs">Los Angeles, CA</div>
+                                <div class="text-gray-600 dark:text-gray-500 text-xs">Los Angeles, CA</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-4 text-xs">
@@ -64,7 +64,7 @@
                         <div class="lg:col-span-2 space-y-4">
                             <div class="flex items-center justify-between mb-2">
                                 <h3 class="text-gray-900 dark:text-white font-semibold">This Week</h3>
-                                <span class="text-gray-500 dark:text-gray-500 text-xs">Jan 27 - Feb 2</span>
+                                <span class="text-gray-600 dark:text-gray-500 text-xs">Jan 27 - Feb 2</span>
                             </div>
 
                             <!-- Tonight's show - highlighted -->
@@ -94,13 +94,13 @@
                             <div class="bg-gray-100 dark:bg-[#16161e] rounded-xl border border-gray-200 dark:border-white/5 p-4">
                                 <div class="flex items-start justify-between">
                                     <div>
-                                        <div class="text-gray-500 dark:text-gray-500 text-xs mb-1">Wed, Jan 29</div>
+                                        <div class="text-gray-600 dark:text-gray-500 text-xs mb-1">Wed, Jan 29</div>
                                         <div class="text-gray-900 dark:text-white font-medium">Jazz Wednesday: Marcus Cole Trio</div>
                                         <div class="text-gray-500 dark:text-gray-400 text-sm">Jazz / Recurring weekly</div>
                                     </div>
                                     <div class="text-right">
                                         <div class="text-gray-900 dark:text-white text-sm">89 / 150</div>
-                                        <div class="text-gray-500 dark:text-gray-500 text-xs">tickets sold</div>
+                                        <div class="text-gray-600 dark:text-gray-500 text-xs">tickets sold</div>
                                     </div>
                                 </div>
                             </div>
@@ -108,13 +108,13 @@
                             <div class="bg-gray-100 dark:bg-[#16161e] rounded-xl border border-gray-200 dark:border-white/5 p-4">
                                 <div class="flex items-start justify-between">
                                     <div>
-                                        <div class="text-gray-500 dark:text-gray-500 text-xs mb-1">Fri, Jan 31</div>
+                                        <div class="text-gray-600 dark:text-gray-500 text-xs mb-1">Fri, Jan 31</div>
                                         <div class="text-gray-900 dark:text-white font-medium">Midnight Sons + The Bridges</div>
                                         <div class="text-gray-500 dark:text-gray-400 text-sm">Indie Rock / Double bill</div>
                                     </div>
                                     <div class="text-right">
                                         <div class="text-gray-900 dark:text-white text-sm">156 / 247</div>
-                                        <div class="text-gray-500 dark:text-gray-500 text-xs">tickets sold</div>
+                                        <div class="text-gray-600 dark:text-gray-500 text-xs">tickets sold</div>
                                     </div>
                                 </div>
                             </div>
@@ -133,14 +133,14 @@
                                         <div class="w-6 h-6 rounded bg-gradient-to-br from-blue-500 to-indigo-500 text-[10px] text-white flex items-center justify-center font-bold">RW</div>
                                         <div class="flex-1 min-w-0">
                                             <div class="text-gray-900 dark:text-white text-xs truncate">River West</div>
-                                            <div class="text-gray-500 dark:text-gray-500 text-[10px]">Alt Country</div>
+                                            <div class="text-gray-600 dark:text-gray-500 text-[10px]">Alt Country</div>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/5">
                                         <div class="w-6 h-6 rounded bg-gradient-to-br from-rose-500 to-pink-500 text-[10px] text-white flex items-center justify-center font-bold">NK</div>
                                         <div class="flex-1 min-w-0">
                                             <div class="text-gray-900 dark:text-white text-xs truncate">Neon Kids</div>
-                                            <div class="text-gray-500 dark:text-gray-500 text-[10px]">Synth Pop</div>
+                                            <div class="text-gray-600 dark:text-gray-500 text-[10px]">Synth Pop</div>
                                         </div>
                                     </div>
                                 </div>
@@ -155,7 +155,7 @@
                                 <div class="text-2xl font-bold text-gray-900 dark:text-white">$18,420</div>
                                 <div class="text-emerald-400 text-xs">+12% vs December</div>
                                 <div class="mt-3 pt-3 border-t border-gray-200 dark:border-white/5">
-                                    <div class="text-gray-500 dark:text-gray-500 text-xs">Platform fees paid</div>
+                                    <div class="text-gray-600 dark:text-gray-500 text-xs">Platform fees paid</div>
                                     <div class="text-gray-900 dark:text-white font-semibold">$0.00</div>
                                 </div>
                             </div>
@@ -192,7 +192,7 @@
                             </div>
                             <div>
                                 <div class="text-gray-900 dark:text-white font-medium">Ticketing platforms taking 15-25% of your door</div>
-                                <div class="text-gray-500 dark:text-gray-500 text-sm">Service fees, facility fees, processing fees...</div>
+                                <div class="text-gray-600 dark:text-gray-500 text-sm">Service fees, facility fees, processing fees...</div>
                             </div>
                         </div>
                         <div class="flex items-start gap-3">
@@ -203,7 +203,7 @@
                             </div>
                             <div>
                                 <div class="text-gray-900 dark:text-white font-medium">Endless email chains with booking agents</div>
-                                <div class="text-gray-500 dark:text-gray-500 text-sm">Back and forth for every show, every detail</div>
+                                <div class="text-gray-600 dark:text-gray-500 text-sm">Back and forth for every show, every detail</div>
                             </div>
                         </div>
                         <div class="flex items-start gap-3">
@@ -214,7 +214,7 @@
                             </div>
                             <div>
                                 <div class="text-gray-900 dark:text-white font-medium">Paying to reach your own fans on social</div>
-                                <div class="text-gray-500 dark:text-gray-500 text-sm">Algorithm changes, boosted posts, declining reach</div>
+                                <div class="text-gray-600 dark:text-gray-500 text-sm">Algorithm changes, boosted posts, declining reach</div>
                             </div>
                         </div>
                     </div>
@@ -234,7 +234,7 @@
                             </div>
                             <div>
                                 <div class="text-gray-900 dark:text-white font-medium">Sell tickets with $0 platform fees</div>
-                                <div class="text-gray-500 dark:text-gray-500 text-sm">Just Stripe's 2.9% + 30c. That's it.</div>
+                                <div class="text-gray-600 dark:text-gray-500 text-sm">Just Stripe's 2.9% + 30c. That's it.</div>
                             </div>
                         </div>
                         <div class="flex items-start gap-3">
@@ -245,7 +245,7 @@
                             </div>
                             <div>
                                 <div class="text-gray-900 dark:text-white font-medium">Artists apply with press kits built-in</div>
-                                <div class="text-gray-500 dark:text-gray-500 text-sm">Music samples, social links, everything in one place</div>
+                                <div class="text-gray-600 dark:text-gray-500 text-sm">Music samples, social links, everything in one place</div>
                             </div>
                         </div>
                         <div class="flex items-start gap-3">
@@ -256,7 +256,7 @@
                             </div>
                             <div>
                                 <div class="text-gray-900 dark:text-white font-medium">Email your fans directly for free</div>
-                                <div class="text-gray-500 dark:text-gray-500 text-sm">New show? One click reaches everyone who follows you</div>
+                                <div class="text-gray-600 dark:text-gray-500 text-sm">New show? One click reaches everyone who follows you</div>
                             </div>
                         </div>
                     </div>
@@ -330,7 +330,7 @@
                                 </div>
                                 <div class="flex-1">
                                     <div class="text-gray-900 dark:text-white text-sm">Neon Heartbreak</div>
-                                    <div class="text-gray-500 dark:text-gray-500 text-xs">3:42 / 45K streams</div>
+                                    <div class="text-gray-600 dark:text-gray-500 text-xs">3:42 / 45K streams</div>
                                 </div>
                             </div>
                         </div>
@@ -371,7 +371,7 @@
                                 <div class="ml-5 space-y-2 text-sm">
                                     <div class="flex items-center justify-between">
                                         <span class="text-gray-600 dark:text-gray-300">8:00pm - The Openers</span>
-                                        <span class="text-gray-500 dark:text-gray-500">45 min</span>
+                                        <span class="text-gray-600 dark:text-gray-500">45 min</span>
                                     </div>
                                     <div class="flex items-center justify-between">
                                         <span class="text-gray-900 dark:text-white font-medium">9:30pm - Midnight Sons</span>
@@ -392,7 +392,7 @@
                                 <div class="ml-5 space-y-2 text-sm">
                                     <div class="flex items-center justify-between">
                                         <span class="text-gray-600 dark:text-gray-300">8:30pm - Jazz Trio</span>
-                                        <span class="text-gray-500 dark:text-gray-500">2 sets</span>
+                                        <span class="text-gray-600 dark:text-gray-500">2 sets</span>
                                     </div>
                                 </div>
                             </div>
@@ -511,11 +511,11 @@
                             </div>
                             <div class="space-y-2 text-sm mb-4">
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500 dark:text-gray-500">Platform fee</span>
+                                    <span class="text-gray-600 dark:text-gray-500">Platform fee</span>
                                     <span class="text-emerald-300">$0.00</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500 dark:text-gray-500">Stripe processing</span>
+                                    <span class="text-gray-600 dark:text-gray-500">Stripe processing</span>
                                     <span class="text-gray-500 dark:text-gray-400">~$1.32</span>
                                 </div>
                             </div>
@@ -615,7 +615,7 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-900 dark:text-white font-medium mb-1">QR Door Scanning</h3>
-                    <p class="text-gray-500 dark:text-gray-500 text-sm">Use any smartphone. No hardware needed.</p>
+                    <p class="text-gray-600 dark:text-gray-500 text-sm">Use any smartphone. No hardware needed.</p>
                 </div>
 
                 <div class="bg-white dark:bg-[#12121a] rounded-xl border border-gray-200 dark:border-white/5 p-5 hover:border-indigo-500/30 transition">
@@ -625,7 +625,7 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-900 dark:text-white font-medium mb-1">Recurring Shows</h3>
-                    <p class="text-gray-500 dark:text-gray-500 text-sm">Jazz Wednesdays auto-repeat every week.</p>
+                    <p class="text-gray-600 dark:text-gray-500 text-sm">Jazz Wednesdays auto-repeat every week.</p>
                 </div>
 
                 <div class="bg-white dark:bg-[#12121a] rounded-xl border border-gray-200 dark:border-white/5 p-5 hover:border-amber-500/30 transition">
@@ -635,7 +635,7 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-900 dark:text-white font-medium mb-1">Promo Graphics</h3>
-                    <p class="text-gray-500 dark:text-gray-500 text-sm">Auto-generate flyers for socials.</p>
+                    <p class="text-gray-600 dark:text-gray-500 text-sm">Auto-generate flyers for socials.</p>
                 </div>
 
                 <div class="bg-white dark:bg-[#12121a] rounded-xl border border-gray-200 dark:border-white/5 p-5 hover:border-cyan-500/30 transition">
@@ -645,7 +645,7 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-900 dark:text-white font-medium mb-1">Venue Analytics</h3>
-                    <p class="text-gray-500 dark:text-gray-500 text-sm">See which genres fill your room.</p>
+                    <p class="text-gray-600 dark:text-gray-500 text-sm">See which genres fill your room.</p>
                 </div>
 
                 <div class="bg-white dark:bg-[#12121a] rounded-xl border border-gray-200 dark:border-white/5 p-5 hover:border-rose-500/30 transition">
@@ -655,7 +655,7 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-900 dark:text-white font-medium mb-1">Google Cal Sync</h3>
-                    <p class="text-gray-500 dark:text-gray-500 text-sm">Two-way sync with your existing calendar.</p>
+                    <p class="text-gray-600 dark:text-gray-500 text-sm">Two-way sync with your existing calendar.</p>
                 </div>
 
                 <div class="bg-white dark:bg-[#12121a] rounded-xl border border-gray-200 dark:border-white/5 p-5 hover:border-emerald-500/30 transition">
@@ -666,7 +666,7 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-900 dark:text-white font-medium mb-1">Load-in Info</h3>
-                    <p class="text-gray-500 dark:text-gray-500 text-sm">Share parking, backline, PA details.</p>
+                    <p class="text-gray-600 dark:text-gray-500 text-sm">Share parking, backline, PA details.</p>
                 </div>
 
                 <div class="bg-white dark:bg-[#12121a] rounded-xl border border-gray-200 dark:border-white/5 p-5 hover:border-fuchsia-500/30 transition">
@@ -676,7 +676,7 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-900 dark:text-white font-medium mb-1">Live Streaming</h3>
-                    <p class="text-gray-500 dark:text-gray-500 text-sm">Sell tickets to virtual attendees.</p>
+                    <p class="text-gray-600 dark:text-gray-500 text-sm">Sell tickets to virtual attendees.</p>
                 </div>
 
                 <div class="bg-white dark:bg-[#12121a] rounded-xl border border-gray-200 dark:border-white/5 p-5 hover:border-blue-500/30 transition">
@@ -686,7 +686,7 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-900 dark:text-white font-medium mb-1">Embed Anywhere</h3>
-                    <p class="text-gray-500 dark:text-gray-500 text-sm">Add your calendar to your website.</p>
+                    <p class="text-gray-600 dark:text-gray-500 text-sm">Add your calendar to your website.</p>
                 </div>
             </div>
         </div>
