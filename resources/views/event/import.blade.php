@@ -438,7 +438,6 @@
                         <!-- Custom Fields Section -->
                         @if (count($role->getEventCustomFields()) > 0)
                         <div class="mt-6">
-                            <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.custom_fields') }}</h4>
                             @php
                                 $eventCustomFields = $role->getEventCustomFields();
                             @endphp

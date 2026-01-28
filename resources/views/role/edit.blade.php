@@ -1399,6 +1399,7 @@
                         </p>
 
                         <div id="event-custom-fields-container">
+                            <input type="hidden" name="event_custom_fields_submitted" value="1">
                             @php
                                 $eventCustomFields = $role->event_custom_fields ?? [];
                                 $fieldIndex = 0;

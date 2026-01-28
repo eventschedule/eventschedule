@@ -16,6 +16,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Keep the sitemap up-to-date** - When adding new pages, add them to `resources/views/sitemap.blade.php`
 - **Complete bento grids** - When using bento grids, ensure all cells are filled (especially the bottom right corner)
 - **Support light and dark mode** - Always consider both light mode and dark mode when working on UI
+- **No co-author on commits** - Do not add "Co-Authored-By: Claude" to git commit messages
 
 ## Terminology
 

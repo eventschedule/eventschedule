@@ -456,7 +456,7 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <a href="https://invoiceninja.com" target="_blank" rel="noopener" class="group block">
                 <div class="bg-gradient-to-br from-emerald-900/30 to-teal-900/30 rounded-3xl border border-gray-200 dark:border-white/10 p-8 hover:border-gray-300 dark:hover:border-white/20 transition-all">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
@@ -471,7 +471,7 @@
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">Learn more about Invoice Ninja</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-4">Explore Invoice Ninja's open-source invoicing platform, features, and selfhosted options.</p>
-                    <span class="inline-flex items-center text-emerald-300 font-medium group-hover:gap-3 gap-2 transition-all">
+                    <span class="inline-flex items-center text-emerald-700 dark:text-emerald-300 font-medium group-hover:gap-3 gap-2 transition-all">
                         Visit invoiceninja.com
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -495,7 +495,7 @@
                     </div>
                     <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-gray-200 transition-colors">Explore more integrations</h3>
                     <p class="text-gray-300 mb-4">Discover all the ways Event Schedule connects with your favorite tools.</p>
-                    <span class="inline-flex items-center text-gray-300 font-medium group-hover:gap-3 gap-2 transition-all">
+                    <span class="inline-flex items-center text-gray-600 dark:text-gray-300 font-medium group-hover:gap-3 gap-2 transition-all">
                         View all integrations
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

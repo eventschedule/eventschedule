@@ -40,6 +40,7 @@ return [
     'name' => 'Name',
     'english_name' => 'English Name',
     'auto_translated_placeholder' => 'Auto-translated if left blank',
+    'translation_failed_warning' => 'Auto-translation failed. Please enter English names manually or try again.',
     'confirm_password' => 'Confirm Password',
     'terms_of_service' => 'Terms of Service',
     'privacy_policy' => 'Privacy Policy',

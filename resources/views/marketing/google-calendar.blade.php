@@ -68,8 +68,8 @@
                         </svg>
                         Secure
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">OAuth 2.0 authentication</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Connect with one click using Google's secure OAuth. No passwords stored. Automatic token refresh keeps you connected.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">OAuth 2.0 authentication</h3>
+                    <p class="text-white/80 mb-6">Connect with one click using Google's secure OAuth. No passwords stored. Automatic token refresh keeps you connected.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-3">
@@ -100,8 +100,8 @@
                         </svg>
                         Real-time
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Instant webhook updates</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Changes in Google Calendar appear instantly. Webhook notifications mean no polling delays.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">Instant webhook updates</h3>
+                    <p class="text-white/80 mb-6">Changes in Google Calendar appear instantly. Webhook notifications mean no polling delays.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-3">
@@ -126,8 +126,8 @@
                         </svg>
                         Flexible
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Three sync modes</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-4">Choose your direction: push events to Google, pull events from Google, or sync both ways.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">Three sync modes</h3>
+                    <p class="text-white/80 mb-4">Choose your direction: push events to Google, pull events from Google, or sync both ways.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
@@ -161,8 +161,8 @@
                                 </svg>
                                 Multi-Calendar
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Choose your calendar</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg">Select which Google Calendar to sync with for each schedule. Perfect if you manage multiple calendars for work, personal, or different projects.</p>
+                            <h3 class="text-3xl font-bold text-white mb-4">Choose your calendar</h3>
+                            <p class="text-white/80 text-lg">Select which Google Calendar to sync with for each schedule. Perfect if you manage multiple calendars for work, personal, or different projects.</p>
                         </div>
                         <div class="space-y-3">
                             <div class="flex items-center gap-3 p-3 rounded-xl bg-cyan-500/20 border border-cyan-400/30">
@@ -192,8 +192,8 @@
                         </svg>
                         Reliable
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Background processing</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-4">Sync jobs run in the background. Your schedule stays fast while events sync reliably behind the scenes.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">Background processing</h3>
+                    <p class="text-white/80 mb-4">Sync jobs run in the background. Your schedule stays fast while events sync reliably behind the scenes.</p>
 
                     <div class="flex items-center gap-2">
                         <div class="flex-1 bg-amber-500/20 rounded-full h-2">
