@@ -18,7 +18,7 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
-                <svg class="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <span class="text-sm text-gray-600 dark:text-gray-300">For Art Galleries & Studios</span>
@@ -194,7 +194,7 @@
                                         </div>
                                         <div>
                                             <div class="text-gray-900 dark:text-white text-sm font-medium">Opening Reception</div>
-                                            <div class="text-purple-300 text-xs">Sending to 1,847 collectors...</div>
+                                            <div class="text-purple-600 dark:text-purple-300 text-xs">Sending to 1,847 collectors...</div>
                                         </div>
                                     </div>
                                     <div class="space-y-2">
@@ -301,7 +301,7 @@
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">MK</div>
                                     <div class="flex-1">
                                         <div class="text-gray-900 dark:text-white text-sm font-medium">Maya Kim - Solo Show</div>
-                                        <div class="text-indigo-300 text-xs">Mixed media &bull; Spring 2025</div>
+                                        <div class="text-indigo-600 dark:text-indigo-300 text-xs">Mixed media &bull; Spring 2025</div>
                                     </div>
                                     <div class="flex gap-1">
                                         <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
@@ -370,7 +370,7 @@
                             <span class="text-gray-600 dark:text-gray-300 text-xs">Virtual Tour</span>
                             <div class="flex items-center gap-1">
                                 <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-                                <span class="text-red-400 text-[10px]">LIVE</span>
+                                <span class="text-red-600 dark:text-red-400 text-[10px]">LIVE</span>
                             </div>
                         </div>
                         <div class="flex items-center justify-center gap-2 text-gray-500 dark:text-white/70 text-xs">
@@ -437,7 +437,7 @@
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Online classes</span>
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Artist talks</span>
                             </div>
-                            <span class="inline-flex items-center text-violet-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center text-violet-600 dark:text-violet-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more about online events
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
