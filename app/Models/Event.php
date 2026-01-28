@@ -532,6 +532,25 @@ class Event extends Model
 
         if (! $subdomain) {
             $subdomain = $this->creatorRole ? $this->creatorRole->subdomain : null;
+
+            // Temp fix - remove once curator_id is corrected 
+            // Check if the given subdomain matches any of the roles
+            if ($subdomain) {
+                $matchingRole = $this->roles->first(function ($role) use ($subdomain) {
+                    return $role->subdomain == $subdomain;
+                });
+
+                // If no matching role, try to find the first claimed role
+                if (! $matchingRole) {
+                    $claimedRole = $this->roles->first(function ($role) {
+                        return $role->isClaimed();
+                    });
+
+                    if ($claimedRole) {
+                        $subdomain = $claimedRole->subdomain;
+                    }
+                }
+            }
         }
 
         $slug = $this->slug;
