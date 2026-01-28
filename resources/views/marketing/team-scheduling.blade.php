@@ -12,6 +12,13 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            .animate-pulse-slow,
+            .animate-float {
+                animation: none;
+            }
+        }
     </style>
 
     <!-- Hero Section -->
@@ -71,9 +78,9 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Invite team members via email</h3>
                             <p class="text-white/80 text-lg mb-6">Add teammates by email address. They'll receive an invitation and can join instantly, even if they don't have an account yet.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Email invitations</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Auto-create accounts</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Resend invites</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Email invitations</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Auto-create accounts</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Resend invites</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -86,7 +93,7 @@
                                             <div class="text-gray-900 dark:text-white text-sm font-medium truncate">John Doe</div>
                                             <div class="text-gray-500 dark:text-gray-400 text-xs truncate">john@example.com</div>
                                         </div>
-                                        <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-xs">Owner</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-xs">Owner</span>
                                     </div>
                                     <!-- Team member 2 -->
                                     <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
@@ -95,7 +102,7 @@
                                             <div class="text-gray-900 dark:text-white text-sm font-medium truncate">Alice Smith</div>
                                             <div class="text-gray-500 dark:text-gray-400 text-xs truncate">alice@example.com</div>
                                         </div>
-                                        <span class="px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 text-xs">Admin</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 text-xs">Admin</span>
                                     </div>
                                     <!-- Pending invite -->
                                     <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-dashed border-gray-300 dark:border-white/20">
@@ -203,9 +210,9 @@
                                 <div class="text-gray-500 py-1">F</div>
                                 <div class="text-gray-500 py-1">S</div>
                                 <!-- Calendar days -->
-                                <div class="py-2 text-gray-400 dark:text-gray-600">29</div>
-                                <div class="py-2 text-gray-400 dark:text-gray-600">30</div>
-                                <div class="py-2 text-gray-400 dark:text-gray-600">31</div>
+                                <div class="py-2 text-gray-400 dark:text-gray-400">29</div>
+                                <div class="py-2 text-gray-400 dark:text-gray-400">30</div>
+                                <div class="py-2 text-gray-400 dark:text-gray-400">31</div>
                                 <div class="py-2 text-gray-900 dark:text-white">1</div>
                                 <div class="py-2 text-gray-900 dark:text-white">2</div>
                                 <div class="py-2 text-gray-900 dark:text-white">3</div>

@@ -16,6 +16,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Keep the sitemap up-to-date** - When adding new pages, add them to `resources/views/sitemap.blade.php`
 - **Complete bento grids** - When using bento grids, ensure all cells are filled (especially the bottom right corner)
 - **Support light and dark mode** - Always consider both light mode and dark mode when working on UI
+- **Marketing bento cards use dark backgrounds** - Feature cards in `resources/views/marketing/` intentionally use dark gradient backgrounds (e.g., `from-emerald-900 to-teal-900`) with white text. This is a deliberate design choice that works in both light and dark modes - do not "fix" these as light mode issues.
 - **No co-author on commits** - Do not add "Co-Authored-By: Claude" to git commit messages
 
 ## Terminology

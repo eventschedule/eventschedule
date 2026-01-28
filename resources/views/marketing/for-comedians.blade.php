@@ -51,23 +51,23 @@
 
             <!-- The journey badges -->
             <div class="mt-14 flex flex-wrap justify-center items-center gap-3">
-                <span class="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 text-xs font-medium border border-red-300 dark:border-red-800/50">Open Mic</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 text-xs font-medium border border-red-300 dark:border-red-800/50">Open Mic</span>
                 <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                <span class="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 text-xs font-medium border border-amber-300 dark:border-amber-800/50">Bringer</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 text-xs font-medium border border-amber-300 dark:border-amber-800/50">Bringer</span>
                 <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                <span class="px-3 py-1.5 rounded-lg bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300 text-xs font-medium border border-orange-300 dark:border-orange-800/50">Guest Spot</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300 text-xs font-medium border border-orange-300 dark:border-orange-800/50">Guest Spot</span>
                 <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                <span class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 text-xs font-medium border border-rose-300 dark:border-rose-800/50">Feature</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 text-xs font-medium border border-rose-300 dark:border-rose-800/50">Feature</span>
                 <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                <span class="px-4 py-1.5 rounded-lg bg-gradient-to-r from-amber-600/60 to-rose-600/60 text-white text-xs font-bold border border-amber-500/50 shadow-lg shadow-amber-500/20">Headliner</span>
+                <span class="inline-flex items-center px-4 py-1.5 rounded-lg bg-gradient-to-r from-amber-600/60 to-rose-600/60 text-white text-xs font-bold border border-amber-500/50 shadow-lg shadow-amber-500/20">Headliner</span>
             </div>
         </div>
     </section>
@@ -150,7 +150,7 @@
                                         <div class="text-white font-semibold">Stand Up NY</div>
                                         <div class="text-gray-500 dark:text-gray-400 text-sm">Open mic · 7 PM signup</div>
                                     </div>
-                                    <div class="px-2 py-1 rounded bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-medium">5 min</div>
+                                    <div class="inline-flex items-center px-2 py-1 rounded bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-medium">5 min</div>
                                 </div>
                                 <div class="flex items-center gap-4 p-3 rounded-xl bg-amber-900/20 border border-amber-800/30">
                                     <div class="w-12 text-center">
@@ -161,7 +161,7 @@
                                         <div class="text-white font-semibold">Comedy Cellar</div>
                                         <div class="text-gray-500 dark:text-gray-400 text-sm">Guest set · 9:30 PM</div>
                                     </div>
-                                    <div class="px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-medium">12 min</div>
+                                    <div class="inline-flex items-center px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-medium">12 min</div>
                                 </div>
                                 <div class="flex items-center gap-4 p-3 rounded-xl bg-orange-900/20 border border-orange-800/30">
                                     <div class="w-12 text-center">
@@ -172,7 +172,7 @@
                                         <div class="text-white font-semibold">Gotham Comedy</div>
                                         <div class="text-gray-500 dark:text-gray-400 text-sm">Late show · 11 PM</div>
                                     </div>
-                                    <div class="px-2 py-1 rounded bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 text-xs font-medium">10 min</div>
+                                    <div class="inline-flex items-center px-2 py-1 rounded bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 text-xs font-medium">10 min</div>
                                 </div>
                                 <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-rose-900/30 to-amber-900/30 border border-rose-700/40">
                                     <div class="w-12 text-center">
@@ -183,7 +183,7 @@
                                         <div class="text-white font-semibold">Carolines</div>
                                         <div class="text-gray-500 dark:text-gray-400 text-sm">Two shows: 8 PM & 10:30 PM</div>
                                     </div>
-                                    <div class="px-2 py-1 rounded bg-gradient-to-r from-rose-600/60 to-amber-600/60 text-white text-xs font-bold">Headlining</div>
+                                    <div class="inline-flex items-center px-2 py-1 rounded bg-gradient-to-r from-rose-600/60 to-amber-600/60 text-white text-xs font-bold">Headlining</div>
                                 </div>
                             </div>
                         </div>
@@ -610,6 +610,12 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             text-shadow: 0 0 40px rgba(251, 191, 36, 0.3);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .animate-pulse {
+                animation: none;
+            }
         }
     </style>
 </x-marketing-layout>

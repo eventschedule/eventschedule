@@ -70,12 +70,12 @@
 
             <!-- Performance tags -->
             <div class="mt-12 flex flex-wrap justify-center gap-2">
-                <span class="px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-500/30">Close-up</span>
-                <span class="px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-xs font-medium border border-purple-200 dark:border-purple-500/30">Stage</span>
-                <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-xs font-medium border border-indigo-200 dark:border-indigo-500/30">Mentalism</span>
-                <span class="px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/20 dark:text-fuchsia-300 text-xs font-medium border border-fuchsia-200 dark:border-fuchsia-500/30">Illusion</span>
-                <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-xs font-medium border border-amber-200 dark:border-amber-500/30">Corporate</span>
-                <span class="px-3 py-1 rounded-full bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300 text-xs font-medium border border-pink-200 dark:border-pink-500/30">Kids Shows</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-500/30">Close-up</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-xs font-medium border border-purple-200 dark:border-purple-500/30">Stage</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-xs font-medium border border-indigo-200 dark:border-indigo-500/30">Mentalism</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/20 dark:text-fuchsia-300 text-xs font-medium border border-fuchsia-200 dark:border-fuchsia-500/30">Illusion</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-xs font-medium border border-amber-200 dark:border-amber-500/30">Corporate</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300 text-xs font-medium border border-pink-200 dark:border-pink-500/30">Kids Shows</span>
             </div>
         </div>
     </section>
@@ -98,9 +98,9 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">One link for event planners</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-6">Wedding planners, corporate event coordinators, and party hosts find your availability, videos, and rates. Professional booking made simple.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Corporate events</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Weddings</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Private parties</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Corporate events</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Weddings</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Private parties</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -268,14 +268,14 @@
                             <div class="flex-1">
                                 <div class="text-white text-sm">David</div>
                             </div>
-                            <span class="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px]">Magician</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px]">Magician</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-xs font-semibold">SK</div>
                             <div class="flex-1">
                                 <div class="text-gray-300 text-sm">Sarah</div>
                             </div>
-                            <span class="px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 text-[10px]">Assistant</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 text-[10px]">Assistant</span>
                         </div>
                     </div>
                 </div>
@@ -318,7 +318,7 @@
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Where magic happens
                 </h2>
-                <p class="text-xl text-gray-600 dark:text-gray-500">
+                <p class="text-xl text-gray-600 dark:text-gray-400">
                     One schedule for every venue and event type
                 </p>
             </div>
@@ -536,9 +536,9 @@
                             <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-indigo-300 transition-colors">Stream to audiences worldwide</h3>
                             <p class="text-gray-400 text-lg mb-4">Sell tickets to viewers anywhere. Virtual magic became huge and stays relevant - reach fans who can't make it to your live shows.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Zoom shows</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Global ticket sales</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Interactive magic</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Zoom shows</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Global ticket sales</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Interactive magic</span>
                             </div>
                             <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more about online events
@@ -663,6 +663,14 @@
 
         .animate-sparkle {
             animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .animate-pulse-slow,
+            .animate-sparkle,
+            .animate-float {
+                animation: none;
+            }
         }
     </style>
 </x-marketing-layout>

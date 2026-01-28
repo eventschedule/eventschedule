@@ -70,16 +70,16 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Parse any format</h3>
                             <p class="text-gray-500 dark:text-white/80 text-lg mb-6">Flyers, emails, social posts, screenshots. Paste the text or drop an image and AI extracts event name, date, time, venue, and description.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Text parsing</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Image recognition</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any language</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Text parsing</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Image recognition</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any language</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
                                 <!-- Input side -->
                                 <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-2xl border border-gray-200 dark:border-white/10 p-4 mb-4 max-w-xs">
-                                    <div class="text-xs text-gray-400 dark:text-gray-500 mb-2">Paste or drop</div>
+                                    <div class="text-xs text-gray-400 dark:text-gray-400 mb-2">Paste or drop</div>
                                     <div class="text-sm text-gray-600 dark:text-gray-300 font-mono leading-relaxed">
                                         Jazz Night at Blue Note<br>
                                         Friday, March 15 at 8pm<br>
@@ -120,15 +120,15 @@
                     <p class="text-gray-500 dark:text-white/80 mb-6">Translate your entire schedule to English automatically. Perfect for international audiences.</p>
 
                     <div class="flex flex-wrap gap-2 justify-center">
-                        <span class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">EN</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">ES</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">FR</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">DE</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">IT</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">PT</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">NL</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">HE</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">AR</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">EN</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">ES</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">FR</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">DE</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">IT</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">PT</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">NL</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">HE</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">AR</span>
                     </div>
                 </div>
 

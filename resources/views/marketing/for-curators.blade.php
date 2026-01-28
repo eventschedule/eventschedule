@@ -61,9 +61,9 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Smart event import</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-6">Paste a URL, drop an image, or copy text from anywhere. AI extracts event details automatically. No more manual data entry.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">URL parsing</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Image recognition</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any language</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">URL parsing</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Image recognition</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any language</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -470,9 +470,9 @@
                             <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Stream to the world</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">Share live performances with fans worldwide. Add your streaming URL and sell tickets to viewers anywhere—no venue required.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Live streaming</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Global ticket sales</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Any platform</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Live streaming</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Global ticket sales</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Any platform</span>
                             </div>
                             <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -608,4 +608,13 @@
         }
     }
     </script>
+
+    <style>
+        @media (prefers-reduced-motion: reduce) {
+            .animate-pulse-slow,
+            .animate-float {
+                animation: none;
+            }
+        }
+    </style>
 </x-marketing-layout>

@@ -50,12 +50,12 @@
 
             <!-- Bar type tags -->
             <div class="mt-12 flex flex-wrap justify-center gap-2">
-                <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-xs font-medium border border-amber-200 dark:border-amber-500/30">Craft Beer</span>
-                <span class="px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-xs font-medium border border-rose-200 dark:border-rose-500/30">Wine Bar</span>
-                <span class="px-3 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300 text-xs font-medium border border-green-200 dark:border-green-500/30">Sports Bar</span>
-                <span class="px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-500/30">Cocktail Lounge</span>
-                <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-xs font-medium border border-emerald-200 dark:border-emerald-500/30">Irish Pub</span>
-                <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300 text-xs font-medium border border-slate-200 dark:border-slate-500/30">Dive Bar</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-xs font-medium border border-amber-200 dark:border-amber-500/30">Craft Beer</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-xs font-medium border border-rose-200 dark:border-rose-500/30">Wine Bar</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300 text-xs font-medium border border-green-200 dark:border-green-500/30">Sports Bar</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-500/30">Cocktail Lounge</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-xs font-medium border border-emerald-200 dark:border-emerald-500/30">Irish Pub</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300 text-xs font-medium border border-slate-200 dark:border-slate-500/30">Dive Bar</span>
             </div>
         </div>
     </section>
@@ -78,8 +78,8 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Tell your regulars what's on</h3>
                             <p class="text-gray-500 dark:text-white/80 text-lg mb-6">No algorithm. No pay-to-play. Wednesday trivia's back? New band this Friday? One click sends the week's lineup straight to everyone who wants to know.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Skip the algorithm</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Your crowd, your reach</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Skip the algorithm</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Your crowd, your reach</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -200,9 +200,9 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Game on the big screen</h3>
                             <p class="text-gray-500 dark:text-white/80 text-lg mb-4">NFL Sundays, UFC fight nights, World Cup matches. Your sports fans follow to know what's showing and when.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live sports</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Watch parties</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Big screen events</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live sports</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Watch parties</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Big screen events</span>
                             </div>
                         </div>
                         <div class="flex justify-center">

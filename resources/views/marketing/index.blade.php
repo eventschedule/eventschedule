@@ -643,7 +643,7 @@
                 </span>
                 <div class="absolute inset-0 animate-shimmer"></div>
             </a>
-            <p class="mt-6 text-gray-600 dark:text-gray-500 text-sm">No credit card required. Free forever.</p>
+            <p class="mt-6 text-gray-600 dark:text-gray-400 text-sm">No credit card required. Free forever.</p>
         </div>
     </section>
 </x-marketing-layout>

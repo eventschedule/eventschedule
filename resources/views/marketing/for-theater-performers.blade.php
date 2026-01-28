@@ -46,12 +46,12 @@
 
             <!-- Genre tags -->
             <div class="flex flex-wrap justify-center gap-3 mt-12">
-                <span class="px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300/80 text-sm border border-amber-300 dark:border-amber-700/30">Musical</span>
-                <span class="px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300/80 text-sm border border-amber-300 dark:border-amber-700/30">Drama</span>
-                <span class="px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300/80 text-sm border border-amber-300 dark:border-amber-700/30">Comedy</span>
-                <span class="px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300/80 text-sm border border-amber-300 dark:border-amber-700/30">Improv</span>
-                <span class="px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300/80 text-sm border border-amber-300 dark:border-amber-700/30">Fringe</span>
-                <span class="px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300/80 text-sm border border-amber-300 dark:border-amber-700/30">Community Theater</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300/80 text-sm border border-amber-300 dark:border-amber-700/30">Musical</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300/80 text-sm border border-amber-300 dark:border-amber-700/30">Drama</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300/80 text-sm border border-amber-300 dark:border-amber-700/30">Comedy</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300/80 text-sm border border-amber-300 dark:border-amber-700/30">Improv</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300/80 text-sm border border-amber-300 dark:border-amber-700/30">Fringe</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300/80 text-sm border border-amber-300 dark:border-amber-700/30">Community Theater</span>
             </div>
         </div>
     </section>
@@ -211,7 +211,7 @@
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
                                     <span class="text-white font-medium">Preview Night</span>
-                                    <span class="px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-xs">Discounted</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-xs">Discounted</span>
                                 </div>
                                 <div class="text-stone-500 text-sm">7:30 PM</div>
                             </div>
@@ -245,7 +245,7 @@
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
                                     <span class="text-white font-medium">Matinee</span>
-                                    <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs">Family-friendly</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs">Family-friendly</span>
                                 </div>
                                 <div class="text-stone-500 text-sm">2:00 PM</div>
                             </div>
@@ -393,9 +393,9 @@
                             <h3 class="text-3xl lg:text-4xl font-light text-gray-900 dark:text-white mb-4">Fill every seat, keep every dollar</h3>
                             <p class="text-gray-500 dark:text-stone-400 text-lg mb-6">Sell tickets directly through your schedule. Connect Stripe and you're ready to go. No platform fees - just payment processing.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-stone-300 text-sm">Preview discounts</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-stone-300 text-sm">Opening night premium</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-stone-300 text-sm">Student rush</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-stone-300 text-sm">Preview discounts</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-stone-300 text-sm">Opening night premium</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-stone-300 text-sm">Student rush</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -463,14 +463,14 @@
                             <div class="flex-1">
                                 <div class="text-gray-900 dark:text-white text-sm">Stage Manager</div>
                             </div>
-                            <span class="px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 text-[10px]">Admin</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 text-[10px]">Admin</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white text-xs font-semibold">JK</div>
                             <div class="flex-1">
                                 <div class="text-gray-600 dark:text-stone-300 text-sm">Cast Member</div>
                             </div>
-                            <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">View</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">View</span>
                         </div>
                     </div>
                 </div>

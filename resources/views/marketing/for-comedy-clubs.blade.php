@@ -54,12 +54,12 @@
 
             <!-- Genre tags -->
             <div class="mt-12 flex flex-wrap justify-center gap-2">
-                <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-xs font-medium border border-amber-500/30">Stand-up</span>
-                <span class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300 text-xs font-medium border border-yellow-500/30">Improv</span>
-                <span class="px-3 py-1 rounded-full bg-lime-100 text-lime-700 dark:bg-lime-500/20 dark:text-lime-300 text-xs font-medium border border-lime-500/30">Open Mic</span>
-                <span class="px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 text-xs font-medium border border-orange-500/30">Showcase</span>
-                <span class="px-3 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300 text-xs font-medium border border-red-500/30">Headliner</span>
-                <span class="px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-xs font-medium border border-purple-500/30">Recording Night</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-xs font-medium border border-amber-500/30">Stand-up</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300 text-xs font-medium border border-yellow-500/30">Improv</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-lime-100 text-lime-700 dark:bg-lime-500/20 dark:text-lime-300 text-xs font-medium border border-lime-500/30">Open Mic</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 text-xs font-medium border border-orange-500/30">Showcase</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300 text-xs font-medium border border-red-500/30">Headliner</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-xs font-medium border border-purple-500/30">Recording Night</span>
             </div>
         </div>
     </section>
@@ -124,7 +124,7 @@
                     </div>
                 </div>
             </div>
-            <p class="text-center text-gray-600 dark:text-gray-500 text-sm mt-4">Recurring events auto-populate your calendar. One setup, endless shows.</p>
+            <p class="text-center text-gray-600 dark:text-gray-400 text-sm mt-4">Recurring events auto-populate your calendar. One setup, endless shows.</p>
         </div>
     </section>
 
@@ -146,9 +146,9 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Announce your lineup, build the buzz</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Feature your headliner, middle act, and host. Add their videos, link their profiles. Fans see who's on stage before they buy.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple performers</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Video embeds</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Profile links</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple performers</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Video embeds</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Profile links</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -168,14 +168,14 @@
                                             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white text-xs font-bold">MR</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Mike Rodriguez</div>
-                                                <div class="text-gray-600 dark:text-gray-500 text-xs">Feature - 20 min</div>
+                                                <div class="text-gray-600 dark:text-gray-400 text-xs">Feature - 20 min</div>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center text-white text-xs font-bold">TK</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Tony Kim</div>
-                                                <div class="text-gray-600 dark:text-gray-500 text-xs">MC / Host</div>
+                                                <div class="text-gray-600 dark:text-gray-400 text-xs">MC / Host</div>
                                             </div>
                                         </div>
                                     </div>
@@ -266,9 +266,9 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Keep 100% of ticket sales</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg">GA, VIP front row, two-drink minimum - however you price it. Scan QR codes at the door. No platform taking a cut.</p>
                             <div class="flex flex-wrap gap-3 mt-4">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple ticket types</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">QR scanning</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Direct to Stripe</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple ticket types</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">QR scanning</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Direct to Stripe</span>
                             </div>
                         </div>
                         <div class="flex justify-center">
@@ -278,21 +278,21 @@
                                         <span class="text-gray-900 dark:text-white font-medium">General Admission</span>
                                         <span class="text-green-300 font-bold">$20</span>
                                     </div>
-                                    <div class="text-gray-600 dark:text-gray-500 text-xs">Standard seating</div>
+                                    <div class="text-gray-600 dark:text-gray-400 text-xs">Standard seating</div>
                                 </div>
                                 <div class="bg-gradient-to-r from-amber-950 to-yellow-950 rounded-xl p-4 border border-amber-500/30">
                                     <div class="flex items-center justify-between mb-1">
                                         <span class="text-gray-900 dark:text-white font-medium">VIP Front Row</span>
                                         <span class="text-amber-300 font-bold">$35</span>
                                     </div>
-                                    <div class="text-gray-600 dark:text-gray-500 text-xs">Best seats + drink voucher</div>
+                                    <div class="text-gray-600 dark:text-gray-400 text-xs">Best seats + drink voucher</div>
                                 </div>
                                 <div class="bg-gradient-to-r from-purple-950 to-pink-950 rounded-xl p-4 border border-purple-500/30">
                                     <div class="flex items-center justify-between mb-1">
                                         <span class="text-gray-900 dark:text-white font-medium">Recording Night</span>
                                         <span class="text-purple-300 font-bold">$40</span>
                                     </div>
-                                    <div class="text-gray-600 dark:text-gray-500 text-xs">Special taping event</div>
+                                    <div class="text-gray-600 dark:text-gray-400 text-xs">Special taping event</div>
                                 </div>
                             </div>
                         </div>
@@ -388,12 +388,12 @@
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-teal-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">The Basement</span>
-                            <span class="ml-auto text-gray-600 dark:text-gray-500 text-xs">5 shows</span>
+                            <span class="ml-auto text-gray-600 dark:text-gray-400 text-xs">5 shows</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-purple-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Podcast Studio</span>
-                            <span class="ml-auto text-gray-600 dark:text-gray-500 text-xs">3 shows</span>
+                            <span class="ml-auto text-gray-600 dark:text-gray-400 text-xs">3 shows</span>
                         </div>
                     </div>
                 </div>
@@ -461,9 +461,9 @@
                             <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-purple-300 transition-colors">Album recordings. Netflix tapings. The big nights.</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Sell tickets to the live audience AND stream to fans worldwide. Your club, your special.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live + Virtual tickets</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Global streaming</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">No capacity limits</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live + Virtual tickets</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Global streaming</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">No capacity limits</span>
                             </div>
                             <span class="inline-flex items-center text-purple-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more about online events

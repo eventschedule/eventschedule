@@ -43,12 +43,12 @@
 
             <!-- Genre tags -->
             <div class="flex flex-wrap justify-center gap-2 mb-10">
-                <span class="px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm">Drama</span>
-                <span class="px-3 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300 text-sm">Musical</span>
-                <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm">Comedy</span>
-                <span class="px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm">Dance</span>
-                <span class="px-3 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300 text-sm">Opera</span>
-                <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm">Improv</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm">Drama</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300 text-sm">Musical</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm">Comedy</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm">Dance</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300 text-sm">Opera</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm">Improv</span>
             </div>
 
             <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-rose-600 to-red-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-rose-500/25">
@@ -78,9 +78,9 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Opening night to closing curtain</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Set up your production once with all performance dates. Thursday preview, weekend matinees, final Sunday - all linked together. Patrons see the full run at a glance.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Show runs</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Season passes</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multi-performance</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Show runs</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Season passes</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multi-performance</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -179,9 +179,9 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Scan tickets at the door</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Use any smartphone as a box office scanner. See who's checked in, catch duplicates, track attendance. No expensive hardware.</p>
                             <div class="flex flex-wrap gap-3 mt-6">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Will call</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">E-tickets</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any device</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Will call</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">E-tickets</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any device</span>
                             </div>
                         </div>
                         <div class="flex justify-center">
@@ -191,8 +191,8 @@
                                     <div class="absolute inset-x-0 top-3 h-0.5 bg-gradient-to-r from-rose-500 to-amber-500 animate-pulse"></div>
                                 </div>
                                 <div class="absolute -bottom-3 -right-3 flex gap-2">
-                                    <span class="px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 text-xs border border-emerald-500/30">Will Call</span>
-                                    <span class="px-2 py-1 rounded bg-rose-500/20 text-rose-300 text-xs border border-rose-500/30">E-Ticket</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 text-xs border border-emerald-500/30">Will Call</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded bg-rose-500/20 text-rose-300 text-xs border border-rose-500/30">E-Ticket</span>
                                 </div>
                             </div>
                         </div>
@@ -318,9 +318,9 @@
                             <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-rose-300 transition-colors">Stream to the world</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Can't make it to the theater? Sell tickets to viewers at home. Live stream your productions worldwide. Virtual ticket buyers get the link, everyone else stays out.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live streaming</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Virtual tickets</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Global reach</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live streaming</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Virtual tickets</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Global reach</span>
                             </div>
                             <span class="inline-flex items-center text-rose-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more

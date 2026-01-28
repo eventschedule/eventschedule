@@ -57,12 +57,12 @@
 
             <!-- Poetry-specific tags styled like typewriter labels -->
             <div class="mt-12 flex flex-wrap justify-center gap-3">
-                <span class="px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">SLAM</span>
-                <span class="px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">OPEN MIC</span>
-                <span class="px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">FEATURED READING</span>
-                <span class="px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">WORKSHOP</span>
-                <span class="px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">BOOK LAUNCH</span>
-                <span class="px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">LIT FEST</span>
+                <span class="inline-flex items-center px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">SLAM</span>
+                <span class="inline-flex items-center px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">OPEN MIC</span>
+                <span class="inline-flex items-center px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">FEATURED READING</span>
+                <span class="inline-flex items-center px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">WORKSHOP</span>
+                <span class="inline-flex items-center px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">BOOK LAUNCH</span>
+                <span class="inline-flex items-center px-3 py-1.5 bg-amber-100 text-amber-800 dark:bg-stone-800/50 dark:text-stone-400 text-xs font-mono tracking-wide border border-amber-300 dark:border-stone-700/50">LIT FEST</span>
             </div>
         </div>
     </section>
@@ -105,10 +105,10 @@
                             <h3 class="text-3xl lg:text-4xl font-serif text-gray-900 dark:text-white mb-4">Every reading. One place.</h3>
                             <p class="text-gray-500 dark:text-stone-400 text-lg mb-6">Coffee shops on Tuesdays. The bar series on Thursdays. That bookstore feature next month. Stop telling people to check your Instagram - give them one link that's always current.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-stone-800 text-gray-500 dark:text-stone-400 text-sm border border-gray-300 dark:border-stone-700">Open mics</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-stone-800 text-gray-500 dark:text-stone-400 text-sm border border-gray-300 dark:border-stone-700">Features</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-stone-800 text-gray-500 dark:text-stone-400 text-sm border border-gray-300 dark:border-stone-700">Slams</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-stone-800 text-gray-500 dark:text-stone-400 text-sm border border-gray-300 dark:border-stone-700">Book events</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-200 dark:bg-stone-800 text-gray-500 dark:text-stone-400 text-sm border border-gray-300 dark:border-stone-700">Open mics</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-200 dark:bg-stone-800 text-gray-500 dark:text-stone-400 text-sm border border-gray-300 dark:border-stone-700">Features</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-200 dark:bg-stone-800 text-gray-500 dark:text-stone-400 text-sm border border-gray-300 dark:border-stone-700">Slams</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-200 dark:bg-stone-800 text-gray-500 dark:text-stone-400 text-sm border border-gray-300 dark:border-stone-700">Book events</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">

@@ -236,7 +236,7 @@
                                     <div class="text-white/70 text-sm">v2.4.1 installed</div>
                                 </div>
                             </div>
-                            <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-medium">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-medium">
                                 Update Available
                             </span>
                         </div>

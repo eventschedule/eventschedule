@@ -47,12 +47,12 @@
 
                     <!-- Genre tags -->
                     <div class="mt-12 flex flex-wrap justify-center lg:justify-start gap-2">
-                        <span class="px-3 py-1 rounded-full bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300 text-xs font-medium border border-pink-200 dark:border-pink-500/30">EDM</span>
-                        <span class="px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/20 dark:text-fuchsia-300 text-xs font-medium border border-fuchsia-200 dark:border-fuchsia-500/30">Hip-Hop</span>
-                        <span class="px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-500/30">Latin</span>
-                        <span class="px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-xs font-medium border border-purple-200 dark:border-purple-500/30">Rooftop</span>
-                        <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-xs font-medium border border-indigo-200 dark:border-indigo-500/30">Underground</span>
-                        <span class="px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-xs font-medium border border-cyan-200 dark:border-cyan-500/30">Lounge</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300 text-xs font-medium border border-pink-200 dark:border-pink-500/30">EDM</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/20 dark:text-fuchsia-300 text-xs font-medium border border-fuchsia-200 dark:border-fuchsia-500/30">Hip-Hop</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-500/30">Latin</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-xs font-medium border border-purple-200 dark:border-purple-500/30">Rooftop</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-xs font-medium border border-indigo-200 dark:border-indigo-500/30">Underground</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-xs font-medium border border-cyan-200 dark:border-cyan-500/30">Lounge</span>
                     </div>
                 </div>
 
@@ -64,7 +64,7 @@
                             <div class="flex items-center justify-between mb-5">
                                 <div>
                                     <div class="flex items-center gap-2 mb-1">
-                                        <span class="px-2 py-0.5 rounded bg-pink-500 text-white text-[10px] font-bold uppercase tracking-wide">Tonight</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-pink-500 text-white text-[10px] font-bold uppercase tracking-wide">Tonight</span>
                                     </div>
                                     <div class="text-gray-900 dark:text-white text-lg font-bold">Club Vortex</div>
                                     <div class="text-gray-500 dark:text-gray-400 text-xs">Saturday, Jan 25</div>
@@ -138,8 +138,8 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Drop your weekend lineup</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-6">Thursday rolls around, you blast out the weekend's DJs to everyone who follows you. No algorithm. No pay-to-play. Just your crowd, hyped and ready.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">One-click send</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Your crowd, direct reach</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">One-click send</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Your crowd, direct reach</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -193,14 +193,14 @@
                             <div class="flex-1">
                                 <div class="text-gray-900 dark:text-white text-sm">Marco R. +3</div>
                             </div>
-                            <span class="px-2 py-0.5 rounded bg-emerald-300 dark:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-[10px] font-medium">Confirmed</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-300 dark:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-[10px] font-medium">Confirmed</span>
                         </div>
                         <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-[10px] font-semibold">SK</div>
                             <div class="flex-1">
                                 <div class="text-gray-700 dark:text-gray-300 text-sm">Sarah K. +1</div>
                             </div>
-                            <span class="px-2 py-0.5 rounded bg-emerald-300 dark:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-[10px] font-medium">Confirmed</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-300 dark:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-[10px] font-medium">Confirmed</span>
                         </div>
                     </div>
                 </div>
@@ -263,9 +263,9 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Table bookings, handled</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg">VIP table requests, bottle service inquiries, birthday packages - all in one inbox. See party size, minimum spend, special requests. Your biggest revenue driver, organized.</p>
                             <div class="flex flex-wrap gap-3 mt-4">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Table reservations</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Bottle service</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Birthday packages</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Table reservations</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Bottle service</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Birthday packages</span>
                             </div>
                         </div>
                         <div class="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-200 dark:border-white/10">
@@ -277,7 +277,7 @@
                                         <div class="text-gray-900 dark:text-white text-sm font-medium">Marco R.</div>
                                         <div class="text-amber-600 dark:text-amber-300 text-xs">Table for 8 &bull; $500 min</div>
                                     </div>
-                                    <span class="px-2 py-0.5 rounded bg-amber-500/30 text-amber-600 dark:text-amber-300 text-[10px] font-medium">VIP</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-amber-500/30 text-amber-600 dark:text-amber-300 text-[10px] font-medium">VIP</span>
                                 </div>
                                 <div class="flex items-center gap-3 p-3 rounded-lg bg-gray-100 dark:bg-white/5">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white text-[10px] font-semibold">JT</div>
@@ -285,7 +285,7 @@
                                         <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">James T.</div>
                                         <div class="text-gray-500 text-xs">Birthday party &bull; 12 guests</div>
                                     </div>
-                                    <span class="px-2 py-0.5 rounded bg-pink-500/30 text-pink-600 dark:text-pink-300 text-[10px] font-medium">BDAY</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-pink-500/30 text-pink-600 dark:text-pink-300 text-[10px] font-medium">BDAY</span>
                                 </div>
                             </div>
                         </div>
@@ -607,9 +607,9 @@
                             <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-pink-300 transition-colors">Stream to the world</h3>
                             <p class="text-gray-400 text-lg mb-4">Broadcast your DJ sets worldwide. Sell tickets to viewers anywhere - no capacity limits.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Twitch</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">YouTube Live</span>
-                                <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Zoom</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Twitch</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">YouTube Live</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Zoom</span>
                             </div>
                             <span class="inline-flex items-center text-pink-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -756,5 +756,12 @@
             background-clip: text;
         }
 
+        @media (prefers-reduced-motion: reduce) {
+            .animate-pulse-slow,
+            .animate-pulse,
+            .animate-float {
+                animation: none;
+            }
+        }
     </style>
 </x-marketing-layout>

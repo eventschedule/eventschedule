@@ -86,9 +86,9 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Fully transparent code</h3>
                             <p class="text-white/80 text-lg mb-6">Every line of code is available on GitHub under the AAL license. Inspect, modify, or contribute. No hidden functionality, no surprises.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">AAL Licensed</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Laravel + Vue.js</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">MIT-friendly</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">AAL Licensed</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Laravel + Vue.js</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">MIT-friendly</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0">
@@ -182,19 +182,19 @@
                         </div>
                         <div class="space-y-3">
                             <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-[#0f0f14] border border-gray-100 dark:border-white/5">
-                                <span class="px-2 py-1 rounded bg-emerald-500/30 text-emerald-300 text-xs font-mono">GET</span>
+                                <span class="inline-flex items-center px-2 py-1 rounded bg-emerald-500/30 text-emerald-300 text-xs font-mono">GET</span>
                                 <span class="text-gray-600 dark:text-gray-300 text-sm font-mono">/api/schedules</span>
                             </div>
                             <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-[#0f0f14] border border-gray-100 dark:border-white/5">
-                                <span class="px-2 py-1 rounded bg-emerald-500/30 text-emerald-300 text-xs font-mono">GET</span>
+                                <span class="inline-flex items-center px-2 py-1 rounded bg-emerald-500/30 text-emerald-300 text-xs font-mono">GET</span>
                                 <span class="text-gray-600 dark:text-gray-300 text-sm font-mono">/api/events</span>
                             </div>
                             <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-[#0f0f14] border border-gray-100 dark:border-white/5">
-                                <span class="px-2 py-1 rounded bg-blue-500/30 text-blue-300 text-xs font-mono">POST</span>
+                                <span class="inline-flex items-center px-2 py-1 rounded bg-blue-500/30 text-blue-300 text-xs font-mono">POST</span>
                                 <span class="text-gray-600 dark:text-gray-300 text-sm font-mono">/api/events/{'{subdomain}'}</span>
                             </div>
                             <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-[#0f0f14] border border-gray-100 dark:border-white/5">
-                                <span class="px-2 py-1 rounded bg-blue-500/30 text-blue-300 text-xs font-mono">POST</span>
+                                <span class="inline-flex items-center px-2 py-1 rounded bg-blue-500/30 text-blue-300 text-xs font-mono">POST</span>
                                 <span class="text-gray-600 dark:text-gray-300 text-sm font-mono">/api/sales</span>
                             </div>
                         </div>

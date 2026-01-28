@@ -54,7 +54,7 @@
                                 <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
                                 <span class="text-gray-500 dark:text-gray-400">Calendar live</span>
                             </div>
-                            <div class="px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 font-medium">2,847 followers</div>
+                            <div class="inline-flex items-center px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 font-medium">2,847 followers</div>
                         </div>
                     </div>
 
@@ -86,7 +86,7 @@
                                 <div class="flex items-center gap-4 text-xs">
                                     <span class="text-gray-500 dark:text-gray-400">Load-in: 4pm</span>
                                     <span class="text-gray-500 dark:text-gray-400">Sound check: 5:30pm</span>
-                                    <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Sold Out</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Sold Out</span>
                                 </div>
                             </div>
 
@@ -126,7 +126,7 @@
                             <div class="bg-gray-100 dark:bg-[#16161e] rounded-xl border border-gray-200 dark:border-white/5 p-4">
                                 <div class="flex items-center justify-between mb-3">
                                     <h4 class="text-gray-900 dark:text-white font-medium text-sm">Booking Requests</h4>
-                                    <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-xs">3 new</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-xs">3 new</span>
                                 </div>
                                 <div class="space-y-2">
                                     <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/5">
@@ -547,8 +547,8 @@
                                 <div class="text-gray-900 dark:text-white text-xl font-bold mb-1">Phoebe Bridgers</div>
                                 <div class="text-gray-600 dark:text-gray-300 text-sm">Saturday, March 15 / Doors 7pm</div>
                                 <div class="mt-3 flex items-center gap-2">
-                                    <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-xs">$45</span>
-                                    <span class="px-3 py-1 rounded-full bg-violet-500/30 text-violet-300 text-xs">On Sale Now</span>
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-xs">$45</span>
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-violet-500/30 text-violet-300 text-xs">On Sale Now</span>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between text-xs">

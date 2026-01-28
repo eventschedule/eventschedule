@@ -47,12 +47,12 @@
 
             <!-- Genre tags -->
             <div class="mt-14 flex flex-wrap justify-center gap-2">
-                <span class="px-3 py-1.5 rounded-lg bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300 text-xs font-medium border border-cyan-200 dark:border-cyan-800/50">Rock</span>
-                <span class="px-3 py-1.5 rounded-lg bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300 text-xs font-medium border border-teal-200 dark:border-teal-800/50">Jazz</span>
-                <span class="px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 text-xs font-medium border border-emerald-200 dark:border-emerald-800/50">Folk</span>
-                <span class="px-3 py-1.5 rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-xs font-medium border border-blue-200 dark:border-blue-800/50">Blues</span>
-                <span class="px-3 py-1.5 rounded-lg bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 text-xs font-medium border border-indigo-200 dark:border-indigo-800/50">Classical</span>
-                <span class="px-3 py-1.5 rounded-lg bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-800/50">Country</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300 text-xs font-medium border border-cyan-200 dark:border-cyan-800/50">Rock</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300 text-xs font-medium border border-teal-200 dark:border-teal-800/50">Jazz</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 text-xs font-medium border border-emerald-200 dark:border-emerald-800/50">Folk</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-xs font-medium border border-blue-200 dark:border-blue-800/50">Blues</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 text-xs font-medium border border-indigo-200 dark:border-indigo-800/50">Classical</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-800/50">Country</span>
             </div>
         </div>
     </section>
@@ -98,9 +98,9 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Announce tours directly to fans</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">New album dropping? Going on tour? Send beautiful show graphics directly to your fans' inbox. No algorithm gatekeeping. Your music, your audience.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Tour announcements</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Album releases</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Show reminders</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Tour announcements</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Album releases</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Show reminders</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -250,21 +250,21 @@
                             <div class="flex-1">
                                 <div class="text-gray-900 dark:text-white text-sm">Jamie</div>
                             </div>
-                            <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">Lead</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">Lead</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white text-xs font-semibold">MK</div>
                             <div class="flex-1">
                                 <div class="text-gray-600 dark:text-gray-300 text-sm">Mike</div>
                             </div>
-                            <span class="px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-300 text-[10px]">Manager</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-300 text-[10px]">Manager</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-yellow-500 to-amber-500 flex items-center justify-center text-white text-xs font-semibold">SA</div>
                             <div class="flex-1">
                                 <div class="text-gray-600 dark:text-gray-300 text-sm">Sarah</div>
                             </div>
-                            <span class="px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-300 text-[10px]">Agent</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-300 text-[10px]">Agent</span>
                         </div>
                     </div>
                 </div>

@@ -11,6 +11,13 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            .animate-pulse-slow,
+            .animate-pulse {
+                animation: none;
+            }
+        }
     </style>
 
     <!-- Hero Section -->
@@ -71,7 +78,7 @@
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center justify-between mb-3">
                             <span class="text-emerald-600 dark:text-emerald-400 text-xs font-medium">INVOICE #1042</span>
-                            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs">Sent</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs">Sent</span>
                         </div>
                         <div class="text-gray-900 dark:text-white font-semibold mb-1">Jazz Night VIP</div>
                         <div class="flex justify-between items-center">
@@ -296,10 +303,10 @@
                     <p class="text-gray-500 dark:text-gray-300 mb-4">Invoice in any currency supported by Invoice Ninja. Perfect for international events and clients.</p>
 
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">USD</span>
-                        <span class="px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">EUR</span>
-                        <span class="px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">GBP</span>
-                        <span class="px-2 py-1 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 text-sm">+100 more</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">USD</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">EUR</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">GBP</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 text-sm">+100 more</span>
                     </div>
                 </div>
 
