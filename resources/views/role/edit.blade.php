@@ -2034,6 +2034,16 @@
 </x-app-admin-layout>
 
 <script {!! nonce_attr() !!}>
+// Prevent browser scroll restoration and scroll to top immediately
+if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+}
+window.scrollTo(0, 0);
+document.documentElement.scrollTop = 0;
+if (document.body) {
+    document.body.scrollTop = 0;
+}
+
 // Style sub-tab navigation
 function showStyleTab(tabName) {
     // Hide all style tab contents
@@ -2663,6 +2673,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize on page load
     initializeSections();
 
+    // Multiple scroll guarantees to ensure page stays at top
+    function scrollToTop() {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+    }
+    scrollToTop();
+    setTimeout(scrollToTop, 0);
+    setTimeout(scrollToTop, 10);
+    requestAnimationFrame(scrollToTop);
+
     // Form validation error handling
     const form = document.querySelector('form');
     if (form) {
@@ -2791,6 +2812,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+});
+
+// Final scroll guarantee on window load
+window.addEventListener('load', function() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
 });
 
 // Integration tabs switching

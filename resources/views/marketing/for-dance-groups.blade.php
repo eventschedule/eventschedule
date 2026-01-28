@@ -76,7 +76,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-500/10 text-rose-300 text-sm font-medium mb-6 border border-rose-500/20">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300 text-sm font-medium mb-6 border border-rose-500/20">
                         Season Planning
                     </div>
                     <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
@@ -117,8 +117,8 @@
                         <div class="space-y-3">
                             <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-amber-500/10 to-transparent border-l-2 border-amber-400">
                                 <div class="text-center w-12">
-                                    <div class="text-amber-300 text-xs">OCT</div>
-                                    <div class="text-white font-medium">18-20</div>
+                                    <div class="text-amber-700 dark:text-amber-300 text-xs">OCT</div>
+                                    <div class="text-gray-900 dark:text-white font-medium">18-20</div>
                                 </div>
                                 <div>
                                     <div class="text-gray-900 dark:text-white text-sm font-medium">Fall Repertory</div>
@@ -127,8 +127,8 @@
                             </div>
                             <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-rose-500/10 to-transparent border-l-2 border-rose-400">
                                 <div class="text-center w-12">
-                                    <div class="text-rose-300 text-xs">DEC</div>
-                                    <div class="text-white font-medium">6-22</div>
+                                    <div class="text-rose-700 dark:text-rose-300 text-xs">DEC</div>
+                                    <div class="text-gray-900 dark:text-white font-medium">6-22</div>
                                 </div>
                                 <div>
                                     <div class="text-gray-900 dark:text-white text-sm font-medium">The Nutcracker</div>
@@ -137,8 +137,8 @@
                             </div>
                             <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-pink-500/10 to-transparent border-l-2 border-pink-400">
                                 <div class="text-center w-12">
-                                    <div class="text-pink-300 text-xs">MAR</div>
-                                    <div class="text-white font-medium">14-16</div>
+                                    <div class="text-pink-700 dark:text-pink-300 text-xs">MAR</div>
+                                    <div class="text-gray-900 dark:text-white font-medium">14-16</div>
                                 </div>
                                 <div>
                                     <div class="text-gray-900 dark:text-white text-sm font-medium">Contemporary Showcase</div>
@@ -147,8 +147,8 @@
                             </div>
                             <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-fuchsia-500/10 to-transparent border-l-2 border-fuchsia-400">
                                 <div class="text-center w-12">
-                                    <div class="text-fuchsia-300 text-xs">MAY</div>
-                                    <div class="text-white font-medium">30-31</div>
+                                    <div class="text-fuchsia-700 dark:text-fuchsia-300 text-xs">MAY</div>
+                                    <div class="text-gray-900 dark:text-white font-medium">30-31</div>
                                 </div>
                                 <div>
                                     <div class="text-gray-900 dark:text-white text-sm font-medium">Spring Gala</div>
@@ -217,7 +217,7 @@
                     </div>
                 </div>
                 <div class="order-1 lg:order-2">
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-fuchsia-500/10 text-fuchsia-300 text-sm font-medium mb-6 border border-fuchsia-500/20">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/10 dark:text-fuchsia-300 text-sm font-medium mb-6 border border-fuchsia-500/20">
                         Classes & Workshops
                     </div>
                     <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
@@ -286,7 +286,7 @@
                 <div class="bg-gradient-to-br from-gray-100 dark:from-stone-900 to-gray-50 dark:to-stone-800 rounded-3xl border border-gray-200 dark:border-stone-700 p-8 lg:p-12 hover:border-indigo-500/30 transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300 text-sm font-medium mb-4 border border-indigo-500/20">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 text-sm font-medium mb-4 border border-indigo-500/20">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
@@ -328,7 +328,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 text-violet-300 text-sm font-medium mb-6 border border-violet-500/20">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300 text-sm font-medium mb-6 border border-violet-500/20">
                         Company Management
                     </div>
                     <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
@@ -345,7 +345,7 @@
                                 <div class="text-gray-900 dark:text-white text-sm">Sarah Chen</div>
                                 <div class="text-stone-500 dark:text-stone-500 text-xs">Artistic Director</div>
                             </div>
-                            <span class="px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-xs">Owner</span>
+                            <span class="px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-xs">Owner</span>
                         </div>
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-stone-800/30 border border-gray-200/50 dark:border-stone-700/50">
                             <div class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white text-sm font-medium">MR</div>
@@ -353,7 +353,7 @@
                                 <div class="text-stone-600 dark:text-stone-300 text-sm">Marcus Rivera</div>
                                 <div class="text-stone-500 dark:text-stone-500 text-xs">Choreographer</div>
                             </div>
-                            <span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 text-xs">Admin</span>
+                            <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-xs">Admin</span>
                         </div>
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-stone-800/30 border border-gray-200/50 dark:border-stone-700/50">
                             <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-sm font-medium">JT</div>
@@ -361,7 +361,7 @@
                                 <div class="text-stone-600 dark:text-stone-300 text-sm">Jamie Torres</div>
                                 <div class="text-stone-500 dark:text-stone-500 text-xs">Company Manager</div>
                             </div>
-                            <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-xs">Admin</span>
+                            <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-xs">Admin</span>
                         </div>
                     </div>
                 </div>

@@ -498,18 +498,26 @@ class Event extends Model
             return '';
         }
 
+        // Select the correct route name based on available data
+        $routeName = 'event.view_guest';
+        if (isset($data['date'])) {
+            $routeName = 'event.view_guest_full';
+        } elseif (isset($data['id'])) {
+            $routeName = 'event.view_guest_with_id';
+        }
+
         // Check if the role has a custom domain
         $role = $this->roles->first(function ($role) use ($data) {
             return $role->subdomain == $data['subdomain'];
         });
 
         if ($role && $role->custom_domain && $useCustomDomain) {
-            $url = route('event.view_guest', $data, false);
+            $url = route($routeName, $data, false);
             $url = $role->custom_domain.$url;
 
-            return explode('?', $url)[0];
+            return $url;
         } else {
-            return route('event.view_guest', $data);
+            return route($routeName, $data);
         }
     }
 
@@ -541,9 +549,11 @@ class Event extends Model
         $data = [
             'subdomain' => $subdomain,
             'slug' => $slug,
+            'id' => UrlUtils::encodeId($this->id),  // Always include ID
         ];
 
-        if ($date) {
+        // Only include date for recurring events
+        if ($date && $this->days_of_week) {
             $data['date'] = $date;
         }
 
