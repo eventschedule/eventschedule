@@ -14,6 +14,11 @@ class GraphicController extends Controller
     public function generateGraphic(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->user()->isMember($subdomain)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
         $layout = $request->get('layout', 'grid');
 
         // Validate layout parameter
@@ -43,6 +48,10 @@ class GraphicController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        if (! auth()->user()->isMember($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
         return response()->json([
             'settings' => $role->graphic_settings,
             'is_pro' => $role->isPro(),
@@ -53,6 +62,10 @@ class GraphicController extends Controller
     public function saveSettings(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->user()->isMember($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
 
         $validated = $request->validate([
             'enabled' => 'boolean',
@@ -92,6 +105,10 @@ class GraphicController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        if (! auth()->user()->isMember($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
         // Require Enterprise plan for sending test emails
         if (! $role->isEnterprise()) {
             return response()->json([
@@ -130,6 +147,11 @@ class GraphicController extends Controller
     public function generateGraphicData(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->user()->isMember($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
         $graphicSettings = $role->graphic_settings;
 
         // Use request parameters if provided, otherwise fall back to saved settings
@@ -285,6 +307,11 @@ class GraphicController extends Controller
     public function downloadGraphic(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->user()->isMember($subdomain)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
         $graphicSettings = $role->graphic_settings;
 
         $layout = $request->get('layout', $graphicSettings['layout'] ?? 'grid');
