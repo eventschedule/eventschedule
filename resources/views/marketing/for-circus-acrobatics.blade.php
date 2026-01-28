@@ -699,10 +699,10 @@
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] spotlight-beam-center opacity-30"></div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-ivory mb-6">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
                 The show must go on.<br>Make sure they know where.
             </h2>
-            <p class="text-xl text-ivory/80 mb-10 max-w-2xl mx-auto">
+            <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
                 Your art deserves an audience. Free forever.
             </p>
             <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-900 hover:bg-amber-400 rounded-sm hover:scale-105 transition-all shadow-xl" style="background-color: #FFD700;">
@@ -778,22 +778,36 @@
         }
 
         /* Circus Color Palette - Dark Mode */
-        @media (prefers-color-scheme: dark) {
-            .bg-circus-dark { background-color: #0f0808; }
-            .text-crimson { color: #DC143C; }
-            .text-crimson-light { color: #ff4d6d; }
-            .text-gold { color: #FFD700; }
-            .text-ivory { color: #FFFFF0; }
-            .border-gold { border-color: #FFD700; }
-            .from-gold {
-                --tw-gradient-from: #FFD700 var(--tw-gradient-from-position);
-                --tw-gradient-to: rgb(255 215 0 / 0) var(--tw-gradient-to-position);
-                --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-            }
-            .to-gold {
-                --tw-gradient-to: #FFD700 var(--tw-gradient-to-position);
-            }
+        .dark .bg-circus-dark { background-color: #0f0808; }
+        .dark .text-crimson { color: #DC143C; }
+        .dark .text-crimson-light { color: #ff4d6d; }
+        .dark .text-gold { color: #FFD700; }
+        .dark .text-ivory { color: #FFFFF0; }
+        .dark .border-gold { border-color: #FFD700; }
+        .dark .from-gold {
+            --tw-gradient-from: #FFD700 var(--tw-gradient-from-position);
+            --tw-gradient-to: rgb(255 215 0 / 0) var(--tw-gradient-to-position);
+            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
         }
+        .dark .to-gold {
+            --tw-gradient-to: #FFD700 var(--tw-gradient-to-position);
+        }
+
+        /* Opacity variants for custom colors - Light Mode */
+        .text-ivory\/80 { color: rgba(31, 41, 55, 0.8); }
+        .text-ivory\/70 { color: rgba(31, 41, 55, 0.7); }
+        .text-gold\/80 { color: rgba(180, 83, 9, 0.8); }
+        .text-gold\/70 { color: rgba(180, 83, 9, 0.7); }
+        .text-gold\/60 { color: rgba(180, 83, 9, 0.6); }
+        .text-gold\/50 { color: rgba(180, 83, 9, 0.5); }
+
+        /* Opacity variants for custom colors - Dark Mode */
+        .dark .text-ivory\/80 { color: rgba(255, 255, 240, 0.8); }
+        .dark .text-ivory\/70 { color: rgba(255, 255, 240, 0.7); }
+        .dark .text-gold\/80 { color: rgba(255, 215, 0, 0.8); }
+        .dark .text-gold\/70 { color: rgba(255, 215, 0, 0.7); }
+        .dark .text-gold\/60 { color: rgba(255, 215, 0, 0.6); }
+        .dark .text-gold\/50 { color: rgba(255, 215, 0, 0.5); }
 
         .text-gradient-circus {
             background: linear-gradient(135deg, #b45309, #ea580c, #b91c3c);
@@ -802,13 +816,11 @@
             background-clip: text;
         }
 
-        @media (prefers-color-scheme: dark) {
-            .text-gradient-circus {
-                background: linear-gradient(135deg, #FFD700, #FFA500, #DC143C);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-            }
+        .dark .text-gradient-circus {
+            background: linear-gradient(135deg, #FFD700, #FFA500, #DC143C);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         /* Tent stripe background - Light Mode */
@@ -816,10 +828,8 @@
             background: repeating-linear-gradient(-45deg, #dc2626 0px, #dc2626 25px, #fef2f2 25px, #fef2f2 50px);
         }
 
-        @media (prefers-color-scheme: dark) {
-            .tent-stripe-bg {
-                background: repeating-linear-gradient(-45deg, #8b0000 0px, #8b0000 25px, #1a0505 25px, #1a0505 50px);
-            }
+        .dark .tent-stripe-bg {
+            background: repeating-linear-gradient(-45deg, #8b0000 0px, #8b0000 25px, #1a0505 25px, #1a0505 50px);
         }
 
         /* Spotlight beams - Light Mode (subtle) */
@@ -832,13 +842,11 @@
             background: conic-gradient(from 180deg at 50% 0%, transparent 35%, rgba(180,83,9,0.08) 50%, transparent 65%);
         }
 
-        @media (prefers-color-scheme: dark) {
-            .spotlight-beam {
-                background: conic-gradient(from 180deg at 50% 0%, transparent 40%, rgba(255,215,0,0.08) 50%, transparent 60%);
-            }
-            .spotlight-beam-center {
-                background: conic-gradient(from 180deg at 50% 0%, transparent 35%, rgba(255,255,240,0.1) 50%, transparent 65%);
-            }
+        .dark .spotlight-beam {
+            background: conic-gradient(from 180deg at 50% 0%, transparent 40%, rgba(255,215,0,0.08) 50%, transparent 60%);
+        }
+        .dark .spotlight-beam-center {
+            background: conic-gradient(from 180deg at 50% 0%, transparent 35%, rgba(255,255,240,0.1) 50%, transparent 65%);
         }
 
         @keyframes spotlight-sway {
@@ -857,15 +865,13 @@
             opacity: 0.3;
         }
 
-        @media (prefers-color-scheme: dark) {
-            .curtain-left {
-                background: linear-gradient(90deg, #8b0000 0%, #dc143c 60%, transparent 100%);
-                opacity: 0.4;
-            }
-            .curtain-right {
-                background: linear-gradient(-90deg, #8b0000 0%, #dc143c 60%, transparent 100%);
-                opacity: 0.4;
-            }
+        .dark .curtain-left {
+            background: linear-gradient(90deg, #8b0000 0%, #dc143c 60%, transparent 100%);
+            opacity: 0.4;
+        }
+        .dark .curtain-right {
+            background: linear-gradient(-90deg, #8b0000 0%, #dc143c 60%, transparent 100%);
+            opacity: 0.4;
         }
 
         /* Marquee badge - Light Mode */
@@ -875,22 +881,18 @@
             box-shadow: 0 0 20px rgba(180,83,9,0.1);
         }
 
-        @media (prefers-color-scheme: dark) {
-            .marquee-badge {
-                background: linear-gradient(135deg, rgba(139,0,0,0.8), rgba(220,20,60,0.6));
-                border: 2px solid rgba(255,215,0,0.5);
-                box-shadow: 0 0 20px rgba(255,215,0,0.2);
-            }
+        .dark .marquee-badge {
+            background: linear-gradient(135deg, rgba(139,0,0,0.8), rgba(220,20,60,0.6));
+            border: 2px solid rgba(255,215,0,0.5);
+            box-shadow: 0 0 20px rgba(255,215,0,0.2);
         }
 
         .marquee-button {
             box-shadow: 0 4px 20px rgba(180,83,9,0.2);
         }
 
-        @media (prefers-color-scheme: dark) {
-            .marquee-button {
-                box-shadow: 0 4px 20px rgba(255,215,0,0.3);
-            }
+        .dark .marquee-button {
+            box-shadow: 0 4px 20px rgba(255,215,0,0.3);
         }
 
         /* Playbill styling - Light Mode */
@@ -899,11 +901,9 @@
             background: linear-gradient(135deg, rgba(185,28,60,0.1), rgba(250,245,240,0.8));
         }
 
-        @media (prefers-color-scheme: dark) {
-            .playbill-header {
-                border: 3px double rgba(255,215,0,0.6);
-                background: linear-gradient(135deg, rgba(139,0,0,0.3), rgba(15,8,8,0.8));
-            }
+        .dark .playbill-header {
+            border: 3px double rgba(255,215,0,0.6);
+            background: linear-gradient(135deg, rgba(139,0,0,0.3), rgba(15,8,8,0.8));
         }
 
         /* Playbill card - Light Mode */
@@ -917,11 +917,9 @@
             overflow: hidden;
         }
 
-        @media (prefers-color-scheme: dark) {
-            .playbill-card {
-                background: linear-gradient(135deg, rgba(30,15,15,0.8), rgba(15,8,8,0.9));
-                border: 1px solid rgba(255,215,0,0.15);
-            }
+        .dark .playbill-card {
+            background: linear-gradient(135deg, rgba(30,15,15,0.8), rgba(15,8,8,0.9));
+            border: 1px solid rgba(255,215,0,0.15);
         }
 
         .playbill-card::before,
@@ -948,19 +946,17 @@
             border-right-color: rgba(180,83,9,0.15);
         }
 
-        @media (prefers-color-scheme: dark) {
-            .playbill-card::before,
-            .playbill-card::after {
-                border-color: rgba(255,215,0,0);
-            }
-            .playbill-card::before {
-                border-top-color: rgba(255,215,0,0.2);
-                border-left-color: rgba(255,215,0,0.2);
-            }
-            .playbill-card::after {
-                border-bottom-color: rgba(255,215,0,0.2);
-                border-right-color: rgba(255,215,0,0.2);
-            }
+        .dark .playbill-card::before,
+        .dark .playbill-card::after {
+            border-color: rgba(255,215,0,0);
+        }
+        .dark .playbill-card::before {
+            border-top-color: rgba(255,215,0,0.2);
+            border-left-color: rgba(255,215,0,0.2);
+        }
+        .dark .playbill-card::after {
+            border-bottom-color: rgba(255,215,0,0.2);
+            border-right-color: rgba(255,215,0,0.2);
         }
 
         .playbill-card:hover {
@@ -968,11 +964,9 @@
             box-shadow: 0 0 30px rgba(180,83,9,0.08);
         }
 
-        @media (prefers-color-scheme: dark) {
-            .playbill-card:hover {
-                border-color: rgba(255,215,0,0.4);
-                box-shadow: 0 0 30px rgba(255,215,0,0.1);
-            }
+        .dark .playbill-card:hover {
+            border-color: rgba(255,215,0,0.4);
+            box-shadow: 0 0 30px rgba(255,215,0,0.1);
         }
 
         .playbill-card:hover::before {
@@ -985,15 +979,13 @@
             border-right-color: rgba(180,83,9,0.4);
         }
 
-        @media (prefers-color-scheme: dark) {
-            .playbill-card:hover::before {
-                border-top-color: rgba(255,215,0,0.5);
-                border-left-color: rgba(255,215,0,0.5);
-            }
-            .playbill-card:hover::after {
-                border-bottom-color: rgba(255,215,0,0.5);
-                border-right-color: rgba(255,215,0,0.5);
-            }
+        .dark .playbill-card:hover::before {
+            border-top-color: rgba(255,215,0,0.5);
+            border-left-color: rgba(255,215,0,0.5);
+        }
+        .dark .playbill-card:hover::after {
+            border-bottom-color: rgba(255,215,0,0.5);
+            border-right-color: rgba(255,215,0,0.5);
         }
 
         /* Sparkle on hover */
@@ -1017,10 +1009,8 @@
             text-align: center;
         }
 
-        @media (prefers-color-scheme: dark) {
-            .act-number {
-                color: rgba(255,215,0,0.8);
-            }
+        .dark .act-number {
+            color: rgba(255,215,0,0.8);
         }
 
         /* Silk sway animation */
