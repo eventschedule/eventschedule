@@ -68,7 +68,7 @@
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Stripe Checkout</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Hosted payment page handles everything. Customers complete payment on Stripe's secure checkout.</p>
 
-                    <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                    <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-3 mb-3">
                             <div class="flex -space-x-2">
                                 <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
@@ -126,7 +126,7 @@
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Instant confirmation</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-4">Webhooks notify us the moment payment completes. Tickets are delivered instantly via email.</p>
 
-                    <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-3 border border-gray-200 dark:border-white/10">
+                    <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-3 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-2">
                             <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
                             <span class="text-emerald-300 text-xs font-mono">payment_intent.succeeded</span>

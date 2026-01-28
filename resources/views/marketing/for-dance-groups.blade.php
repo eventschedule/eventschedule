@@ -48,7 +48,7 @@
     </section>
 
     <!-- The Dance Life Section - Unique to dancers -->
-    <section class="bg-gray-50 dark:bg-stone-950 py-20">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-20">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-4 gap-8 text-center">
                 <div class="p-6">
@@ -163,7 +163,7 @@
     </section>
 
     <!-- Classes & Workshops Section - Unique to dance -->
-    <section class="bg-gray-50 dark:bg-stone-950 py-24 border-t border-gray-200 dark:border-stone-800/50">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24 border-t border-gray-200 dark:border-stone-800/50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div class="order-2 lg:order-1">
@@ -280,7 +280,7 @@
     </section>
 
     <!-- Virtual Performances - Link to online events -->
-    <section class="bg-gray-50 dark:bg-stone-950 py-24 border-t border-gray-200 dark:border-stone-800/50">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24 border-t border-gray-200 dark:border-stone-800/50">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/online-events') }}" class="group block">
                 <div class="bg-gradient-to-br from-gray-100 dark:from-stone-900 to-gray-50 dark:to-stone-800 rounded-3xl border border-gray-200 dark:border-stone-700 p-8 lg:p-12 hover:border-indigo-500/30 transition-all duration-300">
@@ -398,13 +398,13 @@
     </section>
 
     <!-- Perfect For Section - 6 Dance Sub-types -->
-    <section class="bg-stone-50 py-24">
+    <section class="bg-stone-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-light text-stone-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-light text-stone-900 dark:text-white mb-4">
                     Built for every style of dance
                 </h2>
-                <p class="text-lg text-stone-500">
+                <p class="text-lg text-stone-500 dark:text-gray-400">
                     From classical technique to street dance, we understand how you work.
                 </p>
             </div>
@@ -486,20 +486,20 @@
     </section>
 
     <!-- Social Promo Graphics -->
-    <section class="bg-white py-24 border-t border-stone-100">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-stone-100 dark:border-stone-800/50">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 text-orange-600 text-sm font-medium mb-6 border border-orange-500/20">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-600 text-sm font-medium mb-6 border border-orange-500/20">
                         Promo Graphics
                     </div>
-                    <h2 class="text-3xl md:text-4xl font-light text-stone-900 mb-6">
+                    <h2 class="text-3xl md:text-4xl font-light text-stone-900 dark:text-white mb-6">
                         Share-ready images for every performance
                     </h2>
-                    <p class="text-lg text-stone-600 mb-6">
+                    <p class="text-lg text-stone-600 dark:text-gray-400 mb-6">
                         Auto-generate promotional graphics sized perfectly for Instagram, Facebook, and stories. No design skills needed - just download and post.
                     </p>
-                    <ul class="space-y-3 text-stone-600">
+                    <ul class="space-y-3 text-stone-600 dark:text-gray-400">
                         <li class="flex items-center gap-2">
                             <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -539,10 +539,10 @@
     </section>
 
     <!-- How it Works -->
-    <section class="bg-stone-100 py-24">
+    <section class="bg-stone-100 dark:bg-[#0f0f14] py-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-light text-stone-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-light text-stone-900 dark:text-white mb-4">
                     From sign-up to sold-out
                 </h2>
             </div>
@@ -552,8 +552,8 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-pink-600 text-white text-xl font-medium rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-rose-500/25">
                         1
                     </div>
-                    <h3 class="text-lg font-medium text-stone-900 mb-2">Add your season</h3>
-                    <p class="text-stone-500 text-sm">
+                    <h3 class="text-lg font-medium text-stone-900 dark:text-white mb-2">Add your season</h3>
+                    <p class="text-stone-500 dark:text-gray-400 text-sm">
                         Import from Google Calendar or add performances manually. Classes, workshops, shows - all in one place.
                     </p>
                 </div>
@@ -562,8 +562,8 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-pink-600 text-white text-xl font-medium rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-rose-500/25">
                         2
                     </div>
-                    <h3 class="text-lg font-medium text-stone-900 mb-2">Share your link</h3>
-                    <p class="text-stone-500 text-sm">
+                    <h3 class="text-lg font-medium text-stone-900 dark:text-white mb-2">Share your link</h3>
+                    <p class="text-stone-500 dark:text-gray-400 text-sm">
                         Put it on your website, in programs, on posters, in your social bios. One URL that's always current.
                     </p>
                 </div>
@@ -572,8 +572,8 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-pink-600 text-white text-xl font-medium rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-rose-500/25">
                         3
                     </div>
-                    <h3 class="text-lg font-medium text-stone-900 mb-2">Fill your seats</h3>
-                    <p class="text-stone-500 text-sm">
+                    <h3 class="text-lg font-medium text-stone-900 dark:text-white mb-2">Fill your seats</h3>
+                    <p class="text-stone-500 dark:text-gray-400 text-sm">
                         Fans subscribe and get notified about new performances. Sell tickets directly. Build your audience.
                     </p>
                 </div>

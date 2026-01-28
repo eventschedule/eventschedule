@@ -47,12 +47,12 @@
 
                     <!-- Genre tags -->
                     <div class="mt-12 flex flex-wrap justify-center lg:justify-start gap-2">
-                        <span class="px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-xs font-medium border border-pink-500/30">EDM</span>
-                        <span class="px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 text-xs font-medium border border-fuchsia-500/30">Hip-Hop</span>
-                        <span class="px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-xs font-medium border border-violet-500/30">Latin</span>
-                        <span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-medium border border-purple-500/30">Rooftop</span>
-                        <span class="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-medium border border-indigo-500/30">Underground</span>
-                        <span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-medium border border-cyan-500/30">Lounge</span>
+                        <span class="px-3 py-1 rounded-full bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300 text-xs font-medium border border-pink-200 dark:border-pink-500/30">EDM</span>
+                        <span class="px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/20 dark:text-fuchsia-300 text-xs font-medium border border-fuchsia-200 dark:border-fuchsia-500/30">Hip-Hop</span>
+                        <span class="px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-500/30">Latin</span>
+                        <span class="px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-xs font-medium border border-purple-200 dark:border-purple-500/30">Rooftop</span>
+                        <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-xs font-medium border border-indigo-200 dark:border-indigo-500/30">Underground</span>
+                        <span class="px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-xs font-medium border border-cyan-200 dark:border-cyan-500/30">Lounge</span>
                     </div>
                 </div>
 
@@ -126,17 +126,17 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Weekly Lineup Blast - HERO FEATURE (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-900/50 to-fuchsia-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-100 to-fuchsia-100 dark:from-pink-900/50 dark:to-fuchsia-900/50 border border-pink-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                                 Weekly Lineup Blast
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Drop your weekend lineup</h3>
-                            <p class="text-gray-400 text-lg mb-6">Thursday rolls around, you blast out the weekend's DJs to everyone on your list. No algorithm. No pay-to-play. Just your crowd, hyped and ready.</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Drop your weekend lineup</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-lg mb-6">Thursday rolls around, you blast out the weekend's DJs to everyone on your list. No algorithm. No pay-to-play. Just your crowd, hyped and ready.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">One-click send</span>
                                 <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Your list, your reach</span>
@@ -177,15 +177,15 @@
                 </div>
 
                 <!-- Guest List Signups -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/50 dark:to-teal-900/50 border border-emerald-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                         </svg>
                         Guest List
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Get on the list</h3>
-                    <p class="text-gray-400 mb-6">Fans sign up for your guest list right from your calendar. Reduced cover before 11pm - the status thing that fills your early crowd.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Get on the list</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">Fans sign up for your guest list right from your calendar. Reduced cover before 11pm - the status thing that fills your early crowd.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center gap-3 p-2 rounded-lg bg-emerald-500/20 border border-emerald-400/30">
@@ -206,15 +206,15 @@
                 </div>
 
                 <!-- Themed Nights on Autopilot -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-900/50 to-purple-900/50 border border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-100 to-purple-100 dark:from-fuchsia-900/50 dark:to-purple-900/50 border border-fuchsia-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/20 dark:text-fuchsia-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                         Branded Nights
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Your signature nights</h3>
-                    <p class="text-gray-400 mb-6">Latin Fridays. 80s Saturdays. Techno Sundays. Set them up once - they show automatically every week. Build the brand.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your signature nights</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">Latin Fridays. 80s Saturdays. Techno Sundays. Set them up once - they show automatically every week. Build the brand.</p>
 
                     <!-- Mini week view with colors -->
                     <div class="grid grid-cols-7 gap-1">
@@ -251,17 +251,17 @@
                 </div>
 
                 <!-- VIP Tables & Bottle Service - HERO POSITION (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50 border border-amber-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                 </svg>
                                 VIP & Bottle Service
                             </div>
-                            <h3 class="text-3xl font-bold text-white mb-4">Table bookings, handled</h3>
-                            <p class="text-gray-400 text-lg">VIP table requests, bottle service inquiries, birthday packages - all in one inbox. See party size, minimum spend, special requests. Your biggest revenue driver, organized.</p>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Table bookings, handled</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-lg">VIP table requests, bottle service inquiries, birthday packages - all in one inbox. See party size, minimum spend, special requests. Your biggest revenue driver, organized.</p>
                             <div class="flex flex-wrap gap-3 mt-4">
                                 <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Table reservations</span>
                                 <span class="px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Bottle service</span>
@@ -293,15 +293,15 @@
                 </div>
 
                 <!-- DJ Booking Requests -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-violet-900/50 border border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900/50 dark:to-violet-900/50 border border-indigo-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         DJ Inbox
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">DJs come to you</h3>
-                    <p class="text-gray-400 mb-6">Artists submit to play your club. See their SoundCloud, genre, and past gigs. Accept or pass - no endless email threads.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">DJs come to you</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">Artists submit to play your club. See their SoundCloud, genre, and past gigs. Accept or pass - no endless email threads.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-500/20 border border-indigo-400/30">
@@ -323,15 +323,15 @@
                 </div>
 
                 <!-- Lineup Graphics for Social -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-purple-900/50 border border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/50 dark:to-purple-900/50 border border-violet-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Social Graphics
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Insta-ready lineups</h3>
-                    <p class="text-gray-400 mb-6">Auto-generate lineup graphics for Instagram stories and posts. Your DJs, your branding, ready to share.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Insta-ready lineups</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">Auto-generate lineup graphics for Instagram stories and posts. Your DJs, your branding, ready to share.</p>
 
                     <div class="flex justify-center">
                         <div class="relative">
@@ -359,15 +359,15 @@
                 </div>
 
                 <!-- Sold Out Saturdays (Ticketing) -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-900/50 to-pink-900/50 border border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/50 dark:to-pink-900/50 border border-rose-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                         </svg>
                         Ticketing
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Sold out Saturdays</h3>
-                    <p class="text-gray-400 mb-6">NYE. Headliner shows. Theme party takeovers. Sell tickets, scan QR codes at the door. Zero platform fees.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sold out Saturdays</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">NYE. Headliner shows. Theme party takeovers. Sell tickets, scan QR codes at the door. Zero platform fees.</p>
 
                     <div class="flex items-center gap-3">
                         <div class="flex-1 bg-rose-500/20 rounded-xl border border-rose-400/30 p-3">
@@ -403,17 +403,17 @@
             <!-- Thu-Fri-Sat progression -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Thursday -->
-                <div class="bg-gradient-to-br from-fuchsia-900/40 to-purple-900/40 rounded-2xl border border-fuchsia-500/30 p-6">
+                <div class="bg-gradient-to-br from-fuchsia-100 to-purple-100 dark:from-fuchsia-900/40 dark:to-purple-900/40 rounded-2xl border border-fuchsia-200 dark:border-fuchsia-500/30 p-6">
                     <div class="flex items-center gap-3 mb-4">
-                        <div class="w-12 h-12 bg-fuchsia-500/20 rounded-xl flex items-center justify-center">
-                            <span class="text-fuchsia-400 text-lg font-bold">THU</span>
+                        <div class="w-12 h-12 bg-fuchsia-100 dark:bg-fuchsia-500/20 rounded-xl flex items-center justify-center">
+                            <span class="text-fuchsia-600 dark:text-fuchsia-400 text-lg font-bold">THU</span>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold text-white">Industry Night</h3>
-                            <p class="text-fuchsia-300 text-sm">Service industry</p>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Industry Night</h3>
+                            <p class="text-fuchsia-600 dark:text-fuchsia-300 text-sm">Service industry</p>
                         </div>
                     </div>
-                    <div class="space-y-2 text-sm text-gray-400">
+                    <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-fuchsia-400"></div>
                             <span>Lower cover / free entry</span>
@@ -430,17 +430,17 @@
                 </div>
 
                 <!-- Friday -->
-                <div class="bg-gradient-to-br from-orange-900/40 to-amber-900/40 rounded-2xl border border-orange-500/30 p-6">
+                <div class="bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/40 dark:to-amber-900/40 rounded-2xl border border-orange-200 dark:border-orange-500/30 p-6">
                     <div class="flex items-center gap-3 mb-4">
-                        <div class="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center">
-                            <span class="text-orange-400 text-lg font-bold">FRI</span>
+                        <div class="w-12 h-12 bg-orange-100 dark:bg-orange-500/20 rounded-xl flex items-center justify-center">
+                            <span class="text-orange-600 dark:text-orange-400 text-lg font-bold">FRI</span>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold text-white">Themed Night</h3>
-                            <p class="text-orange-300 text-sm">Latin, Hip-Hop, 80s</p>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Themed Night</h3>
+                            <p class="text-orange-600 dark:text-orange-300 text-sm">Latin, Hip-Hop, 80s</p>
                         </div>
                     </div>
-                    <div class="space-y-2 text-sm text-gray-400">
+                    <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
                             <span>Branded recurring night</span>
@@ -457,17 +457,17 @@
                 </div>
 
                 <!-- Saturday -->
-                <div class="bg-gradient-to-br from-pink-900/40 to-rose-900/40 rounded-2xl border border-pink-500/30 p-6">
+                <div class="bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-900/40 dark:to-rose-900/40 rounded-2xl border border-pink-200 dark:border-pink-500/30 p-6">
                     <div class="flex items-center gap-3 mb-4">
-                        <div class="w-12 h-12 bg-pink-500/20 rounded-xl flex items-center justify-center">
-                            <span class="text-pink-400 text-lg font-bold">SAT</span>
+                        <div class="w-12 h-12 bg-pink-100 dark:bg-pink-500/20 rounded-xl flex items-center justify-center">
+                            <span class="text-pink-600 dark:text-pink-400 text-lg font-bold">SAT</span>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold text-white">Headliner Night</h3>
-                            <p class="text-pink-300 text-sm">Touring DJ, premium</p>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Headliner Night</h3>
+                            <p class="text-pink-600 dark:text-pink-300 text-sm">Touring DJ, premium</p>
                         </div>
                     </div>
-                    <div class="space-y-2 text-sm text-gray-400">
+                    <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-pink-400"></div>
                             <span>Premium pricing / ticketed</span>

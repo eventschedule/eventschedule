@@ -91,7 +91,7 @@
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/20 dark:text-fuchsia-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                                 </svg>
@@ -115,26 +115,26 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float">
-                                <div class="bg-gradient-to-br from-fuchsia-900/50 to-pink-900/50 rounded-2xl border border-fuchsia-500/30 p-6 w-72 shadow-2xl shadow-fuchsia-500/10">
+                                <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-fuchsia-900/50 dark:to-pink-900/50 rounded-2xl border border-gray-200 dark:border-fuchsia-500/30 p-6 w-72 shadow-2xl shadow-fuchsia-500/10">
                                     <div class="space-y-3">
-                                        <div class="flex items-center justify-between p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
+                                        <div class="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10">
                                             <div>
                                                 <div class="text-gray-900 dark:text-white font-medium">Early Bird</div>
                                                 <div class="text-emerald-400 text-xs">50 remaining</div>
                                             </div>
                                             <div class="text-xl font-bold text-gray-900 dark:text-white">$15</div>
                                         </div>
-                                        <div class="flex items-center justify-between p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
+                                        <div class="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10">
                                             <div>
                                                 <div class="text-gray-900 dark:text-white font-medium">General</div>
                                                 <div class="text-gray-500 dark:text-gray-400 text-xs">142 sold</div>
                                             </div>
                                             <div class="text-xl font-bold text-gray-900 dark:text-white">$25</div>
                                         </div>
-                                        <div class="flex items-center justify-between p-3 rounded-xl bg-fuchsia-500/20 border border-fuchsia-400/30">
+                                        <div class="flex items-center justify-between p-3 rounded-xl bg-fuchsia-100 dark:bg-fuchsia-500/20 border border-fuchsia-200 dark:border-fuchsia-400/30">
                                             <div>
                                                 <div class="text-gray-900 dark:text-white font-medium">VIP</div>
-                                                <div class="text-fuchsia-300 text-xs">38 sold</div>
+                                                <div class="text-fuchsia-600 dark:text-fuchsia-300 text-xs">38 sold</div>
                                             </div>
                                             <div class="text-xl font-bold text-gray-900 dark:text-white">$75</div>
                                         </div>
@@ -160,7 +160,7 @@
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                                 </svg>
@@ -185,8 +185,8 @@
                             <div class="animate-float" style="animation-delay: 0.5s;">
                                 <div class="flex flex-col items-center gap-2">
                                     <!-- Input -->
-                                    <div class="bg-gray-200 dark:bg-black/40 rounded-xl border border-gray-200 dark:border-white/10 p-4 w-56">
-                                        <div class="text-xs text-gray-400 dark:text-gray-500 mb-2">Paste or drop</div>
+                                    <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-56">
+                                        <div class="text-xs text-gray-500 dark:text-gray-500 mb-2">Paste or drop</div>
                                         <div class="text-sm text-gray-600 dark:text-gray-300 font-mono leading-relaxed">
                                             Jazz Night at Blue Note<br>
                                             Friday, March 15 at 8pm<br>
@@ -198,8 +198,8 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                                     </svg>
                                     <!-- Output -->
-                                    <div class="bg-gradient-to-br from-violet-500/20 to-indigo-500/20 rounded-xl border border-violet-400/30 p-4 w-56">
-                                        <div class="text-xs text-violet-300 mb-2">Extracted</div>
+                                    <div class="bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-500/20 dark:to-indigo-500/20 rounded-xl border border-violet-200 dark:border-violet-400/30 p-4 w-56">
+                                        <div class="text-xs text-violet-600 dark:text-violet-300 mb-2">Extracted</div>
                                         <div class="space-y-1.5 text-sm">
                                             <div class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Name:</span><span class="text-gray-900 dark:text-white">Jazz Night</span></div>
                                             <div class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Date:</span><span class="text-gray-900 dark:text-white">Mar 15, 8 PM</span></div>
@@ -227,7 +227,7 @@
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
@@ -252,8 +252,8 @@
                             <div class="animate-float" style="animation-delay: 1s;">
                                 <div class="flex items-center gap-4">
                                     <!-- Event Schedule box -->
-                                    <div class="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl border border-blue-400/30 p-4 w-28">
-                                        <div class="text-xs text-blue-300 mb-2 text-center">Event Schedule</div>
+                                    <div class="bg-blue-100 dark:bg-gradient-to-br dark:from-blue-500/20 dark:to-indigo-500/20 rounded-xl border border-blue-200 dark:border-blue-400/30 p-4 w-28">
+                                        <div class="text-xs text-blue-600 dark:text-blue-300 mb-2 text-center">Event Schedule</div>
                                         <div class="space-y-1.5">
                                             <div class="h-2 bg-white/20 rounded"></div>
                                             <div class="h-2 bg-white/20 rounded w-3/4"></div>
@@ -299,7 +299,7 @@
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
@@ -322,8 +322,8 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.3s;">
-                                <div class="bg-gradient-to-br from-emerald-900/50 to-teal-900/50 rounded-xl border border-emerald-500/30 p-5 w-64">
-                                    <div class="text-xs text-gray-400 dark:text-gray-500 mb-3">Views this week</div>
+                                <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-emerald-900/50 dark:to-teal-900/50 rounded-xl border border-gray-200 dark:border-emerald-500/30 p-5 w-64">
+                                    <div class="text-xs text-gray-500 mb-3">Views this week</div>
                                     <div class="flex items-end justify-between h-24 gap-2">
                                         <div class="w-6 bg-emerald-500/40 rounded-t" style="height: 40%"></div>
                                         <div class="w-6 bg-emerald-500/50 rounded-t" style="height: 55%"></div>
@@ -333,7 +333,7 @@
                                         <div class="w-6 bg-emerald-500/90 rounded-t" style="height: 85%"></div>
                                         <div class="w-6 bg-emerald-500 rounded-t" style="height: 100%"></div>
                                     </div>
-                                    <div class="flex justify-between mt-2 text-xs text-gray-400 dark:text-gray-500">
+                                    <div class="flex justify-between mt-2 text-xs text-gray-500">
                                         <span>M</span>
                                         <span>T</span>
                                         <span>W</span>
@@ -363,7 +363,7 @@
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
@@ -386,26 +386,26 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.7s;">
-                                <div class="bg-gradient-to-br from-amber-900/50 to-orange-900/50 rounded-xl border border-amber-500/30 p-5 w-56 space-y-3">
+                                <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-amber-900/50 dark:to-orange-900/50 rounded-xl border border-gray-200 dark:border-amber-500/30 p-5 w-56 space-y-3">
                                     <!-- Text field -->
                                     <div>
-                                        <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">Company Name</div>
-                                        <div class="bg-gray-200 dark:bg-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm border border-gray-200 dark:border-white/10">Acme Corp</div>
+                                        <div class="text-[10px] text-gray-500 mb-1">Company Name</div>
+                                        <div class="bg-white dark:bg-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm border border-gray-200 dark:border-white/10">Acme Corp</div>
                                     </div>
                                     <!-- Dropdown field -->
                                     <div>
-                                        <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">T-Shirt Size</div>
-                                        <div class="bg-gray-200 dark:bg-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm border border-gray-200 dark:border-white/10 flex items-center justify-between">
+                                        <div class="text-[10px] text-gray-500 mb-1">T-Shirt Size</div>
+                                        <div class="bg-white dark:bg-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm border border-gray-200 dark:border-white/10 flex items-center justify-between">
                                             <span>Large</span>
                                             <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                                         </div>
                                     </div>
                                     <!-- Yes/No field -->
                                     <div>
-                                        <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">Vegetarian?</div>
-                                        <div class="bg-amber-500/20 rounded-lg px-3 py-2 text-amber-300 text-sm border border-amber-400/30 flex items-center justify-between">
+                                        <div class="text-[10px] text-gray-500 mb-1">Vegetarian?</div>
+                                        <div class="bg-amber-100 dark:bg-amber-500/20 rounded-lg px-3 py-2 text-amber-700 dark:text-amber-300 text-sm border border-amber-200 dark:border-amber-400/30 flex items-center justify-between">
                                             <span>Yes</span>
-                                            <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                            <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                                         </div>
                                     </div>
                                 </div>
@@ -429,7 +429,7 @@
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                 </svg>
@@ -452,30 +452,30 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 1.2s;">
-                                <div class="bg-gradient-to-br from-cyan-900/50 to-teal-900/50 rounded-xl border border-cyan-500/30 p-4 w-56 space-y-2">
+                                <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-cyan-900/50 dark:to-teal-900/50 rounded-xl border border-gray-200 dark:border-cyan-500/30 p-4 w-56 space-y-2">
                                     <!-- Team member 1 -->
-                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-white/10">
                                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center text-white text-xs font-semibold">JD</div>
                                         <div class="flex-1 min-w-0">
                                             <div class="text-gray-900 dark:text-white text-sm font-medium truncate">John Doe</div>
                                         </div>
-                                        <span class="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px]">Owner</span>
+                                        <span class="px-1.5 py-0.5 rounded bg-cyan-100 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-300 text-[10px]">Owner</span>
                                     </div>
                                     <!-- Team member 2 -->
-                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
                                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center text-white text-xs font-semibold">AS</div>
                                         <div class="flex-1 min-w-0">
                                             <div class="text-gray-600 dark:text-gray-300 text-sm font-medium truncate">Alice Smith</div>
                                         </div>
-                                        <span class="px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 text-[10px]">Admin</span>
+                                        <span class="px-1.5 py-0.5 rounded bg-teal-100 dark:bg-teal-500/20 text-teal-600 dark:text-teal-300 text-[10px]">Admin</span>
                                     </div>
                                     <!-- Team member 3 -->
-                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
                                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center text-white text-xs font-semibold">BJ</div>
                                         <div class="flex-1 min-w-0">
                                             <div class="text-gray-600 dark:text-gray-300 text-sm font-medium truncate">Bob Jones</div>
                                         </div>
-                                        <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">Follower</span>
+                                        <span class="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 text-[10px]">Follower</span>
                                     </div>
                                 </div>
                             </div>
@@ -498,7 +498,7 @@
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
@@ -521,22 +521,22 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.4s;">
-                                <div class="bg-gradient-to-br from-rose-900/50 to-pink-900/50 rounded-xl border border-rose-500/30 p-4 w-56">
-                                    <div class="text-xs text-gray-400 dark:text-gray-500 mb-3">Sub-schedules</div>
+                                <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-rose-900/50 dark:to-pink-900/50 rounded-xl border border-gray-200 dark:border-rose-500/30 p-4 w-56">
+                                    <div class="text-xs text-gray-500 mb-3">Sub-schedules</div>
                                     <div class="space-y-2">
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-rose-500/20 border border-rose-500/30">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-rose-100 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/30">
                                             <div class="w-2 h-2 rounded-full bg-rose-400"></div>
                                             <span class="text-gray-900 dark:text-white text-sm">Main Stage</span>
                                         </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
                                             <div class="w-2 h-2 rounded-full bg-pink-400"></div>
                                             <span class="text-gray-600 dark:text-gray-300 text-sm">Acoustic Room</span>
                                         </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
                                             <div class="w-2 h-2 rounded-full bg-fuchsia-400"></div>
                                             <span class="text-gray-600 dark:text-gray-300 text-sm">Outdoor Patio</span>
                                         </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
                                             <div class="w-2 h-2 rounded-full bg-purple-400"></div>
                                             <span class="text-gray-600 dark:text-gray-300 text-sm">Jazz Lounge</span>
                                         </div>
@@ -562,7 +562,7 @@
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
@@ -585,7 +585,7 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.8s;">
-                                <div class="bg-gradient-to-br from-indigo-900/50 to-violet-900/50 rounded-xl border border-indigo-500/30 p-4 w-56">
+                                <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-indigo-900/50 dark:to-violet-900/50 rounded-xl border border-gray-200 dark:border-indigo-500/30 p-4 w-56">
                                     <!-- Toggle switch -->
                                     <div class="flex items-center justify-between mb-4">
                                         <span class="text-gray-600 dark:text-gray-300 text-sm">Online Event</span>
@@ -595,9 +595,9 @@
                                     </div>
                                     <!-- URL field -->
                                     <div>
-                                        <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">Streaming URL</div>
-                                        <div class="bg-indigo-500/20 rounded-lg px-3 py-2 text-indigo-300 text-sm border border-indigo-400/30 flex items-center gap-2">
-                                            <svg class="w-4 h-4 text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <div class="text-[10px] text-gray-500 mb-1">Streaming URL</div>
+                                        <div class="bg-indigo-100 dark:bg-indigo-500/20 rounded-lg px-3 py-2 text-indigo-600 dark:text-indigo-300 text-sm border border-indigo-200 dark:border-indigo-400/30 flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-indigo-500 dark:text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
                                             </svg>
                                             <span class="truncate">zoom.us/j/123...</span>
@@ -647,7 +647,7 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.6s;">
-                                <div class="bg-gray-200 dark:bg-black/50 rounded-xl border border-gray-300 dark:border-white/20 overflow-hidden w-60">
+                                <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border border-gray-300 dark:border-white/20 overflow-hidden w-60">
                                     <!-- Terminal header -->
                                     <div class="flex items-center gap-1.5 px-3 py-2 bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
                                         <div class="w-2.5 h-2.5 rounded-full bg-red-500/70"></div>

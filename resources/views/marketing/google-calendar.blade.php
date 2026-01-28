@@ -71,7 +71,7 @@
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">OAuth 2.0 authentication</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Connect with one click using Google's secure OAuth. No passwords stored. Automatic token refresh keeps you connected.</p>
 
-                    <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                    <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
                                 <svg class="w-6 h-6" viewBox="0 0 24 24">
@@ -103,7 +103,7 @@
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Instant webhook updates</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Changes in Google Calendar appear instantly. Webhook notifications mean no polling delays.</p>
 
-                    <div class="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                    <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center animate-sync">
                                 <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

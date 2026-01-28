@@ -68,7 +68,7 @@
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Professional invoices</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Every ticket purchase automatically generates a professional invoice in Invoice Ninja with all the details.</p>
 
-                    <div class="bg-gray-200 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                    <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center justify-between mb-3">
                             <span class="text-emerald-400 text-xs font-medium">INVOICE #1042</span>
                             <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-xs">Sent</span>
@@ -239,7 +239,7 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Client portal</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Customers access their invoices through Invoice Ninja's client portal. View history, download PDFs, and pay online.</p>
                         </div>
-                        <div class="bg-gray-200 dark:bg-black/30 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
+                        <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-2xl p-6 border border-gray-200 dark:border-white/10">
                             <div class="flex items-center gap-3 mb-4">
                                 <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
                                     <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -276,7 +276,7 @@
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Webhook sync</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-4">Payment notifications flow back automatically. When customers pay, tickets are marked as confirmed instantly.</p>
 
-                    <div class="bg-gray-200 dark:bg-black/30 rounded-xl p-3 border border-gray-200 dark:border-white/10">
+                    <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-3 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-2">
                             <div class="w-2 h-2 rounded-full bg-violet-400 animate-pulse"></div>
                             <span class="text-violet-300 text-xs font-mono">invoice.paid</span>
@@ -317,19 +317,19 @@
                             <p class="text-gray-500 dark:text-gray-400 mb-4">Works with your own Invoice Ninja installation. Full control over your invoicing data and branding.</p>
                         </div>
                         <div class="space-y-3">
-                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-black/20 border border-gray-100 dark:border-white/5">
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-[#0f0f14] border border-gray-100 dark:border-white/5">
                                 <svg class="w-5 h-5 text-teal-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 <span class="text-gray-600 dark:text-gray-300 text-sm">Your server, your data</span>
                             </div>
-                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-black/20 border border-gray-100 dark:border-white/5">
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-[#0f0f14] border border-gray-100 dark:border-white/5">
                                 <svg class="w-5 h-5 text-teal-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 <span class="text-gray-600 dark:text-gray-300 text-sm">Custom branding and templates</span>
                             </div>
-                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-black/20 border border-gray-100 dark:border-white/5">
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-[#0f0f14] border border-gray-100 dark:border-white/5">
                                 <svg class="w-5 h-5 text-teal-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
@@ -344,7 +344,7 @@
     </section>
 
     <!-- How it Works -->
-    <section class="bg-gray-100 dark:bg-black/30 py-24">
+    <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">

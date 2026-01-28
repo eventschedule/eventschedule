@@ -22,13 +22,13 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <!-- Microphone icon badge -->
-            <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-black/60 border border-amber-500/30 mb-8 backdrop-blur-sm">
+            <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-amber-100 dark:bg-[#0f0f14] border border-amber-300 dark:border-amber-500/30 mb-8 backdrop-blur-sm">
                 <div class="relative">
-                    <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                     </svg>
                 </div>
-                <span class="text-sm text-amber-200/90 font-medium tracking-wide">Built for Comics</span>
+                <span class="text-sm text-amber-700 dark:text-amber-200/90 font-medium tracking-wide">Built for Comics</span>
             </div>
 
             <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
@@ -51,19 +51,19 @@
 
             <!-- The journey badges -->
             <div class="mt-14 flex flex-wrap justify-center items-center gap-3">
-                <span class="px-3 py-1.5 rounded-lg bg-red-900/40 text-red-300 text-xs font-medium border border-red-800/50">Open Mic</span>
+                <span class="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 text-xs font-medium border border-red-300 dark:border-red-800/50">Open Mic</span>
                 <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                <span class="px-3 py-1.5 rounded-lg bg-amber-900/40 text-amber-300 text-xs font-medium border border-amber-800/50">Bringer</span>
+                <span class="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 text-xs font-medium border border-amber-300 dark:border-amber-800/50">Bringer</span>
                 <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                <span class="px-3 py-1.5 rounded-lg bg-orange-900/40 text-orange-300 text-xs font-medium border border-orange-800/50">Guest Spot</span>
+                <span class="px-3 py-1.5 rounded-lg bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300 text-xs font-medium border border-orange-300 dark:border-orange-800/50">Guest Spot</span>
                 <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                <span class="px-3 py-1.5 rounded-lg bg-rose-900/40 text-rose-300 text-xs font-medium border border-rose-800/50">Feature</span>
+                <span class="px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 text-xs font-medium border border-rose-300 dark:border-rose-800/50">Feature</span>
                 <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
@@ -206,7 +206,7 @@
                         <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Instagram buried your post.<br>Email won't.</h3>
                         <p class="text-gray-500 dark:text-gray-400 mb-6">You posted about your show. 3% of your followers saw it. The rest saw ads. With email, everyone who signed up actually gets notified. No algorithm deciding who deserves to see it.</p>
 
-                        <div class="bg-gray-200 dark:bg-black/40 rounded-xl border border-gray-200 dark:border-white/10 p-4">
+                        <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4">
                             <div class="flex items-center gap-3 mb-3">
                                 <div class="w-8 h-8 rounded-full bg-rose-500/20 flex items-center justify-center">
                                     <svg class="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -239,7 +239,7 @@
                         <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Your show, your money.<br>Zero platform fees.</h3>
                         <p class="text-gray-500 dark:text-gray-400 mb-6">Producing your own show? Sell tickets directly. Money goes straight to your Stripe - we don't take a cut. Your hustle, your earnings.</p>
 
-                        <div class="bg-gray-200 dark:bg-black/40 rounded-xl border border-gray-200 dark:border-white/10 p-4">
+                        <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4">
                             <div class="flex items-center justify-between mb-4">
                                 <span class="text-gray-400 text-sm">Saturday Late Show</span>
                                 <span class="text-emerald-400 text-sm font-semibold">73 sold</span>

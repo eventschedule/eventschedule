@@ -19,6 +19,8 @@ class RowDesign extends AbstractEventDesign
 
     protected const DEFAULT_ASPECT_RATIO = 5 / 6; // Default 5:6 aspect ratio if image fails
 
+    protected const DEFAULT_MAX_PER_ROW = 100; // Large default means single row behavior by default
+
     // Date bar configuration
     protected const DATE_BAR_HEIGHT = 32;
 
@@ -29,26 +31,50 @@ class RowDesign extends AbstractEventDesign
     // Cache for calculated flyer dimensions
     protected array $flyerDimensions = [];
 
+    // Multi-row layout info
+    protected int $maxPerRow;
+
+    protected int $numRows;
+
+    protected array $rowAssignments = [];
+
     protected function calculateDimensions(): void
     {
         // Calculate dimensions for each flyer based on actual image aspect ratios
         $this->calculateFlyerDimensions();
 
-        // Calculate total width: sum of all flyer widths + margins
-        $totalFlyerWidth = 0;
-        foreach ($this->flyerDimensions as $dims) {
-            $totalFlyerWidth += $dims['width'];
+        $eventCount = $this->events->count();
+        $maxPerRowOption = (int) $this->getOption('max_per_row', self::DEFAULT_MAX_PER_ROW);
+        $this->maxPerRow = max(1, min($maxPerRowOption, $eventCount)); // Clamp to valid range
+
+        // Calculate number of rows needed
+        $this->numRows = (int) ceil($eventCount / $this->maxPerRow);
+
+        // Assign events to rows and calculate row widths
+        $this->rowAssignments = [];
+        for ($i = 0; $i < $eventCount; $i++) {
+            $rowIndex = (int) floor($i / $this->maxPerRow);
+            if (! isset($this->rowAssignments[$rowIndex])) {
+                $this->rowAssignments[$rowIndex] = [];
+            }
+            $this->rowAssignments[$rowIndex][] = $i;
         }
 
-        $eventCount = $this->events->count();
-        $this->totalWidth = $totalFlyerWidth + (self::MARGIN * ($eventCount + 1));
+        // Calculate the width based on the first row (which has maxPerRow flyers, unless total < maxPerRow)
+        $flyersInFirstRow = count($this->rowAssignments[0]);
+        $totalFlyerWidth = 0;
+        foreach ($this->rowAssignments[0] as $eventIndex) {
+            $totalFlyerWidth += $this->flyerDimensions[$eventIndex]['width'];
+        }
 
-        // Calculate height (includes date bar if position is "above")
+        $this->totalWidth = $totalFlyerWidth + (self::MARGIN * ($flyersInFirstRow + 1));
+
+        // Calculate height (includes date bar if position is "above") for multiple rows
         $flyerHeight = self::TARGET_HEIGHT;
         if ($this->getOption('date_position') === 'above') {
             $flyerHeight += self::DATE_BAR_HEIGHT;
         }
-        $this->totalHeight = $flyerHeight + (self::MARGIN * 2);
+        $this->totalHeight = ($flyerHeight * $this->numRows) + (self::MARGIN * ($this->numRows + 1));
     }
 
     /**
@@ -180,17 +206,51 @@ class RowDesign extends AbstractEventDesign
 
     protected function generateEventLayout(): void
     {
-        $currentX = self::MARGIN;
+        $flyerHeight = self::TARGET_HEIGHT;
+        $dateBarHeight = $this->getOption('date_position') === 'above' ? self::DATE_BAR_HEIGHT : 0;
+        $totalFlyerHeight = $flyerHeight + $dateBarHeight;
 
-        foreach ($this->events as $index => $event) {
-            $dims = $this->flyerDimensions[$index] ?? [
-                'width' => (int) (self::TARGET_HEIGHT * self::DEFAULT_ASPECT_RATIO),
-                'height' => self::TARGET_HEIGHT,
-            ];
+        // Available width for flyers (canvas width minus margins on both sides)
+        $availableWidth = $this->totalWidth - (self::MARGIN * 2);
 
-            $this->generateSingleFlyer($event, $currentX, self::MARGIN, $dims['width'], $dims['height']);
+        foreach ($this->rowAssignments as $rowIndex => $eventIndices) {
+            // Reverse order for RTL languages so first event appears on the right
+            if ($this->rtl) {
+                $eventIndices = array_reverse($eventIndices);
+            }
 
-            $currentX += $dims['width'] + self::MARGIN;
+            // Calculate the natural total width of flyers in this row
+            $naturalRowWidth = 0;
+            foreach ($eventIndices as $eventIndex) {
+                $naturalRowWidth += $this->flyerDimensions[$eventIndex]['width'];
+            }
+
+            // Add margins between flyers (not on edges, those are handled separately)
+            $marginsWidth = self::MARGIN * (count($eventIndices) - 1);
+            $totalNaturalWidth = $naturalRowWidth + $marginsWidth;
+
+            // Calculate scale factor to stretch row to fill available width
+            $scaleFactor = $availableWidth / $totalNaturalWidth;
+
+            // Calculate Y position for this row
+            $currentY = self::MARGIN + ($rowIndex * ($totalFlyerHeight + self::MARGIN));
+
+            // Position flyers in this row with scaled widths
+            $currentX = self::MARGIN;
+            foreach ($eventIndices as $eventIndex) {
+                $event = $this->events[$eventIndex];
+                $dims = $this->flyerDimensions[$eventIndex] ?? [
+                    'width' => (int) (self::TARGET_HEIGHT * self::DEFAULT_ASPECT_RATIO),
+                    'height' => self::TARGET_HEIGHT,
+                ];
+
+                // Scale the width to fill the row
+                $scaledWidth = (int) ($dims['width'] * $scaleFactor);
+
+                $this->generateSingleFlyer($event, $currentX, $currentY, $scaledWidth, $dims['height']);
+
+                $currentX += $scaledWidth + (int) (self::MARGIN * $scaleFactor);
+            }
         }
     }
 
@@ -510,7 +570,7 @@ class RowDesign extends AbstractEventDesign
      */
     protected function addDateOverlay(Event $event, int $x, int $y, int $width): void
     {
-        $dateText = $this->formatEventDate($event);
+        $text = $this->getOverlayText($event);
 
         // Create semi-transparent dark background at top of flyer
         $bgColor = imagecolorallocatealpha($this->im, 0, 0, 0, 50); // ~60% opacity
@@ -526,12 +586,13 @@ class RowDesign extends AbstractEventDesign
         // Calculate text position (centered)
         $fontPath = $this->getFontPath('bold');
         $fontSize = self::DATE_FONT_SIZE;
-        $textWidth = $this->getTextWidth($dateText, $fontSize, $fontPath);
-        $textX = $x + ($width - $textWidth) / 2;
+        $textWidth = $this->getTextWidth($text, $fontSize, $fontPath);
+        $leftOffset = $this->getTextLeftOffset($text, $fontSize, $fontPath);
+        $textX = $x + ($width - $textWidth) / 2 - $leftOffset;
         $textY = $y + 10; // Padding from top
 
         // Add white text
-        $this->addText($dateText, (int) $textX, $textY, $fontSize, $this->c['white'], 'bold');
+        $this->addText($text, (int) $textX, $textY, $fontSize, $this->c['white'], 'bold');
     }
 
     /**
@@ -540,7 +601,7 @@ class RowDesign extends AbstractEventDesign
      */
     protected function addDateAbove(Event $event, int $x, int $y, int $width): void
     {
-        $dateText = $this->formatEventDate($event);
+        $text = $this->getOverlayText($event);
 
         // Create solid dark background
         $bgColor = imagecolorallocate($this->im, 51, 51, 51); // #333333
@@ -556,20 +617,80 @@ class RowDesign extends AbstractEventDesign
         // Calculate text position (centered)
         $fontPath = $this->getFontPath('bold');
         $fontSize = self::DATE_FONT_SIZE;
-        $textWidth = $this->getTextWidth($dateText, $fontSize, $fontPath);
-        $textX = $x + ($width - $textWidth) / 2;
+        $textWidth = $this->getTextWidth($text, $fontSize, $fontPath);
+        $leftOffset = $this->getTextLeftOffset($text, $fontSize, $fontPath);
+        $textX = $x + ($width - $textWidth) / 2 - $leftOffset;
         $textY = $y + 8; // Padding from top
 
         // Add white text
-        $this->addText($dateText, (int) $textX, $textY, $fontSize, $this->c['white'], 'bold');
+        $this->addText($text, (int) $textX, $textY, $fontSize, $this->c['white'], 'bold');
     }
 
     /**
-     * Format event date for display
+     * Get the overlay text for an event, parsing variables if a template is provided
+     */
+    protected function getOverlayText(Event $event): string
+    {
+        $template = $this->getOption('overlay_text');
+
+        // If no custom template, use default date format
+        if (empty($template)) {
+            return $this->formatEventDate($event);
+        }
+
+        return $this->parseOverlayText($template, $event);
+    }
+
+    /**
+     * Parse overlay text template with event variables
+     */
+    protected function parseOverlayText(string $template, Event $event): string
+    {
+        try {
+            Carbon::setLocale($this->lang);
+            $startDate = Carbon::parse($event->start_date);
+            $endDate = $event->end_date ? Carbon::parse($event->end_date) : null;
+
+            // Determine time format based on role's 24h setting
+            $timeFormat = $this->role->use_24_hour_time ? 'H:i' : 'g:i A';
+
+            $replacements = [
+                // Date variables
+                '{date_mdy}' => $startDate->format('n/j'),
+                '{date_dmy}' => $startDate->format('j/n'),
+                '{date_full_mdy}' => $startDate->format('m/d/Y'),
+                '{date_full_dmy}' => $startDate->format('d/m/Y'),
+                '{day_name}' => $startDate->translatedFormat('l'),
+                '{day_short}' => $startDate->translatedFormat('D'),
+                '{month}' => $startDate->format('n'),
+                '{month_name}' => $startDate->translatedFormat('F'),
+                '{month_short}' => $startDate->translatedFormat('M'),
+                '{day}' => $startDate->format('j'),
+                '{year}' => $startDate->format('Y'),
+                '{time}' => $startDate->format($timeFormat),
+                '{end_time}' => $endDate ? $endDate->format($timeFormat) : '',
+
+                // Event variables
+                '{event_name}' => $event->translatedName() ?? $event->name ?? '',
+
+                // Venue variables
+                '{venue}' => $event->venue ? ($event->venue->translatedName() ?? '') : '',
+                '{city}' => $event->venue ? ($event->venue->translatedCity() ?? '') : '',
+            ];
+
+            return str_replace(array_keys($replacements), array_values($replacements), $template);
+        } catch (\Exception $e) {
+            return $template;
+        }
+    }
+
+    /**
+     * Format event date for display with localized month names (fallback)
      */
     protected function formatEventDate(Event $event): string
     {
         try {
+            Carbon::setLocale($this->lang);
             $startDate = Carbon::parse($event->start_date);
 
             if ($event->end_date) {
@@ -577,14 +698,14 @@ class RowDesign extends AbstractEventDesign
 
                 if ($startDate->isSameDay($endDate)) {
                     // Same day event
-                    return $startDate->format('M j, Y');
+                    return $startDate->translatedFormat('M j, Y');
                 } else {
                     // Multi-day event
-                    return $startDate->format('M j').' - '.$endDate->format('M j, Y');
+                    return $startDate->translatedFormat('M j').' - '.$endDate->translatedFormat('M j, Y');
                 }
             } else {
                 // Single date event
-                return $startDate->format('M j, Y');
+                return $startDate->translatedFormat('M j, Y');
             }
         } catch (\Exception $e) {
             return 'Date TBD';
@@ -603,6 +724,8 @@ class RowDesign extends AbstractEventDesign
             'total_width' => $this->getWidth(),
             'total_height' => $this->getHeight(),
             'event_count' => $this->events->count(),
+            'max_per_row' => $this->maxPerRow,
+            'num_rows' => $this->numRows,
             'flyer_dimensions' => $this->flyerDimensions,
         ];
     }
@@ -614,6 +737,8 @@ class RowDesign extends AbstractEventDesign
             'total_width' => $this->getWidth(),
             'total_height' => $this->getHeight(),
             'aspect_ratio' => $this->getHeight() > 0 ? round($this->getWidth() / $this->getHeight(), 2) : 0,
+            'max_per_row' => $this->maxPerRow,
+            'num_rows' => $this->numRows,
             'flyer_dimensions' => $this->flyerDimensions,
         ];
     }

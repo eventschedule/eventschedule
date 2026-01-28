@@ -80,7 +80,7 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="animate-float">
-                                <div class="bg-gray-100 dark:bg-black/30 rounded-2xl p-5 border border-gray-200 dark:border-white/10 space-y-4 max-w-xs">
+                                <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10 space-y-4 max-w-xs">
                                     <!-- Text field -->
                                     <div>
                                         <label class="text-gray-500 dark:text-gray-400 text-xs mb-1 block">Company Name</label>
@@ -185,7 +185,7 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Required or optional</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Mark fields as required to ensure you get the information you need, or leave them optional for flexibility. Up to 8 fields per level.</p>
                         </div>
-                        <div class="bg-gray-100 dark:bg-black/30 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
+                        <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-6 border border-gray-200 dark:border-white/10">
                             <div class="space-y-4">
                                 <div class="flex items-center justify-between p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
                                     <div class="flex items-center gap-3">
@@ -426,7 +426,7 @@
 
                         <!-- Mini mockup: Team member avatars with role badges -->
                         <div class="flex-shrink-0">
-                            <div class="bg-gray-100 dark:bg-black/30 rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48 space-y-2">
+                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48 space-y-2">
                                 <!-- Team member 1 -->
                                 <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
                                     <div class="w-7 h-7 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center text-white text-[10px] font-semibold">JD</div>
