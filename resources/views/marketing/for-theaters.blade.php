@@ -85,7 +85,7 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-rose-500/20 to-red-500/20 rounded-2xl border border-rose-400/30 p-4 max-w-xs">
+                                <div class="bg-gradient-to-br from-rose-950 to-red-950 rounded-2xl border border-rose-400/30 p-4 max-w-xs">
                                     <div class="text-center mb-3">
                                         <div class="text-gray-900 dark:text-white font-semibold">Hamlet</div>
                                         <div class="text-rose-300 text-sm">March 2024 Run</div>
@@ -131,7 +131,7 @@
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-amber-400/20">
                         <div class="text-xs text-gray-500 mb-2">To: 1,847 patrons</div>
-                        <div class="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-lg p-3">
+                        <div class="bg-gradient-to-r from-amber-950 to-yellow-950 rounded-lg p-3">
                             <div class="text-amber-300 text-xs font-medium mb-1">NOW ON SALE</div>
                             <div class="text-gray-900 dark:text-white font-semibold">Our Town</div>
                             <div class="text-gray-500 dark:text-gray-400 text-xs">April 12-28</div>
@@ -330,7 +330,7 @@
                             </span>
                         </div>
                         <div class="flex-shrink-0">
-                            <div class="bg-gradient-to-br from-rose-500/20 to-red-500/20 rounded-2xl border border-rose-400/30 p-5 w-56">
+                            <div class="bg-gradient-to-br from-rose-950 to-red-950 rounded-2xl border border-rose-400/30 p-5 w-56">
                                 <div class="flex items-center gap-2 mb-3">
                                     <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
                                     <span class="text-red-300 text-xs font-medium">LIVE</span>

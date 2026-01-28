@@ -150,7 +150,7 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl border border-indigo-400/30 p-4 max-w-xs">
+                                <div class="bg-gradient-to-br from-indigo-950 to-purple-950 rounded-2xl border border-indigo-400/30 p-4 max-w-xs">
                                     <div class="text-xs text-indigo-300 mb-3 font-semibold">DECEMBER</div>
                                     <div class="space-y-2">
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-indigo-500/20 border border-indigo-400/20">

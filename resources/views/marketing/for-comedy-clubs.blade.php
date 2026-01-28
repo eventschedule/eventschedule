@@ -153,7 +153,7 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-amber-500/20 to-yellow-500/20 rounded-2xl border border-amber-400/30 p-4 max-w-xs">
+                                <div class="bg-gradient-to-br from-amber-950 to-yellow-950 rounded-2xl border border-amber-400/30 p-4 max-w-xs">
                                     <div class="text-[10px] text-amber-300 mb-3 font-semibold tracking-wide">FRIDAY NIGHT LINEUP</div>
                                     <div class="space-y-3">
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-amber-500/20 border border-amber-400/30">
@@ -273,21 +273,21 @@
                         </div>
                         <div class="flex justify-center">
                             <div class="space-y-3 w-full max-w-xs">
-                                <div class="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl p-4 border border-green-500/30">
+                                <div class="bg-gradient-to-r from-green-950 to-emerald-950 rounded-xl p-4 border border-green-500/30">
                                     <div class="flex items-center justify-between mb-1">
                                         <span class="text-gray-900 dark:text-white font-medium">General Admission</span>
                                         <span class="text-green-300 font-bold">$20</span>
                                     </div>
                                     <div class="text-gray-500 dark:text-gray-500 text-xs">Standard seating</div>
                                 </div>
-                                <div class="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-xl p-4 border border-amber-500/30">
+                                <div class="bg-gradient-to-r from-amber-950 to-yellow-950 rounded-xl p-4 border border-amber-500/30">
                                     <div class="flex items-center justify-between mb-1">
                                         <span class="text-gray-900 dark:text-white font-medium">VIP Front Row</span>
                                         <span class="text-amber-300 font-bold">$35</span>
                                     </div>
                                     <div class="text-gray-500 dark:text-gray-500 text-xs">Best seats + drink voucher</div>
                                 </div>
-                                <div class="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-4 border border-purple-500/30">
+                                <div class="bg-gradient-to-r from-purple-950 to-pink-950 rounded-xl p-4 border border-purple-500/30">
                                     <div class="flex items-center justify-between mb-1">
                                         <span class="text-gray-900 dark:text-white font-medium">Recording Night</span>
                                         <span class="text-purple-300 font-bold">$40</span>
