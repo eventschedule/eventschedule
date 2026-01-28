@@ -103,6 +103,13 @@ class GenerateSubAudienceBlog extends Command
             return 0;
         }
 
+        // Only generate posts ~70% of the time for a more natural posting pattern
+        if (! $generateAll && rand(1, 100) > 70) {
+            $this->info('Skipping generation this run (random cooldown for natural posting pattern).');
+
+            return 0;
+        }
+
         // Generate posts (one by default, all if --all flag is set)
         $toGenerate = $generateAll ? $missing : [array_shift($missing)];
 
@@ -136,7 +143,7 @@ class GenerateSubAudienceBlog extends Command
                     'featured_image' => $result['featured_image'] ?? null,
                     'author_name' => 'Event Schedule Team',
                     'is_published' => true,
-                    'published_at' => now(),
+                    'published_at' => now()->subSeconds(rand(0, 6 * 60 * 60)),
                 ]);
 
                 // Clear the cache for this slug so the "Learn More" link appears
