@@ -307,8 +307,12 @@ abstract class AbstractEventDesign
         // Sanitize text to replace problematic characters
         $text = $this->sanitizeText($text);
 
-        // Determine RTL based on language or parameter
-        $isRtl = $isRtl ?? $this->rtl;
+        // Determine RTL based on actual text content first, not role language
+        // This ensures English text like "Jan 28, 2026" is never treated as RTL
+        // even when the role is Hebrew/Arabic
+        if ($isRtl === null) {
+            $isRtl = $this->isRTLCharacter($text[0] ?? '');
+        }
 
         // Check if text contains mixed content (Hebrew/Arabic + English) or apostrophes
         if ($this->containsMixedContent($text) || $this->containsApostrophesOrPunctuation($text)) {
@@ -319,9 +323,6 @@ abstract class AbstractEventDesign
 
         // Use smart font selection for single-language text
         $fontPath = $this->getSmartFontPath($text, $weight);
-
-        // Determine RTL based on text content, not role
-        $isRtl = $isRtl ?? $this->isRTLCharacter($text[0] ?? '');
 
         // If TTF fonts are not available, fall back to GD built-in fonts
         if (! file_exists($fontPath) || ! is_readable($fontPath) || ! function_exists('imagettftext')) {
@@ -974,8 +975,10 @@ abstract class AbstractEventDesign
         // Sanitize text to replace problematic characters
         $text = $this->sanitizeText($text);
 
-        $fontPath = $this->getFontPath($weight);
+        // Use getSmartFontPath for consistent font selection with addText()
+        $fontPath = $this->getSmartFontPath($text, $weight);
         $textWidth = $this->getTextWidth($text, $fontSize, $fontPath);
+        $leftOffset = $this->getTextLeftOffset($text, $fontSize, $fontPath);
 
         // If maxWidth is specified, use multiline text
         if ($maxWidth > 0) {
@@ -984,15 +987,15 @@ abstract class AbstractEventDesign
             $startY = $y - ($totalHeight / 2);
 
             foreach ($lines as $line) {
-                $lineWidth = $this->getTextWidth($line, $fontSize, $fontPath);
-                $lineLeftOffset = $this->getTextLeftOffset($line, $fontSize, $fontPath);
+                $lineFontPath = $this->getSmartFontPath($line, $weight);
+                $lineWidth = $this->getTextWidth($line, $fontSize, $lineFontPath);
+                $lineLeftOffset = $this->getTextLeftOffset($line, $fontSize, $lineFontPath);
                 $lineX = $centerX - ($lineWidth / 2) - $lineLeftOffset;
                 $this->addText($line, $lineX, $startY, $fontSize, $color, $weight);
                 $startY += $fontSize * self::DEFAULT_LINE_HEIGHT;
             }
         } else {
             // Single line centered text
-            $leftOffset = $this->getTextLeftOffset($text, $fontSize, $fontPath);
             $x = $centerX - ($textWidth / 2) - $leftOffset;
             $this->addText($text, $x, $y, $fontSize, $color, $weight);
         }

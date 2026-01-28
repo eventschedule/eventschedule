@@ -109,9 +109,9 @@
 
                     <div class="mt-auto">
                         <div class="flex flex-wrap gap-3 mb-4 min-h-[40px]">
-                            <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Two-way sync</span>
-                            <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Auto import</span>
-                            <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Real-time updates</span>
+                            <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Two-way sync</span>
+                            <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Auto import</span>
+                            <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Real-time updates</span>
                         </div>
                         <span class="inline-flex items-center text-blue-300 group-hover:text-blue-200 text-sm font-medium transition-colors group-hover:gap-2 gap-1 transition-all">
                             Learn more
@@ -159,8 +159,8 @@
 
                     <div class="mt-auto">
                         <div class="flex flex-wrap gap-2 mb-4 min-h-[40px]">
-                            <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Two-way sync</span>
-                            <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Selfhosted friendly</span>
+                            <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Two-way sync</span>
+                            <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Selfhosted friendly</span>
                         </div>
                         <span class="inline-flex items-center text-teal-300 group-hover:text-teal-200 text-sm font-medium transition-colors group-hover:gap-2 gap-1 transition-all">
                             Learn more
@@ -213,9 +213,9 @@
 
                     <div class="mt-auto">
                         <div class="flex flex-wrap gap-3 mb-4 min-h-[40px]">
-                            <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Credit cards</span>
-                            <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Apple Pay</span>
-                            <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Google Pay</span>
+                            <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Credit cards</span>
+                            <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Apple Pay</span>
+                            <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Google Pay</span>
                         </div>
                         <span class="inline-flex items-center text-violet-300 group-hover:text-violet-200 text-sm font-medium transition-colors group-hover:gap-2 gap-1 transition-all">
                             Learn more

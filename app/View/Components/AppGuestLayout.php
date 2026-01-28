@@ -14,6 +14,7 @@ class AppGuestLayout extends Component
         public ?Event $event = null,
         public ?string $date = null,
         public array $fonts = [],
+        public bool $showMobileBackground = false,
     ) {}
 
     /**

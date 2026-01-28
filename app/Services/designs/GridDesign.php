@@ -198,7 +198,8 @@ class GridDesign extends AbstractEventDesign
         );
 
         // Calculate text position (centered)
-        $fontPath = $this->getFontPath('bold');
+        // Use getSmartFontPath for consistent font selection with addText()
+        $fontPath = $this->getSmartFontPath($text, 'bold');
         $fontSize = self::DATE_FONT_SIZE;
         $textWidth = $this->getTextWidth($text, $fontSize, $fontPath);
         $leftOffset = $this->getTextLeftOffset($text, $fontSize, $fontPath);
@@ -229,7 +230,8 @@ class GridDesign extends AbstractEventDesign
         );
 
         // Calculate text position (centered)
-        $fontPath = $this->getFontPath('bold');
+        // Use getSmartFontPath for consistent font selection with addText()
+        $fontPath = $this->getSmartFontPath($text, 'bold');
         $fontSize = self::DATE_FONT_SIZE;
         $textWidth = $this->getTextWidth($text, $fontSize, $fontPath);
         $leftOffset = $this->getTextLeftOffset($text, $fontSize, $fontPath);

@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role">
+<x-app-guest-layout :role="$role" :showMobileBackground="true">
 
 @php
   $hasHeaderImage = ($role->header_image && $role->header_image !== 'none') || $role->header_image_url;

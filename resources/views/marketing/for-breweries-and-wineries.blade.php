@@ -183,8 +183,8 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Limited release? Your fans know first.</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">That bourbon barrel stout you've been aging for 18 months? The reserve Pinot from the best vintage in a decade? One click sends it straight to everyone who wants to know - before it's gone.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Skip the algorithm</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Straight from the source</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Skip the algorithm</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Straight from the source</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -238,8 +238,8 @@
                     <!-- Waitlist visual -->
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center justify-between mb-3">
-                            <span class="text-gray-400 text-xs">2024 Reserve Allocation</span>
-                            <span class="text-rose-300 text-xs font-medium">47 spots left</span>
+                            <span class="text-gray-500 dark:text-gray-400 text-xs">2024 Reserve Allocation</span>
+                            <span class="text-rose-700 dark:text-rose-300 text-xs font-medium">47 spots left</span>
                         </div>
                         <div class="space-y-2">
                             <div class="flex items-center gap-2">
@@ -294,9 +294,9 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Tours and private events come to you</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Corporate team outings, bachelorette parties, private tastings. They submit the request, you approve. No email ping-pong.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Group tours</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Private parties</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Buyouts</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Group tours</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Private parties</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Buyouts</span>
                             </div>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10">
@@ -306,7 +306,7 @@
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">AT</div>
                                     <div class="flex-1">
                                         <div class="text-white text-sm font-medium">Acme Tech - Team Outing</div>
-                                        <div class="text-indigo-300 text-xs">Nov 3 &bull; 25 people &bull; Private tour</div>
+                                        <div class="text-indigo-700 dark:text-indigo-300 text-xs">Nov 3 &bull; 25 people &bull; Private tour</div>
                                     </div>
                                     <div class="flex gap-1">
                                         <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
@@ -343,8 +343,8 @@
                     <div class="space-y-2">
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
                             <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
-                            <span class="text-white text-sm">Taproom</span>
-                            <span class="ml-auto text-emerald-300 text-xs">6 events</span>
+                            <span class="text-gray-900 dark:text-white text-sm">Taproom</span>
+                            <span class="ml-auto text-emerald-700 dark:text-emerald-300 text-xs">6 events</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-amber-400"></div>
@@ -461,9 +461,9 @@
                             <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-300 transition-colors">Virtual tastings go global</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Ship your product, host a live tasting. Fans anywhere can join, pay, and taste along. Turn your taproom into a worldwide experience.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Live tastings</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Sell tickets worldwide</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-sm">Any platform</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live tastings</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Sell tickets worldwide</span>
+                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any platform</span>
                             </div>
                             <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
