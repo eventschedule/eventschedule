@@ -95,12 +95,12 @@
                                 </div>
                                 <!-- Output side -->
                                 <div class="bg-gradient-to-br from-violet-500/20 to-indigo-500/20 rounded-2xl border border-violet-400/30 p-4 max-w-xs">
-                                    <div class="text-xs text-violet-300 mb-2">Extracted</div>
+                                    <div class="text-xs text-violet-700 dark:text-violet-300 mb-2">Extracted</div>
                                     <div class="space-y-2 text-sm">
-                                        <div class="flex justify-between"><span class="text-white/60">Name:</span><span class="text-white">Jazz Night</span></div>
-                                        <div class="flex justify-between"><span class="text-white/60">Date:</span><span class="text-white">Mar 15, 8:00 PM</span></div>
-                                        <div class="flex justify-between"><span class="text-white/60">Venue:</span><span class="text-white">Blue Note</span></div>
-                                        <div class="flex justify-between"><span class="text-white/60">Talent:</span><span class="text-white">Sarah Johnson Trio</span></div>
+                                        <div class="flex justify-between"><span class="text-violet-700 dark:text-white/60">Name:</span><span class="text-violet-900 dark:text-white">Jazz Night</span></div>
+                                        <div class="flex justify-between"><span class="text-violet-700 dark:text-white/60">Date:</span><span class="text-violet-900 dark:text-white">Mar 15, 8:00 PM</span></div>
+                                        <div class="flex justify-between"><span class="text-violet-700 dark:text-white/60">Venue:</span><span class="text-violet-900 dark:text-white">Blue Note</span></div>
+                                        <div class="flex justify-between"><span class="text-violet-700 dark:text-white/60">Talent:</span><span class="text-violet-900 dark:text-white">Sarah Johnson Trio</span></div>
                                     </div>
                                 </div>
                             </div>
@@ -152,7 +152,7 @@
                             </div>
                             <div>
                                 <div class="text-gray-900 dark:text-white text-sm font-medium">Blue Note Jazz Club</div>
-                                <div class="text-emerald-400 text-xs">Matched to existing venue</div>
+                                <div class="text-emerald-600 dark:text-emerald-400 text-xs">Matched to existing venue</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -163,7 +163,7 @@
                             </div>
                             <div>
                                 <div class="text-gray-900 dark:text-white text-sm font-medium">Sarah Johnson Trio</div>
-                                <div class="text-emerald-400 text-xs">Matched to existing talent</div>
+                                <div class="text-emerald-600 dark:text-emerald-400 text-xs">Matched to existing talent</div>
                             </div>
                         </div>
                     </div>
@@ -184,25 +184,25 @@
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
-                                <svg class="w-8 h-8 mx-auto mb-2 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="w-8 h-8 mx-auto mb-2 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                                 <div class="text-gray-900 dark:text-white text-sm font-medium">Text</div>
                             </div>
                             <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
-                                <svg class="w-8 h-8 mx-auto mb-2 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="w-8 h-8 mx-auto mb-2 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 <div class="text-gray-900 dark:text-white text-sm font-medium">Images</div>
                             </div>
                             <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
-                                <svg class="w-8 h-8 mx-auto mb-2 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="w-8 h-8 mx-auto mb-2 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                                 </svg>
                                 <div class="text-gray-900 dark:text-white text-sm font-medium">Flyers</div>
                             </div>
                             <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
-                                <svg class="w-8 h-8 mx-auto mb-2 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="w-8 h-8 mx-auto mb-2 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                                 </svg>
                                 <div class="text-gray-900 dark:text-white text-sm font-medium">Social Posts</div>
@@ -328,7 +328,7 @@
                             <div class="flex items-center gap-3">
                                 <!-- Event Schedule box -->
                                 <div class="bg-blue-500/20 rounded-xl border border-blue-400/30 p-3 w-24">
-                                    <div class="text-[10px] text-blue-300 mb-2 text-center">Event Schedule</div>
+                                    <div class="text-[10px] text-blue-700 dark:text-blue-300 mb-2 text-center">Event Schedule</div>
                                     <div class="space-y-1">
                                         <div class="h-1.5 bg-white/20 rounded"></div>
                                         <div class="h-1.5 bg-white/20 rounded w-3/4"></div>
@@ -337,10 +337,10 @@
                                 </div>
                                 <!-- Sync arrows -->
                                 <div class="flex flex-col items-center gap-1">
-                                    <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                     </svg>
-                                    <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                     </svg>
                                 </div>
