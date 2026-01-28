@@ -65,35 +65,18 @@ class SendGraphicEmails extends Command
                     continue;
                 }
 
-                // Parse comma-separated emails and validate
-                $emailList = array_map('trim', explode(',', $recipientEmails));
-                $emailList = array_filter($emailList, fn ($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
-
-                if (empty($emailList)) {
-                    \Log::info('Skipping graphic email - no valid recipient emails for role: '.$role->subdomain);
-                    $skippedCount++;
-
-                    continue;
-                }
-
-                // Send to each recipient
+                // Send to all recipients in a single email (service handles parsing and validation)
                 $service = new GraphicEmailService;
-                $allSent = true;
-                foreach ($emailList as $email) {
-                    $result = $service->sendGraphicEmail($role, $email);
-                    if (! $result) {
-                        $allSent = false;
-                    }
-                }
+                $result = $service->sendGraphicEmail($role, $recipientEmails);
 
-                if ($allSent) {
+                if ($result) {
                     // Update last_sent_at
                     $settings['last_sent_at'] = now()->toIso8601String();
                     $role->graphic_settings = $settings;
                     $role->save();
 
                     $sentCount++;
-                    \Log::info('Sent graphic email for role: '.$role->subdomain.' to '.count($emailList).' recipients');
+                    \Log::info('Sent graphic email for role: '.$role->subdomain);
                 }
             } catch (\Exception $e) {
                 \Log::error('Failed to send graphic email for role '.$role->subdomain.': '.$e->getMessage());

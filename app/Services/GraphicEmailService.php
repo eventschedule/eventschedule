@@ -13,9 +13,13 @@ use Illuminate\Support\Facades\Mail;
 class GraphicEmailService
 {
     /**
-     * Send the graphic email to the specified recipient
+     * Send the graphic email to the specified recipient(s)
+     * 
+     * @param Role $role
+     * @param string $recipientEmails Comma-separated email addresses
+     * @return bool
      */
-    public function sendGraphicEmail(Role $role, string $recipientEmail): bool
+    public function sendGraphicEmail(Role $role, string $recipientEmails): bool
     {
         // Skip sending for demo role
         if (is_demo_role($role)) {
@@ -64,27 +68,36 @@ class GraphicEmailService
                 }
             }
 
-            // Send the email
+            // Parse comma-separated emails and validate
+            $emailList = array_map('trim', explode(',', $recipientEmails));
+            $emailList = array_filter($emailList, fn ($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+
+            if (empty($emailList)) {
+                Log::warning('No valid recipient emails provided', ['role_id' => $role->id, 'recipient_emails' => $recipientEmails]);
+                return false;
+            }
+
+            // Send the email to all recipients in a single email
             if (config('app.hosted')) {
                 // For hosted users, only send if role has email settings
                 if ($role->hasEmailSettings()) {
                     $this->configureRoleMailer($role);
                     $mailerName = 'role_'.$role->id;
-                    Mail::mailer($mailerName)->to($recipientEmail)->send(new GraphicEmail($role, $imageData, $eventText));
+                    Mail::mailer($mailerName)->to(array_values($emailList))->send(new GraphicEmail($role, $imageData, $eventText));
                 } else {
                     // Use default mailer
-                    Mail::to($recipientEmail)->send(new GraphicEmail($role, $imageData, $eventText));
+                    Mail::to(array_values($emailList))->send(new GraphicEmail($role, $imageData, $eventText));
                 }
             } else {
                 // For selfhost users, use system email settings
-                Mail::to($recipientEmail)->send(new GraphicEmail($role, $imageData, $eventText));
+                Mail::to(array_values($emailList))->send(new GraphicEmail($role, $imageData, $eventText));
             }
 
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to send graphic email: '.$e->getMessage(), [
                 'role_id' => $role->id,
-                'recipient' => $recipientEmail,
+                'recipients' => $recipientEmails,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
