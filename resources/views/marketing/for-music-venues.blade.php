@@ -285,7 +285,7 @@
                         No more digging through email, DMs, and voicemails. Artists submit through your calendar with their music, videos, social stats, and draw history. Listen to their tracks, check their following, book or pass.
                     </p>
                     <ul class="space-y-3">
-                        <li class="flex items-center gap-3 text-gray-300">
+                        <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                             <svg class="w-5 h-5 text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
