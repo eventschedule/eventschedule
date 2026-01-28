@@ -29,7 +29,7 @@
                 <svg class="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
                 </svg>
-                <span class="text-sm text-rose-300">For Theaters & Performing Arts Venues</span>
+                <span class="text-sm text-rose-700 dark:text-rose-300">For Theaters & Performing Arts Venues</span>
             </div>
 
             <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
@@ -153,7 +153,7 @@
                     <div class="space-y-2">
                         <div class="flex items-center justify-between p-2 rounded-lg bg-red-500/20 border border-red-400/30">
                             <span class="text-gray-900 dark:text-white text-sm">Orchestra</span>
-                            <span class="text-red-300 font-semibold">$45</span>
+                            <span class="text-red-700 dark:text-red-300 font-semibold">$45</span>
                         </div>
                         <div class="flex items-center justify-between p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Mezzanine</span>
@@ -214,7 +214,7 @@
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-rose-500/20 border border-rose-500/30">
                             <div class="w-2 h-2 rounded-full bg-rose-400"></div>
                             <span class="text-gray-900 dark:text-white text-sm">Main Stage</span>
-                            <span class="ml-auto text-rose-300 text-xs">8 shows</span>
+                            <span class="ml-auto text-rose-700 dark:text-rose-300 text-xs">8 shows</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-amber-400"></div>
@@ -244,7 +244,7 @@
                         <div>
                             <div class="flex justify-between text-xs mb-1">
                                 <span class="text-gray-500 dark:text-gray-400">Musical</span>
-                                <span class="text-amber-300">92%</span>
+                                <span class="text-amber-700 dark:text-amber-300">92%</span>
                             </div>
                             <div class="h-2 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
                                 <div class="h-full bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full" style="width: 92%"></div>
@@ -253,7 +253,7 @@
                         <div>
                             <div class="flex justify-between text-xs mb-1">
                                 <span class="text-gray-500 dark:text-gray-400">Drama</span>
-                                <span class="text-amber-300">78%</span>
+                                <span class="text-amber-700 dark:text-amber-300">78%</span>
                             </div>
                             <div class="h-2 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
                                 <div class="h-full bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full" style="width: 78%"></div>
@@ -262,7 +262,7 @@
                         <div>
                             <div class="flex justify-between text-xs mb-1">
                                 <span class="text-gray-500 dark:text-gray-400">Comedy</span>
-                                <span class="text-amber-300">85%</span>
+                                <span class="text-amber-700 dark:text-amber-300">85%</span>
                             </div>
                             <div class="h-2 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
                                 <div class="h-full bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full" style="width: 85%"></div>
