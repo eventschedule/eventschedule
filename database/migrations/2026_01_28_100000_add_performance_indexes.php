@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('event_role', function (Blueprint $table) {
-            $table->index('group_id');
             $table->index('event_id');
         });
 
@@ -28,7 +27,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('event_role', function (Blueprint $table) {
-            $table->dropIndex(['group_id']);
             $table->dropIndex(['event_id']);
         });
 

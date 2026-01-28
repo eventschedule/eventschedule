@@ -5,7 +5,6 @@ window.Alpine = Alpine;
 Alpine.start();
 
 import flatpickr from 'flatpickr';
-import 'flatpickr/dist/flatpickr.css';
 
 // Import flatpickr locales for all supported languages
 import { Spanish } from 'flatpickr/dist/l10n/es.js';

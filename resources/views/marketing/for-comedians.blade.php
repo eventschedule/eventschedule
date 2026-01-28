@@ -214,7 +214,7 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <div class="text-white text-sm font-medium">Headlining Saturday!</div>
+                                    <div class="text-gray-900 dark:text-white text-sm font-medium">Headlining Saturday!</div>
                                     <div class="text-gray-500 text-xs">Sent to 1,247 fans</div>
                                 </div>
                             </div>
@@ -246,12 +246,12 @@
                             </div>
                             <div class="space-y-2">
                                 <div class="flex justify-between items-center p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                                    <span class="text-white text-sm">General Admission</span>
-                                    <span class="text-white font-medium">$20</span>
+                                    <span class="text-gray-900 dark:text-white text-sm">General Admission</span>
+                                    <span class="text-gray-900 dark:text-white font-medium">$20</span>
                                 </div>
                                 <div class="flex justify-between items-center p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                                    <span class="text-white text-sm">Front Row + Meet & Greet</span>
-                                    <span class="text-white font-medium">$50</span>
+                                    <span class="text-gray-900 dark:text-white text-sm">Front Row + Meet & Greet</span>
+                                    <span class="text-gray-900 dark:text-white font-medium">$50</span>
                                 </div>
                             </div>
                             <div class="mt-4 pt-3 border-t border-gray-200 dark:border-white/10 flex justify-between">
@@ -267,8 +267,8 @@
             <div class="grid md:grid-cols-3 gap-6">
                 <!-- Late Night Shows -->
                 <div class="rounded-2xl bg-gradient-to-br from-[#12101a] to-[#0f0808] border border-violet-900/30 p-6">
-                    <div class="w-10 h-10 rounded-xl bg-violet-900/40 flex items-center justify-center mb-4">
-                        <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
                     </div>
@@ -284,8 +284,8 @@
 
                 <!-- Club Links -->
                 <div class="rounded-2xl bg-gradient-to-br from-[#1a1510] to-[#0f0808] border border-amber-900/30 p-6">
-                    <div class="w-10 h-10 rounded-xl bg-amber-900/40 flex items-center justify-center mb-4">
-                        <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
@@ -301,8 +301,8 @@
 
                 <!-- Promo Graphics -->
                 <div class="rounded-2xl bg-gradient-to-br from-[#1a100f] to-[#0f0808] border border-orange-900/30 p-6">
-                    <div class="w-10 h-10 rounded-xl bg-orange-900/40 flex items-center justify-center mb-4">
-                        <svg class="w-5 h-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>

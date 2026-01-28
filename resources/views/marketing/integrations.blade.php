@@ -267,50 +267,50 @@
     </section>
 
     <!-- Why Integrate Section -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Why integrate?
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Keep your workflow seamless with tools that work together.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm">
-                    <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <div class="bg-white dark:bg-gray-900/50 rounded-2xl p-8 border border-gray-200 dark:border-white/10 shadow-sm">
+                    <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Automatic Sync</h3>
-                    <p class="text-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Automatic Sync</h3>
+                    <p class="text-gray-600 dark:text-gray-400">
                         Changes in one place reflect everywhere. No manual updates needed.
                     </p>
                 </div>
 
-                <div class="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm">
-                    <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <div class="bg-white dark:bg-gray-900/50 rounded-2xl p-8 border border-gray-200 dark:border-white/10 shadow-sm">
+                    <div class="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Secure & Private</h3>
-                    <p class="text-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Secure & Private</h3>
+                    <p class="text-gray-600 dark:text-gray-400">
                         Your data stays yours. We use OAuth and encrypted connections.
                     </p>
                 </div>
 
-                <div class="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm">
-                    <div class="w-14 h-14 bg-violet-100 rounded-2xl flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <div class="bg-white dark:bg-gray-900/50 rounded-2xl p-8 border border-gray-200 dark:border-white/10 shadow-sm">
+                    <div class="w-14 h-14 bg-violet-100 dark:bg-violet-900/30 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Quick Setup</h3>
-                    <p class="text-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Quick Setup</h3>
+                    <p class="text-gray-600 dark:text-gray-400">
                         Connect in minutes. Most integrations are just a few clicks.
                     </p>
                 </div>

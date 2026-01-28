@@ -17,8 +17,8 @@
 
         <!-- Animated neon OPEN sign -->
         <div class="absolute top-16 right-8 md:right-16 animate-neon-flicker opacity-90 hidden sm:block">
-            <div class="px-6 py-3 rounded-lg border-2 border-amber-400 bg-amber-500/10 shadow-lg shadow-amber-500/20">
-                <span class="text-2xl font-bold text-amber-400 tracking-widest neon-text">OPEN</span>
+            <div class="px-6 py-3 rounded-lg border-2 border-amber-500 dark:border-amber-400 bg-amber-500/10 shadow-lg shadow-amber-500/20">
+                <span class="text-2xl font-bold text-amber-600 dark:text-amber-400 tracking-widest neon-text">OPEN</span>
             </div>
         </div>
 
@@ -210,7 +210,7 @@
                             <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border-4 border-gray-700 p-4 w-48">
                                 <div class="bg-gradient-to-br from-green-600/30 to-emerald-600/30 rounded-lg p-3 text-center">
                                     <div class="text-3xl mb-1">&#9917;</div>
-                                    <div class="text-green-300 text-sm font-bold">LIVE</div>
+                                    <div class="text-green-600 dark:text-green-300 text-sm font-bold">LIVE</div>
                                     <div class="text-gray-500 dark:text-white/70 text-xs">Sunday 4pm</div>
                                 </div>
                                 <div class="flex justify-center gap-1 mt-2">

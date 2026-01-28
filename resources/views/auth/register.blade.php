@@ -1,10 +1,6 @@
 <x-auth-layout>
 
     <x-slot name="head">
-        @if(session('pending_request'))
-            <x-step-indicator :compact="true" />
-        @endif
-
         <script {!! nonce_attr() !!}>
         document.addEventListener('DOMContentLoaded', function() {
             var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;            
@@ -48,6 +44,9 @@
                 // Hide the Google signup section
                 var googleSignupSection = document.getElementById('google-signup-section');
                 if (googleSignupSection) googleSignupSection.style.display = 'none';
+                // Hide guest option if code was already sent
+                var guestOption = document.getElementById('guest-option');
+                if (guestOption) guestOption.style.display = 'none';
                 // If email is readonly, lock it
                 if (emailInput.readOnly) {
                     lockedEmail = emailInput.value.toLowerCase();
@@ -133,6 +132,9 @@
                             // Hide the Google signup section
                             var googleSignupSection = document.getElementById('google-signup-section');
                             if (googleSignupSection) googleSignupSection.style.display = 'none';
+                            // Hide the guest option
+                            var guestOption = document.getElementById('guest-option');
+                            if (guestOption) guestOption.style.display = 'none';
                             // Focus on the name field
                             var nameInput = document.getElementById('name');
                             if (nameInput) {
@@ -302,6 +304,9 @@
         </style>
     </x-slot>
 
+    <x-slot name="abovePage">
+    </x-slot>
+
     <form method="POST" action="{{ route('sign_up') }}" class="w-full">
         @csrf
 
@@ -371,6 +376,19 @@
                 </button>
             </div>
             <div id="code-message" class="mt-1 text-sm"></div>
+            @if(session('pending_request'))
+            <div id="guest-option" class="mt-4">
+                <div class="flex items-center mb-3">
+                    <div class="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
+                    <span class="px-3 text-xs text-gray-500 dark:text-gray-400 font-medium">{{ __('messages.or') }}</span>
+                    <div class="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
+                </div>
+                <a href="{{ route('event.guest_import', ['subdomain' => session('pending_request'), 'lang' => request()->lang]) }}"
+                    class="w-full inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-md hover:bg-blue-100 dark:hover:bg-blue-800 hover:text-blue-700 dark:hover:text-blue-200 transition-colors duration-200">
+                    {{ __('messages.continue_as_guest') }}
+                </a>
+            </div>
+            @endif
             @else
             <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', base64_decode(request()->email))" required
                 autocomplete="email" />
