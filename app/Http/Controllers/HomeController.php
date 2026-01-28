@@ -112,7 +112,6 @@ class HomeController extends Controller
 
         $events = Event::with(['roles'])
             ->whereNotNull('starts_at')
-            ->where('starts_at', '!=', '')
             ->orderBy(request()->has('events') ? 'id' : 'starts_at', 'desc')
             ->get();
 
