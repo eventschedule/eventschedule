@@ -29,13 +29,14 @@ class GraphicEmailService
             $layout = $settings['layout'] ?? 'grid';
             $directRegistration = ($settings['link_type'] ?? 'schedule') === 'registration';
 
-            // Get the next 10 events with flyer images
+            // Get the next 10 events with their own flyer images (not relying on role image)
             $events = Event::with('roles')
                 ->whereHas('roles', function ($query) use ($role) {
                     $query->where('role_id', $role->id)->where('is_accepted', true);
                 })
                 ->where('starts_at', '>=', now())
-                ->where('flyer_image_url', '!=', null)
+                ->whereNotNull('flyer_image_url')
+                ->where('flyer_image_url', '!=', '')
                 ->whereNull('days_of_week')
                 ->orderBy('starts_at')
                 ->limit(10)
