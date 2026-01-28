@@ -78,9 +78,9 @@
                         <p class="text-white/80 mb-6">Connect with OAuth for instant, real-time synchronization. Changes in Google Calendar appear immediately via webhook notifications.</p>
 
                         <div class="flex flex-wrap gap-2 mb-6">
-                            <span class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm">OAuth 2.0</span>
-                            <span class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm">Webhooks</span>
-                            <span class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm">Instant sync</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm">OAuth 2.0</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm">Webhooks</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm">Instant sync</span>
                         </div>
 
                         <div class="flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
@@ -110,9 +110,9 @@
                         <p class="text-white/80 mb-6">Sync with any CalDAV-compatible server—Nextcloud, Radicale, Fastmail, iCloud, and more. Perfect for selfhosted setups.</p>
 
                         <div class="flex flex-wrap gap-2 mb-6">
-                            <span class="px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm">Open standard</span>
-                            <span class="px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm">Selfhosted</span>
-                            <span class="px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm">Any server</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm">Open standard</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm">Selfhosted</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm">Any server</span>
                         </div>
 
                         <div class="flex items-center text-teal-400 font-medium group-hover:gap-3 gap-2 transition-all">
@@ -154,9 +154,9 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">True two-way sync</h3>
                             <p class="text-white/80 text-lg mb-6">Push events to your calendar, pull events from your calendar, or sync both ways. Choose the direction that works for your workflow.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Push only</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Pull only</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Both directions</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Push only</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Pull only</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Both directions</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">

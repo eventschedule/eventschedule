@@ -52,12 +52,12 @@
 
             <!-- Performance tags -->
             <div class="mt-12 flex flex-wrap justify-center gap-3">
-                <span class="px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Aerial</span>
-                <span class="px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Fire</span>
-                <span class="px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Acrobatics</span>
-                <span class="px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Juggling</span>
-                <span class="px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Stilt Walking</span>
-                <span class="px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Contortion</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Aerial</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Fire</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Acrobatics</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Juggling</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Stilt Walking</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-sm bg-gold/15 text-gold text-xs font-medium border border-gold/30">Contortion</span>
             </div>
         </div>
     </section>
@@ -229,9 +229,9 @@
                                 <h3 class="text-xl font-bold text-ivory mb-2 font-serif">Track Your Tour</h3>
                                 <p class="text-ivory/70 text-sm mb-4">Renaissance faires, Burning Man, Fringe festivals - show fans every stop on your summer circuit.</p>
                                 <div class="flex flex-wrap gap-2">
-                                    <span class="px-2 py-1 rounded-sm bg-amber-500/10 text-amber-400 text-xs border border-amber-500/20">Summer Tours</span>
-                                    <span class="px-2 py-1 rounded-sm bg-amber-500/10 text-amber-400 text-xs border border-amber-500/20">Ren Faires</span>
-                                    <span class="px-2 py-1 rounded-sm bg-amber-500/10 text-amber-400 text-xs border border-amber-500/20">Burns</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-sm bg-amber-500/10 text-amber-400 text-xs border border-amber-500/20">Summer Tours</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-sm bg-amber-500/10 text-amber-400 text-xs border border-amber-500/20">Ren Faires</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-sm bg-amber-500/10 text-amber-400 text-xs border border-amber-500/20">Burns</span>
                                 </div>
                             </div>
                         </div>
@@ -353,10 +353,10 @@
                                 <h3 class="text-xl font-bold text-ivory mb-2 font-serif">Event Planner Kit</h3>
                                 <p class="text-ivory/70 text-sm mb-4">One link with your availability, videos, specs, and rates. Perfect for corporate bookers and wedding planners.</p>
                                 <div class="flex flex-wrap gap-2">
-                                    <span class="px-2 py-1 rounded-sm bg-indigo-500/10 text-indigo-400 text-xs border border-indigo-500/20">Demo Reel</span>
-                                    <span class="px-2 py-1 rounded-sm bg-indigo-500/10 text-indigo-400 text-xs border border-indigo-500/20">Tech Rider</span>
-                                    <span class="px-2 py-1 rounded-sm bg-indigo-500/10 text-indigo-400 text-xs border border-indigo-500/20">Rates</span>
-                                    <span class="px-2 py-1 rounded-sm bg-indigo-500/10 text-indigo-400 text-xs border border-indigo-500/20">Availability</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-sm bg-indigo-500/10 text-indigo-400 text-xs border border-indigo-500/20">Demo Reel</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-sm bg-indigo-500/10 text-indigo-400 text-xs border border-indigo-500/20">Tech Rider</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-sm bg-indigo-500/10 text-indigo-400 text-xs border border-indigo-500/20">Rates</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-sm bg-indigo-500/10 text-indigo-400 text-xs border border-indigo-500/20">Availability</span>
                                 </div>
                             </div>
                         </div>

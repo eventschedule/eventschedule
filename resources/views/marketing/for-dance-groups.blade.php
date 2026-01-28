@@ -228,10 +228,10 @@
                         Most dance groups teach alongside performing. List your weekly classes, drop-ins, and intensive workshops. Sell registrations with zero platform fees - you keep everything.
                     </p>
                     <div class="flex flex-wrap gap-3">
-                        <span class="px-3 py-1.5 rounded-full bg-gray-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-sm border border-gray-200 dark:border-stone-700">Weekly technique</span>
-                        <span class="px-3 py-1.5 rounded-full bg-gray-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-sm border border-gray-200 dark:border-stone-700">Drop-in classes</span>
-                        <span class="px-3 py-1.5 rounded-full bg-gray-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-sm border border-gray-200 dark:border-stone-700">Masterclasses</span>
-                        <span class="px-3 py-1.5 rounded-full bg-gray-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-sm border border-gray-200 dark:border-stone-700">Summer intensives</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-gray-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-sm border border-gray-200 dark:border-stone-700">Weekly technique</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-gray-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-sm border border-gray-200 dark:border-stone-700">Drop-in classes</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-gray-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-sm border border-gray-200 dark:border-stone-700">Masterclasses</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-gray-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-sm border border-gray-200 dark:border-stone-700">Summer intensives</span>
                     </div>
                 </div>
             </div>
@@ -345,7 +345,7 @@
                                 <div class="text-gray-900 dark:text-white text-sm">Sarah Chen</div>
                                 <div class="text-stone-500 dark:text-stone-500 text-xs">Artistic Director</div>
                             </div>
-                            <span class="px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-xs">Owner</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-xs">Owner</span>
                         </div>
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-stone-800/30 border border-gray-200/50 dark:border-stone-700/50">
                             <div class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white text-sm font-medium">MR</div>
@@ -353,7 +353,7 @@
                                 <div class="text-stone-600 dark:text-stone-300 text-sm">Marcus Rivera</div>
                                 <div class="text-stone-500 dark:text-stone-500 text-xs">Choreographer</div>
                             </div>
-                            <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-xs">Admin</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-xs">Admin</span>
                         </div>
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-stone-800/30 border border-gray-200/50 dark:border-stone-700/50">
                             <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-sm font-medium">JT</div>
@@ -361,7 +361,7 @@
                                 <div class="text-stone-600 dark:text-stone-300 text-sm">Jamie Torres</div>
                                 <div class="text-stone-500 dark:text-stone-500 text-xs">Company Manager</div>
                             </div>
-                            <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-xs">Admin</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-xs">Admin</span>
                         </div>
                     </div>
                 </div>

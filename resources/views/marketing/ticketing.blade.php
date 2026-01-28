@@ -70,9 +70,9 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Contactless check-in</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Every ticket comes with a unique QR code. Scan with any smartphone to check in attendees instantly. No special hardware required.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Instant validation</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Prevent duplicates</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Real-time tracking</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Instant validation</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Prevent duplicates</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Real-time tracking</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0">
@@ -338,7 +338,7 @@
                             <div class="flex flex-col items-center gap-2">
                                 <!-- Input -->
                                 <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3 w-48">
-                                    <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">Raw text</div>
+                                    <div class="text-[10px] text-gray-400 dark:text-gray-400 mb-1">Raw text</div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400 font-mono leading-relaxed">
                                         Jazz Night<br>
                                         Friday 8pm<br>
@@ -353,9 +353,9 @@
                                 <div class="bg-violet-500/20 rounded-xl border border-violet-400/30 p-3 w-48">
                                     <div class="text-[10px] text-violet-600 dark:text-violet-300 mb-1">Extracted</div>
                                     <div class="space-y-1 text-xs">
-                                        <div class="flex justify-between"><span class="text-gray-400 dark:text-gray-500">Name:</span><span class="text-gray-900 dark:text-white">Jazz Night</span></div>
-                                        <div class="flex justify-between"><span class="text-gray-400 dark:text-gray-500">Time:</span><span class="text-gray-900 dark:text-white">Fri 8 PM</span></div>
-                                        <div class="flex justify-between"><span class="text-gray-400 dark:text-gray-500">Venue:</span><span class="text-gray-900 dark:text-white">Blue Note</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-400 dark:text-gray-400">Name:</span><span class="text-gray-900 dark:text-white">Jazz Night</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-400 dark:text-gray-400">Time:</span><span class="text-gray-900 dark:text-white">Fri 8 PM</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-400 dark:text-gray-400">Venue:</span><span class="text-gray-900 dark:text-white">Blue Note</span></div>
                                     </div>
                                 </div>
                             </div>

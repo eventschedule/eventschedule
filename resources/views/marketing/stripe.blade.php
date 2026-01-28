@@ -107,11 +107,11 @@
                     <p class="text-white/80 mb-4">Sell tickets in your local currency. Stripe handles conversion and international payments.</p>
 
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">USD</span>
-                        <span class="px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">EUR</span>
-                        <span class="px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">GBP</span>
-                        <span class="px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">CAD</span>
-                        <span class="px-2 py-1 rounded bg-blue-500/20 text-blue-700 dark:text-blue-300 text-sm">+130 more</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">USD</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">EUR</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">GBP</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">CAD</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded bg-blue-500/20 text-blue-700 dark:text-blue-300 text-sm">+130 more</span>
                     </div>
                 </div>
 
@@ -192,8 +192,8 @@
                     <p class="text-white/80 mb-4">Customers manage their own payment methods, view invoices, and update billing details through Stripe's portal.</p>
 
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Update card</span>
-                        <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">View invoices</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Update card</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">View invoices</span>
                     </div>
                 </div>
 

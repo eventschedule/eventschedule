@@ -82,9 +82,9 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Track your growth</h3>
                             <p class="text-white/80 text-lg mb-6">See daily, weekly, or monthly view counts. Choose from 7 time ranges: last 7/30/90 days, this month, last month, this year, or all time.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Last 7 days</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Last 30 days</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">This year</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Last 7 days</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Last 30 days</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">This year</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -100,7 +100,7 @@
                                         <div class="w-6 bg-emerald-500/90 rounded-t" style="height: 85%"></div>
                                         <div class="w-6 bg-emerald-500 rounded-t" style="height: 100%"></div>
                                     </div>
-                                    <div class="flex justify-between mt-2 text-xs text-gray-400 dark:text-gray-500">
+                                    <div class="flex justify-between mt-2 text-xs text-gray-400 dark:text-gray-400">
                                         <span>Mon</span>
                                         <span>Wed</span>
                                         <span>Fri</span>
@@ -335,12 +335,12 @@
                             <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48 space-y-3">
                                 <!-- Text field -->
                                 <div>
-                                    <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">Company Name</div>
+                                    <div class="text-[10px] text-gray-400 dark:text-gray-400 mb-1">Company Name</div>
                                     <div class="bg-gray-200 dark:bg-white/10 rounded-lg px-2 py-1.5 text-gray-900 dark:text-white text-xs border border-gray-200 dark:border-white/10">Acme Corp</div>
                                 </div>
                                 <!-- Dropdown field -->
                                 <div>
-                                    <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">T-Shirt Size</div>
+                                    <div class="text-[10px] text-gray-400 dark:text-gray-400 mb-1">T-Shirt Size</div>
                                     <div class="bg-gray-200 dark:bg-white/10 rounded-lg px-2 py-1.5 text-gray-900 dark:text-white text-xs border border-gray-200 dark:border-white/10 flex items-center justify-between">
                                         <span>Large</span>
                                         <svg class="w-3 h-3 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
@@ -348,7 +348,7 @@
                                 </div>
                                 <!-- Yes/No field -->
                                 <div>
-                                    <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">Vegetarian?</div>
+                                    <div class="text-[10px] text-gray-400 dark:text-gray-400 mb-1">Vegetarian?</div>
                                     <div class="bg-amber-500/20 rounded-lg px-2 py-1.5 text-amber-300 text-xs border border-amber-400/30 flex items-center justify-between">
                                         <span>Yes</span>
                                         <svg class="w-3 h-3 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>

@@ -71,11 +71,11 @@
                             <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Five flexible field types</h3>
                             <p class="text-white/80 text-lg mb-6">Choose the right input type for each piece of information you need to collect from attendees.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Text</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiline</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Yes/No</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Date</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Dropdown</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Text</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiline</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Yes/No</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Date</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Dropdown</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -433,7 +433,7 @@
                                     <div class="flex-1 min-w-0">
                                         <div class="text-gray-900 dark:text-white text-xs font-medium truncate">John Doe</div>
                                     </div>
-                                    <span class="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[9px]">Owner</span>
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[9px]">Owner</span>
                                 </div>
                                 <!-- Team member 2 -->
                                 <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
@@ -441,7 +441,7 @@
                                     <div class="flex-1 min-w-0">
                                         <div class="text-gray-600 dark:text-gray-300 text-xs font-medium truncate">Alice Smith</div>
                                     </div>
-                                    <span class="px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 text-[9px]">Admin</span>
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 text-[9px]">Admin</span>
                                 </div>
                                 <!-- Team member 3 -->
                                 <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
@@ -449,7 +449,7 @@
                                     <div class="flex-1 min-w-0">
                                         <div class="text-gray-600 dark:text-gray-300 text-xs font-medium truncate">Bob Jones</div>
                                     </div>
-                                    <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[9px]">Follower</span>
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[9px]">Follower</span>
                                 </div>
                             </div>
                         </div>
