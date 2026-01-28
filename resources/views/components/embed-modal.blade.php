@@ -1,4 +1,9 @@
 <!-- Embed Modal -->
+@php
+    $embedUrl = route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true']);
+    // For preview, use current request's protocol to avoid HTTPS cert issues in local dev
+    $previewUrl = preg_replace('/^https?:/', request()->getScheme() . ':', $embedUrl);
+@endphp
 <div id="embed-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="fixed inset-0 bg-gray-500 dark:bg-gray-900 dark:bg-opacity-75 bg-opacity-75 transition-opacity"></div>
 
@@ -34,8 +39,8 @@
                                     {{ __('messages.embed_url') }}
                                 </label>
                                 <div class="flex">
-                                    <input type="text" id="embed-url" readonly 
-                                           value="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true']) }}"
+                                    <input type="text" id="embed-url" readonly
+                                           value="{{ $embedUrl }}"
                                            class="block w-full rounded-l-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] sm:text-sm">
                                     <button type="button" id="embed-url-btn" onclick="copyEmbedUrl()" 
                                             class="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 focus:border-[#4E81FA] focus:outline-none focus:ring-1 focus:ring-[#4E81FA]">
@@ -52,9 +57,9 @@
                                     {{ __('messages.iframe_code') }}
                                 </label>
                                 <div class="flex">
-                                    <textarea id="iframe-code" readonly rows="4" 
+                                    <textarea id="iframe-code" readonly rows="4"
                                               class="block w-full rounded-l-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] sm:text-sm font-mono text-xs"
-                                              style="resize: vertical;"><iframe src="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true']) }}" width="100%" height="800" frameborder="0" style="border: none;"></iframe></textarea>
+                                              style="resize: vertical;"><iframe src="{{ $embedUrl }}" width="100%" height="800" frameborder="0" style="border: none;"></iframe></textarea>
                                     <button type="button" id="iframe-code-btn" onclick="copyIframeCode()" 
                                             class="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 focus:border-[#4E81FA] focus:outline-none focus:ring-1 focus:ring-[#4E81FA]">
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -70,9 +75,9 @@
                                     {{ __('messages.preview') }}
                                 </label>                                
                                 <div class="border border-gray-300 dark:border-gray-700 rounded-md p-2 bg-gray-50 dark:bg-gray-900" style="height: 300px; overflow: auto;">
-                                    <iframe id="embed-preview-iframe" 
-                                            data-src="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true']) }}"
-                                            width="100%" height="800" frameborder="0" 
+                                    <iframe id="embed-preview-iframe"
+                                            data-src="{{ $previewUrl }}"
+                                            width="100%" height="800" frameborder="0"
                                             style="border: none; border-radius: 4px;"></iframe>
                                 </div>
                             </div>
