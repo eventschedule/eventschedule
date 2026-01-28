@@ -409,8 +409,8 @@ return [
     'plan_changed' => '¡Plan cambiado con éxito!',
     'first_year_free' => 'Primer año gratis',
     'copy_url' => 'Copiar URL',
-    'note_all_schedules_are_publicly_listed' => 'Nota: Todos los horarios están listados públicamente',
-    'note_all_events_are_publicly_listed' => 'Nota: Todos los eventos están listados públicamente',
+    'note_all_schedules_are_publicly_listed' => 'Tu horario será visible públicamente',
+    'note_all_events_are_publicly_listed' => 'Tu evento será visible públicamente',
     'add_to_schedule' => 'Agregar al Horario',
     'admin' => 'Administrador',
     'member' => 'Miembro',
@@ -978,4 +978,7 @@ return [
     'slug_pattern' => 'Patrón de URL del Evento',
     'slug_pattern_help' => 'Personaliza las URLs de los nuevos eventos. Ejemplo: {event_name}-{date_dmy}. Deja vacío para usar el nombre del evento.',
     'show_available_variables' => 'Mostrar variables disponibles',
+
+    // Graphic settings tabs
+    'automation' => 'Automatización',
 ];

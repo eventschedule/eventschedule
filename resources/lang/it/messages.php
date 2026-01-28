@@ -258,8 +258,8 @@ return [
     'plan_changed' => 'Piano cambiato con successo!',
     'first_year_free' => 'Primo anno gratuito',
     'copy_url' => 'Copia URL',
-    'note_all_schedules_are_publicly_listed' => 'Nota: Tutti i programmi sono elencati pubblicamente',
-    'note_all_events_are_publicly_listed' => 'Nota: Tutti gli eventi sono elencati pubblicamente',
+    'note_all_schedules_are_publicly_listed' => 'Il tuo programma sarà visibile pubblicamente',
+    'note_all_events_are_publicly_listed' => 'Il tuo evento sarà visibile pubblicamente',
     'add_to_schedule' => 'Aggiungi al Programma',
     'clear' => 'Pulisci',
     'edit_schedule' => 'Modifica Programma',
@@ -979,4 +979,7 @@ return [
     'slug_pattern' => "Modello URL dell'evento",
     'slug_pattern_help' => "Personalizza gli slug URL per i nuovi eventi. Esempio: {event_name}-{date_dmy}. Lascia vuoto per usare il nome dell'evento.",
     'show_available_variables' => 'Mostra variabili disponibili',
+
+    // Graphic settings tabs
+    'automation' => 'Automazione',
 ];

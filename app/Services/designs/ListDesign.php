@@ -68,8 +68,8 @@ class ListDesign extends AbstractEventDesign
         // Add event details on the right
         $this->addEventDetails($event, $x + self::TEXT_LEFT_MARGIN, $y);
 
-        // Add QR code to the right side
-        $this->addEventQRCode($event, $x + $this->totalWidth - self::QR_CODE_SIZE - self::MARGIN, $y + self::ITEM_HEIGHT - self::QR_CODE_SIZE - 10);
+        // Add QR code to the bottom left (consistent with other layouts)
+        $this->addEventQRCode($event, $x + self::QR_CODE_PADDING, $y + self::ITEM_HEIGHT - self::QR_CODE_SIZE - self::QR_CODE_PADDING);
 
         // Add separator line between items (except for the last one)
         if ($y + self::ITEM_HEIGHT < $this->totalHeight - self::MARGIN) {

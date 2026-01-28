@@ -923,17 +923,29 @@ class GeminiUtils
         return array_slice($sortedVideos, 0, 6);
     }
 
-    public static function generateBlogPost($topic)
+    public static function generateBlogPost($topic, $parentPageUrl = null, $parentPageTitle = null)
     {
         // Randomly select a length to vary content length
         $lengths = ['short', 'medium', 'long'];
         $length = $lengths[array_rand($lengths)];
 
+        // Build the internal links requirement based on whether we have parent page info
+        if ($parentPageUrl && $parentPageTitle) {
+            $linksRequirement = "- IMPORTANT: You MUST include exactly 2 internal links in the content:
+          1. One link to 'https://www.eventschedule.com/{$parentPageUrl}' with text like 'Event Schedule for {$parentPageTitle}' or similar contextual text
+          2. One link to 'https://www.eventschedule.com' with 'Event Schedule' as the link text
+        - Place these links naturally within the content where they add value
+        - Use proper HTML anchor tags: <a href=\"URL\">text</a>";
+        } else {
+            $linksRequirement = "- Add 2 links in the text where relevant to 'https://www.eventschedule.com' with 'Event Schedule' as the text
+        - Place these links naturally within the content where they add value";
+        }
+
         $prompt = "Generate a blog post about '{$topic}' with the following specifications:
-        
+
         Tone: professional
         Length: {$length} (short: 300-500 words, medium: 800-1200 words, long: 1500-2000 words)
-        
+
         Please return a JSON object with the following structure:
         {
             \"title\": \"SEO-optimized title (50-60 characters)\",
@@ -944,10 +956,10 @@ class GeminiUtils
             \"meta_description\": \"SEO meta description (150-160 characters)\",
             \"image_category\": \"business|wellness|sports|music|networking|family|productivity|nature|arts|general\"
         }
-        
+
         Requirements:
         - Try not to seem like a robot
-        - Never use em dashes 
+        - Never use em dashes
         - Make the content engaging and informative
         - Include practical tips and actionable advice
         - Use proper HTML formatting with h1, h2, h3 tags
@@ -956,7 +968,7 @@ class GeminiUtils
         - Ensure the content is original and valuable
         - Make it SEO-friendly with relevant keywords
         - Always maintain a professional tone
-        - Add 1 or 2 links in the text where relevant to 'https://www.eventschedule.com' with 'Event Schedule' as the text
+        {$linksRequirement}
         - For image_category, choose the most appropriate category based on the topic:
           * business: for business, professional, corporate topics
           * wellness: for health, wellness, meditation, yoga topics

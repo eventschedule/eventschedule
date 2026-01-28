@@ -4,6 +4,7 @@ namespace App\Services\designs;
 
 use App\Models\Event;
 use App\Services\AbstractEventDesign;
+use Carbon\Carbon;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 
@@ -17,6 +18,13 @@ class RowDesign extends AbstractEventDesign
     protected const MAX_FLYER_WIDTH = 600;
 
     protected const DEFAULT_ASPECT_RATIO = 5 / 6; // Default 5:6 aspect ratio if image fails
+
+    // Date bar configuration
+    protected const DATE_BAR_HEIGHT = 32;
+
+    protected const DATE_OVERLAY_HEIGHT = 36;
+
+    protected const DATE_FONT_SIZE = 14;
 
     // Cache for calculated flyer dimensions
     protected array $flyerDimensions = [];
@@ -34,7 +42,13 @@ class RowDesign extends AbstractEventDesign
 
         $eventCount = $this->events->count();
         $this->totalWidth = $totalFlyerWidth + (self::MARGIN * ($eventCount + 1));
-        $this->totalHeight = self::TARGET_HEIGHT + (self::MARGIN * 2);
+
+        // Calculate height (includes date bar if position is "above")
+        $flyerHeight = self::TARGET_HEIGHT;
+        if ($this->getOption('date_position') === 'above') {
+            $flyerHeight += self::DATE_BAR_HEIGHT;
+        }
+        $this->totalHeight = $flyerHeight + (self::MARGIN * 2);
     }
 
     /**
@@ -71,14 +85,31 @@ class RowDesign extends AbstractEventDesign
 
     /**
      * Get image dimensions from URL
-     * Uses getimagesize() which fetches only image headers for efficiency
+     * Uses aggressive timeouts - better to use default aspect ratio than hang the request
      */
     protected function getImageDimensions(string $url): ?array
     {
         try {
-            // getimagesize doesn't support stream context directly for remote URLs
-            // It will use the default stream context, so we just call it directly
+            // Use aggressive timeout - better to use default aspect ratio than hang
+            $contextOptions = [
+                'http' => [
+                    'timeout' => 3,
+                ],
+            ];
+
+            // Disable SSL verification for local development
+            if (app()->environment('local') || config('app.disable_ssl_verification', false)) {
+                $contextOptions['ssl'] = [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                ];
+            }
+
+            // Set the default stream context for getimagesize
+            stream_context_set_default($contextOptions);
+
             $info = @getimagesize($url);
+
             if ($info && isset($info[0]) && isset($info[1]) && $info[0] > 0 && $info[1] > 0) {
                 return [
                     'width' => $info[0],
@@ -86,10 +117,65 @@ class RowDesign extends AbstractEventDesign
                 ];
             }
 
+            // Fast cURL fallback with aggressive 5-second timeout
+            $imageData = $this->fetchImageDimensionsWithFastCurl($url);
+            if ($imageData !== false) {
+                $image = @imagecreatefromstring($imageData);
+                if ($image) {
+                    $width = imagesx($image);
+                    $height = imagesy($image);
+                    imagedestroy($image);
+                    if ($width > 0 && $height > 0) {
+                        return [
+                            'width' => $width,
+                            'height' => $height,
+                        ];
+                    }
+                }
+            }
+
             return null;
         } catch (\Exception $e) {
             return null;
         }
+    }
+
+    /**
+     * Fast cURL fetch specifically for dimension detection
+     * Uses aggressive timeout to prevent request accumulation
+     */
+    protected function fetchImageDimensionsWithFastCurl(string $url): string|false
+    {
+        if (! function_exists('curl_init')) {
+            return false;
+        }
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);  // Aggressive 5-second timeout
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);  // 3-second connect timeout
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; EventGraphicGenerator/1.0)');
+
+        // SSL handling for local development
+        if (app()->environment('local') || config('app.disable_ssl_verification', false)) {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        } else {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        }
+
+        $imageData = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200 || $imageData === false || empty($imageData)) {
+            return false;
+        }
+
+        return $imageData;
     }
 
     protected function generateEventLayout(): void
@@ -110,11 +196,25 @@ class RowDesign extends AbstractEventDesign
 
     protected function generateSingleFlyer(Event $event, int $x, int $y, int $width, int $height): void
     {
+        $datePosition = $this->getOption('date_position');
+
+        // If date is above, add date bar first and offset the flyer
+        $flyerY = $y;
+        if ($datePosition === 'above') {
+            $this->addDateAbove($event, $x, $y, $width);
+            $flyerY = $y + self::DATE_BAR_HEIGHT;
+        }
+
         // Add the event flyer image
-        $this->addEventFlyerImage($event, $x, $y, $width, $height);
+        $this->addEventFlyerImage($event, $x, $flyerY, $width, $height);
+
+        // Add date overlay on top of flyer if requested
+        if ($datePosition === 'overlay') {
+            $this->addDateOverlay($event, $x, $flyerY, $width);
+        }
 
         // Add QR code to the bottom left corner
-        $this->addEventQRCode($event, $x, $y, $width, $height);
+        $this->addEventQRCode($event, $x, $flyerY, $width, $height);
     }
 
     protected function addEventFlyerImage(Event $event, int $x, int $y, int $width, int $height): void
@@ -401,6 +501,93 @@ class RowDesign extends AbstractEventDesign
 
         } catch (\Exception $e) {
             // Continue without QR code if there's an error
+        }
+    }
+
+    /**
+     * Add date overlay on top of the flyer image
+     * Semi-transparent dark background with white text
+     */
+    protected function addDateOverlay(Event $event, int $x, int $y, int $width): void
+    {
+        $dateText = $this->formatEventDate($event);
+
+        // Create semi-transparent dark background at top of flyer
+        $bgColor = imagecolorallocatealpha($this->im, 0, 0, 0, 50); // ~60% opacity
+        imagefilledrectangle(
+            $this->im,
+            $x,
+            $y,
+            $x + $width,
+            $y + self::DATE_OVERLAY_HEIGHT,
+            $bgColor
+        );
+
+        // Calculate text position (centered)
+        $fontPath = $this->getFontPath('bold');
+        $fontSize = self::DATE_FONT_SIZE;
+        $textWidth = $this->getTextWidth($dateText, $fontSize, $fontPath);
+        $textX = $x + ($width - $textWidth) / 2;
+        $textY = $y + 10; // Padding from top
+
+        // Add white text
+        $this->addText($dateText, (int) $textX, $textY, $fontSize, $this->c['white'], 'bold');
+    }
+
+    /**
+     * Add date bar above the flyer (separate from flyer image)
+     * Solid dark background with white text
+     */
+    protected function addDateAbove(Event $event, int $x, int $y, int $width): void
+    {
+        $dateText = $this->formatEventDate($event);
+
+        // Create solid dark background
+        $bgColor = imagecolorallocate($this->im, 51, 51, 51); // #333333
+        imagefilledrectangle(
+            $this->im,
+            $x,
+            $y,
+            $x + $width,
+            $y + self::DATE_BAR_HEIGHT,
+            $bgColor
+        );
+
+        // Calculate text position (centered)
+        $fontPath = $this->getFontPath('bold');
+        $fontSize = self::DATE_FONT_SIZE;
+        $textWidth = $this->getTextWidth($dateText, $fontSize, $fontPath);
+        $textX = $x + ($width - $textWidth) / 2;
+        $textY = $y + 8; // Padding from top
+
+        // Add white text
+        $this->addText($dateText, (int) $textX, $textY, $fontSize, $this->c['white'], 'bold');
+    }
+
+    /**
+     * Format event date for display
+     */
+    protected function formatEventDate(Event $event): string
+    {
+        try {
+            $startDate = Carbon::parse($event->start_date);
+
+            if ($event->end_date) {
+                $endDate = Carbon::parse($event->end_date);
+
+                if ($startDate->isSameDay($endDate)) {
+                    // Same day event
+                    return $startDate->format('M j, Y');
+                } else {
+                    // Multi-day event
+                    return $startDate->format('M j').' - '.$endDate->format('M j, Y');
+                }
+            } else {
+                // Single date event
+                return $startDate->format('M j, Y');
+            }
+        } catch (\Exception $e) {
+            return 'Date TBD';
         }
     }
 
