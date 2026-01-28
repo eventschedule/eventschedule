@@ -244,3 +244,32 @@ if (! function_exists('get_sub_audience_blog')) {
         );
     }
 }
+
+if (! function_exists('get_sub_audience_info')) {
+    /**
+     * Get sub-audience info for a blog post by slug
+     * Returns info about the parent audience and sub-audience if the slug matches
+     *
+     * @param  string  $slug  The blog post slug (e.g., 'for-solo-artists')
+     * @return object|null Returns object with parent_page, parent_title, sub_audience_name, icon_color, or null if not found
+     */
+    function get_sub_audience_info(string $slug): ?object
+    {
+        $subAudiences = config('sub_audiences', []);
+
+        foreach ($subAudiences as $audienceKey => $audience) {
+            foreach ($audience['sub_audiences'] as $subKey => $subAudience) {
+                if ($subAudience['slug'] === $slug) {
+                    return (object) [
+                        'parent_page' => $audience['page'],
+                        'parent_title' => $audience['title'],
+                        'sub_audience_name' => $subAudience['name'],
+                        'icon_color' => $subAudience['icon_color'],
+                    ];
+                }
+            }
+        }
+
+        return null;
+    }
+}

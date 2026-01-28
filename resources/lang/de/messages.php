@@ -405,8 +405,8 @@ return [
     'plan_changed' => 'Plan erfolgreich geändert!',
     'first_year_free' => 'Erstes Jahr kostenlos',
     'copy_url' => 'URL kopieren',
-    'note_all_schedules_are_publicly_listed' => 'Hinweis: Alle Zeitpläne sind öffentlich aufgeführt',
-    'note_all_events_are_publicly_listed' => 'Hinweis: Alle Veranstaltungen sind öffentlich aufgeführt',
+    'note_all_schedules_are_publicly_listed' => 'Ihr Zeitplan wird öffentlich sichtbar sein',
+    'note_all_events_are_publicly_listed' => 'Ihre Veranstaltung wird öffentlich sichtbar sein',
     'add_to_schedule' => 'Zum Zeitplan hinzufügen',
     'accept_requests' => 'Anfragen akzeptieren',
     'request_terms' => 'Anfragebedingungen',
@@ -982,4 +982,7 @@ return [
     'slug_pattern' => 'Event-URL-Muster',
     'slug_pattern_help' => 'Passen Sie URL-Slugs für neue Events an. Beispiel: {event_name}-{date_dmy}. Leer lassen, um den Eventnamen zu verwenden.',
     'show_available_variables' => 'Verfügbare Variablen anzeigen',
+
+    // Graphic settings tabs
+    'automation' => 'Automatisierung',
 ];

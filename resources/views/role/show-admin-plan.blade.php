@@ -190,9 +190,9 @@
             <div>
                 <form action="{{ route('subscription.resume', ['subdomain' => $role->subdomain]) }}" method="POST" class="inline">
                     @csrf
-                    <button type="submit" class="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
+                    <x-success-button type="submit">
                         {{ __('messages.resume_subscription') }}
-                    </button>
+                    </x-success-button>
                 </form>
             </div>
             @endif

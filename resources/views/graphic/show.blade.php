@@ -16,12 +16,12 @@
                     const originalText = button.innerHTML;
                     button.innerHTML = '<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>{{ __("messages.copied") }}';
                     button.classList.add('bg-green-500', 'hover:bg-green-600');
-                    button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                    button.classList.remove('bg-[#4E81FA]', 'hover:bg-[#3D6FE8]');
 
                     setTimeout(function() {
                         button.innerHTML = originalText;
                         button.classList.remove('bg-green-500', 'hover:bg-green-600');
-                        button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                        button.classList.add('bg-[#4E81FA]', 'hover:bg-[#3D6FE8]');
                     }, 2000);
                 }).catch(function(err) {
                     console.error('Could not copy text: ', err);
@@ -388,11 +388,11 @@
                                document.querySelector('input[name="layout_mobile"]:checked')?.value || 'grid';
                 currentLayout = layout;
 
-                // Show date position only for grid layout
+                // Show date position for grid and row layouts
                 ['date_position_container', 'date_position_container_mobile'].forEach(id => {
                     const container = document.getElementById(id);
                     if (container) {
-                        if (layout === 'grid') {
+                        if (layout === 'grid' || layout === 'row') {
                             container.classList.remove('hidden');
                         } else {
                             container.classList.add('hidden');
@@ -810,10 +810,15 @@
     <!-- Main Content -->
     <div id="graphicContent" x-data="{
         activeTab: localStorage.getItem('graphic_page_tab') || 'graphic',
+        settingsTab: localStorage.getItem('graphic_settings_tab') || 'graphic',
         settingsOpen: localStorage.getItem('graphic_settings_open') === 'true',
         setTab(tab) {
             this.activeTab = tab;
             localStorage.setItem('graphic_page_tab', tab);
+        },
+        setSettingsTab(tab) {
+            this.settingsTab = tab;
+            localStorage.setItem('graphic_settings_tab', tab);
         },
         toggleSettings() {
             this.settingsOpen = !this.settingsOpen;
@@ -849,209 +854,251 @@
                      x-transition:leave-start="opacity-100 translate-y-0"
                      x-transition:leave-end="opacity-0 -translate-y-2"
                      class="p-4 bg-gray-50 dark:bg-gray-900/50">
-                    <!-- Layout Type -->
-                    <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                        <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.layout_type') }}</h4>
-                        <div class="flex flex-col gap-2">
-                            <label class="flex items-center cursor-pointer group">
-                                <input type="radio" name="layout_mobile" value="grid" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" checked>
-                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.grid_layout') }}</span>
-                            </label>
-                            <label class="flex items-center cursor-pointer group">
-                                <input type="radio" name="layout_mobile" value="row" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.row_layout') }}</span>
-                            </label>
-                            <label class="flex items-center cursor-pointer group">
-                                <input type="radio" name="layout_mobile" value="list" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.list_layout') }}</span>
-                            </label>
-                        </div>
+
+                    <!-- Settings Tab Navigation -->
+                    <div class="border-b border-gray-200 dark:border-gray-700 mb-4">
+                        <nav class="flex space-x-4" aria-label="Settings Tabs">
+                            <button type="button"
+                                @click="setSettingsTab('graphic')"
+                                :class="settingsTab === 'graphic' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                                class="px-3 py-2 text-sm font-medium border-b-2">
+                                {{ __('messages.graphic') }}
+                            </button>
+                            <button type="button"
+                                @click="setSettingsTab('text')"
+                                :class="settingsTab === 'text' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                                class="px-3 py-2 text-sm font-medium border-b-2">
+                                {{ __('messages.text') }}
+                            </button>
+                            <button type="button"
+                                @click="setSettingsTab('automation')"
+                                :class="settingsTab === 'automation' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                                class="px-3 py-2 text-sm font-medium border-b-2">
+                                {{ __('messages.automation') }}
+                            </button>
+                        </nav>
                     </div>
 
-                    <!-- Date Position (only for grid layout) -->
-                    <div id="date_position_container_mobile" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                        <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.show_date') }}</h4>
-                        <select id="date_position_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                            <option value="">{{ __('messages.date_position_none') }}</option>
-                            <option value="overlay">{{ __('messages.date_position_overlay') }}</option>
-                            <option value="above">{{ __('messages.date_position_above') }}</option>
-                        </select>
-                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.date_position_help') }}</p>
-                    </div>
-
-                    <!-- Event Count -->
-                    <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                        <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.event_count') }}</h4>
-                        <select id="event_count_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                            <option value="">{{ __('messages.all_available') }}</option>
-                            @for ($i = 1; $i <= min($maxEvents ?? 20, 20); $i++)
-                                <option value="{{ $i }}">{{ $i }}</option>
-                            @endfor
-                        </select>
-                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.event_count_help') }}</p>
-                    </div>
-
-                    <!-- Text Template -->
-                    <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center justify-between mb-3">
-                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.text_template') }}</h4>
-                            <a href="{{ route('marketing.docs.event_graphics') }}" target="_blank"
-                               class="text-xs text-blue-500 hover:text-blue-400">
-                                {{ __('messages.view_docs') }}
-                            </a>
-                        </div>
-                        <textarea id="text_template_mobile" rows="5"
-                            aria-label="{{ __('messages.text_template') }}"
-                            class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-xs font-mono resize-y"
-                            placeholder="*{day_name}* {date_dmy} | {time}&#10;*{event_name}*:&#10;{venue} | {city}&#10;{url}"></textarea>
-                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
-                    </div>
-
-                    <!-- AI Prompt (Pro Feature) -->
-                    @if ($isPro)
-                    <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center justify-between mb-3">
-                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
-                        </div>
-                        <div>
-                            <textarea id="ai_prompt_mobile" rows="5" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
-                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
-                        </div>
-                    </div>
-                    @endif
-
-                    <!-- Link Type Options -->
-                    <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                        <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.options') }}</h4>
-                        <div class="flex flex-col gap-2">
-                            <label class="flex items-center cursor-pointer group">
-                                <input type="radio" name="link_type_mobile" value="schedule" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_event_page') }}</span>
-                            </label>
-                            <label class="flex items-center cursor-pointer group">
-                                <input type="radio" name="link_type_mobile" value="registration" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_registration') }}</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Recurring Events Option -->
-                    @if ($hasRecurringEvents)
-                    <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                        <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.recurring_events') }}</h4>
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="checkbox" id="exclude_recurring_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="syncFormFields()">
-                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.exclude_recurring_events') }}</span>
-                        </label>
-                    </div>
-                    @endif
-
-                    <!-- Screen Capture Rendering (Enterprise Feature) -->
-                    @if ($isEnterprise)
-                    <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center justify-between mb-3">
-                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.screen_capture_rendering') }}</h4>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <label class="flex items-center cursor-pointer">
-                                <input type="checkbox" id="use_screen_capture_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="toggleScreenCapture()">
-                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_screen_capture') }}</span>
-                            </label>
-                        </div>
-                        <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.screen_capture_help') }}</p>
-                    </div>
-                    @endif
-
-                    <!-- Email Scheduling (Enterprise Feature) -->
-                    @if ($isEnterprise)
-                    <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center justify-between mb-3">
-                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.email_scheduling') }}</h4>
-                        </div>
-
-                        <div>
-                            <!-- Enable Toggle -->
-                            <div class="flex items-center gap-3 mb-4">
-                                <label class="flex items-center cursor-pointer">
-                                    <input type="checkbox" id="email_enabled_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="toggleEmailOptions()">
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_scheduled_emails') }}</span>
+                    <!-- Graphic Tab Content -->
+                    <div x-show="settingsTab === 'graphic'" x-cloak>
+                        <!-- Layout Type -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.layout_type') }}</h4>
+                            <div class="flex flex-col gap-2">
+                                <label class="flex items-center cursor-pointer group">
+                                    <input type="radio" name="layout_mobile" value="grid" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" checked>
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.grid_layout') }}</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer group">
+                                    <input type="radio" name="layout_mobile" value="row" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.row_layout') }}</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer group">
+                                    <input type="radio" name="layout_mobile" value="list" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.list_layout') }}</span>
                                 </label>
                             </div>
+                        </div>
 
-                            <!-- Schedule Row (shown/hidden based on checkbox) -->
-                            <div id="email_options_container_mobile" class="hidden">
-                                <div class="flex flex-col gap-3 mb-4">
-                                    <div>
-                                        <label for="frequency_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.frequency') }}</label>
-                                        <select id="frequency_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                                            <option value="daily">{{ __('messages.daily') }}</option>
-                                            <option value="weekly">{{ __('messages.weekly') }}</option>
-                                            <option value="monthly">{{ __('messages.monthly') }}</option>
-                                        </select>
-                                    </div>
+                        <!-- Date Position (only for grid layout) -->
+                        <div id="date_position_container_mobile" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.show_date') }}</h4>
+                            <select id="date_position_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                <option value="">{{ __('messages.date_position_none') }}</option>
+                                <option value="overlay">{{ __('messages.date_position_overlay') }}</option>
+                                <option value="above">{{ __('messages.date_position_above') }}</option>
+                            </select>
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.date_position_help') }}</p>
+                        </div>
 
-                                    <div id="weekly_day_container_mobile" class="hidden">
-                                        <label for="weekly_day_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_on') }}</label>
-                                        <select id="weekly_day_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                                            <option value="0">{{ __('messages.sunday') }}</option>
-                                            <option value="1">{{ __('messages.monday') }}</option>
-                                            <option value="2">{{ __('messages.tuesday') }}</option>
-                                            <option value="3">{{ __('messages.wednesday') }}</option>
-                                            <option value="4">{{ __('messages.thursday') }}</option>
-                                            <option value="5">{{ __('messages.friday') }}</option>
-                                            <option value="6">{{ __('messages.saturday') }}</option>
-                                        </select>
-                                    </div>
+                        <!-- Event Count -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.event_count') }}</h4>
+                            <select id="event_count_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                <option value="">{{ __('messages.all_available') }}</option>
+                                @for ($i = 1; $i <= min($maxEvents ?? 20, 20); $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.event_count_help') }}</p>
+                        </div>
 
-                                    <div id="monthly_day_container_mobile" class="hidden">
-                                        <label for="monthly_day_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.day_of_month') }}</label>
-                                        <select id="monthly_day_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                                            @for ($i = 1; $i <= 28; $i++)
-                                                <option value="{{ $i }}">{{ $i }}</option>
-                                            @endfor
-                                        </select>
-                                    </div>
+                        <!-- Screen Capture Rendering (Enterprise Feature) -->
+                        @if ($isEnterprise)
+                        <div class="mb-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.screen_capture_rendering') }}</h4>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" id="use_screen_capture_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="toggleScreenCapture()">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_screen_capture') }}</span>
+                                </label>
+                            </div>
+                            <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.screen_capture_help') }}</p>
+                        </div>
+                        @endif
+                    </div>
 
-                                    <div>
-                                        <label for="send_hour_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_at_hour') }}</label>
-                                        <select id="send_hour_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                                            @for ($i = 0; $i < 24; $i++)
-                                                <option value="{{ $i }}">{{ sprintf('%02d:00', $i) }}</option>
-                                            @endfor
-                                        </select>
-                                    </div>
-                                </div>
+                    <!-- Text Tab Content -->
+                    <div x-show="settingsTab === 'text'" x-cloak>
+                        <!-- Text Template -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.text_template') }}</h4>
+                                <a href="{{ route('marketing.docs.event_graphics') }}" target="_blank"
+                                   class="text-xs text-blue-500 hover:text-blue-400">
+                                    {{ __('messages.view_docs') }}
+                                </a>
+                            </div>
+                            <textarea id="text_template_mobile" rows="5"
+                                aria-label="{{ __('messages.text_template') }}"
+                                class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-xs font-mono resize-y"
+                                placeholder="*{day_name}* {date_dmy} | {time}&#10;*{event_name}*:&#10;{venue} | {city}&#10;{url}"></textarea>
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
+                        </div>
 
-                                <div class="mb-4">
-                                    <label for="recipient_emails_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                        {{ __('messages.recipient_emails') }}
-                                    </label>
-                                    <input type="text" id="recipient_emails_mobile"
-                                        class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm"
-                                        placeholder="{{ __('messages.recipient_emails_placeholder') }}">
-                                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.recipient_emails_help') }}</p>
-                                </div>
+                        <!-- AI Prompt (Pro Feature) -->
+                        @if ($isPro)
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
+                            </div>
+                            <div>
+                                <textarea id="ai_prompt_mobile" rows="5" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
+                            </div>
+                        </div>
+                        @endif
 
-                                <button id="testEmailBtnMobile" onclick="sendTestEmail()" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
-                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                    </svg>
-                                    {{ __('messages.send_test_email') }}
-                                </button>
+                        <!-- Link Type Options -->
+                        <div class="mb-5">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.options') }}</h4>
+                            <div class="flex flex-col gap-2">
+                                <label class="flex items-center cursor-pointer group">
+                                    <input type="radio" name="link_type_mobile" value="schedule" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_event_page') }}</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer group">
+                                    <input type="radio" name="link_type_mobile" value="registration" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_registration') }}</span>
+                                </label>
                             </div>
                         </div>
                     </div>
-                    @endif
+
+                    <!-- Automation Tab Content -->
+                    <div x-show="settingsTab === 'automation'" x-cloak>
+                        <!-- Recurring Events Option -->
+                        @if ($hasRecurringEvents)
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.recurring_events') }}</h4>
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="checkbox" id="exclude_recurring_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="syncFormFields()">
+                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.exclude_recurring_events') }}</span>
+                            </label>
+                        </div>
+                        @endif
+
+                        <!-- Email Scheduling (Enterprise Feature) -->
+                        @if ($isEnterprise)
+                        <div class="mb-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.email_scheduling') }}</h4>
+                            </div>
+
+                            <div>
+                                <!-- Enable Toggle -->
+                                <div class="flex items-center gap-3 mb-4">
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="checkbox" id="email_enabled_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="toggleEmailOptions()">
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_scheduled_emails') }}</span>
+                                    </label>
+                                </div>
+
+                                <!-- Schedule Row (shown/hidden based on checkbox) -->
+                                <div id="email_options_container_mobile" class="hidden">
+                                    <div class="flex flex-col gap-3 mb-4">
+                                        <div>
+                                            <label for="frequency_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.frequency') }}</label>
+                                            <select id="frequency_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                                <option value="daily">{{ __('messages.daily') }}</option>
+                                                <option value="weekly">{{ __('messages.weekly') }}</option>
+                                                <option value="monthly">{{ __('messages.monthly') }}</option>
+                                            </select>
+                                        </div>
+
+                                        <div id="weekly_day_container_mobile" class="hidden">
+                                            <label for="weekly_day_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_on') }}</label>
+                                            <select id="weekly_day_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                                <option value="0">{{ __('messages.sunday') }}</option>
+                                                <option value="1">{{ __('messages.monday') }}</option>
+                                                <option value="2">{{ __('messages.tuesday') }}</option>
+                                                <option value="3">{{ __('messages.wednesday') }}</option>
+                                                <option value="4">{{ __('messages.thursday') }}</option>
+                                                <option value="5">{{ __('messages.friday') }}</option>
+                                                <option value="6">{{ __('messages.saturday') }}</option>
+                                            </select>
+                                        </div>
+
+                                        <div id="monthly_day_container_mobile" class="hidden">
+                                            <label for="monthly_day_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.day_of_month') }}</label>
+                                            <select id="monthly_day_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                                @for ($i = 1; $i <= 28; $i++)
+                                                    <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label for="send_hour_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_at_hour') }}</label>
+                                            <select id="send_hour_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                                @for ($i = 0; $i < 24; $i++)
+                                                    <option value="{{ $i }}">{{ sprintf('%02d:00', $i) }}</option>
+                                                @endfor
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="recipient_emails_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                            {{ __('messages.recipient_emails') }}
+                                        </label>
+                                        <input type="text" id="recipient_emails_mobile"
+                                            class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm"
+                                            placeholder="{{ __('messages.recipient_emails_placeholder') }}">
+                                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.recipient_emails_help') }}</p>
+                                    </div>
+
+                                    <button id="testEmailBtnMobile" onclick="sendTestEmail()" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                        </svg>
+                                        {{ __('messages.send_test_email') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        @else
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            @if ($hasRecurringEvents)
+                                {{ __('messages.enterprise_feature_email_scheduling') }}
+                            @else
+                                {{ __('messages.enterprise_feature_email_scheduling') }}
+                            @endif
+                        </p>
+                        @endif
+                    </div>
 
                     <!-- Buttons (side by side on mobile) -->
-                    <div class="flex gap-2">
-                        <button id="saveSettingsBtnMobile" onclick="saveSettings()" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-md transition-colors">
+                    <div class="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <button id="saveSettingsBtnMobile" onclick="saveSettings()" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
                             {{ __('messages.save_settings') }}
                         </button>
-                        <button id="runBtnMobile" onclick="loadGraphic()" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md transition-colors">
+                        <button id="runBtnMobile" onclick="loadGraphic()" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md transition-colors">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -1091,209 +1138,250 @@
                         <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.settings') }}</h3>
                     </div>
                     <div class="p-4 bg-gray-50 dark:bg-gray-900/50">
-                        <!-- Layout Type -->
-                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.layout_type') }}</h4>
-                            <div class="flex flex-col gap-2">
-                                <label class="flex items-center cursor-pointer group">
-                                    <input type="radio" name="layout" value="grid" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" checked>
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.grid_layout') }}</span>
-                                </label>
-                                <label class="flex items-center cursor-pointer group">
-                                    <input type="radio" name="layout" value="row" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.row_layout') }}</span>
-                                </label>
-                                <label class="flex items-center cursor-pointer group">
-                                    <input type="radio" name="layout" value="list" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.list_layout') }}</span>
-                                </label>
-                            </div>
+                        <!-- Settings Tab Navigation -->
+                        <div class="border-b border-gray-200 dark:border-gray-700 mb-4">
+                            <nav class="flex space-x-4" aria-label="Settings Tabs">
+                                <button type="button"
+                                    @click="setSettingsTab('graphic')"
+                                    :class="settingsTab === 'graphic' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                                    class="px-3 py-2 text-sm font-medium border-b-2">
+                                    {{ __('messages.graphic') }}
+                                </button>
+                                <button type="button"
+                                    @click="setSettingsTab('text')"
+                                    :class="settingsTab === 'text' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                                    class="px-3 py-2 text-sm font-medium border-b-2">
+                                    {{ __('messages.text') }}
+                                </button>
+                                <button type="button"
+                                    @click="setSettingsTab('automation')"
+                                    :class="settingsTab === 'automation' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                                    class="px-3 py-2 text-sm font-medium border-b-2">
+                                    {{ __('messages.automation') }}
+                                </button>
+                            </nav>
                         </div>
 
-                        <!-- Date Position (only for grid layout) -->
-                        <div id="date_position_container" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.show_date') }}</h4>
-                            <select id="date_position" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                                <option value="">{{ __('messages.date_position_none') }}</option>
-                                <option value="overlay">{{ __('messages.date_position_overlay') }}</option>
-                                <option value="above">{{ __('messages.date_position_above') }}</option>
-                            </select>
-                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.date_position_help') }}</p>
-                        </div>
-
-                        <!-- Event Count -->
-                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.event_count') }}</h4>
-                            <select id="event_count" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                                <option value="">{{ __('messages.all_available') }}</option>
-                                @for ($i = 1; $i <= min($maxEvents ?? 20, 20); $i++)
-                                    <option value="{{ $i }}">{{ $i }}</option>
-                                @endfor
-                            </select>
-                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.event_count_help') }}</p>
-                        </div>
-
-                        <!-- Text Template -->
-                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                            <div class="flex items-center justify-between mb-3">
-                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.text_template') }}</h4>
-                                <a href="{{ route('marketing.docs.event_graphics') }}" target="_blank"
-                                   class="text-xs text-blue-500 hover:text-blue-400">
-                                    {{ __('messages.view_docs') }}
-                                </a>
-                            </div>
-                            <textarea id="text_template" rows="5"
-                                aria-label="{{ __('messages.text_template') }}"
-                                class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-xs font-mono resize-y"
-                                placeholder="*{day_name}* {date_dmy} | {time}&#10;*{event_name}*:&#10;{venue} | {city}&#10;{url}"></textarea>
-                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
-                        </div>
-
-                        <!-- AI Prompt (Pro Feature) -->
-                        @if ($isPro)
-                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                            <div class="flex items-center justify-between mb-3">
-                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
-                            </div>
-                            <div>
-                                <textarea id="ai_prompt" rows="5" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
-                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
-                            </div>
-                        </div>
-                        @endif
-
-                        <!-- Link Type Options -->
-                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.options') }}</h4>
-                            <div class="flex flex-col gap-2">
-                                <label class="flex items-center cursor-pointer group">
-                                    <input type="radio" name="link_type" value="schedule" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_event_page') }}</span>
-                                </label>
-                                <label class="flex items-center cursor-pointer group">
-                                    <input type="radio" name="link_type" value="registration" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_registration') }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Recurring Events Option -->
-                        @if ($hasRecurringEvents)
-                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.recurring_events') }}</h4>
-                            <label class="flex items-center cursor-pointer group">
-                                <input type="checkbox" id="exclude_recurring" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="syncFormFields()">
-                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.exclude_recurring_events') }}</span>
-                            </label>
-                        </div>
-                        @endif
-
-                        <!-- Screen Capture Rendering (Enterprise Feature) -->
-                        @if ($isEnterprise)
-                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                            <div class="flex items-center justify-between mb-3">
-                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.screen_capture_rendering') }}</h4>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <label class="flex items-center cursor-pointer">
-                                    <input type="checkbox" id="use_screen_capture" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="toggleScreenCapture()">
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_screen_capture') }}</span>
-                                </label>
-                            </div>
-                            <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.screen_capture_help') }}</p>
-                        </div>
-                        @endif
-
-                        <!-- Email Scheduling (Enterprise Feature) -->
-                        @if ($isEnterprise)
-                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                            <div class="flex items-center justify-between mb-3">
-                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.email_scheduling') }}</h4>
-                            </div>
-
-                            <div>
-                                <!-- Enable Toggle -->
-                                <div class="flex items-center gap-3 mb-4">
-                                    <label class="flex items-center cursor-pointer">
-                                        <input type="checkbox" id="email_enabled" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="toggleEmailOptions()">
-                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_scheduled_emails') }}</span>
+                        <!-- Graphic Tab Content -->
+                        <div x-show="settingsTab === 'graphic'" x-cloak>
+                            <!-- Layout Type -->
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.layout_type') }}</h4>
+                                <div class="flex flex-col gap-2">
+                                    <label class="flex items-center cursor-pointer group">
+                                        <input type="radio" name="layout" value="grid" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" checked>
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.grid_layout') }}</span>
+                                    </label>
+                                    <label class="flex items-center cursor-pointer group">
+                                        <input type="radio" name="layout" value="row" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.row_layout') }}</span>
+                                    </label>
+                                    <label class="flex items-center cursor-pointer group">
+                                        <input type="radio" name="layout" value="list" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.list_layout') }}</span>
                                     </label>
                                 </div>
+                            </div>
 
-                                <!-- Schedule Row (shown/hidden based on checkbox) -->
-                                <div id="email_options_container" class="hidden">
-                                    <div class="flex flex-col gap-3 mb-4">
-                                        <div>
-                                            <label for="frequency" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.frequency') }}</label>
-                                            <select id="frequency" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                                                <option value="daily">{{ __('messages.daily') }}</option>
-                                                <option value="weekly">{{ __('messages.weekly') }}</option>
-                                                <option value="monthly">{{ __('messages.monthly') }}</option>
-                                            </select>
-                                        </div>
+                            <!-- Date Position (only for grid layout) -->
+                            <div id="date_position_container" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.show_date') }}</h4>
+                                <select id="date_position" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                    <option value="">{{ __('messages.date_position_none') }}</option>
+                                    <option value="overlay">{{ __('messages.date_position_overlay') }}</option>
+                                    <option value="above">{{ __('messages.date_position_above') }}</option>
+                                </select>
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.date_position_help') }}</p>
+                            </div>
 
-                                        <div id="weekly_day_container" class="hidden">
-                                            <label for="weekly_day" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_on') }}</label>
-                                            <select id="weekly_day" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                                                <option value="0">{{ __('messages.sunday') }}</option>
-                                                <option value="1">{{ __('messages.monday') }}</option>
-                                                <option value="2">{{ __('messages.tuesday') }}</option>
-                                                <option value="3">{{ __('messages.wednesday') }}</option>
-                                                <option value="4">{{ __('messages.thursday') }}</option>
-                                                <option value="5">{{ __('messages.friday') }}</option>
-                                                <option value="6">{{ __('messages.saturday') }}</option>
-                                            </select>
-                                        </div>
+                            <!-- Event Count -->
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.event_count') }}</h4>
+                                <select id="event_count" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                    <option value="">{{ __('messages.all_available') }}</option>
+                                    @for ($i = 1; $i <= min($maxEvents ?? 20, 20); $i++)
+                                        <option value="{{ $i }}">{{ $i }}</option>
+                                    @endfor
+                                </select>
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.event_count_help') }}</p>
+                            </div>
 
-                                        <div id="monthly_day_container" class="hidden">
-                                            <label for="monthly_day" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.day_of_month') }}</label>
-                                            <select id="monthly_day" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                                                @for ($i = 1; $i <= 28; $i++)
-                                                    <option value="{{ $i }}">{{ $i }}</option>
-                                                @endfor
-                                            </select>
-                                        </div>
+                            <!-- Screen Capture Rendering (Enterprise Feature) -->
+                            @if ($isEnterprise)
+                            <div class="mb-5">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.screen_capture_rendering') }}</h4>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="checkbox" id="use_screen_capture" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="toggleScreenCapture()">
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_screen_capture') }}</span>
+                                    </label>
+                                </div>
+                                <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.screen_capture_help') }}</p>
+                            </div>
+                            @endif
+                        </div>
 
-                                        <div>
-                                            <label for="send_hour" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_at_hour') }}</label>
-                                            <select id="send_hour" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                                                @for ($i = 0; $i < 24; $i++)
-                                                    <option value="{{ $i }}">{{ sprintf('%02d:00', $i) }}</option>
-                                                @endfor
-                                            </select>
-                                        </div>
-                                    </div>
+                        <!-- Text Tab Content -->
+                        <div x-show="settingsTab === 'text'" x-cloak>
+                            <!-- Text Template -->
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.text_template') }}</h4>
+                                    <a href="{{ route('marketing.docs.event_graphics') }}" target="_blank"
+                                       class="text-xs text-blue-500 hover:text-blue-400">
+                                        {{ __('messages.view_docs') }}
+                                    </a>
+                                </div>
+                                <textarea id="text_template" rows="5"
+                                    aria-label="{{ __('messages.text_template') }}"
+                                    class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-xs font-mono resize-y"
+                                    placeholder="*{day_name}* {date_dmy} | {time}&#10;*{event_name}*:&#10;{venue} | {city}&#10;{url}"></textarea>
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
+                            </div>
 
-                                    <div class="mb-4">
-                                        <label for="recipient_emails" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                            {{ __('messages.recipient_emails') }}
-                                        </label>
-                                        <input type="text" id="recipient_emails"
-                                            class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm"
-                                            placeholder="{{ __('messages.recipient_emails_placeholder') }}">
-                                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.recipient_emails_help') }}</p>
-                                    </div>
+                            <!-- AI Prompt (Pro Feature) -->
+                            @if ($isPro)
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
+                                </div>
+                                <div>
+                                    <textarea id="ai_prompt" rows="5" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
+                                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
+                                </div>
+                            </div>
+                            @endif
 
-                                    <button id="testEmailBtn" onclick="sendTestEmail()" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
-                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                        </svg>
-                                        {{ __('messages.send_test_email') }}
-                                    </button>
+                            <!-- Link Type Options -->
+                            <div class="mb-5">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.options') }}</h4>
+                                <div class="flex flex-col gap-2">
+                                    <label class="flex items-center cursor-pointer group">
+                                        <input type="radio" name="link_type" value="schedule" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_event_page') }}</span>
+                                    </label>
+                                    <label class="flex items-center cursor-pointer group">
+                                        <input type="radio" name="link_type" value="registration" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_registration') }}</span>
+                                    </label>
                                 </div>
                             </div>
                         </div>
-                        @endif
+
+                        <!-- Automation Tab Content -->
+                        <div x-show="settingsTab === 'automation'" x-cloak>
+                            <!-- Recurring Events Option -->
+                            @if ($hasRecurringEvents)
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.recurring_events') }}</h4>
+                                <label class="flex items-center cursor-pointer group">
+                                    <input type="checkbox" id="exclude_recurring" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="syncFormFields()">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.exclude_recurring_events') }}</span>
+                                </label>
+                            </div>
+                            @endif
+
+                            <!-- Email Scheduling (Enterprise Feature) -->
+                            @if ($isEnterprise)
+                            <div class="mb-5">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.email_scheduling') }}</h4>
+                                </div>
+
+                                <div>
+                                    <!-- Enable Toggle -->
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="checkbox" id="email_enabled" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="toggleEmailOptions()">
+                                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_scheduled_emails') }}</span>
+                                        </label>
+                                    </div>
+
+                                    <!-- Schedule Row (shown/hidden based on checkbox) -->
+                                    <div id="email_options_container" class="hidden">
+                                        <div class="flex flex-col gap-3 mb-4">
+                                            <div>
+                                                <label for="frequency" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.frequency') }}</label>
+                                                <select id="frequency" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                                    <option value="daily">{{ __('messages.daily') }}</option>
+                                                    <option value="weekly">{{ __('messages.weekly') }}</option>
+                                                    <option value="monthly">{{ __('messages.monthly') }}</option>
+                                                </select>
+                                            </div>
+
+                                            <div id="weekly_day_container" class="hidden">
+                                                <label for="weekly_day" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_on') }}</label>
+                                                <select id="weekly_day" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                                    <option value="0">{{ __('messages.sunday') }}</option>
+                                                    <option value="1">{{ __('messages.monday') }}</option>
+                                                    <option value="2">{{ __('messages.tuesday') }}</option>
+                                                    <option value="3">{{ __('messages.wednesday') }}</option>
+                                                    <option value="4">{{ __('messages.thursday') }}</option>
+                                                    <option value="5">{{ __('messages.friday') }}</option>
+                                                    <option value="6">{{ __('messages.saturday') }}</option>
+                                                </select>
+                                            </div>
+
+                                            <div id="monthly_day_container" class="hidden">
+                                                <label for="monthly_day" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.day_of_month') }}</label>
+                                                <select id="monthly_day" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                                    @for ($i = 1; $i <= 28; $i++)
+                                                        <option value="{{ $i }}">{{ $i }}</option>
+                                                    @endfor
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label for="send_hour" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_at_hour') }}</label>
+                                                <select id="send_hour" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                                    @for ($i = 0; $i < 24; $i++)
+                                                        <option value="{{ $i }}">{{ sprintf('%02d:00', $i) }}</option>
+                                                    @endfor
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label for="recipient_emails" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                                {{ __('messages.recipient_emails') }}
+                                            </label>
+                                            <input type="text" id="recipient_emails"
+                                                class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm"
+                                                placeholder="{{ __('messages.recipient_emails_placeholder') }}">
+                                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.recipient_emails_help') }}</p>
+                                        </div>
+
+                                        <button id="testEmailBtn" onclick="sendTestEmail()" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                            </svg>
+                                            {{ __('messages.send_test_email') }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            @else
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                @if ($hasRecurringEvents)
+                                    {{ __('messages.enterprise_feature_email_scheduling') }}
+                                @else
+                                    {{ __('messages.enterprise_feature_email_scheduling') }}
+                                @endif
+                            </p>
+                            @endif
+                        </div>
 
                         <!-- Buttons -->
-                        <div class="flex flex-row gap-2">
-                            <button id="saveSettingsBtn" onclick="saveSettings()" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-md transition-colors">
+                        <div class="flex flex-row gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <button id="saveSettingsBtn" onclick="saveSettings()" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors">
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
                                 {{ __('messages.save_settings') }}
                             </button>
-                            <button id="runBtn" onclick="loadGraphic()" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md transition-colors">
+                            <button id="runBtn" onclick="loadGraphic()" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md transition-colors">
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -1312,7 +1400,7 @@
                             <button
                                 onclick="copyToClipboard(document.getElementById('eventText').value, 'copyTextBtn')"
                                 id="copyTextBtn"
-                                class="inline-flex items-center px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-md transition-colors"
+                                class="inline-flex items-center px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors"
                             >
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
@@ -1340,7 +1428,7 @@
                             <button
                                 id="downloadBtn"
                                 onclick="downloadImage()"
-                                class="inline-flex items-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md transition-colors"
+                                class="inline-flex items-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md transition-colors"
                             >
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>

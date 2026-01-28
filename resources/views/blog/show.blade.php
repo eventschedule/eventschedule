@@ -195,16 +195,65 @@
         <article class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 -mt-4">
 
             <!-- CTA Card -->
-            <div class="mb-8">
-                <a href="{{ marketing_url('/') }}" class="block group">
-                    <div class="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl p-6 shadow-md transition-all duration-300 group-hover:shadow-lg group-hover:shadow-violet-500/25 group-hover:scale-[1.02]">
-                        <div class="text-center">
-                            <p class="text-white text-lg font-medium">
-                                {!! str_replace(':link', '<span class="font-bold underline">eventschedule.com</span>',  __('messages.try_event_schedule')) !!}
-                            </p>
+            <div class="mb-8 overflow-visible relative z-20">
+                @if($subAudienceInfo)
+                    @php
+                        // Color mapping for parent audiences
+                        $colorMap = [
+                            'for-musicians' => ['from' => 'cyan-600', 'to' => 'teal-600', 'shadow' => 'cyan-500/25'],
+                            'for-bars' => ['from' => 'amber-500', 'to' => 'amber-600', 'shadow' => 'amber-500/25'],
+                            'for-restaurants' => ['from' => 'rose-500', 'to' => 'rose-600', 'shadow' => 'rose-500/25'],
+                            'for-nightclubs' => ['from' => 'fuchsia-600', 'to' => 'pink-600', 'shadow' => 'fuchsia-500/25'],
+                            'for-djs' => ['from' => 'indigo-600', 'to' => 'purple-600', 'shadow' => 'indigo-500/25'],
+                            'for-comedians' => ['from' => 'amber-500', 'to' => 'orange-500', 'shadow' => 'amber-500/25'],
+                            'for-music-venues' => ['from' => 'cyan-600', 'to' => 'cyan-700', 'shadow' => 'cyan-500/25'],
+                            'for-theaters' => ['from' => 'rose-600', 'to' => 'purple-600', 'shadow' => 'rose-500/25'],
+                            'for-comedy-clubs' => ['from' => 'pink-500', 'to' => 'pink-600', 'shadow' => 'pink-500/25'],
+                            'for-breweries-and-wineries' => ['from' => 'amber-500', 'to' => 'orange-500', 'shadow' => 'amber-500/25'],
+                            'for-art-galleries' => ['from' => 'fuchsia-600', 'to' => 'purple-600', 'shadow' => 'fuchsia-500/25'],
+                            'for-community-centers' => ['from' => 'emerald-500', 'to' => 'emerald-600', 'shadow' => 'emerald-500/25'],
+                            'for-circus-acrobatics' => ['from' => 'fuchsia-500', 'to' => 'fuchsia-600', 'shadow' => 'fuchsia-500/25'],
+                            'for-magicians' => ['from' => 'violet-600', 'to' => 'violet-700', 'shadow' => 'violet-500/25'],
+                            'for-spoken-word' => ['from' => 'rose-500', 'to' => 'rose-600', 'shadow' => 'rose-500/25'],
+                            'for-dance-groups' => ['from' => 'fuchsia-600', 'to' => 'pink-600', 'shadow' => 'fuchsia-500/25'],
+                            'for-theater-performers' => ['from' => 'purple-600', 'to' => 'purple-700', 'shadow' => 'purple-500/25'],
+                            'for-food-trucks-and-vendors' => ['from' => 'orange-500', 'to' => 'orange-600', 'shadow' => 'orange-500/25'],
+                        ];
+                        $colors = $colorMap[$subAudienceInfo->parent_page] ?? ['from' => 'violet-500', 'to' => 'purple-500', 'shadow' => 'violet-500/25'];
+                    @endphp
+                    <a href="{{ marketing_url('/' . $subAudienceInfo->parent_page) }}" class="block group">
+                        <div class="bg-gradient-to-r from-{{ $colors['from'] }} to-{{ $colors['to'] }} rounded-2xl p-6 md:p-8 shadow-md transition-all duration-300 group-hover:shadow-lg group-hover:shadow-{{ $colors['shadow'] }} group-hover:scale-[1.02]">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <div class="flex-1">
+                                    <h3 class="text-xl md:text-2xl font-bold text-white mb-2">
+                                        Learn more about Event Schedule for {{ $subAudienceInfo->parent_title }}
+                                    </h3>
+                                    <p class="text-white/90 text-base md:text-lg">
+                                        See how {{ $subAudienceInfo->sub_audience_name }} and others are using Event Schedule
+                                    </p>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <span class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold px-5 py-3 rounded-xl transition-colors">
+                                        Learn More
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                        </svg>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </a>
+                    </a>
+                @else
+                    <a href="{{ marketing_url('/') }}" class="block group">
+                        <div class="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl p-6 shadow-md transition-all duration-300 group-hover:shadow-lg group-hover:shadow-violet-500/25 group-hover:scale-[1.02]">
+                            <div class="text-center">
+                                <p class="text-white text-lg font-medium">
+                                    {!! str_replace(':link', '<span class="font-bold underline">eventschedule.com</span>',  __('messages.try_event_schedule')) !!}
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                @endif
             </div>
 
             <!-- Featured Image -->

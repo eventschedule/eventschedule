@@ -398,6 +398,11 @@
                             <x-primary-button class="w-full justify-center">
                                 {{ __('messages.save') }}
                             </x-primary-button>
+                            @if (! $event->exists)
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-3 text-center">
+                                {{ __('messages.note_all_events_are_publicly_listed') }}
+                            </p>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -1605,23 +1610,17 @@
                 </div> <!-- End of main content area -->
             </div> <!-- End of grid container -->
 
-        <div class="mx-auto space-y-6 pt-4">
-            <p class="text-base dark:text-gray-400 text-gray-600 pb-2">
-                @if ($event->exists)
-                    {{ __('messages.event_created_by', ['user' => $event->user->name]) }}
-                @else
-                    {{ __('messages.note_all_events_are_publicly_listed') }}
-                @endif
-            </p>
-
-        </div>
-
         <!-- Spacer for mobile fixed buttons -->
         <div class="lg:hidden h-24"></div>
 
         <!-- Mobile Fixed Save Bar -->
         <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 z-40 shadow-lg"
              style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
+            @if (! $event->exists)
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3 text-center">
+                {{ __('messages.note_all_events_are_publicly_listed') }}
+            </p>
+            @endif
             <div class="flex gap-3 justify-center max-w-lg mx-auto">
                 <x-primary-button class="flex-1 justify-center">
                     {{ __('messages.save') }}

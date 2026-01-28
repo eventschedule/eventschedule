@@ -402,8 +402,8 @@ return [
     'plan_changed' => 'تم تغيير الخطة بنجاح!',
     'first_year_free' => 'السنة الأولى مجاناً',
     'copy_url' => 'نسخ الرابط',
-    'note_all_schedules_are_publicly_listed' => 'ملاحظة: جميع الجداول الزمنية متاحة للجمهور',
-    'note_all_events_are_publicly_listed' => 'ملاحظة: جميع الفعاليات متاحة للجمهور',
+    'note_all_schedules_are_publicly_listed' => 'سيكون جدولك الزمني مرئيًا للعامة',
+    'note_all_events_are_publicly_listed' => 'سيكون حدثك مرئيًا للعامة',
     'add_to_schedule' => 'إضافة إلى الجدول الزمني',
     'accept_requests' => 'قبول الطلبات',
     'request_terms' => 'شروط الطلب',
@@ -979,4 +979,7 @@ return [
     'slug_pattern' => 'نمط عنوان URL للحدث',
     'slug_pattern_help' => 'تخصيص روابط URL للأحداث الجديدة. مثال: {event_name}-{date_dmy}. اتركه فارغاً لاستخدام اسم الحدث.',
     'show_available_variables' => 'عرض المتغيرات المتاحة',
+
+    // Graphic settings tabs
+    'automation' => 'الأتمتة',
 ];

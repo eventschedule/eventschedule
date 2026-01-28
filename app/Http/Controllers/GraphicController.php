@@ -135,10 +135,10 @@ class GraphicController extends Controller
             $layout = 'grid';
         }
 
-        // Get date_position from request or settings (only applies to grid layout)
+        // Get date_position from request or settings (applies to grid and row layouts)
         $datePosition = $request->get('date_position', $graphicSettings['date_position'] ?? null);
-        if ($layout !== 'grid') {
-            $datePosition = null; // Date position only applies to grid layout
+        if (!in_array($layout, ['grid', 'row'])) {
+            $datePosition = null; // Date position only applies to grid and row layouts
         }
 
         // Get event_count from request or settings
@@ -266,9 +266,9 @@ class GraphicController extends Controller
             $layout = 'grid';
         }
 
-        // Get date_position from settings (only applies to grid layout)
+        // Get date_position from settings (applies to grid and row layouts)
         $datePosition = $graphicSettings['date_position'] ?? null;
-        if ($layout !== 'grid') {
+        if (!in_array($layout, ['grid', 'row'])) {
             $datePosition = null;
         }
 
@@ -461,7 +461,17 @@ class GraphicController extends Controller
             $replacements['{custom_'.$i.'}'] = '';
         }
 
-        return str_replace(array_keys($replacements), array_values($replacements), $template);
+        $result = str_replace(array_keys($replacements), array_values($replacements), $template);
+
+        // Remove lines where all variables were blank (only separators/formatting remain)
+        $lines = explode("\n", $result);
+        $filteredLines = array_filter($lines, function ($line) {
+            // Remove formatting characters and whitespace to check if line has real content
+            $stripped = preg_replace('/[\s\*\|\:\-\,\.]+/', '', $line);
+            return $stripped !== '';
+        });
+
+        return implode("\n", $filteredLines);
     }
 
     private function getPrice($event)

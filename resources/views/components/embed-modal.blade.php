@@ -81,8 +81,8 @@
                     </div>
                 </div>
                 <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                    <button type="button" onclick="closeEmbedModal()" 
-                            class="inline-flex w-full justify-center rounded-md bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg sm:ml-3 sm:w-auto">
+                    <button type="button" onclick="closeEmbedModal()"
+                            class="inline-flex w-full items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors sm:ml-3 sm:w-auto">
                         {{ __('messages.close') }}
                     </button>
                 </div>

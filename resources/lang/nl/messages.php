@@ -255,8 +255,8 @@ return [
     'plan_changed' => 'Abonnement succesvol gewijzigd!',
     'first_year_free' => 'Eerste jaar gratis',
     'copy_url' => 'Kopieer URL',
-    'note_all_schedules_are_publicly_listed' => 'Let op: Alle schema\'s zijn openbaar zichtbaar',
-    'note_all_events_are_publicly_listed' => 'Let op: Alle evenementen zijn openbaar zichtbaar',
+    'note_all_schedules_are_publicly_listed' => 'Je schema zal publiekelijk zichtbaar zijn',
+    'note_all_events_are_publicly_listed' => 'Je evenement zal publiekelijk zichtbaar zijn',
     'add_to_schedule' => 'Toevoegen aan Schema',
     'clear' => 'Wissen',
     'upgrade_to_pro' => 'Upgrade naar Pro om leden toe te voegen',
@@ -976,4 +976,7 @@ return [
     'slug_pattern' => 'Evenement URL-patroon',
     'slug_pattern_help' => 'Pas URL-slugs aan voor nieuwe evenementen. Voorbeeld: {event_name}-{date_dmy}. Laat leeg om de evenementnaam te gebruiken.',
     'show_available_variables' => 'Beschikbare variabelen tonen',
+
+    // Graphic settings tabs
+    'automation' => 'Automatisering',
 ];

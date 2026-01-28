@@ -146,7 +146,10 @@ class BlogController extends Controller
             ->limit(3)
             ->get();
 
-        return view('blog.show', compact('post', 'relatedPosts'));
+        // Check if this is a sub-audience blog post
+        $subAudienceInfo = get_sub_audience_info($post->slug);
+
+        return view('blog.show', compact('post', 'relatedPosts', 'subAudienceInfo'));
     }
 
     /**

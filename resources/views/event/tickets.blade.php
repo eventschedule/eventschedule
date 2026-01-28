@@ -347,13 +347,13 @@
         </div>
 
         <div class="flex justify-center items-center py-4 gap-8">
-            <button
+            <x-brand-button
                 type="submit"
-                class="mt-4 inline-flex gap-x-1.5 rounded-md bg-[#4E81FA] px-6 py-3 text-lg font-semibold text-white shadow-sm hover:bg-[#3D6FE8] transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-sm disabled:bg-gray-400"
-                :disabled="!hasSelectedTickets"
+                class="mt-4 text-lg px-6"
+                x-bind:disabled="!hasSelectedTickets"
             >
                 {{ strtoupper(__('messages.checkout')) }}
-            </button>
+            </x-brand-button>
             
             <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                 {{ strtoupper(__('messages.cancel')) }}

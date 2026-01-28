@@ -456,8 +456,8 @@ return [
     'plan_changed' => 'Plan changed successfully!',
     'first_year_free' => 'First year free',
     'copy_url' => 'Copy URL',
-    'note_all_schedules_are_publicly_listed' => 'Note: All schedules are publicly listed',
-    'note_all_events_are_publicly_listed' => 'Note: All events are publicly listed',
+    'note_all_schedules_are_publicly_listed' => 'Your schedule will be publicly visible',
+    'note_all_events_are_publicly_listed' => 'Your event will be publicly visible',
     'add_to_schedule' => 'Add to Schedule',
     'upgrade_to_pro' => 'Upgrade to Pro to add members',
     'member_already_exists' => 'Member already exists',
@@ -936,7 +936,7 @@ return [
     // Event graphic layout and options
     'layout_type' => 'Layout Type',
     'grid_layout' => 'Grid',
-    'row_layout' => 'Row',
+    'row_layout' => 'Rows',
     'list_layout' => 'List',
     'show_date' => 'Show Date',
     'date_position_none' => 'None',
@@ -1005,4 +1005,7 @@ return [
     'slug_pattern' => 'Event URL Pattern',
     'slug_pattern_help' => 'Customize URL slugs for new events. Example: {event_name}-{date_dmy}. Leave empty to use event name.',
     'show_available_variables' => 'Show available variables',
+
+    // Graphic settings tabs
+    'automation' => 'Automation',
 ];

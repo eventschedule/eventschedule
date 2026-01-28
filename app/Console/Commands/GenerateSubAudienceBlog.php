@@ -111,8 +111,12 @@ class GenerateSubAudienceBlog extends Command
             $this->line("  Topic: {$item['topic']}");
 
             try {
+                // Get the parent page from config for internal linking
+                $parentPage = $config[$item['audience']]['page'];
+                $parentTitle = $config[$item['audience']]['title'];
+
                 // Generate the blog post content using Gemini
-                $result = GeminiUtils::generateBlogPost($item['topic']);
+                $result = GeminiUtils::generateBlogPost($item['topic'], $parentPage, $parentTitle);
 
                 if (empty($result) || empty($result['content'])) {
                     $this->error("  Failed to generate content for {$item['name']}");

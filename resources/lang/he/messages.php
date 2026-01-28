@@ -225,8 +225,8 @@ return [
     'plan_changed' => 'המסלול שונתה בהצלחה!',
     'first_year_free' => 'השנה הראשונה חינם',
     'copy_url' => 'העתק כתובת URL',
-    'note_all_schedules_are_publicly_listed' => 'הערה: כל לוחות הזמנים רשומים בפומבי',
-    'note_all_events_are_publicly_listed' => 'הערה: כל האירועים רשומים בפומבי',
+    'note_all_schedules_are_publicly_listed' => 'לוח הזמנים שלך יהיה גלוי לציבור',
+    'note_all_events_are_publicly_listed' => 'האירוע שלך יהיה גלוי לציבור',
     'add_to_schedule' => 'הוסף ללוח זמנים',
     'upgrade_to_pro' => 'שדרג לפרו כדי להוסיף חברים',
     'member_already_exists' => 'החבר כבר קיים',
@@ -971,4 +971,7 @@ return [
     'slug_pattern' => 'תבנית כתובת URL של אירוע',
     'slug_pattern_help' => 'התאם אישית כתובות URL לאירועים חדשים. דוגמה: {event_name}-{date_dmy}. השאר ריק כדי להשתמש בשם האירוע.',
     'show_available_variables' => 'הצג משתנים זמינים',
+
+    // Graphic settings tabs
+    'automation' => 'אוטומציה',
 ];

@@ -694,13 +694,13 @@ abstract class AbstractEventDesign
         $newWidth = (int) ($bgWidth * $scale);
         $newHeight = (int) ($bgHeight * $scale);
 
-        // Center the image
+        // Center the image (these can be negative for cropping)
         $x = (int) (($targetWidth - $newWidth) / 2);
         $y = (int) (($targetHeight - $newHeight) / 2);
 
         // Apply 50% alpha transparency to the background image
-        // First, create a temporary image with alpha blending
-        $tempImage = imagecreatetruecolor($newWidth, $newHeight);
+        // Create temp image at CANVAS SIZE (not scaled background size) to avoid memory issues
+        $tempImage = imagecreatetruecolor($targetWidth, $targetHeight);
         if ($tempImage) {
             // Enable alpha blending
             imagealphablending($tempImage, false);
@@ -710,18 +710,58 @@ abstract class AbstractEventDesign
             $transparent = imagecolorallocatealpha($tempImage, 0, 0, 0, 127);
             imagefill($tempImage, 0, 0, $transparent);
 
-            // Copy the resized background image to temp image
-            imagecopyresampled($tempImage, $bgImage, 0, 0, 0, 0, $newWidth, $newHeight, $bgWidth, $bgHeight);
+            // Calculate source region to sample from the background image
+            // We need to figure out which portion of the source maps to the visible canvas
+            if ($x < 0) {
+                // Background is wider than canvas - crop horizontally
+                $srcX = (int) ((-$x) / $scale);
+                $srcWidth = (int) ($targetWidth / $scale);
+                $dstX = 0;
+                $dstWidth = $targetWidth;
+            } else {
+                // Background fits within canvas width
+                $srcX = 0;
+                $srcWidth = $bgWidth;
+                $dstX = $x;
+                $dstWidth = $newWidth;
+            }
+
+            if ($y < 0) {
+                // Background is taller than canvas - crop vertically
+                $srcY = (int) ((-$y) / $scale);
+                $srcHeight = (int) ($targetHeight / $scale);
+                $dstY = 0;
+                $dstHeight = $targetHeight;
+            } else {
+                // Background fits within canvas height
+                $srcY = 0;
+                $srcHeight = $bgHeight;
+                $dstY = $y;
+                $dstHeight = $newHeight;
+            }
+
+            // Resample directly to temp image at canvas size
+            imagecopyresampled(
+                $tempImage, $bgImage,
+                $dstX, $dstY,
+                $srcX, $srcY,
+                $dstWidth, $dstHeight,
+                $srcWidth, $srcHeight
+            );
 
             // Apply 50% transparency by blending with the main image
-            // We'll use imagecopymerge with 50% opacity
-            imagecopymerge($this->im, $tempImage, $x, $y, 0, 0, $newWidth, $newHeight, 50);
+            imagecopymerge($this->im, $tempImage, 0, 0, 0, 0, $targetWidth, $targetHeight, 50);
 
             // Clean up temp image
             imagedestroy($tempImage);
         } else {
-            // Fallback to original method if temp image creation fails
-            imagecopyresampled($this->im, $bgImage, $x, $y, 0, 0, $newWidth, $newHeight, $bgWidth, $bgHeight);
+            // Fallback: render directly without transparency effect
+            imagecopyresampled(
+                $this->im, $bgImage,
+                $x, $y, 0, 0,
+                $newWidth, $newHeight,
+                $bgWidth, $bgHeight
+            );
         }
     }
 
