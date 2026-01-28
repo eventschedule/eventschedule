@@ -1158,6 +1158,16 @@
                                 </div>
                             </div>
 
+                            @if ($role->isPro() && $user->isMember($subdomain))
+                            <div class="flex items-center mt-3" v-show="event.tickets_enabled">
+                                <input id="save_default_tickets" name="save_default_tickets" type="checkbox"
+                                    class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                <label for="save_default_tickets" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                    {{ __('messages.save_as_default') }}
+                                </label>
+                            </div>
+                            @endif
+
                             <!-- Registration URL (only visible when tickets are disabled) -->
                             <div class="mb-6" v-show="!event.tickets_enabled">
                                 <x-input-label for="registration_url" :value="__('messages.registration_url')" />
@@ -1500,7 +1510,7 @@
 
                         @foreach($eventCustomFields as $fieldKey => $field)
                         <div class="mb-6">
-                            <x-input-label for="custom_field_{{ $fieldKey }}" :value="$field['name'] . (!empty($field['required']) ? ' *' : '')" />
+                            <x-input-label for="custom_field_{{ $fieldKey }}" :value="((app()->getLocale() === 'en' && !empty($field['name_en'])) ? $field['name_en'] : $field['name']) . (!empty($field['required']) ? ' *' : '')" />
 
                             @if(($field['type'] ?? 'string') === 'string')
                             <x-text-input

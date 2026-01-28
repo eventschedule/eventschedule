@@ -1222,7 +1222,7 @@ class RoleController extends Controller
         }
 
         // Handle event custom fields
-        if ($request->has('event_custom_fields')) {
+        if ($request->has('event_custom_fields_submitted')) {
             $submittedFields = $request->input('event_custom_fields', []);
             $existingCustomFields = $role->event_custom_fields ?? [];
             $eventCustomFields = [];
@@ -1263,6 +1263,7 @@ class RoleController extends Controller
 
             // Batch translate field names that need translation
             if (! empty($fieldsNeedingTranslation)) {
+                $translations = [];
                 try {
                     $translations = GeminiUtils::translateCustomFieldNames(
                         array_values($fieldsNeedingTranslation),
@@ -1277,6 +1278,11 @@ class RoleController extends Controller
                 } catch (\Exception $e) {
                     \Log::error('Failed to translate custom field names: '.$e->getMessage());
                     // Continue without translations if API fails
+                }
+
+                // Warn user if translation failed
+                if (empty($translations)) {
+                    session()->flash('warning', __('messages.translation_failed_warning'));
                 }
             }
 

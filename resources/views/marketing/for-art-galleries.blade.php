@@ -71,7 +71,7 @@
                 <!-- Winter -->
                 <div class="bg-gradient-to-br from-indigo-900/40 to-violet-900/40 rounded-2xl border border-indigo-500/20 p-5 relative overflow-hidden group hover:border-indigo-500/40 transition-colors">
                     <div class="absolute top-2 right-2 text-indigo-400/30 text-4xl">&#10052;</div>
-                    <div class="text-indigo-300 text-xs font-semibold tracking-wider uppercase mb-3">Winter</div>
+                    <div class="text-indigo-700 dark:text-indigo-300 text-xs font-semibold tracking-wider uppercase mb-3">Winter</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
@@ -87,7 +87,7 @@
                 <!-- Spring -->
                 <div class="bg-gradient-to-br from-emerald-900/40 to-teal-900/40 rounded-2xl border border-emerald-500/20 p-5 relative overflow-hidden group hover:border-emerald-500/40 transition-colors">
                     <div class="absolute top-2 right-2 text-emerald-400/30 text-4xl">&#127807;</div>
-                    <div class="text-emerald-300 text-xs font-semibold tracking-wider uppercase mb-3">Spring</div>
+                    <div class="text-emerald-700 dark:text-emerald-300 text-xs font-semibold tracking-wider uppercase mb-3">Spring</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
@@ -103,7 +103,7 @@
                 <!-- Summer -->
                 <div class="bg-gradient-to-br from-amber-900/40 to-yellow-900/40 rounded-2xl border border-amber-500/20 p-5 relative overflow-hidden group hover:border-amber-500/40 transition-colors">
                     <div class="absolute top-2 right-2 text-amber-400/30 text-4xl">&#9728;</div>
-                    <div class="text-amber-300 text-xs font-semibold tracking-wider uppercase mb-3">Summer</div>
+                    <div class="text-amber-700 dark:text-amber-300 text-xs font-semibold tracking-wider uppercase mb-3">Summer</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
@@ -119,7 +119,7 @@
                 <!-- Fall -->
                 <div class="bg-gradient-to-br from-orange-900/40 to-red-900/40 rounded-2xl border border-orange-500/20 p-5 relative overflow-hidden group hover:border-orange-500/40 transition-colors">
                     <div class="absolute top-2 right-2 text-orange-400/30 text-4xl">&#127810;</div>
-                    <div class="text-orange-300 text-xs font-semibold tracking-wider uppercase mb-3">Fall</div>
+                    <div class="text-orange-700 dark:text-orange-300 text-xs font-semibold tracking-wider uppercase mb-3">Fall</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
@@ -135,7 +135,7 @@
                 <!-- Holiday -->
                 <div class="bg-gradient-to-br from-purple-900/40 to-rose-900/40 rounded-2xl border border-purple-500/20 p-5 relative overflow-hidden group hover:border-purple-500/40 transition-colors col-span-2 lg:col-span-1">
                     <div class="absolute top-2 right-2 text-purple-400/30 text-4xl">&#127873;</div>
-                    <div class="text-purple-300 text-xs font-semibold tracking-wider uppercase mb-3">Holiday</div>
+                    <div class="text-purple-700 dark:text-purple-300 text-xs font-semibold tracking-wider uppercase mb-3">Holiday</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-purple-400"></div>

@@ -275,7 +275,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                         </svg>
                                     </div>
-                                    <div class="text-emerald-300 text-sm">Event created</div>
+                                    <div class="text-emerald-700 dark:text-emerald-300 text-sm">Event created</div>
                                     <div class="text-gray-500 text-xs">synced</div>
                                 </div>
                                 <div class="flex items-center gap-3">
@@ -284,7 +284,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                         </svg>
                                     </div>
-                                    <div class="text-emerald-300 text-sm">Event updated</div>
+                                    <div class="text-emerald-700 dark:text-emerald-300 text-sm">Event updated</div>
                                     <div class="text-gray-500 text-xs">synced</div>
                                 </div>
                                 <div class="flex items-center gap-3">
@@ -293,7 +293,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                         </svg>
                                     </div>
-                                    <div class="text-emerald-300 text-sm">Event deleted</div>
+                                    <div class="text-emerald-700 dark:text-emerald-300 text-sm">Event deleted</div>
                                     <div class="text-gray-500 text-xs">synced</div>
                                 </div>
                             </div>
