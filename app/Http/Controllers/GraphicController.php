@@ -91,6 +91,32 @@ class GraphicController extends Controller
         $currentSettings = $role->graphic_settings;
         $newSettings = array_merge($currentSettings, $validated);
 
+        // Require recipient_emails when enabled is true
+        $isEnabled = $newSettings['enabled'] ?? false;
+        $recipientEmails = trim($newSettings['recipient_emails'] ?? '');
+        
+        if ($isEnabled) {
+            if (empty($recipientEmails)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.email_required'),
+                    'errors' => ['recipient_emails' => [__('messages.email_required')]],
+                ], 422);
+            }
+
+            // Validate that at least one email is valid
+            $emailList = array_map('trim', explode(',', $recipientEmails));
+            $validEmails = array_filter($emailList, fn ($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+
+            if (empty($validEmails)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.email_required'),
+                    'errors' => ['recipient_emails' => [__('messages.email_required')]],
+                ], 422);
+            }
+        }
+
         $role->graphic_settings = $newSettings;
         $role->save();
 
@@ -117,9 +143,22 @@ class GraphicController extends Controller
             ], 403);
         }
 
-        // Use the authenticated user's email
-        $user = auth()->user();
-        if (! $user || empty($user->email)) {
+        // Get recipient emails from graphic settings
+        $settings = $role->graphic_settings;
+        $recipientEmails = trim($settings['recipient_emails'] ?? '');
+
+        if (empty($recipientEmails)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.email_required'),
+            ], 400);
+        }
+
+        // Validate that at least one email is valid
+        $emailList = array_map('trim', explode(',', $recipientEmails));
+        $validEmails = array_filter($emailList, fn ($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+
+        if (empty($validEmails)) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.email_required'),
@@ -128,7 +167,8 @@ class GraphicController extends Controller
 
         try {
             $service = new GraphicEmailService;
-            $service->sendGraphicEmail($role, $user->email);
+            // Send to all recipients in a single email (service handles parsing)
+            $service->sendGraphicEmail($role, $recipientEmails);
 
             return response()->json([
                 'success' => true,
