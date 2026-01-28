@@ -21,7 +21,7 @@
 }
 
 .flatpickr-current-month .numInputWrapper {
-    width: 8ch;
+    width: 10ch;
     flex-shrink: 0;
 }
 
