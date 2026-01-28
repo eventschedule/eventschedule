@@ -105,20 +105,20 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-violet-950 to-purple-950 rounded-2xl border border-violet-400/30 p-4 max-w-xs">
-                                    <div class="text-xs text-violet-300 font-semibold mb-3 uppercase tracking-wide">Booking Inquiry</div>
+                                <div class="bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-950 dark:to-purple-950 rounded-2xl border border-violet-300 dark:border-violet-400/30 p-4 max-w-xs">
+                                    <div class="text-xs text-violet-600 dark:text-violet-300 font-semibold mb-3 uppercase tracking-wide">Booking Inquiry</div>
                                     <div class="space-y-3">
-                                        <div class="p-3 rounded-lg bg-white/10 border border-white/10">
+                                        <div class="p-3 rounded-lg bg-violet-200 dark:bg-white/10 border border-violet-300 dark:border-white/10">
                                             <div class="flex items-center gap-2 mb-1">
-                                                <div class="w-2 h-2 rounded-full bg-amber-400"></div>
-                                                <span class="text-white text-sm font-medium">Corporate Gala</span>
+                                                <div class="w-2 h-2 rounded-full bg-amber-500 dark:bg-amber-400"></div>
+                                                <span class="text-gray-900 dark:text-white text-sm font-medium">Corporate Gala</span>
                                             </div>
-                                            <div class="text-gray-400 text-xs">Dec 15 - Marriott Ballroom</div>
+                                            <div class="text-gray-500 dark:text-gray-400 text-xs">Dec 15 - Marriott Ballroom</div>
                                         </div>
-                                        <div class="p-3 rounded-lg bg-white/5">
+                                        <div class="p-3 rounded-lg bg-violet-100 dark:bg-white/5">
                                             <div class="flex items-center gap-2 mb-1">
-                                                <div class="w-2 h-2 rounded-full bg-pink-400"></div>
-                                                <span class="text-gray-300 text-sm font-medium">Wedding Reception</span>
+                                                <div class="w-2 h-2 rounded-full bg-pink-500 dark:bg-pink-400"></div>
+                                                <span class="text-gray-600 dark:text-gray-300 text-sm font-medium">Wedding Reception</span>
                                             </div>
                                             <div class="text-gray-500 text-xs">Jan 8 - Private Venue</div>
                                         </div>
@@ -193,21 +193,21 @@
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Keep 100% of ticket sales</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg">Your show, your revenue. Zero platform fees. Stripe goes directly to you. QR tickets for easy check-in.</p>
                         </div>
-                        <div class="bg-gray-900 rounded-2xl p-5 border border-white/10">
+                        <div class="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-200 dark:border-white/10">
                             <div class="space-y-3">
-                                <div class="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/10">
+                                <div class="flex items-center justify-between p-3 rounded-xl bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10">
                                     <div>
-                                        <div class="text-white font-medium">General Admission</div>
-                                        <div class="text-emerald-400 text-xs">120 remaining</div>
+                                        <div class="text-gray-900 dark:text-white font-medium">General Admission</div>
+                                        <div class="text-emerald-600 dark:text-emerald-400 text-xs">120 remaining</div>
                                     </div>
-                                    <div class="text-xl font-bold text-white">$25</div>
+                                    <div class="text-xl font-bold text-gray-900 dark:text-white">$25</div>
                                 </div>
                                 <div class="flex items-center justify-between p-3 rounded-xl bg-emerald-500/20 border border-emerald-400/30">
                                     <div>
-                                        <div class="text-white font-medium">VIP Front Row</div>
-                                        <div class="text-emerald-300 text-xs">8 remaining</div>
+                                        <div class="text-gray-900 dark:text-white font-medium">VIP Front Row</div>
+                                        <div class="text-emerald-600 dark:text-emerald-300 text-xs">8 remaining</div>
                                     </div>
-                                    <div class="text-xl font-bold text-white">$75</div>
+                                    <div class="text-xl font-bold text-gray-900 dark:text-white">$75</div>
                                 </div>
                             </div>
                         </div>
@@ -548,25 +548,25 @@
                             </span>
                         </div>
                         <div class="flex-shrink-0">
-                            <div class="bg-gray-900 rounded-2xl border border-white/10 p-6 w-52">
+                            <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-white/10 p-6 w-52">
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="text-gray-300 text-xs">Online Event</span>
+                                    <span class="text-gray-600 dark:text-gray-300 text-xs">Online Event</span>
                                     <div class="w-10 h-5 bg-indigo-500 rounded-full relative">
                                         <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full"></div>
                                     </div>
                                 </div>
                                 <div class="space-y-2">
-                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
+                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-gray-100 dark:bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-blue-400"></div>
-                                        <span class="text-gray-300 text-xs">Zoom</span>
+                                        <span class="text-gray-600 dark:text-gray-300 text-xs">Zoom</span>
                                     </div>
-                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
+                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-gray-100 dark:bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-red-400"></div>
-                                        <span class="text-gray-300 text-xs">YouTube Live</span>
+                                        <span class="text-gray-600 dark:text-gray-300 text-xs">YouTube Live</span>
                                     </div>
-                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded-lg">
+                                    <div class="flex items-center gap-2 px-2 py-1.5 bg-gray-100 dark:bg-white/5 rounded-lg">
                                         <div class="w-2 h-2 rounded-full bg-purple-400"></div>
-                                        <span class="text-gray-300 text-xs">Twitch</span>
+                                        <span class="text-gray-600 dark:text-gray-300 text-xs">Twitch</span>
                                     </div>
                                 </div>
                             </div>

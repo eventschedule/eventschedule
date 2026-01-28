@@ -68,14 +68,14 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-fuchsia-950 to-pink-950 rounded-2xl border border-fuchsia-400/30 p-4 max-w-xs">
+                                <div class="bg-gradient-to-br from-fuchsia-100 to-pink-100 dark:from-fuchsia-950 dark:to-pink-950 rounded-2xl border border-fuchsia-300 dark:border-fuchsia-400/30 p-4 max-w-xs">
                                     <div class="text-center mb-3">
                                         <div class="text-gray-900 dark:text-white font-semibold">The Blue Note</div>
-                                        <div class="text-fuchsia-300 text-sm">March 2024</div>
+                                        <div class="text-fuchsia-600 dark:text-fuchsia-300 text-sm">March 2024</div>
                                     </div>
                                     <div class="space-y-2">
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-fuchsia-500/20 border border-fuchsia-400/30">
-                                            <div class="text-fuchsia-300 text-xs font-mono w-12">Mar 15</div>
+                                            <div class="text-fuchsia-600 dark:text-fuchsia-300 text-xs font-mono w-12">Mar 15</div>
                                             <span class="text-gray-900 dark:text-white text-sm">Jazz Night</span>
                                         </div>
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
