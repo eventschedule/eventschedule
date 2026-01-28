@@ -82,7 +82,7 @@
 
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <a href="{{ route('marketing.docs.getting_started') }}" class="doc-card block">
-                    <div class="rounded-xl border border-gray-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-cyan-900/30 to-teal-900/30 hover:border-cyan-500/30 transition-colors">
+                    <div class="rounded-xl border border-gray-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-cyan-900 dark:to-teal-900 hover:border-cyan-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
                             <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -94,7 +94,7 @@
                 </a>
 
                 <a href="{{ route('marketing.docs.schedule_basics') }}" class="doc-card block">
-                    <div class="rounded-xl border border-gray-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-teal-900/30 to-blue-900/30 hover:border-teal-500/30 transition-colors">
+                    <div class="rounded-xl border border-gray-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-teal-900 dark:to-blue-900 hover:border-teal-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
                             <svg class="w-5 h-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
@@ -106,7 +106,7 @@
                 </a>
 
                 <a href="{{ route('marketing.docs.creating_events') }}" class="doc-card block">
-                    <div class="rounded-xl border border-gray-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-blue-900/30 to-indigo-900/30 hover:border-blue-500/30 transition-colors">
+                    <div class="rounded-xl border border-gray-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-blue-900 dark:to-indigo-900 hover:border-blue-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
                             <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -118,7 +118,7 @@
                 </a>
 
                 <a href="{{ route('marketing.docs.sharing') }}" class="doc-card block">
-                    <div class="rounded-xl border border-gray-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-indigo-900/30 to-violet-900/30 hover:border-indigo-500/30 transition-colors">
+                    <div class="rounded-xl border border-gray-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-indigo-900 dark:to-violet-900 hover:border-indigo-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
                             <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -130,7 +130,7 @@
                 </a>
 
                 <a href="{{ route('marketing.docs.tickets') }}" class="doc-card block">
-                    <div class="rounded-xl border border-gray-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-violet-900/30 to-purple-900/30 hover:border-violet-500/30 transition-colors">
+                    <div class="rounded-xl border border-gray-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-violet-900 dark:to-purple-900 hover:border-violet-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
                             <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
@@ -142,7 +142,7 @@
                 </a>
 
                 <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-card block">
-                    <div class="rounded-xl border border-gray-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-purple-900/30 to-pink-900/30 hover:border-purple-500/30 transition-colors">
+                    <div class="rounded-xl border border-gray-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-purple-900 dark:to-pink-900 hover:border-purple-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
                             <svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -162,7 +162,7 @@
             <div class="grid md:grid-cols-2 gap-6">
                 <!-- Selfhost Section Card -->
                 <a href="{{ route('marketing.docs.selfhost') }}" class="section-card block group">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-8 h-full bg-gradient-to-br from-violet-900/50 via-purple-900/50 to-indigo-900/50 group-hover:border-violet-500/30 transition-colors">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-8 h-full bg-gradient-to-br from-violet-900 via-purple-900 to-indigo-900 group-hover:border-violet-500/30 transition-colors">
                         <!-- Glow effect -->
                         <div class="absolute -top-24 -right-24 w-48 h-48 bg-violet-500/20 rounded-full blur-[60px] group-hover:bg-violet-500/30 transition-colors"></div>
 
@@ -173,23 +173,23 @@
                                 </svg>
                             </div>
 
-                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Selfhost Installation</h2>
-                            <p class="text-gray-500 dark:text-gray-400 mb-6">Deploy Event Schedule on your own server. Complete control, full customization.</p>
+                            <h2 class="text-2xl font-bold text-white mb-3">Selfhost Installation</h2>
+                            <p class="text-gray-300 mb-6">Deploy Event Schedule on your own server. Complete control, full customization.</p>
 
                             <div class="space-y-2 mb-6">
-                                <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                <div class="flex items-center gap-2 text-sm text-gray-300">
                                     <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
                                     Installation Guide
                                 </div>
-                                <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                <div class="flex items-center gap-2 text-sm text-gray-300">
                                     <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
                                     SaaS Multi-tenant Setup
                                 </div>
-                                <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                <div class="flex items-center gap-2 text-sm text-gray-300">
                                     <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
@@ -209,7 +209,7 @@
 
                 <!-- API Reference Card -->
                 <a href="{{ route('marketing.docs.developer.api') }}" class="section-card block group">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-8 h-full bg-gradient-to-br from-emerald-900/50 via-teal-900/50 to-cyan-900/50 group-hover:border-emerald-500/30 transition-colors">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-8 h-full bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 group-hover:border-emerald-500/30 transition-colors">
                         <!-- Glow effect -->
                         <div class="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/20 rounded-full blur-[60px] group-hover:bg-emerald-500/30 transition-colors"></div>
 
@@ -225,23 +225,23 @@
                                 <span class="text-sm font-medium text-emerald-300">REST API</span>
                             </div>
 
-                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">API Reference</h2>
-                            <p class="text-gray-500 dark:text-gray-400 mb-6">Complete REST API documentation with authentication, endpoints, request/response examples, and error handling.</p>
+                            <h2 class="text-2xl font-bold text-white mb-3">API Reference</h2>
+                            <p class="text-gray-300 mb-6">Complete REST API documentation with authentication, endpoints, request/response examples, and error handling.</p>
 
                             <div class="flex flex-wrap items-center gap-4 mb-6">
-                                <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                <div class="flex items-center gap-2 text-sm text-gray-300">
                                     <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     JSON responses
                                 </div>
-                                <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                <div class="flex items-center gap-2 text-sm text-gray-300">
                                     <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     API key auth
                                 </div>
-                                <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                <div class="flex items-center gap-2 text-sm text-gray-300">
                                     <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>

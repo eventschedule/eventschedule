@@ -74,17 +74,17 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Open Source (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900/50 to-slate-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 to-slate-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-500/20 text-gray-700 dark:text-gray-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-500/20 text-gray-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                                 </svg>
                                 Open Source
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Fully transparent code</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Every line of code is available on GitHub under the AAL license. Inspect, modify, or contribute. No hidden functionality, no surprises.</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Fully transparent code</h3>
+                            <p class="text-white/80 text-lg mb-6">Every line of code is available on GitHub under the AAL license. Inspect, modify, or contribute. No hidden functionality, no surprises.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">AAL Licensed</span>
                                 <span class="px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Laravel + Vue.js</span>
@@ -113,15 +113,15 @@
                 </div>
 
                 <!-- Self-Host Options -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900 to-teal-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2" />
                         </svg>
                         Selfhost
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your server, your data</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Install via Softaculous (one-click) or Docker. Keep full control of your data.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">Your server, your data</h3>
+                    <p class="text-white/80 mb-6">Install via Softaculous (one-click) or Docker. Keep full control of your data.</p>
 
                     <div class="space-y-3">
                         <a href="https://www.softaculous.com/apps/calendars/Event_Schedule" target="_blank" class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10 hover:bg-gray-300 dark:hover:bg-white/15 transition-colors">
@@ -150,15 +150,15 @@
                 </div>
 
                 <!-- REST API -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-700 dark:text-violet-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900 to-indigo-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                         </svg>
                         REST API
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Build integrations</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Programmatically manage schedules and events. Create custom workflows and automations.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">Build integrations</h3>
+                    <p class="text-white/80 mb-6">Programmatically manage schedules and events. Create custom workflows and automations.</p>
 
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 code-block text-xs">
                         <div class="text-gray-500 mb-2"># Create an event</div>
@@ -168,17 +168,17 @@
                 </div>
 
                 <!-- API Endpoints (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-blue-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900 to-blue-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-start">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 API Endpoints
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Full CRUD operations</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg">Manage your schedules, events, and ticket sales programmatically. API access requires a Pro subscription.</p>
+                            <h3 class="text-3xl font-bold text-white mb-4">Full CRUD operations</h3>
+                            <p class="text-white/80 text-lg">Manage your schedules, events, and ticket sales programmatically. API access requires a Pro subscription.</p>
                         </div>
                         <div class="space-y-3">
                             <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-[#0f0f14] border border-gray-100 dark:border-white/5">
@@ -351,12 +351,12 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/ticketing') }}" class="group block">
-                <div class="bg-gradient-to-br from-fuchsia-900/50 to-violet-900/50 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-fuchsia-900 to-violet-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <!-- Text content -->
                         <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-fuchsia-300 transition-colors">Ticketing</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Sell tickets directly from your schedule. QR codes for fast check-ins, Stripe payments built-in.</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-fuchsia-300 transition-colors">Ticketing</h3>
+                            <p class="text-white/80 text-lg mb-4">Sell tickets directly from your schedule. QR codes for fast check-ins, Stripe payments built-in.</p>
                             <span class="inline-flex items-center text-fuchsia-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

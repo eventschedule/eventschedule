@@ -75,7 +75,7 @@
             <div class="grid md:grid-cols-2 gap-6">
                 <!-- Installation Guide -->
                 <a href="{{ route('marketing.docs.selfhost.installation') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full bg-gradient-to-br from-cyan-900/50 to-teal-900/50">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full bg-gradient-to-br from-cyan-900 to-teal-900">
                         <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-cyan-500/20">
                             <svg class="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -94,7 +94,7 @@
 
                 <!-- SaaS Setup -->
                 <a href="{{ route('marketing.docs.selfhost.saas') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full bg-gradient-to-br from-blue-900/50 to-cyan-900/50">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full bg-gradient-to-br from-blue-900 to-cyan-900">
                         <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-blue-500/20">
                             <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
@@ -113,7 +113,7 @@
 
                 <!-- Stripe Integration -->
                 <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full bg-gradient-to-br from-indigo-900/50 to-blue-900/50">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full bg-gradient-to-br from-indigo-900 to-blue-900">
                         <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-indigo-500/20">
                             <svg class="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -132,7 +132,7 @@
 
                 <!-- Google Calendar -->
                 <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full bg-gradient-to-br from-violet-900/50 to-indigo-900/50">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full bg-gradient-to-br from-violet-900 to-indigo-900">
                         <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-violet-500/20">
                             <svg class="w-6 h-6 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

@@ -737,8 +737,6 @@ return [
     'subscribe' => 'تابع',
     'submit_event' => 'إرسال فعالية',
     'link_type' => 'نوع الرابط',
-    'link_to_event_page' => 'رابط لصفحة الحدث',
-    'link_to_registration' => 'رابط مباشر للتسجيل',
     'text' => 'نص',
     'download' => 'تحميل',
     'copy' => 'نسخ',
@@ -982,4 +980,14 @@ return [
 
     // Graphic settings tabs
     'automation' => 'الأتمتة',
+
+    // URL formatting options
+    'link_to' => 'ربط بـ',
+    'link_to_event_page' => 'Event Schedule',
+    'link_to_event_page_desc' => 'تفاصيل الحدث على Event Schedule',
+    'link_to_registration' => 'التسجيل',
+    'link_to_registration_desc' => 'موقع تذاكر أو تسجيل تابع لجهة خارجية',
+    'url_format' => 'تنسيق الرابط',
+    'url_include_https' => 'تضمين HTTPS',
+    'url_include_id' => 'تضمين معرف الحدث',
 ];

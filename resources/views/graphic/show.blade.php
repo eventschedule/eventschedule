@@ -74,6 +74,10 @@
                                   document.getElementById('max_per_row_mobile')?.value || '';
                 const overlayText = document.getElementById('overlay_text')?.value ||
                                     document.getElementById('overlay_text_mobile')?.value || '';
+                const urlIncludeHttps = document.getElementById('url_include_https')?.checked ||
+                                        document.getElementById('url_include_https_mobile')?.checked || false;
+                const urlIncludeId = document.getElementById('url_include_id')?.checked ||
+                                     document.getElementById('url_include_id_mobile')?.checked || false;
 
                 return {
                     link_type: linkType,
@@ -85,7 +89,9 @@
                     date_position: datePosition,
                     event_count: eventCount,
                     max_per_row: maxPerRow,
-                    overlay_text: overlayText
+                    overlay_text: overlayText,
+                    url_include_https: urlIncludeHttps,
+                    url_include_id: urlIncludeId
                 };
             }
 
@@ -208,6 +214,20 @@
                 if (overlayTextDesktop && overlayTextMobile) {
                     overlayTextMobile.value = overlayTextDesktop.value;
                 }
+
+                // Sync URL include HTTPS
+                const urlIncludeHttpsDesktop = document.getElementById('url_include_https');
+                const urlIncludeHttpsMobile = document.getElementById('url_include_https_mobile');
+                if (urlIncludeHttpsDesktop && urlIncludeHttpsMobile) {
+                    urlIncludeHttpsMobile.checked = urlIncludeHttpsDesktop.checked;
+                }
+
+                // Sync URL include ID
+                const urlIncludeIdDesktop = document.getElementById('url_include_id');
+                const urlIncludeIdMobile = document.getElementById('url_include_id_mobile');
+                if (urlIncludeIdDesktop && urlIncludeIdMobile) {
+                    urlIncludeIdMobile.checked = urlIncludeIdDesktop.checked;
+                }
             }
 
             function loadGraphic() {
@@ -238,8 +258,10 @@
                 const eventCountParam = formSettings.event_count ? '&event_count=' + encodeURIComponent(formSettings.event_count) : '';
                 const maxPerRowParam = formSettings.max_per_row ? '&max_per_row=' + encodeURIComponent(formSettings.max_per_row) : '';
                 const overlayTextParam = formSettings.overlay_text ? '&overlay_text=' + encodeURIComponent(formSettings.overlay_text) : '';
+                const urlIncludeHttpsParam = formSettings.url_include_https ? '&url_include_https=1' : '';
+                const urlIncludeIdParam = formSettings.url_include_id ? '&url_include_id=1' : '';
 
-                fetch('{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + screenCaptureParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam)
+                fetch('{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + screenCaptureParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + urlIncludeHttpsParam + urlIncludeIdParam)
                     .then(response => {
                         if (!response.ok) {
                             if (response.status === 404) {
@@ -422,6 +444,22 @@
                     }
                 });
                 toggleOverlayTextVisibility();
+
+                // Update URL include HTTPS checkboxes
+                ['url_include_https', 'url_include_https_mobile'].forEach(id => {
+                    const urlIncludeHttps = document.getElementById(id);
+                    if (urlIncludeHttps) {
+                        urlIncludeHttps.checked = currentSettings.url_include_https || false;
+                    }
+                });
+
+                // Update URL include ID checkboxes
+                ['url_include_id', 'url_include_id_mobile'].forEach(id => {
+                    const urlIncludeId = document.getElementById(id);
+                    if (urlIncludeId) {
+                        urlIncludeId.checked = currentSettings.url_include_id || false;
+                    }
+                });
             }
 
             function toggleDatePositionVisibility() {
@@ -630,6 +668,10 @@
                 // Get overlay text
                 const overlayText = document.getElementById('overlay_text') || document.getElementById('overlay_text_mobile');
 
+                // Get URL formatting options
+                const urlIncludeHttps = document.getElementById('url_include_https') || document.getElementById('url_include_https_mobile');
+                const urlIncludeId = document.getElementById('url_include_id') || document.getElementById('url_include_id_mobile');
+
                 const settings = {
                     enabled: emailEnabled ? emailEnabled.checked : false,
                     frequency: frequency,
@@ -645,7 +687,9 @@
                     date_position: datePosition ? datePosition.value || null : null,
                     event_count: eventCount && eventCount.value ? parseInt(eventCount.value) : null,
                     max_per_row: maxPerRow && maxPerRow.value ? parseInt(maxPerRow.value) : null,
-                    overlay_text: overlayText ? overlayText.value : ''
+                    overlay_text: overlayText ? overlayText.value : '',
+                    url_include_https: urlIncludeHttps ? urlIncludeHttps.checked : false,
+                    url_include_id: urlIncludeId ? urlIncludeId.checked : false
                 };
 
                 fetch('{{ route("event.save_graphic_settings", ["subdomain" => $role->subdomain]) }}', {
@@ -1126,17 +1170,38 @@
                         </div>
                         @endif
 
-                        <!-- Link Type Options -->
+                        <!-- Link to Section -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.link_to') }}</h4>
+                            <div class="flex flex-col gap-3">
+                                <label class="flex items-start cursor-pointer group">
+                                    <input type="radio" name="link_type_mobile" value="schedule" class="w-4 h-4 mt-0.5 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                    <div class="ml-2">
+                                        <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_event_page') }}</span>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.link_to_event_page_desc') }}</p>
+                                    </div>
+                                </label>
+                                <label class="flex items-start cursor-pointer group">
+                                    <input type="radio" name="link_type_mobile" value="registration" class="w-4 h-4 mt-0.5 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                    <div class="ml-2">
+                                        <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_registration') }}</span>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.link_to_registration_desc') }}</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- URL Format Section -->
                         <div class="mb-5">
-                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.options') }}</h4>
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.url_format') }}</h4>
                             <div class="flex flex-col gap-2">
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="radio" name="link_type_mobile" value="schedule" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_event_page') }}</span>
+                                    <input type="checkbox" id="url_include_https_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="syncFormFields()">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.url_include_https') }}</span>
                                 </label>
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="radio" name="link_type_mobile" value="registration" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_registration') }}</span>
+                                    <input type="checkbox" id="url_include_id_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="syncFormFields()">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.url_include_id') }}</span>
                                 </label>
                             </div>
                         </div>
@@ -1429,17 +1494,38 @@
                             </div>
                             @endif
 
-                            <!-- Link Type Options -->
+                            <!-- Link to Section -->
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.link_to') }}</h4>
+                                <div class="flex flex-col gap-3">
+                                    <label class="flex items-start cursor-pointer group">
+                                        <input type="radio" name="link_type" value="schedule" class="w-4 h-4 mt-0.5 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                        <div class="ml-2">
+                                            <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_event_page') }}</span>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.link_to_event_page_desc') }}</p>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-start cursor-pointer group">
+                                        <input type="radio" name="link_type" value="registration" class="w-4 h-4 mt-0.5 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                        <div class="ml-2">
+                                            <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_registration') }}</span>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.link_to_registration_desc') }}</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- URL Format Section -->
                             <div class="mb-5">
-                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.options') }}</h4>
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.url_format') }}</h4>
                                 <div class="flex flex-col gap-2">
                                     <label class="flex items-center cursor-pointer group">
-                                        <input type="radio" name="link_type" value="schedule" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_event_page') }}</span>
+                                        <input type="checkbox" id="url_include_https" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="syncFormFields()">
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.url_include_https') }}</span>
                                     </label>
                                     <label class="flex items-center cursor-pointer group">
-                                        <input type="radio" name="link_type" value="registration" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_registration') }}</span>
+                                        <input type="checkbox" id="url_include_id" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="syncFormFields()">
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.url_include_id') }}</span>
                                     </label>
                                 </div>
                             </div>

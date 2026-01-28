@@ -758,8 +758,6 @@ return [
     'subscribe' => 'Follow',
     'submit_event' => 'Submit Event',
     'link_type' => 'Link Type',
-    'link_to_event_page' => 'Link to Event Page',
-    'link_to_registration' => 'Link Directly to Registration',
     'text' => 'Text',
     'download' => 'Download',
     'copy' => 'Copy',
@@ -1013,4 +1011,14 @@ return [
 
     // Graphic settings tabs
     'automation' => 'Automation',
+
+    // URL formatting options
+    'link_to' => 'Link to',
+    'link_to_event_page' => 'Event Schedule',
+    'link_to_event_page_desc' => 'Event details on Event Schedule',
+    'link_to_registration' => 'Registration',
+    'link_to_registration_desc' => 'Third-party ticketing or registration site',
+    'url_format' => 'URL Format',
+    'url_include_https' => 'Include HTTPS',
+    'url_include_id' => 'Include Event ID',
 ];

@@ -68,6 +68,8 @@ class GraphicController extends Controller
             'event_count' => 'nullable|integer|min:1',
             'max_per_row' => 'nullable|integer|min:1|max:20',
             'overlay_text' => 'nullable|string|max:200',
+            'url_include_https' => 'boolean',
+            'url_include_id' => 'boolean',
         ]);
 
         // Merge with existing settings to preserve defaults
@@ -244,8 +246,18 @@ class GraphicController extends Controller
             ? $request->get('text_template', '')
             : ($graphicSettings['text_template'] ?? '');
 
+        // Get URL formatting settings
+        $urlSettings = [
+            'url_include_https' => $request->has('url_include_https')
+                ? $request->boolean('url_include_https')
+                : ($graphicSettings['url_include_https'] ?? false),
+            'url_include_id' => $request->has('url_include_id')
+                ? $request->boolean('url_include_id')
+                : ($graphicSettings['url_include_id'] ?? false),
+        ];
+
         // Generate event text content
-        $eventText = $this->generateEventText($role, $events, $directRegistration, $textTemplate);
+        $eventText = $this->generateEventText($role, $events, $directRegistration, $textTemplate, $urlSettings);
 
         // Process text through AI if ai_prompt is set (Pro feature)
         // Use request parameter if provided, otherwise fall back to saved settings
@@ -388,7 +400,7 @@ class GraphicController extends Controller
             ->header('Expires', '0');
     }
 
-    private function generateEventText($role, $events, $directRegistration = false, $template = null)
+    private function generateEventText($role, $events, $directRegistration = false, $template = null, $urlSettings = [])
     {
         $text = '';
 
@@ -398,7 +410,7 @@ class GraphicController extends Controller
         }
 
         foreach ($events as $event) {
-            $text .= $this->parseTemplate($template, $event, $role, $directRegistration);
+            $text .= $this->parseTemplate($template, $event, $role, $directRegistration, $urlSettings);
             $text .= "\n\n";
         }
 
@@ -410,7 +422,7 @@ class GraphicController extends Controller
         return "*{day_name}* {date_dmy} | {time}\n*{event_name}*:\n{venue} | {city}\n{url}";
     }
 
-    private function parseTemplate($template, $event, $role, $directRegistration)
+    private function parseTemplate($template, $event, $role, $directRegistration, $urlSettings = [])
     {
         // Set Carbon locale for translated date formats
         $locale = $role->language_code ?? 'en';
@@ -430,6 +442,23 @@ class GraphicController extends Controller
             } else {
                 $eventUrl .= '/';
             }
+        }
+
+        // Get URL formatting settings
+        $urlIncludeHttps = $urlSettings['url_include_https'] ?? false;
+        $urlIncludeId = $urlSettings['url_include_id'] ?? false;
+        $isRecurring = ! empty($event->days_of_week);
+
+        // Remove HTTPS if not wanted
+        if (! $urlIncludeHttps) {
+            $eventUrl = preg_replace('#^https?://#', '', $eventUrl);
+        }
+
+        // Remove event ID from URL if not wanted (but always keep for recurring events)
+        if (! $urlIncludeId && ! $isRecurring) {
+            // Remove the encoded ID from the URL path
+            // URL format: subdomain.domain/slug/ENCODED_ID or subdomain.domain/slug/ENCODED_ID?date=...
+            $eventUrl = preg_replace('#/[A-Za-z0-9+/=]+(\?|$)#', '$1', $eventUrl);
         }
 
         // Build replacements array

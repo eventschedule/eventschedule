@@ -58,15 +58,15 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Professional Invoices -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border border-gray-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900 to-teal-900 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         Invoicing
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Professional invoices</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Every ticket purchase automatically generates a professional invoice in Invoice Ninja with all the details.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">Professional invoices</h3>
+                    <p class="text-gray-300 mb-6">Every ticket purchase automatically generates a professional invoice in Invoice Ninja with all the details.</p>
 
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center justify-between mb-3">
@@ -82,15 +82,15 @@
                 </div>
 
                 <!-- Client Management -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900/50 to-cyan-900/50 border border-gray-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900 to-cyan-900 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                         Clients
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Client management</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-4">Automatically creates new clients or links to existing ones. Build your customer database with every sale.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">Client management</h3>
+                    <p class="text-gray-300 mb-4">Automatically creates new clients or links to existing ones. Build your customer database with every sale.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
@@ -110,15 +110,15 @@
                 </div>
 
                 <!-- QR Code Tickets -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/50 to-blue-900/50 border border-gray-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900 to-blue-900 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                         </svg>
                         Tickets
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">QR code tickets</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-4">The invoice includes a unique QR code for event check-in. Customers can use the invoice as their ticket.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">QR code tickets</h3>
+                    <p class="text-gray-300 mb-4">The invoice includes a unique QR code for event check-in. Customers can use the invoice as their ticket.</p>
 
                     <div class="flex justify-center">
                         <div class="w-24 h-24 bg-white rounded-xl p-2">
@@ -227,7 +227,7 @@
                 </div>
 
                 <!-- Client Portal (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/50 to-cyan-900/50 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900 to-cyan-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
@@ -236,8 +236,8 @@
                                 </svg>
                                 Self-service
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Client portal</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg">Customers access their invoices through Invoice Ninja's client portal. View history, download PDFs, and pay online.</p>
+                            <h3 class="text-3xl font-bold text-white mb-4">Client portal</h3>
+                            <p class="text-gray-300 text-lg">Customers access their invoices through Invoice Ninja's client portal. View history, download PDFs, and pay online.</p>
                         </div>
                         <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-2xl p-6 border border-gray-200 dark:border-white/10">
                             <div class="flex items-center gap-3 mb-4">
@@ -266,15 +266,15 @@
                 </div>
 
                 <!-- Webhook Sync -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-purple-900/50 border border-gray-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900 to-purple-900 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                         Real-time
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Webhook sync</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-4">Payment notifications flow back automatically. When customers pay, tickets are marked as confirmed instantly.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">Webhook sync</h3>
+                    <p class="text-gray-300 mb-4">Payment notifications flow back automatically. When customers pay, tickets are marked as confirmed instantly.</p>
 
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-3 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-2">
@@ -285,15 +285,15 @@
                 </div>
 
                 <!-- Multiple Currencies -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-gray-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900 to-orange-900 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Global
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">100+ currencies</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-4">Invoice in any currency supported by Invoice Ninja. Perfect for international events and clients.</p>
+                    <h3 class="text-2xl font-bold text-white mb-3">100+ currencies</h3>
+                    <p class="text-gray-300 mb-4">Invoice in any currency supported by Invoice Ninja. Perfect for international events and clients.</p>
 
                     <div class="flex flex-wrap gap-2">
                         <span class="px-2 py-1 rounded bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">USD</span>
@@ -304,7 +304,7 @@
                 </div>
 
                 <!-- Selfhosted Friendly -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900/50 to-emerald-900/50 border border-gray-200 dark:border-white/10 p-8">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900 to-emerald-900 border border-gray-200 dark:border-white/10 p-8">
                     <div class="grid md:grid-cols-2 gap-6 items-center">
                         <div>
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm font-medium mb-4">
@@ -313,8 +313,8 @@
                                 </svg>
                                 Selfhosted
                             </div>
-                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Selfhosted friendly</h3>
-                            <p class="text-gray-500 dark:text-gray-400 mb-4">Works with your own Invoice Ninja installation. Full control over your invoicing data and branding.</p>
+                            <h3 class="text-2xl font-bold text-white mb-3">Selfhosted friendly</h3>
+                            <p class="text-gray-300 mb-4">Works with your own Invoice Ninja installation. Full control over your invoicing data and branding.</p>
                         </div>
                         <div class="space-y-3">
                             <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-[#0f0f14] border border-gray-100 dark:border-white/5">
@@ -486,16 +486,16 @@
     <section class="bg-white dark:bg-[#0a0a0f] py-16">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <a href="{{ marketing_url('/integrations') }}" class="group block">
-                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-3xl border border-gray-200 dark:border-white/10 p-8 hover:border-gray-300 dark:hover:border-white/20 transition-all">
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 hover:border-gray-300 dark:hover:border-white/20 transition-all">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-gray-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         Invoicing
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">Explore more integrations</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-4">Discover all the ways Event Schedule connects with your favorite tools.</p>
-                    <span class="inline-flex items-center text-gray-600 dark:text-gray-300 font-medium group-hover:gap-3 gap-2 transition-all">
+                    <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-gray-200 transition-colors">Explore more integrations</h3>
+                    <p class="text-gray-300 mb-4">Discover all the ways Event Schedule connects with your favorite tools.</p>
+                    <span class="inline-flex items-center text-gray-300 font-medium group-hover:gap-3 gap-2 transition-all">
                         View all integrations
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
