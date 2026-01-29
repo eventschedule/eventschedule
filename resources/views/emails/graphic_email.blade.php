@@ -12,9 +12,7 @@
     </div>
 
     <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.8; color: #333;">{!! nl2br(e($eventText)) !!}</pre>
-        </div>
+        <pre style="margin: 0 0 20px 0; white-space: pre-wrap; word-wrap: break-word; font-family: 'Courier New', Courier, monospace; font-size: 13px; line-height: 1.6; color: #333; background-color: #f5f5f5; padding: 16px; border: 1px solid #ddd; border-radius: 4px;">{!! nl2br(e($eventText)) !!}</pre>
 
         <div style="text-align: center; margin: 30px 0;">
             <a href="{{ $scheduleUrl }}"
