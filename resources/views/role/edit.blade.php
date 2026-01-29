@@ -1438,6 +1438,15 @@
                                         class="mt-1 block w-full"
                                         :placeholder="__('messages.options_placeholder')" />
                                 </div>
+                                <div class="mt-3">
+                                    <x-input-label :value="__('messages.ai_prompt_custom_field')" class="text-sm" />
+                                    <textarea name="event_custom_fields[{{ $fieldKey }}][ai_prompt]"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm"
+                                        rows="2"
+                                        maxlength="500"
+                                        placeholder="{{ __('messages.ai_prompt_custom_field_placeholder') }}">{{ $field['ai_prompt'] ?? '' }}</textarea>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_prompt_custom_field_help') }}</p>
+                                </div>
                                 <div class="mt-3 flex items-center justify-between">
                                     <div class="flex items-center">
                                         <input type="checkbox" name="event_custom_fields[{{ $fieldKey }}][required]"
@@ -3206,6 +3215,15 @@ function addEventCustomField() {
                 <input type="text" name="event_custom_fields[${fieldKey}][options]"
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
                     placeholder="{!! __('messages.options_placeholder') !!}" />
+            </div>
+            <div class="mt-3">
+                <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.ai_prompt_custom_field') !!}</label>
+                <textarea name="event_custom_fields[${fieldKey}][ai_prompt]"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm"
+                    rows="2"
+                    maxlength="500"
+                    placeholder="{!! __('messages.ai_prompt_custom_field_placeholder') !!}"></textarea>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{!! __('messages.ai_prompt_custom_field_help') !!}</p>
             </div>
             <div class="mt-3 flex items-center justify-between">
                 <div class="flex items-center">

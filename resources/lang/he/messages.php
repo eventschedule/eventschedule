@@ -982,4 +982,7 @@ return [
     'url_format' => 'פורמט כתובת URL',
     'url_include_https' => 'כלול HTTPS',
     'url_include_id' => 'כלול מזהה אירוע',
+    'ai_prompt_custom_field' => 'הנחיית AI',
+    'ai_prompt_custom_field_placeholder' => 'לדוגמה, חלץ את קוד הלבוש מפרטי האירוע',
+    'ai_prompt_custom_field_help' => 'הנחיה אופציונלית ל-AI כיצד לחלץ את הערך של שדה זה',
 ];

@@ -1022,4 +1022,7 @@ return [
     'url_format' => 'URL Format',
     'url_include_https' => 'Include HTTPS',
     'url_include_id' => 'Include Event ID',
+    'ai_prompt_custom_field' => 'AI prompt',
+    'ai_prompt_custom_field_placeholder' => 'e.g., Extract the dress code from the event details',
+    'ai_prompt_custom_field_help' => 'Optional instruction for AI on how to extract this field\'s value',
 ];
