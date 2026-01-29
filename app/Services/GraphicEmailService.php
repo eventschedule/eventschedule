@@ -29,7 +29,6 @@ class GraphicEmailService
 
         try {
             $settings = $role->graphic_settings;
-            $layout = $settings['layout'] ?? 'grid';
             $directRegistration = ($settings['link_type'] ?? 'schedule') === 'registration';
             $excludeRecurring = $settings['exclude_recurring'] ?? false;
 
@@ -60,27 +59,6 @@ class GraphicEmailService
 
                 return false;
             }
-
-            // Build options array for the generator (matching web preview)
-            $datePosition = $settings['date_position'] ?? null;
-            if (! in_array($layout, ['grid', 'row'])) {
-                $datePosition = null;
-            }
-            $maxPerRow = $settings['max_per_row'] ?? null;
-            if ($layout !== 'row') {
-                $maxPerRow = null;
-            }
-            $overlayText = $settings['overlay_text'] ?? '';
-
-            $options = [
-                'date_position' => $datePosition,
-                'max_per_row' => $maxPerRow,
-                'overlay_text' => $overlayText,
-            ];
-
-            // Generate the graphic image
-            $generator = new EventGraphicGenerator($role, $events, $layout, $directRegistration, $options);
-            $imageData = $generator->generate();
 
             // Generate event text using shared template logic
             $textTemplate = $settings['text_template'] ?? '';
@@ -115,14 +93,14 @@ class GraphicEmailService
                 if ($role->hasEmailSettings()) {
                     $this->configureRoleMailer($role);
                     $mailerName = 'role_'.$role->id;
-                    Mail::mailer($mailerName)->to(array_values($emailList))->send(new GraphicEmail($role, $imageData, $eventText));
+                    Mail::mailer($mailerName)->to(array_values($emailList))->send(new GraphicEmail($role, $eventText));
                 } else {
                     // Use default mailer
-                    Mail::to(array_values($emailList))->send(new GraphicEmail($role, $imageData, $eventText));
+                    Mail::to(array_values($emailList))->send(new GraphicEmail($role, $eventText));
                 }
             } else {
                 // For selfhost users, use system email settings
-                Mail::to(array_values($emailList))->send(new GraphicEmail($role, $imageData, $eventText));
+                Mail::to(array_values($emailList))->send(new GraphicEmail($role, $eventText));
             }
 
             return true;
