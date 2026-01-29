@@ -1607,7 +1607,7 @@
 
                         @if ($role->exists)
                         <div class="mb-6">
-                            <x-secondary-button onclick="testImport()" type="button">
+                            <x-secondary-button onclick="testImport(this)" type="button">
                                 {{ __('messages.test_import') }}
                             </x-secondary-button>
                         </div>

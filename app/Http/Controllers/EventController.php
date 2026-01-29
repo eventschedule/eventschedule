@@ -55,6 +55,10 @@ class EventController extends Controller
             }
         }
 
+        if ($request->expectsJson()) {
+            return response()->json(['message' => __('messages.deleted_image')]);
+        }
+
         return redirect(route('event.edit', ['subdomain' => $subdomain, 'hash' => $request->hash]))
             ->with('message', __('messages.deleted_image'));
     }
