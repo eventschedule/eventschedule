@@ -350,7 +350,7 @@
             <x-brand-button
                 type="submit"
                 class="mt-4 text-lg px-6"
-                :disabled="!hasSelectedTickets"
+                v-bind:disabled="!hasSelectedTickets"
             >
                 {{ strtoupper(__('messages.checkout')) }}
             </x-brand-button>
