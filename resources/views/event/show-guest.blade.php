@@ -41,6 +41,7 @@
           <div class="flex flex-col">
             <h2
               class="text-white text-[40px] sm:text-{52px} leading-snug font-semibold"
+              dir="auto"
             >
               {{ $translation ? $translation->name_translated : $event->translatedName() }}
             </h2>

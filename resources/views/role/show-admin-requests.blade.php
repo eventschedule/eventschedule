@@ -39,18 +39,18 @@
                     <img class="mx-auto rounded-lg h-24 w-24 object-cover mb-4" src="{{ $event->role()->profile_image_url }}" alt="Profile Image">
                 @endif
                 @if ($event->role() && $event->role()->getGuestUrl())
-                    <x-link href="{{ $event->role() ? $event->role()->getGuestUrl() : '#' }}" target="_blank" class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 hover:text-blue-600 dark:hover:text-blue-400">{{ $event->role() ? $event->role()->name : $event->translatedName() }}</x-link>
+                    <x-link href="{{ $event->role() ? $event->role()->getGuestUrl() : '#' }}" target="_blank" class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 hover:text-blue-600 dark:hover:text-blue-400" dir="auto">{{ $event->role() ? $event->role()->name : $event->translatedName() }}</x-link>
                 @else
-                    <span class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">{{ $event->role() ? $event->role()->name : $event->translatedName() }}</span>
+                    <span class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1" dir="auto">{{ $event->role() ? $event->role()->name : $event->translatedName() }}</span>
                 @endif
             @else
                 @if ($event->venue && $event->venue->profile_image_url)
                     <img class="mx-auto rounded-lg h-24 w-24 object-cover mb-4" src="{{ $event->venue->profile_image_url }}" alt="Profile Image">
                 @endif
                 @if ($event->venue && $event->venue->getGuestUrl())
-                    <x-link href="{{ $event->venue ? $event->venue->getGuestUrl() : '#' }}" target="_blank" class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 hover:text-blue-600 dark:hover:text-blue-400">{{ $event->venue ? $event->venue->name : $event->translatedName() }}</x-link>
+                    <x-link href="{{ $event->venue ? $event->venue->getGuestUrl() : '#' }}" target="_blank" class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 hover:text-blue-600 dark:hover:text-blue-400" dir="auto">{{ $event->venue ? $event->venue->name : $event->translatedName() }}</x-link>
                 @else
-                    <span class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">{{ $event->venue ? $event->venue->name : $event->translatedName() }}</span>
+                    <span class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1" dir="auto">{{ $event->venue ? $event->venue->name : $event->translatedName() }}</span>
                 @endif
             @endif
 
