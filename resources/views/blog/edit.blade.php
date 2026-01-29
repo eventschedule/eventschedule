@@ -42,7 +42,7 @@
                         <div class="sm:col-span-2">
                             <label for="content" class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">Content *</label>
                             <div class="mt-2">
-                                <textarea name="content" id="content" rows="20" required
+                                <textarea name="content" id="content" rows="20" required dir="auto"
                                           class="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">{{ old('content', $blogPost->content) }}</textarea>
                             </div>
                             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Use HTML tags for formatting. You can use &lt;h1&gt;, &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;strong&gt;, &lt;em&gt;, etc.</p>
@@ -55,7 +55,7 @@
                         <div class="sm:col-span-2">
                             <label for="excerpt" class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">Excerpt</label>
                             <div class="mt-2">
-                                <textarea name="excerpt" id="excerpt" rows="3" maxlength="500"
+                                <textarea name="excerpt" id="excerpt" rows="3" maxlength="500" dir="auto"
                                           class="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">{{ old('excerpt', $blogPost->excerpt) }}</textarea>
                             </div>
                             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Leave empty to auto-generate from content (max 500 characters)</p>
@@ -156,7 +156,7 @@
                         <div class="sm:col-span-2">
                             <label for="meta_description" class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">Meta Description</label>
                             <div class="mt-2">
-                                <textarea name="meta_description" id="meta_description" rows="3" maxlength="160"
+                                <textarea name="meta_description" id="meta_description" rows="3" maxlength="160" dir="auto"
                                           class="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">{{ old('meta_description', $blogPost->meta_description) }}</textarea>
                             </div>
                             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Leave empty to use the excerpt (max 160 characters)</p>

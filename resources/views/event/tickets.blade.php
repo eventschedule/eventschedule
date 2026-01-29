@@ -220,6 +220,7 @@
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
                     rows="3"
+                    dir="auto"
                     class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"></textarea>
                 <!-- Yes/No switch -->
                 <div v-else-if="field.type === 'switch'" class="mt-1">
@@ -298,6 +299,7 @@
                         v-model="ticket.custom_values[fieldKey]"
                         :required="field.required"
                         rows="2"
+                        dir="auto"
                         class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"></textarea>
                     <!-- Yes/No switch -->
                     <div v-else-if="field.type === 'switch'" class="mt-1">
