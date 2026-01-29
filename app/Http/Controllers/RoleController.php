@@ -575,7 +575,8 @@ class RoleController extends Controller
 
             // Calculate month boundaries in user's/role's timezone, then convert to UTC for database query
             $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-            $endOfMonth = $startOfMonth->copy()->endOfMonth()->endOfDay();
+            // Load events for 4 months to support mobile view showing all upcoming events
+            $endOfMonth = $startOfMonth->copy()->addMonths(4)->endOfMonth()->endOfDay();
 
             // Convert to UTC for database query
             $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
