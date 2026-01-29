@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Mail\GraphicEmail;
 use App\Models\Event;
 use App\Models\Role;
+use App\Utils\EventTextGenerator;
 use App\Utils\GeminiUtils;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
@@ -14,10 +15,8 @@ class GraphicEmailService
 {
     /**
      * Send the graphic email to the specified recipient(s)
-     * 
-     * @param Role $role
-     * @param string $recipientEmails Comma-separated email addresses
-     * @return bool
+     *
+     * @param  string  $recipientEmails  Comma-separated email addresses
      */
     public function sendGraphicEmail(Role $role, string $recipientEmails): bool
     {
@@ -32,18 +31,28 @@ class GraphicEmailService
             $settings = $role->graphic_settings;
             $layout = $settings['layout'] ?? 'grid';
             $directRegistration = ($settings['link_type'] ?? 'schedule') === 'registration';
+            $excludeRecurring = $settings['exclude_recurring'] ?? false;
 
-            // Get the next 10 events with their own flyer images (not relying on role image)
-            $events = Event::with('roles')
+            // Use saved event_count setting (default 20, matching web preview)
+            $eventCountSetting = $settings['event_count'] ?? null;
+            $eventLimit = $eventCountSetting ? (int) $eventCountSetting : 20;
+
+            // Build the events query
+            $query = Event::with(['roles', 'tickets', 'venue'])
                 ->whereHas('roles', function ($query) use ($role) {
                     $query->where('role_id', $role->id)->where('is_accepted', true);
                 })
                 ->where('starts_at', '>=', now())
                 ->whereNotNull('flyer_image_url')
-                ->where('flyer_image_url', '!=', '')
-                ->whereNull('days_of_week')
-                ->orderBy('starts_at')
-                ->limit(10)
+                ->where('flyer_image_url', '!=', '');
+
+            // Only exclude recurring events if setting is true
+            if ($excludeRecurring) {
+                $query->whereNull('days_of_week');
+            }
+
+            $events = $query->orderBy('starts_at')
+                ->limit($eventLimit)
                 ->get();
 
             if ($events->isEmpty()) {
@@ -52,12 +61,34 @@ class GraphicEmailService
                 return false;
             }
 
+            // Build options array for the generator (matching web preview)
+            $datePosition = $settings['date_position'] ?? null;
+            if (! in_array($layout, ['grid', 'row'])) {
+                $datePosition = null;
+            }
+            $maxPerRow = $settings['max_per_row'] ?? null;
+            if ($layout !== 'row') {
+                $maxPerRow = null;
+            }
+            $overlayText = $settings['overlay_text'] ?? '';
+
+            $options = [
+                'date_position' => $datePosition,
+                'max_per_row' => $maxPerRow,
+                'overlay_text' => $overlayText,
+            ];
+
             // Generate the graphic image
-            $generator = new EventGraphicGenerator($role, $events, $layout, $directRegistration);
+            $generator = new EventGraphicGenerator($role, $events, $layout, $directRegistration, $options);
             $imageData = $generator->generate();
 
-            // Generate event text
-            $eventText = $this->generateEventText($role, $events, $directRegistration);
+            // Generate event text using shared template logic
+            $textTemplate = $settings['text_template'] ?? '';
+            $urlSettings = [
+                'url_include_https' => $settings['url_include_https'] ?? false,
+                'url_include_id' => $settings['url_include_id'] ?? false,
+            ];
+            $eventText = EventTextGenerator::generate($role, $events, $directRegistration, $textTemplate, $urlSettings);
 
             // Apply AI prompt if configured (Enterprise feature)
             $aiPrompt = trim($settings['ai_prompt'] ?? '');
@@ -74,6 +105,7 @@ class GraphicEmailService
 
             if (empty($emailList)) {
                 Log::warning('No valid recipient emails provided', ['role_id' => $role->id, 'recipient_emails' => $recipientEmails]);
+
                 return false;
             }
 
@@ -103,54 +135,6 @@ class GraphicEmailService
             ]);
             throw $e;
         }
-    }
-
-    /**
-     * Generate event text content
-     */
-    protected function generateEventText(Role $role, $events, bool $directRegistration = false): string
-    {
-        $text = '';
-
-        foreach ($events as $event) {
-            $startDate = $event->getStartDateTime(null, true);
-            $dayName = $startDate->format('l');
-            $dateStr = $startDate->format('j/n');
-            $timeStr = $startDate->format('H:i');
-
-            // Line 1: *DayName* d/m | HH:MM
-            $text .= "*{$dayName}* {$dateStr} | {$timeStr}\n";
-
-            // Line 2: *Event Name*:
-            $text .= "*{$event->translatedName()}*:\n";
-
-            // Line 3: Venue | City
-            if ($event->venue) {
-                $venueName = $event->venue->translatedName();
-                $city = $event->venue->translatedCity();
-                if ($city) {
-                    $text .= "{$venueName} | {$city}\n";
-                } else {
-                    $text .= "{$venueName}\n";
-                }
-            }
-
-            // Line 4: URL
-            $eventUrl = $event->getGuestUrl($role->subdomain, null, true);
-            if ($directRegistration && $event->registration_url) {
-                if (str_contains($eventUrl, '?')) {
-                    $eventUrl = str_replace('?', '/?', $eventUrl);
-                } else {
-                    $eventUrl .= '/';
-                }
-            }
-            $text .= "{$eventUrl}\n";
-
-            // Blank line between events
-            $text .= "\n";
-        }
-
-        return $text;
     }
 
     /**

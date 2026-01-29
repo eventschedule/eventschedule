@@ -597,22 +597,7 @@
                 });
             }
 
-            function saveSettings() {
-                // Handle both desktop and mobile save buttons
-                const saveBtn = document.getElementById('saveSettingsBtn');
-                const saveBtnMobile = document.getElementById('saveSettingsBtnMobile');
-                const originalText = saveBtn ? saveBtn.innerHTML : '';
-                const originalTextMobile = saveBtnMobile ? saveBtnMobile.innerHTML : '';
-
-                if (saveBtn) {
-                    saveBtn.disabled = true;
-                    saveBtn.innerHTML = '{{ __("messages.saving") }}';
-                }
-                if (saveBtnMobile) {
-                    saveBtnMobile.disabled = true;
-                    saveBtnMobile.innerHTML = '{{ __("messages.saving") }}';
-                }
-
+            function gatherSettings() {
                 // Get values from desktop or mobile (whichever has value)
                 const frequencyEl = document.getElementById('frequency') || document.getElementById('frequency_mobile');
                 const frequency = frequencyEl ? frequencyEl.value : 'weekly';
@@ -632,21 +617,6 @@
                 const useScreenCapture = document.getElementById('use_screen_capture') || document.getElementById('use_screen_capture_mobile');
                 const excludeRecurring = document.getElementById('exclude_recurring') || document.getElementById('exclude_recurring_mobile');
                 const recipientEmails = document.getElementById('recipient_emails') || document.getElementById('recipient_emails_mobile');
-
-                // Validate recipient emails is required when email scheduling is enabled
-                if (emailEnabled && emailEnabled.checked && recipientEmails && !recipientEmails.value.trim()) {
-                    showNotification('{{ __("messages.recipient_emails_required") }}', 'error');
-                    if (saveBtn) {
-                        saveBtn.disabled = false;
-                        saveBtn.innerHTML = originalText;
-                    }
-                    if (saveBtnMobile) {
-                        saveBtnMobile.disabled = false;
-                        saveBtnMobile.innerHTML = originalTextMobile;
-                    }
-                    recipientEmails.focus();
-                    return;
-                }
 
                 // Get link type from desktop or mobile
                 const linkTypeChecked = document.querySelector('input[name="link_type"]:checked') ||
@@ -672,7 +642,7 @@
                 const urlIncludeHttps = document.getElementById('url_include_https') || document.getElementById('url_include_https_mobile');
                 const urlIncludeId = document.getElementById('url_include_id') || document.getElementById('url_include_id_mobile');
 
-                const settings = {
+                return {
                     enabled: emailEnabled ? emailEnabled.checked : false,
                     frequency: frequency,
                     send_day: parseInt(sendDay),
@@ -691,8 +661,10 @@
                     url_include_https: urlIncludeHttps ? urlIncludeHttps.checked : false,
                     url_include_id: urlIncludeId ? urlIncludeId.checked : false
                 };
+            }
 
-                fetch('{{ route("event.save_graphic_settings", ["subdomain" => $role->subdomain]) }}', {
+            function saveSettingsToServer(settings) {
+                return fetch('{{ route("event.save_graphic_settings", ["subdomain" => $role->subdomain]) }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -704,14 +676,56 @@
                 .then(data => {
                     if (data.success) {
                         currentSettings = data.settings;
-                        showNotification('{{ __("messages.settings_saved") }}', 'success');
+                        return data;
                     } else {
-                        showNotification(data.message || '{{ __("messages.error") }}', 'error');
+                        throw new Error(data.message || '{{ __("messages.error") }}');
                     }
+                });
+            }
+
+            function saveSettings() {
+                // Handle both desktop and mobile save buttons
+                const saveBtn = document.getElementById('saveSettingsBtn');
+                const saveBtnMobile = document.getElementById('saveSettingsBtnMobile');
+                const originalText = saveBtn ? saveBtn.innerHTML : '';
+                const originalTextMobile = saveBtnMobile ? saveBtnMobile.innerHTML : '';
+
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML = '{{ __("messages.saving") }}';
+                }
+                if (saveBtnMobile) {
+                    saveBtnMobile.disabled = true;
+                    saveBtnMobile.innerHTML = '{{ __("messages.saving") }}';
+                }
+
+                const settings = gatherSettings();
+
+                const emailEnabled = document.getElementById('email_enabled') || document.getElementById('email_enabled_mobile');
+                const recipientEmails = document.getElementById('recipient_emails') || document.getElementById('recipient_emails_mobile');
+
+                // Validate recipient emails is required when email scheduling is enabled
+                if (emailEnabled && emailEnabled.checked && recipientEmails && !recipientEmails.value.trim()) {
+                    showNotification('{{ __("messages.recipient_emails_required") }}', 'error');
+                    if (saveBtn) {
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = originalText;
+                    }
+                    if (saveBtnMobile) {
+                        saveBtnMobile.disabled = false;
+                        saveBtnMobile.innerHTML = originalTextMobile;
+                    }
+                    recipientEmails.focus();
+                    return;
+                }
+
+                saveSettingsToServer(settings)
+                .then(() => {
+                    showNotification('{{ __("messages.settings_saved") }}', 'success');
                 })
                 .catch(error => {
                     console.error('Error saving settings:', error);
-                    showNotification('{{ __("messages.error") }}', 'error');
+                    showNotification(error.message || '{{ __("messages.error") }}', 'error');
                 })
                 .finally(() => {
                     if (saveBtn) {
@@ -741,13 +755,34 @@
                     testBtnMobile.innerHTML = '{{ __("messages.sending") }}...';
                 }
 
-                fetch('{{ route("event.graphic_test_email", ["subdomain" => $role->subdomain]) }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({})
+                const settings = gatherSettings();
+
+                if (!settings.recipient_emails.trim()) {
+                    showNotification('{{ __("messages.recipient_emails_required") }}', 'error');
+                    if (testBtn) {
+                        testBtn.disabled = false;
+                        testBtn.innerHTML = originalText;
+                    }
+                    if (testBtnMobile) {
+                        testBtnMobile.disabled = false;
+                        testBtnMobile.innerHTML = originalTextMobile;
+                    }
+                    const recipientEmails = document.getElementById('recipient_emails') || document.getElementById('recipient_emails_mobile');
+                    if (recipientEmails) recipientEmails.focus();
+                    return;
+                }
+
+                // Save settings first, then send test email
+                saveSettingsToServer(settings)
+                .then(() => {
+                    return fetch('{{ route("event.graphic_test_email", ["subdomain" => $role->subdomain]) }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({})
+                    });
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -759,7 +794,7 @@
                 })
                 .catch(error => {
                     console.error('Error sending test email:', error);
-                    showNotification('{{ __("messages.error") }}', 'error');
+                    showNotification(error.message || '{{ __("messages.error") }}', 'error');
                 })
                 .finally(() => {
                     if (testBtn) {
