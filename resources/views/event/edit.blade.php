@@ -525,7 +525,7 @@
                             @if ($event->flyer_image_url)
                             <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="pt-3" id="flyer_preview" />
                             <button type="button"
-                                onclick="deleteFlyer('{{ route('event.delete_image', ['subdomain' => $subdomain]) }}', '{{ \App\Utils\UrlUtils::encodeId($event->id) }}', '{{ csrf_token() }}')"
+                                onclick="deleteFlyer('{{ route('event.delete_image', ['subdomain' => $subdomain]) }}', '{{ \App\Utils\UrlUtils::encodeId($event->id) }}', '{{ csrf_token() }}', this)"
                                 class="hover:underline text-gray-900 dark:text-gray-100">
                                 {{ __('messages.delete_image') }}
                             </button>
@@ -2652,7 +2652,7 @@ window.addEventListener('load', function() {
     }, 0);
 });
 
-function deleteFlyer(url, hash, token) {
+function deleteFlyer(url, hash, token, button) {
     if (!confirm('{{ __('messages.are_you_sure') }}')) {
         return;
     }
@@ -2666,7 +2666,7 @@ function deleteFlyer(url, hash, token) {
     }).then(response => {
         if (response.ok) {
             document.getElementById('flyer_preview').remove();
-            event.target.remove();
+            button.remove();
         } else {
             alert('Failed to delete image');
         }

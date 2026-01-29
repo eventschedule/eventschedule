@@ -89,6 +89,10 @@ class RoleController extends Controller
             }
         }
 
+        if ($request->expectsJson()) {
+            return response()->json(['message' => __('messages.deleted_image')]);
+        }
+
         return redirect(route('role.edit', ['subdomain' => $subdomain]))
             ->with('message', __('messages.deleted_image'));
     }
