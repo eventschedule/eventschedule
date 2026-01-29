@@ -14,7 +14,7 @@
                 navigator.clipboard.writeText(text).then(function() {
                     const button = document.getElementById(buttonId);
                     const originalText = button.innerHTML;
-                    button.innerHTML = '<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>{{ __("messages.copied") }}';
+                    button.innerHTML = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>{{ __("messages.copied") }}`;
                     button.classList.add('bg-green-500', 'hover:bg-green-600');
                     button.classList.remove('bg-[#4E81FA]', 'hover:bg-[#3D6FE8]');
 
