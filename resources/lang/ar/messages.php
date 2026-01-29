@@ -990,4 +990,7 @@ return [
     'url_format' => 'تنسيق الرابط',
     'url_include_https' => 'تضمين HTTPS',
     'url_include_id' => 'تضمين معرف الحدث',
+    'ai_prompt_custom_field' => 'موجه الذكاء الاصطناعي',
+    'ai_prompt_custom_field_placeholder' => 'مثال: استخرج قواعد اللباس من تفاصيل الحدث',
+    'ai_prompt_custom_field_help' => 'تعليمات اختيارية للذكاء الاصطناعي حول كيفية استخراج قيمة هذا الحقل',
 ];

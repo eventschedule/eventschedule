@@ -989,4 +989,7 @@ return [
     'url_format' => 'Format d\'URL',
     'url_include_https' => 'Inclure HTTPS',
     'url_include_id' => 'Inclure l\'ID de l\'événement',
+    'ai_prompt_custom_field' => 'Invite IA',
+    'ai_prompt_custom_field_placeholder' => 'ex. : Extraire le code vestimentaire des détails de l\'événement',
+    'ai_prompt_custom_field_help' => 'Instruction optionnelle pour l\'IA sur la façon d\'extraire la valeur de ce champ',
 ];

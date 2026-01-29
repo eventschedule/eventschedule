@@ -282,7 +282,14 @@ class GeminiUtils
                 $typeHint = 'Choose from: '.$fieldConfig['options'];
             }
 
-            $fields[$customFieldKey] = $fieldName.($typeHint ? " ({$typeHint})" : '');
+            $hint = $fieldName;
+            if ($typeHint) {
+                $hint .= " ({$typeHint})";
+            }
+            if (! empty($fieldConfig['ai_prompt'])) {
+                $hint .= ' - '.$fieldConfig['ai_prompt'];
+            }
+            $fields[$customFieldKey] = $hint;
         }
 
         // Build prompt from fields

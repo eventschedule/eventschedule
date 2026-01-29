@@ -987,4 +987,7 @@ return [
     'url_format' => 'URL-formaat',
     'url_include_https' => 'HTTPS opnemen',
     'url_include_id' => 'Evenement-ID opnemen',
+    'ai_prompt_custom_field' => 'AI-prompt',
+    'ai_prompt_custom_field_placeholder' => 'bijv. Haal de dresscode uit de evenementdetails',
+    'ai_prompt_custom_field_help' => 'Optionele instructie voor AI over hoe de waarde van dit veld te extraheren',
 ];

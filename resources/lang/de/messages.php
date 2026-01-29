@@ -993,4 +993,7 @@ return [
     'url_format' => 'URL-Format',
     'url_include_https' => 'HTTPS einschließen',
     'url_include_id' => 'Event-ID einschließen',
+    'ai_prompt_custom_field' => 'KI-Prompt',
+    'ai_prompt_custom_field_placeholder' => 'z.B. Extrahiere die Kleiderordnung aus den Veranstaltungsdetails',
+    'ai_prompt_custom_field_help' => 'Optionale Anweisung für die KI, wie der Wert dieses Feldes extrahiert werden soll',
 ];

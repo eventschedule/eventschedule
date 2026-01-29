@@ -1251,6 +1251,7 @@ class RoleController extends Controller
                     'type' => $fieldData['type'] ?? 'string',
                     'required' => ! empty($fieldData['required']),
                     'options' => $fieldData['options'] ?? '',
+                    'ai_prompt' => $fieldData['ai_prompt'] ?? '',
                 ];
 
                 // Handle name_en - preserve manually entered value or check if translation needed
