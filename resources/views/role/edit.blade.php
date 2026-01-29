@@ -332,8 +332,8 @@
                     headerHtml +
                     '<div class="px-3 pb-3 flex flex-col">' +
                         profileHtml +
-                        '<div class="flex items-center justify-between gap-2">' +
-                            '<div class="text-sm font-semibold text-[#151B26] ' + contentTopPadding + '" style="color: ' + fontColor + '; font-family: ' + fontFamily + ';">' + name + '</div>' +
+                        '<div class="flex items-center justify-between gap-2 ' + contentTopPadding + '">' +
+                            '<div class="text-sm font-semibold text-[#151B26]" style="color: ' + fontColor + '; font-family: ' + fontFamily + ';">' + name + '</div>' +
                             '<div class="flex gap-1.5">' +
                                 '<div class="w-6 h-6 rounded-md flex items-center justify-center shadow-sm" style="background-color: ' + accentColor + '">' +
                                     '<svg class="w-3 h-3" fill="white" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>' +
