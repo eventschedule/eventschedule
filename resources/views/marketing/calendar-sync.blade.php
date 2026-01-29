@@ -459,7 +459,7 @@
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/analytics') }}" class="group block">
+            <a href="{{ route('marketing.analytics') }}" class="group block">
                 <div class="bg-gradient-to-br from-emerald-900 to-teal-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <!-- Text content -->

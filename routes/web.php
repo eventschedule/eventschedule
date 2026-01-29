@@ -255,7 +255,7 @@ if (config('app.is_nexus')) {
         Route::get('/caldav', [MarketingController::class, 'caldav'])->name('marketing.caldav');
         Route::get('/stripe', [MarketingController::class, 'stripe'])->name('marketing.stripe');
         Route::get('/invoiceninja', [MarketingController::class, 'invoiceninja'])->name('marketing.invoiceninja');
-        // Marketing analytics route hidden in test mode to avoid conflict with authenticated /analytics route
+        Route::get('/wp/analytics', [MarketingController::class, 'analytics'])->name('marketing.analytics');
         Route::get('/integrations', [MarketingController::class, 'integrations'])->name('marketing.integrations');
         Route::get('/custom-fields', [MarketingController::class, 'customFields'])->name('marketing.custom_fields');
         Route::get('/team-scheduling', [MarketingController::class, 'teamScheduling'])->name('marketing.team_scheduling');
