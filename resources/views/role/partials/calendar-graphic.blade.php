@@ -39,7 +39,8 @@
                                 <!-- Event Name -->
                                 <div class="pt-1">
                                     <h3 class="text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate" 
-                                        title="{{ $event->translatedName() }}">
+                                        title="{{ $event->translatedName() }}"
+                                        dir="auto">
                                         {{ $event->translatedName() }}
                                     </h3>
                                 </div>

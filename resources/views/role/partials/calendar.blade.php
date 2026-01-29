@@ -360,7 +360,7 @@
                                     @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
                                     <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }} truncate">
                                         <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'" 
-                                              class="hover:underline truncate" v-text="getEventDisplayName(event)">
+                                              class="hover:underline truncate" dir="auto" v-text="getEventDisplayName(event)">
                                         </span>
                                         <span v-if="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1" 
                                               class="text-gray-400 dark:text-gray-500 truncate" v-text="getEventTime(event)">
@@ -411,7 +411,7 @@
                                             <div class="flex {{ rtl_class($role ?? null, 'flex-row-reverse', '', $isAdminRoute) }}">
                                                 {{-- Content Section --}}
                                                 <div class="flex-1 py-3 px-4 flex flex-col min-w-0 {{ rtl_class($role ?? null, 'text-right', '', $isAdminRoute) }}">
-                                                    <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" v-text="event.name"></h3>
+                                                    <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
                                                     <div v-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 {{ rtl_class($role ?? null, 'flex-row-reverse', '', $isAdminRoute) }}">
                                                         <svg class="h-4 w-4 text-gray-400 flex-shrink-0 {{ rtl_class($role ?? null, 'ml-2', 'mr-2', $isAdminRoute) }}" viewBox="0 0 20 20" fill="currentColor">
                                                             <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
