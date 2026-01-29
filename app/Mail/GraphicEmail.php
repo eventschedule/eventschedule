@@ -4,7 +4,6 @@ namespace App\Mail;
 
 use App\Models\Role;
 use Illuminate\Bus\Queueable;
-use Illuminate\Mail\Attachment;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
@@ -17,17 +16,14 @@ class GraphicEmail extends Mailable
 
     protected $role;
 
-    protected $imageData;
-
     protected $eventText;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Role $role, string $imageData, string $eventText)
+    public function __construct(Role $role, string $eventText)
     {
         $this->role = $role;
-        $this->imageData = $imageData;
         $this->eventText = $eventText;
     }
 
@@ -61,29 +57,11 @@ class GraphicEmail extends Mailable
      */
     public function content(): Content
     {
-        $scheduleUrl = $this->role->getGuestUrl();
-
         return new Content(
-            view: 'emails.graphic_email',
             text: 'emails.graphic_email_text',
             with: [
-                'role' => $this->role,
                 'eventText' => $this->eventText,
-                'scheduleUrl' => $scheduleUrl,
             ]
         );
-    }
-
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
-    public function attachments(): array
-    {
-        return [
-            Attachment::fromData(fn () => $this->imageData, $this->role->subdomain.'-upcoming-events.png')
-                ->withMime('image/png'),
-        ];
     }
 }
