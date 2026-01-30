@@ -249,7 +249,7 @@
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Drop your schedule link anywhere. Fans see all upcoming sets - residencies, festivals, guest spots.</p>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10">
-                            <div class="text-xs text-gray-500 mb-2">Your schedule link</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">Your schedule link</div>
                             <div class="flex items-center gap-2 p-3 rounded-xl bg-blue-500/20 border border-blue-400/30">
                                 <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />

@@ -326,6 +326,30 @@ class MarketingController extends Controller
     }
 
     /**
+     * Use Cases page
+     */
+    public function useCases()
+    {
+        return view('marketing.use-cases');
+    }
+
+    /**
+     * Compare page
+     */
+    public function compare()
+    {
+        return view('marketing.compare');
+    }
+
+    /**
+     * Contact page
+     */
+    public function contact()
+    {
+        return view('marketing.contact');
+    }
+
+    /**
      * Integrations page
      */
     public function integrations()

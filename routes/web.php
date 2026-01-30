@@ -283,6 +283,9 @@ if (config('app.is_nexus')) {
         Route::get('/for-breweries-and-wineries', [MarketingController::class, 'forBreweriesAndWineries'])->name('marketing.for_breweries_and_wineries');
         Route::get('/for-art-galleries', [MarketingController::class, 'forArtGalleries'])->name('marketing.for_art_galleries');
         Route::get('/for-community-centers', [MarketingController::class, 'forCommunityCenters'])->name('marketing.for_community_centers');
+        Route::get('/use-cases', [MarketingController::class, 'useCases'])->name('marketing.use_cases');
+        Route::get('/compare', [MarketingController::class, 'compare'])->name('marketing.compare');
+        Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
         Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
         Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
         Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
@@ -355,6 +358,9 @@ if (config('app.is_nexus')) {
             Route::get('/for-restaurants', [MarketingController::class, 'forRestaurants'])->name('marketing.for_restaurants');
             Route::get('/for-breweries-and-wineries', [MarketingController::class, 'forBreweriesAndWineries'])->name('marketing.for_breweries_and_wineries');
             Route::get('/for-art-galleries', [MarketingController::class, 'forArtGalleries'])->name('marketing.for_art_galleries');
+            Route::get('/use-cases', [MarketingController::class, 'useCases'])->name('marketing.use_cases');
+            Route::get('/compare', [MarketingController::class, 'compare'])->name('marketing.compare');
+            Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
             Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
             Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
             Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
@@ -429,6 +435,9 @@ if (config('app.is_nexus')) {
             Route::get('/for-breweries-and-wineries', fn () => redirect('https://eventschedule.com/for-breweries-and-wineries', 301));
             Route::get('/for-art-galleries', fn () => redirect('https://eventschedule.com/for-art-galleries', 301));
             Route::get('/for-community-centers', fn () => redirect('https://eventschedule.com/for-community-centers', 301));
+            Route::get('/use-cases', fn () => redirect('https://eventschedule.com/use-cases', 301));
+            Route::get('/compare', fn () => redirect('https://eventschedule.com/compare', 301));
+            Route::get('/contact', fn () => redirect('https://eventschedule.com/contact', 301));
             Route::get('/privacy', fn () => redirect('https://eventschedule.com/privacy', 301));
             Route::get('/terms-of-service', fn () => redirect('https://eventschedule.com/terms-of-service', 301));
             Route::get('/self-hosting-terms-of-service', fn () => redirect('https://eventschedule.com/self-hosting-terms-of-service', 301));
@@ -501,6 +510,9 @@ if (config('app.is_nexus')) {
     Route::get('/for-breweries-and-wineries', fn () => redirect()->route('home'));
     Route::get('/for-art-galleries', fn () => redirect()->route('home'));
     Route::get('/for-community-centers', fn () => redirect()->route('home'));
+    Route::get('/use-cases', fn () => redirect()->route('home'));
+    Route::get('/compare', fn () => redirect()->route('home'));
+    Route::get('/contact', fn () => redirect()->route('home'));
     Route::get('/selfhost', fn () => redirect()->route('home'));
     Route::get('/saas', fn () => redirect()->route('home'));
     Route::get('/docs', fn () => redirect()->route('home'));

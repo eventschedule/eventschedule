@@ -344,7 +344,7 @@
                                 </div>
                                 <div class="flex-1">
                                     <div class="text-gray-900 dark:text-white text-sm">acme.yourdomain.com</div>
-                                    <div class="text-gray-500 text-xs">Pro Plan</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-xs">Pro Plan</div>
                                 </div>
                             </div>
                             <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-3 flex items-center gap-3">
@@ -355,7 +355,7 @@
                                 </div>
                                 <div class="flex-1">
                                     <div class="text-gray-900 dark:text-white text-sm">startup.yourdomain.com</div>
-                                    <div class="text-gray-500 text-xs">Free Plan</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-xs">Free Plan</div>
                                 </div>
                             </div>
                             <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-3 flex items-center gap-3">
@@ -366,7 +366,7 @@
                                 </div>
                                 <div class="flex-1">
                                     <div class="text-gray-900 dark:text-white text-sm">events.yourdomain.com</div>
-                                    <div class="text-gray-500 text-xs">Trial (12 days left)</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-xs">Trial (12 days left)</div>
                                 </div>
                             </div>
                         </div>

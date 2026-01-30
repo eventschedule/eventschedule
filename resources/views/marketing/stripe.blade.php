@@ -202,13 +202,13 @@
     </section>
 
     <!-- How it Works -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     How it works
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Start accepting payments in four simple steps.
                 </p>
             </div>
@@ -218,8 +218,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-violet-500 to-indigo-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/25">
                         1
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Connect Stripe</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Connect Stripe</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         Link your Stripe account with one click. We use Stripe Connect for secure authorization.
                     </p>
                 </div>
@@ -228,8 +228,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-violet-500 to-indigo-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/25">
                         2
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Create tickets</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Create tickets</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         Add ticket types to your events with prices and quantities. Set up multiple tiers if needed.
                     </p>
                 </div>
@@ -238,8 +238,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-violet-500 to-indigo-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/25">
                         3
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Share event</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Share event</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         Customers buy tickets directly from your schedule page. No redirects to external sites.
                     </p>
                 </div>
@@ -248,8 +248,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-violet-500 to-indigo-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/25">
                         4
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Get paid</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Get paid</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         Payments go directly to your Stripe account. Standard Stripe payouts to your bank.
                     </p>
                 </div>

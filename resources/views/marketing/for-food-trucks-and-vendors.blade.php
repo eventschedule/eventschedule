@@ -67,7 +67,7 @@
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold text-sm">TT</div>
                     <div>
                         <div class="text-gray-900 dark:text-white font-medium text-sm">Taco Truck Tony</div>
-                        <div class="text-gray-500 text-xs">Posted a photo</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-xs">Posted a photo</div>
                     </div>
                 </div>
 
@@ -140,7 +140,7 @@
                     <!-- Monday -->
                     <div class="flex items-center gap-4">
                         <div class="w-16 text-right">
-                            <span class="text-gray-500 text-sm font-medium">Mon</span>
+                            <span class="text-gray-500 dark:text-gray-400 text-sm font-medium">Mon</span>
                         </div>
                         <div class="relative">
                             <div class="w-4 h-4 rounded-full bg-gray-600 border-2 border-gray-500"></div>
@@ -148,7 +148,7 @@
                         </div>
                         <div class="flex-1 bg-gray-100 dark:bg-white/5 rounded-xl p-3">
                             <span class="text-gray-500 dark:text-gray-400 text-sm">Downtown Food Park</span>
-                            <span class="text-gray-600 text-xs block">11am - 2pm</span>
+                            <span class="text-gray-600 dark:text-gray-300 text-xs block">11am - 2pm</span>
                         </div>
                     </div>
 
@@ -178,7 +178,7 @@
                     <!-- Wednesday -->
                     <div class="flex items-center gap-4">
                         <div class="w-16 text-right">
-                            <span class="text-gray-500 text-sm font-medium">Wed</span>
+                            <span class="text-gray-500 dark:text-gray-400 text-sm font-medium">Wed</span>
                         </div>
                         <div class="relative">
                             <div class="w-4 h-4 rounded-full bg-orange-500/50 border-2 border-orange-400/50"></div>
@@ -186,35 +186,35 @@
                         </div>
                         <div class="flex-1 bg-gray-100 dark:bg-white/5 rounded-xl p-3">
                             <span class="text-gray-500 dark:text-gray-400 text-sm">Farmers Market</span>
-                            <span class="text-gray-600 text-xs block">8am - 1pm</span>
+                            <span class="text-gray-600 dark:text-gray-300 text-xs block">8am - 1pm</span>
                         </div>
                     </div>
 
                     <!-- Thursday -->
                     <div class="flex items-center gap-4">
                         <div class="w-16 text-right">
-                            <span class="text-gray-500 text-sm font-medium">Thu</span>
+                            <span class="text-gray-500 dark:text-gray-400 text-sm font-medium">Thu</span>
                         </div>
                         <div class="relative">
                             <div class="w-4 h-4 rounded-full bg-amber-500/30 border-2 border-amber-400/30"></div>
                             <div class="absolute top-4 left-1.5 w-0.5 h-8 bg-amber-500/20"></div>
                         </div>
                         <div class="flex-1 bg-gray-100 dark:bg-white/5 rounded-xl p-3 border border-dashed border-gray-200 dark:border-white/10">
-                            <span class="text-gray-500 text-sm italic">Private event (not shown publicly)</span>
+                            <span class="text-gray-500 dark:text-gray-400 text-sm italic">Private event (not shown publicly)</span>
                         </div>
                     </div>
 
                     <!-- Friday -->
                     <div class="flex items-center gap-4">
                         <div class="w-16 text-right">
-                            <span class="text-gray-500 text-sm font-medium">Fri</span>
+                            <span class="text-gray-500 dark:text-gray-400 text-sm font-medium">Fri</span>
                         </div>
                         <div class="relative">
                             <div class="w-4 h-4 rounded-full bg-yellow-500/30 border-2 border-yellow-400/30"></div>
                         </div>
                         <div class="flex-1 bg-gray-100 dark:bg-white/5 rounded-xl p-3">
                             <span class="text-gray-500 dark:text-gray-400 text-sm">Brewery District Food Truck Rally</span>
-                            <span class="text-gray-600 text-xs block">5pm - 10pm</span>
+                            <span class="text-gray-600 dark:text-gray-300 text-xs block">5pm - 10pm</span>
                         </div>
                     </div>
                 </div>
@@ -397,7 +397,7 @@
                         <div class="flex items-center justify-between p-3 rounded-lg bg-gray-200 dark:bg-white/10">
                             <div>
                                 <span class="text-gray-900 dark:text-white text-sm">Corporate Lunch</span>
-                                <span class="text-gray-500 text-xs block">50 people, March 15</span>
+                                <span class="text-gray-500 dark:text-gray-400 text-xs block">50 people, March 15</span>
                             </div>
                             <span class="text-amber-400 text-sm font-medium">$650</span>
                         </div>

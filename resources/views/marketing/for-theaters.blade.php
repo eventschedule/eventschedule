@@ -130,7 +130,7 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-6">New show announced? One click emails every subscriber. No algorithm, no paying Facebook to reach your own patrons.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-amber-400/20">
-                        <div class="text-xs text-gray-500 mb-2">To: 1,847 patrons</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">To: 1,847 patrons</div>
                         <div class="bg-gradient-to-r from-amber-950 to-yellow-950 rounded-lg p-3">
                             <div class="text-amber-300 text-xs font-medium mb-1">NOW ON SALE</div>
                             <div class="text-gray-900 dark:text-white font-semibold">Our Town</div>
@@ -219,12 +219,12 @@
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-amber-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Black Box</span>
-                            <span class="ml-auto text-gray-500 text-xs">12 shows</span>
+                            <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">12 shows</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-red-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Studio</span>
-                            <span class="ml-auto text-gray-500 text-xs">5 shows</span>
+                            <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">5 shows</span>
                         </div>
                     </div>
                 </div>

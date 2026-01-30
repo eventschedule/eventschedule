@@ -2324,19 +2324,19 @@
     .then(data => {
       statusDiv.classList.add('hidden');
       if (data.error) {
-        alert('Error: ' + data.error);
+        alert('{{ __('messages.error') }}: ' + data.error);
       } else {
         location.reload(); // Refresh to show updated sync status
       }
     })
     .catch(error => {
       statusDiv.classList.add('hidden');
-      alert('Error: ' + error.message);
+      alert('{{ __('messages.error') }}: ' + error.message);
     });
   }
 
   function unsyncEvent(subdomain, eventId) {
-    if (!confirm('Are you sure you want to remove this event from Google Calendar?')) {
+    if (!confirm('{{ __('messages.confirm_remove_google_calendar') }}')) {
       return;
     }
     
@@ -2359,14 +2359,14 @@
     .then(data => {
       statusDiv.classList.add('hidden');
       if (data.error) {
-        alert('Error: ' + data.error);
+        alert('{{ __('messages.error') }}: ' + data.error);
       } else {
         location.reload(); // Refresh to show updated sync status
       }
     })
     .catch(error => {
       statusDiv.classList.add('hidden');
-      alert('Error: ' + error.message);
+      alert('{{ __('messages.error') }}: ' + error.message);
     });
   }
 

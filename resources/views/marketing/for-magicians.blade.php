@@ -120,7 +120,7 @@
                                                 <div class="w-2 h-2 rounded-full bg-pink-500 dark:bg-pink-400"></div>
                                                 <span class="text-gray-600 dark:text-gray-300 text-sm font-medium">Wedding Reception</span>
                                             </div>
-                                            <div class="text-gray-500 text-xs">Jan 8 - Private Venue</div>
+                                            <div class="text-gray-500 dark:text-gray-400 text-xs">Jan 8 - Private Venue</div>
                                         </div>
                                     </div>
                                 </div>

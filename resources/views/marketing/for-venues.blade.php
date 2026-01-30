@@ -128,7 +128,7 @@
                             <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold">DJ</div>
                             <div class="flex-1">
                                 <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">DJ Nova</div>
-                                <div class="text-gray-500 text-xs">Requesting Apr 5</div>
+                                <div class="text-gray-500 dark:text-gray-400 text-xs">Requesting Apr 5</div>
                             </div>
                         </div>
                     </div>
@@ -168,7 +168,7 @@
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Organize events by space. Main stage, rooftop bar, private room. Each gets its own filterable schedule.</p>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10">
-                            <div class="text-xs text-gray-500 mb-3">Filter by room</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-3">Filter by room</div>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
                                     <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
@@ -178,17 +178,17 @@
                                 <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                     <div class="w-2 h-2 rounded-full bg-teal-400"></div>
                                     <span class="text-gray-600 dark:text-gray-300 text-sm">Rooftop Bar</span>
-                                    <span class="ml-auto text-gray-500 text-xs">8 events</span>
+                                    <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">8 events</span>
                                 </div>
                                 <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                     <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
                                     <span class="text-gray-600 dark:text-gray-300 text-sm">Acoustic Lounge</span>
-                                    <span class="ml-auto text-gray-500 text-xs">5 events</span>
+                                    <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">5 events</span>
                                 </div>
                                 <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                     <div class="w-2 h-2 rounded-full bg-green-400"></div>
                                     <span class="text-gray-600 dark:text-gray-300 text-sm">Private Room</span>
-                                    <span class="ml-auto text-gray-500 text-xs">3 events</span>
+                                    <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">3 events</span>
                                 </div>
                             </div>
                         </div>

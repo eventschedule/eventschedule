@@ -287,7 +287,7 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">Ticketing & QR Check-ins</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-sm">Sell tickets online with multiple types (GA, VIP), set limits, and scan QR codes for fast check-ins.</p>
-                    <div class="flex items-center gap-1.5 mt-2 text-xs text-gray-500">
+                    <div class="flex items-center gap-1.5 mt-2 text-xs text-gray-500 dark:text-gray-400">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
@@ -413,12 +413,79 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Open Source & API</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-sm">Self-host on your own server. Full REST API for custom integrations. AAL licensed.</p>
-                    <span class="inline-flex items-center mt-3 text-sm font-medium text-gray-600 group-hover:gap-2 gap-1 transition-all">
+                    <span class="inline-flex items-center mt-3 text-sm font-medium text-gray-600 dark:text-gray-300 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
                 </a>
 
+            </div>
+        </div>
+    </section>
+
+    <!-- Integrates With Section -->
+    <section class="bg-white dark:bg-[#0a0a0f] py-16">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-10">Integrates with</p>
+            <div class="flex flex-wrap justify-center items-center gap-x-10 gap-y-8">
+                <!-- Google Calendar -->
+                <a href="{{ marketing_url('/google-calendar') }}" class="group flex flex-col items-center gap-2">
+                    <svg class="h-10 w-10 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="4" width="18" height="18" rx="2" class="stroke-gray-400 group-hover:stroke-blue-500 dark:stroke-gray-500" stroke-width="1.5" fill="none"/>
+                        <path d="M3 10h18" class="stroke-gray-400 group-hover:stroke-blue-500 dark:stroke-gray-500" stroke-width="1.5"/>
+                        <path d="M8 2v4M16 2v4" class="stroke-gray-400 group-hover:stroke-blue-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="12" cy="16" r="2" class="fill-gray-400 group-hover:fill-blue-500 dark:fill-gray-500"/>
+                    </svg>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Google Calendar</span>
+                </a>
+                <!-- Stripe -->
+                <a href="{{ marketing_url('/stripe') }}" class="group flex flex-col items-center gap-2">
+                    <svg class="h-10 w-10 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                        <rect x="2" y="5" width="20" height="14" rx="2" class="stroke-gray-400 group-hover:stroke-violet-500 dark:stroke-gray-500" stroke-width="1.5" fill="none"/>
+                        <path d="M2 10h20" class="stroke-gray-400 group-hover:stroke-violet-500 dark:stroke-gray-500" stroke-width="1.5"/>
+                        <path d="M6 15h4" class="stroke-gray-400 group-hover:stroke-violet-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Stripe</span>
+                </a>
+                <!-- Invoice Ninja -->
+                <a href="{{ marketing_url('/invoiceninja') }}" class="group flex flex-col items-center gap-2">
+                    <svg class="h-10 w-10 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 2h6l2 4H7l2-4z" class="stroke-gray-400 group-hover:stroke-emerald-500 dark:stroke-gray-500" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+                        <rect x="4" y="6" width="16" height="16" rx="1" class="stroke-gray-400 group-hover:stroke-emerald-500 dark:stroke-gray-500" stroke-width="1.5" fill="none"/>
+                        <path d="M9 11h6M9 15h4" class="stroke-gray-400 group-hover:stroke-emerald-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Invoice Ninja</span>
+                </a>
+                <!-- CalDAV -->
+                <a href="{{ marketing_url('/caldav') }}" class="group flex flex-col items-center gap-2">
+                    <svg class="h-10 w-10 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                        <path d="M4 7a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V7z" class="stroke-gray-400 group-hover:stroke-orange-500 dark:stroke-gray-500" stroke-width="1.5" fill="none"/>
+                        <path d="M4 11h16" class="stroke-gray-400 group-hover:stroke-orange-500 dark:stroke-gray-500" stroke-width="1.5"/>
+                        <path d="M8 3v4M16 3v4" class="stroke-gray-400 group-hover:stroke-orange-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M9 15l2 2 4-4" class="stroke-gray-400 group-hover:stroke-orange-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">CalDAV</span>
+                </a>
+                <!-- Apple Calendar -->
+                <a href="{{ marketing_url('/calendar-sync') }}" class="group flex flex-col items-center gap-2">
+                    <svg class="h-10 w-10 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="4" width="18" height="18" rx="2" class="stroke-gray-400 group-hover:stroke-red-500 dark:stroke-gray-500" stroke-width="1.5" fill="none"/>
+                        <path d="M3 10h18" class="stroke-gray-400 group-hover:stroke-red-500 dark:stroke-gray-500" stroke-width="1.5"/>
+                        <path d="M8 2v4M16 2v4" class="stroke-gray-400 group-hover:stroke-red-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M12 14v4M10 16h4" class="stroke-gray-400 group-hover:stroke-red-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Apple Calendar</span>
+                </a>
+                <!-- Outlook -->
+                <a href="{{ marketing_url('/calendar-sync') }}" class="group flex flex-col items-center gap-2">
+                    <svg class="h-10 w-10 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="4" width="18" height="18" rx="2" class="stroke-gray-400 group-hover:stroke-sky-500 dark:stroke-gray-500" stroke-width="1.5" fill="none"/>
+                        <path d="M3 10h18" class="stroke-gray-400 group-hover:stroke-sky-500 dark:stroke-gray-500" stroke-width="1.5"/>
+                        <path d="M8 2v4M16 2v4" class="stroke-gray-400 group-hover:stroke-sky-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M9.5 15.5L12 18l2.5-2.5M12 13v5" class="stroke-gray-400 group-hover:stroke-sky-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Outlook</span>
+                </a>
             </div>
         </div>
     </section>

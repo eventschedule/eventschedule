@@ -300,7 +300,7 @@
                             </div>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10">
-                            <div class="text-xs text-gray-500 mb-3">Booking Requests</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-3">Booking Requests</div>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-500/20 border border-indigo-400/30">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">AT</div>
@@ -321,7 +321,7 @@
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white text-xs font-semibold">JM</div>
                                     <div class="flex-1">
                                         <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Jamie's Bachelorette</div>
-                                        <div class="text-gray-500 text-xs">Oct 28 &bull; 12 people</div>
+                                        <div class="text-gray-500 dark:text-gray-400 text-xs">Oct 28 &bull; 12 people</div>
                                     </div>
                                 </div>
                             </div>
@@ -349,12 +349,12 @@
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-amber-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Patio & Beer Garden</span>
-                            <span class="ml-auto text-gray-500 text-xs">4 events</span>
+                            <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">4 events</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-purple-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Barrel Room</span>
-                            <span class="ml-auto text-gray-500 text-xs">2 events</span>
+                            <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">2 events</span>
                         </div>
                     </div>
                 </div>

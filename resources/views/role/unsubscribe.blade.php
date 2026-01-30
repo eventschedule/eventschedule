@@ -9,7 +9,7 @@
                 {{ __('messages.unsubscribed') }}
             </h2>
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                You have been successfully unsubscribed from future emails.
+                {{ __('messages.unsubscribed_message') }}
             </p>
         </div>
     @else
