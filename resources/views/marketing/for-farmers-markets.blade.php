@@ -301,28 +301,6 @@
                     </div>
                 </div>
 
-                <!-- Shopper Followers -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-900 dark:to-rose-900 border border-pink-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/20 text-pink-700 dark:text-pink-300 text-sm font-medium mb-4">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                        Followers
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Build your shopper community</h3>
-                    <p class="text-gray-500 dark:text-white/80 mb-6">Shoppers follow your market. They get updates in their inbox - no social media required.</p>
-
-                    <div class="flex items-center justify-center gap-1">
-                        <div class="flex -space-x-2">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 border-2 border-white dark:border-gray-800 flex items-center justify-center text-white text-[10px] font-semibold">SL</div>
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-lime-500 to-green-500 border-2 border-white dark:border-gray-800 flex items-center justify-center text-white text-[10px] font-semibold">MK</div>
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 border-2 border-white dark:border-gray-800 flex items-center justify-center text-white text-[10px] font-semibold">JR</div>
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 border-2 border-white dark:border-gray-800 flex items-center justify-center text-white text-[10px] font-semibold">+8</div>
-                        </div>
-                    </div>
-                    <div class="text-center mt-3 text-gray-500 dark:text-white/70 text-xs">1,243 shoppers following</div>
-                </div>
-
                 <!-- Analytics -->
                 <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 border border-cyan-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 text-sm font-medium mb-4">

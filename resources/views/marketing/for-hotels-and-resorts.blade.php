@@ -79,7 +79,7 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-slate-950 to-amber-950 rounded-2xl border border-amber-400/30 p-4 max-w-xs">
+                                <div class="bg-gradient-to-br from-slate-100 to-amber-100 dark:from-slate-950 dark:to-amber-950 rounded-2xl border border-amber-300 dark:border-amber-400/30 p-4 max-w-xs">
                                     <div class="flex items-center gap-3 mb-4">
                                         <div class="w-10 h-10 bg-gradient-to-br from-slate-500 to-amber-600 rounded-xl flex items-center justify-center">
                                             <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -214,32 +214,6 @@
                                     <div class="text-gray-500 dark:text-gray-400 text-xs font-mono w-10">Thu</div>
                                     <span class="text-gray-600 dark:text-gray-300 text-sm">Cooking Class &bull; 4 PM</span>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Concierge Link -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 border border-violet-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                        </svg>
-                        One Link
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">One link for all guest info</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Print on room cards, add to WiFi landing pages, share at check-in. Guests see everything happening at your property.</p>
-
-                    <div class="flex justify-center">
-                        <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-full max-w-[200px]">
-                            <div class="flex items-center gap-2 p-2 rounded-lg bg-violet-500/20 border border-violet-400/30 mb-3">
-                                <div class="w-2 h-2 rounded-full bg-violet-400"></div>
-                                <span class="text-gray-900 dark:text-white text-xs font-mono truncate">yourhotel.eventschedule.com</span>
-                            </div>
-                            <div class="space-y-1.5">
-                                <div class="h-2 bg-gray-200 dark:bg-white/10 rounded-full w-full"></div>
-                                <div class="h-2 bg-gray-200 dark:bg-white/10 rounded-full w-3/4"></div>
-                                <div class="h-2 bg-gray-200 dark:bg-white/10 rounded-full w-5/6"></div>
                             </div>
                         </div>
                     </div>
@@ -381,7 +355,7 @@
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
                 <!-- Monday -->
                 <div class="bg-gradient-to-br from-slate-900/40 to-amber-900/40 rounded-xl border border-amber-500/20 p-4 relative overflow-hidden group hover:border-amber-500/40 transition-colors">
-                    <div class="text-amber-300 text-xs font-semibold tracking-wider uppercase mb-3">Mon</div>
+                    <div class="text-amber-700 dark:text-amber-300 text-xs font-semibold tracking-wider uppercase mb-3">Mon</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-1.5">
                             <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
@@ -396,7 +370,7 @@
 
                 <!-- Tuesday -->
                 <div class="bg-gradient-to-br from-emerald-900/40 to-green-900/40 rounded-xl border border-emerald-500/20 p-4 relative overflow-hidden group hover:border-emerald-500/40 transition-colors">
-                    <div class="text-emerald-300 text-xs font-semibold tracking-wider uppercase mb-3">Tue</div>
+                    <div class="text-emerald-700 dark:text-emerald-300 text-xs font-semibold tracking-wider uppercase mb-3">Tue</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-1.5">
                             <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
@@ -411,7 +385,7 @@
 
                 <!-- Wednesday -->
                 <div class="bg-gradient-to-br from-teal-900/40 to-cyan-900/40 rounded-xl border border-teal-500/20 p-4 relative overflow-hidden group hover:border-teal-500/40 transition-colors">
-                    <div class="text-teal-300 text-xs font-semibold tracking-wider uppercase mb-3">Wed</div>
+                    <div class="text-teal-700 dark:text-teal-300 text-xs font-semibold tracking-wider uppercase mb-3">Wed</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-1.5">
                             <div class="w-1.5 h-1.5 rounded-full bg-teal-400"></div>
@@ -426,7 +400,7 @@
 
                 <!-- Thursday -->
                 <div class="bg-gradient-to-br from-orange-900/40 to-amber-900/40 rounded-xl border border-orange-500/20 p-4 relative overflow-hidden group hover:border-orange-500/40 transition-colors">
-                    <div class="text-orange-300 text-xs font-semibold tracking-wider uppercase mb-3">Thu</div>
+                    <div class="text-orange-700 dark:text-orange-300 text-xs font-semibold tracking-wider uppercase mb-3">Thu</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-1.5">
                             <div class="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
@@ -441,7 +415,7 @@
 
                 <!-- Friday -->
                 <div class="bg-gradient-to-br from-violet-900/40 to-purple-900/40 rounded-xl border border-violet-500/20 p-4 relative overflow-hidden group hover:border-violet-500/40 transition-colors">
-                    <div class="text-violet-300 text-xs font-semibold tracking-wider uppercase mb-3">Fri</div>
+                    <div class="text-violet-700 dark:text-violet-300 text-xs font-semibold tracking-wider uppercase mb-3">Fri</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-1.5">
                             <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
@@ -456,7 +430,7 @@
 
                 <!-- Saturday -->
                 <div class="bg-gradient-to-br from-rose-900/40 to-pink-900/40 rounded-xl border border-rose-500/20 p-4 relative overflow-hidden group hover:border-rose-500/40 transition-colors">
-                    <div class="text-rose-300 text-xs font-semibold tracking-wider uppercase mb-3">Sat</div>
+                    <div class="text-rose-700 dark:text-rose-300 text-xs font-semibold tracking-wider uppercase mb-3">Sat</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-1.5">
                             <div class="w-1.5 h-1.5 rounded-full bg-rose-400"></div>
@@ -471,7 +445,7 @@
 
                 <!-- Sunday -->
                 <div class="bg-gradient-to-br from-sky-900/40 to-blue-900/40 rounded-xl border border-sky-500/20 p-4 relative overflow-hidden group hover:border-sky-500/40 transition-colors">
-                    <div class="text-sky-300 text-xs font-semibold tracking-wider uppercase mb-3">Sun</div>
+                    <div class="text-sky-700 dark:text-sky-300 text-xs font-semibold tracking-wider uppercase mb-3">Sun</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-1.5">
                             <div class="w-1.5 h-1.5 rounded-full bg-sky-400"></div>
