@@ -384,25 +384,63 @@
 
             <a href="{{ marketing_url('/for-curators') }}" class="group block relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 to-violet-900 border border-white/10 p-8 lg:p-10 hover:scale-[1.01] transition-all">
                 <div class="absolute inset-0 bg-gradient-to-br from-violet-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div class="relative flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
-                    <div class="flex-1">
-                        <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3">Curate events from across your scene</h3>
-                        <p class="text-gray-300 text-base lg:text-lg mb-6">Aggregate events from multiple venues and performers into one shareable schedule. Be the go-to source for what's happening in your community.</p>
-                        <div class="flex flex-wrap gap-2 mb-6">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Event Promoters</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Music Bloggers</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Community Organizers</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Scene Guides</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Local Media</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Tourism Boards</span>
-                        </div>
-                        <span class="inline-flex items-center text-violet-400 font-semibold group-hover:text-violet-300 transition-colors">
-                            Learn more
-                            <svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                        </span>
+                <div class="relative">
+                    <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3">Curate events from across your scene</h3>
+                    <p class="text-gray-300 text-base lg:text-lg mb-6 max-w-3xl">Aggregate events from multiple venues and performers into one shareable schedule. Be the go-to source for what's happening in your community.</p>
+                    <div class="flex flex-wrap gap-2 mb-8">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Event Promoters</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Music Bloggers</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Community Organizers</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Scene Guides</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Local Media</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Tourism Boards</span>
                     </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+                            <div class="w-9 h-9 rounded-lg bg-violet-500/20 flex items-center justify-center mb-3">
+                                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                            <h4 class="text-white font-semibold text-sm mb-1">AI Import</h4>
+                            <p class="text-gray-400 text-xs">Paste a URL or image, AI extracts event details</p>
+                        </div>
+                        <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+                            <div class="w-9 h-9 rounded-lg bg-violet-500/20 flex items-center justify-center mb-3">
+                                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                                </svg>
+                            </div>
+                            <h4 class="text-white font-semibold text-sm mb-1">Aggregation</h4>
+                            <p class="text-gray-400 text-xs">Pull events from venues, performers, and other curators</p>
+                        </div>
+                        <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+                            <div class="w-9 h-9 rounded-lg bg-violet-500/20 flex items-center justify-center mb-3">
+                                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <h4 class="text-white font-semibold text-sm mb-1">Approval Workflow</h4>
+                            <p class="text-gray-400 text-xs">Review and approve events before publishing</p>
+                        </div>
+                        <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+                            <div class="w-9 h-9 rounded-lg bg-violet-500/20 flex items-center justify-center mb-3">
+                                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <h4 class="text-white font-semibold text-sm mb-1">Build Your Following</h4>
+                            <p class="text-gray-400 text-xs">Followers get notified when you add events</p>
+                        </div>
+                    </div>
+
+                    <span class="inline-flex items-center text-violet-400 font-semibold group-hover:text-violet-300 transition-colors">
+                        Learn more
+                        <svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </span>
                 </div>
             </a>
         </div>

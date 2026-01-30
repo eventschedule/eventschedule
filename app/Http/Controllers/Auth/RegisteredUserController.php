@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -164,17 +165,17 @@ class RegisteredUserController extends Controller
             $sanitizedPassword = $sanitizeEnvValue($request->database_password);
             $sanitizedUrl = $sanitizeEnvValue($url);
 
-            $envContent = preg_replace('/APP_ENV=.*/', 'APP_ENV=production', $envContent);
-            $envContent = preg_replace('/APP_URL=.*/', 'APP_URL="'.$sanitizedUrl.'"', $envContent);
+            $envContent = preg_replace_callback('/APP_ENV=.*/', fn () => 'APP_ENV=production', $envContent);
+            $envContent = preg_replace_callback('/APP_URL=.*/', fn () => 'APP_URL="'.$sanitizedUrl.'"', $envContent);
 
-            $envContent = preg_replace('/DB_HOST=.*/', 'DB_HOST="'.$sanitizedHost.'"', $envContent);
-            $envContent = preg_replace('/DB_PORT=.*/', 'DB_PORT='.$sanitizedPort, $envContent);
-            $envContent = preg_replace('/DB_DATABASE=.*/', 'DB_DATABASE="'.$sanitizedName.'"', $envContent);
-            $envContent = preg_replace('/DB_USERNAME=.*/', 'DB_USERNAME="'.$sanitizedUsername.'"', $envContent);
-            $envContent = preg_replace('/DB_PASSWORD=.*/', 'DB_PASSWORD="'.$sanitizedPassword.'"', $envContent);
+            $envContent = preg_replace_callback('/DB_HOST=.*/', fn () => 'DB_HOST="'.$sanitizedHost.'"', $envContent);
+            $envContent = preg_replace_callback('/DB_PORT=.*/', fn () => 'DB_PORT='.$sanitizedPort, $envContent);
+            $envContent = preg_replace_callback('/DB_DATABASE=.*/', fn () => 'DB_DATABASE="'.$sanitizedName.'"', $envContent);
+            $envContent = preg_replace_callback('/DB_USERNAME=.*/', fn () => 'DB_USERNAME="'.$sanitizedUsername.'"', $envContent);
+            $envContent = preg_replace_callback('/DB_PASSWORD=.*/', fn () => 'DB_PASSWORD="'.$sanitizedPassword.'"', $envContent);
 
             if ($request->report_errors) {
-                $envContent = preg_replace('/REPORT_ERRORS=.*/', 'REPORT_ERRORS=true', $envContent);
+                $envContent = preg_replace_callback('/REPORT_ERRORS=.*/', fn () => 'REPORT_ERRORS=true', $envContent);
             }
 
             // Write to temporary file first, then move to prevent corruption
@@ -188,16 +189,20 @@ class RegisteredUserController extends Controller
                 throw new \Exception('Failed to update configuration file');
             }
 
-            file_put_contents($envPath, $envContent);
-
             config(['database.connections.mysql.host' => $request->database_host]);
             config(['database.connections.mysql.port' => $request->database_port]);
             config(['database.connections.mysql.database' => $request->database_name]);
             config(['database.connections.mysql.username' => $request->database_username]);
             config(['database.connections.mysql.password' => $request->database_password]);
 
-            Artisan::call('migrate', ['--force' => true]);
-            Artisan::call('storage:link');
+            DB::purge('mysql');
+
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+                Artisan::call('storage:link');
+            } catch (\Exception $e) {
+                return back()->withErrors(['database_host' => 'Database setup failed: '.$e->getMessage()])->withInput();
+            }
         }
 
         if (! config('app.hosted') && ! config('app.is_testing') && User::count() > 0) {
