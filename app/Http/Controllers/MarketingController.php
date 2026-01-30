@@ -326,6 +326,54 @@ class MarketingController extends Controller
     }
 
     /**
+     * For Fitness & Yoga page
+     */
+    public function forFitnessAndYoga()
+    {
+        return view('marketing.for-fitness-and-yoga');
+    }
+
+    /**
+     * For Workshop Instructors page
+     */
+    public function forWorkshopInstructors()
+    {
+        return view('marketing.for-workshop-instructors');
+    }
+
+    /**
+     * For Visual Artists page
+     */
+    public function forVisualArtists()
+    {
+        return view('marketing.for-visual-artists');
+    }
+
+    /**
+     * For Farmers Markets page
+     */
+    public function forFarmersMarkets()
+    {
+        return view('marketing.for-farmers-markets');
+    }
+
+    /**
+     * For Hotels & Resorts page
+     */
+    public function forHotelsAndResorts()
+    {
+        return view('marketing.for-hotels-and-resorts');
+    }
+
+    /**
+     * For Libraries page
+     */
+    public function forLibraries()
+    {
+        return view('marketing.for-libraries');
+    }
+
+    /**
      * Use Cases page
      */
     public function useCases()

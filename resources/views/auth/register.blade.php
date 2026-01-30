@@ -351,7 +351,7 @@
             <div class="mt-4">
                 <x-input-label for="database_password" :value="__('messages.password')" />
                 <x-password-input id="database_password" class="block mt-1 w-full" name="database_password" :value="old('database_password')"
-                    autocomplete="off" />
+                    autocomplete="new-password" />
                 <x-input-error :messages="$errors->get('database_password')" class="mt-2" />
             </div>
 
