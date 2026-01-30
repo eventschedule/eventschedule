@@ -18,7 +18,7 @@
                         </div>
                     </div>
                     <div class="ml-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Users</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_users')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalUsers) }}</p>
                     </div>
                 </div>
@@ -27,7 +27,7 @@
                         {{ $usersChangePercent >= 0 ? '+' : '' }}{{ $usersChangePercent }}%
                     </span>
                     <span class="text-gray-500 dark:text-gray-400 ml-2">
-                        +{{ number_format($usersInPeriod) }} in period
+                        +{{ number_format($usersInPeriod) }} @lang('messages.in_period')
                     </span>
                 </div>
             </div>
@@ -43,7 +43,7 @@
                         </div>
                     </div>
                     <div class="ml-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Schedules</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_schedules')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalSchedules) }}</p>
                     </div>
                 </div>
@@ -52,7 +52,7 @@
                         {{ $schedulesChangePercent >= 0 ? '+' : '' }}{{ $schedulesChangePercent }}%
                     </span>
                     <span class="text-gray-500 dark:text-gray-400 ml-2">
-                        +{{ number_format($schedulesInPeriod) }} in period
+                        +{{ number_format($schedulesInPeriod) }} @lang('messages.in_period')
                     </span>
                 </div>
             </div>
@@ -68,7 +68,7 @@
                         </div>
                     </div>
                     <div class="ml-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Events</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_events')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalEvents) }}</p>
                     </div>
                 </div>
@@ -77,7 +77,7 @@
                         {{ $eventsChangePercent >= 0 ? '+' : '' }}{{ $eventsChangePercent }}%
                     </span>
                     <span class="text-gray-500 dark:text-gray-400 ml-2">
-                        +{{ number_format($eventsInPeriod) }} in period
+                        +{{ number_format($eventsInPeriod) }} @lang('messages.in_period')
                     </span>
                 </div>
             </div>
@@ -86,15 +86,15 @@
         {{-- Activity Stats --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Users (7 days)</p>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_users_7_days')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers7Days) }}</p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Users (30 days)</p>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_users_30_days')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers30Days) }}</p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Avg Events per Schedule</p>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.avg_events_per_schedule')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ $avgEventsPerSchedule }}</p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
@@ -104,7 +104,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <p class="ml-2 text-sm font-medium text-gray-500 dark:text-gray-400">Upcoming Online Events</p>
+                    <p class="ml-2 text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.upcoming_online_events')</p>
                 </div>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($upcomingOnlineEvents) }}</p>
             </div>
@@ -113,7 +113,7 @@
         {{-- Events by Country --}}
         @if($eventsByCountry->count() > 0)
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Upcoming Events by Country</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.upcoming_events_by_country')</h3>
             <div class="space-y-3">
                 @foreach($eventsByCountry as $country)
                     <div class="flex items-center">
@@ -138,7 +138,7 @@
 
         {{-- Growth Trends Chart --}}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Growth Trends</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.growth_trends')</h3>
             <div class="h-64">
                 <canvas id="trendsChart"></canvas>
             </div>
@@ -149,7 +149,7 @@
             {{-- Recent Schedules --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Recent Schedules</h3>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">@lang('messages.recent_schedules')</h3>
                 </div>
                 <div class="divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse ($recentSchedules as $schedule)
@@ -166,14 +166,14 @@
                                 <div class="text-right text-sm text-gray-500 dark:text-gray-400">
                                     <p>{{ $schedule->created_at->diffForHumans() }}</p>
                                     @if ($schedule->owner())
-                                        <p class="text-xs">by {{ $schedule->owner()->name }}</p>
+                                        <p class="text-xs">@lang('messages.by') {{ $schedule->owner()->name }}</p>
                                     @endif
                                 </div>
                             </div>
                         </div>
                     @empty
                         <div class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                            No schedules yet
+                            @lang('messages.no_schedules_yet')
                         </div>
                     @endforelse
                 </div>
@@ -182,7 +182,7 @@
             {{-- Recent Events --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Recent Events</h3>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">@lang('messages.recent_events')</h3>
                 </div>
                 <div class="divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse ($recentEvents as $event)
@@ -203,7 +203,7 @@
                                         @if ($viewableRole)
                                             {{ $viewableRole->name }}
                                         @else
-                                            No schedule
+                                            @lang('messages.no_schedule')
                                         @endif
                                     </p>
                                 </div>
@@ -217,7 +217,7 @@
                         </div>
                     @empty
                         <div class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                            No events yet
+                            @lang('messages.no_events_yet')
                         </div>
                     @endforelse
                 </div>
@@ -250,7 +250,7 @@
                     labels: {!! json_encode($trendData['labels']) !!},
                     datasets: [
                         {
-                            label: 'Users',
+                            label: @json(__('messages.users')),
                             data: {!! json_encode($trendData['users']) !!},
                             borderColor: '#4E81FA',
                             backgroundColor: 'rgba(78, 129, 250, 0.1)',
@@ -258,7 +258,7 @@
                             tension: 0.3
                         },
                         {
-                            label: 'Schedules',
+                            label: @json(__('messages.schedules')),
                             data: {!! json_encode($trendData['schedules']) !!},
                             borderColor: '#10B981',
                             backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -266,7 +266,7 @@
                             tension: 0.3
                         },
                         {
-                            label: 'Events',
+                            label: @json(__('messages.events')),
                             data: {!! json_encode($trendData['events']) !!},
                             borderColor: '#8B5CF6',
                             backgroundColor: 'rgba(139, 92, 246, 0.1)',

@@ -16,7 +16,7 @@
                         </div>
                     </div>
                     <div class="ml-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Free</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.free')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($freeCount) }}</p>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
                         </div>
                     </div>
                     <div class="ml-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pro</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.pro')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($proCount) }}</p>
                     </div>
                 </div>
@@ -50,7 +50,7 @@
                         </div>
                     </div>
                     <div class="ml-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Enterprise</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.enterprise')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($enterpriseCount) }}</p>
                     </div>
                 </div>
@@ -67,7 +67,7 @@
                         </div>
                     </div>
                     <div class="ml-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Subs</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_subs')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeSubscriptions) }}</p>
                     </div>
                 </div>
@@ -84,7 +84,7 @@
                         </div>
                     </div>
                     <div class="ml-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Expiring Soon</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.expiring_soon')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($expiringSoon) }}</p>
                     </div>
                 </div>
@@ -96,32 +96,32 @@
             <form method="GET" action="{{ route('admin.plans') }}" class="flex flex-col sm:flex-row gap-4">
                 <div class="flex-1">
                     <input type="text" name="search" value="{{ request('search') }}"
-                        placeholder="Search by name, subdomain, or email..."
+                        placeholder="{{ __('messages.search_schedules') }}"
                         class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                 </div>
                 <div class="w-full sm:w-40">
                     <select name="plan_type" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        <option value="">All Plans</option>
-                        <option value="free" {{ request('plan_type') === 'free' ? 'selected' : '' }}>Free</option>
-                        <option value="pro" {{ request('plan_type') === 'pro' ? 'selected' : '' }}>Pro</option>
-                        <option value="enterprise" {{ request('plan_type') === 'enterprise' ? 'selected' : '' }}>Enterprise</option>
+                        <option value="">@lang('messages.all_plans')</option>
+                        <option value="free" {{ request('plan_type') === 'free' ? 'selected' : '' }}>@lang('messages.free')</option>
+                        <option value="pro" {{ request('plan_type') === 'pro' ? 'selected' : '' }}>@lang('messages.pro')</option>
+                        <option value="enterprise" {{ request('plan_type') === 'enterprise' ? 'selected' : '' }}>@lang('messages.enterprise')</option>
                     </select>
                 </div>
                 <div class="w-full sm:w-40">
                     <select name="status" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        <option value="">All Status</option>
-                        <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
-                        <option value="expired" {{ request('status') === 'expired' ? 'selected' : '' }}>Expired</option>
-                        <option value="trial" {{ request('status') === 'trial' ? 'selected' : '' }}>Trial</option>
+                        <option value="">@lang('messages.all_status')</option>
+                        <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>@lang('messages.active')</option>
+                        <option value="expired" {{ request('status') === 'expired' ? 'selected' : '' }}>@lang('messages.expired')</option>
+                        <option value="trial" {{ request('status') === 'trial' ? 'selected' : '' }}>@lang('messages.trial')</option>
                     </select>
                 </div>
                 <div class="flex gap-2">
                     <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                        Filter
+                        @lang('messages.filter')
                     </button>
                     @if(request('search') || request('plan_type') || request('status'))
                         <a href="{{ route('admin.plans') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-gray-700 dark:text-gray-200 uppercase tracking-widest hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            Clear
+                            @lang('messages.clear')
                         </a>
                     @endif
                 </div>
@@ -135,25 +135,25 @@
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Schedule
+                                @lang('messages.schedule')
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Type
+                                @lang('messages.type')
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Plan
+                                @lang('messages.plan')
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Term
+                                @lang('messages.term')
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Expires
+                                @lang('messages.expires')
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Status
+                                @lang('messages.status')
                             </th>
                             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Actions
+                                @lang('messages.actions')
                             </th>
                         </tr>
                     </thead>
@@ -211,14 +211,14 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <a href="{{ route('admin.plans.edit', ['role' => $role->encodeId()]) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
-                                        Edit
+                                        @lang('messages.edit')
                                     </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
                                 <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                                    No schedules found
+                                    @lang('messages.no_schedules_found')
                                 </td>
                             </tr>
                         @endforelse

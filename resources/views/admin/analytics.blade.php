@@ -9,7 +9,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {{-- Device Breakdown --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Device Breakdown (Selected Period)</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.device_breakdown') (@lang('messages.selected_period'))</h3>
                 <div class="flex items-center gap-6">
                     <div class="w-48 h-48">
                         <canvas id="deviceChart"></canvas>
@@ -24,7 +24,7 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
                                 <span class="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
-                                <span class="text-sm text-gray-600 dark:text-gray-400">Desktop</span>
+                                <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.desktop')</span>
                             </div>
                             <div class="text-right">
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($desktopViews) }}</span>
@@ -34,7 +34,7 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
                                 <span class="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
-                                <span class="text-sm text-gray-600 dark:text-gray-400">Mobile</span>
+                                <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.mobile')</span>
                             </div>
                             <div class="text-right">
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($mobileViews) }}</span>
@@ -44,7 +44,7 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
                                 <span class="w-3 h-3 rounded-full bg-purple-500 mr-2"></span>
-                                <span class="text-sm text-gray-600 dark:text-gray-400">Tablet</span>
+                                <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.tablet')</span>
                             </div>
                             <div class="text-right">
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($tabletViews) }}</span>
@@ -53,7 +53,7 @@
                         </div>
                         <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
                             <p class="text-xs text-gray-500 dark:text-gray-400">
-                                Total: {{ number_format($totalPageViews) }} page views
+                                @lang('messages.total'): {{ number_format($totalPageViews) }} @lang('messages.page_views')
                             </p>
                         </div>
                     </div>
@@ -62,30 +62,30 @@
 
             {{-- Traffic Sources --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Traffic Sources (Selected Period)</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.traffic_sources') (@lang('messages.selected_period'))</h3>
                 <div class="h-48">
                     <canvas id="trafficSourcesChart"></canvas>
                 </div>
                 <div class="mt-4 grid grid-cols-5 gap-2 text-center">
                     <div>
                         <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($directViews) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Direct</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.direct')</p>
                     </div>
                     <div>
                         <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($searchViews) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Search</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.search')</p>
                     </div>
                     <div>
                         <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($socialViews) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Social</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.social')</p>
                     </div>
                     <div>
                         <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($emailViews) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Email</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.email')</p>
                     </div>
                     <div>
                         <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($otherViews) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Other</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.other')</p>
                     </div>
                 </div>
             </div>
@@ -93,12 +93,12 @@
 
         {{-- Feature Adoption --}}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Feature Adoption</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.feature_adoption')</h3>
             <div class="space-y-4">
                 <div>
                     <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Google Calendar</span>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $googleCalendarPercent }}% ({{ number_format($googleCalendarEnabled) }} schedules)</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.google_calendar_integration')</span>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $googleCalendarPercent }}% ({{ number_format($googleCalendarEnabled) }} @lang('messages.schedules'))</span>
                     </div>
                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                         <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ min($googleCalendarPercent, 100) }}%"></div>
@@ -106,8 +106,8 @@
                 </div>
                 <div>
                     <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Stripe Payments</span>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $stripePercent }}% ({{ number_format($stripeEnabled) }} schedules)</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.stripe_payments')</span>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $stripePercent }}% ({{ number_format($stripeEnabled) }} @lang('messages.schedules'))</span>
                     </div>
                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                         <div class="bg-green-600 h-2.5 rounded-full" style="width: {{ min($stripePercent, 100) }}%"></div>
@@ -115,8 +115,8 @@
                 </div>
                 <div>
                     <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Custom Domain</span>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $customDomainPercent }}% ({{ number_format($customDomainEnabled) }} schedules)</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.custom_domain')</span>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $customDomainPercent }}% ({{ number_format($customDomainEnabled) }} @lang('messages.schedules'))</span>
                     </div>
                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                         <div class="bg-purple-600 h-2.5 rounded-full" style="width: {{ min($customDomainPercent, 100) }}%"></div>
@@ -124,8 +124,8 @@
                 </div>
                 <div>
                     <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Custom CSS</span>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $customCssPercent }}% ({{ number_format($customCssEnabled) }} schedules)</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.custom_css')</span>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $customCssPercent }}% ({{ number_format($customCssEnabled) }} @lang('messages.schedules'))</span>
                     </div>
                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                         <div class="bg-amber-600 h-2.5 rounded-full" style="width: {{ min($customCssPercent, 100) }}%"></div>
@@ -133,13 +133,13 @@
                 </div>
             </div>
             <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">
-                Based on {{ number_format($totalSchedules) }} total schedules
+                @lang('messages.based_on_total_schedules', ['count' => number_format($totalSchedules)])
             </p>
         </div>
 
         {{-- Top Schedules by Events --}}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Top Schedules by Events</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_schedules_by_events')</h3>
             <div class="h-64">
                 <canvas id="topSchedulesChart"></canvas>
             </div>
@@ -168,7 +168,7 @@
             new Chart(deviceCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Desktop', 'Mobile', 'Tablet'],
+                    labels: [@json(__('messages.desktop')), @json(__('messages.mobile')), @json(__('messages.tablet'))],
                     datasets: [{
                         data: [{{ $desktopViews }}, {{ $mobileViews }}, {{ $tabletViews }}],
                         backgroundColor: ['#3B82F6', '#10B981', '#8B5CF6'],
@@ -193,9 +193,9 @@
             new Chart(trafficSourcesCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['Direct', 'Search', 'Social', 'Email', 'Other'],
+                    labels: [@json(__('messages.direct')), @json(__('messages.search')), @json(__('messages.social')), @json(__('messages.email')), @json(__('messages.other'))],
                     datasets: [{
-                        label: 'Views',
+                        label: @json(__('messages.views')),
                         data: [{{ $directViews }}, {{ $searchViews }}, {{ $socialViews }}, {{ $emailViews }}, {{ $otherViews }}],
                         backgroundColor: ['#6366F1', '#10B981', '#F59E0B', '#EF4444', '#6B7280']
                     }]
@@ -239,7 +239,7 @@
                 data: {
                     labels: {!! json_encode($topSchedulesByEvents->pluck('name')->toArray()) !!},
                     datasets: [{
-                        label: 'Events',
+                        label: @json(__('messages.events')),
                         data: {!! json_encode($topSchedulesByEvents->pluck('events_count')->toArray()) !!},
                         backgroundColor: '#4E81FA'
                     }]
