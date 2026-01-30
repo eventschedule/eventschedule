@@ -80,7 +80,7 @@
                     <div class="text-4xl font-bold text-red-400 mb-2">7</div>
                     <div class="text-gray-500 dark:text-gray-400 text-sm">mics a week just to stay sharp</div>
                 </div>
-                <div class="p-6 border-x border-white/5">
+                <div class="p-6 border-x border-gray-200 dark:border-white/5">
                     <div class="text-4xl font-bold text-amber-400 mb-2">5</div>
                     <div class="text-gray-500 dark:text-gray-400 text-sm">clubs where you're trying to get regular</div>
                 </div>
@@ -97,7 +97,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             <!-- Main Feature: The Weekly Grind Tracker -->
-            <div class="relative rounded-3xl bg-gradient-to-br from-[#1a1010] to-[#0f0808] border border-red-900/30 p-8 lg:p-12 mb-8 overflow-hidden">
+            <div class="relative rounded-3xl bg-gradient-to-br from-red-100 to-red-50 dark:from-[#1a1010] dark:to-[#0f0808] border border-red-200 dark:border-red-900/30 p-8 lg:p-12 mb-8 overflow-hidden">
                 <!-- Subtle stage light glow -->
                 <div class="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-[100px]"></div>
 
@@ -111,7 +111,7 @@
                         </div>
                         <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-6">See your whole week.<br>Never double-book again.</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Running between clubs? Texting yourself set times? One calendar shows every mic, every guest set, every headline - plus your total stage time for the week.</p>
-                        <ul class="space-y-3 text-gray-300">
+                        <ul class="space-y-3 text-gray-600 dark:text-gray-300">
                             <li class="flex items-center gap-3">
                                 <svg class="w-5 h-5 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -135,52 +135,52 @@
 
                     <!-- Visual: Weekly Schedule Mock -->
                     <div class="relative">
-                        <div class="bg-black/60 rounded-2xl border border-white/10 p-5 backdrop-blur-sm">
+                        <div class="bg-gray-100 dark:bg-black/60 rounded-2xl border border-gray-200 dark:border-white/10 p-5 backdrop-blur-sm">
                             <div class="flex items-center justify-between mb-4">
-                                <span class="text-gray-400 text-sm font-medium">This Week</span>
-                                <span class="text-amber-400 text-xs font-semibold">47 min stage time</span>
+                                <span class="text-gray-500 dark:text-gray-400 text-sm font-medium">This Week</span>
+                                <span class="text-amber-600 dark:text-amber-400 text-xs font-semibold">47 min stage time</span>
                             </div>
                             <div class="space-y-3">
-                                <div class="flex items-center gap-4 p-3 rounded-xl bg-red-900/20 border border-red-800/30">
+                                <div class="flex items-center gap-4 p-3 rounded-xl bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30">
                                     <div class="w-12 text-center">
-                                        <div class="text-red-300 text-xs font-bold">MON</div>
-                                        <div class="text-white text-lg font-bold">12</div>
+                                        <div class="text-red-600 dark:text-red-300 text-xs font-bold">MON</div>
+                                        <div class="text-gray-900 dark:text-white text-lg font-bold">12</div>
                                     </div>
                                     <div class="flex-1">
-                                        <div class="text-white font-semibold">Stand Up NY</div>
+                                        <div class="text-gray-900 dark:text-white font-semibold">Stand Up NY</div>
                                         <div class="text-gray-500 dark:text-gray-400 text-sm">Open mic · 7 PM signup</div>
                                     </div>
                                     <div class="inline-flex items-center px-2 py-1 rounded bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-medium">5 min</div>
                                 </div>
-                                <div class="flex items-center gap-4 p-3 rounded-xl bg-amber-900/20 border border-amber-800/30">
+                                <div class="flex items-center gap-4 p-3 rounded-xl bg-amber-100 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30">
                                     <div class="w-12 text-center">
-                                        <div class="text-amber-300 text-xs font-bold">WED</div>
-                                        <div class="text-white text-lg font-bold">14</div>
+                                        <div class="text-amber-600 dark:text-amber-300 text-xs font-bold">WED</div>
+                                        <div class="text-gray-900 dark:text-white text-lg font-bold">14</div>
                                     </div>
                                     <div class="flex-1">
-                                        <div class="text-white font-semibold">Comedy Cellar</div>
+                                        <div class="text-gray-900 dark:text-white font-semibold">Comedy Cellar</div>
                                         <div class="text-gray-500 dark:text-gray-400 text-sm">Guest set · 9:30 PM</div>
                                     </div>
                                     <div class="inline-flex items-center px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-medium">12 min</div>
                                 </div>
-                                <div class="flex items-center gap-4 p-3 rounded-xl bg-orange-900/20 border border-orange-800/30">
+                                <div class="flex items-center gap-4 p-3 rounded-xl bg-orange-100 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/30">
                                     <div class="w-12 text-center">
-                                        <div class="text-orange-300 text-xs font-bold">THU</div>
-                                        <div class="text-white text-lg font-bold">15</div>
+                                        <div class="text-orange-600 dark:text-orange-300 text-xs font-bold">THU</div>
+                                        <div class="text-gray-900 dark:text-white text-lg font-bold">15</div>
                                     </div>
                                     <div class="flex-1">
-                                        <div class="text-white font-semibold">Gotham Comedy</div>
+                                        <div class="text-gray-900 dark:text-white font-semibold">Gotham Comedy</div>
                                         <div class="text-gray-500 dark:text-gray-400 text-sm">Late show · 11 PM</div>
                                     </div>
                                     <div class="inline-flex items-center px-2 py-1 rounded bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 text-xs font-medium">10 min</div>
                                 </div>
-                                <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-rose-900/30 to-amber-900/30 border border-rose-700/40">
+                                <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-rose-100 to-amber-100 dark:from-rose-900/30 dark:to-amber-900/30 border border-rose-200 dark:border-rose-700/40">
                                     <div class="w-12 text-center">
-                                        <div class="text-rose-300 text-xs font-bold">SAT</div>
-                                        <div class="text-white text-lg font-bold">17</div>
+                                        <div class="text-rose-600 dark:text-rose-300 text-xs font-bold">SAT</div>
+                                        <div class="text-gray-900 dark:text-white text-lg font-bold">17</div>
                                     </div>
                                     <div class="flex-1">
-                                        <div class="text-white font-semibold">Carolines</div>
+                                        <div class="text-gray-900 dark:text-white font-semibold">Carolines</div>
                                         <div class="text-gray-500 dark:text-gray-400 text-sm">Two shows: 8 PM & 10:30 PM</div>
                                     </div>
                                     <div class="inline-flex items-center px-2 py-1 rounded bg-gradient-to-r from-rose-600/60 to-amber-600/60 text-white text-xs font-bold">Headlining</div>
@@ -194,7 +194,7 @@
             <!-- Two Column Features -->
             <div class="grid md:grid-cols-2 gap-8 mb-8">
                 <!-- Newsletter Feature -->
-                <div class="relative rounded-3xl bg-gradient-to-br from-[#1a0f10] to-[#0f0808] border border-rose-900/30 p-8 overflow-hidden">
+                <div class="relative rounded-3xl bg-gradient-to-br from-rose-100 to-rose-50 dark:from-[#1a0f10] dark:to-[#0f0808] border border-rose-200 dark:border-rose-900/30 p-8 overflow-hidden">
                     <div class="absolute bottom-0 right-0 w-64 h-64 bg-rose-500/5 rounded-full blur-[80px]"></div>
                     <div class="relative">
                         <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 text-sm font-medium mb-5 border border-rose-200 dark:border-rose-800/30">
@@ -227,7 +227,7 @@
                 </div>
 
                 <!-- Ticket Sales Feature -->
-                <div class="relative rounded-3xl bg-gradient-to-br from-[#101a0f] to-[#0f0808] border border-emerald-900/30 p-8 overflow-hidden">
+                <div class="relative rounded-3xl bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-[#101a0f] dark:to-[#0f0808] border border-emerald-200 dark:border-emerald-900/30 p-8 overflow-hidden">
                     <div class="absolute bottom-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px]"></div>
                     <div class="relative">
                         <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-sm font-medium mb-5 border border-emerald-200 dark:border-emerald-800/30">
@@ -266,7 +266,7 @@
             <!-- Three Column Features -->
             <div class="grid md:grid-cols-3 gap-6">
                 <!-- Late Night Shows -->
-                <div class="rounded-2xl bg-gradient-to-br from-[#12101a] to-[#0f0808] border border-violet-900/30 p-6">
+                <div class="rounded-2xl bg-gradient-to-br from-violet-100 to-violet-50 dark:from-[#12101a] dark:to-[#0f0808] border border-violet-200 dark:border-violet-900/30 p-6">
                     <div class="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center mb-4">
                         <svg class="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
@@ -274,16 +274,16 @@
                     </div>
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Built for late nights</h3>
                     <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">10:30 show? Midnight mic that runs until 2? We get it. No more calendar apps showing tomorrow's date for tonight's set.</p>
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-violet-900/30 border border-violet-800/30">
-                        <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-violet-100 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-800/30">
+                        <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span class="text-violet-300 text-sm font-medium">10:30 PM - 12:30 AM</span>
+                        <span class="text-violet-600 dark:text-violet-300 text-sm font-medium">10:30 PM - 12:30 AM</span>
                     </div>
                 </div>
 
                 <!-- Club Links -->
-                <div class="rounded-2xl bg-gradient-to-br from-[#1a1510] to-[#0f0808] border border-amber-900/30 p-6">
+                <div class="rounded-2xl bg-gradient-to-br from-amber-100 to-amber-50 dark:from-[#1a1510] dark:to-[#0f0808] border border-amber-200 dark:border-amber-900/30 p-6">
                     <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center mb-4">
                         <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -292,15 +292,15 @@
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Booked by a club? It shows up automatically.</h3>
                     <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">When a club adds you to their lineup, your schedule updates. No copy-paste. No 'wait, what time did they say?'</p>
                     <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded bg-amber-900/40 flex items-center justify-center text-amber-300 text-[10px] font-bold">CC</div>
-                        <div class="w-6 h-6 rounded bg-rose-900/40 flex items-center justify-center text-rose-300 text-[10px] font-bold">GC</div>
-                        <div class="w-6 h-6 rounded bg-red-900/40 flex items-center justify-center text-red-300 text-[10px] font-bold">SU</div>
+                        <div class="w-6 h-6 rounded bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-700 dark:text-amber-300 text-[10px] font-bold">CC</div>
+                        <div class="w-6 h-6 rounded bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center text-rose-700 dark:text-rose-300 text-[10px] font-bold">GC</div>
+                        <div class="w-6 h-6 rounded bg-red-100 dark:bg-red-900/40 flex items-center justify-center text-red-700 dark:text-red-300 text-[10px] font-bold">SU</div>
                         <span class="text-gray-500 text-xs ml-1">+ more</span>
                     </div>
                 </div>
 
                 <!-- Promo Graphics -->
-                <div class="rounded-2xl bg-gradient-to-br from-[#1a100f] to-[#0f0808] border border-orange-900/30 p-6">
+                <div class="rounded-2xl bg-gradient-to-br from-orange-100 to-orange-50 dark:from-[#1a100f] dark:to-[#0f0808] border border-orange-200 dark:border-orange-900/30 p-6">
                     <div class="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center mb-4">
                         <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -334,8 +334,8 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Open Mic Comics -->
-                <div class="bg-gradient-to-br from-[#1a0f0f] to-[#0f0808] rounded-2xl p-6 border border-red-900/20 hover:border-red-800/40 transition-colors">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-red-900/30 mb-4">
+                <div class="bg-gradient-to-br from-red-100 to-red-50 dark:from-[#1a0f0f] dark:to-[#0f0808] rounded-2xl p-6 border border-red-200 dark:border-red-900/20 hover:border-red-300 dark:hover:border-red-800/40 transition-colors">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/30 mb-4">
                         <svg class="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -345,8 +345,8 @@
                 </div>
 
                 <!-- Working Comics -->
-                <div class="bg-gradient-to-br from-[#1a1510] to-[#0f0808] rounded-2xl p-6 border border-amber-900/20 hover:border-amber-800/40 transition-colors">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-900/30 mb-4">
+                <div class="bg-gradient-to-br from-amber-100 to-amber-50 dark:from-[#1a1510] dark:to-[#0f0808] rounded-2xl p-6 border border-amber-200 dark:border-amber-900/20 hover:border-amber-300 dark:hover:border-amber-800/40 transition-colors">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 mb-4">
                         <svg class="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                         </svg>
@@ -356,8 +356,8 @@
                 </div>
 
                 <!-- Feature Acts -->
-                <div class="bg-gradient-to-br from-[#1a100f] to-[#0f0808] rounded-2xl p-6 border border-orange-900/20 hover:border-orange-800/40 transition-colors">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-orange-900/30 mb-4">
+                <div class="bg-gradient-to-br from-orange-100 to-orange-50 dark:from-[#1a100f] dark:to-[#0f0808] rounded-2xl p-6 border border-orange-200 dark:border-orange-900/20 hover:border-orange-300 dark:hover:border-orange-800/40 transition-colors">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 mb-4">
                         <svg class="w-6 h-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                         </svg>
@@ -367,8 +367,8 @@
                 </div>
 
                 <!-- Headliners -->
-                <div class="bg-gradient-to-br from-[#1a0f10] to-[#0f0808] rounded-2xl p-6 border border-rose-900/20 hover:border-rose-800/40 transition-colors">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-rose-900/30 mb-4">
+                <div class="bg-gradient-to-br from-rose-100 to-rose-50 dark:from-[#1a0f10] dark:to-[#0f0808] rounded-2xl p-6 border border-rose-200 dark:border-rose-900/20 hover:border-rose-300 dark:hover:border-rose-800/40 transition-colors">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-900/30 mb-4">
                         <svg class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                         </svg>
@@ -378,8 +378,8 @@
                 </div>
 
                 <!-- Touring Comics -->
-                <div class="bg-gradient-to-br from-[#12101a] to-[#0f0808] rounded-2xl p-6 border border-violet-900/20 hover:border-violet-800/40 transition-colors">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-900/30 mb-4">
+                <div class="bg-gradient-to-br from-violet-100 to-violet-50 dark:from-[#12101a] dark:to-[#0f0808] rounded-2xl p-6 border border-violet-200 dark:border-violet-900/20 hover:border-violet-300 dark:hover:border-violet-800/40 transition-colors">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-900/30 mb-4">
                         <svg class="w-6 h-6 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -389,8 +389,8 @@
                 </div>
 
                 <!-- Improv & Sketch -->
-                <div class="bg-gradient-to-br from-[#101510] to-[#0f0808] rounded-2xl p-6 border border-teal-900/20 hover:border-teal-800/40 transition-colors">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-900/30 mb-4">
+                <div class="bg-gradient-to-br from-teal-100 to-teal-50 dark:from-[#101510] dark:to-[#0f0808] rounded-2xl p-6 border border-teal-200 dark:border-teal-900/20 hover:border-teal-300 dark:hover:border-teal-800/40 transition-colors">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-900/30 mb-4">
                         <svg class="w-6 h-6 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
@@ -546,17 +546,17 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="relative bg-gradient-to-br from-[#1a0f0f] to-[#0f0808] py-24 overflow-hidden border-t border-red-900/20">
-        <!-- Stage light effect -->
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px]">
+    <section class="relative bg-white dark:bg-gradient-to-br dark:from-[#1a0f0f] dark:to-[#0f0808] py-24 overflow-hidden border-t border-red-200 dark:border-red-900/20">
+        <!-- Stage light effect (dark mode only) -->
+        <div class="hidden dark:block absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px]">
             <div class="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[200px] border-r-[200px] border-t-[300px] border-l-transparent border-r-transparent border-t-amber-500/[0.02]"></div>
         </div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
                 Your fans want to see you.<br class="hidden md:block">Give them one link.
             </h2>
-            <p class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
+            <p class="text-xl text-gray-500 dark:text-gray-400 mb-10 max-w-2xl mx-auto">
                 No catch. No 'premium tier.'<br class="hidden md:block">Free forever.
             </p>
             <a href="{{ route('sign_up') }}" class="group inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-black bg-gradient-to-r from-amber-400 to-amber-500 rounded-2xl hover:scale-105 transition-all shadow-xl shadow-amber-500/20">

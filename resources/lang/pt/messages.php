@@ -300,6 +300,7 @@ return [
     'username' => 'Nome de usuário',
     'test' => 'Teste',
     'report_errors' => 'Reportar erros aos desenvolvedores para nos ajudar a melhorar o aplicativo (opcional)',
+    'env_not_writable' => 'The .env file is not writable. Settings cannot be saved automatically.',
     'optional' => 'Opcional',
     'i_accept_the_terms' => 'Eu aceito os :terms',
     'import' => 'Importar',

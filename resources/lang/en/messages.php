@@ -496,6 +496,7 @@ return [
     'username' => 'Username',
     'test' => 'Test',
     'report_errors' => 'Report errors to the developers to help us improve the app (optional)',
+    'env_not_writable' => 'The .env file is not writable. Settings cannot be saved automatically.',
     'optional' => 'Optional',
     'i_accept_the_terms' => 'I accept the :terms',
     'import' => 'Import',

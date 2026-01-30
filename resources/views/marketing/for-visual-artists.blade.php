@@ -13,12 +13,48 @@
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] h-[40%] bg-rose-600/10 rounded-full blur-[100px]"></div>
         </div>
 
-        <!-- Grid overlay for texture -->
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+        <!-- Canvas texture SVG overlay -->
+        <div class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]">
+            <svg width="100%" height="100%">
+                <defs>
+                    <pattern id="canvas-weave" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+                        <path d="M0,4 L8,4 M4,0 L4,8" stroke="currentColor" stroke-width="0.5" class="text-fuchsia-800 dark:text-fuchsia-300"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#canvas-weave)"/>
+            </svg>
+        </div>
+
+        <!-- Paint splatter decorations -->
+        <div class="absolute top-[15%] left-[8%] opacity-[0.08] dark:opacity-[0.10] hidden md:block">
+            <svg width="180" height="160" viewBox="0 0 180 160" fill="currentColor" class="text-fuchsia-500">
+                <ellipse cx="80" cy="70" rx="60" ry="50" />
+                <circle cx="30" cy="30" r="15" />
+                <circle cx="140" cy="45" r="20" />
+                <circle cx="55" cy="130" r="12" />
+                <circle cx="120" cy="120" r="8" />
+                <circle cx="160" cy="80" r="6" />
+            </svg>
+        </div>
+        <div class="absolute bottom-[20%] right-[5%] opacity-[0.06] dark:opacity-[0.08] hidden md:block">
+            <svg width="140" height="130" viewBox="0 0 140 130" fill="currentColor" class="text-pink-500">
+                <ellipse cx="70" cy="60" rx="50" ry="40" />
+                <circle cx="20" cy="100" r="18" />
+                <circle cx="120" cy="30" r="14" />
+                <circle cx="110" cy="105" r="10" />
+            </svg>
+        </div>
+        <div class="absolute top-[60%] left-[20%] opacity-[0.05] dark:opacity-[0.07] hidden lg:block">
+            <svg width="100" height="90" viewBox="0 0 100 90" fill="currentColor" class="text-rose-500">
+                <ellipse cx="50" cy="45" rx="35" ry="30" />
+                <circle cx="15" cy="15" r="12" />
+                <circle cx="85" cy="70" r="10" />
+            </svg>
+        </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <!-- Badge -->
-            <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 backdrop-blur-sm">
+            <!-- Badge with picture frame border -->
+            <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-sm glass artist-frame-badge mb-8 backdrop-blur-sm">
                 <div class="relative">
                     <svg class="w-5 h-5 text-fuchsia-600 dark:text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -357,40 +393,40 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <!-- Spring -->
-                    <div class="relative bg-gradient-to-br from-fuchsia-50 to-pink-50 dark:from-fuchsia-950/50 dark:to-pink-950/50 rounded-2xl border border-fuchsia-200 dark:border-fuchsia-800/30 p-6 text-center hover:scale-105 transition-transform">
-                        <div class="hidden md:flex absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-fuchsia-500 rounded-full items-center justify-center">
-                            <div class="w-2 h-2 bg-white rounded-full"></div>
-                        </div>
+                    <div class="relative gallery-wall-card bg-gradient-to-br from-fuchsia-50 to-pink-50 dark:from-fuchsia-950/50 dark:to-pink-950/50 rounded-2xl border border-fuchsia-200 dark:border-fuchsia-800/30 p-6 text-center hover:rotate-0 transition-transform shadow-lg" style="transform: rotate(-1deg);">
+                        <!-- Hanging wire -->
+                        <div class="hidden md:block absolute -top-6 left-1/2 -translate-x-1/2 w-px h-6 bg-gray-400 dark:bg-gray-600"></div>
+                        <div class="hidden md:block absolute -top-7 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full border border-gray-400 dark:border-gray-600"></div>
                         <div class="text-fuchsia-600 dark:text-fuchsia-400 text-xs font-semibold uppercase tracking-wider mb-2">Spring</div>
                         <div class="text-gray-900 dark:text-white font-bold text-lg mb-1">Open Studio</div>
                         <div class="text-gray-500 dark:text-gray-400 text-sm">Invite collectors into your creative space</div>
                     </div>
 
                     <!-- Summer -->
-                    <div class="relative bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/50 dark:to-rose-950/50 rounded-2xl border border-pink-200 dark:border-pink-800/30 p-6 text-center hover:scale-105 transition-transform">
-                        <div class="hidden md:flex absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-pink-500 rounded-full items-center justify-center">
-                            <div class="w-2 h-2 bg-white rounded-full"></div>
-                        </div>
+                    <div class="relative gallery-wall-card bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/50 dark:to-rose-950/50 rounded-2xl border border-pink-200 dark:border-pink-800/30 p-6 text-center hover:rotate-0 transition-transform shadow-lg" style="transform: rotate(1deg);">
+                        <!-- Hanging wire -->
+                        <div class="hidden md:block absolute -top-6 left-1/2 -translate-x-1/2 w-px h-6 bg-gray-400 dark:bg-gray-600"></div>
+                        <div class="hidden md:block absolute -top-7 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full border border-gray-400 dark:border-gray-600"></div>
                         <div class="text-pink-600 dark:text-pink-400 text-xs font-semibold uppercase tracking-wider mb-2">Summer</div>
                         <div class="text-gray-900 dark:text-white font-bold text-lg mb-1">Art Fair</div>
                         <div class="text-gray-500 dark:text-gray-400 text-sm">Booth at a regional or national fair</div>
                     </div>
 
                     <!-- Fall -->
-                    <div class="relative bg-gradient-to-br from-rose-50 to-fuchsia-50 dark:from-rose-950/50 dark:to-fuchsia-950/50 rounded-2xl border border-rose-200 dark:border-rose-800/30 p-6 text-center hover:scale-105 transition-transform">
-                        <div class="hidden md:flex absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-rose-500 rounded-full items-center justify-center">
-                            <div class="w-2 h-2 bg-white rounded-full"></div>
-                        </div>
+                    <div class="relative gallery-wall-card bg-gradient-to-br from-rose-50 to-fuchsia-50 dark:from-rose-950/50 dark:to-fuchsia-950/50 rounded-2xl border border-rose-200 dark:border-rose-800/30 p-6 text-center hover:rotate-0 transition-transform shadow-lg" style="transform: rotate(-1deg);">
+                        <!-- Hanging wire -->
+                        <div class="hidden md:block absolute -top-6 left-1/2 -translate-x-1/2 w-px h-6 bg-gray-400 dark:bg-gray-600"></div>
+                        <div class="hidden md:block absolute -top-7 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full border border-gray-400 dark:border-gray-600"></div>
                         <div class="text-rose-600 dark:text-rose-400 text-xs font-semibold uppercase tracking-wider mb-2">Fall</div>
                         <div class="text-gray-900 dark:text-white font-bold text-lg mb-1">Solo Exhibition</div>
                         <div class="text-gray-500 dark:text-gray-400 text-sm">Your own gallery show with opening reception</div>
                     </div>
 
                     <!-- Winter -->
-                    <div class="relative bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-violet-950/50 dark:to-fuchsia-950/50 rounded-2xl border border-violet-200 dark:border-violet-800/30 p-6 text-center hover:scale-105 transition-transform">
-                        <div class="hidden md:flex absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-violet-500 rounded-full items-center justify-center">
-                            <div class="w-2 h-2 bg-white rounded-full"></div>
-                        </div>
+                    <div class="relative gallery-wall-card bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-violet-950/50 dark:to-fuchsia-950/50 rounded-2xl border border-violet-200 dark:border-violet-800/30 p-6 text-center hover:rotate-0 transition-transform shadow-lg" style="transform: rotate(1deg);">
+                        <!-- Hanging wire -->
+                        <div class="hidden md:block absolute -top-6 left-1/2 -translate-x-1/2 w-px h-6 bg-gray-400 dark:bg-gray-600"></div>
+                        <div class="hidden md:block absolute -top-7 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full border border-gray-400 dark:border-gray-600"></div>
                         <div class="text-violet-600 dark:text-violet-400 text-xs font-semibold uppercase tracking-wider mb-2">Winter</div>
                         <div class="text-gray-900 dark:text-white font-bold text-lg mb-1">Group Show</div>
                         <div class="text-gray-500 dark:text-gray-400 text-sm">Collaborative exhibition with fellow artists</div>
@@ -611,6 +647,24 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             text-shadow: 0 0 40px rgba(217, 70, 239, 0.3);
+        }
+
+        .artist-frame-badge {
+            border: 2px solid rgba(161, 98, 7, 0.3);
+            box-shadow: inset 0 0 0 2px rgba(161, 98, 7, 0.1), 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .dark .artist-frame-badge {
+            border-color: rgba(217, 119, 6, 0.3);
+            box-shadow: inset 0 0 0 2px rgba(217, 119, 6, 0.1), 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .gallery-wall-card {
+            box-shadow: 4px 4px 12px rgba(0,0,0,0.1), -1px -1px 4px rgba(0,0,0,0.03);
+        }
+
+        .dark .gallery-wall-card {
+            box-shadow: 4px 4px 16px rgba(0,0,0,0.3), -1px -1px 4px rgba(0,0,0,0.1);
         }
     </style>
 </x-marketing-layout>

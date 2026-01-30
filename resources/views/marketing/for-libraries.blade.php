@@ -14,15 +14,46 @@
             <div class="absolute top-40 right-1/3 w-[200px] h-[200px] bg-indigo-500/10 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s;"></div>
         </div>
 
-        <!-- Grid -->
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+        <!-- Bookshelf SVG pattern -->
+        <div class="absolute inset-0 opacity-[0.04] dark:opacity-[0.06] overflow-hidden">
+            <svg width="100%" height="100%">
+                <defs>
+                    <pattern id="bookshelf" x="0" y="0" width="200" height="80" patternUnits="userSpaceOnUse">
+                        <!-- Shelf line -->
+                        <line x1="0" y1="78" x2="200" y2="78" stroke="#475569" stroke-width="2"/>
+                        <!-- Book spines - varying heights and colors -->
+                        <rect x="8" y="15" width="10" height="63" rx="1" fill="#0ea5e9"/>
+                        <rect x="22" y="25" width="8" height="53" rx="1" fill="#6366f1"/>
+                        <rect x="34" y="10" width="12" height="68" rx="1" fill="#3b82f6"/>
+                        <rect x="50" y="20" width="9" height="58" rx="1" fill="#8b5cf6"/>
+                        <rect x="63" y="30" width="11" height="48" rx="1" fill="#0ea5e9"/>
+                        <rect x="78" y="8" width="10" height="70" rx="1" fill="#475569"/>
+                        <rect x="92" y="22" width="8" height="56" rx="1" fill="#6366f1"/>
+                        <rect x="104" y="15" width="12" height="63" rx="1" fill="#3b82f6"/>
+                        <rect x="120" y="28" width="9" height="50" rx="1" fill="#0ea5e9"/>
+                        <rect x="133" y="12" width="11" height="66" rx="1" fill="#8b5cf6"/>
+                        <rect x="148" y="18" width="10" height="60" rx="1" fill="#475569"/>
+                        <rect x="162" y="25" width="8" height="53" rx="1" fill="#6366f1"/>
+                        <rect x="174" y="10" width="12" height="68" rx="1" fill="#3b82f6"/>
+                        <rect x="190" y="20" width="8" height="58" rx="1" fill="#0ea5e9"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#bookshelf)"/>
+            </svg>
+        </div>
+
+        <!-- Reading lamp warm glow -->
+        <div class="absolute top-0 left-0 w-[60%] h-[60%] bg-amber-400/[0.04] dark:bg-amber-400/[0.03] rounded-full blur-[150px]"></div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
-                <svg class="w-4 h-4 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-                <span class="text-sm text-gray-600 dark:text-gray-300">For Libraries</span>
+            <div class="inline-flex flex-col items-center px-5 py-2.5 rounded-sm library-card-badge mb-8 backdrop-blur-sm">
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    <span class="text-sm text-gray-600 dark:text-gray-300 font-medium">For Libraries</span>
+                </div>
+                <div class="w-full h-px bg-sky-400/30 mt-1.5"></div>
             </div>
 
             <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
@@ -336,8 +367,12 @@
             <!-- Programming Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <!-- Toddler Story Time -->
-                <div class="bg-gradient-to-br from-sky-900/40 to-blue-900/40 rounded-xl border border-sky-500/20 p-5 relative overflow-hidden group hover:border-sky-500/40 transition-colors">
-                    <div class="flex items-center gap-2 mb-3">
+                <div class="catalog-card bg-amber-50/80 dark:bg-sky-900/40 rounded-sm border border-amber-200/60 dark:border-sky-500/20 p-5 relative overflow-hidden group hover:border-sky-500/40 transition-colors">
+                    <!-- Index tab -->
+                    <div class="absolute -top-px left-4 w-12 h-2.5 bg-sky-400/60 dark:bg-sky-400/40 rounded-b-sm"></div>
+                    <!-- Dewey number -->
+                    <div class="absolute top-2 right-3 text-[9px] font-mono text-gray-400 dark:text-gray-500">028.5</div>
+                    <div class="flex items-center gap-2 mb-3 mt-1">
                         <div class="w-8 h-8 rounded-lg bg-sky-500/20 flex items-center justify-center">
                             <span class="text-sm">&#128214;</span>
                         </div>
@@ -353,8 +388,10 @@
                 </div>
 
                 <!-- Teen Coding Club -->
-                <div class="bg-gradient-to-br from-indigo-900/40 to-violet-900/40 rounded-xl border border-indigo-500/20 p-5 relative overflow-hidden group hover:border-indigo-500/40 transition-colors">
-                    <div class="flex items-center gap-2 mb-3">
+                <div class="catalog-card bg-amber-50/80 dark:bg-indigo-900/40 rounded-sm border border-amber-200/60 dark:border-indigo-500/20 p-5 relative overflow-hidden group hover:border-indigo-500/40 transition-colors">
+                    <div class="absolute -top-px left-4 w-12 h-2.5 bg-indigo-400/60 dark:bg-indigo-400/40 rounded-b-sm"></div>
+                    <div class="absolute top-2 right-3 text-[9px] font-mono text-gray-400 dark:text-gray-500">005.1</div>
+                    <div class="flex items-center gap-2 mb-3 mt-1">
                         <div class="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
                             <span class="text-sm">&#128187;</span>
                         </div>
@@ -370,8 +407,10 @@
                 </div>
 
                 <!-- Adult Book Club -->
-                <div class="bg-gradient-to-br from-blue-900/40 to-sky-900/40 rounded-xl border border-blue-500/20 p-5 relative overflow-hidden group hover:border-blue-500/40 transition-colors">
-                    <div class="flex items-center gap-2 mb-3">
+                <div class="catalog-card bg-amber-50/80 dark:bg-blue-900/40 rounded-sm border border-amber-200/60 dark:border-blue-500/20 p-5 relative overflow-hidden group hover:border-blue-500/40 transition-colors">
+                    <div class="absolute -top-px left-4 w-12 h-2.5 bg-blue-400/60 dark:bg-blue-400/40 rounded-b-sm"></div>
+                    <div class="absolute top-2 right-3 text-[9px] font-mono text-gray-400 dark:text-gray-500">813.5</div>
+                    <div class="flex items-center gap-2 mb-3 mt-1">
                         <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
                             <span class="text-sm">&#128218;</span>
                         </div>
@@ -387,8 +426,10 @@
                 </div>
 
                 <!-- Senior Tech Help -->
-                <div class="bg-gradient-to-br from-teal-900/40 to-cyan-900/40 rounded-xl border border-teal-500/20 p-5 relative overflow-hidden group hover:border-teal-500/40 transition-colors">
-                    <div class="flex items-center gap-2 mb-3">
+                <div class="catalog-card bg-amber-50/80 dark:bg-teal-900/40 rounded-sm border border-amber-200/60 dark:border-teal-500/20 p-5 relative overflow-hidden group hover:border-teal-500/40 transition-colors">
+                    <div class="absolute -top-px left-4 w-12 h-2.5 bg-teal-400/60 dark:bg-teal-400/40 rounded-b-sm"></div>
+                    <div class="absolute top-2 right-3 text-[9px] font-mono text-gray-400 dark:text-gray-500">004.0</div>
+                    <div class="flex items-center gap-2 mb-3 mt-1">
                         <div class="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center">
                             <span class="text-sm">&#128421;</span>
                         </div>
@@ -404,8 +445,10 @@
                 </div>
 
                 <!-- Author Readings -->
-                <div class="bg-gradient-to-br from-violet-900/40 to-purple-900/40 rounded-xl border border-violet-500/20 p-5 relative overflow-hidden group hover:border-violet-500/40 transition-colors">
-                    <div class="flex items-center gap-2 mb-3">
+                <div class="catalog-card bg-amber-50/80 dark:bg-violet-900/40 rounded-sm border border-amber-200/60 dark:border-violet-500/20 p-5 relative overflow-hidden group hover:border-violet-500/40 transition-colors">
+                    <div class="absolute -top-px left-4 w-12 h-2.5 bg-violet-400/60 dark:bg-violet-400/40 rounded-b-sm"></div>
+                    <div class="absolute top-2 right-3 text-[9px] font-mono text-gray-400 dark:text-gray-500">808.0</div>
+                    <div class="flex items-center gap-2 mb-3 mt-1">
                         <div class="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
                             <span class="text-sm">&#9997;&#65039;</span>
                         </div>
@@ -421,8 +464,10 @@
                 </div>
 
                 <!-- Film Screenings -->
-                <div class="bg-gradient-to-br from-rose-900/40 to-pink-900/40 rounded-xl border border-rose-500/20 p-5 relative overflow-hidden group hover:border-rose-500/40 transition-colors">
-                    <div class="flex items-center gap-2 mb-3">
+                <div class="catalog-card bg-amber-50/80 dark:bg-rose-900/40 rounded-sm border border-amber-200/60 dark:border-rose-500/20 p-5 relative overflow-hidden group hover:border-rose-500/40 transition-colors">
+                    <div class="absolute -top-px left-4 w-12 h-2.5 bg-rose-400/60 dark:bg-rose-400/40 rounded-b-sm"></div>
+                    <div class="absolute top-2 right-3 text-[9px] font-mono text-gray-400 dark:text-gray-500">791.4</div>
+                    <div class="flex items-center gap-2 mb-3 mt-1">
                         <div class="w-8 h-8 rounded-lg bg-rose-500/20 flex items-center justify-center">
                             <span class="text-sm">&#127916;</span>
                         </div>
@@ -660,6 +705,34 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .library-card-badge {
+            background: rgba(255, 251, 235, 0.8);
+            border: 1px solid rgba(14, 165, 233, 0.2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .dark .library-card-badge {
+            background: rgba(15, 23, 42, 0.6);
+            border-color: rgba(14, 165, 233, 0.2);
+        }
+
+        .catalog-card {
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .catalog-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .dark .catalog-card {
+            background: transparent;
+        }
+
+        .dark .catalog-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
     </style>
 </x-marketing-layout>

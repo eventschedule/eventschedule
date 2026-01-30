@@ -443,6 +443,7 @@ return [
     'username' => 'اسم المستخدم',
     'test' => 'اختبار',
     'report_errors' => 'الإبلاغ عن الأخطاء للمطورين لمساعدتنا في تحسين التطبيق (اختياري)',
+    'env_not_writable' => 'The .env file is not writable. Settings cannot be saved automatically.',
     'optional' => 'اختياري',
     'i_accept_the_terms' => 'أوافق على :terms',
     'import' => 'استيراد',

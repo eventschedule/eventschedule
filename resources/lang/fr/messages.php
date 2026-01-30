@@ -451,6 +451,7 @@ return [
     'username' => 'Nom d\'utilisateur',
     'test' => 'Test',
     'report_errors' => 'Signaler les erreurs aux développeurs pour nous aider à améliorer l\'application (facultatif)',
+    'env_not_writable' => 'The .env file is not writable. Settings cannot be saved automatically.',
     'optional' => 'Facultatif',
     'i_accept_the_terms' => 'J\'accepte les :terms',
     'import' => 'Importer',

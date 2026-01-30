@@ -14,6 +14,33 @@
         <!-- Grid pattern -->
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
 
+        <!-- Tool silhouette decorations -->
+        <div class="absolute top-[20%] left-[5%] opacity-[0.04] dark:opacity-[0.06] hidden md:block" style="transform: rotate(-15deg);">
+            <svg width="80" height="200" viewBox="0 0 80 200" fill="currentColor" class="text-indigo-700 dark:text-indigo-300">
+                <!-- Paintbrush -->
+                <rect x="35" y="0" width="10" height="130" rx="3"/>
+                <path d="M25,130 L55,130 L50,190 Q40,200 30,190 Z"/>
+            </svg>
+        </div>
+        <div class="absolute top-[25%] right-[6%] opacity-[0.04] dark:opacity-[0.06] hidden md:block" style="transform: rotate(10deg);">
+            <svg width="90" height="180" viewBox="0 0 90 180" fill="currentColor" class="text-purple-700 dark:text-purple-300">
+                <!-- Rolling pin -->
+                <rect x="10" y="50" width="70" height="30" rx="15"/>
+                <rect x="35" y="0" width="20" height="50" rx="4"/>
+                <rect x="35" y="80" width="20" height="50" rx="4"/>
+                <circle cx="45" cy="0" r="10"/>
+                <circle cx="45" cy="135" r="10"/>
+            </svg>
+        </div>
+        <div class="absolute bottom-[15%] left-[12%] opacity-[0.04] dark:opacity-[0.06] hidden lg:block" style="transform: rotate(5deg);">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3" class="text-violet-700 dark:text-violet-300">
+                <!-- Camera lens -->
+                <circle cx="50" cy="50" r="45"/>
+                <circle cx="50" cy="50" r="30"/>
+                <circle cx="50" cy="50" r="15"/>
+            </svg>
+        </div>
+
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <!-- Badge -->
             <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 backdrop-blur-sm">
@@ -58,20 +85,38 @@
         </div>
     </section>
 
-    <!-- Stats Section -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-16 border-t border-gray-200 dark:border-white/5">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Stats Section - Chalkboard Style -->
+    <section class="bg-gray-100 dark:bg-[#1e293b] py-16 border-t border-gray-200 dark:border-white/5 relative overflow-hidden">
+        <!-- Chalk dust texture overlay -->
+        <div class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]">
+            <svg width="100%" height="100%">
+                <defs>
+                    <pattern id="chalk-dust" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                        <circle cx="10" cy="15" r="0.5" fill="white"/>
+                        <circle cx="45" cy="8" r="0.4" fill="white"/>
+                        <circle cx="78" cy="32" r="0.6" fill="white"/>
+                        <circle cx="25" cy="55" r="0.3" fill="white"/>
+                        <circle cx="60" cy="70" r="0.5" fill="white"/>
+                        <circle cx="90" cy="85" r="0.4" fill="white"/>
+                        <circle cx="35" cy="92" r="0.3" fill="white"/>
+                        <circle cx="70" cy="48" r="0.5" fill="white"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#chalk-dust)"/>
+            </svg>
+        </div>
+        <div class="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                 <div>
-                    <div class="text-4xl md:text-5xl font-bold text-gradient-workshop mb-2">68%</div>
+                    <div class="text-4xl md:text-5xl font-bold chalk-text mb-2">68%</div>
                     <p class="text-gray-500 dark:text-gray-400">workshop spots go unsold without direct marketing</p>
                 </div>
                 <div>
-                    <div class="text-4xl md:text-5xl font-bold text-gradient-workshop mb-2">$0</div>
+                    <div class="text-4xl md:text-5xl font-bold chalk-text mb-2">$0</div>
                     <p class="text-gray-500 dark:text-gray-400">platform fees on ticket sales</p>
                 </div>
                 <div>
-                    <div class="text-4xl md:text-5xl font-bold text-gradient-workshop mb-2">1-click</div>
+                    <div class="text-4xl md:text-5xl font-bold chalk-text mb-2">1-click</div>
                     <p class="text-gray-500 dark:text-gray-400">email to your entire student list</p>
                 </div>
             </div>
@@ -354,8 +399,10 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <!-- Session 1 -->
-                    <div class="relative rounded-2xl bg-gradient-to-br from-indigo-200 to-indigo-300 dark:from-indigo-800/60 dark:to-indigo-700/40 border border-indigo-300 dark:border-indigo-500/30 p-6 text-center">
+                    <!-- Session 1 - Post-it note style -->
+                    <div class="relative postit-card bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-indigo-800/60 dark:to-indigo-700/40 border border-yellow-300 dark:border-indigo-500/30 p-6 text-center" style="transform: rotate(-1.5deg);">
+                        <!-- Fold corner -->
+                        <div class="absolute top-0 right-0 w-6 h-6 bg-gradient-to-bl from-yellow-200/80 to-transparent dark:from-indigo-600/40 dark:to-transparent"></div>
                         <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-indigo-500/30 flex items-center justify-center">
                             <span class="text-indigo-700 dark:text-indigo-200 text-lg font-bold">1</span>
                         </div>
@@ -369,7 +416,8 @@
                     </div>
 
                     <!-- Session 2 -->
-                    <div class="relative rounded-2xl bg-gradient-to-br from-violet-200 to-violet-300 dark:from-violet-800/60 dark:to-violet-700/40 border border-violet-300 dark:border-violet-500/30 p-6 text-center">
+                    <div class="relative postit-card bg-gradient-to-br from-orange-100 to-yellow-100 dark:from-violet-800/60 dark:to-violet-700/40 border border-orange-300 dark:border-violet-500/30 p-6 text-center" style="transform: rotate(1deg);">
+                        <div class="absolute top-0 right-0 w-6 h-6 bg-gradient-to-bl from-orange-200/80 to-transparent dark:from-violet-600/40 dark:to-transparent"></div>
                         <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-violet-500/30 flex items-center justify-center">
                             <span class="text-violet-700 dark:text-violet-200 text-lg font-bold">2</span>
                         </div>
@@ -378,7 +426,8 @@
                     </div>
 
                     <!-- Session 3 -->
-                    <div class="relative rounded-2xl bg-gradient-to-br from-purple-200 to-purple-300 dark:from-purple-800/60 dark:to-purple-700/40 border border-purple-300 dark:border-purple-500/30 p-6 text-center">
+                    <div class="relative postit-card bg-gradient-to-br from-lime-100 to-green-100 dark:from-purple-800/60 dark:to-purple-700/40 border border-lime-300 dark:border-purple-500/30 p-6 text-center" style="transform: rotate(-0.5deg);">
+                        <div class="absolute top-0 right-0 w-6 h-6 bg-gradient-to-bl from-lime-200/80 to-transparent dark:from-purple-600/40 dark:to-transparent"></div>
                         <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-purple-500/30 flex items-center justify-center">
                             <span class="text-purple-700 dark:text-purple-200 text-lg font-bold">3</span>
                         </div>
@@ -387,7 +436,8 @@
                     </div>
 
                     <!-- Session 4 -->
-                    <div class="relative rounded-2xl bg-gradient-to-br from-fuchsia-200 to-fuchsia-300 dark:from-fuchsia-800/60 dark:to-fuchsia-700/40 border border-fuchsia-300 dark:border-fuchsia-500/30 p-6 text-center">
+                    <div class="relative postit-card bg-gradient-to-br from-sky-100 to-blue-100 dark:from-fuchsia-800/60 dark:to-fuchsia-700/40 border border-sky-300 dark:border-fuchsia-500/30 p-6 text-center" style="transform: rotate(1.5deg);">
+                        <div class="absolute top-0 right-0 w-6 h-6 bg-gradient-to-bl from-sky-200/80 to-transparent dark:from-fuchsia-600/40 dark:to-transparent"></div>
                         <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-fuchsia-500/30 flex items-center justify-center">
                             <span class="text-fuchsia-700 dark:text-fuchsia-200 text-lg font-bold">4</span>
                         </div>
@@ -611,6 +661,35 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .chalk-text {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .dark .chalk-text {
+            background: linear-gradient(135deg, #c7d2fe, #e0e7ff, #ddd6fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 8px rgba(199, 210, 254, 0.3);
+            filter: blur(0.2px);
+        }
+
+        .postit-card {
+            box-shadow: 2px 3px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .postit-card:hover {
+            transform: rotate(0deg) !important;
+        }
+
+        .dark .postit-card {
+            box-shadow: 2px 3px 12px rgba(0,0,0,0.3);
         }
     </style>
 </x-marketing-layout>

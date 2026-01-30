@@ -13,8 +13,29 @@
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] h-[40%] bg-green-600/10 rounded-full blur-[100px]"></div>
         </div>
 
-        <!-- Grid overlay for texture -->
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+        <!-- Flowing wave SVG pattern -->
+        <div class="absolute inset-0 overflow-hidden opacity-[0.04] dark:opacity-[0.06]">
+            <svg class="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 320" preserveAspectRatio="none" style="height: 40%;">
+                <path fill="currentColor" class="text-emerald-600" d="M0,160L48,170.7C96,181,192,203,288,192C384,181,480,139,576,133.3C672,128,768,160,864,176C960,192,1056,192,1152,176C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
+            <svg class="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 320" preserveAspectRatio="none" style="height: 35%;">
+                <path fill="currentColor" class="text-teal-600" d="M0,224L48,213.3C96,203,192,181,288,186.7C384,192,480,224,576,234.7C672,245,768,235,864,213.3C960,192,1056,160,1152,165.3C1248,171,1344,213,1392,234.7L1440,256L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
+        </div>
+
+        <!-- Breathing animation circle -->
+        <div class="absolute top-20 right-[15%] w-32 h-32 rounded-full border-2 border-emerald-500/10 dark:border-emerald-400/10 fitness-breathe hidden md:block"></div>
+        <div class="absolute bottom-32 left-[10%] w-24 h-24 rounded-full border border-teal-500/8 dark:border-teal-400/8 fitness-breathe hidden md:block" style="animation-delay: 2s;"></div>
+
+        <!-- Yoga pose silhouette watermark -->
+        <div class="absolute right-[8%] top-1/2 -translate-y-1/2 opacity-[0.05] dark:opacity-[0.07] hidden lg:block">
+            <svg width="280" height="380" viewBox="0 0 280 380" fill="currentColor" class="text-emerald-700 dark:text-emerald-400">
+                <!-- Tree pose silhouette -->
+                <ellipse cx="140" cy="28" rx="22" ry="24"/>
+                <path d="M140,52 L140,160 M140,100 L100,60 M140,100 L180,60 M140,160 L110,280 M140,160 L170,280 M170,160 L170,120 C170,100 200,90 200,110 L200,140" stroke="currentColor" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M110,280 L95,380 M110,280 L125,380 M170,280 L155,380 M170,280 L185,380" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round"/>
+            </svg>
+        </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <!-- Badge -->
@@ -376,7 +397,11 @@
                         <div class="bg-emerald-500/20 dark:bg-emerald-500/30 rounded-xl p-3 border border-emerald-400/30">
                             <div class="text-gray-900 dark:text-white text-xs font-semibold">Morning Flow</div>
                             <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">7:00 AM</div>
-                            <div class="mt-2 w-full h-1 bg-emerald-400/40 rounded-full"></div>
+                            <div class="flex justify-center gap-0.5 mt-2" title="Low intensity">
+                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400/20"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400/20"></div>
+                            </div>
                         </div>
                     </div>
                     <!-- Tuesday -->
@@ -385,7 +410,11 @@
                         <div class="bg-amber-500/20 dark:bg-amber-500/30 rounded-xl p-3 border border-amber-400/30">
                             <div class="text-gray-900 dark:text-white text-xs font-semibold">Lunch Express</div>
                             <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">12:00 PM</div>
-                            <div class="mt-2 w-full h-1 bg-amber-400/40 rounded-full"></div>
+                            <div class="flex justify-center gap-0.5 mt-2" title="Medium intensity">
+                                <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-amber-400/20"></div>
+                            </div>
                         </div>
                     </div>
                     <!-- Wednesday -->
@@ -394,7 +423,11 @@
                         <div class="bg-teal-500/20 dark:bg-teal-500/30 rounded-xl p-3 border border-teal-400/30 ring-2 ring-teal-400/50">
                             <div class="text-gray-900 dark:text-white text-xs font-semibold">Power Yoga</div>
                             <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">6:00 PM</div>
-                            <div class="mt-2 w-full h-1 bg-teal-400/60 rounded-full"></div>
+                            <div class="flex justify-center gap-0.5 mt-2" title="High intensity">
+                                <div class="w-1.5 h-1.5 rounded-full bg-teal-400"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-teal-400"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-teal-400"></div>
+                            </div>
                             <div class="text-teal-600 dark:text-teal-300 text-[9px] mt-1 font-medium">Popular</div>
                         </div>
                     </div>
@@ -413,7 +446,11 @@
                         <div class="bg-cyan-500/20 dark:bg-cyan-500/30 rounded-xl p-3 border border-cyan-400/30">
                             <div class="text-gray-900 dark:text-white text-xs font-semibold">HIIT & Stretch</div>
                             <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">5:30 PM</div>
-                            <div class="mt-2 w-full h-1 bg-cyan-400/40 rounded-full"></div>
+                            <div class="flex justify-center gap-0.5 mt-2" title="High intensity">
+                                <div class="w-1.5 h-1.5 rounded-full bg-cyan-400"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-cyan-400"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-cyan-400"></div>
+                            </div>
                         </div>
                     </div>
                     <!-- Saturday -->
@@ -422,7 +459,11 @@
                         <div class="bg-violet-500/20 dark:bg-violet-500/30 rounded-xl p-3 border border-violet-400/30 ring-2 ring-violet-400/50">
                             <div class="text-gray-900 dark:text-white text-xs font-semibold">Weekend Workshop</div>
                             <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">9:00 AM</div>
-                            <div class="mt-2 w-full h-1 bg-violet-400/60 rounded-full"></div>
+                            <div class="flex justify-center gap-0.5 mt-2" title="Medium intensity">
+                                <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-violet-400/20"></div>
+                            </div>
                             <div class="text-violet-600 dark:text-violet-300 text-[9px] mt-1 font-medium">Popular</div>
                         </div>
                     </div>
@@ -432,7 +473,11 @@
                         <div class="bg-green-500/20 dark:bg-green-500/30 rounded-xl p-3 border border-green-400/30">
                             <div class="text-gray-900 dark:text-white text-xs font-semibold">Gentle Sunday</div>
                             <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">10:00 AM</div>
-                            <div class="mt-2 w-full h-1 bg-green-400/40 rounded-full"></div>
+                            <div class="flex justify-center gap-0.5 mt-2" title="Low intensity">
+                                <div class="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-green-400/20"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-green-400/20"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -648,6 +693,21 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             text-shadow: 0 0 40px rgba(16, 185, 129, 0.3);
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(0.95); opacity: 0.5; }
+            50% { transform: scale(1.08); opacity: 0.9; }
+        }
+
+        .fitness-breathe {
+            animation: breathe 4s ease-in-out infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .fitness-breathe {
+                animation: none;
+            }
         }
     </style>
 </x-marketing-layout>
