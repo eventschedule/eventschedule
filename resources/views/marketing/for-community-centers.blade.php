@@ -274,7 +274,7 @@
                             <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold">SC</div>
                             <div class="flex-1">
                                 <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Scout Troop 42</div>
-                                <div class="text-gray-500 text-xs">Gym &bull; Oct 22</div>
+                                <div class="text-gray-500 dark:text-gray-400 text-xs">Gym &bull; Oct 22</div>
                             </div>
                         </div>
                     </div>
@@ -373,17 +373,17 @@
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-orange-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Meeting Room A</span>
-                            <span class="ml-auto text-gray-500 text-xs">8 events</span>
+                            <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">8 events</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-yellow-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Activity Room</span>
-                            <span class="ml-auto text-gray-500 text-xs">15 events</span>
+                            <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">15 events</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-green-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Outdoor Pavilion</span>
-                            <span class="ml-auto text-gray-500 text-xs">4 events</span>
+                            <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">4 events</span>
                         </div>
                     </div>
                 </div>

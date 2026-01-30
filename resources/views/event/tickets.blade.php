@@ -99,7 +99,7 @@
                 validateForm(e) {
                     if (!this.hasSelectedTickets) {
                         e.preventDefault();
-                        alert('Please select at least one ticket');
+                        alert('{{ __('messages.please_select_ticket') }}');
                         return;
                     }
                     if (this.turnstileEnabled && !this.turnstileToken) {

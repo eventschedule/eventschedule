@@ -591,8 +591,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-purple-600 to-violet-700 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/25">
                         1
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Add your gallery</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Add your gallery</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         Upload your logo, add your spaces (main gallery, project room, sculpture garden), and customize your branding.
                     </p>
                 </div>
@@ -601,8 +601,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-purple-600 to-violet-700 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/25">
                         2
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Post exhibitions & events</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Post exhibitions & events</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         Opening receptions, artist talks, workshops, art walks. Add tickets if needed. Set recurring events once.
                     </p>
                 </div>
@@ -611,8 +611,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-purple-600 to-violet-700 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/25">
                         3
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Reach your collectors</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Reach your collectors</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         Visitors follow your calendar. When you post a new exhibition, it goes straight to their inbox.
                     </p>
                 </div>

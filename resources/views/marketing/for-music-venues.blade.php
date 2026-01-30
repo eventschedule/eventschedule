@@ -73,14 +73,14 @@
                                     <div>
                                         <div class="flex items-center gap-2 mb-1">
                                             <span class="text-violet-300 text-xs font-medium">TONIGHT</span>
-                                            <span class="text-gray-500 text-xs">Doors 8pm</span>
+                                            <span class="text-gray-500 dark:text-gray-400 text-xs">Doors 8pm</span>
                                         </div>
                                         <div class="text-gray-900 dark:text-white font-semibold">Luna & The Wolves</div>
                                         <div class="text-gray-500 dark:text-gray-400 text-sm">Indie Folk / Sold Out</div>
                                     </div>
                                     <div class="text-right">
                                         <div class="text-emerald-400 text-sm font-semibold">247 / 247</div>
-                                        <div class="text-gray-500 text-xs">tickets sold</div>
+                                        <div class="text-gray-500 dark:text-gray-400 text-xs">tickets sold</div>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-4 text-xs">
@@ -307,7 +307,7 @@
                 </div>
                 <div class="relative">
                     <div class="bg-gray-50 dark:bg-[#12121a] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                        <div class="text-xs text-gray-500 uppercase tracking-wider mb-4">Booking Request</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Booking Request</div>
                         <div class="flex items-start gap-4 mb-4">
                             <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xl font-bold">MS</div>
                             <div class="flex-1">
@@ -321,7 +321,7 @@
                         </div>
 
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-3 mb-4">
-                            <div class="text-xs text-gray-500 mb-2">Latest track</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">Latest track</div>
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
                                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -485,15 +485,15 @@
                             </div>
                             <div class="space-y-2 text-sm mb-4">
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">Service fee</span>
+                                    <span class="text-gray-500 dark:text-gray-400">Service fee</span>
                                     <span class="text-red-300">+$8.50</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">Facility charge</span>
+                                    <span class="text-gray-500 dark:text-gray-400">Facility charge</span>
                                     <span class="text-red-300">+$3.00</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">Order processing</span>
+                                    <span class="text-gray-500 dark:text-gray-400">Order processing</span>
                                     <span class="text-red-300">+$2.95</span>
                                 </div>
                             </div>
@@ -556,7 +556,7 @@
                                     <span class="text-emerald-400">2,704 delivered</span>
                                     <span class="text-fuchsia-300">892 opened</span>
                                 </div>
-                                <span class="text-gray-500">33% open rate</span>
+                                <span class="text-gray-500 dark:text-gray-400">33% open rate</span>
                             </div>
                         </div>
                     </div>

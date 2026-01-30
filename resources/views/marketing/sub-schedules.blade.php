@@ -184,82 +184,82 @@
     </section>
 
     <!-- Use Cases Section -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Perfect for
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Sub-schedules work great for any venue or organizer with multiple event categories.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Concert Venues -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm text-center">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-100 mb-6">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-100 dark:bg-white/10 mb-6">
                         <svg class="w-8 h-8 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Concert Venues</h3>
-                    <p class="text-gray-600 text-sm">Organize by main stage, side stage, VIP area, and outdoor spaces.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Concert Venues</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">Organize by main stage, side stage, VIP area, and outdoor spaces.</p>
                 </div>
 
                 <!-- Conference Centers -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm text-center">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-100 mb-6">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-100 dark:bg-white/10 mb-6">
                         <svg class="w-8 h-8 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Conference Centers</h3>
-                    <p class="text-gray-600 text-sm">Separate tracks for different topics, workshops, and keynotes.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Conference Centers</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">Separate tracks for different topics, workshops, and keynotes.</p>
                 </div>
 
                 <!-- Theaters -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm text-center">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-100 mb-6">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-100 dark:bg-white/10 mb-6">
                         <svg class="w-8 h-8 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Theaters</h3>
-                    <p class="text-gray-600 text-sm">Main theater, black box, rehearsal space, and special screenings.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Theaters</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">Main theater, black box, rehearsal space, and special screenings.</p>
                 </div>
 
                 <!-- Event Series -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm text-center">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-100 mb-6">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-100 dark:bg-white/10 mb-6">
                         <svg class="w-8 h-8 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Event Series</h3>
-                    <p class="text-gray-600 text-sm">Group recurring events like weekly trivia, monthly open mics, or seasonal markets.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Event Series</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">Group recurring events like weekly trivia, monthly open mics, or seasonal markets.</p>
                 </div>
 
                 <!-- Multi-Purpose Venues -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm text-center">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-100 mb-6">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-100 dark:bg-white/10 mb-6">
                         <svg class="w-8 h-8 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Multi-Purpose Venues</h3>
-                    <p class="text-gray-600 text-sm">Bars, restaurants, and community centers with different event types.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Multi-Purpose Venues</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">Bars, restaurants, and community centers with different event types.</p>
                 </div>
 
                 <!-- Festival Stages -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm text-center">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-100 mb-6">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-100 dark:bg-white/10 mb-6">
                         <svg class="w-8 h-8 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Festival Stages</h3>
-                    <p class="text-gray-600 text-sm">Multiple stages, food areas, workshop tents, and activity zones.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Festival Stages</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">Multiple stages, food areas, workshop tents, and activity zones.</p>
                 </div>
             </div>
         </div>

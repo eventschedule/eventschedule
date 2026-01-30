@@ -73,7 +73,7 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-900 dark:text-white font-semibold mb-1">Nextcloud</h3>
-                    <p class="text-gray-500 text-sm">Selfhosted cloud</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Selfhosted cloud</p>
                 </div>
 
                 <!-- Radicale -->
@@ -84,7 +84,7 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-900 dark:text-white font-semibold mb-1">Radicale</h3>
-                    <p class="text-gray-500 text-sm">Lightweight server</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Lightweight server</p>
                 </div>
 
                 <!-- Fastmail -->
@@ -95,7 +95,7 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-900 dark:text-white font-semibold mb-1">Fastmail</h3>
-                    <p class="text-gray-500 text-sm">Privacy-focused email</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Privacy-focused email</p>
                 </div>
 
                 <!-- iCloud -->
@@ -106,11 +106,11 @@
                         </svg>
                     </div>
                     <h3 class="text-gray-900 dark:text-white font-semibold mb-1">iCloud</h3>
-                    <p class="text-gray-500 text-sm">Apple ecosystem</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Apple ecosystem</p>
                 </div>
             </div>
 
-            <p class="text-center text-gray-500 mt-8">
+            <p class="text-center text-gray-500 dark:text-gray-400 mt-8">
                 And any other CalDAV-compatible server
             </p>
         </div>
@@ -203,7 +203,7 @@
                             <p class="text-white/80 text-lg">Enter your server URL and we'll find all your calendars automatically. No manual configuration needed.</p>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                            <div class="text-xs text-gray-500 mb-3 font-mono">PROPFIND Response</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-3 font-mono">PROPFIND Response</div>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-2 p-2 rounded-lg bg-violet-500/20 border border-violet-400/30">
                                     <div class="w-3 h-3 rounded-full bg-violet-400"></div>
@@ -384,7 +384,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                     </svg>
                     <h3 class="text-gray-900 dark:text-white font-semibold mb-1">SUMMARY</h3>
-                    <p class="text-gray-500 text-sm">Event name</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Event name</p>
                 </div>
 
                 <div class="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 text-center">
@@ -392,7 +392,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                     </svg>
                     <h3 class="text-gray-900 dark:text-white font-semibold mb-1">DESCRIPTION</h3>
-                    <p class="text-gray-500 text-sm">Full details</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Full details</p>
                 </div>
 
                 <div class="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 text-center">
@@ -400,7 +400,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <h3 class="text-gray-900 dark:text-white font-semibold mb-1">DTSTART / DTEND</h3>
-                    <p class="text-gray-500 text-sm">Date and time</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Date and time</p>
                 </div>
 
                 <div class="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 text-center">
@@ -409,7 +409,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                     <h3 class="text-gray-900 dark:text-white font-semibold mb-1">LOCATION</h3>
-                    <p class="text-gray-500 text-sm">Venue address</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Venue address</p>
                 </div>
 
                 <div class="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 text-center">
@@ -417,7 +417,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                     </svg>
                     <h3 class="text-gray-900 dark:text-white font-semibold mb-1">URL</h3>
-                    <p class="text-gray-500 text-sm">Event link</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Event link</p>
                 </div>
 
                 <div class="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 text-center">
@@ -425,7 +425,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
                     </svg>
                     <h3 class="text-gray-900 dark:text-white font-semibold mb-1">UID</h3>
-                    <p class="text-gray-500 text-sm">Unique identifier</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Unique identifier</p>
                 </div>
             </div>
         </div>

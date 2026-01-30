@@ -52,19 +52,19 @@
             <!-- The journey badges -->
             <div class="mt-14 flex flex-wrap justify-center items-center gap-3">
                 <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 text-xs font-medium border border-red-300 dark:border-red-800/50">Open Mic</span>
-                <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
                 <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 text-xs font-medium border border-amber-300 dark:border-amber-800/50">Bringer</span>
-                <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
                 <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300 text-xs font-medium border border-orange-300 dark:border-orange-800/50">Guest Spot</span>
-                <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
                 <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 text-xs font-medium border border-rose-300 dark:border-rose-800/50">Feature</span>
-                <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
                 <span class="inline-flex items-center px-4 py-1.5 rounded-lg bg-gradient-to-r from-amber-600/60 to-rose-600/60 text-white text-xs font-bold border border-amber-500/50 shadow-lg shadow-amber-500/20">Headliner</span>
@@ -215,7 +215,7 @@
                                 </div>
                                 <div>
                                     <div class="text-gray-900 dark:text-white text-sm font-medium">Headlining Saturday!</div>
-                                    <div class="text-gray-500 text-xs">Sent to 1,247 fans</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-xs">Sent to 1,247 fans</div>
                                 </div>
                             </div>
                             <div class="flex gap-4 text-xs">

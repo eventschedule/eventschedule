@@ -251,13 +251,13 @@
     </section>
 
     <!-- How It Works Section -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     How it works
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Get your team collaborating in three simple steps.
                 </p>
             </div>
@@ -268,8 +268,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-cyan-500 to-teal-500 text-white rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-lg shadow-cyan-500/25 text-2xl font-bold">
                         1
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Invite your team</h3>
-                    <p class="text-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Invite your team</h3>
+                    <p class="text-gray-600 dark:text-gray-300">
                         Go to your schedule settings and add team members by their email address. They'll receive an invitation immediately.
                     </p>
                 </div>
@@ -279,8 +279,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-cyan-500 to-teal-500 text-white rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-lg shadow-cyan-500/25 text-2xl font-bold">
                         2
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Set permissions</h3>
-                    <p class="text-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Set permissions</h3>
+                    <p class="text-gray-600 dark:text-gray-300">
                         Choose whether each member is an Admin who can manage events, or a Follower with view-only access.
                     </p>
                 </div>
@@ -290,8 +290,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-cyan-500 to-teal-500 text-white rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-lg shadow-cyan-500/25 text-2xl font-bold">
                         3
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Collaborate</h3>
-                    <p class="text-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Collaborate</h3>
+                    <p class="text-gray-600 dark:text-gray-300">
                         Your team can now create events, update schedules, and coordinate together seamlessly.
                     </p>
                 </div>
@@ -300,92 +300,92 @@
     </section>
 
     <!-- Use Cases Section -->
-    <section class="bg-white py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Perfect for teams of all kinds
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Team scheduling adapts to how your organization works.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Event Venues -->
-                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                <div class="bg-gray-50 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
                     <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 text-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/25">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Event Venues</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Event Venues</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         Let multiple staff members manage bookings and coordinate room schedules across your venue.
                     </p>
                 </div>
 
                 <!-- Music Bands -->
-                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                <div class="bg-gray-50 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
                     <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 text-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/25">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Bands & Artists</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Bands & Artists</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         All band members can add gigs and mark unavailable dates, making tour planning easier.
                     </p>
                 </div>
 
                 <!-- Community Organizations -->
-                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                <div class="bg-gray-50 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
                     <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 text-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/25">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Community Groups</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Community Groups</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         Empower volunteers and organizers to contribute events while maintaining oversight.
                     </p>
                 </div>
 
                 <!-- Sports Teams -->
-                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                <div class="bg-gray-50 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
                     <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 text-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/25">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Sports Teams</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Sports Teams</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         Coaches and team managers can coordinate practice schedules and game times together.
                     </p>
                 </div>
 
                 <!-- Event Agencies -->
-                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                <div class="bg-gray-50 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
                     <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 text-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/25">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Event Agencies</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Event Agencies</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         Multiple planners can manage client events and share workload efficiently.
                     </p>
                 </div>
 
                 <!-- Religious Organizations -->
-                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                <div class="bg-gray-50 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
                     <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 text-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/25">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Religious Organizations</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Religious Organizations</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         Staff and volunteers can coordinate services, meetings, and community events.
                     </p>
                 </div>

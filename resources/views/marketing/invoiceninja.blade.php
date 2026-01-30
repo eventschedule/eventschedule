@@ -354,10 +354,10 @@
     <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     How it works
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Automatic invoicing in four simple steps.
                 </p>
             </div>
@@ -367,8 +367,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/25">
                         1
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Connect account</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Connect account</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         Add your Invoice Ninja API URL and token in settings. Works with hosted or selfhosted.
                     </p>
                 </div>
@@ -377,8 +377,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/25">
                         2
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Create tickets</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Create tickets</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         Add ticket types to your events. Invoice Ninja handles the billing side.
                     </p>
                 </div>
@@ -387,8 +387,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/25">
                         3
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Customer purchases</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Customer purchases</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         When someone buys tickets, an invoice is created automatically in Invoice Ninja.
                     </p>
                 </div>
@@ -397,8 +397,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/25">
                         4
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Invoice sent</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Invoice sent</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
                         Customer receives the invoice with QR ticket. Payment confirmation syncs back automatically.
                     </p>
                 </div>

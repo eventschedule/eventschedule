@@ -80,18 +80,18 @@
                     <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                     </svg>
-                    <span class="text-sm text-gray-300">News, tips & insights</span>
+                    <span class="text-sm text-gray-300">{{ __('messages.news_tips_insights') }}</span>
                 </div>
 
                 <!-- Main headline -->
                 <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
                     <span class="text-white">The Event Schedule</span><br>
-                    <span class="text-gradient">Blog</span>
+                    <span class="text-gradient">{{ __('messages.blog') }}</span>
                 </h1>
 
                 <!-- Subheadline -->
                 <p class="text-xl sm:text-2xl text-gray-400 max-w-2xl mx-auto mb-10">
-                    Your guide to event scheduling, ticketing, and building thriving communities.
+                    {{ __('messages.blog_hero_subtitle') }}
                 </p>
 
                 <!-- Stats or social proof -->
@@ -106,7 +106,7 @@
                         <svg class="w-5 h-5 text-fuchsia-500" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
                         </svg>
-                        <span class="text-gray-400">{{ $allTags->count() }} topics</span>
+                        <span class="text-gray-400">{{ $allTags->count() }} {{ __('messages.topics') }}</span>
                     </div>
                 </div>
             </div>
@@ -123,7 +123,7 @@
                 <div class="mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <span class="text-sm text-gray-600 dark:text-gray-400">Filtered by:</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.filtered_by') }}</span>
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-violet-100 dark:bg-violet-900/50 text-violet-800 dark:text-violet-300">
                                 #{{ request('tag') }}
                             </span>
@@ -133,7 +133,7 @@
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
-                            Clear filter
+                            {{ __('messages.clear_filter') }}
                         </a>
                     </div>
                 </div>
@@ -187,8 +187,8 @@
                         </div>
                     @else
                         <div class="text-center py-12">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No posts found</h3>
-                            <p class="text-gray-600 dark:text-gray-400">Check back soon for new content!</p>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ __('messages.no_posts_found') }}</h3>
+                            <p class="text-gray-600 dark:text-gray-400">{{ __('messages.check_back_soon') }}</p>
                         </div>
                     @endif
                 </div>
@@ -196,7 +196,7 @@
                 <div class="space-y-6">
                     @if($allTags->count() > 0)
                         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Tags</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('messages.tags') }}</h3>
                             <div class="flex flex-wrap gap-2" id="tags-container">
                                 @foreach($allTags->take(20) as $tag)
                                     <a href="{{ route('blog.index', ['tag' => $tag]) }}"
@@ -215,11 +215,11 @@
                                     </div>
                                     <button id="show-more-tags"
                                             class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors mt-2">
-                                        Show more tags
+                                        {{ __('messages.show_more_tags') }}
                                     </button>
                                     <button id="show-less-tags"
                                             class="hidden inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors mt-2">
-                                        Show less
+                                        {{ __('messages.show_less') }}
                                     </button>
                                 @endif
                             </div>
@@ -227,10 +227,9 @@
                     @endif
                     <!-- About -->
                     <div class="bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/50 dark:to-indigo-900/50 border border-violet-200 dark:border-violet-800 rounded-2xl shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-violet-900 dark:text-violet-100 mb-2">About Our Blog</h3>
+                        <h3 class="text-lg font-semibold text-violet-900 dark:text-violet-100 mb-2">{{ __('messages.about_our_blog') }}</h3>
                         <p class="text-sm text-violet-800 dark:text-violet-200">
-                            Stay updated with the latest tips, news, and insights about event scheduling and ticketing.
-                            Our team shares valuable information to help you make the most of your events.
+                            {{ __('messages.about_our_blog_description') }}
                         </p>
                     </div>
                 </div>

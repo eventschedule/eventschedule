@@ -128,7 +128,7 @@
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                                 </svg>
-                                Blog
+                                {{ __('messages.blog') }}
                             </a>
                         </li>
                         <li>
@@ -136,7 +136,7 @@
                                 <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                             </svg>
                         </li>
-                        <li class="text-gray-500 truncate max-w-xs">Article</li>
+                        <li class="text-gray-500 truncate max-w-xs">{{ __('messages.article') }}</li>
                     </ol>
                 </nav>
 
@@ -234,7 +234,7 @@
                                 </div>
                                 <div class="flex-shrink-0">
                                     <span class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold px-5 py-3 rounded-xl transition-colors">
-                                        Learn More
+                                        {{ __('messages.learn_more') }}
                                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                         </svg>
@@ -288,7 +288,7 @@
                 <!-- Related Posts -->
                 @if($relatedPosts->count() > 0)
                     <div class="mt-16 pt-8 border-t border-gray-200 dark:border-gray-700">
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Related Posts</h2>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">{{ __('messages.related_posts') }}</h2>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             @foreach($relatedPosts as $relatedPost)
                                 <article class="group">
@@ -325,7 +325,7 @@
                         <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
                         </svg>
-                        Back to Blog
+                        {{ __('messages.back_to_blog') }}
                     </a>
                 </div>
             </div>

@@ -276,7 +276,7 @@
                                         </svg>
                                     </div>
                                     <div class="text-emerald-700 dark:text-emerald-300 text-sm">Event created</div>
-                                    <div class="text-gray-500 text-xs">synced</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-xs">synced</div>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center animate-sync" style="animation-delay: 0.3s;">
@@ -285,7 +285,7 @@
                                         </svg>
                                     </div>
                                     <div class="text-emerald-700 dark:text-emerald-300 text-sm">Event updated</div>
-                                    <div class="text-gray-500 text-xs">synced</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-xs">synced</div>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center animate-sync" style="animation-delay: 0.6s;">
@@ -294,7 +294,7 @@
                                         </svg>
                                     </div>
                                     <div class="text-emerald-700 dark:text-emerald-300 text-sm">Event deleted</div>
-                                    <div class="text-gray-500 text-xs">synced</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-xs">synced</div>
                                 </div>
                             </div>
                         </div>
@@ -418,7 +418,7 @@
                         <tr class="border-b border-gray-100 dark:border-white/5">
                             <td class="py-4 px-4 text-gray-600 dark:text-gray-300">Selfhosted friendly</td>
                             <td class="py-4 px-4 text-center">
-                                <span class="text-gray-500">Requires Google API setup</span>
+                                <span class="text-gray-500 dark:text-gray-400">Requires Google API setup</span>
                             </td>
                             <td class="py-4 px-4 text-center">
                                 <svg class="w-5 h-5 text-teal-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -477,7 +477,7 @@
                         <!-- Mini mockup: Bar chart visualization -->
                         <div class="flex-shrink-0">
                             <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
-                                <div class="text-[10px] text-gray-500 mb-3">Views this week</div>
+                                <div class="text-[10px] text-gray-500 dark:text-gray-400 mb-3">Views this week</div>
                                 <div class="flex items-end justify-between h-20 gap-1.5">
                                     <div class="w-4 bg-emerald-500/40 rounded-t" style="height: 40%"></div>
                                     <div class="w-4 bg-emerald-500/50 rounded-t" style="height: 55%"></div>
@@ -487,7 +487,7 @@
                                     <div class="w-4 bg-emerald-500/90 rounded-t" style="height: 85%"></div>
                                     <div class="w-4 bg-emerald-500 rounded-t" style="height: 100%"></div>
                                 </div>
-                                <div class="flex justify-between mt-2 text-[9px] text-gray-600">
+                                <div class="flex justify-between mt-2 text-[9px] text-gray-600 dark:text-gray-400">
                                     <span>M</span>
                                     <span>T</span>
                                     <span>W</span>

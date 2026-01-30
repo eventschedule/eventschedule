@@ -70,7 +70,7 @@
                                     <div class="text-gray-500 dark:text-gray-400 text-xs">Saturday, Jan 25</div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-gray-500 text-[10px] uppercase tracking-wide">Doors</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-[10px] uppercase tracking-wide">Doors</div>
                                     <div class="text-gray-900 dark:text-white text-sm font-medium">10pm</div>
                                 </div>
                             </div>
@@ -93,14 +93,14 @@
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-[10px] font-semibold">MX</div>
                                     <div class="flex-1">
                                         <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Max Luna</div>
-                                        <div class="text-gray-500 text-[10px]">12am - 2am</div>
+                                        <div class="text-gray-500 dark:text-gray-400 text-[10px]">12am - 2am</div>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-[10px] font-semibold">KR</div>
                                     <div class="flex-1">
                                         <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Kira B2B Echo</div>
-                                        <div class="text-gray-500 text-[10px]">10pm - 12am</div>
+                                        <div class="text-gray-500 dark:text-gray-400 text-[10px]">10pm - 12am</div>
                                     </div>
                                 </div>
                             </div>
@@ -111,7 +111,7 @@
                                     <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
                                     <span class="text-emerald-600 dark:text-emerald-400 text-xs font-medium">Guest List Open</span>
                                 </div>
-                                <span class="text-gray-500 text-xs">Free before 11pm</span>
+                                <span class="text-gray-500 dark:text-gray-400 text-xs">Free before 11pm</span>
                             </div>
                         </div>
                     </div>
@@ -219,15 +219,15 @@
                     <!-- Mini week view with colors -->
                     <div class="grid grid-cols-7 gap-1">
                         <div class="text-center">
-                            <div class="text-gray-500 text-[10px] mb-1">M</div>
+                            <div class="text-gray-500 dark:text-gray-400 text-[10px] mb-1">M</div>
                             <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-white/5 mx-auto"></div>
                         </div>
                         <div class="text-center">
-                            <div class="text-gray-500 text-[10px] mb-1">T</div>
+                            <div class="text-gray-500 dark:text-gray-400 text-[10px] mb-1">T</div>
                             <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-white/5 mx-auto"></div>
                         </div>
                         <div class="text-center">
-                            <div class="text-gray-500 text-[10px] mb-1">W</div>
+                            <div class="text-gray-500 dark:text-gray-400 text-[10px] mb-1">W</div>
                             <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-white/5 mx-auto"></div>
                         </div>
                         <div class="text-center">
@@ -247,7 +247,7 @@
                             <div class="w-6 h-6 rounded-full bg-violet-500 mx-auto" title="Techno Sundays"></div>
                         </div>
                     </div>
-                    <div class="text-center mt-3 text-gray-500 text-xs">Color-coded. Repeating. Memorable.</div>
+                    <div class="text-center mt-3 text-gray-500 dark:text-gray-400 text-xs">Color-coded. Repeating. Memorable.</div>
                 </div>
 
                 <!-- VIP Tables & Bottle Service - HERO POSITION (spans 2 cols) -->
@@ -269,7 +269,7 @@
                             </div>
                         </div>
                         <div class="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-200 dark:border-white/10">
-                            <div class="text-xs text-gray-500 mb-3">VIP Requests - Saturday</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-3">VIP Requests - Saturday</div>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-3 p-3 rounded-lg bg-amber-500/20 border border-amber-400/30">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white text-[10px] font-semibold">MR</div>
@@ -283,7 +283,7 @@
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white text-[10px] font-semibold">JT</div>
                                     <div class="flex-1">
                                         <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">James T.</div>
-                                        <div class="text-gray-500 text-xs">Birthday party &bull; 12 guests</div>
+                                        <div class="text-gray-500 dark:text-gray-400 text-xs">Birthday party &bull; 12 guests</div>
                                     </div>
                                     <span class="inline-flex items-center px-2 py-0.5 rounded bg-pink-500/30 text-pink-600 dark:text-pink-300 text-[10px] font-medium">BDAY</span>
                                 </div>

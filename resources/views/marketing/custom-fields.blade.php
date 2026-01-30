@@ -210,7 +210,7 @@
                                         <div class="w-5 h-5 rounded border border-gray-300 dark:border-white/30"></div>
                                         <span class="text-gray-500 dark:text-gray-400">How did you hear about us?</span>
                                     </div>
-                                    <span class="text-gray-500 text-xs">Optional</span>
+                                    <span class="text-gray-500 dark:text-gray-400 text-xs">Optional</span>
                                 </div>
                             </div>
                         </div>

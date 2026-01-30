@@ -341,7 +341,7 @@
                             </div>
                         </div>
                         <div class="bg-white dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10">
-                            <div class="text-xs text-gray-500 mb-3">Private Dining Requests</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-3">Private Dining Requests</div>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-400/30">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white text-xs font-semibold">EB</div>
@@ -362,7 +362,7 @@
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold">MK</div>
                                     <div class="flex-1">
                                         <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Michael K. - 50th Birthday</div>
-                                        <div class="text-gray-500 text-xs">Jan 8 &bull; Party of 16</div>
+                                        <div class="text-gray-500 dark:text-gray-400 text-xs">Jan 8 &bull; Party of 16</div>
                                     </div>
                                 </div>
                             </div>
@@ -390,12 +390,12 @@
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-teal-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Private Room</span>
-                            <span class="ml-auto text-gray-500 text-xs">4 events</span>
+                            <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">4 events</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Patio</span>
-                            <span class="ml-auto text-gray-500 text-xs">3 events</span>
+                            <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">3 events</span>
                         </div>
                     </div>
                 </div>
@@ -485,7 +485,7 @@
                             </svg>
                         </div>
                         <h4 class="text-gray-900 dark:text-white font-semibold mb-2">Discovery</h4>
-                        <p class="text-gray-500 text-sm">Guest finds you online or walks in</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Guest finds you online or walks in</p>
                     </div>
 
                     <!-- Step 2: Follow -->
@@ -496,7 +496,7 @@
                             </svg>
                         </div>
                         <h4 class="text-gray-900 dark:text-white font-semibold mb-2">Follow</h4>
-                        <p class="text-gray-500 text-sm">Signs up for your updates via QR or calendar</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Signs up for your updates via QR or calendar</p>
                     </div>
 
                     <!-- Step 3: Return -->
@@ -507,7 +507,7 @@
                             </svg>
                         </div>
                         <h4 class="text-gray-900 dark:text-white font-semibold mb-2">Return</h4>
-                        <p class="text-gray-500 text-sm">Gets email about new menu, comes back</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Gets email about new menu, comes back</p>
                     </div>
 
                     <!-- Step 4: Regular -->
@@ -518,7 +518,7 @@
                             </svg>
                         </div>
                         <h4 class="text-gray-900 dark:text-white font-semibold mb-2">Regular</h4>
-                        <p class="text-gray-500 text-sm">Books chef's table, buys wine dinner tickets</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Books chef's table, buys wine dinner tickets</p>
                     </div>
 
                     <!-- Step 5: Advocate -->
@@ -529,7 +529,7 @@
                             </svg>
                         </div>
                         <h4 class="text-gray-900 dark:text-white font-semibold mb-2">Advocate</h4>
-                        <p class="text-gray-500 text-sm">Shares your events with friends</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Shares your events with friends</p>
                     </div>
                 </div>
             </div>

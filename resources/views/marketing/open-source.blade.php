@@ -100,7 +100,7 @@
                                         <div class="w-3 h-3 rounded-full bg-green-500/70"></div>
                                     </div>
                                     <div class="code-block text-xs space-y-1">
-                                        <div class="text-gray-500">// Event Schedule</div>
+                                        <div class="text-gray-500 dark:text-gray-400">// Event Schedule</div>
                                         <div><span class="text-purple-400">git</span> <span class="text-gray-600 dark:text-gray-300">clone</span></div>
                                         <div class="text-cyan-400 text-[10px] break-all">github.com/eventschedule</div>
                                         <div class="mt-2"><span class="text-purple-400">composer</span> <span class="text-gray-600 dark:text-gray-300">install</span></div>
@@ -161,9 +161,9 @@
                     <p class="text-white/80 mb-6">Programmatically manage schedules and events. Create custom workflows and automations.</p>
 
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 code-block text-xs">
-                        <div class="text-gray-500 mb-2"># Create an event</div>
+                        <div class="text-gray-500 dark:text-gray-400 mb-2"># Create an event</div>
                         <div class="text-violet-400">POST <span class="text-gray-600 dark:text-gray-300">/api/events/myschedule</span></div>
-                        <div class="text-gray-500 mt-2">X-API-Key: your_api_key</div>
+                        <div class="text-gray-500 dark:text-gray-400 mt-2">X-API-Key: your_api_key</div>
                     </div>
                 </div>
 
@@ -209,46 +209,46 @@
     <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Developer-friendly API
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Built for reliability and ease of use.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- API Key Auth -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm text-center">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-100 mb-6">
-                        <svg class="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-100 dark:bg-white/10 mb-6">
+                        <svg class="w-8 h-8 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">API Key Authentication</h3>
-                    <p class="text-gray-600 text-sm">Simple header-based authentication. Generate API keys from your account settings.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">API Key Authentication</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">Simple header-based authentication. Generate API keys from your account settings.</p>
                 </div>
 
                 <!-- Rate Limiting -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm text-center">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-100 mb-6">
-                        <svg class="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-100 dark:bg-white/10 mb-6">
+                        <svg class="w-8 h-8 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Rate Limiting</h3>
-                    <p class="text-gray-600 text-sm">60 requests per minute per IP. Built-in brute force protection keeps your data safe.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Rate Limiting</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">60 requests per minute per IP. Built-in brute force protection keeps your data safe.</p>
                 </div>
 
                 <!-- JSON Responses -->
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm text-center">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-100 mb-6">
-                        <svg class="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-100 dark:bg-white/10 mb-6">
+                        <svg class="w-8 h-8 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3zm5 1h6m-6 4h6m-6 4h4" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">JSON Responses</h3>
-                    <p class="text-gray-600 text-sm">Clean, paginated JSON responses with metadata. Easy to parse in any language.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">JSON Responses</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">Clean, paginated JSON responses with metadata. Easy to parse in any language.</p>
                 </div>
             </div>
         </div>
@@ -313,34 +313,6 @@
             </div>
         </div>
     </section>
-
-    <!-- Pricing Note -->
-    <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-violet-100 mb-8">
-                    <svg class="w-10 h-10 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                    </svg>
-                </div>
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                    API access included with Pro
-                </h2>
-                <p class="text-xl text-gray-600 mb-6 max-w-2xl mx-auto">
-                    API access requires a Pro subscription. The first year is free, then $5/month. Self-hosted installations have full API access.
-                </p>
-                <div class="flex flex-wrap justify-center gap-4">
-                    <a href="{{ route('sign_up') }}" class="inline-flex items-center px-6 py-3 text-lg font-semibold text-white bg-gradient-to-r from-violet-600 to-indigo-600 rounded-xl hover:scale-105 transition-all shadow-lg shadow-violet-500/25">
-                        Start Free Trial
-                    </a>
-                    <a href="{{ marketing_url('/selfhost') }}" class="inline-flex items-center px-6 py-3 text-lg font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
-                        Learn about selfhosting
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Next Feature -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
         <!-- Animated background blobs matching Ticketing page's colors -->

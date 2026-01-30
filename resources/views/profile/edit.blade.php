@@ -24,7 +24,7 @@
                 class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 dark:bg-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-600 focus:ring-2 focus:ring-inset focus:ring-[#4E81FA]">
                 <option value="section-profile">{{ __('messages.profile_information') }}</option>
                 <option value="section-payment-methods">{{ __('messages.payment_methods') }}</option>
-                <option value="section-api">{{ __('API Settings') }}</option>
+                <option value="section-api">{{ __('messages.api_settings') }}</option>
                 <option value="section-google-calendar">{{ __('messages.google_settings') }}</option>
                 @if (! config('app.hosted') && ! config('app.testing'))
                 <option value="section-app">{{ __('messages.app_update') }}</option>
@@ -57,7 +57,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
                             </svg>
-                            {{ __('API Settings') }}
+                            {{ __('messages.api_settings') }}
                         </a>
                         <a href="#section-google-calendar" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-google-calendar">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">

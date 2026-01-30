@@ -24,7 +24,7 @@
                                 <div class="flex items-center gap-x-4 text-sm text-gray-500 dark:text-gray-400 mb-6">
                                     <span>By ${author}</span>
                                     <span>•</span>
-                                    <span class="text-yellow-600 dark:text-yellow-500 font-medium">Draft Preview</span>
+                                    <span class="text-yellow-600 dark:text-yellow-500 font-medium">{{ __('messages.draft_preview') }}</span>
                                 </div>
                                 ${excerpt ? `<p class="text-xl text-gray-600 dark:text-gray-300 leading-relaxed mb-6">${excerpt}</p>` : ''}
                                 ${tagsHtml ? `<div class="flex flex-wrap gap-2 mb-6">${tagsHtml}</div>` : ''}
@@ -34,7 +34,7 @@
                             </div>
                             <div class="mt-6 flex justify-end">
                                 <button onclick="closePreview()" class="bg-gray-600 dark:bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
-                                    Close Preview
+                                    {{ __('messages.close_preview') }}
                                 </button>
                             </div>
                         </div>
@@ -63,9 +63,9 @@
     <div class="flow-root">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-100">Blog Posts</h1>
+                <h1 class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.blog_posts') }}</h1>
                 <p class="mt-2 text-sm text-gray-700 dark:text-gray-400">
-                    Manage your blog posts. Only published posts are visible to the public.
+                    {{ __('messages.blog_posts_description') }}
                 </p>
             </div>
             @if (config('services.google.gemini_key'))
@@ -74,7 +74,7 @@
                     <svg class="-ml-0.5 mr-2 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
-                    Create Post
+                    {{ __('messages.create_post') }}
                 </x-brand-link>
             </div>
             @endif
@@ -93,12 +93,12 @@
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50 dark:bg-gray-800">
                                     <tr>
-                                        <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 sm:pl-6 w-1/3">Title</th>
-                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Status</th>
-                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Published</th>
-                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Views</th>
+                                        <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 sm:pl-6 w-1/3">{{ __('messages.title') }}</th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.status') }}</th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.published') }}</th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.views') }}</th>
                                         <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                                            <span class="sr-only">Actions</span>
+                                            <span class="sr-only">{{ __('messages.actions') }}</span>
                                         </th>
                                     </tr>
                                 </thead>
@@ -114,15 +114,15 @@
                                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                                                 @if($post->is_published && $post->published_at && $post->published_at <= now())
                                                     <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/30 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30">
-                                                        Published
+                                                        {{ __('messages.published') }}
                                                     </span>
                                                 @elseif($post->is_published && $post->published_at && $post->published_at > now())
                                                     <span class="inline-flex items-center rounded-md bg-yellow-50 dark:bg-yellow-900/30 px-2 py-1 text-xs font-medium text-yellow-700 dark:text-yellow-400 ring-1 ring-inset ring-yellow-600/20 dark:ring-yellow-500/30">
-                                                        Scheduled
+                                                        {{ __('messages.scheduled') }}
                                                     </span>
                                                 @else
                                                     <span class="inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20 dark:ring-gray-500/30">
-                                                        Draft
+                                                        {{ __('messages.draft') }}
                                                     </span>
                                                 @endif
                                             </td>
@@ -142,11 +142,11 @@
                                                         <a href="{{ route('blog.show', $post->slug) }}"
                                                            target="_blank"
                                                            class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-                                                           title="View published post">
-                                                            View
+                                                           title="{{ __('messages.view') }}">
+                                                            {{ __('messages.view') }}
                                                         </a>
                                                     @elseif($post->is_published && $post->published_at && $post->published_at > now())
-                                                        <span class="text-gray-400 dark:text-gray-500" title="Scheduled for {{ $post->formatted_published_at }}">
+                                                        <span class="text-gray-400 dark:text-gray-500" title="{{ __('messages.scheduled') }}">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                             </svg>
@@ -155,21 +155,21 @@
                                                         <a href="{{ route('blog.show', [$post->slug]) }}?preview=1"
                                                            target="_blank"
                                                            class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
-                                                           title="Preview draft post">
-                                                            Preview
+                                                           title="{{ __('messages.preview') }}">
+                                                            {{ __('messages.preview') }}
                                                         </a>
                                                     @endif
                                                     <a href="{{ route('blog.edit', $post) }}"
                                                        class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors">
-                                                        Edit
+                                                        {{ __('messages.edit') }}
                                                     </a>
                                                     <form method="POST" action="{{ route('blog.destroy', $post) }}"
-                                                          onsubmit="return confirm('Are you sure you want to delete this post?')"
+                                                          onsubmit="return confirm('{{ __('messages.confirm_delete_post') }}')"
                                                           class="inline">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors">
-                                                            Delete
+                                                            {{ __('messages.delete') }}
                                                         </button>
                                                     </form>
                                                 </div>
@@ -182,11 +182,11 @@
                                                     <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                     </svg>
-                                                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No posts</h3>
-                                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating a new blog post.</p>
+                                                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.no_posts') }}</h3>
+                                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_posts_description') }}</p>
                                                     <div class="mt-6">
                                                         <x-brand-link href="{{ route('blog.create') }}" class="text-sm px-3 py-2">
-                                                            Create Post
+                                                            {{ __('messages.create_post') }}
                                                         </x-brand-link>
                                                     </div>
                                                 </div>

@@ -70,7 +70,7 @@
                             <div class="relative animate-float">
                                 <!-- Input side -->
                                 <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-white/10 p-4 mb-3 max-w-xs">
-                                    <div class="text-xs text-gray-500 mb-2">Paste URL or text</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">Paste URL or text</div>
                                     <div class="text-sm text-gray-600 dark:text-gray-300 font-mono leading-relaxed">
                                         eventbrite.com/e/jazz...<br>
                                         <span class="text-amber-500 dark:text-amber-400">Parsing...</span>
@@ -127,7 +127,7 @@
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="flex-1">
                                 <div class="text-gray-600 dark:text-gray-300 text-sm">Live Music @ Stubbs</div>
-                                <div class="text-gray-500 text-xs">Red River District</div>
+                                <div class="text-gray-500 dark:text-gray-400 text-xs">Red River District</div>
                             </div>
                             <button class="px-2 py-1 rounded bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Add</button>
                         </div>
@@ -163,7 +163,7 @@
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5">
                             <div class="flex-1">
                                 <div class="text-gray-300 text-sm font-medium">Comedy Show @ The Roxy</div>
-                                <div class="text-gray-500 text-xs">Pending review</div>
+                                <div class="text-gray-500 dark:text-gray-400 text-xs">Pending review</div>
                             </div>
                         </div>
                     </div>
@@ -183,7 +183,7 @@
                             <p class="text-gray-600 dark:text-gray-400 text-lg">Pull events from venues, performers, and other curators. Display everything in one beautiful, searchable calendar.</p>
                         </div>
                         <div class="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-200 dark:border-white/10">
-                            <div class="text-xs text-gray-500 mb-3">Sources</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-3">Sources</div>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-3 p-2 rounded-lg bg-rose-500/20 border border-rose-500/30">
                                     <div class="w-8 h-8 rounded-lg bg-rose-500/30 flex items-center justify-center">
@@ -201,7 +201,7 @@
                                     <div class="flex-1">
                                         <div class="text-gray-600 dark:text-gray-300 text-sm">Sarah Johnson Trio</div>
                                     </div>
-                                    <span class="text-gray-500 text-xs">8 events</span>
+                                    <span class="text-gray-500 dark:text-gray-400 text-xs">8 events</span>
                                 </div>
                                 <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                                     <div class="w-8 h-8 rounded-lg bg-gray-200 dark:bg-white/10 flex items-center justify-center">
@@ -210,7 +210,7 @@
                                     <div class="flex-1">
                                         <div class="text-gray-600 dark:text-gray-300 text-sm">Austin Music Blog</div>
                                     </div>
-                                    <span class="text-gray-500 text-xs">24 events</span>
+                                    <span class="text-gray-500 dark:text-gray-400 text-xs">24 events</span>
                                 </div>
                             </div>
                         </div>

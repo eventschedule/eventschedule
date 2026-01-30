@@ -122,7 +122,7 @@
                             </div>
                             <div>
                                 <div class="text-gray-700 dark:text-gray-300 text-sm font-medium">The Roxy</div>
-                                <div class="text-gray-500 text-xs">Linked</div>
+                                <div class="text-gray-500 dark:text-gray-400 text-xs">Linked</div>
                             </div>
                         </div>
                     </div>
@@ -211,13 +211,13 @@
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Block off dates when you're unavailable. Venues can see when you're free before reaching out.</p>
 
                     <div class="grid grid-cols-7 gap-1 text-center text-xs">
-                        <div class="text-gray-500">M</div>
-                        <div class="text-gray-500">T</div>
-                        <div class="text-gray-500">W</div>
-                        <div class="text-gray-500">T</div>
-                        <div class="text-gray-500">F</div>
-                        <div class="text-gray-500">S</div>
-                        <div class="text-gray-500">S</div>
+                        <div class="text-gray-500 dark:text-gray-400">M</div>
+                        <div class="text-gray-500 dark:text-gray-400">T</div>
+                        <div class="text-gray-500 dark:text-gray-400">W</div>
+                        <div class="text-gray-500 dark:text-gray-400">T</div>
+                        <div class="text-gray-500 dark:text-gray-400">F</div>
+                        <div class="text-gray-500 dark:text-gray-400">S</div>
+                        <div class="text-gray-500 dark:text-gray-400">S</div>
                         <div class="p-1 rounded bg-emerald-500/30 text-emerald-300">1</div>
                         <div class="p-1 rounded bg-emerald-500/30 text-emerald-300">2</div>
                         <div class="p-1 rounded bg-red-500/30 text-red-300">3</div>

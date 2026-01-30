@@ -12,7 +12,7 @@
             <div class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl dark:shadow-gray-900/50 transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:p-6">
                 <div class="absolute right-0 top-0 pr-4 pt-4">
                     <button type="button" onclick="closeEmbedModal()" class="rounded-md bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-                        <span class="sr-only">Close</span>
+                        <span class="sr-only">{{ __('messages.close_modal') }}</span>
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>

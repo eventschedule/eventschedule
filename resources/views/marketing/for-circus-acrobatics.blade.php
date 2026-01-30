@@ -605,7 +605,7 @@
                 <!-- Step 1: Add your acts -->
                 <div class="relative group">
                     <div class="absolute -inset-1 bg-gradient-to-r from-crimson to-rose-500 rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
-                    <div class="relative bg-white border border-gray-200 rounded-2xl p-8 h-full shadow-sm hover:shadow-lg transition-shadow">
+                    <div class="relative bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 h-full shadow-sm hover:shadow-lg transition-shadow">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#DC143C] to-rose-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-crimson/25">1</div>
                             <div class="h-px flex-1 bg-gradient-to-r from-crimson/30 to-transparent"></div>
@@ -622,8 +622,8 @@
                                 <circle cx="32" cy="46" r="4" fill="currentColor" opacity="0.4"/>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2 text-center">Add your acts</h3>
-                        <p class="text-gray-600 text-sm text-center">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 text-center">Add your acts</h3>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm text-center">
                             Shows, workshops, festival appearances. Import from Google Calendar or add manually.
                         </p>
                     </div>
@@ -632,7 +632,7 @@
                 <!-- Step 2: Share one link -->
                 <div class="relative group">
                     <div class="absolute -inset-1 bg-gradient-to-r from-gold to-amber-500 rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
-                    <div class="relative bg-white border border-gray-200 rounded-2xl p-8 h-full shadow-sm hover:shadow-lg transition-shadow">
+                    <div class="relative bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 h-full shadow-sm hover:shadow-lg transition-shadow">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-gold flex items-center justify-center text-gray-900 font-bold text-xl shadow-lg shadow-gold/25">2</div>
                             <div class="h-px flex-1 bg-gradient-to-r from-gold/30 to-transparent"></div>
@@ -649,8 +649,8 @@
                                 <path d="M32 48V56M32 56L28 52M32 56L36 52" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2 text-center">Share one link</h3>
-                        <p class="text-gray-600 text-sm text-center">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 text-center">Share one link</h3>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm text-center">
                             Add to your website, social bios, and booking portfolio. Planners see everything.
                         </p>
                     </div>
@@ -659,7 +659,7 @@
                 <!-- Step 3: Build your following -->
                 <div class="relative group">
                     <div class="absolute -inset-1 bg-gradient-to-r from-rose-500 to-crimson rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
-                    <div class="relative bg-white border border-gray-200 rounded-2xl p-8 h-full shadow-sm hover:shadow-lg transition-shadow">
+                    <div class="relative bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 h-full shadow-sm hover:shadow-lg transition-shadow">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-crimson flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-rose-500/25">3</div>
                             <div class="h-px flex-1 bg-gradient-to-r from-rose-400/30 to-transparent"></div>
@@ -680,8 +680,8 @@
                                 <path d="M50 18C50 14 54 14 54 18C54 14 58 14 58 18C58 22 54 26 54 26C54 26 50 22 50 18Z" fill="currentColor" opacity="0.8"/>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2 text-center">Build your following</h3>
-                        <p class="text-gray-600 text-sm text-center">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 text-center">Build your following</h3>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm text-center">
                             Fans follow your schedule and get notified about performances in their area.
                         </p>
                     </div>

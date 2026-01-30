@@ -76,51 +76,51 @@
                 <div class="flex gap-3 min-w-[700px]">
                     <!-- Monday -->
                     <div class="flex-1 text-center p-4 rounded-xl bg-gray-200/50 dark:bg-gray-800/30 border border-gray-300/30 dark:border-gray-700/30">
-                        <div class="text-gray-500 text-xs font-semibold mb-2">MON</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-xs font-semibold mb-2">MON</div>
                         <div class="w-3 h-3 rounded-full bg-gray-400 dark:bg-gray-700 mx-auto mb-2"></div>
-                        <div class="text-gray-600 text-xs">Dark</div>
+                        <div class="text-gray-600 dark:text-gray-300 text-xs">Dark</div>
                     </div>
                     <!-- Tuesday -->
                     <div class="flex-1 text-center p-4 rounded-xl bg-lime-900/30 border border-lime-700/30">
                         <div class="text-lime-400 text-xs font-semibold mb-2">TUE</div>
                         <div class="w-3 h-3 rounded-full bg-lime-500 mx-auto mb-2 animate-pulse"></div>
                         <div class="text-lime-300 text-xs font-medium">Open Mic</div>
-                        <div class="text-gray-500 text-[10px] mt-1">New comics cut their teeth</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">New comics cut their teeth</div>
                     </div>
                     <!-- Wednesday -->
                     <div class="flex-1 text-center p-4 rounded-xl bg-blue-900/30 border border-blue-700/30">
                         <div class="text-blue-400 text-xs font-semibold mb-2">WED</div>
                         <div class="w-3 h-3 rounded-full bg-blue-500 mx-auto mb-2"></div>
                         <div class="text-blue-300 text-xs font-medium">Improv Jam</div>
-                        <div class="text-gray-500 text-[10px] mt-1">Ensemble magic</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Ensemble magic</div>
                     </div>
                     <!-- Thursday -->
                     <div class="flex-1 text-center p-4 rounded-xl bg-amber-900/30 border border-amber-700/30">
                         <div class="text-amber-400 text-xs font-semibold mb-2">THU</div>
                         <div class="w-3 h-3 rounded-full bg-amber-500 mx-auto mb-2"></div>
                         <div class="text-amber-300 text-xs font-medium">New Talent</div>
-                        <div class="text-gray-500 text-[10px] mt-1">Rising stars</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Rising stars</div>
                     </div>
                     <!-- Friday -->
                     <div class="flex-1 text-center p-4 rounded-xl bg-yellow-900/40 border border-yellow-600/40">
                         <div class="text-yellow-400 text-xs font-semibold mb-2">FRI</div>
                         <div class="w-3 h-3 rounded-full bg-yellow-400 mx-auto mb-2 shadow-lg shadow-yellow-500/50"></div>
                         <div class="text-yellow-300 text-xs font-medium">Headliner</div>
-                        <div class="text-gray-500 text-[10px] mt-1">The draw</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">The draw</div>
                     </div>
                     <!-- Saturday -->
                     <div class="flex-1 text-center p-4 rounded-xl bg-yellow-900/40 border border-yellow-600/40">
                         <div class="text-yellow-400 text-xs font-semibold mb-2">SAT</div>
                         <div class="w-3 h-3 rounded-full bg-yellow-400 mx-auto mb-2 shadow-lg shadow-yellow-500/50"></div>
                         <div class="text-yellow-300 text-xs font-medium">Headliner</div>
-                        <div class="text-gray-500 text-[10px] mt-1">Sold out shows</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Sold out shows</div>
                     </div>
                     <!-- Sunday -->
                     <div class="flex-1 text-center p-4 rounded-xl bg-purple-900/30 border border-purple-700/30">
                         <div class="text-purple-400 text-xs font-semibold mb-2">SUN</div>
                         <div class="w-3 h-3 rounded-full bg-purple-500 mx-auto mb-2"></div>
                         <div class="text-purple-300 text-xs font-medium">Industry</div>
-                        <div class="text-gray-500 text-[10px] mt-1">Podcast / Special</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Podcast / Special</div>
                     </div>
                 </div>
             </div>
