@@ -17,6 +17,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Complete bento grids** - When using bento grids, ensure all cells are filled (especially the bottom right corner)
 - **Support light and dark mode** - Always consider both light mode and dark mode when working on UI
 - **No co-author on commits** - Do not add "Co-Authored-By: Claude" to git commit messages
+- **Never use em-dashes** - Use hyphens, "to", or "or" instead of em-dashes (—) in all written content
 
 ## Terminology
 

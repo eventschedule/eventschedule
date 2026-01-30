@@ -447,6 +447,7 @@ return [
     'username' => 'Benutzername',
     'test' => 'Test',
     'report_errors' => 'Fehler an die Entwickler melden, um uns bei der Verbesserung der App zu helfen (optional)',
+    'env_not_writable' => 'The .env file is not writable. Settings cannot be saved automatically.',
     'optional' => 'Optional',
     'i_accept_the_terms' => 'Ich akzeptiere die :terms',
     'import' => 'Importieren',

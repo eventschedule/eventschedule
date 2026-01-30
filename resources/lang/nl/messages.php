@@ -294,6 +294,7 @@ return [
     'username' => 'Gebruikersnaam',
     'test' => 'Test',
     'report_errors' => 'Rapporteer fouten aan de ontwikkelaars om ons te helpen de app te verbeteren (optioneel)',
+    'env_not_writable' => 'The .env file is not writable. Settings cannot be saved automatically.',
     'optional' => 'Optioneel',
     'i_accept_the_terms' => 'Ik accepteer de :terms',
     'import' => 'Importeren',

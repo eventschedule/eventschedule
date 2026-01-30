@@ -14,21 +14,46 @@
             <div class="absolute top-40 right-1/3 w-[200px] h-[200px] bg-yellow-500/10 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s;"></div>
         </div>
 
-        <!-- Grid -->
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+        <!-- Marble/terrazzo texture SVG overlay -->
+        <div class="absolute inset-0 opacity-[0.03] dark:opacity-[0.04]">
+            <svg width="100%" height="100%">
+                <defs>
+                    <pattern id="marble-speckle" x="0" y="0" width="120" height="120" patternUnits="userSpaceOnUse">
+                        <circle cx="15" cy="20" r="0.8" fill="#94a3b8"/>
+                        <circle cx="45" cy="10" r="0.5" fill="#d97706"/>
+                        <circle cx="80" cy="35" r="0.7" fill="#94a3b8"/>
+                        <circle cx="25" cy="60" r="0.4" fill="#d97706"/>
+                        <circle cx="65" cy="75" r="0.9" fill="#94a3b8"/>
+                        <circle cx="100" cy="50" r="0.6" fill="#d97706"/>
+                        <circle cx="35" cy="95" r="0.5" fill="#94a3b8"/>
+                        <circle cx="75" cy="105" r="0.7" fill="#d97706"/>
+                        <circle cx="110" cy="85" r="0.4" fill="#94a3b8"/>
+                        <circle cx="10" cy="110" r="0.6" fill="#d97706"/>
+                        <circle cx="55" cy="45" r="0.3" fill="#94a3b8"/>
+                        <circle cx="90" cy="15" r="0.5" fill="#94a3b8"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#marble-speckle)"/>
+            </svg>
+        </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass hotel-brass-badge mb-8">
                 <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
-                <span class="text-sm text-gray-600 dark:text-gray-300">For Hotels & Resorts</span>
+                <span class="text-sm text-gray-600 dark:text-gray-300 font-medium">For Hotels & Resorts</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
                 Elevate the<br>
                 <span class="text-gradient-slate-gold">guest experience.</span>
             </h1>
+
+            <!-- Gold foil shimmer line -->
+            <div class="flex justify-center mb-8">
+                <div class="hotel-shimmer-line w-48 h-px"></div>
+            </div>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
                 From pool parties to wine tastings. One calendar for every guest activity. Keep guests engaged and delighted.
@@ -413,8 +438,14 @@
                     </div>
                 </div>
 
-                <!-- Friday -->
+                <!-- Friday - Concierge Recommends -->
                 <div class="bg-gradient-to-br from-violet-900/40 to-purple-900/40 rounded-xl border border-violet-500/20 p-4 relative overflow-hidden group hover:border-violet-500/40 transition-colors">
+                    <!-- Concierge Recommends badge -->
+                    <div class="absolute -top-1 -right-1 w-8 h-8">
+                        <svg viewBox="0 0 32 32" fill="none" class="w-full h-full">
+                            <path d="M16,2 L19,11 L28,11 L21,17 L23,26 L16,21 L9,26 L11,17 L4,11 L13,11 Z" fill="#d97706" opacity="0.8"/>
+                        </svg>
+                    </div>
                     <div class="text-violet-700 dark:text-violet-300 text-xs font-semibold tracking-wider uppercase mb-3">Fri</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-1.5">
@@ -425,6 +456,7 @@
                             <div class="w-1.5 h-1.5 rounded-full bg-purple-400"></div>
                             <span class="text-gray-500 dark:text-gray-400 text-xs">7:00 PM</span>
                         </div>
+                        <div class="text-amber-600 dark:text-amber-400 text-[8px] font-medium mt-1">Concierge Pick</div>
                     </div>
                 </div>
 
@@ -679,6 +711,44 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .hotel-brass-badge {
+            border: 1.5px solid rgba(217, 119, 6, 0.35);
+            box-shadow: inset 0 0 6px rgba(217, 119, 6, 0.1), 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .dark .hotel-brass-badge {
+            border-color: rgba(245, 158, 11, 0.3);
+            box-shadow: inset 0 0 8px rgba(245, 158, 11, 0.08), 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .hotel-shimmer-line {
+            background: linear-gradient(90deg, transparent, #d97706, transparent);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hotel-shimmer-line::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -100%;
+            width: 60%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            animation: shimmer 5s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hotel-shimmer-line::after {
+                animation: none;
+            }
         }
     </style>
 </x-marketing-layout>

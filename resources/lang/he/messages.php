@@ -263,6 +263,7 @@ return [
     'username' => 'שם משתמש',
     'test' => 'בדיקה',
     'report_errors' => 'דווח על שגיאות למפתחים כדי לעזור לנו לשפר את האפליקציה (אופציונלי)',
+    'env_not_writable' => 'The .env file is not writable. Settings cannot be saved automatically.',
     'optional' => 'אופציונלי',
     'i_accept_the_terms' => 'אני מקבל את התנאים',
     'import' => 'ייבא',

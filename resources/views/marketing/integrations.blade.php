@@ -57,7 +57,7 @@
                 </div>
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Keep your events in sync</h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-4">Sync across all your calendars automatically</p>
-                <a href="{{ marketing_url('/calendar-sync') }}" class="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
+                <a href="{{ marketing_url('/calendar-sync') }}" class="inline-flex items-center text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium transition-colors">
                     Learn about all calendar options
                     <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

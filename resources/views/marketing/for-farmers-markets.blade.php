@@ -12,22 +12,45 @@
             <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-green-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
 
+        <!-- Bunting/pennant banner -->
+        <div class="absolute top-0 left-0 right-0 overflow-hidden h-20 hidden md:block">
+            <svg class="w-full" height="60" viewBox="0 0 1200 60" preserveAspectRatio="none" fill="none">
+                <!-- String -->
+                <path d="M0,10 Q300,25 600,10 Q900,25 1200,10" stroke="currentColor" stroke-width="1.5" class="text-gray-400 dark:text-gray-600" fill="none"/>
+                <!-- Pennant flags -->
+                <polygon points="80,12 100,50 120,12" class="fill-lime-500/20 dark:fill-lime-500/15"/>
+                <polygon points="160,16 180,52 200,16" class="fill-amber-500/20 dark:fill-amber-500/15"/>
+                <polygon points="240,14 260,50 280,14" class="fill-orange-500/20 dark:fill-orange-500/15"/>
+                <polygon points="320,17 340,52 360,17" class="fill-red-500/15 dark:fill-red-500/10"/>
+                <polygon points="400,13 420,50 440,13" class="fill-lime-500/20 dark:fill-lime-500/15"/>
+                <polygon points="480,18 500,52 520,18" class="fill-amber-500/20 dark:fill-amber-500/15"/>
+                <polygon points="560,12 580,50 600,12" class="fill-orange-500/20 dark:fill-orange-500/15"/>
+                <polygon points="640,17 660,52 680,17" class="fill-red-500/15 dark:fill-red-500/10"/>
+                <polygon points="720,13 740,50 760,13" class="fill-lime-500/20 dark:fill-lime-500/15"/>
+                <polygon points="800,18 820,52 840,18" class="fill-amber-500/20 dark:fill-amber-500/15"/>
+                <polygon points="880,12 900,50 920,12" class="fill-orange-500/20 dark:fill-orange-500/15"/>
+                <polygon points="960,16 980,52 1000,16" class="fill-red-500/15 dark:fill-red-500/10"/>
+                <polygon points="1040,14 1060,50 1080,14" class="fill-lime-500/20 dark:fill-lime-500/15"/>
+                <polygon points="1120,17 1140,52 1160,17" class="fill-amber-500/20 dark:fill-amber-500/15"/>
+            </svg>
+        </div>
+
         <!-- Grid -->
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
 
-        <!-- Floating market icon -->
+        <!-- Floating market icon - Rustic stamp style -->
         <div class="absolute top-16 right-8 md:right-16 animate-float opacity-90 hidden sm:block">
-            <div class="px-5 py-3 rounded-lg border-2 border-lime-500 dark:border-lime-400 bg-lime-500/10 shadow-lg shadow-lime-500/20">
+            <div class="rustic-stamp px-5 py-3">
                 <span class="text-2xl font-bold text-lime-600 dark:text-lime-400 tracking-widest">FRESH</span>
             </div>
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg wood-grain-badge border border-amber-300/50 dark:border-amber-600/30 mb-8 backdrop-blur-sm">
                 <svg class="w-4 h-4 text-lime-600 dark:text-lime-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span class="text-sm text-gray-600 dark:text-gray-300">For Farmers Markets & Outdoor Markets</span>
+                <span class="text-sm text-gray-600 dark:text-gray-300 font-medium">For Farmers Markets & Outdoor Markets</span>
             </div>
 
             <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
@@ -363,7 +386,11 @@
                     <div class="text-center">
                         <div class="bg-green-500/20 border border-green-400/30 rounded-xl p-4 min-h-[160px] flex flex-col items-center justify-center relative">
                             <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-green-500 rounded text-[9px] text-white font-bold">SPRING</div>
-                            <div class="text-2xl mb-2">&#127793;</div>
+                            <!-- Carrot SVG -->
+                            <svg class="w-8 h-8 mb-2" viewBox="0 0 32 32" fill="none">
+                                <path d="M16,8 L14,28 Q16,30 18,28 Z" fill="#f97316"/>
+                                <path d="M14,10 L10,6 M16,8 L16,3 M18,10 L22,6" stroke="#22c55e" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
                             <div class="text-green-700 dark:text-green-300 text-sm font-bold mb-1">Spring Opening</div>
                             <div class="text-gray-500 dark:text-white/70 text-xs">April kick-off</div>
                             <div class="text-gray-500 dark:text-white/70 text-[10px] mt-2">Asparagus, greens, seedlings</div>
@@ -373,7 +400,13 @@
                     <div class="text-center">
                         <div class="bg-yellow-500/20 border border-yellow-400/30 rounded-xl p-4 min-h-[160px] flex flex-col items-center justify-center relative">
                             <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-yellow-500 rounded text-[9px] text-white font-bold">SUMMER</div>
-                            <div class="text-2xl mb-2">&#9728;&#65039;</div>
+                            <!-- Tomato SVG -->
+                            <svg class="w-8 h-8 mb-2" viewBox="0 0 32 32" fill="none">
+                                <circle cx="16" cy="18" r="11" fill="#ef4444"/>
+                                <ellipse cx="16" cy="18" rx="11" ry="10" fill="#dc2626"/>
+                                <path d="M12,8 Q14,5 16,7 Q18,5 20,8" stroke="#22c55e" stroke-width="2" fill="none" stroke-linecap="round"/>
+                                <path d="M16,7 L16,4" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round"/>
+                            </svg>
                             <div class="text-yellow-700 dark:text-yellow-300 text-sm font-bold mb-1">Peak Season</div>
                             <div class="text-gray-500 dark:text-white/70 text-xs">June - August</div>
                             <div class="text-gray-500 dark:text-white/70 text-[10px] mt-2">Berries, tomatoes, corn</div>
@@ -383,7 +416,13 @@
                     <div class="text-center">
                         <div class="bg-orange-500/20 border border-orange-400/30 rounded-xl p-4 min-h-[160px] flex flex-col items-center justify-center relative">
                             <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-orange-500 rounded text-[9px] text-white font-bold">FALL</div>
-                            <div class="text-2xl mb-2">&#127810;</div>
+                            <!-- Pumpkin SVG -->
+                            <svg class="w-8 h-8 mb-2" viewBox="0 0 32 32" fill="none">
+                                <ellipse cx="16" cy="20" rx="12" ry="10" fill="#f97316"/>
+                                <ellipse cx="16" cy="20" rx="5" ry="10" fill="#ea580c" opacity="0.5"/>
+                                <path d="M16,10 L16,6" stroke="#22c55e" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M14,8 Q16,5 18,8" stroke="#22c55e" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                            </svg>
                             <div class="text-orange-700 dark:text-orange-300 text-sm font-bold mb-1">Harvest Festival</div>
                             <div class="text-gray-500 dark:text-white/70 text-xs">September - November</div>
                             <div class="text-gray-500 dark:text-white/70 text-[10px] mt-2">Pumpkins, apples, cider</div>
@@ -393,7 +432,16 @@
                     <div class="text-center">
                         <div class="bg-blue-500/20 border border-blue-400/30 rounded-xl p-4 min-h-[160px] flex flex-col items-center justify-center relative">
                             <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-blue-500 rounded text-[9px] text-white font-bold">WINTER</div>
-                            <div class="text-2xl mb-2">&#10052;&#65039;</div>
+                            <!-- Snowflake SVG -->
+                            <svg class="w-8 h-8 mb-2" viewBox="0 0 32 32" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round">
+                                <line x1="16" y1="4" x2="16" y2="28"/>
+                                <line x1="6" y1="10" x2="26" y2="22"/>
+                                <line x1="6" y1="22" x2="26" y2="10"/>
+                                <line x1="16" y1="4" x2="13" y2="7"/><line x1="16" y1="4" x2="19" y2="7"/>
+                                <line x1="16" y1="28" x2="13" y2="25"/><line x1="16" y1="28" x2="19" y2="25"/>
+                                <line x1="6" y1="10" x2="9" y2="8"/><line x1="6" y1="10" x2="8" y2="13"/>
+                                <line x1="26" y1="22" x2="23" y2="24"/><line x1="26" y1="22" x2="24" y2="19"/>
+                            </svg>
                             <div class="text-blue-700 dark:text-blue-300 text-sm font-bold mb-1">Holiday Market</div>
                             <div class="text-gray-500 dark:text-white/70 text-xs">December - March</div>
                             <div class="text-gray-500 dark:text-white/70 text-[10px] mt-2">Gifts, preserves, wreaths</div>
@@ -609,6 +657,30 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .rustic-stamp {
+            border: 3px solid currentColor;
+            border-radius: 4px;
+            color: rgb(101, 163, 13);
+            transform: rotate(-3deg);
+            background: rgba(101, 163, 13, 0.05);
+            box-shadow: 0 4px 12px rgba(101, 163, 13, 0.15);
+        }
+
+        .dark .rustic-stamp {
+            color: rgb(163, 230, 53);
+            background: rgba(163, 230, 53, 0.05);
+            box-shadow: 0 4px 12px rgba(163, 230, 53, 0.1);
+        }
+
+        .wood-grain-badge {
+            background: linear-gradient(135deg, rgba(180, 140, 80, 0.1), rgba(160, 120, 60, 0.15), rgba(180, 140, 80, 0.1));
+            position: relative;
+        }
+
+        .dark .wood-grain-badge {
+            background: linear-gradient(135deg, rgba(120, 80, 30, 0.3), rgba(100, 70, 20, 0.4), rgba(120, 80, 30, 0.3));
         }
 
         @media (prefers-reduced-motion: reduce) {
