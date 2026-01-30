@@ -17,7 +17,7 @@
                         </div>
                     </div>
                     <div class="ml-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Users</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_users')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalUsers) }}</p>
                     </div>
                 </div>
@@ -26,18 +26,18 @@
                         {{ $usersChangePercent >= 0 ? '+' : '' }}{{ $usersChangePercent }}%
                     </span>
                     <span class="text-gray-500 dark:text-gray-400 ml-2">
-                        +{{ number_format($usersInPeriod) }} in period
+                        +{{ number_format($usersInPeriod) }} @lang('messages.in_period')
                     </span>
                 </div>
             </div>
 
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Users (7 days)</p>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_users_7_days')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers7Days) }}</p>
             </div>
 
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Users (30 days)</p>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_users_30_days')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers30Days) }}</p>
             </div>
         </div>
@@ -46,7 +46,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {{-- Signup Method Donut Chart --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Signup Method Breakdown (All Time)</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.signup_method_breakdown') (@lang('messages.all_time'))</h3>
                 <div class="flex items-center gap-6">
                     <div class="w-48 h-48">
                         <canvas id="signupMethodChart"></canvas>
@@ -61,7 +61,7 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
                                 <span class="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
-                                <span class="text-sm text-gray-600 dark:text-gray-400">Email</span>
+                                <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.email')</span>
                             </div>
                             <div class="text-right">
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($emailUsers) }}</span>
@@ -71,7 +71,7 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
                                 <span class="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
-                                <span class="text-sm text-gray-600 dark:text-gray-400">Google</span>
+                                <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.google')</span>
                             </div>
                             <div class="text-right">
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($googleUsers) }}</span>
@@ -81,7 +81,7 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
                                 <span class="w-3 h-3 rounded-full bg-amber-500 mr-2"></span>
-                                <span class="text-sm text-gray-600 dark:text-gray-400">Hybrid</span>
+                                <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.hybrid')</span>
                             </div>
                             <div class="text-right">
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($hybridUsers) }}</span>
@@ -90,7 +90,7 @@
                         </div>
                         <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
                             <p class="text-xs text-gray-500 dark:text-gray-400">
-                                Hybrid = Email signup + Google connected
+                                @lang('messages.hybrid') = @lang('messages.hybrid_description')
                             </p>
                         </div>
                     </div>
@@ -99,22 +99,22 @@
 
             {{-- Signup Method in Period --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Signups by Method (Selected Period)</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.signups_by_method') (@lang('messages.selected_period'))</h3>
                 <div class="h-48">
                     <canvas id="signupMethodTrendChart"></canvas>
                 </div>
                 <div class="mt-4 grid grid-cols-3 gap-4 text-center">
                     <div>
                         <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ number_format($emailUsersInPeriod) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Email</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.email')</p>
                     </div>
                     <div>
                         <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ number_format($googleUsersInPeriod) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Google</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.google')</p>
                     </div>
                     <div>
                         <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ number_format($hybridUsersInPeriod) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Hybrid</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.hybrid')</p>
                     </div>
                 </div>
             </div>
@@ -143,7 +143,7 @@
             new Chart(signupMethodCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Email', 'Google', 'Hybrid'],
+                    labels: [@json(__('messages.email')), @json(__('messages.google')), @json(__('messages.hybrid'))],
                     datasets: [{
                         data: [{{ $emailUsers }}, {{ $googleUsers }}, {{ $hybridUsers }}],
                         backgroundColor: ['#3B82F6', '#EF4444', '#F59E0B'],
@@ -171,19 +171,19 @@
                     labels: {!! json_encode($trendData['labels']) !!},
                     datasets: [
                         {
-                            label: 'Email',
+                            label: @json(__('messages.email')),
                             data: {!! json_encode($trendData['emailUsers']) !!},
                             backgroundColor: '#3B82F6',
                             stack: 'signups'
                         },
                         {
-                            label: 'Google',
+                            label: @json(__('messages.google')),
                             data: {!! json_encode($trendData['googleUsers']) !!},
                             backgroundColor: '#EF4444',
                             stack: 'signups'
                         },
                         {
-                            label: 'Hybrid',
+                            label: @json(__('messages.hybrid')),
                             data: {!! json_encode($trendData['hybridUsers']) !!},
                             backgroundColor: '#F59E0B',
                             stack: 'signups'

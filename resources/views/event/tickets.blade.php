@@ -336,7 +336,7 @@
 
         <div class="mt-6 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
             <div class="flex justify-between items-center">
-                <span class="text-gray-600 dark:text-gray-400">Total</span>
+                <span class="text-gray-600 dark:text-gray-400">@lang('messages.total')</span>
                 <span class="text-xl font-bold text-gray-900 dark:text-gray-100">@{{ formatPrice(totalAmount) }}</span>
             </div>
         </div>
