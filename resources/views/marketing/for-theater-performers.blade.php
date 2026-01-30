@@ -169,9 +169,9 @@
     <section class="bg-gray-50 dark:bg-[#0c0a0a] py-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-900/30 border border-red-700/30 mb-6">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-700/30 mb-6">
                     <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-                    <span class="text-red-300 text-sm font-medium uppercase tracking-wider">Now Playing</span>
+                    <span class="text-red-700 dark:text-red-300 text-sm font-medium uppercase tracking-wider">Now Playing</span>
                 </div>
                 <h2 class="text-3xl md:text-4xl font-light text-gray-900 dark:text-white mb-4">
                     Your entire run, <span class="text-red-400">one schedule</span>
@@ -295,7 +295,7 @@
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-300 text-sm font-medium mb-6 border border-amber-500/20">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300 text-sm font-medium mb-6 border border-amber-200 dark:border-amber-500/20">
                         Season Announcements
                     </div>
                     <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
@@ -463,14 +463,14 @@
                             <div class="flex-1">
                                 <div class="text-gray-900 dark:text-white text-sm">Stage Manager</div>
                             </div>
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 text-[10px]">Admin</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-[10px]">Admin</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white text-xs font-semibold">JK</div>
                             <div class="flex-1">
                                 <div class="text-gray-600 dark:text-stone-300 text-sm">Cast Member</div>
                             </div>
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">View</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-[10px]">View</span>
                         </div>
                     </div>
                 </div>
@@ -487,11 +487,11 @@
                     <p class="text-gray-500 dark:text-stone-400 mb-6">Two-way sync keeps rehearsals, tech week, and performances updated everywhere.</p>
 
                     <div class="flex items-center justify-center gap-3">
-                        <div class="bg-emerald-500/20 rounded-xl border border-emerald-400/30 p-3 w-20">
-                            <div class="text-[10px] text-emerald-300 mb-1 text-center">Schedule</div>
+                        <div class="bg-emerald-200 dark:bg-emerald-500/20 rounded-xl border border-emerald-400/30 p-3 w-20">
+                            <div class="text-[10px] text-emerald-700 dark:text-emerald-300 mb-1 text-center">Schedule</div>
                             <div class="space-y-1">
-                                <div class="h-1.5 bg-white/20 rounded"></div>
-                                <div class="h-1.5 bg-white/20 rounded w-3/4"></div>
+                                <div class="h-1.5 bg-emerald-300 dark:bg-white/20 rounded"></div>
+                                <div class="h-1.5 bg-emerald-300 dark:bg-white/20 rounded w-3/4"></div>
                             </div>
                         </div>
                         <div class="flex flex-col items-center gap-0.5">
@@ -525,12 +525,12 @@
 
                     <div class="flex justify-center">
                         <div class="w-12 h-12 bg-gradient-to-br from-indigo-500/30 to-blue-500/30 rounded-xl flex items-center justify-center border border-indigo-400/30">
-                            <svg class="w-6 h-6 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
                     </div>
-                    <span class="inline-flex items-center text-indigo-400 text-sm font-medium mt-4 group-hover:gap-2 gap-1 transition-all">
+                    <span class="inline-flex items-center text-indigo-600 dark:text-indigo-400 text-sm font-medium mt-4 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

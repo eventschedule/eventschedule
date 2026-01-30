@@ -61,15 +61,15 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- OAuth Authentication -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900 to-indigo-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                         Secure
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">OAuth 2.0 authentication</h3>
-                    <p class="text-white/80 mb-6">Connect with one click using Google's secure OAuth. No passwords stored. Automatic token refresh keeps you connected.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">OAuth 2.0 authentication</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">Connect with one click using Google's secure OAuth. No passwords stored. Automatic token refresh keeps you connected.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-3">
@@ -93,15 +93,15 @@
                 </div>
 
                 <!-- Real-time Webhooks -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900 to-teal-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                         Real-time
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Instant webhook updates</h3>
-                    <p class="text-white/80 mb-6">Changes in Google Calendar appear instantly. Webhook notifications mean no polling delays.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Instant webhook updates</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">Changes in Google Calendar appear instantly. Webhook notifications mean no polling delays.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-3">
@@ -119,15 +119,15 @@
                 </div>
 
                 <!-- Three Sync Modes -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900 to-purple-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                         </svg>
                         Flexible
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Three sync modes</h3>
-                    <p class="text-white/80 mb-4">Choose your direction: push events to Google, pull events from Google, or sync both ways.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Three sync modes</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-4">Choose your direction: push events to Google, pull events from Google, or sync both ways.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
@@ -146,23 +146,23 @@
                             <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                             </svg>
-                            <span class="text-violet-300 text-sm">Both directions</span>
+                            <span class="text-violet-700 dark:text-violet-300 text-sm">Both directions</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Multi-Calendar Support (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900 to-blue-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
                                 Multi-Calendar
                             </div>
-                            <h3 class="text-3xl font-bold text-white mb-4">Choose your calendar</h3>
-                            <p class="text-white/80 text-lg">Select which Google Calendar to sync with for each schedule. Perfect if you manage multiple calendars for work, personal, or different projects.</p>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Choose your calendar</h3>
+                            <p class="text-gray-600 dark:text-white/80 text-lg">Select which Google Calendar to sync with for each schedule. Perfect if you manage multiple calendars for work, personal, or different projects.</p>
                         </div>
                         <div class="space-y-3">
                             <div class="flex items-center gap-3 p-3 rounded-xl bg-cyan-500/20 border border-cyan-400/30">
@@ -185,21 +185,21 @@
                 </div>
 
                 <!-- Background Processing -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900 to-orange-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                         Reliable
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Background processing</h3>
-                    <p class="text-white/80 mb-4">Sync jobs run in the background. Your schedule stays fast while events sync reliably behind the scenes.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Background processing</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-4">Sync jobs run in the background. Your schedule stays fast while events sync reliably behind the scenes.</p>
 
                     <div class="flex items-center gap-2">
                         <div class="flex-1 bg-amber-500/20 rounded-full h-2">
                             <div class="bg-amber-400 rounded-full h-2 w-3/4 animate-pulse"></div>
                         </div>
-                        <span class="text-amber-300 text-xs">Syncing...</span>
+                        <span class="text-amber-700 dark:text-amber-300 text-xs">Syncing...</span>
                     </div>
                 </div>
 

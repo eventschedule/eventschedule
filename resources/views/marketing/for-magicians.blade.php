@@ -227,10 +227,10 @@
 
                     <div class="flex items-center justify-center gap-3">
                         <div class="bg-blue-500/20 rounded-xl border border-blue-400/30 p-3 w-20">
-                            <div class="text-[10px] text-blue-300 mb-1 text-center">Schedule</div>
+                            <div class="text-[10px] text-blue-600 dark:text-blue-300 mb-1 text-center">Schedule</div>
                             <div class="space-y-1">
-                                <div class="h-1.5 bg-white/20 rounded"></div>
-                                <div class="h-1.5 bg-white/20 rounded w-3/4"></div>
+                                <div class="h-1.5 bg-gray-300 dark:bg-white/20 rounded"></div>
+                                <div class="h-1.5 bg-gray-300 dark:bg-white/20 rounded w-3/4"></div>
                             </div>
                         </div>
                         <div class="flex flex-col items-center gap-0.5">
@@ -241,7 +241,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
                         </div>
-                        <div class="bg-white/10 rounded-xl border border-white/20 p-3 w-20">
+                        <div class="bg-gray-100 dark:bg-white/10 rounded-xl border border-gray-200 dark:border-white/20 p-3 w-20">
                             <div class="text-[10px] text-gray-600 dark:text-gray-300 mb-1 text-center">Google</div>
                             <div class="space-y-1">
                                 <div class="h-1.5 bg-blue-400/40 rounded"></div>
@@ -263,19 +263,19 @@
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Assistants, agents, technicians - everyone sees the schedule. No double-bookings.</p>
 
                     <div class="space-y-2">
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/10">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-violet-500 flex items-center justify-center text-white text-xs font-semibold">DM</div>
                             <div class="flex-1">
-                                <div class="text-white text-sm">David</div>
+                                <div class="text-gray-900 dark:text-white text-sm">David</div>
                             </div>
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px]">Magician</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-[10px]">Magician</span>
                         </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-xs font-semibold">SK</div>
                             <div class="flex-1">
-                                <div class="text-gray-300 text-sm">Sarah</div>
+                                <div class="text-gray-600 dark:text-gray-300 text-sm">Sarah</div>
                             </div>
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 text-[10px]">Assistant</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-[10px]">Assistant</span>
                         </div>
                     </div>
                 </div>
@@ -325,63 +325,63 @@
 
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <!-- Corporate Events -->
-                <div class="group relative bg-gradient-to-br from-[#12101a] to-[#0a0a0f] rounded-2xl p-6 border border-violet-900/20 hover:border-violet-600/40 transition-all text-center">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="group relative bg-gradient-to-br from-violet-50 to-gray-50 dark:from-[#12101a] dark:to-[#0a0a0f] rounded-2xl p-6 border border-violet-200 dark:border-violet-900/20 hover:border-violet-400 dark:hover:border-violet-600/40 transition-all text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <h3 class="text-sm font-semibold text-white">Corporate</h3>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Corporate</h3>
                 </div>
 
                 <!-- Weddings -->
-                <div class="group relative bg-gradient-to-br from-[#170f17] to-[#0a0a0f] rounded-2xl p-6 border border-pink-900/20 hover:border-pink-600/40 transition-all text-center">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-pink-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="group relative bg-gradient-to-br from-pink-50 to-gray-50 dark:from-[#170f17] dark:to-[#0a0a0f] rounded-2xl p-6 border border-pink-200 dark:border-pink-900/20 hover:border-pink-400 dark:hover:border-pink-600/40 transition-all text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-pink-100 dark:bg-pink-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-pink-600 dark:text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-sm font-semibold text-white">Weddings</h3>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Weddings</h3>
                 </div>
 
                 <!-- Private Parties -->
-                <div class="group relative bg-gradient-to-br from-[#1a1510] to-[#0a0a0f] rounded-2xl p-6 border border-amber-900/20 hover:border-amber-600/40 transition-all text-center">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="group relative bg-gradient-to-br from-amber-50 to-gray-50 dark:from-[#1a1510] dark:to-[#0a0a0f] rounded-2xl p-6 border border-amber-200 dark:border-amber-900/20 hover:border-amber-400 dark:hover:border-amber-600/40 transition-all text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />
                         </svg>
                     </div>
-                    <h3 class="text-sm font-semibold text-white">Parties</h3>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Parties</h3>
                 </div>
 
                 <!-- Theaters -->
-                <div class="group relative bg-gradient-to-br from-[#15101a] to-[#0a0a0f] rounded-2xl p-6 border border-purple-900/20 hover:border-purple-600/40 transition-all text-center">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-purple-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="group relative bg-gradient-to-br from-purple-50 to-gray-50 dark:from-[#15101a] dark:to-[#0a0a0f] rounded-2xl p-6 border border-purple-200 dark:border-purple-900/20 hover:border-purple-400 dark:hover:border-purple-600/40 transition-all text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
                         </svg>
                     </div>
-                    <h3 class="text-sm font-semibold text-white">Theaters</h3>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Theaters</h3>
                 </div>
 
                 <!-- Restaurants & Bars -->
-                <div class="group relative bg-gradient-to-br from-[#101518] to-[#0a0a0f] rounded-2xl p-6 border border-teal-900/20 hover:border-teal-600/40 transition-all text-center">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="group relative bg-gradient-to-br from-teal-50 to-gray-50 dark:from-[#101518] dark:to-[#0a0a0f] rounded-2xl p-6 border border-teal-200 dark:border-teal-900/20 hover:border-teal-400 dark:hover:border-teal-600/40 transition-all text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                     </div>
-                    <h3 class="text-sm font-semibold text-white">Restaurants</h3>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Restaurants</h3>
                 </div>
 
                 <!-- Virtual/Online -->
-                <div class="group relative bg-gradient-to-br from-[#0f1520] to-[#0a0a0f] rounded-2xl p-6 border border-indigo-900/20 hover:border-indigo-600/40 transition-all text-center">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="group relative bg-gradient-to-br from-indigo-50 to-gray-50 dark:from-[#0f1520] dark:to-[#0a0a0f] rounded-2xl p-6 border border-indigo-200 dark:border-indigo-900/20 hover:border-indigo-400 dark:hover:border-indigo-600/40 transition-all text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <h3 class="text-sm font-semibold text-white">Virtual</h3>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Virtual</h3>
                 </div>
             </div>
         </div>
@@ -524,21 +524,21 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-indigo-900 to-violet-900 rounded-3xl border border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900 dark:to-violet-900 rounded-3xl border border-indigo-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
                                 Virtual Magic Shows
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-indigo-300 transition-colors">Stream to audiences worldwide</h3>
-                            <p class="text-gray-400 text-lg mb-4">Sell tickets to viewers anywhere. Virtual magic became huge and stays relevant - reach fans who can't make it to your live shows.</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Stream to audiences worldwide</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">Sell tickets to viewers anywhere. Virtual magic became huge and stays relevant - reach fans who can't make it to your live shows.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Zoom shows</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Global ticket sales</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Interactive magic</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Zoom shows</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Global ticket sales</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Interactive magic</span>
                             </div>
                             <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more about online events

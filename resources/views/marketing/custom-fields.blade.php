@@ -59,17 +59,17 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Five Field Types (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900 to-orange-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
                                 </svg>
                                 Field Types
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">Five flexible field types</h3>
-                            <p class="text-white/80 text-lg mb-6">Choose the right input type for each piece of information you need to collect from attendees.</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Five flexible field types</h3>
+                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Choose the right input type for each piece of information you need to collect from attendees.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Text</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiline</span>
@@ -117,15 +117,15 @@
                 </div>
 
                 <!-- Per-Order Fields -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-900 to-red-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 text-orange-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900 dark:to-red-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                         Per-Order
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Event-level fields</h3>
-                    <p class="text-white/80 mb-6">Collect information once per order. Great for details that apply to the entire purchase.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Event-level fields</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">Collect information once per order. Great for details that apply to the entire purchase.</p>
 
                     <div class="space-y-3">
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
@@ -144,15 +144,15 @@
                 </div>
 
                 <!-- Per-Ticket Fields -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-yellow-900 to-amber-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900 dark:to-amber-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                         </svg>
                         Per-Ticket
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Ticket-specific fields</h3>
-                    <p class="text-white/80 mb-6">Collect info for each ticket type. Only shown when that specific ticket is selected.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Ticket-specific fields</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">Collect info for each ticket type. Only shown when that specific ticket is selected.</p>
 
                     <div class="space-y-3">
                         <div class="p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
@@ -173,17 +173,17 @@
                 </div>
 
                 <!-- Required or Optional (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900 to-yellow-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900 dark:to-yellow-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 Validation
                             </div>
-                            <h3 class="text-3xl font-bold text-white mb-4">Required or optional</h3>
-                            <p class="text-white/80 text-lg">Mark fields as required to ensure you get the information you need, or leave them optional for flexibility. Up to 8 fields per level.</p>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Required or optional</h3>
+                            <p class="text-gray-600 dark:text-white/80 text-lg">Mark fields as required to ensure you get the information you need, or leave them optional for flexibility. Up to 8 fields per level.</p>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-6 border border-gray-200 dark:border-white/10">
                             <div class="space-y-4">
@@ -410,12 +410,12 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/team-scheduling') }}" class="group block">
-                <div class="bg-gradient-to-br from-cyan-900 to-teal-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <!-- Text content -->
                         <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-cyan-300 transition-colors">Team Scheduling</h3>
-                            <p class="text-white/80 text-lg mb-4">Invite team members via email, assign roles, and collaborate on events together.</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors">Team Scheduling</h3>
+                            <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Invite team members via email, assign roles, and collaborate on events together.</p>
                             <span class="inline-flex items-center text-cyan-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -433,7 +433,7 @@
                                     <div class="flex-1 min-w-0">
                                         <div class="text-gray-900 dark:text-white text-xs font-medium truncate">John Doe</div>
                                     </div>
-                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[9px]">Owner</span>
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-[9px]">Owner</span>
                                 </div>
                                 <!-- Team member 2 -->
                                 <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
@@ -441,7 +441,7 @@
                                     <div class="flex-1 min-w-0">
                                         <div class="text-gray-600 dark:text-gray-300 text-xs font-medium truncate">Alice Smith</div>
                                     </div>
-                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 text-[9px]">Admin</span>
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-[9px]">Admin</span>
                                 </div>
                                 <!-- Team member 3 -->
                                 <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
@@ -449,7 +449,7 @@
                                     <div class="flex-1 min-w-0">
                                         <div class="text-gray-600 dark:text-gray-300 text-xs font-medium truncate">Bob Jones</div>
                                     </div>
-                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[9px]">Follower</span>
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-[9px]">Follower</span>
                                 </div>
                             </div>
                         </div>

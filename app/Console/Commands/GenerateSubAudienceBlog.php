@@ -76,6 +76,7 @@ class GenerateSubAudienceBlog extends Command
                         'name' => $subAudience['name'],
                         'slug' => $slug,
                         'topic' => $subAudience['blog_topic'],
+                        'features' => $subAudience['features'] ?? [],
                     ];
                 }
             }
@@ -123,7 +124,7 @@ class GenerateSubAudienceBlog extends Command
                 $parentTitle = $config[$item['audience']]['title'];
 
                 // Generate the blog post content using Gemini
-                $result = GeminiUtils::generateBlogPost($item['topic'], $parentPage, $parentTitle);
+                $result = GeminiUtils::generateBlogPost($item['topic'], $parentPage, $parentTitle, $item['features']);
 
                 if (empty($result) || empty($result['content'])) {
                     $this->error("  Failed to generate content for {$item['name']}");

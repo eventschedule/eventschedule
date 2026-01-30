@@ -936,7 +936,7 @@ class GeminiUtils
         return array_slice($sortedVideos, 0, 6);
     }
 
-    public static function generateBlogPost($topic, $parentPageUrl = null, $parentPageTitle = null)
+    public static function generateBlogPost($topic, $parentPageUrl = null, $parentPageTitle = null, $features = [])
     {
         // Randomly select a length to vary content length
         $lengths = ['short', 'medium', 'long'];
@@ -952,6 +952,13 @@ class GeminiUtils
         } else {
             $linksRequirement = "- Add 2 links in the text where relevant to 'https://www.eventschedule.com' with 'Event Schedule' as the text
         - Place these links naturally within the content where they add value";
+        }
+
+        // Build features context if available
+        $featuresRequirement = '';
+        if (! empty($features)) {
+            $featuresList = implode(', ', $features);
+            $featuresRequirement = "- The blog post should naturally mention these Event Schedule features: {$featuresList}. Weave them into the content as practical recommendations, not as a feature list.\n        ";
         }
 
         $prompt = "Generate a blog post about '{$topic}' with the following specifications:
@@ -978,6 +985,7 @@ class GeminiUtils
         - Use proper HTML formatting with h1, h2, h3 tags
         - Include bullet points and numbered lists where appropriate
         - Make it relevant to event scheduling and ticketing
+        {$featuresRequirement}
         - Ensure the content is original and valuable
         - Make it SEO-friendly with relevant keywords
         - Always maintain a professional tone

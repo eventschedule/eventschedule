@@ -3,6 +3,7 @@
     'description',
     'iconColor' => 'cyan',
     'blogSlug' => null,
+    'features' => [],
 ])
 
 @php
@@ -15,6 +16,14 @@
     </div>
     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ $name }}</h3>
     <p class="text-gray-600 dark:text-gray-400 text-sm">{{ $description }}</p>
+
+    @if(!empty($features))
+        <div class="flex flex-wrap gap-1.5 mt-3">
+            @foreach($features as $feature)
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $iconColor }}-50 text-{{ $iconColor }}-700 dark:bg-{{ $iconColor }}-500/10 dark:text-{{ $iconColor }}-300">{{ $feature }}</span>
+            @endforeach
+        </div>
+    @endif
 
     @if($blogPost)
         <a href="{{ blog_url('/' . $blogPost->slug) }}" class="inline-flex items-center text-{{ $iconColor }}-600 hover:text-{{ $iconColor }}-800 dark:text-{{ $iconColor }}-400 dark:hover:text-{{ $iconColor }}-300 text-sm font-medium mt-3 group">
