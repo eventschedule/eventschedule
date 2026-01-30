@@ -79,7 +79,7 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-sky-950 to-blue-950 rounded-2xl border border-sky-400/30 p-4 max-w-xs">
+                                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-950 dark:to-blue-950 rounded-2xl border border-sky-300 dark:border-sky-400/30 p-4 max-w-xs">
                                     <div class="flex items-center gap-3 mb-4">
                                         <div class="w-10 h-10 bg-gradient-to-br from-sky-500 to-blue-600 rounded-xl flex items-center justify-center">
                                             <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -271,42 +271,6 @@
                                 <div class="w-8 h-0.5 bg-blue-400/50"></div>
                             </div>
                             <div class="text-blue-700 dark:text-blue-300 text-xs font-medium text-center mt-2">Two-way sync</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Team Management -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 border border-teal-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-sm font-medium mb-4">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                        Team
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Manage your library team</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Give staff access to post events and manage programs. Control who can do what.</p>
-
-                    <div class="space-y-2">
-                        <div class="flex items-center gap-3 p-2 rounded-lg bg-teal-500/20 border border-teal-400/30">
-                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center text-white text-xs font-semibold">SL</div>
-                            <div class="flex-1">
-                                <div class="text-gray-900 dark:text-white text-xs font-medium">Sarah L.</div>
-                                <div class="text-teal-700 dark:text-teal-300 text-[10px]">Head Librarian</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center text-white text-xs font-semibold">MR</div>
-                            <div class="flex-1">
-                                <div class="text-gray-600 dark:text-gray-300 text-xs font-medium">Mike R.</div>
-                                <div class="text-gray-500 dark:text-gray-400 text-[10px]">Children's Dept.</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-sky-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">JK</div>
-                            <div class="flex-1">
-                                <div class="text-gray-600 dark:text-gray-300 text-xs font-medium">Jen K.</div>
-                                <div class="text-gray-500 dark:text-gray-400 text-[10px]">Teen Services</div>
-                            </div>
                         </div>
                     </div>
                 </div>

@@ -319,29 +319,6 @@
                     </div>
                 </div>
 
-                <!-- Student Followers -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-900 dark:to-rose-900 border border-pink-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-300 text-sm font-medium mb-5 border border-pink-200 dark:border-pink-800/30">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                        Followers
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Students follow your schedule</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Students get notified about new classes, schedule changes, and special workshops automatically.</p>
-
-                    <div class="flex items-center justify-center">
-                        <div class="flex -space-x-2">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">A</div>
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-rose-500 to-red-500 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">B</div>
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-orange-500 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">C</div>
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">D</div>
-                            <div class="w-8 h-8 rounded-full bg-white/20 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">+84</div>
-                        </div>
-                    </div>
-                    <div class="text-center mt-3 text-pink-300 text-xs">88 students following your classes</div>
-                </div>
-
                 <!-- Class Analytics -->
                 <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-sky-100 dark:from-cyan-900 dark:to-sky-900 border border-cyan-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300 text-sm font-medium mb-5 border border-cyan-200 dark:border-cyan-800/30">

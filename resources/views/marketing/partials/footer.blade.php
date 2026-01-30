@@ -2,7 +2,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <!-- Main Body: Link Columns -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
 
             <!-- Product -->
             <div>
@@ -19,8 +19,8 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ marketing_url('/integrations') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
-                            Integrations
+                        <a href="{{ marketing_url('/use-cases') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                            Use Cases
                         </a>
                     </li>
                     <li>
@@ -29,50 +29,8 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ marketing_url('/use-cases') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
-                            Use Cases
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ marketing_url('/open-source') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
-                            Open Source
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Features -->
-            <div>
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Features</h3>
-                <ul class="space-y-3">
-                    <li>
-                        <a href="{{ marketing_url('/ticketing') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
-                            Ticketing
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ marketing_url('/ai') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
-                            AI
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ marketing_url('/calendar-sync') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
-                            Calendar Sync
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ marketing_url('/custom-fields') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
-                            Custom Fields
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ marketing_url('/analytics') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
-                            Analytics
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ marketing_url('/team-scheduling') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
-                            Team Scheduling
+                        <a href="{{ marketing_url('/integrations') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                            Integrations
                         </a>
                     </li>
                 </ul>
@@ -104,11 +62,6 @@
                         </a>
                     </li>
                     @endif
-                    <li>
-                        <a href="{{ marketing_url('/contact') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
-                            Contact
-                        </a>
-                    </li>
                 </ul>
             </div>
 
@@ -132,8 +85,13 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ marketing_url('/stripe') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
-                            Stripe
+                        <a href="{{ marketing_url('/open-source') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                            Open Source
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/eventschedule/eventschedule" target="_blank" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                            GitHub
                         </a>
                     </li>
                 </ul>
@@ -149,6 +107,11 @@
                         </a>
                     </li>
                     <li>
+                        <a href="{{ marketing_url('/contact') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                            Contact
+                        </a>
+                    </li>
+                    <li>
                         <a href="{{ marketing_url('/privacy') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
                             Privacy Policy
                         </a>
@@ -161,16 +124,6 @@
                     <li>
                         <a href="{{ marketing_url('/self-hosting-terms-of-service') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
                             Self-Hosting Terms
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('login') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
-                            Sign In
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('sign_up') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
-                            Get Started
                         </a>
                     </li>
                 </ul>

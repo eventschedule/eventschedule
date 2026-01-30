@@ -16,7 +16,14 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <!-- Badge -->
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-200 dark:bg-[#0f0f14] border border-gray-200 dark:border-white/10 mb-8">
+            <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 backdrop-blur-sm">
+                <div class="relative">
+                    <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+                    </svg>
+                </div>
                 <span class="text-sm text-gray-600 dark:text-gray-300 font-medium tracking-wide">For Workshop Instructors & Educators</span>
             </div>
 
@@ -96,14 +103,14 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-indigo-950 to-purple-950 rounded-2xl border border-indigo-400/30 p-4 max-w-xs">
-                                    <div class="text-[10px] text-indigo-300 mb-3 font-semibold tracking-wide">UPCOMING WORKSHOPS</div>
+                                <div class="bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-950 dark:to-purple-950 rounded-2xl border border-indigo-300 dark:border-indigo-400/30 p-4 max-w-xs">
+                                    <div class="text-[10px] text-indigo-600 dark:text-indigo-300 mb-3 font-semibold tracking-wide">UPCOMING WORKSHOPS</div>
                                     <div class="space-y-3">
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-indigo-500/20 border border-indigo-400/30">
                                             <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white text-xs font-bold">SAT</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-900 dark:text-white text-sm font-semibold">Italian Pasta Making</div>
-                                                <div class="text-indigo-300 text-xs">Sat, Feb 8 - 3 spots left</div>
+                                                <div class="text-indigo-600 dark:text-indigo-300 text-xs">Sat, Feb 8 - 3 spots left</div>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
@@ -194,35 +201,35 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-violet-950 to-purple-950 rounded-2xl border border-violet-400/30 p-4 max-w-xs">
+                                <div class="bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-950 dark:to-purple-950 rounded-2xl border border-violet-300 dark:border-violet-400/30 p-4 max-w-xs">
                                     <div class="flex items-center justify-between mb-3">
-                                        <div class="text-[10px] text-violet-300 font-semibold tracking-wide">POTTERY FUNDAMENTALS</div>
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-green-500/20 text-green-300 text-[10px] font-medium border border-green-500/30">Series Discount</span>
+                                        <div class="text-[10px] text-violet-600 dark:text-violet-300 font-semibold tracking-wide">POTTERY FUNDAMENTALS</div>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-300 text-[10px] font-medium border border-green-300 dark:border-green-500/30">Series Discount</span>
                                     </div>
                                     <div class="space-y-2">
-                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-violet-500/20 border border-violet-400/30">
-                                            <div class="w-8 h-8 rounded-full bg-violet-500/40 flex items-center justify-center text-violet-200 text-xs font-bold">1</div>
+                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-violet-200 dark:bg-violet-500/20 border border-violet-300 dark:border-violet-400/30">
+                                            <div class="w-8 h-8 rounded-full bg-violet-500/40 flex items-center justify-center text-violet-600 dark:text-violet-200 text-xs font-bold">1</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-900 dark:text-white text-sm font-medium">Hand Building</div>
                                             </div>
                                             <svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                                         </div>
-                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-violet-500/20 border border-violet-400/30">
-                                            <div class="w-8 h-8 rounded-full bg-violet-500/40 flex items-center justify-center text-violet-200 text-xs font-bold">2</div>
+                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-violet-200 dark:bg-violet-500/20 border border-violet-300 dark:border-violet-400/30">
+                                            <div class="w-8 h-8 rounded-full bg-violet-500/40 flex items-center justify-center text-violet-600 dark:text-violet-200 text-xs font-bold">2</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-900 dark:text-white text-sm font-medium">Wheel Throwing</div>
                                             </div>
                                             <svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                                         </div>
-                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-violet-500/10 border border-violet-400/20">
-                                            <div class="w-8 h-8 rounded-full bg-violet-500/30 flex items-center justify-center text-violet-300 text-xs font-bold">3</div>
+                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-violet-100 dark:bg-violet-500/10 border border-violet-200 dark:border-violet-400/20">
+                                            <div class="w-8 h-8 rounded-full bg-violet-500/30 flex items-center justify-center text-violet-600 dark:text-violet-300 text-xs font-bold">3</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Glazing</div>
                                             </div>
-                                            <div class="text-violet-400 text-[10px]">Next</div>
+                                            <div class="text-violet-600 dark:text-violet-400 text-[10px]">Next</div>
                                         </div>
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                                            <div class="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center text-violet-400 text-xs font-bold">4</div>
+                                            <div class="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center text-violet-500 dark:text-violet-400 text-xs font-bold">4</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-600 dark:text-gray-400 text-sm font-medium">Advanced Forms</div>
                                             </div>
@@ -292,33 +299,6 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                             </svg>
                             <div class="text-blue-300 text-xs">Google Calendar</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Custom Fields (materials/skill levels) -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900 dark:to-pink-900 border border-rose-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                        Custom Fields
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Collect what you need</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Ask about skill levels, materials to bring, dietary restrictions - anything.</p>
-
-                    <div class="space-y-2">
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-rose-500/20 border border-rose-400/30">
-                            <span class="text-gray-600 dark:text-gray-300 text-xs flex-1">Skill Level</span>
-                            <span class="text-rose-300 text-xs px-2 py-0.5 bg-rose-500/20 rounded-full">Beginner</span>
-                        </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                            <span class="text-gray-500 dark:text-gray-400 text-xs flex-1">Dietary Restrictions</span>
-                            <span class="text-gray-600 dark:text-gray-400 text-xs">Gluten-free</span>
-                        </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                            <span class="text-gray-500 dark:text-gray-400 text-xs flex-1">Bringing Own Camera?</span>
-                            <span class="text-gray-600 dark:text-gray-400 text-xs">Yes</span>
                         </div>
                     </div>
                 </div>
