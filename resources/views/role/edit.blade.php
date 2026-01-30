@@ -1441,10 +1441,9 @@
                                 <div class="mt-3">
                                     <x-input-label :value="__('messages.ai_prompt_custom_field')" class="text-sm" />
                                     <textarea name="event_custom_fields[{{ $fieldKey }}][ai_prompt]"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm ai-prompt-textarea"
                                         rows="2"
-                                        maxlength="500"
-                                        placeholder="{{ __('messages.ai_prompt_custom_field_placeholder') }}">{{ $field['ai_prompt'] ?? '' }}</textarea>
+                                        maxlength="500">{{ $field['ai_prompt'] ?? '' }}</textarea>
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_prompt_custom_field_help') }}</p>
                                 </div>
                                 <div class="mt-3 flex items-center justify-between">
@@ -3169,6 +3168,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Event Custom Fields Management
 let eventCustomFieldCounter = {{ count($role->event_custom_fields ?? []) }};
+const aiPromptExamples = @json(array_map(fn($i) => __("messages.ai_prompt_example_$i"), range(1, 20)));
+const aiPromptEgPrefix = @json(__('messages.eg'));
+
+function getRandomAiPromptPlaceholder() {
+    const usedPlaceholders = [];
+    document.querySelectorAll('.ai-prompt-textarea').forEach(function(textarea) {
+        if (textarea.placeholder) {
+            usedPlaceholders.push(textarea.placeholder);
+        }
+    });
+    const available = aiPromptExamples.filter(function(example) {
+        return !usedPlaceholders.some(function(used) { return used.includes(example); });
+    });
+    const pool = available.length > 0 ? available : aiPromptExamples;
+    const picked = pool[Math.floor(Math.random() * pool.length)];
+    return aiPromptEgPrefix + ' ' + picked;
+}
+
+document.querySelectorAll('.ai-prompt-textarea').forEach(function(textarea) {
+    if (!textarea.placeholder) {
+        textarea.placeholder = getRandomAiPromptPlaceholder();
+    }
+});
 
 function addEventCustomField() {
     const container = document.getElementById('event-custom-fields-container');
@@ -3219,10 +3241,9 @@ function addEventCustomField() {
             <div class="mt-3">
                 <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.ai_prompt_custom_field') !!}</label>
                 <textarea name="event_custom_fields[${fieldKey}][ai_prompt]"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm ai-prompt-textarea"
                     rows="2"
-                    maxlength="500"
-                    placeholder="{!! __('messages.ai_prompt_custom_field_placeholder') !!}"></textarea>
+                    maxlength="500"></textarea>
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{!! __('messages.ai_prompt_custom_field_help') !!}</p>
             </div>
             <div class="mt-3 flex items-center justify-between">
@@ -3241,6 +3262,10 @@ function addEventCustomField() {
     `;
 
     container.insertAdjacentHTML('beforeend', fieldHtml);
+    const newTextarea = container.querySelector('.event-custom-field-item:last-child .ai-prompt-textarea');
+    if (newTextarea) {
+        newTextarea.placeholder = getRandomAiPromptPlaceholder();
+    }
     updateEventCustomFieldButton();
 }
 
