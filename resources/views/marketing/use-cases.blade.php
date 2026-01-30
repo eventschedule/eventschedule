@@ -200,6 +200,57 @@
                         </div>
                     </div>
                 </a>
+
+                <!-- Fitness & Yoga Instructors -->
+                <a href="{{ marketing_url('/for-fitness-and-yoga') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900 to-green-900 border border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="relative">
+                        <h3 class="text-xl font-bold text-white mb-2">Fitness & Yoga Instructors</h3>
+                        <p class="text-gray-300 text-sm mb-4">Share your class schedule and let students follow your sessions.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Yoga Teachers</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Personal Trainers</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Pilates Instructors</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">CrossFit Coaches</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Group Fitness</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Meditation Guides</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Workshop Instructors -->
+                <a href="{{ marketing_url('/for-workshop-instructors') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900 to-purple-900 border border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="relative">
+                        <h3 class="text-xl font-bold text-white mb-2">Workshop Instructors</h3>
+                        <p class="text-gray-300 text-sm mb-4">List your workshops and courses to fill every seat.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Cooking Classes</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Pottery & Ceramics</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Photography</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Craft & Maker</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Art Teachers</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Music Lessons</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Visual Artists -->
+                <a href="{{ marketing_url('/for-visual-artists') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-900 to-pink-900 border border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-fuchsia-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="relative">
+                        <h3 class="text-xl font-bold text-white mb-2">Visual Artists</h3>
+                        <p class="text-gray-300 text-sm mb-4">Announce exhibitions, open studios, and art fairs to collectors.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Painters & Illustrators</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Sculptors</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Photographers</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Printmakers</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Mixed Media</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Digital Artists</span>
+                        </div>
+                    </div>
+                </a>
             </div>
         </div>
     </section>
@@ -367,6 +418,57 @@
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Cultural Centers</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Neighborhood Centers</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Faith-Based Centers</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Farmers Markets -->
+                <a href="{{ marketing_url('/for-farmers-markets') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-lime-900 to-green-900 border border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-lime-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="relative">
+                        <h3 class="text-xl font-bold text-white mb-2">Farmers Markets</h3>
+                        <p class="text-gray-300 text-sm mb-4">Share your market schedule and build a loyal shopper community.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Weekly Farmers Markets</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Artisan & Craft Markets</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Flea Markets</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Holiday Markets</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Night Markets</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Specialty Food Markets</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Hotels & Resorts -->
+                <a href="{{ marketing_url('/for-hotels-and-resorts') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 to-amber-900 border border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-slate-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="relative">
+                        <h3 class="text-xl font-bold text-white mb-2">Hotels & Resorts</h3>
+                        <p class="text-gray-300 text-sm mb-4">Elevate the guest experience with activity calendars and events.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Boutique Hotels</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Beach Resorts</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Conference Hotels</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Spa & Wellness</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Mountain Lodges</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Casino Hotels</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Libraries -->
+                <a href="{{ marketing_url('/for-libraries') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-900 to-blue-900 border border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="relative">
+                        <h3 class="text-xl font-bold text-white mb-2">Libraries</h3>
+                        <p class="text-gray-300 text-sm mb-4">Share programs, author events, and community activities with patrons.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Public Libraries</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">University Libraries</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Community Reading Rooms</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Children's Libraries</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Archive Centers</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 text-xs">Mobile Libraries</span>
                         </div>
                     </div>
                 </a>
