@@ -112,41 +112,41 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <!-- Phase 1: The Craft -->
-                    <div class="relative bg-gradient-to-br from-amber-900/40 to-yellow-900/40 rounded-2xl border border-amber-500/20 p-6 hover:border-amber-500/40 transition-colors">
+                    <div class="relative bg-gradient-to-br from-amber-100/40 to-yellow-100/40 dark:from-amber-900/40 dark:to-yellow-900/40 rounded-2xl border border-amber-500/20 p-6 hover:border-amber-500/40 transition-colors">
                         <div class="lg:absolute lg:-top-3 lg:left-1/2 lg:-translate-x-1/2 w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4 lg:mb-0 mx-auto lg:mx-0">1</div>
                         <div class="text-center lg:pt-6">
                             <div class="text-3xl mb-3">&#127806;</div>
-                            <div class="text-amber-300 text-sm font-semibold tracking-wider uppercase mb-2">The Craft</div>
+                            <div class="text-amber-700 dark:text-amber-300 text-sm font-semibold tracking-wider uppercase mb-2">The Craft</div>
                             <p class="text-gray-500 dark:text-gray-400 text-sm">Share behind-the-scenes: harvest updates, brew day photos, barrel selection. Build anticipation from day one.</p>
                         </div>
                     </div>
 
                     <!-- Phase 2: The Wait -->
-                    <div class="relative bg-gradient-to-br from-purple-900/40 to-indigo-900/40 rounded-2xl border border-purple-500/20 p-6 hover:border-purple-500/40 transition-colors">
+                    <div class="relative bg-gradient-to-br from-purple-100/40 to-indigo-100/40 dark:from-purple-900/40 dark:to-indigo-900/40 rounded-2xl border border-purple-500/20 p-6 hover:border-purple-500/40 transition-colors">
                         <div class="lg:absolute lg:-top-3 lg:left-1/2 lg:-translate-x-1/2 w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4 lg:mb-0 mx-auto lg:mx-0">2</div>
                         <div class="text-center lg:pt-6">
                             <div class="text-3xl mb-3">&#127866;</div>
-                            <div class="text-purple-300 text-sm font-semibold tracking-wider uppercase mb-2">The Wait</div>
+                            <div class="text-purple-700 dark:text-purple-300 text-sm font-semibold tracking-wider uppercase mb-2">The Wait</div>
                             <p class="text-gray-500 dark:text-gray-400 text-sm">Aging in barrels, fermenting in tanks. Tease your members with early samples and first-access previews.</p>
                         </div>
                     </div>
 
                     <!-- Phase 3: The Release -->
-                    <div class="relative bg-gradient-to-br from-rose-900/40 to-orange-900/40 rounded-2xl border border-rose-500/20 p-6 hover:border-rose-500/40 transition-colors">
+                    <div class="relative bg-gradient-to-br from-rose-100/40 to-orange-100/40 dark:from-rose-900/40 dark:to-orange-900/40 rounded-2xl border border-rose-500/20 p-6 hover:border-rose-500/40 transition-colors">
                         <div class="lg:absolute lg:-top-3 lg:left-1/2 lg:-translate-x-1/2 w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4 lg:mb-0 mx-auto lg:mx-0">3</div>
                         <div class="text-center lg:pt-6">
                             <div class="text-3xl mb-3">&#127881;</div>
-                            <div class="text-rose-300 text-sm font-semibold tracking-wider uppercase mb-2">The Release</div>
+                            <div class="text-rose-700 dark:text-rose-300 text-sm font-semibold tracking-wider uppercase mb-2">The Release</div>
                             <p class="text-gray-500 dark:text-gray-400 text-sm">The moment arrives. Email blast, release party, allocations ship. Your fans showed up because you told them first.</p>
                         </div>
                     </div>
 
                     <!-- Phase 4: The Community -->
-                    <div class="relative bg-gradient-to-br from-emerald-900/40 to-teal-900/40 rounded-2xl border border-emerald-500/20 p-6 hover:border-emerald-500/40 transition-colors">
+                    <div class="relative bg-gradient-to-br from-emerald-100/40 to-teal-100/40 dark:from-emerald-900/40 dark:to-teal-900/40 rounded-2xl border border-emerald-500/20 p-6 hover:border-emerald-500/40 transition-colors">
                         <div class="lg:absolute lg:-top-3 lg:left-1/2 lg:-translate-x-1/2 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4 lg:mb-0 mx-auto lg:mx-0">4</div>
                         <div class="text-center lg:pt-6">
                             <div class="text-3xl mb-3">&#129346;</div>
-                            <div class="text-emerald-300 text-sm font-semibold tracking-wider uppercase mb-2">The Community</div>
+                            <div class="text-emerald-700 dark:text-emerald-300 text-sm font-semibold tracking-wider uppercase mb-2">The Community</div>
                             <p class="text-gray-500 dark:text-gray-400 text-sm">Taproom visits, club events, share nights. The relationship continues until the next release.</p>
                         </div>
                     </div>
@@ -244,12 +244,12 @@
                         <div class="space-y-2">
                             <div class="flex items-center gap-2">
                                 <div class="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white text-[10px] font-bold">M</div>
-                                <span class="text-white text-xs flex-1">Wine Club Member</span>
+                                <span class="text-gray-900 dark:text-white text-xs flex-1">Wine Club Member</span>
                                 <span class="text-emerald-400 text-[10px]">Confirmed</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <div class="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-[10px] font-bold">J</div>
-                                <span class="text-gray-300 text-xs flex-1">Email Subscriber</span>
+                                <span class="text-gray-600 dark:text-gray-300 text-xs flex-1">Email Subscriber</span>
                                 <span class="text-amber-400 text-[10px]">Waitlist #3</span>
                             </div>
                         </div>
@@ -305,7 +305,7 @@
                                 <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-500/20 border border-indigo-400/30">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">AT</div>
                                     <div class="flex-1">
-                                        <div class="text-white text-sm font-medium">Acme Tech - Team Outing</div>
+                                        <div class="text-gray-900 dark:text-white text-sm font-medium">Acme Tech - Team Outing</div>
                                         <div class="text-indigo-700 dark:text-indigo-300 text-xs">Nov 3 &bull; 25 people &bull; Private tour</div>
                                     </div>
                                     <div class="flex gap-1">
@@ -449,17 +449,17 @@
         </div>
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-indigo-900 to-violet-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900 dark:to-violet-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
                                 Online Events
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-300 transition-colors">Virtual tastings go global</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Ship your product, host a live tasting. Fans anywhere can join, pay, and taste along. Turn your taproom into a worldwide experience.</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Virtual tastings go global</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">Ship your product, host a live tasting. Fans anywhere can join, pay, and taste along. Turn your taproom into a worldwide experience.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live tastings</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Sell tickets worldwide</span>
@@ -483,10 +483,10 @@
                                 </div>
                                 <div class="bg-gradient-to-br from-amber-600/30 to-orange-600/30 rounded-lg p-4 text-center mb-3">
                                     <div class="text-2xl mb-1">&#127866;</div>
-                                    <div class="text-white text-sm font-medium">IPA Flight</div>
-                                    <div class="text-gray-400 text-xs">with Brewmaster Mike</div>
+                                    <div class="text-gray-900 dark:text-white text-sm font-medium">IPA Flight</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-xs">with Brewmaster Mike</div>
                                 </div>
-                                <div class="flex items-center justify-center gap-2 text-gray-400 text-xs">
+                                <div class="flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400 text-xs">
                                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>

@@ -107,18 +107,18 @@
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Link your schedule to venue calendars. When they post your show, it appears on your schedule automatically.</p>
 
                     <div class="space-y-2">
-                        <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-500/20 border border-indigo-400/30">
-                            <div class="w-8 h-8 rounded-lg bg-indigo-500/30 flex items-center justify-center">
-                                <span class="text-indigo-300 text-xs font-bold">BN</span>
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-200 dark:bg-indigo-500/20 border border-indigo-400/30">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-200 dark:bg-indigo-500/30 flex items-center justify-center">
+                                <span class="text-indigo-700 dark:text-indigo-300 text-xs font-bold">BN</span>
                             </div>
                             <div>
-                                <div class="text-white text-sm font-medium">Blue Note</div>
-                                <div class="text-indigo-300 text-xs">Linked</div>
+                                <div class="text-gray-900 dark:text-white text-sm font-medium">Blue Note</div>
+                                <div class="text-indigo-600 dark:text-indigo-300 text-xs">Linked</div>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5">
-                            <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-                                <span class="text-gray-400 text-xs font-bold">TR</span>
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/5">
+                            <div class="w-8 h-8 rounded-lg bg-gray-200 dark:bg-white/10 flex items-center justify-center">
+                                <span class="text-gray-500 dark:text-gray-400 text-xs font-bold">TR</span>
                             </div>
                             <div>
                                 <div class="text-gray-700 dark:text-gray-300 text-sm font-medium">The Roxy</div>
@@ -140,11 +140,11 @@
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Connect your Google Calendar. Changes sync both ways automatically via real-time webhooks.</p>
 
                     <div class="flex items-center justify-center gap-3">
-                        <div class="bg-blue-500/20 rounded-xl border border-blue-400/30 p-3 w-20">
-                            <div class="text-[10px] text-blue-300 mb-1 text-center">Schedule</div>
+                        <div class="bg-blue-200 dark:bg-blue-500/20 rounded-xl border border-blue-400/30 p-3 w-20">
+                            <div class="text-[10px] text-blue-600 dark:text-blue-300 mb-1 text-center">Schedule</div>
                             <div class="space-y-1">
-                                <div class="h-1.5 bg-white/20 rounded"></div>
-                                <div class="h-1.5 bg-white/20 rounded w-3/4"></div>
+                                <div class="h-1.5 bg-blue-300 dark:bg-white/20 rounded"></div>
+                                <div class="h-1.5 bg-blue-300 dark:bg-white/20 rounded w-3/4"></div>
                             </div>
                         </div>
                         <div class="flex flex-col items-center gap-0.5">
@@ -155,7 +155,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
                         </div>
-                        <div class="bg-white/10 rounded-xl border border-white/20 p-3 w-20">
+                        <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-3 w-20">
                             <div class="text-[10px] text-gray-600 dark:text-gray-300 mb-1 text-center">Google</div>
                             <div class="space-y-1">
                                 <div class="h-1.5 bg-blue-400/40 rounded"></div>
@@ -218,18 +218,18 @@
                         <div class="text-gray-500 dark:text-gray-400">F</div>
                         <div class="text-gray-500 dark:text-gray-400">S</div>
                         <div class="text-gray-500 dark:text-gray-400">S</div>
-                        <div class="p-1 rounded bg-emerald-500/30 text-emerald-300">1</div>
-                        <div class="p-1 rounded bg-emerald-500/30 text-emerald-300">2</div>
-                        <div class="p-1 rounded bg-red-500/30 text-red-300">3</div>
-                        <div class="p-1 rounded bg-emerald-500/30 text-emerald-300">4</div>
-                        <div class="p-1 rounded bg-violet-500/30 text-violet-300">5</div>
-                        <div class="p-1 rounded bg-violet-500/30 text-violet-300">6</div>
-                        <div class="p-1 rounded bg-emerald-500/30 text-emerald-300">7</div>
+                        <div class="p-1 rounded bg-emerald-200 text-emerald-700 dark:bg-emerald-500/30 dark:text-emerald-300">1</div>
+                        <div class="p-1 rounded bg-emerald-200 text-emerald-700 dark:bg-emerald-500/30 dark:text-emerald-300">2</div>
+                        <div class="p-1 rounded bg-red-200 text-red-700 dark:bg-red-500/30 dark:text-red-300">3</div>
+                        <div class="p-1 rounded bg-emerald-200 text-emerald-700 dark:bg-emerald-500/30 dark:text-emerald-300">4</div>
+                        <div class="p-1 rounded bg-violet-200 text-violet-700 dark:bg-violet-500/30 dark:text-violet-300">5</div>
+                        <div class="p-1 rounded bg-violet-200 text-violet-700 dark:bg-violet-500/30 dark:text-violet-300">6</div>
+                        <div class="p-1 rounded bg-emerald-200 text-emerald-700 dark:bg-emerald-500/30 dark:text-emerald-300">7</div>
                     </div>
                     <div class="flex gap-4 mt-4 text-xs">
-                        <div class="flex items-center gap-1"><div class="w-2 h-2 rounded bg-emerald-500"></div><span class="text-gray-400">Available</span></div>
-                        <div class="flex items-center gap-1"><div class="w-2 h-2 rounded bg-violet-500"></div><span class="text-gray-400">Booked</span></div>
-                        <div class="flex items-center gap-1"><div class="w-2 h-2 rounded bg-red-500"></div><span class="text-gray-400">Blocked</span></div>
+                        <div class="flex items-center gap-1"><div class="w-2 h-2 rounded bg-emerald-500"></div><span class="text-gray-500 dark:text-gray-400">Available</span></div>
+                        <div class="flex items-center gap-1"><div class="w-2 h-2 rounded bg-violet-500"></div><span class="text-gray-500 dark:text-gray-400">Booked</span></div>
+                        <div class="flex items-center gap-1"><div class="w-2 h-2 rounded bg-red-500"></div><span class="text-gray-500 dark:text-gray-400">Blocked</span></div>
                     </div>
                 </div>
 
@@ -245,26 +245,26 @@
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Invite band members to manage the schedule together. Everyone stays in sync.</p>
 
                     <div class="space-y-2">
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-violet-500 flex items-center justify-center text-white text-xs font-semibold">JD</div>
                             <div class="flex-1">
-                                <div class="text-white text-sm">Jake</div>
+                                <div class="text-gray-900 dark:text-white text-sm">Jake</div>
                             </div>
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px]">Owner</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-[10px]">Owner</span>
                         </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-xs font-semibold">MK</div>
                             <div class="flex-1">
                                 <div class="text-gray-700 dark:text-gray-300 text-sm">Maya</div>
                             </div>
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 text-[10px]">Admin</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-[10px]">Admin</span>
                         </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">SR</div>
                             <div class="flex-1">
                                 <div class="text-gray-700 dark:text-gray-300 text-sm">Sam</div>
                             </div>
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px]">Member</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-[10px]">Member</span>
                         </div>
                     </div>
                 </div>
@@ -285,7 +285,7 @@
                             <div class="w-full h-full bg-gradient-to-br from-violet-600/40 to-indigo-600/40 rounded-lg flex flex-col items-center justify-center">
                                 <div class="text-white text-[10px] font-semibold mb-1">LIVE TONIGHT</div>
                                 <div class="text-amber-300 text-xs font-bold">The Jazz Trio</div>
-                                <div class="text-gray-400 text-[8px] mt-1">Blue Note • 8PM</div>
+                                <div class="text-gray-500 dark:text-gray-400 text-[8px] mt-1">Blue Note • 8PM</div>
                             </div>
                             <div class="absolute -bottom-2 -right-2 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
                                 <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -529,17 +529,17 @@
         </div>
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-indigo-900 to-violet-900 rounded-3xl border border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900 dark:to-violet-900 rounded-3xl border border-indigo-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
                                 Online Events
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-indigo-300 transition-colors">Stream to the world</h3>
-                            <p class="text-gray-400 text-lg mb-4">Share live performances with fans worldwide. Add your streaming URL and sell tickets to viewers anywhere—no venue required.</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-300 transition-colors">Stream to the world</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">Share live performances with fans worldwide. Add your streaming URL and sell tickets to viewers anywhere - no venue required.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live streaming</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Global ticket sales</span>

@@ -59,7 +59,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Google Calendar Card -->
                 <a href="{{ marketing_url('/google-calendar') }}" class="group block">
-                    <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900 to-indigo-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 h-full">
+                    <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 h-full">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
                                 <svg class="w-7 h-7" viewBox="0 0 24 24">
@@ -70,17 +70,17 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-2xl font-bold text-white group-hover:text-blue-300 transition-colors">Google Calendar</h3>
-                                <p class="text-white/60 text-sm">Real-time sync with webhooks</p>
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-blue-300 transition-colors">Google Calendar</h3>
+                                <p class="text-gray-400 dark:text-white/60 text-sm">Real-time sync with webhooks</p>
                             </div>
                         </div>
 
-                        <p class="text-white/80 mb-6">Connect with OAuth for instant, real-time synchronization. Changes in Google Calendar appear immediately via webhook notifications.</p>
+                        <p class="text-gray-600 dark:text-white/80 mb-6">Connect with OAuth for instant, real-time synchronization. Changes in Google Calendar appear immediately via webhook notifications.</p>
 
                         <div class="flex flex-wrap gap-2 mb-6">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm">OAuth 2.0</span>
-                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm">Webhooks</span>
-                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm">Instant sync</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm">OAuth 2.0</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm">Webhooks</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm">Instant sync</span>
                         </div>
 
                         <div class="flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
@@ -94,7 +94,7 @@
 
                 <!-- CalDAV Card -->
                 <a href="{{ marketing_url('/caldav') }}" class="group block">
-                    <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900 to-cyan-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 h-full">
+                    <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 h-full">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center">
                                 <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -102,17 +102,17 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-2xl font-bold text-white group-hover:text-teal-300 transition-colors">CalDAV</h3>
-                                <p class="text-white/60 text-sm">Open standard, any server</p>
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-teal-300 transition-colors">CalDAV</h3>
+                                <p class="text-gray-400 dark:text-white/60 text-sm">Open standard, any server</p>
                             </div>
                         </div>
 
-                        <p class="text-white/80 mb-6">Sync with any CalDAV-compatible server—Nextcloud, Radicale, Fastmail, iCloud, and more. Perfect for selfhosted setups.</p>
+                        <p class="text-gray-600 dark:text-white/80 mb-6">Sync with any CalDAV-compatible server--Nextcloud, Radicale, Fastmail, iCloud, and more. Perfect for selfhosted setups.</p>
 
                         <div class="flex flex-wrap gap-2 mb-6">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm">Open standard</span>
-                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm">Selfhosted</span>
-                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm">Any server</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-sm">Open standard</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-sm">Selfhosted</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-sm">Any server</span>
                         </div>
 
                         <div class="flex items-center text-teal-400 font-medium group-hover:gap-3 gap-2 transition-all">
@@ -142,17 +142,17 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 <!-- Bidirectional Sync (full width) -->
-                <div class="bento-card md:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900 to-indigo-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card md:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900 dark:to-indigo-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                 </svg>
                                 Bidirectional
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">True two-way sync</h3>
-                            <p class="text-white/80 text-lg mb-6">Push events to your calendar, pull events from your calendar, or sync both ways. Choose the direction that works for your workflow.</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">True two-way sync</h3>
+                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Push events to your calendar, pull events from your calendar, or sync both ways. Choose the direction that works for your workflow.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Push only</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Pull only</span>
@@ -196,15 +196,15 @@
                 </div>
 
                 <!-- Attendee Calendar Integration -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-900 to-pink-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900 dark:to-pink-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
                         For Attendees
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">One-click add</h3>
-                    <p class="text-white/80 mb-6">Visitors can add any event to their personal calendar with a single click. No account required.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">One-click add</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">Visitors can add any event to their personal calendar with a single click. No account required.</p>
 
                     <div class="flex flex-wrap gap-2 justify-center">
                         <span class="px-4 py-2 rounded-xl bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium flex items-center gap-2">
@@ -229,15 +229,15 @@
                 </div>
 
                 <!-- Multi-Calendar Support -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900 to-blue-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                         Flexible
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Choose your calendar</h3>
-                    <p class="text-white/80 mb-4">Select which calendar to sync with for each schedule. Different schedules can use different calendars.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Choose your calendar</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-4">Select which calendar to sync with for each schedule. Different schedules can use different calendars.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-cyan-500/20 border border-cyan-400/30">
@@ -255,17 +255,17 @@
                 </div>
 
                 <!-- Automatic Sync (full width) -->
-                <div class="bento-card md:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900 to-teal-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card md:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col md:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
                                 Automatic
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3">Set it and forget it</h3>
-                            <p class="text-white/80 text-lg">Events sync automatically when created, updated, or deleted. No manual work required.</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3">Set it and forget it</h3>
+                            <p class="text-gray-600 dark:text-white/80 text-lg">Events sync automatically when created, updated, or deleted. No manual work required.</p>
                         </div>
                         <div class="flex-shrink-0">
                             <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 space-y-2">
@@ -460,12 +460,12 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ route('marketing.analytics') }}" class="group block">
-                <div class="bg-gradient-to-br from-emerald-900 to-teal-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <!-- Text content -->
                         <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-emerald-300 transition-colors">Built-in Analytics</h3>
-                            <p class="text-white/80 text-lg mb-4">Track page views, device breakdown, and traffic sources. Privacy-first with no external services.</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-emerald-300 transition-colors">Built-in Analytics</h3>
+                            <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Track page views, device breakdown, and traffic sources. Privacy-first with no external services.</p>
                             <span class="inline-flex items-center text-emerald-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

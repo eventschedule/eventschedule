@@ -81,45 +81,45 @@
                         <div class="text-gray-600 dark:text-gray-300 text-xs">Dark</div>
                     </div>
                     <!-- Tuesday -->
-                    <div class="flex-1 text-center p-4 rounded-xl bg-lime-900/30 border border-lime-700/30">
-                        <div class="text-lime-400 text-xs font-semibold mb-2">TUE</div>
+                    <div class="flex-1 text-center p-4 rounded-xl bg-lime-100/30 dark:bg-lime-900/30 border border-lime-300/30 dark:border-lime-700/30">
+                        <div class="text-lime-600 dark:text-lime-400 text-xs font-semibold mb-2">TUE</div>
                         <div class="w-3 h-3 rounded-full bg-lime-500 mx-auto mb-2 animate-pulse"></div>
-                        <div class="text-lime-300 text-xs font-medium">Open Mic</div>
+                        <div class="text-lime-700 dark:text-lime-300 text-xs font-medium">Open Mic</div>
                         <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">New comics cut their teeth</div>
                     </div>
                     <!-- Wednesday -->
-                    <div class="flex-1 text-center p-4 rounded-xl bg-blue-900/30 border border-blue-700/30">
-                        <div class="text-blue-400 text-xs font-semibold mb-2">WED</div>
+                    <div class="flex-1 text-center p-4 rounded-xl bg-blue-100/30 dark:bg-blue-900/30 border border-blue-300/30 dark:border-blue-700/30">
+                        <div class="text-blue-600 dark:text-blue-400 text-xs font-semibold mb-2">WED</div>
                         <div class="w-3 h-3 rounded-full bg-blue-500 mx-auto mb-2"></div>
-                        <div class="text-blue-300 text-xs font-medium">Improv Jam</div>
+                        <div class="text-blue-700 dark:text-blue-300 text-xs font-medium">Improv Jam</div>
                         <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Ensemble magic</div>
                     </div>
                     <!-- Thursday -->
-                    <div class="flex-1 text-center p-4 rounded-xl bg-amber-900/30 border border-amber-700/30">
-                        <div class="text-amber-400 text-xs font-semibold mb-2">THU</div>
+                    <div class="flex-1 text-center p-4 rounded-xl bg-amber-100/30 dark:bg-amber-900/30 border border-amber-300/30 dark:border-amber-700/30">
+                        <div class="text-amber-600 dark:text-amber-400 text-xs font-semibold mb-2">THU</div>
                         <div class="w-3 h-3 rounded-full bg-amber-500 mx-auto mb-2"></div>
-                        <div class="text-amber-300 text-xs font-medium">New Talent</div>
+                        <div class="text-amber-700 dark:text-amber-300 text-xs font-medium">New Talent</div>
                         <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Rising stars</div>
                     </div>
                     <!-- Friday -->
-                    <div class="flex-1 text-center p-4 rounded-xl bg-yellow-900/40 border border-yellow-600/40">
-                        <div class="text-yellow-400 text-xs font-semibold mb-2">FRI</div>
+                    <div class="flex-1 text-center p-4 rounded-xl bg-yellow-100/40 dark:bg-yellow-900/40 border border-yellow-300/40 dark:border-yellow-600/40">
+                        <div class="text-yellow-600 dark:text-yellow-400 text-xs font-semibold mb-2">FRI</div>
                         <div class="w-3 h-3 rounded-full bg-yellow-400 mx-auto mb-2 shadow-lg shadow-yellow-500/50"></div>
-                        <div class="text-yellow-300 text-xs font-medium">Headliner</div>
+                        <div class="text-yellow-700 dark:text-yellow-300 text-xs font-medium">Headliner</div>
                         <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">The draw</div>
                     </div>
                     <!-- Saturday -->
-                    <div class="flex-1 text-center p-4 rounded-xl bg-yellow-900/40 border border-yellow-600/40">
-                        <div class="text-yellow-400 text-xs font-semibold mb-2">SAT</div>
+                    <div class="flex-1 text-center p-4 rounded-xl bg-yellow-100/40 dark:bg-yellow-900/40 border border-yellow-300/40 dark:border-yellow-600/40">
+                        <div class="text-yellow-600 dark:text-yellow-400 text-xs font-semibold mb-2">SAT</div>
                         <div class="w-3 h-3 rounded-full bg-yellow-400 mx-auto mb-2 shadow-lg shadow-yellow-500/50"></div>
-                        <div class="text-yellow-300 text-xs font-medium">Headliner</div>
+                        <div class="text-yellow-700 dark:text-yellow-300 text-xs font-medium">Headliner</div>
                         <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Sold out shows</div>
                     </div>
                     <!-- Sunday -->
-                    <div class="flex-1 text-center p-4 rounded-xl bg-purple-900/30 border border-purple-700/30">
-                        <div class="text-purple-400 text-xs font-semibold mb-2">SUN</div>
+                    <div class="flex-1 text-center p-4 rounded-xl bg-purple-100/30 dark:bg-purple-900/30 border border-purple-300/30 dark:border-purple-700/30">
+                        <div class="text-purple-600 dark:text-purple-400 text-xs font-semibold mb-2">SUN</div>
                         <div class="w-3 h-3 rounded-full bg-purple-500 mx-auto mb-2"></div>
-                        <div class="text-purple-300 text-xs font-medium">Industry</div>
+                        <div class="text-purple-700 dark:text-purple-300 text-xs font-medium">Industry</div>
                         <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Podcast / Special</div>
                     </div>
                 </div>
@@ -153,14 +153,14 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-amber-950 to-yellow-950 rounded-2xl border border-amber-400/30 p-4 max-w-xs">
-                                    <div class="text-[10px] text-amber-300 mb-3 font-semibold tracking-wide">FRIDAY NIGHT LINEUP</div>
+                                <div class="bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-950 dark:to-yellow-950 rounded-2xl border border-amber-300 dark:border-amber-400/30 p-4 max-w-xs">
+                                    <div class="text-[10px] text-amber-700 dark:text-amber-300 mb-3 font-semibold tracking-wide">FRIDAY NIGHT LINEUP</div>
                                     <div class="space-y-3">
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-amber-500/20 border border-amber-400/30">
                                             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center text-white text-xs font-bold">SC</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-900 dark:text-white text-sm font-semibold">Sarah Chen</div>
-                                                <div class="text-amber-300 text-xs">Headliner - 45 min</div>
+                                                <div class="text-amber-600 dark:text-amber-300 text-xs">Headliner - 45 min</div>
                                             </div>
                                             <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                         </div>
@@ -236,7 +236,7 @@
                             <div class="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-xs font-semibold">JL</div>
                             <div class="flex-1">
                                 <div class="text-gray-900 dark:text-white text-sm font-medium">Jamie Lee</div>
-                                <div class="text-teal-300 text-xs">Wants a showcase spot</div>
+                                <div class="text-teal-600 dark:text-teal-300 text-xs">Wants a showcase spot</div>
                             </div>
                         </div>
                         <div class="relative bg-gray-200 dark:bg-[#0f0f14] rounded-lg overflow-hidden aspect-video mb-3">
@@ -273,24 +273,24 @@
                         </div>
                         <div class="flex justify-center">
                             <div class="space-y-3 w-full max-w-xs">
-                                <div class="bg-gradient-to-r from-green-950 to-emerald-950 rounded-xl p-4 border border-green-500/30">
+                                <div class="bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-950 dark:to-emerald-950 rounded-xl p-4 border border-green-500/30">
                                     <div class="flex items-center justify-between mb-1">
                                         <span class="text-gray-900 dark:text-white font-medium">General Admission</span>
-                                        <span class="text-green-300 font-bold">$20</span>
+                                        <span class="text-green-700 dark:text-green-300 font-bold">$20</span>
                                     </div>
                                     <div class="text-gray-600 dark:text-gray-400 text-xs">Standard seating</div>
                                 </div>
-                                <div class="bg-gradient-to-r from-amber-950 to-yellow-950 rounded-xl p-4 border border-amber-500/30">
+                                <div class="bg-gradient-to-r from-amber-100 to-yellow-100 dark:from-amber-950 dark:to-yellow-950 rounded-xl p-4 border border-amber-500/30">
                                     <div class="flex items-center justify-between mb-1">
                                         <span class="text-gray-900 dark:text-white font-medium">VIP Front Row</span>
-                                        <span class="text-amber-300 font-bold">$35</span>
+                                        <span class="text-amber-700 dark:text-amber-300 font-bold">$35</span>
                                     </div>
                                     <div class="text-gray-600 dark:text-gray-400 text-xs">Best seats + drink voucher</div>
                                 </div>
-                                <div class="bg-gradient-to-r from-purple-950 to-pink-950 rounded-xl p-4 border border-purple-500/30">
+                                <div class="bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-950 dark:to-pink-950 rounded-xl p-4 border border-purple-500/30">
                                     <div class="flex items-center justify-between mb-1">
                                         <span class="text-gray-900 dark:text-white font-medium">Recording Night</span>
-                                        <span class="text-purple-300 font-bold">$40</span>
+                                        <span class="text-purple-700 dark:text-purple-300 font-bold">$40</span>
                                     </div>
                                     <div class="text-gray-600 dark:text-gray-400 text-xs">Special taping event</div>
                                 </div>
@@ -319,8 +319,8 @@
                             </div>
                             <span class="text-gray-900 dark:text-white text-xs font-medium">This Week at The Comedy Cellar</span>
                         </div>
-                        <div class="text-yellow-300 text-[10px] mb-2">Sending to 2,341 followers...</div>
-                        <div class="h-1 bg-yellow-900/50 rounded-full overflow-hidden">
+                        <div class="text-yellow-600 dark:text-yellow-300 text-[10px] mb-2">Sending to 2,341 followers...</div>
+                        <div class="h-1 bg-yellow-200 dark:bg-yellow-900/50 rounded-full overflow-hidden">
                             <div class="h-full bg-yellow-400 rounded-full animate-pulse" style="width: 75%"></div>
                         </div>
                     </div>
@@ -341,7 +341,7 @@
                         <div>
                             <div class="flex items-center justify-between mb-1">
                                 <span class="text-gray-500 dark:text-gray-400 text-xs">Headliner Shows</span>
-                                <span class="text-cyan-300 text-xs font-medium">94%</span>
+                                <span class="text-cyan-600 dark:text-cyan-300 text-xs font-medium">94%</span>
                             </div>
                             <div class="w-full h-2 bg-cyan-500/20 rounded-full overflow-hidden">
                                 <div class="w-[94%] h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full"></div>
@@ -350,7 +350,7 @@
                         <div>
                             <div class="flex items-center justify-between mb-1">
                                 <span class="text-gray-500 dark:text-gray-400 text-xs">Showcase Nights</span>
-                                <span class="text-cyan-300 text-xs font-medium">76%</span>
+                                <span class="text-cyan-600 dark:text-cyan-300 text-xs font-medium">76%</span>
                             </div>
                             <div class="w-full h-2 bg-cyan-500/20 rounded-full overflow-hidden">
                                 <div class="w-[76%] h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full"></div>
@@ -359,7 +359,7 @@
                         <div>
                             <div class="flex items-center justify-between mb-1">
                                 <span class="text-gray-500 dark:text-gray-400 text-xs">Open Mic</span>
-                                <span class="text-cyan-300 text-xs font-medium">58%</span>
+                                <span class="text-cyan-600 dark:text-cyan-300 text-xs font-medium">58%</span>
                             </div>
                             <div class="w-full h-2 bg-cyan-500/20 rounded-full overflow-hidden">
                                 <div class="w-[58%] h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full"></div>
@@ -383,7 +383,7 @@
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
                             <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
                             <span class="text-gray-900 dark:text-white text-sm">Main Showroom</span>
-                            <span class="ml-auto text-emerald-300 text-xs">8 shows</span>
+                            <span class="ml-auto text-emerald-600 dark:text-emerald-300 text-xs">8 shows</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-2 h-2 rounded-full bg-teal-400"></div>
@@ -412,29 +412,29 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Open Mic -->
-                <div class="relative rounded-2xl bg-gradient-to-br from-lime-900/30 to-green-900/30 border border-lime-500/30 p-8 text-center">
+                <div class="relative rounded-2xl bg-gradient-to-br from-lime-100/30 to-green-100/30 dark:from-lime-900/30 dark:to-green-900/30 border border-lime-500/30 p-8 text-center">
                     <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-lime-500/20 flex items-center justify-center">
                         <div class="w-6 h-6 rounded-full bg-lime-400/60"></div>
                     </div>
-                    <h3 class="text-xl font-bold text-lime-400 mb-2">Open Mic</h3>
+                    <h3 class="text-xl font-bold text-lime-600 dark:text-lime-400 mb-2">Open Mic</h3>
                     <p class="text-gray-500 dark:text-gray-400">5 minutes to prove yourself</p>
                 </div>
 
                 <!-- Feature -->
-                <div class="relative rounded-2xl bg-gradient-to-br from-amber-900/30 to-orange-900/30 border border-amber-500/30 p-8 text-center">
+                <div class="relative rounded-2xl bg-gradient-to-br from-amber-100/30 to-orange-100/30 dark:from-amber-900/30 dark:to-orange-900/30 border border-amber-500/30 p-8 text-center">
                     <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-amber-500/20 flex items-center justify-center">
                         <div class="w-10 h-10 rounded-full bg-amber-400/70"></div>
                     </div>
-                    <h3 class="text-xl font-bold text-amber-400 mb-2">Feature</h3>
+                    <h3 class="text-xl font-bold text-amber-600 dark:text-amber-400 mb-2">Feature</h3>
                     <p class="text-gray-500 dark:text-gray-400">25 minutes. The crowd knows your name.</p>
                 </div>
 
                 <!-- Headliner -->
-                <div class="relative rounded-2xl bg-gradient-to-br from-yellow-900/40 to-amber-900/40 border border-yellow-500/40 p-8 text-center shadow-lg shadow-yellow-500/10">
+                <div class="relative rounded-2xl bg-gradient-to-br from-yellow-100/40 to-amber-100/40 dark:from-yellow-900/40 dark:to-amber-900/40 border border-yellow-500/40 p-8 text-center shadow-lg shadow-yellow-500/10">
                     <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-yellow-500/30 flex items-center justify-center shadow-lg shadow-yellow-400/30">
                         <div class="w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-amber-400"></div>
                     </div>
-                    <h3 class="text-2xl font-bold text-yellow-400 mb-2">Headliner</h3>
+                    <h3 class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mb-2">Headliner</h3>
                     <p class="text-gray-500 dark:text-gray-400">Your name on the marquee</p>
                 </div>
             </div>
@@ -449,17 +449,17 @@
         </div>
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-purple-900 to-red-900 rounded-3xl border border-purple-500/30 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-purple-100 to-red-100 dark:from-purple-900 dark:to-red-900 rounded-3xl border border-purple-200 dark:border-purple-500/30 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
                                 Recording Nights
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-purple-300 transition-colors">Album recordings. Netflix tapings. The big nights.</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Sell tickets to the live audience AND stream to fans worldwide. Your club, your special.</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">Album recordings. Netflix tapings. The big nights.</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">Sell tickets to the live audience AND stream to fans worldwide. Your club, your special.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live + Virtual tickets</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Global streaming</span>
@@ -473,7 +473,7 @@
                             </span>
                         </div>
                         <div class="flex-shrink-0">
-                            <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-2xl border border-red-500/30 p-6 w-56">
+                            <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-2xl border border-red-200 dark:border-red-500/30 p-6 w-56">
                                 <div class="flex items-center justify-between mb-4">
                                     <span class="text-gray-600 dark:text-gray-300 text-xs font-medium">RECORDING IN PROGRESS</span>
                                 </div>

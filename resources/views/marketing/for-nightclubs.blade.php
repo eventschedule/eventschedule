@@ -195,7 +195,7 @@
                             </div>
                             <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-300 dark:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-[10px] font-medium">Confirmed</span>
                         </div>
-                        <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
+                        <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-[10px] font-semibold">SK</div>
                             <div class="flex-1">
                                 <div class="text-gray-700 dark:text-gray-300 text-sm">Sarah K. +1</div>
@@ -595,21 +595,21 @@
         </div>
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-pink-900 to-fuchsia-900 rounded-3xl border border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-pink-100 to-fuchsia-100 dark:from-pink-900 dark:to-fuchsia-900 rounded-3xl border border-pink-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
                                 Online Events
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-pink-300 transition-colors">Stream to the world</h3>
-                            <p class="text-gray-400 text-lg mb-4">Broadcast your DJ sets worldwide. Sell tickets to viewers anywhere - no capacity limits.</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-pink-300 transition-colors">Stream to the world</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">Broadcast your DJ sets worldwide. Sell tickets to viewers anywhere - no capacity limits.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Twitch</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">YouTube Live</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Zoom</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Twitch</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">YouTube Live</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Zoom</span>
                             </div>
                             <span class="inline-flex items-center text-pink-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more

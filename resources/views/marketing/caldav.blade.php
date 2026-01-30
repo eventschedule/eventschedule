@@ -122,31 +122,31 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Open Standard -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900 to-cyan-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Open Standard
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Universal protocol</h3>
-                    <p class="text-white/80 mb-4">CalDAV is an open internet standard. No vendor lock-in. Works with any compliant server.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Universal protocol</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-4">CalDAV is an open internet standard. No vendor lock-in. Works with any compliant server.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-3 border border-gray-200 dark:border-white/10">
-                        <code class="text-teal-300 text-xs font-mono">RFC 4791 - CalDAV</code>
+                        <code class="text-teal-700 dark:text-teal-300 text-xs font-mono">RFC 4791 - CalDAV</code>
                     </div>
                 </div>
 
                 <!-- HTTPS Security -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900 to-teal-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                         Secure
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">HTTPS enforced</h3>
-                    <p class="text-white/80 mb-4">All connections require HTTPS. Your credentials and calendar data are encrypted in transit.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">HTTPS enforced</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-4">All connections require HTTPS. Your credentials and calendar data are encrypted in transit.</p>
 
                     <div class="flex items-center gap-2 text-emerald-400 text-sm">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -157,15 +157,15 @@
                 </div>
 
                 <!-- Three Sync Modes -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900 to-blue-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                         </svg>
                         Flexible
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Three sync modes</h3>
-                    <p class="text-white/80 mb-4">Push events to CalDAV, pull events from CalDAV, or sync both ways.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Three sync modes</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-4">Push events to CalDAV, pull events from CalDAV, or sync both ways.</p>
 
                     <div class="space-y-2">
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
@@ -190,24 +190,24 @@
                 </div>
 
                 <!-- Auto Discovery (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900 to-purple-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                                 Auto-Discovery
                             </div>
-                            <h3 class="text-3xl font-bold text-white mb-4">Automatic calendar discovery</h3>
-                            <p class="text-white/80 text-lg">Enter your server URL and we'll find all your calendars automatically. No manual configuration needed.</p>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Automatic calendar discovery</h3>
+                            <p class="text-gray-600 dark:text-white/80 text-lg">Enter your server URL and we'll find all your calendars automatically. No manual configuration needed.</p>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
                             <div class="text-xs text-gray-500 dark:text-gray-400 mb-3 font-mono">PROPFIND Response</div>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-2 p-2 rounded-lg bg-violet-500/20 border border-violet-400/30">
                                     <div class="w-3 h-3 rounded-full bg-violet-400"></div>
-                                    <span class="text-violet-200 text-sm">Personal Calendar</span>
+                                    <span class="text-violet-700 dark:text-violet-200 text-sm">Personal Calendar</span>
                                     <svg class="w-4 h-4 text-violet-400 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
@@ -226,15 +226,15 @@
                 </div>
 
                 <!-- Scheduled Sync -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900 to-orange-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Scheduled
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Syncs every 15 minutes</h3>
-                    <p class="text-white/80 mb-4">Automatic scheduled sync keeps your calendars in harmony. Uses sync tokens for efficient change detection.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Syncs every 15 minutes</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-4">Automatic scheduled sync keeps your calendars in harmony. Uses sync tokens for efficient change detection.</p>
 
                     <div class="flex items-center gap-2">
                         <div class="flex gap-1">
@@ -247,17 +247,17 @@
                 </div>
 
                 <!-- Selfhosted Friendly -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-900 to-pink-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900 dark:to-pink-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
                                 </svg>
                                 Selfhosted Friendly
                             </div>
-                            <h3 class="text-3xl font-bold text-white mb-4">Your server, your data</h3>
-                            <p class="text-white/80 text-lg mb-6">Perfect for selfhosted setups. Connect Event Schedule to your own CalDAV server and keep full control of your data.</p>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Your server, your data</h3>
+                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Perfect for selfhosted setups. Connect Event Schedule to your own CalDAV server and keep full control of your data.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">No cloud dependency</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Full data ownership</span>
@@ -285,15 +285,15 @@
                 </div>
 
                 <!-- Encrypted Storage -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-800/50 to-zinc-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-500/20 text-slate-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-100 to-zinc-100 dark:from-slate-800/50 dark:to-zinc-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
                         </svg>
                         Protected
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3">Encrypted credentials</h3>
-                    <p class="text-white/80">Your CalDAV username and password are stored encrypted. Even if the database is compromised, credentials remain secure.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Encrypted credentials</h3>
+                    <p class="text-gray-600 dark:text-white/80">Your CalDAV username and password are stored encrypted. Even if the database is compromised, credentials remain secure.</p>
                 </div>
 
             </div>
