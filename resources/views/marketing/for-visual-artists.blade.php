@@ -25,33 +25,6 @@
             </svg>
         </div>
 
-        <!-- Paint splatter decorations -->
-        <div class="absolute top-[15%] left-[8%] opacity-[0.08] dark:opacity-[0.10] hidden md:block">
-            <svg width="180" height="160" viewBox="0 0 180 160" fill="currentColor" class="text-fuchsia-500">
-                <ellipse cx="80" cy="70" rx="60" ry="50" />
-                <circle cx="30" cy="30" r="15" />
-                <circle cx="140" cy="45" r="20" />
-                <circle cx="55" cy="130" r="12" />
-                <circle cx="120" cy="120" r="8" />
-                <circle cx="160" cy="80" r="6" />
-            </svg>
-        </div>
-        <div class="absolute bottom-[20%] right-[5%] opacity-[0.06] dark:opacity-[0.08] hidden md:block">
-            <svg width="140" height="130" viewBox="0 0 140 130" fill="currentColor" class="text-pink-500">
-                <ellipse cx="70" cy="60" rx="50" ry="40" />
-                <circle cx="20" cy="100" r="18" />
-                <circle cx="120" cy="30" r="14" />
-                <circle cx="110" cy="105" r="10" />
-            </svg>
-        </div>
-        <div class="absolute top-[60%] left-[20%] opacity-[0.05] dark:opacity-[0.07] hidden lg:block">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="currentColor" class="text-rose-500">
-                <ellipse cx="50" cy="45" rx="35" ry="30" />
-                <circle cx="15" cy="15" r="12" />
-                <circle cx="85" cy="70" r="10" />
-            </svg>
-        </div>
-
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <!-- Badge with picture frame border -->
             <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-sm glass artist-frame-badge mb-8 backdrop-blur-sm">

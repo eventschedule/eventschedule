@@ -77,15 +77,29 @@ if (! file_exists(__DIR__.'/../.env')) {
     </div>
     <script>
     function copyCommand(btn) {
-        navigator.clipboard.writeText("cp .env.example .env").then(function() {
-            var originalHTML = btn.innerHTML;
+        var text = "cp .env.example .env";
+        var originalHTML = btn.innerHTML;
+        function showSuccess() {
             btn.innerHTML = \'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>\';
             btn.style.color = "#4ade80";
             setTimeout(function() {
                 btn.innerHTML = originalHTML;
                 btn.style.color = "";
             }, 2000);
-        });
+        }
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(showSuccess);
+        } else {
+            var ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+            showSuccess();
+        }
     }
     </script>
 </body>

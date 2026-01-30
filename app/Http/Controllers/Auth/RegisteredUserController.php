@@ -144,49 +144,62 @@ class RegisteredUserController extends Controller
             $url = rtrim($baseUrl.$basePath, '/');
 
             // Update database settings in .env file
-            $envPath = base_path('.env');
-            $envContent = file_get_contents($envPath);
+            try {
+                $envPath = base_path('.env');
 
-            // Sanitize input values to prevent .env injection
-            // addslashes() is insufficient - we must also block newlines and special chars
-            $sanitizeEnvValue = function ($value) {
-                // Remove any newlines, carriage returns, and null bytes which could inject new env vars
-                $value = str_replace(["\r", "\n", "\0"], '', $value);
-                // Escape backslashes and double quotes for .env format
-                $value = str_replace(['\\', '"'], ['\\\\', '\\"'], $value);
+                if (! is_writable($envPath)) {
+                    return back()->withErrors(['database_host' => __('messages.env_not_writable')])->withInput();
+                }
 
-                return $value;
-            };
+                $envContent = file_get_contents($envPath);
 
-            $sanitizedHost = $sanitizeEnvValue($request->database_host);
-            $sanitizedPort = (int) $request->database_port;
-            $sanitizedName = $sanitizeEnvValue($request->database_name);
-            $sanitizedUsername = $sanitizeEnvValue($request->database_username);
-            $sanitizedPassword = $sanitizeEnvValue($request->database_password);
-            $sanitizedUrl = $sanitizeEnvValue($url);
+                // Sanitize input values to prevent .env injection
+                // addslashes() is insufficient - we must also block newlines and special chars
+                $sanitizeEnvValue = function ($value) {
+                    // Remove any newlines, carriage returns, and null bytes which could inject new env vars
+                    $value = str_replace(["\r", "\n", "\0"], '', $value);
+                    // Escape backslashes and double quotes for .env format
+                    $value = str_replace(['\\', '"'], ['\\\\', '\\"'], $value);
 
-            $envContent = preg_replace_callback('/APP_ENV=.*/', fn () => 'APP_ENV=production', $envContent);
-            $envContent = preg_replace_callback('/APP_URL=.*/', fn () => 'APP_URL="'.$sanitizedUrl.'"', $envContent);
+                    return $value;
+                };
 
-            $envContent = preg_replace_callback('/DB_HOST=.*/', fn () => 'DB_HOST="'.$sanitizedHost.'"', $envContent);
-            $envContent = preg_replace_callback('/DB_PORT=.*/', fn () => 'DB_PORT='.$sanitizedPort, $envContent);
-            $envContent = preg_replace_callback('/DB_DATABASE=.*/', fn () => 'DB_DATABASE="'.$sanitizedName.'"', $envContent);
-            $envContent = preg_replace_callback('/DB_USERNAME=.*/', fn () => 'DB_USERNAME="'.$sanitizedUsername.'"', $envContent);
-            $envContent = preg_replace_callback('/DB_PASSWORD=.*/', fn () => 'DB_PASSWORD="'.$sanitizedPassword.'"', $envContent);
+                $sanitizedHost = $sanitizeEnvValue($request->database_host);
+                $sanitizedPort = (int) $request->database_port;
+                $sanitizedName = $sanitizeEnvValue($request->database_name);
+                $sanitizedUsername = $sanitizeEnvValue($request->database_username);
+                $sanitizedPassword = $sanitizeEnvValue($request->database_password);
+                $sanitizedUrl = $sanitizeEnvValue($url);
 
-            if ($request->report_errors) {
-                $envContent = preg_replace_callback('/REPORT_ERRORS=.*/', fn () => 'REPORT_ERRORS=true', $envContent);
-            }
+                $envContent = preg_replace_callback('/APP_ENV=.*/', fn () => 'APP_ENV=production', $envContent);
+                $envContent = preg_replace_callback('/APP_URL=.*/', fn () => 'APP_URL="'.$sanitizedUrl.'"', $envContent);
 
-            // Write to temporary file first, then move to prevent corruption
-            $tempFile = $envPath.'.tmp';
-            if (file_put_contents($tempFile, $envContent) === false) {
-                throw new \Exception('Failed to write configuration file');
-            }
+                $envContent = preg_replace_callback('/DB_HOST=.*/', fn () => 'DB_HOST="'.$sanitizedHost.'"', $envContent);
+                $envContent = preg_replace_callback('/DB_PORT=.*/', fn () => 'DB_PORT='.$sanitizedPort, $envContent);
+                $envContent = preg_replace_callback('/DB_DATABASE=.*/', fn () => 'DB_DATABASE="'.$sanitizedName.'"', $envContent);
+                $envContent = preg_replace_callback('/DB_USERNAME=.*/', fn () => 'DB_USERNAME="'.$sanitizedUsername.'"', $envContent);
+                $envContent = preg_replace_callback('/DB_PASSWORD=.*/', fn () => 'DB_PASSWORD="'.$sanitizedPassword.'"', $envContent);
 
-            if (! rename($tempFile, $envPath)) {
-                unlink($tempFile);
-                throw new \Exception('Failed to update configuration file');
+                if ($request->report_errors) {
+                    $envContent = preg_replace_callback('/REPORT_ERRORS=.*/', fn () => 'REPORT_ERRORS=true', $envContent);
+                }
+
+                // Write to temporary file first, then move to prevent corruption
+                $tempFile = $envPath.'.tmp';
+                if (file_put_contents($tempFile, $envContent) === false) {
+                    throw new \Exception('Failed to write configuration file');
+                }
+
+                if (! rename($tempFile, $envPath)) {
+                    // Fall back to direct write if rename fails (e.g. Docker bind mounts)
+                    if (file_put_contents($envPath, $envContent) === false) {
+                        @unlink($tempFile);
+                        throw new \Exception('Failed to update configuration file');
+                    }
+                    @unlink($tempFile);
+                }
+            } catch (\Exception $e) {
+                return back()->withErrors(['database_host' => __('messages.env_not_writable')])->withInput();
             }
 
             config(['database.connections.mysql.host' => $request->database_host]);

@@ -83,7 +83,7 @@
 
             <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                 <!-- Softaculous -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900 to-indigo-900 border border-gray-200 dark:border-white/10 p-8 flex flex-col h-full">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 border border-gray-200 dark:border-white/10 p-8 flex flex-col h-full">
                     <div class="flex items-center gap-4 mb-6">
                         <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
                             <svg class="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -91,27 +91,27 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-2xl font-bold text-white">Softaculous</h3>
-                            <p class="text-white">One-click installer</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Softaculous</h3>
+                            <p class="text-gray-600 dark:text-white">One-click installer</p>
                         </div>
                     </div>
-                    <p class="text-white/80 mb-6">
+                    <p class="text-gray-600 dark:text-white/80 mb-6">
                         Available on most cPanel hosting providers. Install Event Schedule with a single click - no command line required.
                     </p>
                     <ul class="space-y-3 mb-8 flex-grow">
-                        <li class="flex items-center gap-3 text-white/90">
+                        <li class="flex items-center gap-3 text-gray-700 dark:text-white/90">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Automatic database setup
                         </li>
-                        <li class="flex items-center gap-3 text-white/90">
+                        <li class="flex items-center gap-3 text-gray-700 dark:text-white/90">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Auto-configured environment
                         </li>
-                        <li class="flex items-center gap-3 text-white/90">
+                        <li class="flex items-center gap-3 text-gray-700 dark:text-white/90">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
@@ -127,7 +127,7 @@
                 </div>
 
                 <!-- Docker -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900 to-teal-900 border border-gray-200 dark:border-white/10 p-8 flex flex-col h-full">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 border border-gray-200 dark:border-white/10 p-8 flex flex-col h-full">
                     <div class="flex items-center gap-4 mb-6">
                         <div class="w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
                             <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -135,27 +135,27 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-2xl font-bold text-white">Docker</h3>
-                            <p class="text-white">Containerized deployment</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Docker</h3>
+                            <p class="text-gray-600 dark:text-white">Containerized deployment</p>
                         </div>
                     </div>
-                    <p class="text-white/80 mb-6">
+                    <p class="text-gray-600 dark:text-white/80 mb-6">
                         Deploy with Docker Compose for a consistent, isolated environment. Perfect for VPS, cloud servers, or local development.
                     </p>
                     <ul class="space-y-3 mb-8 flex-grow">
-                        <li class="flex items-center gap-3 text-white/90">
+                        <li class="flex items-center gap-3 text-gray-700 dark:text-white/90">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Isolated environment
                         </li>
-                        <li class="flex items-center gap-3 text-white/90">
+                        <li class="flex items-center gap-3 text-gray-700 dark:text-white/90">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Easy scaling and backups
                         </li>
-                        <li class="flex items-center gap-3 text-white/90">
+                        <li class="flex items-center gap-3 text-gray-700 dark:text-white/90">
                             <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
@@ -225,18 +225,18 @@
                     </ul>
                 </div>
                 <div class="relative">
-                    <div class="animate-float bg-gradient-to-br from-violet-900 to-purple-900 border border-gray-200 dark:border-white/10 rounded-2xl p-6 shadow-2xl">
+                    <div class="animate-float bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 border border-gray-200 dark:border-white/10 rounded-2xl p-6 shadow-2xl">
                         <div class="flex items-center justify-between mb-6">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
                                     <span class="text-white font-bold">ES</span>
                                 </div>
                                 <div>
-                                    <div class="text-white font-semibold">Event Schedule</div>
-                                    <div class="text-white/70 text-sm">v2.4.1 installed</div>
+                                    <div class="text-gray-900 dark:text-white font-semibold">Event Schedule</div>
+                                    <div class="text-gray-500 dark:text-white/70 text-sm">v2.4.1 installed</div>
                                 </div>
                             </div>
-                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-medium">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-xs font-medium">
                                 Update Available
                             </span>
                         </div>
@@ -279,15 +279,15 @@
 
             <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                 <!-- Auto Import -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900 to-orange-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
                         Auto Import
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-4">Automatic event importing</h3>
-                    <p class="text-white/80 mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Automatic event importing</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">
                         Automatically pull events from external websites into your schedule. Our intelligent system extracts event details from any webpage using AI-powered parsing.
                     </p>
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 mb-6">
@@ -301,7 +301,7 @@
                             We check each website's robots.txt file before importing to ensure we only access content that site owners have permitted for automated access.
                         </p>
                     </div>
-                    <ul class="space-y-2 text-white/90 text-sm">
+                    <ul class="space-y-2 text-gray-700 dark:text-white/90 text-sm">
                         <li class="flex items-center gap-2">
                             <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -324,15 +324,15 @@
                 </div>
 
                 <!-- AI Blog -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-900 to-pink-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-100 to-pink-100 dark:from-fuchsia-900 dark:to-pink-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/20 dark:text-fuchsia-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                         </svg>
                         AI-Powered Blog
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-4">Automated content for SEO</h3>
-                    <p class="text-white/80 mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Automated content for SEO</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">
                         Generate relevant blog content automatically to drive organic traffic to your event schedule. Our AI creates engaging posts tailored to your events and audience.
                     </p>
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 mb-6">
@@ -361,7 +361,7 @@
                             </div>
                         </div>
                     </div>
-                    <ul class="space-y-2 text-white/90 text-sm">
+                    <ul class="space-y-2 text-gray-700 dark:text-white/90 text-sm">
                         <li class="flex items-center gap-2">
                             <svg class="w-4 h-4 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -438,45 +438,45 @@
     <!-- SaaS White-Label Section -->
     <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900 via-violet-900 to-purple-900 border border-gray-200 dark:border-white/10 p-8 md:p-12">
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 via-violet-100 to-purple-100 dark:from-indigo-900 dark:via-violet-900 dark:to-purple-900 border border-gray-200 dark:border-white/10 p-8 md:p-12">
                 <!-- Background decoration -->
                 <div class="absolute top-0 right-0 w-64 h-64 bg-violet-500/20 rounded-full blur-[100px]"></div>
                 <div class="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-[100px]"></div>
 
                 <div class="relative z-10 grid lg:grid-cols-2 gap-8 items-center">
                     <div>
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                             Business Opportunity
                         </div>
-                        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                             Build your own SaaS business
                         </h2>
-                        <p class="text-xl text-white/80 mb-6">
+                        <p class="text-xl text-gray-600 dark:text-white/80 mb-6">
                             Turn Event Schedule into your own white-label SaaS platform. Offer event scheduling as a service to your customers under your own brand.
                         </p>
                         <ul class="space-y-3 mb-8">
-                            <li class="flex items-center gap-3 text-white/90">
+                            <li class="flex items-center gap-3 text-gray-700 dark:text-white/90">
                                 <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Multi-tenant architecture built-in
                             </li>
-                            <li class="flex items-center gap-3 text-white/90">
+                            <li class="flex items-center gap-3 text-gray-700 dark:text-white/90">
                                 <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Stripe integration for subscriptions
                             </li>
-                            <li class="flex items-center gap-3 text-white/90">
+                            <li class="flex items-center gap-3 text-gray-700 dark:text-white/90">
                                 <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Full white-label customization
                             </li>
-                            <li class="flex items-center gap-3 text-white/90">
+                            <li class="flex items-center gap-3 text-gray-700 dark:text-white/90">
                                 <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
@@ -541,24 +541,24 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="relative bg-gradient-to-br from-emerald-600 to-teal-700 py-24 overflow-hidden">
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+    <section class="relative bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-600 dark:to-teal-700 py-24 overflow-hidden">
+        <div class="hidden dark:block absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
                 Ready to selfhost?
             </h2>
-            <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
+            <p class="text-xl text-gray-600 dark:text-white/80 mb-10 max-w-2xl mx-auto">
                 Get started with the installation guide. Have questions? Check out our GitHub discussions.
             </p>
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="{{ route('marketing.docs.selfhost.installation') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-emerald-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
+                <a href="{{ route('marketing.docs.selfhost.installation') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 dark:text-emerald-600 dark:bg-white dark:bg-none rounded-2xl hover:scale-105 transition-all shadow-xl">
                     Read Installation Guide
                     <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                 </a>
-                <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white border-2 border-white/30 rounded-2xl hover:bg-white/10 transition-all">
+                <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-900 border-2 border-gray-300 dark:text-white dark:border-white/30 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all">
                     Or try the hosted version
                 </a>
             </div>

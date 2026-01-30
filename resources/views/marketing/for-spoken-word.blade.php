@@ -461,12 +461,12 @@
                     </x-slot:icon>
                 </x-sub-audience-card>
 
-                <!-- Workshop Leaders -->
+                <!-- Storytellers -->
                 <x-sub-audience-card
-                    name="Workshop Leaders"
-                    description="Teaching craft, generative writing, masterclasses. Fill your workshops and manage enrollment."
+                    name="Storytellers"
+                    description="Oral storytelling, narrative performance, and story slams. Share your upcoming shows and captivate new audiences."
                     icon-color="emerald"
-                    blog-slug="for-poetry-workshop-leaders"
+                    blog-slug="for-storytellers"
                 >
                     <x-slot:icon>
                         <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">

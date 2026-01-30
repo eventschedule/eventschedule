@@ -14,33 +14,6 @@
         <!-- Grid pattern -->
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
 
-        <!-- Tool silhouette decorations -->
-        <div class="absolute top-[20%] left-[5%] opacity-[0.04] dark:opacity-[0.06] hidden md:block" style="transform: rotate(-15deg);">
-            <svg width="80" height="200" viewBox="0 0 80 200" fill="currentColor" class="text-indigo-700 dark:text-indigo-300">
-                <!-- Paintbrush -->
-                <rect x="35" y="0" width="10" height="130" rx="3"/>
-                <path d="M25,130 L55,130 L50,190 Q40,200 30,190 Z"/>
-            </svg>
-        </div>
-        <div class="absolute top-[25%] right-[6%] opacity-[0.04] dark:opacity-[0.06] hidden md:block" style="transform: rotate(10deg);">
-            <svg width="90" height="180" viewBox="0 0 90 180" fill="currentColor" class="text-purple-700 dark:text-purple-300">
-                <!-- Rolling pin -->
-                <rect x="10" y="50" width="70" height="30" rx="15"/>
-                <rect x="35" y="0" width="20" height="50" rx="4"/>
-                <rect x="35" y="80" width="20" height="50" rx="4"/>
-                <circle cx="45" cy="0" r="10"/>
-                <circle cx="45" cy="135" r="10"/>
-            </svg>
-        </div>
-        <div class="absolute bottom-[15%] left-[12%] opacity-[0.04] dark:opacity-[0.06] hidden lg:block" style="transform: rotate(5deg);">
-            <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3" class="text-violet-700 dark:text-violet-300">
-                <!-- Camera lens -->
-                <circle cx="50" cy="50" r="45"/>
-                <circle cx="50" cy="50" r="30"/>
-                <circle cx="50" cy="50" r="15"/>
-            </svg>
-        </div>
-
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <!-- Badge -->
             <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 backdrop-blur-sm">

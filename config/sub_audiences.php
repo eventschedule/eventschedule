@@ -736,11 +736,11 @@ return [
                 'blog_topic' => 'Building successful literary reading series and salon events',
                 'icon_color' => 'indigo',
             ],
-            'workshop-leaders' => [
-                'name' => 'Workshop Leaders',
-                'slug' => 'for-poetry-workshop-leaders',
-                'description' => 'Teaching craft, generative writing, masterclasses. Fill your workshops and manage enrollment.',
-                'blog_topic' => 'Growing poetry and writing workshop enrollment through strategic promotion',
+            'storytellers' => [
+                'name' => 'Storytellers',
+                'slug' => 'for-storytellers',
+                'description' => 'Oral storytelling, narrative performance, and story slams. Share your upcoming shows and captivate new audiences.',
+                'blog_topic' => 'Building an audience for oral storytelling and narrative performance events',
                 'icon_color' => 'emerald',
             ],
             'spoken-word-hosts' => [
@@ -792,11 +792,11 @@ return [
                 'blog_topic' => 'Growing ballroom and Latin dance events from socials to competitions',
                 'icon_color' => 'rose',
             ],
-            'dance-fitness-wellness' => [
-                'name' => 'Dance Fitness & Wellness',
-                'slug' => 'for-dance-fitness-wellness',
-                'description' => 'Zumba, Barre, dance cardio, movement therapy. Class schedules that keep your community moving.',
-                'blog_topic' => 'Building a loyal following for dance fitness and wellness classes',
+            'dance-schools-academies' => [
+                'name' => 'Dance Schools & Academies',
+                'slug' => 'for-dance-schools-academies',
+                'description' => 'Structured dance education, student recitals, and showcase performances. Manage class schedules and enrollment.',
+                'blog_topic' => 'Promoting dance school recitals, showcases, and enrollment events',
                 'icon_color' => 'pink',
             ],
         ],
@@ -855,19 +855,19 @@ return [
         'page' => 'for-food-trucks-and-vendors',
         'title' => 'Food Trucks & Vendors',
         'sub_audiences' => [
-            'food-trucks' => [
-                'name' => 'Food Trucks',
-                'slug' => 'for-food-trucks',
-                'description' => 'Daily locations, festival appearances, and private events. Let customers find you.',
-                'blog_topic' => 'Using scheduling to help food truck customers find your daily locations',
+            'taco-trucks' => [
+                'name' => 'Taco Trucks',
+                'slug' => 'for-taco-trucks',
+                'description' => 'Authentic tacos, burritos, and Mexican street food - let fans track your daily location and specials.',
+                'blog_topic' => 'Helping taco truck fans find your daily location and specials',
                 'icon_color' => 'orange',
             ],
-            'farmers-market-vendors' => [
-                'name' => 'Farmers Market Vendors',
-                'slug' => 'for-market-vendors',
-                'description' => 'Weekly market schedules, seasonal products, and special offerings. Connect with your community.',
-                'blog_topic' => 'Building customer loyalty as a farmers market vendor',
-                'icon_color' => 'emerald',
+            'festival-vendors' => [
+                'name' => 'Festival Vendors',
+                'slug' => 'for-festival-vendors',
+                'description' => 'Music festivals, county fairs, and outdoor events - let fans know which festivals you\'ll be serving at.',
+                'blog_topic' => 'Promoting your festival vending schedule to reach more customers',
+                'icon_color' => 'teal',
             ],
             'pop-up-restaurants' => [
                 'name' => 'Pop-Up Restaurants',
