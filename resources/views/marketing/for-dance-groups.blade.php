@@ -470,12 +470,12 @@
                     </x-slot:icon>
                 </x-sub-audience-card>
 
-                <!-- Dance Fitness & Wellness -->
+                <!-- Dance Schools & Academies -->
                 <x-sub-audience-card
-                    name="Dance Fitness & Wellness"
-                    description="Zumba, Barre, dance cardio, movement therapy. Class schedules that keep your community moving."
+                    name="Dance Schools & Academies"
+                    description="Structured dance education, student recitals, and showcase performances. Manage class schedules and enrollment."
                     icon-color="pink"
-                    blog-slug="for-dance-fitness-wellness"
+                    blog-slug="for-dance-schools-academies"
                 >
                     <x-slot:icon>
                         <span class="text-2xl">❤️‍🔥</span>

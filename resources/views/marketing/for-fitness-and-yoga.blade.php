@@ -27,16 +27,6 @@
         <div class="absolute top-20 right-[15%] w-32 h-32 rounded-full border-2 border-emerald-500/10 dark:border-emerald-400/10 fitness-breathe hidden md:block"></div>
         <div class="absolute bottom-32 left-[10%] w-24 h-24 rounded-full border border-teal-500/8 dark:border-teal-400/8 fitness-breathe hidden md:block" style="animation-delay: 2s;"></div>
 
-        <!-- Yoga pose silhouette watermark -->
-        <div class="absolute right-[8%] top-1/2 -translate-y-1/2 opacity-[0.05] dark:opacity-[0.07] hidden lg:block">
-            <svg width="280" height="380" viewBox="0 0 280 380" fill="currentColor" class="text-emerald-700 dark:text-emerald-400">
-                <!-- Tree pose silhouette -->
-                <ellipse cx="140" cy="28" rx="22" ry="24"/>
-                <path d="M140,52 L140,160 M140,100 L100,60 M140,100 L180,60 M140,160 L110,280 M140,160 L170,280 M170,160 L170,120 C170,100 200,90 200,110 L200,140" stroke="currentColor" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M110,280 L95,380 M110,280 L125,380 M170,280 L155,380 M170,280 L185,380" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round"/>
-            </svg>
-        </div>
-
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <!-- Badge -->
             <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 backdrop-blur-sm">

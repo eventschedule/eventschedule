@@ -78,7 +78,7 @@
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Google Calendar</h3>
 
                     <div class="flex-grow">
-                        <p class="text-white/80 mb-6">Two-way sync with Google Calendar. Import events automatically or push your schedule to Google. Changes sync in real-time.</p>
+                        <p class="text-gray-600 dark:text-white/80 mb-6">Two-way sync with Google Calendar. Import events automatically or push your schedule to Google. Changes sync in real-time.</p>
 
                         <div class="relative animate-float mb-6">
                             <div class="w-full h-40 bg-gradient-to-br from-gray-100 dark:from-white/10 to-gray-50 dark:to-white/5 rounded-2xl border border-gray-300 dark:border-white/20 p-4 shadow-2xl">
@@ -94,13 +94,13 @@
                                     <span class="text-gray-900 dark:text-white font-medium text-sm">Google Calendar</span>
                                 </div>
                                 <div class="space-y-2">
-                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-400/30">
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-blue-100 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-400/30">
                                         <div class="w-2 h-2 rounded-full bg-blue-400"></div>
-                                        <span class="text-blue-200 text-xs">Jazz Night - 8pm</span>
+                                        <span class="text-blue-700 dark:text-blue-200 text-xs">Jazz Night - 8pm</span>
                                     </div>
-                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/20 border border-emerald-400/30">
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-400/30">
                                         <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
-                                        <span class="text-emerald-200 text-xs">Open Mic - 7pm</span>
+                                        <span class="text-emerald-700 dark:text-emerald-200 text-xs">Open Mic - 7pm</span>
                                     </div>
                                 </div>
                             </div>
@@ -113,7 +113,7 @@
                             <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Auto import</span>
                             <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Real-time updates</span>
                         </div>
-                        <span class="inline-flex items-center text-blue-300 group-hover:text-blue-200 text-sm font-medium transition-colors group-hover:gap-2 gap-1 transition-all">
+                        <span class="inline-flex items-center text-blue-600 group-hover:text-blue-700 dark:text-blue-300 dark:group-hover:text-blue-200 text-sm font-medium transition-colors group-hover:gap-2 gap-1 transition-all">
                             Learn more
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -123,17 +123,17 @@
                 </a>
 
                 <!-- CalDAV -->
-                <a href="{{ marketing_url('/caldav') }}" class="bento-card group relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900 to-cyan-900 border border-gray-200 dark:border-white/10 p-8 h-full flex flex-col hover:border-teal-500/30 transition-all" aria-label="Learn more about CalDAV integration">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm font-medium mb-4 w-fit">
+                <a href="{{ marketing_url('/caldav') }}" class="bento-card group relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 h-full flex flex-col hover:border-teal-500/30 transition-all" aria-label="Learn more about CalDAV integration">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-sm font-medium mb-4 w-fit">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Calendar Sync
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-teal-300 transition-colors">CalDAV</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-teal-600 dark:group-hover:text-teal-300 transition-colors">CalDAV</h3>
 
                     <div class="flex-grow">
-                        <p class="text-white/80 mb-6">Sync with any CalDAV server—Nextcloud, Radicale, Fastmail, and more. Two-way sync keeps events in harmony.</p>
+                        <p class="text-gray-600 dark:text-white/80 mb-6">Sync with any CalDAV server—Nextcloud, Radicale, Fastmail, and more. Two-way sync keeps events in harmony.</p>
 
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
                             <div class="flex items-center gap-3 mb-3">
@@ -153,7 +153,7 @@
                                     </svg>
                                 </div>
                             </div>
-                            <div class="text-center text-teal-300 text-xs font-medium">Two-way sync</div>
+                            <div class="text-center text-teal-600 dark:text-teal-300 text-xs font-medium">Two-way sync</div>
                         </div>
                     </div>
 
@@ -162,7 +162,7 @@
                             <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Two-way sync</span>
                             <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Selfhosted friendly</span>
                         </div>
-                        <span class="inline-flex items-center text-teal-300 group-hover:text-teal-200 text-sm font-medium transition-colors group-hover:gap-2 gap-1 transition-all">
+                        <span class="inline-flex items-center text-teal-600 group-hover:text-teal-700 dark:text-teal-300 dark:group-hover:text-teal-200 text-sm font-medium transition-colors group-hover:gap-2 gap-1 transition-all">
                             Learn more
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -192,17 +192,17 @@
             <!-- Payment Cards Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Stripe -->
-                <a href="{{ marketing_url('/stripe') }}" class="bento-card group relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900 to-indigo-900 border border-gray-200 dark:border-white/10 p-8 h-full flex flex-col hover:border-violet-500/30 transition-all" aria-label="Learn more about Stripe payment integration">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4 w-fit">
+                <a href="{{ marketing_url('/stripe') }}" class="bento-card group relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900 dark:to-indigo-900 border border-gray-200 dark:border-white/10 p-8 h-full flex flex-col hover:border-violet-500/30 transition-all" aria-label="Learn more about Stripe payment integration">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4 w-fit">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                         </svg>
                         Payments
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-violet-300 transition-colors">Stripe</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-colors">Stripe</h3>
 
                     <div class="flex-grow">
-                        <p class="text-white/80 mb-6">Accept credit cards, Apple Pay, and Google Pay. Payments go directly to your Stripe account.</p>
+                        <p class="text-gray-600 dark:text-white/80 mb-6">Accept credit cards, Apple Pay, and Google Pay. Payments go directly to your Stripe account.</p>
 
                         <div class="flex justify-center mb-6">
                             <div class="bg-white rounded-2xl px-5 py-3 shadow-lg">
@@ -217,7 +217,7 @@
                             <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Apple Pay</span>
                             <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Google Pay</span>
                         </div>
-                        <span class="inline-flex items-center text-violet-300 group-hover:text-violet-200 text-sm font-medium transition-colors group-hover:gap-2 gap-1 transition-all">
+                        <span class="inline-flex items-center text-violet-600 group-hover:text-violet-700 dark:text-violet-300 dark:group-hover:text-violet-200 text-sm font-medium transition-colors group-hover:gap-2 gap-1 transition-all">
                             Learn more
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -227,22 +227,22 @@
                 </a>
 
                 <!-- Invoice Ninja -->
-                <a href="{{ marketing_url('/invoiceninja') }}" class="bento-card group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900 to-teal-900 border border-gray-200 dark:border-white/10 p-8 h-full flex flex-col hover:border-emerald-500/30 transition-all" aria-label="Learn more about Invoice Ninja integration">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium mb-4 w-fit">
+                <a href="{{ marketing_url('/invoiceninja') }}" class="bento-card group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 border border-gray-200 dark:border-white/10 p-8 h-full flex flex-col hover:border-emerald-500/30 transition-all" aria-label="Learn more about Invoice Ninja integration">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-sm font-medium mb-4 w-fit">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         Invoicing
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-emerald-300 transition-colors">Invoice Ninja</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">Invoice Ninja</h3>
 
                     <div class="flex-grow">
-                        <p class="text-white/80 mb-6">Generate professional invoices for ticket purchases. Perfect for corporate events and B2B sales.</p>
+                        <p class="text-gray-600 dark:text-white/80 mb-6">Generate professional invoices for ticket purchases. Perfect for corporate events and B2B sales.</p>
 
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
                             <div class="flex items-center justify-between mb-3">
-                                <span class="text-emerald-400 text-xs font-medium">INVOICE #1042</span>
-                                <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-xs">Paid</span>
+                                <span class="text-emerald-600 dark:text-emerald-400 text-xs font-medium">INVOICE #1042</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-xs">Paid</span>
                             </div>
                             <div class="text-gray-900 dark:text-white font-semibold mb-1">Corporate Event Package</div>
                             <div class="flex justify-between items-center">
@@ -254,7 +254,7 @@
 
                     <div class="mt-auto">
                         <div class="min-h-[40px] mb-4"></div>
-                        <span class="inline-flex items-center text-emerald-300 group-hover:text-emerald-200 text-sm font-medium transition-colors group-hover:gap-2 gap-1 transition-all">
+                        <span class="inline-flex items-center text-emerald-600 group-hover:text-emerald-700 dark:text-emerald-300 dark:group-hover:text-emerald-200 text-sm font-medium transition-colors group-hover:gap-2 gap-1 transition-all">
                             Learn more
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -319,17 +319,17 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="relative bg-gradient-to-br from-blue-600 to-cyan-700 py-24 overflow-hidden">
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+    <section class="relative bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-600 dark:to-cyan-700 py-24 overflow-hidden">
+        <div class="absolute inset-0 hidden dark:block bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
                 Connect your tools today
             </h2>
-            <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
+            <p class="text-xl text-gray-600 dark:text-white/80 mb-10 max-w-2xl mx-auto">
                 Get started for free and integrate with your favorite services.
             </p>
-            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
+            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 dark:text-blue-600 dark:bg-white dark:bg-none rounded-2xl hover:scale-105 transition-all shadow-xl">
                 Get Started Free
                 <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

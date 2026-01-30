@@ -428,12 +428,12 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Food Trucks -->
+                <!-- Taco Trucks -->
                 <x-sub-audience-card
-                    name="Food Trucks"
-                    description="Tacos, burgers, gourmet cuisine - share your daily spots and build a loyal following of hungry fans."
+                    name="Taco Trucks"
+                    description="Authentic tacos, burritos, and Mexican street food - let fans track your daily location and specials."
                     icon-color="orange"
-                    blog-slug="for-food-trucks"
+                    blog-slug="for-taco-trucks"
                 >
                     <x-slot:icon>
                         <svg class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -500,12 +500,12 @@
                     </x-slot:icon>
                 </x-sub-audience-card>
 
-                <!-- Market Vendors -->
+                <!-- Festival Vendors -->
                 <x-sub-audience-card
-                    name="Market Vendors"
-                    description="Farmers markets, craft fairs, festivals - share which markets you'll be at this week."
+                    name="Festival Vendors"
+                    description="Music festivals, county fairs, and outdoor events - let fans know which festivals you'll be serving at."
                     icon-color="teal"
-                    blog-slug="for-market-vendors"
+                    blog-slug="for-festival-vendors"
                 >
                     <x-slot:icon>
                         <svg class="w-6 h-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
