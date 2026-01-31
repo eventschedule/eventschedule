@@ -9,22 +9,22 @@
 
             <!-- Desktop Navigation -->
             <div class="hidden md:flex items-center space-x-8">
-                <a href="{{ marketing_url('/features') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/features') || request()->is('features') ? 'text-blue-600 dark:text-blue-400 font-medium' : '' }}">
+                <a href="{{ marketing_url('/features') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/features') || request()->is('features') ? 'text-violet-600 dark:text-violet-400 font-medium border-b-2 border-violet-600 dark:border-violet-400 pb-0.5' : '' }}">
                     Features
                 </a>
-                <a href="{{ marketing_url('/pricing') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/pricing') || request()->is('pricing') ? 'text-blue-600 dark:text-blue-400 font-medium' : '' }}">
+                <a href="{{ marketing_url('/pricing') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/pricing') || request()->is('pricing') ? 'text-violet-600 dark:text-violet-400 font-medium border-b-2 border-violet-600 dark:border-violet-400 pb-0.5' : '' }}">
                     Pricing
                 </a>
-                <a href="{{ marketing_url('/integrations') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/integrations') || request()->is('integrations') ? 'text-blue-600 dark:text-blue-400 font-medium' : '' }}">
+                <a href="{{ marketing_url('/integrations') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/integrations') || request()->is('integrations') ? 'text-violet-600 dark:text-violet-400 font-medium border-b-2 border-violet-600 dark:border-violet-400 pb-0.5' : '' }}">
                     Integrations
                 </a>
-                <a href="{{ marketing_url('/selfhost') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/selfhost') || request()->is('selfhost') ? 'text-blue-600 dark:text-blue-400 font-medium' : '' }}">
+                <a href="{{ marketing_url('/selfhost') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/selfhost') || request()->is('selfhost') ? 'text-violet-600 dark:text-violet-400 font-medium border-b-2 border-violet-600 dark:border-violet-400 pb-0.5' : '' }}">
                     Selfhost
                 </a>
-                <a href="{{ marketing_url('/docs') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/docs*') || request()->is('docs*') ? 'text-blue-600 dark:text-blue-400 font-medium' : '' }}">
+                <a href="{{ marketing_url('/docs') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/docs*') || request()->is('docs*') ? 'text-violet-600 dark:text-violet-400 font-medium border-b-2 border-violet-600 dark:border-violet-400 pb-0.5' : '' }}">
                     Docs
                 </a>
-                <a href="{{ marketing_url('/about') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/about') || request()->is('about') ? 'text-blue-600 dark:text-blue-400 font-medium' : '' }}">
+                <a href="{{ marketing_url('/about') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/about') || request()->is('about') ? 'text-violet-600 dark:text-violet-400 font-medium border-b-2 border-violet-600 dark:border-violet-400 pb-0.5' : '' }}">
                     About
                 </a>
             </div>
@@ -55,7 +55,7 @@
                             <a href="{{ route('login') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
                                 Sign In
                             </a>
-                            <a href="{{ route('sign_up') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                            <a href="{{ route('sign_up') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-sm font-medium rounded-lg transition-all shadow-sm shadow-violet-500/25">
                                 Get Started
                             </a>
                         @else
@@ -67,7 +67,7 @@
                         <a href="{{ route('login') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
                             Sign In
                         </a>
-                        <a href="{{ route('sign_up') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                        <a href="{{ route('sign_up') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-sm font-medium rounded-lg transition-all shadow-sm shadow-violet-500/25">
                             Get Started
                         </a>
                     @endauth
@@ -116,7 +116,7 @@
                             <a href="{{ route('login') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
                                 Sign In
                             </a>
-                            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-sm font-medium rounded-lg transition-colors">
                                 Get Started
                             </a>
                         @else
@@ -128,7 +128,7 @@
                         <a href="{{ route('login') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
                             Sign In
                         </a>
-                        <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                        <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-sm font-medium rounded-lg transition-colors">
                             Get Started
                         </a>
                     @endauth

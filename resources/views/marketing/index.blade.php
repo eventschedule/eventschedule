@@ -5,26 +5,16 @@
     <x-slot name="socialImage">social/home.png</x-slot>
 
     <style>
-        /* Smooth scrolling for anchor links */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Animations */
+        /* Homepage-specific animations (not shared across pages) */
         @keyframes gradient-shift {
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
-        }
-        @keyframes float-gentle {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(1deg); }
         }
         @keyframes marquee {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
         }
         @keyframes scroll-step {
-            /* 7 images, each shows for ~1.5s with quick slide */
             0%, 12% { transform: translateX(0); }
             14%, 26% { transform: translateX(-100%); }
             28%, 40% { transform: translateX(-200%); }
@@ -34,10 +24,6 @@
             84%, 96% { transform: translateX(-600%); }
             100% { transform: translateX(-700%); }
         }
-        @keyframes pulse-ring {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(1.5); opacity: 0; }
-        }
         @keyframes reveal-up {
             from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
@@ -46,21 +32,11 @@
             0% { background-position: -200% 0; }
             100% { background-position: 200% 0; }
         }
-        @keyframes bounce-subtle {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        @keyframes pulse-slow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
 
         .animate-gradient {
             background-size: 200% 200%;
             animation: gradient-shift 8s ease infinite;
         }
-        .animate-float { animation: float-gentle 6s ease-in-out infinite; }
         .animate-marquee { animation: marquee 30s linear infinite; }
         .animate-scroll-step { animation: scroll-step 21s ease-in-out infinite; }
         .screenshot-carousel:hover .animate-scroll-step {
@@ -72,33 +48,11 @@
             background-size: 200% 100%;
             animation: shimmer 2s infinite;
         }
-        .animate-bounce-subtle { animation: bounce-subtle 2s ease-in-out infinite; }
 
         /* Delays */
         .delay-100 { animation-delay: 0.1s; }
         .delay-200 { animation-delay: 0.2s; }
         .delay-300 { animation-delay: 0.3s; }
-        .delay-400 { animation-delay: 0.4s; }
-
-        /* Glass effect */
-        .glass {
-            background: rgba(0, 0, 0, 0.05);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-        .dark .glass {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Gradient text */
-        .text-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
 
         /* Noise overlay */
         .noise::before {
@@ -110,34 +64,9 @@
             pointer-events: none;
         }
 
-        /* Glow effects */
-        .glow-blue { box-shadow: 0 0 60px rgba(102, 126, 234, 0.4); }
-        .glow-purple { box-shadow: 0 0 60px rgba(118, 75, 162, 0.4); }
-        .glow-pink { box-shadow: 0 0 60px rgba(240, 147, 251, 0.3); }
-
-        /* Interactive card */
-        .bento-card {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .bento-card:hover {
-            transform: translateY(-4px) scale(1.01);
-        }
-
         /* Marquee pause on hover */
         .marquee-container:hover .animate-marquee {
             animation-play-state: paused;
-        }
-
-        /* Cursor glow - optional fancy effect */
-        .cursor-glow {
-            position: fixed;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(102, 126, 234, 0.15) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 0;
-            transform: translate(-50%, -50%);
-            transition: opacity 0.3s;
         }
     </style>
 
@@ -423,6 +352,9 @@
         </div>
     </section>
 
+    <!-- Transition -->
+    <div class="h-16 section-fade-to-white"></div>
+
     <!-- Integrates With Section -->
     <section class="bg-white dark:bg-[#0a0a0f] py-16">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -430,59 +362,69 @@
             <div class="flex flex-wrap justify-center items-center gap-x-10 gap-y-8">
                 <!-- Google Calendar -->
                 <a href="{{ marketing_url('/google-calendar') }}" class="group flex flex-col items-center gap-2">
-                    <svg class="h-10 w-10 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
-                        <rect x="3" y="4" width="18" height="18" rx="2" class="stroke-gray-400 group-hover:stroke-blue-500 dark:stroke-gray-500" stroke-width="1.5" fill="none"/>
-                        <path d="M3 10h18" class="stroke-gray-400 group-hover:stroke-blue-500 dark:stroke-gray-500" stroke-width="1.5"/>
-                        <path d="M8 2v4M16 2v4" class="stroke-gray-400 group-hover:stroke-blue-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round"/>
-                        <circle cx="12" cy="16" r="2" class="fill-gray-400 group-hover:fill-blue-500 dark:fill-gray-500"/>
+                    <svg class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                        <path d="M18.316 5.684H5.684v12.632h12.632V5.684z" class="fill-gray-300 group-hover:fill-white dark:fill-gray-600 dark:group-hover:fill-white/20"/>
+                        <path d="M21.053 22H5.684l-2.631-2.632V5.684L5.684 3h12.632L21.053 5.684V22z" class="fill-gray-400 group-hover:fill-[#4285F4] dark:fill-gray-500 dark:group-hover:fill-[#4285F4]"/>
+                        <path d="M18.316 22l2.737-2.632V22h-2.737z" class="fill-gray-500 group-hover:fill-[#1A73E8] dark:fill-gray-600 dark:group-hover:fill-[#1A73E8]"/>
+                        <path d="M5.684 18.316L3.053 22V19.368l2.631-1.053z" class="fill-gray-500 group-hover:fill-[#1A73E8] dark:fill-gray-600 dark:group-hover:fill-[#1A73E8]"/>
+                        <path d="M21.053 5.684L18.316 3v2.684h2.737z" class="fill-gray-500 group-hover:fill-[#1A73E8] dark:fill-gray-600 dark:group-hover:fill-[#1A73E8]"/>
+                        <path d="M5.684 3L3.053 5.684h2.631V3z" class="fill-gray-500 group-hover:fill-[#EA4335] dark:fill-gray-600 dark:group-hover:fill-[#EA4335]"/>
+                        <path d="M18.316 5.684V3l2.737 2.684h-2.737z" class="fill-gray-500 group-hover:fill-[#34A853] dark:fill-gray-600 dark:group-hover:fill-[#34A853]"/>
+                        <rect x="7" y="9" width="10" height="1" rx="0.5" class="fill-gray-400 group-hover:fill-[#4285F4] dark:fill-gray-500 dark:group-hover:fill-[#4285F4]"/>
+                        <rect x="7" y="12" width="7" height="1" rx="0.5" class="fill-gray-400 group-hover:fill-[#4285F4] dark:fill-gray-500 dark:group-hover:fill-[#4285F4]"/>
+                        <rect x="7" y="15" width="5" height="1" rx="0.5" class="fill-gray-400 group-hover:fill-[#4285F4] dark:fill-gray-500 dark:group-hover:fill-[#4285F4]"/>
                     </svg>
                     <span class="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Google Calendar</span>
                 </a>
                 <!-- Stripe -->
                 <a href="{{ marketing_url('/stripe') }}" class="group flex flex-col items-center gap-2">
-                    <svg class="h-10 w-10 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
-                        <rect x="2" y="5" width="20" height="14" rx="2" class="stroke-gray-400 group-hover:stroke-violet-500 dark:stroke-gray-500" stroke-width="1.5" fill="none"/>
-                        <path d="M2 10h20" class="stroke-gray-400 group-hover:stroke-violet-500 dark:stroke-gray-500" stroke-width="1.5"/>
-                        <path d="M6 15h4" class="stroke-gray-400 group-hover:stroke-violet-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round"/>
+                    <svg class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                        <rect x="1" y="4" width="22" height="16" rx="3" class="fill-gray-400 group-hover:fill-[#635BFF] dark:fill-gray-500 dark:group-hover:fill-[#635BFF]"/>
+                        <path d="M11.5 10.5c0-.828.895-1.5 2-1.5s2 .672 2 1.5c0 1.5-2.5 1.5-2.5 3M13 15.5v.01" class="stroke-white dark:stroke-gray-300" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                        <path d="M8.5 9.5c-.469 0-1 .266-1 .75 0 1.125 3.5.563 3.5 2.5 0 .844-.688 1.25-1.5 1.25M9.5 9.5V8.75M9.5 14v.75" class="stroke-white dark:stroke-gray-300" stroke-width="1.2" stroke-linecap="round" fill="none"/>
                     </svg>
                     <span class="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Stripe</span>
                 </a>
                 <!-- Invoice Ninja -->
                 <a href="{{ marketing_url('/invoiceninja') }}" class="group flex flex-col items-center gap-2">
-                    <svg class="h-10 w-10 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
-                        <path d="M9 2h6l2 4H7l2-4z" class="stroke-gray-400 group-hover:stroke-emerald-500 dark:stroke-gray-500" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
-                        <rect x="4" y="6" width="16" height="16" rx="1" class="stroke-gray-400 group-hover:stroke-emerald-500 dark:stroke-gray-500" stroke-width="1.5" fill="none"/>
-                        <path d="M9 11h6M9 15h4" class="stroke-gray-400 group-hover:stroke-emerald-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round"/>
+                    <svg class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="5" width="18" height="16" rx="2" class="fill-gray-400 group-hover:fill-[#000] dark:fill-gray-500 dark:group-hover:fill-white"/>
+                        <path d="M7.5 10h9M7.5 13h6M7.5 16h3" class="stroke-white group-hover:stroke-white dark:stroke-gray-800 dark:group-hover:stroke-gray-900" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M12 2L9 5h6l-3-3z" class="fill-gray-500 group-hover:fill-[#2E7D32] dark:fill-gray-600 dark:group-hover:fill-[#4CAF50]"/>
                     </svg>
                     <span class="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Invoice Ninja</span>
                 </a>
                 <!-- CalDAV -->
                 <a href="{{ marketing_url('/caldav') }}" class="group flex flex-col items-center gap-2">
-                    <svg class="h-10 w-10 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
-                        <path d="M4 7a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V7z" class="stroke-gray-400 group-hover:stroke-orange-500 dark:stroke-gray-500" stroke-width="1.5" fill="none"/>
-                        <path d="M4 11h16" class="stroke-gray-400 group-hover:stroke-orange-500 dark:stroke-gray-500" stroke-width="1.5"/>
-                        <path d="M8 3v4M16 3v4" class="stroke-gray-400 group-hover:stroke-orange-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round"/>
-                        <path d="M9 15l2 2 4-4" class="stroke-gray-400 group-hover:stroke-orange-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="5" width="18" height="17" rx="2" class="fill-gray-400 group-hover:fill-[#F57C00] dark:fill-gray-500 dark:group-hover:fill-[#F57C00]"/>
+                        <rect x="3" y="5" width="18" height="5" rx="2" class="fill-gray-500 group-hover:fill-[#E65100] dark:fill-gray-600 dark:group-hover:fill-[#E65100]"/>
+                        <circle cx="7" cy="7.5" r="1" class="fill-white/80"/>
+                        <circle cx="17" cy="7.5" r="1" class="fill-white/80"/>
+                        <path d="M9 15l2 2 4-4" class="stroke-white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                     </svg>
                     <span class="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">CalDAV</span>
                 </a>
                 <!-- Apple Calendar -->
                 <a href="{{ marketing_url('/calendar-sync') }}" class="group flex flex-col items-center gap-2">
-                    <svg class="h-10 w-10 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
-                        <rect x="3" y="4" width="18" height="18" rx="2" class="stroke-gray-400 group-hover:stroke-red-500 dark:stroke-gray-500" stroke-width="1.5" fill="none"/>
-                        <path d="M3 10h18" class="stroke-gray-400 group-hover:stroke-red-500 dark:stroke-gray-500" stroke-width="1.5"/>
-                        <path d="M8 2v4M16 2v4" class="stroke-gray-400 group-hover:stroke-red-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round"/>
-                        <path d="M12 14v4M10 16h4" class="stroke-gray-400 group-hover:stroke-red-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round"/>
+                    <svg class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="5" width="18" height="17" rx="3" class="fill-gray-400 group-hover:fill-white dark:fill-gray-500 dark:group-hover:fill-gray-800"/>
+                        <rect x="3" y="5" width="18" height="6" rx="3" class="fill-gray-500 group-hover:fill-[#EF4444] dark:fill-gray-600 dark:group-hover:fill-[#EF4444]"/>
+                        <text x="7.5" y="9.5" class="fill-white" font-size="5" font-weight="bold" font-family="system-ui">31</text>
+                        <circle cx="8" cy="16" r="1.5" class="fill-gray-500 group-hover:fill-[#EF4444] dark:fill-gray-600 dark:group-hover:fill-[#EF4444]"/>
+                        <rect x="11" y="14" width="6" height="1" rx="0.5" class="fill-gray-300 group-hover:fill-gray-400 dark:fill-gray-700 dark:group-hover:fill-gray-600"/>
+                        <rect x="11" y="16.5" width="4" height="1" rx="0.5" class="fill-gray-300 group-hover:fill-gray-400 dark:fill-gray-700 dark:group-hover:fill-gray-600"/>
                     </svg>
                     <span class="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Apple Calendar</span>
                 </a>
                 <!-- Outlook -->
                 <a href="{{ marketing_url('/calendar-sync') }}" class="group flex flex-col items-center gap-2">
-                    <svg class="h-10 w-10 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
-                        <rect x="3" y="4" width="18" height="18" rx="2" class="stroke-gray-400 group-hover:stroke-sky-500 dark:stroke-gray-500" stroke-width="1.5" fill="none"/>
-                        <path d="M3 10h18" class="stroke-gray-400 group-hover:stroke-sky-500 dark:stroke-gray-500" stroke-width="1.5"/>
-                        <path d="M8 2v4M16 2v4" class="stroke-gray-400 group-hover:stroke-sky-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round"/>
-                        <path d="M9.5 15.5L12 18l2.5-2.5M12 13v5" class="stroke-gray-400 group-hover:stroke-sky-500 dark:stroke-gray-500" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="4" width="18" height="17" rx="2" class="fill-gray-400 group-hover:fill-[#0078D4] dark:fill-gray-500 dark:group-hover:fill-[#0078D4]"/>
+                        <rect x="12" y="4" width="9" height="8.5" rx="1" class="fill-gray-500 group-hover:fill-[#0063B1] dark:fill-gray-600 dark:group-hover:fill-[#0063B1]"/>
+                        <path d="M13 5.5l4 3-4 3" class="stroke-white" stroke-width="1" fill="none" stroke-linejoin="round"/>
+                        <ellipse cx="8" cy="14.5" rx="3.5" ry="4" class="fill-gray-500 group-hover:fill-[#0063B1] dark:fill-gray-600 dark:group-hover:fill-[#0063B1]"/>
+                        <ellipse cx="8" cy="14.5" rx="2" ry="2.5" class="fill-white/30"/>
                     </svg>
                     <span class="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Outlook</span>
                 </a>
@@ -504,7 +446,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Free Plan -->
-                <div class="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 text-center">
+                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-6 text-center">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 mb-4">
                         <svg class="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -515,7 +457,7 @@
                 </div>
 
                 <!-- No Platform Fees -->
-                <div class="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 text-center">
+                <div class="bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-900/30 dark:to-indigo-900/30 border border-violet-200 dark:border-violet-500/20 rounded-2xl p-6 text-center">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-violet-500/20 mb-4">
                         <svg class="w-6 h-6 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -526,7 +468,7 @@
                 </div>
 
                 <!-- Open Source -->
-                <div class="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 text-center">
+                <div class="bg-gradient-to-br from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30 border border-fuchsia-200 dark:border-fuchsia-500/20 rounded-2xl p-6 text-center">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-fuchsia-500/20 mb-4">
                         <svg class="w-6 h-6 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
@@ -627,6 +569,9 @@
         </div>
     </section>
     --}}
+
+    <!-- Transition -->
+    <div class="h-16 section-fade-to-gray"></div>
 
     <!-- How it works - Visual steps -->
     <section class="relative bg-gray-50 dark:bg-[#0f0f14] py-32">

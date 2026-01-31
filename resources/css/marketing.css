@@ -141,9 +141,37 @@ html {
     transform: translateY(-8px);
 }
 
+.persona-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.persona-card:hover {
+    transform: translateY(-8px);
+}
+
 /* ========================================
    Reduced Motion Support
    ======================================== */
+
+/* ========================================
+   Section Transitions
+   ======================================== */
+
+.section-fade-to-gray {
+    background: linear-gradient(to bottom, white, #f9fafb);
+}
+
+.dark .section-fade-to-gray {
+    background: linear-gradient(to bottom, #0a0a0f, #0f0f14);
+}
+
+.section-fade-to-white {
+    background: linear-gradient(to bottom, #f9fafb, white);
+}
+
+.dark .section-fade-to-white {
+    background: linear-gradient(to bottom, #0f0f14, #0a0a0f);
+}
 
 /* ========================================
    Focus States for Keyboard Navigation
