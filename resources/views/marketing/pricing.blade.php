@@ -267,7 +267,7 @@
             </div>
 
             <div class="space-y-6">
-                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm">
+                <div class="bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900 dark:to-indigo-900 rounded-2xl p-6 border border-violet-200 dark:border-white/10 shadow-sm">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                         Is there really a free plan?
                     </h3>
@@ -276,7 +276,7 @@
                     </p>
                 </div>
 
-                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm">
+                <div class="bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900 rounded-2xl p-6 border border-blue-200 dark:border-white/10 shadow-sm">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                         What does "first year free" mean?
                     </h3>
@@ -285,7 +285,7 @@
                     </p>
                 </div>
 
-                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm">
+                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl p-6 border border-emerald-200 dark:border-white/10 shadow-sm">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                         Can I cancel anytime?
                     </h3>
@@ -294,7 +294,7 @@
                     </p>
                 </div>
 
-                <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm">
+                <div class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-2xl p-6 border border-amber-200 dark:border-white/10 shadow-sm">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                         Do you take a cut of ticket sales?
                     </h3>

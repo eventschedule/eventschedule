@@ -278,19 +278,19 @@
                 </p>
 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
-                    <div class="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
+                    <div class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-2xl p-6 border border-amber-200 dark:border-white/10">
                         <div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">JPEG</div>
                         <p class="text-gray-500 dark:text-gray-400 text-sm">Photos & flyers</p>
                     </div>
-                    <div class="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
+                    <div class="bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 rounded-2xl p-6 border border-blue-200 dark:border-white/10">
                         <div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">PNG</div>
                         <p class="text-gray-500 dark:text-gray-400 text-sm">Screenshots</p>
                     </div>
-                    <div class="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
+                    <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl p-6 border border-emerald-200 dark:border-white/10">
                         <div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">GIF</div>
                         <p class="text-gray-500 dark:text-gray-400 text-sm">Animated graphics</p>
                     </div>
-                    <div class="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
+                    <div class="bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 rounded-2xl p-6 border border-violet-200 dark:border-white/10">
                         <div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">WebP</div>
                         <p class="text-gray-500 dark:text-gray-400 text-sm">Modern format</p>
                     </div>
