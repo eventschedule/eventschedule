@@ -46,9 +46,14 @@ class DeletedEventNotification extends Notification
             ->subject(__('messages.event_has_been_deleted'))
             ->line(str_replace(
                 [':name', ':venue', ':user'],
-                [$role->name, $event->getVenueDisplayName(), $user->name],
+                [$role->name, $this->event->getVenueDisplayName(), $user->name],
                 __('messages.event_has_been_deleted_details'))
-            );
+            )
+            ->withSymfonyMessage(function ($message) use ($role) {
+                $unsubscribeUrl = route('role.unsubscribe', ['subdomain' => $role->subdomain]);
+                $message->getHeaders()->addTextHeader('List-Unsubscribe', '<'.$unsubscribeUrl.'>');
+                $message->getHeaders()->addTextHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
+            });
     }
 
     /**
@@ -60,19 +65,6 @@ class DeletedEventNotification extends Notification
     {
         return [
             //
-        ];
-    }
-
-    /**
-     * Get the notification's mail headers.
-     */
-    public function toMailHeaders(): array
-    {
-        $role = $this->event->role();
-
-        return [
-            'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $role->subdomain]).'>',
-            'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
         ];
     }
 }

@@ -39,11 +39,16 @@ class RequestAcceptedNotification extends Notification
         $role = $this->event->role();
 
         return (new MailMessage)
-            ->replyTo($this->venue->user->email, $this->venue->user->name)
+            ->replyTo($venue->user->email, $venue->user->name)
             ->subject(str_replace(':venue', $venue->name, __('messages.'.$role->type.'_request_accepted')))
             ->line(str_replace(':venue', $venue->name, __('messages.'.$role->type.'_request_accepted')))
             ->action(__('messages.view_event'), $this->event->getGuestUrl())
-            ->line(__('messages.thank_you_for_using'));
+            ->line(__('messages.thank_you_for_using'))
+            ->withSymfonyMessage(function ($message) {
+                $unsubscribeUrl = route('role.unsubscribe', ['subdomain' => $this->event->venue->subdomain]);
+                $message->getHeaders()->addTextHeader('List-Unsubscribe', '<'.$unsubscribeUrl.'>');
+                $message->getHeaders()->addTextHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
+            });
     }
 
     /**
@@ -55,19 +60,6 @@ class RequestAcceptedNotification extends Notification
     {
         return [
             //
-        ];
-    }
-
-    /**
-     * Get the notification's mail headers.
-     */
-    public function toMailHeaders(): array
-    {
-        $venue = $this->event->venue;
-
-        return [
-            'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $venue->subdomain]).'>',
-            'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
         ];
     }
 }
