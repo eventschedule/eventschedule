@@ -8,6 +8,8 @@ use App\Utils\GeminiUtils;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class AppController extends Controller
@@ -64,6 +66,22 @@ class AppController extends Controller
 
                 return response()->json(['success' => false, 'error' => 'Unable to connect to database. Please check your credentials.']);
             }
+
+            // After successful connection, check for existing users
+            try {
+                $result = mysqli_query($connection, 'SELECT COUNT(*) as count FROM users');
+                if ($result) {
+                    $row = mysqli_fetch_assoc($result);
+                    if ($row && (int) $row['count'] > 0) {
+                        mysqli_close($connection);
+
+                        return response()->json(['success' => true, 'has_existing_user' => true]);
+                    }
+                }
+            } catch (\Exception $e) {
+                // Table doesn't exist - that's fine, it's a fresh database
+            }
+
             mysqli_close($connection);
         } catch (\Exception $e) {
             \Log::warning('Database connection test exception', ['host' => $host, 'error' => $e->getMessage()]);
@@ -83,26 +101,63 @@ class AppController extends Controller
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
-        \Artisan::call('app:translate');
-        \Artisan::call('app:send-graphic-emails');
-        \Artisan::call('google:refresh-webhooks');        
+        $lock = Cache::lock('translate_data_lock', 300);
+        if (! $lock->get()) {
+            return response()->json(['message' => 'Already running'], 200);
+        }
 
-        $currentHourUtc = (int) now('UTC')->format('H');
-        if ($currentHourUtc === 12) {
-            \Artisan::call('app:notify-request-changes');
+        try {
+            try {
+                // Process queued jobs (emails, etc.)
+                \Artisan::call('queue:work', [
+                    '--stop-when-empty' => true,
+                    '--max-time' => 120,
+                    '--tries' => 3,
+                ]);
 
-            if (config('app.is_nexus')) {
-                \Artisan::call('app:generate-sub-audience-blog');
+                // Retry failed jobs (capped at 50 to prevent infinite loops)
+                $failedCount = DB::table('failed_jobs')->count();
+                if ($failedCount > 0) {
+                    \Log::warning("Found {$failedCount} failed jobs, retrying up to 50");
+                    $failedIds = DB::table('failed_jobs')->orderBy('failed_at')->limit(50)->pluck('uuid');
+                    foreach ($failedIds as $uuid) {
+                        \Artisan::call('queue:retry', ['id' => [$uuid]]);
+                    }
+
+                    // Process retried jobs
+                    \Artisan::call('queue:work', [
+                        '--stop-when-empty' => true,
+                        '--max-time' => 60,
+                        '--tries' => 3,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Queue processing failed: ' . $e->getMessage());
             }
-        }
 
-        if (! config('app.hosted')) {
-            \Artisan::call('app:import-curator-events');
-        }
+            \Artisan::call('app:translate');
+            \Artisan::call('app:send-graphic-emails');
+            \Artisan::call('google:refresh-webhooks');
 
-        // Auto-generate daily blog post (once per day)
-        if (config('app.hosted')) {
-            $this->generateDailyBlogPost();
+            $currentHourUtc = (int) now('UTC')->format('H');
+            if ($currentHourUtc === 12) {
+                \Artisan::call('app:notify-request-changes');
+
+                if (config('app.is_nexus')) {
+                    \Artisan::call('app:generate-sub-audience-blog');
+                }
+            }
+
+            if (! config('app.hosted')) {
+                \Artisan::call('app:import-curator-events');
+            }
+
+            // Auto-generate daily blog post (once per day)
+            if (config('app.hosted')) {
+                $this->generateDailyBlogPost();
+            }
+        } finally {
+            $lock->release();
         }
 
         return response()->json(['success' => true]);
