@@ -169,6 +169,21 @@ if (! function_exists('blog_url')) {
     }
 }
 
+if (! function_exists('demo_url')) {
+    /**
+     * Generate the URL for the demo schedule
+     * Returns local URL for testing, subdomain URL for hosted production
+     */
+    function demo_url(): string
+    {
+        if (config('app.is_testing')) {
+            return url('/demo');
+        }
+
+        return 'https://demo.eventschedule.com';
+    }
+}
+
 if (! function_exists('is_demo_mode')) {
     /**
      * Check if the current session is in demo mode
