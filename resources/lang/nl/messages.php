@@ -1202,6 +1202,7 @@ return [
     'utm_attribution' => 'UTM-toewijzing',
     'top_sources' => 'Topbronnen',
     'top_campaigns' => 'Topcampagnes',
+    'recent_signups' => 'Recente registraties',
     'from_campaigns' => 'van gevolgde campagnes',
     'no_utm_data' => 'Geen UTM-gegevens beschikbaar',
     'organic' => 'Organisch',

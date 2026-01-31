@@ -2,6 +2,7 @@
 
 namespace App\Repos;
 
+use App\Jobs\SendQueuedEmail;
 use App\Mail\ClaimRole;
 use App\Mail\ClaimVenue;
 use App\Models\Event;
@@ -13,7 +14,6 @@ use App\Utils\GeminiUtils;
 use App\Utils\SlugPatternUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -498,9 +498,15 @@ class EventRepo
 
                     if ($shouldSendEmail) {
                         if ($role->isVenue()) {
-                            Mail::to($role->email)->send(new ClaimVenue($event));
+                            SendQueuedEmail::dispatch(
+                                new ClaimVenue($event),
+                                $role->email
+                            );
                         } elseif ($role->isTalent()) {
-                            Mail::to($role->email)->send(new ClaimRole($event));
+                            SendQueuedEmail::dispatch(
+                                new ClaimRole($event),
+                                $role->email
+                            );
                         }
                     }
                 }

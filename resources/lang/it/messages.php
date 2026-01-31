@@ -1204,6 +1204,7 @@ return [
     'utm_attribution' => 'Attribuzione UTM',
     'top_sources' => 'Fonti principali',
     'top_campaigns' => 'Campagne principali',
+    'recent_signups' => 'Registrazioni recenti',
     'from_campaigns' => 'da campagne tracciate',
     'no_utm_data' => 'Nessun dato UTM disponibile',
     'organic' => 'Organico',

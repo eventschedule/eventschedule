@@ -1208,6 +1208,7 @@ return [
     'utm_attribution' => 'UTM-Zuordnung',
     'top_sources' => 'Top-Quellen',
     'top_campaigns' => 'Top-Kampagnen',
+    'recent_signups' => 'Neueste Registrierungen',
     'from_campaigns' => 'aus verfolgten Kampagnen',
     'no_utm_data' => 'Keine UTM-Daten verfügbar',
     'organic' => 'Organisch',

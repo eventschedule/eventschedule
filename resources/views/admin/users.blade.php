@@ -187,6 +187,42 @@
                 </div>
             </div>
         @endif
+
+        {{-- Recent Signups --}}
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.recent_signups')</h3>
+
+            @if($recentSignups->count() > 0)
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-200 dark:border-gray-700">
+                                <th class="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.name')</th>
+                                <th class="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.email')</th>
+                                <th class="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.date')</th>
+                                <th class="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.source')</th>
+                                <th class="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.medium')</th>
+                                <th class="text-left py-2 font-medium text-gray-500 dark:text-gray-400">@lang('messages.campaign')</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($recentSignups as $signup)
+                                <tr class="border-b border-gray-100 dark:border-gray-700/50">
+                                    <td class="py-2 pr-4 text-gray-900 dark:text-white">{{ $signup->name }}</td>
+                                    <td class="py-2 pr-4 text-gray-600 dark:text-gray-400">{{ $signup->email }}</td>
+                                    <td class="py-2 pr-4 text-gray-600 dark:text-gray-400">{{ $signup->created_at->format('M j, Y') }}</td>
+                                    <td class="py-2 pr-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_source ?? '-' }}</td>
+                                    <td class="py-2 pr-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_medium ?? '-' }}</td>
+                                    <td class="py-2 text-gray-600 dark:text-gray-400">{{ $signup->utm_campaign ?? '-' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_data')</p>
+            @endif
+        </div>
     </div>
 
     {{-- Chart.js --}}

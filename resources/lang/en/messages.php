@@ -1217,6 +1217,7 @@ return [
     'utm_attribution' => 'UTM Attribution',
     'top_sources' => 'Top Sources',
     'top_campaigns' => 'Top Campaigns',
+    'recent_signups' => 'Recent Signups',
     'from_campaigns' => 'from tracked campaigns',
     'no_utm_data' => 'No UTM data available',
     'organic' => 'Organic',

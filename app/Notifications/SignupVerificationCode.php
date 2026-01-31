@@ -85,6 +85,20 @@ class SignupVerificationCode extends Notification
                     ]
                 );
             }
+
+            public function headers(): \Illuminate\Mail\Mailables\Headers
+            {
+                if ($this->email) {
+                    return new \Illuminate\Mail\Mailables\Headers(
+                        text: [
+                            'List-Unsubscribe' => '<'.route('user.unsubscribe', ['email' => base64_encode($this->email)]).'>',
+                            'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
+                        ],
+                    );
+                }
+
+                return new \Illuminate\Mail\Mailables\Headers;
+            }
         };
     }
 

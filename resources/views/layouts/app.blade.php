@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ is_rtl() ? 'rtl' : 'ltr' }}">
 <head class="h-full bg-white">
     <title>{{ $title ?? 'Event Schedule' }}</title>
     <!-- Version: {{ config('self-update.version_installed') }} -->
@@ -150,7 +150,10 @@
         .rtl .lg\\:justify-start { justify-content: flex-end; }
         .rtl .lg\\:justify-end { justify-content: flex-start; }
         .rtl .sm\\:justify-end { justify-content: flex-start; }
-        
+
+        /* RTL sidebar layout adjustments */
+        .rtl .lg\\:pl-72 { padding-left: 0; padding-right: 18rem; }
+
         .tooltip {
             font-family: sans-serif !important;
             position: absolute;

@@ -104,13 +104,23 @@ class TicketController extends Controller
                 'password' => ['required', 'string', 'min:8'],
             ]);
 
+            $utmParams = session('utm_params', []);
+
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'timezone' => $event->user->timezone,
                 'language_code' => $event->user->language_code,
+                'utm_source' => $utmParams['utm_source'] ?? null,
+                'utm_medium' => $utmParams['utm_medium'] ?? null,
+                'utm_campaign' => $utmParams['utm_campaign'] ?? null,
+                'utm_content' => $utmParams['utm_content'] ?? null,
+                'utm_term' => $utmParams['utm_term'] ?? null,
+                'referrer_url' => session('utm_referrer_url'),
             ]);
+
+            session()->forget(['utm_params', 'utm_referrer_url']);
 
             $role = Role::subdomain($subdomain)->firstOrFail();
             $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
@@ -719,7 +729,7 @@ class TicketController extends Controller
             $role = $event->venue ?: $event->roles->first();
             $emailService = new EmailService;
 
-            $success = $emailService->sendTicketEmail($sale, $role);
+            $success = $emailService->sendTicketEmail($sale, $role, queue: false);
 
             if ($success) {
                 return response()->json(['success' => true, 'message' => __('messages.email_sent_successfully')]);
