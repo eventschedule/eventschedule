@@ -57,7 +57,7 @@
         </div>
 
         <!-- Static sidebar for desktop -->
-        <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
+        <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col {{ is_rtl() ? 'lg:right-0' : 'lg:left-0' }}">
             <!-- Sidebar component, swap this element with another sidebar if you like -->
             <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 dark:bg-[#1A1A1A] px-6 pb-4">
 
@@ -66,7 +66,7 @@
             </div>
         </div>
 
-        <div class="lg:pl-72 flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div class="{{ is_rtl() ? 'lg:pr-72' : 'lg:pl-72' }} flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
             <div
                 class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
                 <button id="open-sidebar" type="button" class="-m-2.5 p-2.5 text-gray-700 dark:text-gray-300 lg:hidden">
