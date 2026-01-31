@@ -72,13 +72,23 @@ class SocialAuthController extends Controller
         }
 
         // New user - create account
+        $utmParams = session('utm_params', []);
+
         $user = User::create([
             'name' => $googleUser->getName(),
             'email' => $email,
             'google_oauth_id' => $googleId,
             'email_verified_at' => now(), // Google verified the email
             'password' => null, // No password for Google-only users
+            'utm_source' => $utmParams['utm_source'] ?? null,
+            'utm_medium' => $utmParams['utm_medium'] ?? null,
+            'utm_campaign' => $utmParams['utm_campaign'] ?? null,
+            'utm_content' => $utmParams['utm_content'] ?? null,
+            'utm_term' => $utmParams['utm_term'] ?? null,
+            'referrer_url' => session('utm_referrer_url'),
         ]);
+
+        session()->forget(['utm_params', 'utm_referrer_url']);
 
         Auth::login($user, true);
 

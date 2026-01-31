@@ -44,6 +44,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'facebook_token',
         'facebook_token_expires_at',
         'email_verified_at',
+        'utm_source',
+        'utm_medium',
+        'utm_campaign',
+        'utm_content',
+        'utm_term',
+        'referrer_url',
     ];
 
     /**

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CaptureUtmParameters;
 use App\Http\Middleware\DemoAutoLogin;
 use App\Http\Middleware\DetectTrailingSlash;
 use App\Http\Middleware\EnsureEmailIsVerified;
@@ -37,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(SecurityHeaders::class);
 
         $middleware->web(append: [
+            CaptureUtmParameters::class,
             SetUserLanguage::class,
             EnsureEmailIsVerified::class,
             HandleBotTraffic::class,

@@ -1191,4 +1191,19 @@ return [
     'error_prefix' => 'Error: :error',
     'error_testing_connection' => 'Error testing connection',
     'stripe' => 'Stripe',
+    'database_already_initialized' => 'This database already has an existing installation. Please use a different database or log in to the existing installation.',
+
+    // UTM Attribution
+    'utm_attribution' => 'ייחוס UTM',
+    'top_sources' => 'מקורות מובילים',
+    'top_campaigns' => 'קמפיינים מובילים',
+    'from_campaigns' => 'מקמפיינים מעוקבים',
+    'no_utm_data' => 'אין נתוני UTM זמינים',
+    'organic' => 'אורגני',
+    'referrer' => 'מפנה',
+    'source' => 'מקור',
+    'medium' => 'מדיום',
+    'campaign' => 'קמפיין',
+    'of' => 'מתוך',
+    'signups_total' => 'הרשמות',
 ];
