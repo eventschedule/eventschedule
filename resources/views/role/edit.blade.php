@@ -952,17 +952,17 @@
 
                     <!-- Sub-Tab Navigation -->
                     <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
-                        <nav class="-mb-px flex space-x-4 overflow-x-auto">
+                        <nav class="-mb-px flex space-x-2 sm:space-x-6">
                             <button type="button" onclick="showStyleTab('images')" id="style-tab-images"
-                                class="style-tab-button whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-[#4E81FA] text-[#4E81FA]">
+                                class="style-tab-button flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-[#4E81FA] text-[#4E81FA]">
                                 {{ __('messages.images') }}
                             </button>
                             <button type="button" onclick="showStyleTab('background')" id="style-tab-background"
-                                class="style-tab-button whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
+                                class="style-tab-button flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
                                 {{ __('messages.background') }}
                             </button>
                             <button type="button" onclick="showStyleTab('settings')" id="style-tab-settings"
-                                class="style-tab-button whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
+                                class="style-tab-button flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
                                 {{ __('messages.settings') }}
                             </button>
                         </nav>
@@ -1323,14 +1323,14 @@
 
                         <!-- Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
-                            <nav class="flex space-x-4 overflow-x-auto" aria-label="Tabs">
-                                <button type="button" class="settings-tab px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="general">
+                            <nav class="flex space-x-2 sm:space-x-4" aria-label="Tabs">
+                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="general">
                                     {{ __('messages.general') }}
                                 </button>
-                                <button type="button" class="settings-tab px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
+                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
                                     {{ __('messages.custom_fields') }}
                                 </button>
-                                <button type="button" class="settings-tab px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="subschedules">
+                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="subschedules">
                                     {{ __('messages.subschedules') }}
                                 </button>
                             </nav>

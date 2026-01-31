@@ -399,15 +399,15 @@
                 </p>
 
                 <div class="grid sm:grid-cols-3 gap-6 mb-10">
-                    <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-6 border border-gray-200 dark:border-white/10">
+                    <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-xl p-6 border border-emerald-200 dark:border-emerald-500/20">
                         <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">100%</div>
                         <div class="text-gray-500 dark:text-gray-400 text-sm">Open Source</div>
                     </div>
-                    <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-6 border border-gray-200 dark:border-white/10">
+                    <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-xl p-6 border border-emerald-200 dark:border-emerald-500/20">
                         <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Free</div>
                         <div class="text-gray-500 dark:text-gray-400 text-sm">Forever</div>
                     </div>
-                    <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-6 border border-gray-200 dark:border-white/10">
+                    <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-xl p-6 border border-emerald-200 dark:border-emerald-500/20">
                         <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">AAL</div>
                         <div class="text-gray-500 dark:text-gray-400 text-sm">Licensed</div>
                     </div>
