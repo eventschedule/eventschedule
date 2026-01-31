@@ -115,7 +115,7 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float">
-                                <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-fuchsia-900 dark:to-pink-900 rounded-2xl border border-gray-200 dark:border-fuchsia-500/30 p-6 w-72 shadow-2xl shadow-fuchsia-500/10">
+                                <div class="bg-gradient-to-br from-fuchsia-50 to-pink-50 dark:from-fuchsia-900 dark:to-pink-900 rounded-2xl border border-fuchsia-200 dark:border-fuchsia-500/30 p-6 w-72 shadow-2xl shadow-fuchsia-500/10">
                                     <div class="space-y-3">
                                         <div class="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10">
                                             <div>
@@ -322,7 +322,7 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.3s;">
-                                <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-emerald-900 dark:to-teal-900 rounded-xl border border-gray-200 dark:border-emerald-500/30 p-5 w-64">
+                                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900 dark:to-teal-900 rounded-xl border border-emerald-200 dark:border-emerald-500/30 p-5 w-64">
                                     <div class="text-xs text-gray-500 dark:text-white/70 mb-3">Views this week</div>
                                     <div class="flex items-end justify-between h-24 gap-2">
                                         <div class="w-6 bg-emerald-500/40 rounded-t" style="height: 40%"></div>
@@ -408,7 +408,7 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.7s;">
-                                <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-amber-900 dark:to-orange-900 rounded-xl border border-gray-200 dark:border-amber-500/30 p-5 w-56 space-y-3">
+                                <div class="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900 dark:to-orange-900 rounded-xl border border-amber-200 dark:border-amber-500/30 p-5 w-56 space-y-3">
                                     <!-- Text field -->
                                     <div>
                                         <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">Company Name</div>
@@ -474,7 +474,7 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 1.2s;">
-                                <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-cyan-900 dark:to-teal-900 rounded-xl border border-gray-200 dark:border-cyan-500/30 p-4 w-56 space-y-2">
+                                <div class="bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900 dark:to-teal-900 rounded-xl border border-cyan-200 dark:border-cyan-500/30 p-4 w-56 space-y-2">
                                     <!-- Team member 1 -->
                                     <div class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-white/10">
                                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center text-white text-xs font-semibold">JD</div>
@@ -543,7 +543,7 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.4s;">
-                                <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-rose-900 dark:to-pink-900 rounded-xl border border-gray-200 dark:border-rose-500/30 p-4 w-56">
+                                <div class="bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900 dark:to-pink-900 rounded-xl border border-rose-200 dark:border-rose-500/30 p-4 w-56">
                                     <div class="text-xs text-gray-500 dark:text-white/70 mb-3">Sub-schedules</div>
                                     <div class="space-y-2">
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-rose-100 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/30">
@@ -607,7 +607,7 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.8s;">
-                                <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-indigo-900 dark:to-violet-900 rounded-xl border border-gray-200 dark:border-indigo-500/30 p-4 w-56">
+                                <div class="bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900 dark:to-violet-900 rounded-xl border border-indigo-200 dark:border-indigo-500/30 p-4 w-56">
                                     <!-- Toggle switch -->
                                     <div class="flex items-center justify-between mb-4">
                                         <span class="text-gray-600 dark:text-gray-300 text-sm">Online Event</span>
