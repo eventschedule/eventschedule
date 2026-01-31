@@ -301,13 +301,13 @@
     </section>
 
     <!-- How it Works -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     How it works
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Connect to your CalDAV server in five simple steps.
                 </p>
             </div>
@@ -317,8 +317,8 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-500 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-teal-500/25">
                         1
                     </div>
-                    <h3 class="text-base font-semibold text-gray-900 mb-2">Enter server URL</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Enter server URL</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Provide your CalDAV server URL (HTTPS required).
                     </p>
                 </div>
@@ -327,8 +327,8 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-500 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-teal-500/25">
                         2
                     </div>
-                    <h3 class="text-base font-semibold text-gray-900 mb-2">Authenticate</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Authenticate</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Enter your username and password securely.
                     </p>
                 </div>
@@ -337,8 +337,8 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-500 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-teal-500/25">
                         3
                     </div>
-                    <h3 class="text-base font-semibold text-gray-900 mb-2">Select calendar</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Select calendar</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Choose from auto-discovered calendars.
                     </p>
                 </div>
@@ -347,8 +347,8 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-500 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-teal-500/25">
                         4
                     </div>
-                    <h3 class="text-base font-semibold text-gray-900 mb-2">Choose direction</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Choose direction</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Push, pull, or sync both ways.
                     </p>
                 </div>
@@ -357,8 +357,8 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-500 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-teal-500/25">
                         5
                     </div>
-                    <h3 class="text-base font-semibold text-gray-900 mb-2">Auto-sync</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Auto-sync</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Sync runs every 15 minutes automatically.
                     </p>
                 </div>

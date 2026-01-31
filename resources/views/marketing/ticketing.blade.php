@@ -141,7 +141,7 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Choose Stripe for instant checkout or Invoice Ninja for B2B invoicing.</p>
 
                     <div class="flex justify-center gap-4">
-                        <a href="{{ marketing_url('/stripe') }}" class="bg-white rounded-xl px-4 py-3 shadow-lg hover:scale-105 transition-transform">
+                        <a href="{{ marketing_url('/stripe') }}" class="bg-white dark:bg-gray-800 rounded-xl px-4 py-3 shadow-lg hover:scale-105 transition-transform">
                             <span class="text-lg font-bold" style="color: #635BFF;">stripe</span>
                         </a>
                         <a href="{{ marketing_url('/invoiceninja') }}" class="bg-emerald-500/20 border border-emerald-400/30 rounded-xl px-4 py-3 hover:scale-105 transition-transform flex items-center gap-2">
