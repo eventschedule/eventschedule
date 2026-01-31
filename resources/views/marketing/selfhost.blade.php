@@ -12,10 +12,6 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        /* Enhanced feature card hover for this page */
-        .feature-card:hover {
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        }
     </style>
 
     <!-- Hero Section -->
@@ -118,7 +114,7 @@
                             Available on 1000+ hosts
                         </li>
                     </ul>
-                    <a href="https://www.softaculous.com/apps/calendars/Event_Schedule" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-medium transition-colors mt-auto">
+                    <a href="https://www.softaculous.com/apps/calendars/Event_Schedule" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-xl text-white font-medium transition-colors mt-auto">
                         Install with Softaculous
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -162,7 +158,7 @@
                             Pre-configured compose file
                         </li>
                     </ul>
-                    <a href="https://github.com/eventschedule/dockerfiles" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-white font-medium transition-colors mt-auto">
+                    <a href="https://github.com/eventschedule/dockerfiles" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 rounded-xl text-white font-medium transition-colors mt-auto">
                         View Docker Setup
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />

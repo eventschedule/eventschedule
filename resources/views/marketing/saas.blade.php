@@ -12,10 +12,6 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        /* Enhanced feature card hover for this page */
-        .feature-card:hover {
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        }
     </style>
 
     <!-- Hero Section -->
@@ -49,7 +45,7 @@
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="{{ route('marketing.docs.selfhost.saas') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
+                <a href="{{ route('marketing.docs.selfhost.saas') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-violet-500/25">
                     View Setup Guide
                     <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -496,7 +492,7 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="relative bg-gradient-to-br from-blue-600 to-indigo-700 py-24 overflow-hidden">
+    <section class="relative bg-gradient-to-br from-violet-600 to-indigo-700 py-24 overflow-hidden">
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -507,7 +503,7 @@
                 Get started with the setup guide. Everything you need to run your own white-label ticketing platform.
             </p>
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="{{ route('marketing.docs.selfhost.saas') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
+                <a href="{{ route('marketing.docs.selfhost.saas') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-violet-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                     Read Setup Guide
                     <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
