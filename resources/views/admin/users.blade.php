@@ -119,6 +119,74 @@
                 </div>
             </div>
         </div>
+
+        {{-- UTM Attribution Section --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {{-- UTM Summary Card + Bar Chart --}}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.utm_attribution') (@lang('messages.selected_period'))</h3>
+
+                @if($usersWithUtmInPeriod + $usersWithoutUtmInPeriod > 0)
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        {{ number_format($usersWithUtmInPeriod) }} @lang('messages.from_campaigns')
+                        ({{ $usersWithUtmInPeriod + $usersWithoutUtmInPeriod > 0 ? round(($usersWithUtmInPeriod / ($usersWithUtmInPeriod + $usersWithoutUtmInPeriod)) * 100, 1) : 0 }}%
+                        @lang('messages.of') {{ number_format($usersWithUtmInPeriod + $usersWithoutUtmInPeriod) }} @lang('messages.signups_total'))
+                    </p>
+
+                    @if($utmSourcesInPeriod->count() > 0)
+                        <div class="h-48">
+                            <canvas id="utmSourcesChart"></canvas>
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_utm_data')</p>
+                    @endif
+                @else
+                    <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_utm_data')</p>
+                @endif
+            </div>
+
+            {{-- Top Campaigns Table --}}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_campaigns') (@lang('messages.all_time'))</h3>
+
+                @if($topUtmCampaigns->count() > 0)
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                    <th class="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.source')</th>
+                                    <th class="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.medium')</th>
+                                    <th class="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.campaign')</th>
+                                    <th class="text-right py-2 font-medium text-gray-500 dark:text-gray-400">@lang('messages.users')</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($topUtmCampaigns as $campaign)
+                                    <tr class="border-b border-gray-100 dark:border-gray-700/50">
+                                        <td class="py-2 pr-4 text-gray-900 dark:text-white">{{ $campaign->utm_source ?? '-' }}</td>
+                                        <td class="py-2 pr-4 text-gray-600 dark:text-gray-400">{{ $campaign->utm_medium ?? '-' }}</td>
+                                        <td class="py-2 pr-4 text-gray-600 dark:text-gray-400">{{ $campaign->utm_campaign }}</td>
+                                        <td class="py-2 text-right font-medium text-gray-900 dark:text-white">{{ number_format($campaign->count) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_utm_data')</p>
+                @endif
+            </div>
+        </div>
+
+        {{-- Top UTM Sources (All Time) --}}
+        @if($topUtmSources->count() > 0)
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_sources') (@lang('messages.all_time'))</h3>
+                <div class="h-64">
+                    <canvas id="utmTopSourcesChart"></canvas>
+                </div>
+            </div>
+        @endif
     </div>
 
     {{-- Chart.js --}}
@@ -227,6 +295,76 @@
                     }
                 }
             });
+
+            // UTM Sources Bar Chart (selected period)
+            @if($utmSourcesInPeriod->count() > 0)
+                const utmSourcesCtx = document.getElementById('utmSourcesChart').getContext('2d');
+                new Chart(utmSourcesCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: {!! json_encode($utmSourcesInPeriod->pluck('utm_source')->toArray()) !!},
+                        datasets: [{
+                            label: @json(__('messages.users')),
+                            data: {!! json_encode($utmSourcesInPeriod->pluck('count')->toArray()) !!},
+                            backgroundColor: '#8B5CF6'
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: { color: gridColor },
+                                ticks: { color: textColor, precision: 0 }
+                            },
+                            y: {
+                                grid: { display: false },
+                                ticks: { color: textColor }
+                            }
+                        }
+                    }
+                });
+            @endif
+
+            // UTM Top Sources Bar Chart (all time)
+            @if($topUtmSources->count() > 0)
+                const utmTopSourcesCtx = document.getElementById('utmTopSourcesChart').getContext('2d');
+                new Chart(utmTopSourcesCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: {!! json_encode($topUtmSources->pluck('utm_source')->toArray()) !!},
+                        datasets: [{
+                            label: @json(__('messages.users')),
+                            data: {!! json_encode($topUtmSources->pluck('count')->toArray()) !!},
+                            backgroundColor: '#8B5CF6'
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: { color: gridColor },
+                                ticks: { color: textColor, precision: 0 }
+                            },
+                            y: {
+                                grid: { display: false },
+                                ticks: { color: textColor }
+                            }
+                        }
+                    }
+                });
+            @endif
         }
 
         // Initialize charts when DOM is ready

@@ -1211,4 +1211,19 @@ return [
     'error_prefix' => 'Error: :error',
     'error_testing_connection' => 'Error testing connection',
     'stripe' => 'Stripe',
+    'database_already_initialized' => 'This database already has an existing installation. Please use a different database or log in to the existing installation.',
+
+    // UTM Attribution
+    'utm_attribution' => 'UTM Attribution',
+    'top_sources' => 'Top Sources',
+    'top_campaigns' => 'Top Campaigns',
+    'from_campaigns' => 'from tracked campaigns',
+    'no_utm_data' => 'No UTM data available',
+    'organic' => 'Organic',
+    'referrer' => 'Referrer',
+    'source' => 'Source',
+    'medium' => 'Medium',
+    'campaign' => 'Campaign',
+    'of' => 'of',
+    'signups_total' => 'signups',
 ];

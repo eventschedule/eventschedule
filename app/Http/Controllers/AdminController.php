@@ -274,6 +274,50 @@ class AdminController extends Controller
         // Trends data for signup methods
         $trendData = $this->getTrendData($startDate, $endDate);
 
+        // UTM Attribution - Top 10 sources (all time)
+        $topUtmSources = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('utm_source')
+            ->select('utm_source', DB::raw('COUNT(*) as count'))
+            ->groupBy('utm_source')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get();
+
+        // UTM Attribution - Top 10 campaigns (all time)
+        $topUtmCampaigns = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('utm_campaign')
+            ->select('utm_source', 'utm_medium', 'utm_campaign', DB::raw('COUNT(*) as count'))
+            ->groupBy('utm_source', 'utm_medium', 'utm_campaign')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get();
+
+        // UTM source breakdown for selected period
+        $utmSourcesInPeriod = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('utm_source')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->select('utm_source', DB::raw('COUNT(*) as count'))
+            ->groupBy('utm_source')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get();
+
+        // Users with vs without UTM data in period
+        $usersWithUtmInPeriod = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('utm_source')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        $usersWithoutUtmInPeriod = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNull('utm_source')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
         return view('admin.users', compact(
             'totalUsers',
             'usersInPeriod',
@@ -287,7 +331,12 @@ class AdminController extends Controller
             'googleUsersInPeriod',
             'hybridUsersInPeriod',
             'trendData',
-            'range'
+            'range',
+            'topUtmSources',
+            'topUtmCampaigns',
+            'utmSourcesInPeriod',
+            'usersWithUtmInPeriod',
+            'usersWithoutUtmInPeriod'
         ));
     }
 

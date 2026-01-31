@@ -14,9 +14,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
@@ -253,13 +253,23 @@ class RegisteredUserController extends Controller
             }
         }
 
+        $utmParams = session('utm_params', []);
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'timezone' => $request->timezone ?? 'America/New_York',
             'language_code' => $request->language_code ?? 'en',
+            'utm_source' => $utmParams['utm_source'] ?? null,
+            'utm_medium' => $utmParams['utm_medium'] ?? null,
+            'utm_campaign' => $utmParams['utm_campaign'] ?? null,
+            'utm_content' => $utmParams['utm_content'] ?? null,
+            'utm_term' => $utmParams['utm_term'] ?? null,
+            'referrer_url' => session('utm_referrer_url'),
         ]);
+
+        session()->forget(['utm_params', 'utm_referrer_url']);
 
         // Mark email as verified if code was validated (hosted mode) or in non-hosted/testing mode
         if ((config('app.hosted') && ! config('app.is_testing')) || ! config('app.hosted') || config('app.is_testing')) {
