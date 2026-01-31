@@ -26,6 +26,14 @@ class CaptureUtmParameters
             }
         }
 
+        // Capture referrer independently of UTM params (first-touch)
+        if (! $request->session()->has('utm_referrer_url')) {
+            $referer = $request->header('Referer');
+            if ($referer) {
+                $request->session()->put('utm_referrer_url', mb_substr(trim($referer), 0, 2048));
+            }
+        }
+
         return $next($request);
     }
 

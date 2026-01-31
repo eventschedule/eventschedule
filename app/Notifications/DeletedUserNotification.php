@@ -44,7 +44,12 @@ class DeletedUserNotification extends Notification
                 ':user',
                 $user->name,
                 __('messages.user_has_been_deleted_details'))
-            );
+            )
+            ->withSymfonyMessage(function ($message) use ($notifiable) {
+                $unsubscribeUrl = route('user.unsubscribe', ['email' => base64_encode($notifiable->email)]);
+                $message->getHeaders()->addTextHeader('List-Unsubscribe', '<'.$unsubscribeUrl.'>');
+                $message->getHeaders()->addTextHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
+            });
     }
 
     /**

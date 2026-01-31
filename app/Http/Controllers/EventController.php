@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\EventCreateRequest;
 use App\Http\Requests\EventUpdateRequest;
+use App\Jobs\SendQueuedEmail;
 use App\Mail\EventAccepted;
 use App\Mail\EventDeclined;
 use App\Models\Event;
@@ -19,7 +20,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -547,12 +547,12 @@ class EventController extends Controller
         // (Guest submissions without accounts have user_id set to venue's user)
         if ($event->user && $event->user->email && ! is_demo_mode()) {
             if (! $event->user->isMember($subdomain)) {
-                $originalLocale = app()->getLocale();
-                if ($event->user->language_code) {
-                    app()->setLocale($event->user->language_code);
-                }
-                Mail::to($event->user->email)->send(new EventAccepted($event, $role));
-                app()->setLocale($originalLocale);
+                SendQueuedEmail::dispatch(
+                    new EventAccepted($event, $role),
+                    $event->user->email,
+                    null,
+                    $event->user->language_code
+                );
             }
         }
 
@@ -582,12 +582,12 @@ class EventController extends Controller
         // (Guest submissions without accounts have user_id set to venue's user)
         if ($event->user && $event->user->email && ! is_demo_mode()) {
             if (! $event->user->isMember($subdomain)) {
-                $originalLocale = app()->getLocale();
-                if ($event->user->language_code) {
-                    app()->setLocale($event->user->language_code);
-                }
-                Mail::to($event->user->email)->send(new EventDeclined($event, $role));
-                app()->setLocale($originalLocale);
+                SendQueuedEmail::dispatch(
+                    new EventDeclined($event, $role),
+                    $event->user->email,
+                    null,
+                    $event->user->language_code
+                );
             }
         }
 
@@ -629,12 +629,12 @@ class EventController extends Controller
                 // (Guest submissions without accounts have user_id set to venue's user)
                 if ($event->user && $event->user->email && ! is_demo_mode()) {
                     if (! $event->user->isMember($subdomain)) {
-                        $originalLocale = app()->getLocale();
-                        if ($event->user->language_code) {
-                            app()->setLocale($event->user->language_code);
-                        }
-                        Mail::to($event->user->email)->send(new EventAccepted($event, $role));
-                        app()->setLocale($originalLocale);
+                        SendQueuedEmail::dispatch(
+                            new EventAccepted($event, $role),
+                            $event->user->email,
+                            null,
+                            $event->user->language_code
+                        );
                     }
                 }
             }
@@ -950,13 +950,23 @@ class EventController extends Controller
         ]);
 
         // Create the user
+        $utmParams = session('utm_params', []);
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'timezone' => 'America/New_York', // Default timezone
             'language_code' => 'en', // Default language
+            'utm_source' => $utmParams['utm_source'] ?? null,
+            'utm_medium' => $utmParams['utm_medium'] ?? null,
+            'utm_campaign' => $utmParams['utm_campaign'] ?? null,
+            'utm_content' => $utmParams['utm_content'] ?? null,
+            'utm_term' => $utmParams['utm_term'] ?? null,
+            'referrer_url' => session('utm_referrer_url'),
         ]);
+
+        session()->forget(['utm_params', 'utm_referrer_url']);
 
         // Mark email as verified for guest users (they're already using the system)
         $user->email_verified_at = now();

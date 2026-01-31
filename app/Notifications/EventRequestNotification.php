@@ -43,7 +43,12 @@ class EventRequestNotification extends Notification
             ->subject(str_replace(':name', $this->role->name, __('messages.new_request')))
             ->line(str_replace(':name', $this->role->name, __('messages.new_request')))
             ->action(__('messages.view_details'), route('role.view_admin', ['subdomain' => $this->venue->subdomain, 'tab' => 'requests']))
-            ->line(__('messages.thank_you_for_using'));
+            ->line(__('messages.thank_you_for_using'))
+            ->withSymfonyMessage(function ($message) {
+                $unsubscribeUrl = route('role.unsubscribe', ['subdomain' => $this->venue->subdomain]);
+                $message->getHeaders()->addTextHeader('List-Unsubscribe', '<'.$unsubscribeUrl.'>');
+                $message->getHeaders()->addTextHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
+            });
     }
 
     /**
@@ -55,17 +60,6 @@ class EventRequestNotification extends Notification
     {
         return [
             //
-        ];
-    }
-
-    /**
-     * Get the notification's mail headers.
-     */
-    public function toMailHeaders(): array
-    {
-        return [
-            'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $this->venue->subdomain]).'>',
-            'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
         ];
     }
 }

@@ -318,6 +318,13 @@ class AdminController extends Controller
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
+        // Recent signups with UTM data
+        $recentSignups = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get(['name', 'email', 'created_at', 'utm_source', 'utm_medium', 'utm_campaign']);
+
         return view('admin.users', compact(
             'totalUsers',
             'usersInPeriod',
@@ -336,7 +343,8 @@ class AdminController extends Controller
             'topUtmCampaigns',
             'utmSourcesInPeriod',
             'usersWithUtmInPeriod',
-            'usersWithoutUtmInPeriod'
+            'usersWithoutUtmInPeriod',
+            'recentSignups'
         ));
     }
 

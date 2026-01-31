@@ -328,13 +328,13 @@
         <!-- Per the AAL license, please do not remove the link to Event Schedule -->
         @if (config('app.is_nexus'))
             <p class="text-[#F5F9FE] text-base text-center flex items-center justify-center gap-2 {{ $isRtl ? 'flex-row-reverse' : '' }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
-                <span>{!! str_replace(':link', '<a href="' . marketing_url() . '" target="_blank" class="text-white hover:underline">' . marketing_domain() . '</a>',  __('messages.try_event_schedule')) !!}</span>
+                <span>{!! str_replace(':link', '<bdi dir="ltr"><a href="' . marketing_url() . '" target="_blank" class="text-white hover:underline">' . marketing_domain() . '</a></bdi>',  __('messages.try_event_schedule')) !!}</span>
                 <span>•</span>
                 <span>{!! __('messages.supported_by', ['link' => '<a href="https://invoiceninja.com" target="_blank" class="text-white hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>']) !!}</span>
             </p>
         @else
             <p class="text-[#F5F9FE] text-base text-center" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
-                {!! str_replace(':link', '<a href="' . marketing_url() . '" target="_blank" class="text-white hover:underline">' . marketing_domain() . '</a>',  __('messages.try_event_schedule')) !!}
+                {!! str_replace(':link', '<bdi dir="ltr"><a href="' . marketing_url() . '" target="_blank" class="text-white hover:underline">' . marketing_domain() . '</a></bdi>',  __('messages.try_event_schedule')) !!}
             </p>
         @endif
       </div>

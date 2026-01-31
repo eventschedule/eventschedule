@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\SendQueuedEmail;
 use App\Mail\TicketPurchase;
 use App\Models\Role;
 use App\Models\Sale;
@@ -14,7 +15,7 @@ class EmailService
     /**
      * Send ticket purchase email
      */
-    public function sendTicketEmail(Sale $sale, ?Role $role = null): bool
+    public function sendTicketEmail(Sale $sale, ?Role $role = null, bool $queue = true): bool
     {
         // Skip sending to test/example email addresses
         if ($this->isTestEmail($sale->email)) {
@@ -49,14 +50,25 @@ class EmailService
                 if (! $role || ! $role->hasEmailSettings()) {
                     return false;
                 }
+            }
 
-                // Configure and use role-specific SMTP
-                $this->configureRoleMailer($role);
-                $mailerName = 'role_'.$role->id;
-                Mail::mailer($mailerName)->to($sale->email)->send(new TicketPurchase($sale, $event, $role));
+            $mailable = new TicketPurchase($sale, $event, $role);
+
+            if ($queue) {
+                SendQueuedEmail::dispatch(
+                    $mailable,
+                    $sale->email,
+                    $role?->id,
+                    app()->getLocale()
+                );
             } else {
-                // For selfhost users, use system email settings
-                Mail::to($sale->email)->send(new TicketPurchase($sale, $event, $role));
+                if (config('app.hosted') && $role && $role->hasEmailSettings()) {
+                    $this->configureRoleMailer($role);
+                    $mailerName = 'role_'.$role->id;
+                    Mail::mailer($mailerName)->to($sale->email)->send($mailable);
+                } else {
+                    Mail::to($sale->email)->send($mailable);
+                }
             }
 
             return true;

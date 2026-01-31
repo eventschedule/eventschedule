@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ is_rtl() ? 'rtl' : 'ltr' }}">
 <head class="h-full">
     <title>{{ $title ?? 'Event Schedule - The simple way to share your event schedule' }}</title>
     <meta charset="utf-8">

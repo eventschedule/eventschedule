@@ -59,7 +59,11 @@ class NewRequestsNotification extends Notification
                 'requestCount' => $this->requestCount,
                 'actionUrl' => $actionUrl,
                 'unsubscribeUrl' => $unsubscribeUrl,
-            ]);
+            ])
+            ->withSymfonyMessage(function ($message) use ($unsubscribeUrl) {
+                $message->getHeaders()->addTextHeader('List-Unsubscribe', '<'.$unsubscribeUrl.'>');
+                $message->getHeaders()->addTextHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
+            });
     }
 
     /**
@@ -71,17 +75,6 @@ class NewRequestsNotification extends Notification
     {
         return [
             //
-        ];
-    }
-
-    /**
-     * Get the notification's mail headers.
-     */
-    public function toMailHeaders(): array
-    {
-        return [
-            'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $this->role->subdomain]).'>',
-            'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
         ];
     }
 }
