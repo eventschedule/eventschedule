@@ -205,7 +205,7 @@
                         <p class="text-gray-600 dark:text-white/80 mb-6">Accept credit cards, Apple Pay, and Google Pay. Payments go directly to your Stripe account.</p>
 
                         <div class="flex justify-center mb-6">
-                            <div class="bg-white rounded-2xl px-5 py-3 shadow-lg">
+                            <div class="bg-white dark:bg-gray-800 rounded-2xl px-5 py-3 shadow-lg">
                                 <span class="text-2xl font-bold" style="color: #635BFF;">stripe</span>
                             </div>
                         </div>

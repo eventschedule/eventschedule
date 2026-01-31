@@ -61,7 +61,7 @@
                 <a href="{{ marketing_url('/google-calendar') }}" class="group block">
                     <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 h-full">
                         <div class="flex items-center gap-3 mb-6">
-                            <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                            <div class="w-12 h-12 bg-white dark:bg-gray-800 rounded-xl flex items-center justify-center">
                                 <svg class="w-7 h-7" viewBox="0 0 24 24">
                                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -306,13 +306,13 @@
     </section>
 
     <!-- How it Works -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     How sync works
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Connect once, stay in sync forever.
                 </p>
             </div>
@@ -322,8 +322,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/25">
                         1
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Connect your calendar</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Connect your calendar</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Choose Google Calendar (OAuth) or any CalDAV server (username/password).
                     </p>
                 </div>
@@ -332,8 +332,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/25">
                         2
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Choose direction</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Choose direction</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Push events out, pull events in, or sync both ways. You decide.
                     </p>
                 </div>
@@ -342,8 +342,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/25">
                         3
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Select calendar</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Select calendar</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Pick which calendar to use. Different schedules can use different calendars.
                     </p>
                 </div>
@@ -352,8 +352,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/25">
                         4
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Auto-sync</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Auto-sync</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Events sync automatically when created, updated, or deleted. No manual work.
                     </p>
                 </div>

@@ -189,17 +189,17 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Author readings, book signings, and Q&A sessions. Let patrons register and never miss an event.</p>
 
                     <div class="flex justify-center">
-                        <div class="bg-gradient-to-br from-violet-100 to-purple-50 rounded-xl border border-violet-300/50 p-4 w-48 shadow-lg transform -rotate-2 hover:rotate-0 transition-transform">
+                        <div class="bg-gradient-to-br from-violet-100 to-purple-50 dark:from-violet-800 dark:to-purple-900 rounded-xl border border-violet-300/50 dark:border-violet-600/30 p-4 w-48 shadow-lg transform -rotate-2 hover:rotate-0 transition-transform">
                             <div class="text-center">
-                                <div class="text-violet-800 text-[10px] tracking-widest uppercase">Author Visit</div>
-                                <div class="text-violet-900 text-sm font-serif font-semibold mt-1">Jane Smith</div>
-                                <div class="w-16 h-20 bg-gradient-to-br from-violet-200 to-purple-300 rounded mx-auto mt-2 flex items-center justify-center">
-                                    <svg class="w-8 h-8 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="text-violet-800 dark:text-violet-200 text-[10px] tracking-widest uppercase">Author Visit</div>
+                                <div class="text-violet-900 dark:text-violet-100 text-sm font-serif font-semibold mt-1">Jane Smith</div>
+                                <div class="w-16 h-20 bg-gradient-to-br from-violet-200 to-purple-300 dark:from-violet-700 dark:to-purple-800 rounded mx-auto mt-2 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-violet-600 dark:text-violet-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                     </svg>
                                 </div>
-                                <div class="text-violet-600 text-[10px] mt-2">Sat, Mar 15 &bull; 2 PM</div>
-                                <div class="text-violet-500 text-[9px] mt-1">Reading & Signing</div>
+                                <div class="text-violet-600 dark:text-violet-300 text-[10px] mt-2">Sat, Mar 15 &bull; 2 PM</div>
+                                <div class="text-violet-500 dark:text-violet-400 text-[9px] mt-1">Reading & Signing</div>
                             </div>
                         </div>
                     </div>
@@ -259,13 +259,13 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Free tickets for free programs. Manage capacity for story time, workshops, and special events without any fees.</p>
 
                     <div class="flex justify-center">
-                        <div class="bg-gradient-to-br from-emerald-100 to-green-50 rounded-xl border border-emerald-300/50 p-4 w-44 shadow-lg transform rotate-1 hover:rotate-0 transition-transform">
+                        <div class="bg-gradient-to-br from-emerald-100 to-green-50 dark:from-emerald-800 dark:to-green-900 rounded-xl border border-emerald-300/50 dark:border-emerald-600/30 p-4 w-44 shadow-lg transform rotate-1 hover:rotate-0 transition-transform">
                             <div class="text-center">
-                                <div class="text-emerald-800 text-[10px] tracking-widest uppercase">Free Event</div>
-                                <div class="text-emerald-900 text-sm font-serif font-semibold mt-1">Story Time</div>
-                                <div class="text-emerald-700 text-xl font-bold mt-2">FREE</div>
-                                <div class="text-emerald-600 text-[10px] mt-1">Tuesdays &bull; 10 AM</div>
-                                <div class="text-emerald-500 text-[9px] mt-1">15 spots remaining</div>
+                                <div class="text-emerald-800 dark:text-emerald-200 text-[10px] tracking-widest uppercase">Free Event</div>
+                                <div class="text-emerald-900 dark:text-emerald-100 text-sm font-serif font-semibold mt-1">Story Time</div>
+                                <div class="text-emerald-700 dark:text-emerald-300 text-xl font-bold mt-2">FREE</div>
+                                <div class="text-emerald-600 dark:text-emerald-300 text-[10px] mt-1">Tuesdays &bull; 10 AM</div>
+                                <div class="text-emerald-500 dark:text-emerald-400 text-[9px] mt-1">15 spots remaining</div>
                             </div>
                         </div>
                     </div>
@@ -284,7 +284,7 @@
 
                     <div class="flex justify-center">
                         <div class="relative">
-                            <div class="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center mx-auto">
+                            <div class="w-16 h-16 bg-white dark:bg-gray-800 rounded-2xl shadow-lg flex items-center justify-center mx-auto">
                                 <svg class="w-10 h-10" viewBox="0 0 24 24">
                                     <path fill="#4285F4" d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12s4.48 10 10 10 10-4.48 10-10z" opacity="0.1"/>
                                     <path fill="#4285F4" d="M12 7v5l4.28 2.54.72-1.21-3.5-2.08V7H12z"/>

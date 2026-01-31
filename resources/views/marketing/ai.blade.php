@@ -216,13 +216,13 @@
     </section>
 
     <!-- How it Works -->
-    <section class="bg-gray-50 py-24">
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     How it works
                 </h2>
-                <p class="text-xl text-gray-500">
+                <p class="text-xl text-gray-500 dark:text-gray-400">
                     Three steps to import any event.
                 </p>
             </div>
@@ -232,8 +232,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/25">
                         1
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Paste or Drop</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Paste or Drop</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Copy text from anywhere or drop an image of an event flyer or screenshot.
                     </p>
                 </div>
@@ -242,8 +242,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/25">
                         2
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">AI Extracts</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">AI Extracts</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         AI identifies event name, date, time, venue, performer, and description.
                     </p>
                 </div>
@@ -252,8 +252,8 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/25">
                         3
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Review & Save</h3>
-                    <p class="text-gray-600 text-sm">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Review & Save</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Verify the extracted details, make any edits, and add to your schedule.
                     </p>
                 </div>

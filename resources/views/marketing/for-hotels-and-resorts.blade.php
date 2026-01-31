@@ -257,7 +257,7 @@
 
                     <div class="flex justify-center">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-white rounded-xl shadow-lg flex items-center justify-center">
+                            <div class="w-12 h-12 bg-white dark:bg-gray-800 rounded-xl shadow-lg flex items-center justify-center">
                                 <svg class="w-7 h-7" viewBox="0 0 24 24">
                                     <path fill="#4285F4" d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12s4.48 10 10 10 10-4.48 10-10z" opacity="0.1"/>
                                     <path fill="#4285F4" d="M12 7v5l4.28 2.54.72-1.21-3.5-2.08V7H12z"/>
