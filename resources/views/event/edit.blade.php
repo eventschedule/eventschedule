@@ -1223,20 +1223,20 @@
 
                                 <!-- Ticket Section Tabs -->
                                 <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
-                                    <nav class="-mb-px flex space-x-4 overflow-x-auto">
+                                    <nav class="-mb-px flex space-x-2 sm:space-x-6">
                                         <button type="button" @click="activeTicketTab = 'tickets'"
                                             :class="activeTicketTab === 'tickets' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
                                             {{ __('messages.general') }}
                                         </button>
                                         <button type="button" @click="activeTicketTab = 'payment'"
                                             :class="activeTicketTab === 'payment' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
                                             {{ __('messages.payment') }}
                                         </button>
                                         <button type="button" @click="activeTicketTab = 'options'"
                                             :class="activeTicketTab === 'options' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
                                             {{ __('messages.options') }}
                                         </button>
                                     </nav>
