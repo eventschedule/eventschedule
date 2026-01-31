@@ -77,6 +77,18 @@
             border-left-color: #ef4444 !important;
         }
 
+        /* Mobile accordion styles */
+        .mobile-section-header.active .accordion-chevron {
+            transform: rotate(180deg);
+        }
+        .mobile-section-header.active {
+            color: #4E81FA;
+            border-color: #4E81FA;
+        }
+        .mobile-section-header.validation-error {
+            border-color: #dc2626 !important;
+        }
+
         </style>
 
         <script {!! nonce_attr() !!}>
@@ -587,30 +599,6 @@
         @endif
 
         <div class="py-5">
-            <!-- Mobile section dropdown (visible on small screens, hidden on lg+) -->
-            <div class="lg:hidden mb-4">
-                <label for="mobile-section-select" class="sr-only">{{ __('messages.select_a_tab') }}</label>
-                <select id="mobile-section-select"
-                    class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 dark:bg-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-600 focus:ring-2 focus:ring-inset focus:ring-[#4E81FA]">
-                    <option value="section-details">{{ __('messages.details') }}</option>
-                    @if ($role->isVenue())
-                    <option value="section-address">{{ __('messages.venue_address') }}</option>
-                    @endif
-                    <option value="section-contact-info">{{ __('messages.contact_info') }}</option>
-                    <option value="section-style">{{ __('messages.schedule_style') }}</option>
-                    <option value="section-settings">{{ __('messages.schedule_settings') }}</option>
-                    @if (! config('app.hosted'))
-                    <option value="section-auto-import">{{ __('messages.auto_import_settings') }}</option>
-                    @endif
-                    @if (! $role->exists || $role->user_id == auth()->user()->id)
-                    <option value="section-integrations">{{ __('messages.integrations') }}</option>
-                    @endif
-                    @if (config('app.hosted'))
-                    <option value="section-email-settings">{{ __('messages.email_settings') }}</option>
-                    @endif
-                </select>
-            </div>
-
             <div class="mx-auto lg:grid lg:grid-cols-12 lg:gap-6">
                 <!-- Sidebar Navigation (hidden on small screens, visible on lg+) -->
                 <div class="hidden lg:block lg:col-span-3">
@@ -694,6 +682,17 @@
 
                 <!-- Main Content Area -->
                 <div class="lg:col-span-9 space-y-6 lg:space-y-0">
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-details">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        </svg>
+                        {{ __('messages.details') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
                 <div id="section-details" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">
 
@@ -778,6 +777,18 @@
                 </div>
 
                 @if ($role->isVenue())
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-address">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                        </svg>
+                        {{ __('messages.venue_address') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
                 <div id="section-address" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">
 
@@ -841,6 +852,17 @@
                 </div>
                 @endif
 
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-contact-info">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                        </svg>
+                        {{ __('messages.contact_info') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
                 <div id="section-contact-info" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">
 
@@ -904,6 +926,17 @@
                     </div>
                 </div>
 
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-style">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 3 3 0 005.78-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
+                        </svg>
+                        {{ __('messages.schedule_style') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
                 <div id="section-style" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div>
 
@@ -1259,6 +1292,18 @@
                     </div>
                 </div>
 
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-settings">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {{ __('messages.schedule_settings') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
                 <div id="section-settings" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">
 
@@ -1548,6 +1593,17 @@
                 </div>
 
                 @if (! config('app.hosted'))
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-auto-import">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                        {{ __('messages.auto_import_settings') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
                 <div id="section-auto-import" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">
 
@@ -1627,6 +1683,17 @@
                 @endif
 
                 @if (! $role->exists || $role->user_id == auth()->user()->id)
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-integrations">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                        </svg>
+                        {{ __('messages.integrations') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
                 <div id="section-integrations" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">
 
@@ -1921,6 +1988,17 @@
                 @endif
 
                 @if (config('app.hosted'))
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-email-settings">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                        </svg>
+                        {{ __('messages.email_settings') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
                 <div id="section-email-settings" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
@@ -2590,7 +2668,18 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', function() {
     const sectionLinks = document.querySelectorAll('.section-nav-link');
     const sections = document.querySelectorAll('.section-content');
-    const mobileSelect = document.getElementById('mobile-section-select');
+    const mobileHeaders = document.querySelectorAll('.mobile-section-header');
+
+    // Function to sync mobile accordion headers
+    function syncMobileHeaders(sectionId) {
+        mobileHeaders.forEach(header => {
+            if (header.getAttribute('data-section') === sectionId) {
+                header.classList.add('active');
+            } else {
+                header.classList.remove('active');
+            }
+        });
+    }
 
     // Function to show a specific section and hide others
     function showSection(sectionId, preventScroll = false) {
@@ -2613,10 +2702,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Sync mobile dropdown
-        if (mobileSelect) {
-            mobileSelect.value = sectionId;
-        }
+        // Sync mobile accordion headers
+        syncMobileHeaders(sectionId);
 
         // Update URL hash
         if (history.pushState) {
@@ -2640,12 +2727,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Handle mobile dropdown change
-    if (mobileSelect) {
-        mobileSelect.addEventListener('change', function() {
-            showSection(this.value);
+    // Handle mobile accordion header clicks
+    mobileHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const sectionId = this.getAttribute('data-section');
+            showSection(sectionId);
         });
-    }
+    });
 
     // Check if we're on a large screen
     function isLargeScreen() {
@@ -2717,10 +2805,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Function to highlight section navigation link
         function highlightSectionError(sectionId) {
             if (!sectionId) return;
-            
+
             const sectionLink = document.querySelector(`.section-nav-link[data-section="${sectionId}"]`);
             if (sectionLink) {
                 sectionLink.classList.add('validation-error');
+            }
+            const mobileHeader = document.querySelector(`.mobile-section-header[data-section="${sectionId}"]`);
+            if (mobileHeader) {
+                mobileHeader.classList.add('validation-error');
             }
         }
 
@@ -2728,10 +2820,14 @@ document.addEventListener('DOMContentLoaded', function() {
         function clearSectionError(fieldId) {
             const sectionId = findSectionForField(fieldId);
             if (!sectionId) return;
-            
+
             const sectionLink = document.querySelector(`.section-nav-link[data-section="${sectionId}"]`);
             if (sectionLink) {
                 sectionLink.classList.remove('validation-error');
+            }
+            const mobileHeader = document.querySelector(`.mobile-section-header[data-section="${sectionId}"]`);
+            if (mobileHeader) {
+                mobileHeader.classList.remove('validation-error');
             }
         }
 
@@ -2746,32 +2842,21 @@ document.addEventListener('DOMContentLoaded', function() {
             const field = document.getElementById(fieldId);
             if (field) {
                 field.addEventListener('invalid', function(e) {
-                    // Only handle on large screens where sections are hidden
-                    if (!isLargeScreen()) {
-                        return;
-                    }
-                    
                     const sectionId = findSectionForField(fieldId);
                     if (sectionId) {
-                        // Highlight the navigation link (don't change the displayed section)
                         highlightSectionError(sectionId);
                     }
-                }, true); // Use capture phase to run before browser's default handling
+                }, true);
             }
         });
 
         // Form submit handler - check validity before submission
         form.addEventListener('submit', function(e) {
-            // Only check on large screens where sections are hidden
-            if (!isLargeScreen()) {
-                return; // Let browser handle validation normally
-            }
-
             // Check if form is valid
             if (!form.checkValidity()) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 // Find first invalid field
                 let firstInvalidField = null;
                 let firstInvalidSection = null;
@@ -2786,7 +2871,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 if (firstInvalidField && firstInvalidSection) {
-                    // Highlight the navigation link (don't change the displayed section)
+                    // Show the section containing the invalid field
+                    showSection(firstInvalidSection);
                     highlightSectionError(firstInvalidSection);
                     
                     // Trigger validation on the field to show browser message

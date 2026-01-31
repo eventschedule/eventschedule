@@ -350,6 +350,28 @@
             </div>
         </section>
 
+        <!-- Visual break - Highlight bar -->
+        <section class="relative py-16 overflow-hidden">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-3xl p-8 md:p-12 shadow-xl shadow-violet-500/20">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                        <div>
+                            <div class="text-3xl md:text-4xl font-bold text-white mb-2">100%</div>
+                            <div class="text-violet-200 text-sm">Free and open source</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl md:text-4xl font-bold text-white mb-2">0%</div>
+                            <div class="text-violet-200 text-sm">Platform fees on tickets</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl md:text-4xl font-bold text-white mb-2">9</div>
+                            <div class="text-violet-200 text-sm">Languages supported</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Banner 5: Custom Fields (Text Left, Visual Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->

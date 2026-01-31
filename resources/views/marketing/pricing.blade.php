@@ -148,7 +148,7 @@
                         </li>
                     </ul>
 
-                    <a href="{{ route('sign_up') }}" class="mt-auto block w-full text-center px-6 py-4 bg-gray-300 dark:bg-white/10 hover:bg-gray-400 dark:hover:bg-white/20 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-semibold rounded-2xl transition-all">
+                    <a href="{{ route('sign_up') }}" class="mt-auto block w-full text-center px-6 py-4 bg-white dark:bg-white/10 hover:bg-emerald-50 dark:hover:bg-white/20 border-2 border-emerald-300 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-semibold rounded-2xl transition-all">
                         Get Started Free
                     </a>
                 </div>
@@ -266,41 +266,69 @@
                 </p>
             </div>
 
-            <div class="space-y-6">
-                <div class="bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900 dark:to-indigo-900 rounded-2xl p-6 border border-violet-200 dark:border-white/10 shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                        Is there really a free plan?
-                    </h3>
-                    <p class="text-gray-600 dark:text-gray-400">
-                        Yes! The free plan includes unlimited events and all core features. You only need to upgrade if you want custom domains or want to remove branding.
-                    </p>
+            <div class="space-y-4" x-data="{ open: null }">
+                <div class="bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900 dark:to-indigo-900 rounded-2xl border border-violet-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Is there really a free plan?
+                        </h3>
+                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 1" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes! The free plan includes unlimited events and all core features. You only need to upgrade if you want custom domains or want to remove branding.
+                        </p>
+                    </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900 rounded-2xl p-6 border border-blue-200 dark:border-white/10 shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                        What does "first year free" mean?
-                    </h3>
-                    <p class="text-gray-600 dark:text-gray-400">
-                        When you sign up for Pro, your first year is completely free. After that, it's $5/month billed yearly. You can cancel anytime.
-                    </p>
+                <div class="bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            What does "first year free" mean?
+                        </h3>
+                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 2" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            When you sign up for Pro, your first year is completely free. After that, it's $5/month billed yearly. You can cancel anytime.
+                        </p>
+                    </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl p-6 border border-emerald-200 dark:border-white/10 shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                        Can I cancel anytime?
-                    </h3>
-                    <p class="text-gray-600 dark:text-gray-400">
-                        Absolutely. You can cancel your Pro subscription at any time and you'll keep access until the end of your billing period.
-                    </p>
+                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I cancel anytime?
+                        </h3>
+                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 3" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Absolutely. You can cancel your Pro subscription at any time and you'll keep access until the end of your billing period.
+                        </p>
+                    </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-2xl p-6 border border-amber-200 dark:border-white/10 shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                        Do you take a cut of ticket sales?
-                    </h3>
-                    <p class="text-gray-600 dark:text-gray-400">
-                        No! We don't charge any fees on ticket sales. You only pay the standard Stripe processing fees (typically 2.9% + $0.30 per transaction).
-                    </p>
+                <div class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-2xl border border-amber-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Do you take a cut of ticket sales?
+                        </h3>
+                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 4" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            No! We don't charge any fees on ticket sales. You only pay the standard Stripe processing fees (typically 2.9% + $0.30 per transaction).
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
