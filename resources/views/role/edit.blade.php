@@ -952,7 +952,7 @@
 
                     <!-- Sub-Tab Navigation -->
                     <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
-                        <nav class="-mb-px flex space-x-6">
+                        <nav class="-mb-px flex space-x-4 overflow-x-auto">
                             <button type="button" onclick="showStyleTab('images')" id="style-tab-images"
                                 class="style-tab-button whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-[#4E81FA] text-[#4E81FA]">
                                 {{ __('messages.images') }}
@@ -1323,7 +1323,7 @@
 
                         <!-- Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
-                            <nav class="flex space-x-4" aria-label="Tabs">
+                            <nav class="flex space-x-4 overflow-x-auto" aria-label="Tabs">
                                 <button type="button" class="settings-tab px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="general">
                                     {{ __('messages.general') }}
                                 </button>

@@ -1223,7 +1223,7 @@
 
                                 <!-- Ticket Section Tabs -->
                                 <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
-                                    <nav class="-mb-px flex space-x-6">
+                                    <nav class="-mb-px flex space-x-4 overflow-x-auto">
                                         <button type="button" @click="activeTicketTab = 'tickets'"
                                             :class="activeTicketTab === 'tickets' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
                                             class="whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">

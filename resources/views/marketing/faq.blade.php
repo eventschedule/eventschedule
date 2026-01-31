@@ -3,20 +3,11 @@
     <x-slot name="description">Find answers to frequently asked questions about Event Schedule. Learn about pricing, features, ticketing, Google Calendar sync, selfhosting, and more.</x-slot>
     <x-slot name="keywords">event schedule faq, event calendar questions, ticketing faq, google calendar sync help, selfhost event calendar, event management help</x-slot>
 
-    <style>
-        .faq-item {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .faq-item:hover {
-            transform: translateY(-2px);
-        }
-    </style>
-
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->
         <div class="absolute inset-0">
-            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
             <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
 
@@ -25,7 +16,7 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
-                <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span class="text-sm text-gray-600 dark:text-gray-300">Help Center</span>
@@ -37,10 +28,13 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto">
-                Everything you need to know about Event Schedule. Can't find what you're looking for? <a href="mailto:contact@eventschedule.com" class="text-blue-400 hover:text-blue-300 transition-colors">Contact us</a>.
+                Everything you need to know about Event Schedule. Can't find what you're looking for? <a href="mailto:contact@eventschedule.com" class="text-violet-400 hover:text-violet-300 transition-colors">Contact us</a>.
             </p>
         </div>
     </section>
+
+    <!-- Transition -->
+    <div class="section-fade-to-gray h-24"></div>
 
     <!-- FAQ Content -->
     <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
@@ -78,7 +72,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. The free plan includes unlimited events, mobile-optimized calendars, Google Calendar sync, team collaboration, venue location maps, and more. These features are free forever, not a trial. The <a href="{{ marketing_url('/pricing') }}" class="text-blue-600 hover:text-blue-700 underline">Pro plan</a> (which adds ticketing, custom domains, and branding removal) is free for your first year, then $5/month after that.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. The free plan includes unlimited events, mobile-optimized calendars, Google Calendar sync, team collaboration, venue location maps, and more. These features are free forever, not a trial. The <a href="{{ marketing_url('/pricing') }}" class="text-violet-600 hover:text-violet-700 underline">Pro plan</a> (which adds ticketing, custom domains, and branding removal) is free for your first year, then $5/month after that.</p>
                         </div>
                     </div>
 
@@ -90,7 +84,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">No. Creating your schedule takes just a few clicks. Add your events, customize the look, and share the link. You can also paste event details or drop an image and our <a href="{{ marketing_url('/ai') }}" class="text-blue-600 hover:text-blue-700 underline">AI will extract the information</a> automatically.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">No. Creating your schedule takes just a few clicks. Add your events, customize the look, and share the link. You can also paste event details or drop an image and our <a href="{{ marketing_url('/ai') }}" class="text-violet-600 hover:text-violet-700 underline">AI will extract the information</a> automatically.</p>
                         </div>
                     </div>
 
@@ -102,7 +96,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Every schedule has an <a href="{{ marketing_url('/docs/sharing') }}" class="text-blue-600 hover:text-blue-700 underline">embed code</a> you can copy and paste into your website. The embedded calendar matches your site and updates automatically when you add or change events.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Every schedule has an <a href="{{ marketing_url('/docs/sharing') }}" class="text-violet-600 hover:text-violet-700 underline">embed code</a> you can copy and paste into your website. The embedded calendar matches your site and updates automatically when you add or change events.</p>
                         </div>
                     </div>
                 </div>
@@ -128,7 +122,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">The Free plan includes everything you need for a professional event calendar: unlimited events, Google Calendar sync, team collaboration, and mobile-optimized design. Pro adds ticketing with QR check-ins, the ability to remove Event Schedule branding, event graphics generation, custom domains, REST API access, and multiple team members. <a href="{{ marketing_url('/pricing') }}" class="text-blue-600 hover:text-blue-700 underline">See our pricing page</a> for details.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">The Free plan includes everything you need for a professional event calendar: unlimited events, Google Calendar sync, team collaboration, and mobile-optimized design. Pro adds ticketing with QR check-ins, the ability to remove Event Schedule branding, event graphics generation, custom domains, REST API access, and multiple team members. <a href="{{ marketing_url('/pricing') }}" class="text-violet-600 hover:text-violet-700 underline">See our pricing page</a> for details.</p>
                         </div>
                     </div>
 
@@ -140,7 +134,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">No. We never take a cut of your ticket revenue. When you sell tickets through Event Schedule, you pay only <a href="{{ marketing_url('/stripe') }}" class="text-blue-600 hover:text-blue-700 underline">Stripe's</a> standard processing fees (approximately 2.9% + $0.30 per transaction). The rest is yours.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">No. We never take a cut of your ticket revenue. When you sell tickets through Event Schedule, you pay only <a href="{{ marketing_url('/stripe') }}" class="text-violet-600 hover:text-violet-700 underline">Stripe's</a> standard processing fees (approximately 2.9% + $0.30 per transaction). The rest is yours.</p>
                         </div>
                     </div>
 
@@ -190,7 +184,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">First, <a href="{{ marketing_url('/stripe') }}" class="text-blue-600 hover:text-blue-700 underline">connect your Stripe account</a> (takes about 2 minutes). Then, when creating or editing an event, add ticket types with names, prices, and quantities. Your attendees can purchase directly from your event page and receive tickets with QR codes via email. Learn more about <a href="{{ marketing_url('/ticketing') }}" class="text-blue-600 hover:text-blue-700 underline">ticketing</a>.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">First, <a href="{{ marketing_url('/stripe') }}" class="text-violet-600 hover:text-violet-700 underline">connect your Stripe account</a> (takes about 2 minutes). Then, when creating or editing an event, add ticket types with names, prices, and quantities. Your attendees can purchase directly from your event page and receive tickets with QR codes via email. Learn more about <a href="{{ marketing_url('/ticketing') }}" class="text-violet-600 hover:text-violet-700 underline">ticketing</a>.</p>
                         </div>
                     </div>
 
@@ -226,7 +220,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. You can add <a href="{{ marketing_url('/custom-fields') }}" class="text-blue-600 hover:text-blue-700 underline">custom fields</a> to your ticket forms, including text fields, dropdowns, date pickers, and yes/no questions. Use these to collect meal preferences, t-shirt sizes, accessibility needs, or any other information.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. You can add <a href="{{ marketing_url('/custom-fields') }}" class="text-violet-600 hover:text-violet-700 underline">custom fields</a> to your ticket forms, including text fields, dropdowns, date pickers, and yes/no questions. Use these to collect meal preferences, t-shirt sizes, accessibility needs, or any other information.</p>
                         </div>
                     </div>
 
@@ -264,7 +258,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes, and it's bidirectional. Events you create in Event Schedule automatically appear in your connected <a href="{{ marketing_url('/google-calendar') }}" class="text-blue-600 hover:text-blue-700 underline">Google Calendar</a>. Events you add to Google Calendar also sync back to Event Schedule. Changes update in real-time via webhooks.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes, and it's bidirectional. Events you create in Event Schedule automatically appear in your connected <a href="{{ marketing_url('/google-calendar') }}" class="text-violet-600 hover:text-violet-700 underline">Google Calendar</a>. Events you add to Google Calendar also sync back to Event Schedule. Changes update in real-time via webhooks.</p>
                         </div>
                     </div>
 
@@ -288,7 +282,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">A schedule is your main calendar (like "The Blue Note" or "DJ Sarah"). <a href="{{ marketing_url('/sub-schedules') }}" class="text-blue-600 hover:text-blue-700 underline">Sub-schedules</a> help organize events within that calendar by category, room, or series (like "Main Stage" and "Lounge"). Events are the individual shows, performances, or happenings on your schedule.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">A schedule is your main calendar (like "The Blue Note" or "DJ Sarah"). <a href="{{ marketing_url('/sub-schedules') }}" class="text-violet-600 hover:text-violet-700 underline">Sub-schedules</a> help organize events within that calendar by category, room, or series (like "Main Stage" and "Lounge"). Events are the individual shows, performances, or happenings on your schedule.</p>
                         </div>
                     </div>
 
@@ -338,7 +332,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. We never see or store your customers' credit card numbers. All payment processing happens through <a href="{{ marketing_url('/stripe') }}" class="text-blue-600 hover:text-blue-700 underline">Stripe</a>, which is PCI-DSS compliant and uses industry-standard encryption.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. We never see or store your customers' credit card numbers. All payment processing happens through <a href="{{ marketing_url('/stripe') }}" class="text-violet-600 hover:text-violet-700 underline">Stripe</a>, which is PCI-DSS compliant and uses industry-standard encryption.</p>
                         </div>
                     </div>
 
@@ -376,7 +370,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Event Schedule is <a href="{{ marketing_url('/open-source') }}" class="text-blue-600 hover:text-blue-700 underline">open source</a> and licensed under the AAL (Attribution Assurance License). You can view the full source code on <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener" class="text-blue-600 hover:text-blue-700 underline">GitHub</a>, contribute improvements, report issues, or fork it for your own projects.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Event Schedule is <a href="{{ marketing_url('/open-source') }}" class="text-violet-600 hover:text-violet-700 underline">open source</a> and licensed under the AAL (Attribution Assurance License). You can view the full source code on <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener" class="text-violet-600 hover:text-violet-700 underline">GitHub</a>, contribute improvements, report issues, or fork it for your own projects.</p>
                         </div>
                     </div>
 
@@ -388,7 +382,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Download the code from <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener" class="text-blue-600 hover:text-blue-700 underline">GitHub</a> and run it on your own server. Selfhosting is completely free and includes all features, including Pro features. This gives you complete control over your data and customization options. <a href="{{ marketing_url('/selfhost') }}" class="text-blue-600 hover:text-blue-700 underline">Learn more about selfhosting</a>.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Download the code from <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener" class="text-violet-600 hover:text-violet-700 underline">GitHub</a> and run it on your own server. Selfhosting is completely free and includes all features, including Pro features. This gives you complete control over your data and customization options. <a href="{{ marketing_url('/selfhost') }}" class="text-violet-600 hover:text-violet-700 underline">Learn more about selfhosting</a>.</p>
                         </div>
                     </div>
 
@@ -400,7 +394,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Pro users have access to our <a href="{{ marketing_url('/docs/developer/api') }}" class="text-blue-600 hover:text-blue-700 underline">REST API</a>, which lets you programmatically create events, manage schedules, retrieve ticket sales, and integrate with your own systems.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Pro users have access to our <a href="{{ marketing_url('/docs/developer/api') }}" class="text-violet-600 hover:text-violet-700 underline">REST API</a>, which lets you programmatically create events, manage schedules, retrieve ticket sales, and integrate with your own systems.</p>
                         </div>
                     </div>
 
@@ -412,7 +406,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">The interface is available in 9 languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, and Arabic. You can also use <a href="{{ marketing_url('/ai') }}" class="text-blue-600 hover:text-blue-700 underline">AI-powered translation</a> to automatically translate your event descriptions.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">The interface is available in 9 languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, and Arabic. You can also use <a href="{{ marketing_url('/ai') }}" class="text-violet-600 hover:text-violet-700 underline">AI-powered translation</a> to automatically translate your event descriptions.</p>
                         </div>
                     </div>
                 </div>
@@ -422,7 +416,7 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="relative bg-gradient-to-br from-blue-600 to-violet-700 py-24 overflow-hidden">
+    <section class="relative bg-gradient-to-br from-violet-600 to-indigo-700 py-24 overflow-hidden">
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -433,7 +427,7 @@
                 We're here to help. Reach out and we'll get back to you as soon as possible.
             </p>
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="mailto:contact@eventschedule.com" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
+                <a href="mailto:contact@eventschedule.com" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-violet-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                     Contact Us
                     <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
