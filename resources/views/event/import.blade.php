@@ -18,7 +18,7 @@
 </div>
 @else
 <form method="post"
-    action="{{ isset($isGuest) && $isGuest ? route('event.guest_import', ['subdomain' => $role->subdomain]) : route('event.import', ['subdomain' => $role->subdomain]) }}"
+    action="{{ isset($isGuest) && $isGuest ? route('event.guest_import.store', ['subdomain' => $role->subdomain]) : route('event.import', ['subdomain' => $role->subdomain]) }}"
     enctype="multipart/form-data"
     id="event-import-app">
 
@@ -1276,7 +1276,7 @@
                     const eventName = parsed.event_name;
 
                     // Send request to server
-                    const response = await fetch('{{ isset($isGuest) && $isGuest ? route("event.guest_import", ["subdomain" => $role->subdomain]) : route("event.import", ["subdomain" => $role->subdomain]) }}', {
+                    const response = await fetch('{{ isset($isGuest) && $isGuest ? route("event.guest_import.store", ["subdomain" => $role->subdomain]) : route("event.import", ["subdomain" => $role->subdomain]) }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

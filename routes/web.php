@@ -33,7 +33,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/request', [RoleController::class, 'request'])->name('role.request');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
-        Route::post('/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import');
+        Route::post('/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import.store');
         Route::post('/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse');
         Route::post('/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image');
         Route::get('/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');
@@ -587,7 +587,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     Route::get('/{subdomain}/request', [RoleController::class, 'request'])->name('role.request');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     Route::get('/{subdomain}/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
-    Route::post('/{subdomain}/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import');
+    Route::post('/{subdomain}/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import.store');
     Route::post('/{subdomain}/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse');
     Route::post('/{subdomain}/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image');
     Route::get('/{subdomain}/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');
