@@ -151,7 +151,7 @@
         </div>
 
         <!-- Grid pattern overlay -->
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
+        <div class="absolute inset-0 grid-pattern bg-[size:60px_60px]"></div>
 
         <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16 items-center">

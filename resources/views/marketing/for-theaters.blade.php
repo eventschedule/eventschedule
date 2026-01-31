@@ -22,7 +22,7 @@
             </div>
         </div>
 
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
+        <div class="absolute inset-0 grid-pattern bg-[size:60px_60px]"></div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-500/10 border border-gray-200 dark:border-white/10 mb-6">
