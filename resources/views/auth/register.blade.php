@@ -17,6 +17,11 @@
             @if (! config('app.hosted') && ! config('app.url'))
                 // Disable register button initially
                 document.querySelector('button[type="submit"]').disabled = true;
+
+                @if (!is_writable(base_path('.env')))
+                    var testBtn = document.querySelector('button[onclick="testConnection()"]');
+                    if (testBtn) testBtn.disabled = true;
+                @endif
             @endif
         });
 
@@ -272,19 +277,40 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById('test-result').innerHTML = '<span class="text-green-600 dark:text-green-400"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> {{ __('messages.connection_successful') }}!</span>';
-                        // Enable register button on successful connection
-                        document.querySelector('button[type="submit"]').disabled = false;
+                        if (data.has_existing_user) {
+                            document.getElementById('test-result').innerHTML = '<span class="text-amber-600 dark:text-amber-400"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg> {{ __('messages.database_already_initialized') }}</span>';
+                            document.querySelector('button[type="submit"]').disabled = true;
+                            @if (! config('app.url'))
+                            var regFields = document.getElementById('registration-fields');
+                            if (regFields) regFields.style.display = 'none';
+                            @endif
+                        } else {
+                            document.getElementById('test-result').innerHTML = '<span class="text-green-600 dark:text-green-400"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> {{ __('messages.connection_successful') }}!</span>';
+                            // Enable register button on successful connection
+                            document.querySelector('button[type="submit"]').disabled = false;
+                            @if (! config('app.url'))
+                            var regFields = document.getElementById('registration-fields');
+                            if (regFields) regFields.style.display = 'block';
+                            @endif
+                        }
                     } else {
                         document.getElementById('test-result').innerHTML = '<span class="text-red-600 dark:text-red-400"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg> ' + data.error + '</span>';
                         // Disable register button on failed connection
                         document.querySelector('button[type="submit"]').disabled = true;
+                        @if (! config('app.url'))
+                        var regFields = document.getElementById('registration-fields');
+                        if (regFields) regFields.style.display = 'none';
+                        @endif
                     }
                 })
                 .catch(error => {
                     document.getElementById('test-result').innerHTML = '<span class="text-red-600 dark:text-red-400"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg> {{ __('messages.error_testing_connection') }}</span>';
                     // Disable register button on error
                     document.querySelector('button[type="submit"]').disabled = true;
+                    @if (! config('app.url'))
+                    var regFields = document.getElementById('registration-fields');
+                    if (regFields) regFields.style.display = 'none';
+                    @endif
                 });
             }
 
@@ -380,6 +406,10 @@
                 </x-primary-button>
             </div>
 
+        @endif
+
+        @if (! config('app.hosted') && ! config('app.url'))
+        <div id="registration-fields" style="display: none;">
         @endif
 
         <!-- Email Address -->
@@ -513,6 +543,10 @@
                 </x-primary-button>
             </div>
         </div>
+
+        @if (! config('app.hosted') && ! config('app.url'))
+        </div>
+        @endif
     </form>
 
     @if (config('services.google.client_id') && config('app.hosted'))
