@@ -66,7 +66,7 @@
                     </a>
                 </li>
 
-                @if (auth()->user()->isAdmin())
+                @if (auth()->user()->isAdmin() || !config('app.hosted'))
                 <li>
                     <a href="{{ route('newsletter.index') }}"
                         class="group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('newsletters*') || request()->is('newsletter-segments*') ? 'bg-gray-800 text-white' : '' }}">
