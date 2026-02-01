@@ -10,8 +10,8 @@
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
         <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
         <div class="absolute inset-0 grid-pattern"></div>
 
@@ -19,8 +19,8 @@
             <x-docs-breadcrumb currentTitle="Sharing Your Schedule" />
 
             <div class="flex items-center gap-4 mb-4">
-                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-500/20">
-                    <svg class="w-6 h-6 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/20">
+                    <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                     </svg>
                 </div>
@@ -61,7 +61,7 @@
 
                             <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
                                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Your schedule URL format:</p>
-                                <code class="text-violet-400">{{ config('app.url') }}/your-schedule-name</code>
+                                <code class="text-blue-400">{{ config('app.url') }}/your-schedule-name</code>
                             </div>
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">Share this link anywhere:</p>
@@ -132,7 +132,7 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-4">Each event also has its own URL that you can share. The preview will show the event name, date, and flyer image.</p>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Event Graphics</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Use the <a href="{{ route('marketing.docs.event_graphics') }}" class="text-violet-400 hover:text-violet-300">Event Graphics</a> feature to generate shareable images showing multiple upcoming events. Perfect for weekly social media posts.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Use the <a href="{{ route('marketing.docs.event_graphics') }}" class="text-blue-400 hover:text-blue-300">Event Graphics</a> feature to generate shareable images showing multiple upcoming events. Perfect for weekly social media posts.</p>
                         </section>
 
                         <!-- Followers -->

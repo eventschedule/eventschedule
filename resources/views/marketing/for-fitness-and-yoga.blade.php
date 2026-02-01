@@ -63,8 +63,8 @@
                 <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300 text-xs font-medium border border-teal-200 dark:border-teal-800/50">Pilates</span>
                 <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 text-xs font-medium border border-green-200 dark:border-green-800/50">CrossFit</span>
                 <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300 text-xs font-medium border border-cyan-200 dark:border-cyan-800/50">HIIT</span>
-                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 text-xs font-medium border border-indigo-200 dark:border-indigo-800/50">Meditation</span>
-                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-800/50">Barre</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 text-xs font-medium border border-sky-200 dark:border-sky-800/50">Meditation</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-xs font-medium border border-blue-200 dark:border-blue-800/50">Barre</span>
             </div>
         </div>
     </section>
@@ -82,7 +82,7 @@
                     <div class="text-gray-500 dark:text-gray-400 text-sm">of students forget class times without reminders</div>
                 </div>
                 <div class="p-6">
-                    <div class="text-4xl font-bold text-fuchsia-400 mb-2">$50-100/mo</div>
+                    <div class="text-4xl font-bold text-sky-400 mb-2">$50-100/mo</div>
                     <div class="text-gray-500 dark:text-gray-400 text-sm">spent on booking platforms</div>
                 </div>
             </div>
@@ -184,8 +184,8 @@
                 </div>
 
                 <!-- One Link -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900 dark:to-blue-900 border border-indigo-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-sm font-medium mb-5 border border-indigo-200 dark:border-indigo-800/30">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-sky-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 text-sm font-medium mb-5 border border-sky-200 dark:border-sky-800/30">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                         </svg>
@@ -195,25 +195,25 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Put it in your Instagram bio, website, or printed on your studio flyers. All your classes in one place.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-indigo-500/20 border border-indigo-400/30 mb-3">
-                            <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-sky-500/20 border border-sky-400/30 mb-3">
+                            <svg class="w-4 h-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                             </svg>
                             <span class="text-gray-900 dark:text-white text-xs font-mono">eventschedule.com/yourstudio</span>
                         </div>
                         <div class="grid grid-cols-3 gap-1 text-center">
-                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-indigo-300 text-[10px]">Instagram</div>
-                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-indigo-300 text-[10px]">Website</div>
-                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-indigo-300 text-[10px]">Flyers</div>
+                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-sky-300 text-[10px]">Instagram</div>
+                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-sky-300 text-[10px]">Website</div>
+                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-sky-300 text-[10px]">Flyers</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Recurring Classes (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 border border-violet-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-blue-100 dark:from-blue-900 dark:to-blue-900 border border-blue-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-sm font-medium mb-5 border border-violet-200 dark:border-violet-800/30">
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-sm font-medium mb-5 border border-blue-200 dark:border-blue-800/30">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
@@ -223,15 +223,15 @@
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Create your weekly class schedule once. Recurring events auto-populate your calendar so students always know what's coming up.</p>
                         </div>
                         <div class="flex items-center justify-center">
-                            <div class="bg-violet-500/10 rounded-xl border border-violet-400/20 p-3 w-full max-w-xs">
+                            <div class="bg-blue-500/10 rounded-xl border border-blue-400/20 p-3 w-full max-w-xs">
                                 <div class="grid grid-cols-7 gap-1 text-center mb-2">
-                                    <div class="text-violet-300 text-[10px] font-semibold">Mon</div>
-                                    <div class="text-violet-300 text-[10px] font-semibold">Tue</div>
-                                    <div class="text-violet-300 text-[10px] font-semibold">Wed</div>
-                                    <div class="text-violet-300 text-[10px] font-semibold">Thu</div>
-                                    <div class="text-violet-300 text-[10px] font-semibold">Fri</div>
-                                    <div class="text-violet-300 text-[10px] font-semibold">Sat</div>
-                                    <div class="text-violet-300 text-[10px] font-semibold">Sun</div>
+                                    <div class="text-blue-300 text-[10px] font-semibold">Mon</div>
+                                    <div class="text-blue-300 text-[10px] font-semibold">Tue</div>
+                                    <div class="text-blue-300 text-[10px] font-semibold">Wed</div>
+                                    <div class="text-blue-300 text-[10px] font-semibold">Thu</div>
+                                    <div class="text-blue-300 text-[10px] font-semibold">Fri</div>
+                                    <div class="text-blue-300 text-[10px] font-semibold">Sat</div>
+                                    <div class="text-blue-300 text-[10px] font-semibold">Sun</div>
                                 </div>
                                 <!-- Morning row -->
                                 <div class="grid grid-cols-7 gap-1 mb-1">
@@ -241,14 +241,14 @@
                                     <div class="p-1 rounded bg-amber-500/30 border border-amber-400/30 text-[8px] text-gray-900 dark:text-white text-center">7am HIIT</div>
                                     <div class="p-1 rounded bg-emerald-500/30 border border-emerald-400/30 text-[8px] text-gray-900 dark:text-white text-center">7am Flow</div>
                                     <div class="p-1 rounded bg-teal-500/30 border border-teal-400/30 text-[8px] text-gray-900 dark:text-white text-center">9am Power</div>
-                                    <div class="p-1 rounded bg-violet-500/30 border border-violet-400/30 text-[8px] text-gray-900 dark:text-white text-center">10am Gentle</div>
+                                    <div class="p-1 rounded bg-blue-500/30 border border-blue-400/30 text-[8px] text-gray-900 dark:text-white text-center">10am Gentle</div>
                                 </div>
                                 <!-- Evening row -->
                                 <div class="grid grid-cols-7 gap-1">
                                     <div class="p-1 rounded bg-teal-500/30 border border-teal-400/30 text-[8px] text-gray-900 dark:text-white text-center">6pm Power</div>
-                                    <div class="p-1 rounded bg-pink-500/30 border border-pink-400/30 text-[8px] text-gray-900 dark:text-white text-center">6pm Pilates</div>
+                                    <div class="p-1 rounded bg-cyan-500/30 border border-cyan-400/30 text-[8px] text-gray-900 dark:text-white text-center">6pm Pilates</div>
                                     <div class="p-1 rounded bg-teal-500/30 border border-teal-400/30 text-[8px] text-gray-900 dark:text-white text-center">6pm Power</div>
-                                    <div class="p-1 rounded bg-pink-500/30 border border-pink-400/30 text-[8px] text-gray-900 dark:text-white text-center">6pm Pilates</div>
+                                    <div class="p-1 rounded bg-cyan-500/30 border border-cyan-400/30 text-[8px] text-gray-900 dark:text-white text-center">6pm Pilates</div>
                                     <div class="p-1 rounded bg-cyan-500/30 border border-cyan-400/30 text-[8px] text-gray-900 dark:text-white text-center">6pm Stretch</div>
                                     <div class="p-1 rounded bg-gray-500/20 border border-gray-400/10 text-[8px] text-gray-400 text-center">-</div>
                                     <div class="p-1 rounded bg-gray-500/20 border border-gray-400/10 text-[8px] text-gray-400 text-center">-</div>
@@ -295,7 +295,7 @@
                 </div>
 
                 <!-- Google Calendar Sync -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 border border-blue-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-blue-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-sm font-medium mb-5 border border-blue-200 dark:border-blue-800/30">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -317,7 +317,7 @@
                             <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
-                            <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-4 h-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
                         </div>
@@ -447,15 +447,15 @@
                     <!-- Saturday -->
                     <div class="text-center">
                         <div class="text-emerald-700 dark:text-emerald-300 text-sm font-semibold mb-3">Sat</div>
-                        <div class="bg-violet-500/20 dark:bg-violet-500/30 rounded-xl p-3 border border-violet-400/30 ring-2 ring-violet-400/50">
+                        <div class="bg-blue-500/20 dark:bg-blue-500/30 rounded-xl p-3 border border-blue-400/30 ring-2 ring-blue-400/50">
                             <div class="text-gray-900 dark:text-white text-xs font-semibold">Weekend Workshop</div>
                             <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">9:00 AM</div>
                             <div class="flex justify-center gap-0.5 mt-2" title="Medium intensity">
-                                <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
-                                <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
-                                <div class="w-1.5 h-1.5 rounded-full bg-violet-400/20"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-blue-400/20"></div>
                             </div>
-                            <div class="text-violet-600 dark:text-violet-300 text-[9px] mt-1 font-medium">Popular</div>
+                            <div class="text-blue-600 dark:text-blue-300 text-[9px] mt-1 font-medium">Popular</div>
                         </div>
                     </div>
                     <!-- Sunday -->
@@ -567,7 +567,7 @@
                     blog-slug="for-meditation-guides"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                         </svg>
                     </x-slot:icon>

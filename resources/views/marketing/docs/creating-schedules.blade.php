@@ -62,7 +62,7 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-1">Schedule Basics</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Set up your schedule name, type, location, contact info, and core settings.</p>
                                 </a>
-                                <a href="{{ route('marketing.docs.schedule_styling') }}" class="block bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 hover:border-purple-500/30 transition-colors">
+                                <a href="{{ route('marketing.docs.schedule_styling') }}" class="block bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 hover:border-blue-500/30 transition-colors">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-1">Schedule Styling</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Customize colors, fonts, backgrounds, and visual appearance.</p>
                                 </a>

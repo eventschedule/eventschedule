@@ -6,12 +6,6 @@
     <x-slot name="socialImage">social/features.png</x-slot>
 
     <style>
-        .text-gradient {
-            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
         @keyframes pulse-slow {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
@@ -41,7 +35,7 @@
         <!-- Animated background -->
         <div class="absolute inset-0">
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-cyan-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 0.75s;"></div>
         </div>
 
@@ -119,7 +113,7 @@
                 </a>
 
                 <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-card block">
-                    <div class="rounded-xl border border-rose-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900 dark:to-pink-900 hover:border-rose-500/30 transition-colors">
+                    <div class="rounded-xl border border-rose-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-rose-50 to-cyan-50 dark:from-rose-900 dark:to-cyan-900 hover:border-rose-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
                             <svg class="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
@@ -131,7 +125,7 @@
                 </a>
 
                 <a href="{{ route('marketing.docs.creating_events') }}" class="doc-card block">
-                    <div class="rounded-xl border border-blue-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 hover:border-blue-500/30 transition-colors">
+                    <div class="rounded-xl border border-blue-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-900 dark:to-sky-900 hover:border-blue-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
                             <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -143,9 +137,9 @@
                 </a>
 
                 <a href="{{ route('marketing.docs.sharing') }}" class="doc-card block">
-                    <div class="rounded-xl border border-indigo-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900 dark:to-violet-900 hover:border-indigo-500/30 transition-colors">
+                    <div class="rounded-xl border border-sky-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900 dark:to-blue-900 hover:border-sky-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
-                            <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                             </svg>
                             <h3 class="font-semibold text-gray-900 dark:text-white">Sharing</h3>
@@ -167,9 +161,9 @@
                 </a>
 
                 <a href="{{ route('marketing.docs.tickets') }}" class="doc-card block">
-                    <div class="rounded-xl border border-violet-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900 dark:to-purple-900 hover:border-violet-500/30 transition-colors">
+                    <div class="rounded-xl border border-blue-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-blue-50 to-blue-50 dark:from-blue-900 dark:to-blue-900 hover:border-blue-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
-                            <svg class="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                             </svg>
                             <h3 class="font-semibold text-gray-900 dark:text-white">Selling Tickets</h3>
@@ -179,9 +173,9 @@
                 </a>
 
                 <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-card block">
-                    <div class="rounded-xl border border-purple-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 hover:border-purple-500/30 transition-colors">
+                    <div class="rounded-xl border border-blue-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900 hover:border-blue-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
-                            <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                             <h3 class="font-semibold text-gray-900 dark:text-white">Event Graphics</h3>
@@ -199,13 +193,13 @@
             <div class="grid md:grid-cols-2 gap-6">
                 <!-- Selfhost Section Card -->
                 <a href="{{ route('marketing.docs.selfhost') }}" class="section-card block group">
-                    <div class="relative overflow-hidden rounded-2xl border border-violet-200 dark:border-white/10 p-8 h-full bg-gradient-to-br from-violet-100 via-purple-100 to-indigo-100 dark:from-violet-900 dark:via-purple-900 dark:to-indigo-900 group-hover:border-violet-500/30 transition-colors">
+                    <div class="relative overflow-hidden rounded-2xl border border-blue-200 dark:border-white/10 p-8 h-full bg-gradient-to-br from-blue-100 via-blue-100 to-sky-100 dark:from-blue-900 dark:via-blue-900 dark:to-sky-900 group-hover:border-blue-500/30 transition-colors">
                         <!-- Glow effect -->
-                        <div class="absolute -top-24 -right-24 w-48 h-48 bg-violet-500/20 rounded-full blur-[60px] group-hover:bg-violet-500/30 transition-colors"></div>
+                        <div class="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/20 rounded-full blur-[60px] group-hover:bg-blue-500/30 transition-colors"></div>
 
                         <div class="relative z-10">
-                            <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-6 bg-violet-100 dark:bg-violet-500/20">
-                                <svg class="w-7 h-7 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-6 bg-blue-100 dark:bg-blue-500/20">
+                                <svg class="w-7 h-7 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
                                 </svg>
                             </div>
@@ -215,26 +209,26 @@
 
                             <div class="space-y-2 mb-6">
                                 <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                    <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
                                     Installation Guide
                                 </div>
                                 <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                    <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
                                     SaaS Multi-tenant Setup
                                 </div>
                                 <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                    <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
                                     Stripe & Google Calendar Integration
                                 </div>
                             </div>
 
-                            <div class="inline-flex items-center text-sm font-medium text-violet-600 dark:text-violet-400 group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors">
+                            <div class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
                                 View Selfhost Docs
                                 <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />

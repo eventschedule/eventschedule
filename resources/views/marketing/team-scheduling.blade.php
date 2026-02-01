@@ -399,12 +399,12 @@
         <!-- Animated background blobs matching Sub-schedules page's colors -->
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-rose-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-pink-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/features/sub-schedules') }}" class="group block">
-                <div class="bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900 dark:to-pink-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-rose-100 to-cyan-100 dark:from-rose-900 dark:to-cyan-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <!-- Text content -->
                         <div class="flex-1 text-center lg:text-left">
@@ -428,15 +428,15 @@
                                         <span class="text-gray-900 dark:text-white text-xs">Main Stage</span>
                                     </div>
                                     <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
-                                        <div class="w-2 h-2 rounded-full bg-pink-400"></div>
+                                        <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
                                         <span class="text-gray-600 dark:text-gray-300 text-xs">Acoustic Room</span>
                                     </div>
                                     <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
-                                        <div class="w-2 h-2 rounded-full bg-fuchsia-400"></div>
+                                        <div class="w-2 h-2 rounded-full bg-sky-400"></div>
                                         <span class="text-gray-600 dark:text-gray-300 text-xs">Outdoor Patio</span>
                                     </div>
                                     <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
-                                        <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+                                        <div class="w-2 h-2 rounded-full bg-blue-400"></div>
                                         <span class="text-gray-600 dark:text-gray-300 text-xs">Jazz Lounge</span>
                                     </div>
                                 </div>

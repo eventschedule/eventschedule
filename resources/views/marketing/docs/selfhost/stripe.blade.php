@@ -10,8 +10,8 @@
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
         <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
         <div class="absolute inset-0 grid-pattern"></div>
 
@@ -19,8 +19,8 @@
             <x-docs-breadcrumb currentTitle="Stripe Integration" section="selfhost" sectionTitle="Selfhost" sectionRoute="marketing.docs.selfhost" />
 
             <div class="flex items-center gap-4 mb-4">
-                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-500/20">
-                    <svg class="w-6 h-6 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/20">
+                    <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
                 </div>
@@ -90,12 +90,12 @@
                                         <tr>
                                             <td>Running your <strong class="text-white">own Event Schedule instance</strong> for your organization</td>
                                             <td>Your single Stripe account</td>
-                                            <td><a href="#selfhosted-users" class="text-violet-400 hover:text-violet-300">Selfhosted Users</a></td>
+                                            <td><a href="#selfhosted-users" class="text-blue-400 hover:text-blue-300">Selfhosted Users</a></td>
                                         </tr>
                                         <tr>
                                             <td>Running a <strong class="text-white">white-label SaaS</strong> platform</td>
                                             <td>Your customers' Stripe accounts + your account for subscriptions</td>
-                                            <td><a href="#saas-operators" class="text-violet-400 hover:text-violet-300">SaaS Operators</a></td>
+                                            <td><a href="#saas-operators" class="text-blue-400 hover:text-blue-300">SaaS Operators</a></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -105,8 +105,8 @@
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Decision Tree</h3>
                                 <div class="text-gray-600 dark:text-gray-300 space-y-3 text-sm">
                                     <p><strong class="text-white">Q: Will multiple people create events and need their own payment accounts?</strong></p>
-                                    <p class="pl-4">→ Yes: <a href="#saas-operators" class="text-violet-400 hover:text-violet-300">SaaS Operators</a></p>
-                                    <p class="pl-4">→ No: <a href="#selfhosted-users" class="text-violet-400 hover:text-violet-300">Selfhosted Users</a></p>
+                                    <p class="pl-4">→ Yes: <a href="#saas-operators" class="text-blue-400 hover:text-blue-300">SaaS Operators</a></p>
+                                    <p class="pl-4">→ No: <a href="#selfhosted-users" class="text-blue-400 hover:text-blue-300">Selfhosted Users</a></p>
                                 </div>
                             </div>
                         </section>
@@ -116,13 +116,13 @@
                             <h2 class="doc-heading">For Selfhosted Users</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">If you're running your own Event Schedule instance for your organization, venue, or community, all ticket payments go to a single Stripe account that you control.</p>
 
-                            <div class="bg-violet-500/10 border border-violet-500/20 rounded-xl p-4 mb-6">
+                            <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-6">
                                 <div class="flex items-start gap-3">
-                                    <svg class="w-5 h-5 text-violet-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     <div>
-                                        <p class="text-violet-300 font-medium mb-1">This guide is for you if...</p>
+                                        <p class="text-blue-300 font-medium mb-1">This guide is for you if...</p>
                                         <p class="text-gray-400 text-sm">You want all ticket revenue from all events on your instance to go to one Stripe account. Event creators don't need their own Stripe accounts.</p>
                                     </div>
                                 </div>
@@ -130,7 +130,7 @@
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">1. Get Your Stripe API Keys</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to the <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" class="text-violet-400 hover:text-violet-300">Stripe Dashboard</a></li>
+                                <li>Go to the <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300">Stripe Dashboard</a></li>
                                 <li>Navigate to <strong class="text-white">Developers</strong> → <strong class="text-white">API keys</strong></li>
                                 <li>Note your <strong class="text-white">Publishable key</strong> and <strong class="text-white">Secret key</strong></li>
                             </ol>
@@ -206,14 +206,14 @@
                             </div>
 
                             <!-- Part A: Stripe Connect -->
-                            <div class="bg-violet-500/5 border-l-4 border-violet-500 pl-4 mb-6">
+                            <div class="bg-blue-500/5 border-l-4 border-blue-500 pl-4 mb-6">
                                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Part A: Stripe Connect (Ticket Sales)</h3>
                                 <p class="text-gray-400 text-sm">Allow your event creators to receive payments for their ticket sales</p>
                             </div>
 
                             <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">1. Enable Stripe Connect</h4>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to the <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" class="text-violet-400 hover:text-violet-300">Stripe Dashboard</a></li>
+                                <li>Go to the <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300">Stripe Dashboard</a></li>
                                 <li>Navigate to <strong class="text-white">Settings</strong> → <strong class="text-white">Connect</strong> → <strong class="text-white">Settings</strong></li>
                                 <li>Enable Connect for your platform</li>
                                 <li>Configure your branding and platform profile</li>
@@ -285,7 +285,7 @@
                             </div>
 
                             <!-- Part B: Laravel Cashier -->
-                            <div class="bg-purple-500/5 border-l-4 border-purple-500 pl-4 mb-6">
+                            <div class="bg-blue-500/5 border-l-4 border-blue-500 pl-4 mb-6">
                                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Part B: Laravel Cashier (Subscription Billing)</h3>
                                 <p class="text-gray-400 text-sm">Charge your customers for Pro plan subscriptions</p>
                             </div>
@@ -397,13 +397,13 @@
                                 </table>
                             </div>
 
-                            <div class="bg-violet-500/10 border border-violet-500/20 rounded-xl p-4 mb-6">
+                            <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-6">
                                 <div class="flex items-start gap-3">
-                                    <svg class="w-5 h-5 text-violet-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     <div>
-                                        <p class="text-violet-300 font-medium mb-1">Architecture Note</p>
+                                        <p class="text-blue-300 font-medium mb-1">Architecture Note</p>
                                         <p class="text-gray-400 text-sm">Laravel Cashier uses the <code class="doc-inline-code">Role</code> model (schedule/calendar) as the billable entity, not <code class="doc-inline-code">User</code>. This means each schedule has its own subscription, and users can have multiple schedules with different plans.</p>
                                     </div>
                                 </div>
@@ -454,7 +454,7 @@
                             <p class="text-gray-400 text-sm mb-6">Use any future expiration date and any 3-digit CVC.</p>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Testing Webhooks Locally</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Use the <a href="https://stripe.com/docs/stripe-cli" target="_blank" rel="noopener noreferrer" class="text-violet-400 hover:text-violet-300">Stripe CLI</a> to forward webhooks:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Use the <a href="https://stripe.com/docs/stripe-cli" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300">Stripe CLI</a> to forward webhooks:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">

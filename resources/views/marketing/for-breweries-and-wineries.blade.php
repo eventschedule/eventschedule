@@ -10,7 +10,7 @@
         <!-- Animated background with copper/amber and purple tones -->
         <div class="absolute inset-0">
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-amber-700/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-purple-800/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-blue-800/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
             <div class="absolute top-40 right-1/3 w-[250px] h-[250px] bg-amber-600/15 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s;"></div>
         </div>
 
@@ -48,7 +48,7 @@
                     <!-- Venue type tags -->
                     <div class="mt-12 flex flex-wrap justify-center lg:justify-start gap-2">
                         <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-xs font-medium border border-amber-500/30">Craft Brewery</span>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-xs font-medium border border-purple-500/30">Winery</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-xs font-medium border border-blue-500/30">Winery</span>
                         <span class="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 text-xs font-medium border border-orange-500/30">Cidery</span>
                         <span class="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300 text-xs font-medium border border-yellow-500/30">Meadery</span>
                         <span class="inline-flex items-center px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-xs font-medium border border-rose-500/30">Distillery</span>
@@ -86,7 +86,7 @@
                             </button>
                         </div>
                         <!-- Decorative floating elements -->
-                        <div class="absolute -top-4 -right-4 w-16 h-16 bg-purple-500/20 rounded-full blur-xl"></div>
+                        <div class="absolute -top-4 -right-4 w-16 h-16 bg-blue-500/20 rounded-full blur-xl"></div>
                         <div class="absolute -bottom-6 -left-6 w-20 h-20 bg-amber-500/20 rounded-full blur-xl"></div>
                     </div>
                 </div>
@@ -109,7 +109,7 @@
             <!-- The Release Cycle Journey -->
             <div class="relative">
                 <!-- Connection line (desktop) -->
-                <div class="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-500/50 via-purple-500/50 to-amber-500/50 -translate-y-1/2"></div>
+                <div class="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-500/50 via-blue-500/50 to-amber-500/50 -translate-y-1/2"></div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <!-- Phase 1: The Craft -->
@@ -123,11 +123,11 @@
                     </div>
 
                     <!-- Phase 2: The Wait -->
-                    <div class="relative bg-gradient-to-br from-purple-100/40 to-indigo-100/40 dark:from-purple-900/40 dark:to-indigo-900/40 rounded-2xl border border-purple-500/20 p-6 hover:border-purple-500/40 transition-colors">
-                        <div class="lg:absolute lg:-top-3 lg:left-1/2 lg:-translate-x-1/2 w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4 lg:mb-0 mx-auto lg:mx-0">2</div>
+                    <div class="relative bg-gradient-to-br from-blue-100/40 to-sky-100/40 dark:from-blue-900/40 dark:to-sky-900/40 rounded-2xl border border-blue-500/20 p-6 hover:border-blue-500/40 transition-colors">
+                        <div class="lg:absolute lg:-top-3 lg:left-1/2 lg:-translate-x-1/2 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4 lg:mb-0 mx-auto lg:mx-0">2</div>
                         <div class="text-center lg:pt-6">
                             <div class="text-3xl mb-3">&#127866;</div>
-                            <div class="text-purple-700 dark:text-purple-300 text-sm font-semibold tracking-wider uppercase mb-2">The Wait</div>
+                            <div class="text-blue-700 dark:text-blue-300 text-sm font-semibold tracking-wider uppercase mb-2">The Wait</div>
                             <p class="text-gray-500 dark:text-gray-400 text-sm">Aging in barrels, fermenting in tanks. Tease your members with early samples and first-access previews.</p>
                         </div>
                     </div>
@@ -209,9 +209,9 @@
                                             <span class="ml-auto text-amber-300 text-[10px]">47 left</span>
                                         </div>
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
-                                            <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+                                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
                                             <span class="text-gray-300 text-xs">Reserve Pinot Noir</span>
-                                            <span class="ml-auto text-purple-300 text-[10px]">12 cases</span>
+                                            <span class="ml-auto text-blue-300 text-[10px]">12 cases</span>
                                         </div>
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
                                             <div class="w-2 h-2 rounded-full bg-orange-400"></div>
@@ -226,7 +226,7 @@
                 </div>
 
                 <!-- Club Members First / Allocation -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900 dark:to-pink-900 border border-rose-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-cyan-100 dark:from-rose-900 dark:to-cyan-900 border border-rose-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
@@ -249,7 +249,7 @@
                                 <span class="text-emerald-400 text-[10px]">Confirmed</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-[10px] font-bold">J</div>
+                                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white text-[10px] font-bold">J</div>
                                 <span class="text-gray-600 dark:text-gray-300 text-xs flex-1">Email Subscriber</span>
                                 <span class="text-amber-400 text-[10px]">Waitlist #3</span>
                             </div>
@@ -258,8 +258,8 @@
                 </div>
 
                 <!-- Ticketed Tastings -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-900 dark:to-violet-900 border border-purple-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-blue-100 dark:from-blue-900 dark:to-blue-900 border border-blue-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                         </svg>
@@ -270,23 +270,23 @@
 
                     <!-- Ticket card visual -->
                     <div class="flex justify-center">
-                        <div class="bg-gradient-to-br from-purple-100 to-violet-50 rounded-xl border border-purple-300/50 p-4 w-44 shadow-lg transform rotate-2 hover:rotate-0 transition-transform">
+                        <div class="bg-gradient-to-br from-blue-100 to-blue-50 rounded-xl border border-blue-300/50 p-4 w-44 shadow-lg transform rotate-2 hover:rotate-0 transition-transform">
                             <div class="text-center">
-                                <div class="text-purple-800 text-[10px] tracking-widest uppercase">Exclusive Tasting</div>
-                                <div class="text-purple-900 text-sm font-serif font-semibold mt-1">Barrel Room Tour</div>
-                                <div class="text-purple-700 text-xl font-bold mt-2">$45<span class="text-xs font-normal">pp</span></div>
-                                <div class="text-purple-600 text-[10px] mt-1">Sat, Oct 14 &bull; 2:00 PM</div>
-                                <div class="text-purple-500 text-[9px] mt-1">Only 8 spots left</div>
+                                <div class="text-blue-800 text-[10px] tracking-widest uppercase">Exclusive Tasting</div>
+                                <div class="text-blue-900 text-sm font-serif font-semibold mt-1">Barrel Room Tour</div>
+                                <div class="text-blue-700 text-xl font-bold mt-2">$45<span class="text-xs font-normal">pp</span></div>
+                                <div class="text-blue-600 text-[10px] mt-1">Sat, Oct 14 &bull; 2:00 PM</div>
+                                <div class="text-blue-500 text-[9px] mt-1">Only 8 spots left</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Private Events & Tours (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900 dark:to-blue-900 border border-indigo-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-sky-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
@@ -303,11 +303,11 @@
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10">
                             <div class="text-xs text-gray-500 dark:text-gray-400 mb-3">Booking Requests</div>
                             <div class="space-y-2">
-                                <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-500/20 border border-indigo-400/30">
-                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">AT</div>
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-sky-500/20 border border-sky-400/30">
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">AT</div>
                                     <div class="flex-1">
                                         <div class="text-gray-900 dark:text-white text-sm font-medium">Acme Tech - Team Outing</div>
-                                        <div class="text-indigo-700 dark:text-indigo-300 text-xs">Nov 3 &bull; 25 people &bull; Private tour</div>
+                                        <div class="text-sky-700 dark:text-sky-300 text-xs">Nov 3 &bull; 25 people &bull; Private tour</div>
                                     </div>
                                     <div class="flex gap-1">
                                         <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
@@ -319,7 +319,7 @@
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/5">
-                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white text-xs font-semibold">JM</div>
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-rose-500 flex items-center justify-center text-white text-xs font-semibold">JM</div>
                                     <div class="flex-1">
                                         <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Jamie's Bachelorette</div>
                                         <div class="text-gray-500 dark:text-gray-400 text-xs">Oct 28 &bull; 12 people</div>
@@ -353,7 +353,7 @@
                             <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">4 events</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                            <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Barrel Room</span>
                             <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">2 events</span>
                         </div>
@@ -445,28 +445,28 @@
     <!-- Virtual Tastings Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
         <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-sky-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/features/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900 dark:to-violet-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
                                 Online Events
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Virtual tastings go global</h3>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Virtual tastings go global</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">Ship your product, host a live tasting. Fans anywhere can join, pay, and taste along. Turn your taproom into a worldwide experience.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live tastings</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Sell tickets worldwide</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any platform</span>
                             </div>
-                            <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -550,7 +550,7 @@
                     blog-slug="for-wineries-vineyards"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </x-slot:icon>

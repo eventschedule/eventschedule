@@ -17,7 +17,7 @@
 
         <!-- Neon glow effects -->
         <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-amber-500/10 rounded-full blur-[150px]"></div>
-        <div class="absolute top-1/3 left-1/3 w-[300px] h-[300px] bg-pink-500/10 rounded-full blur-[120px] animate-pulse-slow"></div>
+        <div class="absolute top-1/3 left-1/3 w-[300px] h-[300px] bg-cyan-500/10 rounded-full blur-[120px] animate-pulse-slow"></div>
         <div class="absolute top-1/3 right-1/3 w-[300px] h-[300px] bg-amber-500/10 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1s;"></div>
 
         <!-- Subtle stage floor reflection -->
@@ -60,7 +60,7 @@
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-lime-100 text-lime-700 dark:bg-lime-500/20 dark:text-lime-300 text-xs font-medium border border-lime-500/30">Open Mic</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 text-xs font-medium border border-orange-500/30">Showcase</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300 text-xs font-medium border border-red-500/30">Headliner</span>
-                <span class="inline-flex items-center px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-xs font-medium border border-purple-500/30">Recording Night</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-xs font-medium border border-blue-500/30">Recording Night</span>
             </div>
         </div>
     </section>
@@ -117,10 +117,10 @@
                         <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Sold out shows</div>
                     </div>
                     <!-- Sunday -->
-                    <div class="flex-1 text-center p-4 rounded-xl bg-purple-100/30 dark:bg-purple-900/30 border border-purple-300/30 dark:border-purple-700/30">
-                        <div class="text-purple-600 dark:text-purple-400 text-xs font-semibold mb-2">SUN</div>
-                        <div class="w-3 h-3 rounded-full bg-purple-500 mx-auto mb-2"></div>
-                        <div class="text-purple-700 dark:text-purple-300 text-xs font-medium">Industry</div>
+                    <div class="flex-1 text-center p-4 rounded-xl bg-blue-100/30 dark:bg-blue-900/30 border border-blue-300/30 dark:border-blue-700/30">
+                        <div class="text-blue-600 dark:text-blue-400 text-xs font-semibold mb-2">SUN</div>
+                        <div class="w-3 h-3 rounded-full bg-blue-500 mx-auto mb-2"></div>
+                        <div class="text-blue-700 dark:text-blue-300 text-xs font-medium">Industry</div>
                         <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Podcast / Special</div>
                     </div>
                 </div>
@@ -288,10 +288,10 @@
                                     </div>
                                     <div class="text-gray-600 dark:text-gray-400 text-xs">Best seats + drink voucher</div>
                                 </div>
-                                <div class="bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-950 dark:to-pink-950 rounded-xl p-4 border border-purple-500/30">
+                                <div class="bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-950 dark:to-cyan-950 rounded-xl p-4 border border-blue-500/30">
                                     <div class="flex items-center justify-between mb-1">
                                         <span class="text-gray-900 dark:text-white font-medium">Recording Night</span>
-                                        <span class="text-purple-700 dark:text-purple-300 font-bold">$40</span>
+                                        <span class="text-blue-700 dark:text-blue-300 font-bold">$40</span>
                                     </div>
                                     <div class="text-gray-600 dark:text-gray-400 text-xs">Special taping event</div>
                                 </div>
@@ -392,7 +392,7 @@
                             <span class="ml-auto text-gray-600 dark:text-gray-400 text-xs">5 shows</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                            <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Podcast Studio</span>
                             <span class="ml-auto text-gray-600 dark:text-gray-400 text-xs">3 shows</span>
                         </div>
@@ -445,12 +445,12 @@
     <!-- Recording Night / Special Events Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
         <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-purple-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
             <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-red-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/features/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-purple-100 to-red-100 dark:from-purple-900 dark:to-red-900 rounded-3xl border border-purple-200 dark:border-purple-500/30 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-blue-100 to-red-100 dark:from-blue-900 dark:to-red-900 rounded-3xl border border-blue-200 dark:border-blue-500/30 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300 text-sm font-medium mb-4">
@@ -459,14 +459,14 @@
                                 </svg>
                                 Recording Nights
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">Album recordings. Netflix tapings. The big nights.</h3>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Album recordings. Netflix tapings. The big nights.</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">Sell tickets to the live audience AND stream to fans worldwide. Your club, your special.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live + Virtual tickets</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Global streaming</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">No capacity limits</span>
                             </div>
-                            <span class="inline-flex items-center text-purple-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more about online events
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -484,7 +484,7 @@
                                 </div>
                                 <div class="space-y-2">
                                     <div class="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-white/5 rounded-lg">
-                                        <svg class="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                         </svg>
                                         <span class="text-gray-600 dark:text-gray-300 text-xs">2,847 watching</span>
@@ -595,7 +595,7 @@
                     blog-slug="for-live-podcast-studios"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                     </x-slot:icon>

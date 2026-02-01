@@ -11,7 +11,7 @@
     <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-rose-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-pink-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-cyan-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
         <div class="absolute inset-0 grid-pattern"></div>
 
@@ -473,7 +473,7 @@ https://example.com/event/summer-concert</code></pre>
                         <section id="screen-capture" class="doc-section">
                             <h2 class="doc-heading">Screen Capture Rendering</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-500/20 text-purple-300 mr-2">Enterprise Feature</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500/20 text-blue-300 mr-2">Enterprise Feature</span>
                                 Use browser-based rendering for the graphic image instead of the default server-side generation.
                             </p>
 
@@ -494,7 +494,7 @@ https://example.com/event/summer-concert</code></pre>
                         <section id="email-scheduling" class="doc-section">
                             <h2 class="doc-heading">Email Scheduling</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-500/20 text-purple-300 mr-2">Enterprise Feature</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500/20 text-blue-300 mr-2">Enterprise Feature</span>
                                 Automatically send event graphics to your followers on a schedule.
                             </p>
 

@@ -9,8 +9,8 @@
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->
         <div class="absolute inset-0">
-            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-sky-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
 
         <!-- Grid -->
@@ -18,7 +18,7 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
-                <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
                 <span class="text-sm text-gray-600 dark:text-gray-300">Use Cases</span>
@@ -40,8 +40,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center gap-3 mb-4">
                 <a href="{{ marketing_url('/for-talent') }}" class="group inline-flex items-center gap-2">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">For Talent</h2>
-                    <svg class="w-6 h-6 text-gray-400 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">For Talent</h2>
+                    <svg class="w-6 h-6 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -50,8 +50,8 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Musicians -->
-                <a href="{{ marketing_url('/for-musicians') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900 dark:to-indigo-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-violet-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <a href="{{ marketing_url('/for-musicians') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Musicians</h3>
                         <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Share your gigs, sync calendars, and let fans follow your shows.</p>
@@ -67,8 +67,8 @@
                 </a>
 
                 <!-- DJs -->
-                <a href="{{ marketing_url('/for-djs') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-100 to-fuchsia-100 dark:from-purple-900 dark:to-fuchsia-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <a href="{{ marketing_url('/for-djs') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">DJs</h3>
                         <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Promote your sets, manage bookings, and grow your following.</p>
@@ -101,7 +101,7 @@
                 </a>
 
                 <!-- Circus & Acrobatics -->
-                <a href="{{ marketing_url('/for-circus-acrobatics') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900 dark:to-pink-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-circus-acrobatics') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-cyan-100 dark:from-rose-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-rose-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Circus & Acrobatics</h3>
@@ -118,8 +118,8 @@
                 </a>
 
                 <!-- Magicians -->
-                <a href="{{ marketing_url('/for-magicians') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <a href="{{ marketing_url('/for-magicians') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Magicians</h3>
                         <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Book more shows and let audiences find your next performance.</p>
@@ -152,8 +152,8 @@
                 </a>
 
                 <!-- Dance Groups -->
-                <a href="{{ marketing_url('/for-dance-groups') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-900 dark:to-rose-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-pink-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <a href="{{ marketing_url('/for-dance-groups') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-rose-100 dark:from-cyan-900 dark:to-rose-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-cyan-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Dance Groups</h3>
                         <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Promote performances, classes, and recitals in one place.</p>
@@ -220,8 +220,8 @@
                 </a>
 
                 <!-- Workshop Instructors -->
-                <a href="{{ marketing_url('/for-workshop-instructors') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <a href="{{ marketing_url('/for-workshop-instructors') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Workshop Instructors</h3>
                         <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">List your workshops and courses to fill every seat.</p>
@@ -237,8 +237,8 @@
                 </a>
 
                 <!-- Visual Artists -->
-                <a href="{{ marketing_url('/for-visual-artists') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-100 to-pink-100 dark:from-fuchsia-900 dark:to-pink-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-fuchsia-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <a href="{{ marketing_url('/for-visual-artists') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Visual Artists</h3>
                         <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Announce exhibitions, open studios, and art fairs to collectors.</p>
@@ -261,8 +261,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center gap-3 mb-4">
                 <a href="{{ marketing_url('/for-venues') }}" class="group inline-flex items-center gap-2">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">For Venues</h2>
-                    <svg class="w-6 h-6 text-gray-400 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">For Venues</h2>
+                    <svg class="w-6 h-6 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -288,8 +288,8 @@
                 </a>
 
                 <!-- Nightclubs -->
-                <a href="{{ marketing_url('/for-nightclubs') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-100 to-purple-100 dark:from-fuchsia-900 dark:to-purple-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-fuchsia-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <a href="{{ marketing_url('/for-nightclubs') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Nightclubs</h3>
                         <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Promote DJ lineups, themed nights, and special events.</p>
@@ -305,7 +305,7 @@
                 </a>
 
                 <!-- Music Venues -->
-                <a href="{{ marketing_url('/for-music-venues') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-music-venues') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Music Venues</h3>
@@ -485,8 +485,8 @@
             </div>
             <p class="text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-3xl">Event promoters, bloggers, and community organizers who aggregate and share events from multiple sources.</p>
 
-            <a href="{{ marketing_url('/for-curators') }}" class="group block relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-100 to-violet-100 dark:from-slate-900 dark:to-violet-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.01] transition-all">
-                <div class="absolute inset-0 bg-gradient-to-br from-violet-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <a href="{{ marketing_url('/for-curators') }}" class="group block relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-100 to-blue-100 dark:from-slate-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.01] transition-all">
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <div class="relative">
                     <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3">Curate events from across your scene</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-base lg:text-lg mb-6 max-w-3xl">Aggregate events from multiple venues and performers into one shareable schedule. Be the go-to source for what's happening in your community.</p>
@@ -501,8 +501,8 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                         <div class="rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-5">
-                            <div class="w-9 h-9 rounded-lg bg-violet-500/20 flex items-center justify-center mb-3">
-                                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3">
+                                <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                             </div>
@@ -510,8 +510,8 @@
                             <p class="text-gray-400 text-xs">Paste a URL or image, AI extracts event details</p>
                         </div>
                         <div class="rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-5">
-                            <div class="w-9 h-9 rounded-lg bg-violet-500/20 flex items-center justify-center mb-3">
-                                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3">
+                                <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                                 </svg>
                             </div>
@@ -519,8 +519,8 @@
                             <p class="text-gray-400 text-xs">Pull events from venues, performers, and other curators</p>
                         </div>
                         <div class="rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-5">
-                            <div class="w-9 h-9 rounded-lg bg-violet-500/20 flex items-center justify-center mb-3">
-                                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3">
+                                <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
@@ -528,8 +528,8 @@
                             <p class="text-gray-400 text-xs">Review and approve events before publishing</p>
                         </div>
                         <div class="rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-5">
-                            <div class="w-9 h-9 rounded-lg bg-violet-500/20 flex items-center justify-center mb-3">
-                                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3">
+                                <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                             </div>
@@ -538,7 +538,7 @@
                         </div>
                     </div>
 
-                    <span class="inline-flex items-center text-violet-600 dark:text-violet-400 font-semibold group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors">
+                    <span class="inline-flex items-center text-blue-600 dark:text-blue-400 font-semibold group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
                         Learn more
                         <svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -554,7 +554,7 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">Ready to share your events?</h2>
             <p class="text-xl text-gray-600 dark:text-gray-400 mb-10">Create your free schedule and start reaching your audience today.</p>
-            <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-violet-500/25">
+            <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
                 Get started for free
                 <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

@@ -88,14 +88,14 @@ html {
    ======================================== */
 
 .text-gradient {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background: linear-gradient(135deg, #4E81FA 0%, #0EA5E9 50%, #22D3EE 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
 .gradient-text {
-    background: linear-gradient(135deg, #4E81FA 0%, #7C3AED 100%);
+    background: linear-gradient(135deg, #4E81FA 0%, #0EA5E9 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -106,11 +106,11 @@ html {
    ======================================== */
 
 .hero-gradient {
-    background: linear-gradient(135deg, rgba(78, 129, 250, 0.15) 0%, rgba(124, 58, 237, 0.15) 100%);
+    background: linear-gradient(135deg, rgba(78, 129, 250, 0.15) 0%, rgba(14, 165, 233, 0.15) 100%);
 }
 
 .dark .hero-gradient {
-    background: linear-gradient(135deg, rgba(78, 129, 250, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%);
+    background: linear-gradient(135deg, rgba(78, 129, 250, 0.2) 0%, rgba(14, 165, 233, 0.2) 100%);
 }
 
 /* ========================================

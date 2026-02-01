@@ -9,8 +9,8 @@
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Mesh gradient background -->
         <div class="absolute inset-0">
-            <div class="absolute bottom-0 left-[-20%] w-[70%] h-[70%] bg-fuchsia-600/20 rounded-full blur-[120px]"></div>
-            <div class="absolute top-0 right-[-10%] w-[50%] h-[60%] bg-pink-600/20 rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-0 left-[-20%] w-[70%] h-[70%] bg-sky-600/20 rounded-full blur-[120px]"></div>
+            <div class="absolute top-0 right-[-10%] w-[50%] h-[60%] bg-cyan-600/20 rounded-full blur-[120px]"></div>
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] h-[40%] bg-rose-600/10 rounded-full blur-[100px]"></div>
         </div>
 
@@ -19,7 +19,7 @@
             <svg width="100%" height="100%">
                 <defs>
                     <pattern id="canvas-weave" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
-                        <path d="M0,4 L8,4 M4,0 L4,8" stroke="currentColor" stroke-width="0.5" class="text-fuchsia-800 dark:text-fuchsia-300"/>
+                        <path d="M0,4 L8,4 M4,0 L4,8" stroke="currentColor" stroke-width="0.5" class="text-sky-800 dark:text-sky-300"/>
                     </pattern>
                 </defs>
                 <rect width="100%" height="100%" fill="url(#canvas-weave)"/>
@@ -30,7 +30,7 @@
             <!-- Badge with picture frame border -->
             <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-sm glass artist-frame-badge mb-8 backdrop-blur-sm">
                 <div class="relative">
-                    <svg class="w-5 h-5 text-fuchsia-600 dark:text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                 </div>
@@ -50,7 +50,7 @@
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="{{ route('sign_up') }}" class="group inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-fuchsia-600 to-pink-600 rounded-2xl hover:scale-105 transition-transform duration-150 will-change-transform shadow-lg shadow-fuchsia-500/25">
+                <a href="{{ route('sign_up') }}" class="group inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-sky-600 to-cyan-600 rounded-2xl hover:scale-105 transition-transform duration-150 will-change-transform shadow-lg shadow-sky-500/25">
                     Create your schedule
                     <svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -60,10 +60,10 @@
 
             <!-- Medium tags -->
             <div class="mt-14 flex flex-wrap justify-center gap-2">
-                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300 text-xs font-medium border border-fuchsia-200 dark:border-fuchsia-800/50">Painting</span>
-                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300 text-xs font-medium border border-pink-200 dark:border-pink-800/50">Sculpture</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 text-xs font-medium border border-sky-200 dark:border-sky-800/50">Painting</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300 text-xs font-medium border border-cyan-200 dark:border-cyan-800/50">Sculpture</span>
                 <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 text-xs font-medium border border-rose-200 dark:border-rose-800/50">Photography</span>
-                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-800/50">Printmaking</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-xs font-medium border border-blue-200 dark:border-blue-800/50">Printmaking</span>
                 <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 text-xs font-medium border border-amber-200 dark:border-amber-800/50">Mixed Media</span>
                 <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300 text-xs font-medium border border-cyan-200 dark:border-cyan-800/50">Digital Art</span>
             </div>
@@ -75,11 +75,11 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-3 gap-6 text-center">
                 <div class="p-6">
-                    <div class="text-4xl font-bold text-fuchsia-400 mb-2">80%</div>
+                    <div class="text-4xl font-bold text-sky-400 mb-2">80%</div>
                     <div class="text-gray-500 dark:text-gray-400 text-sm">of artists rely on word-of-mouth alone</div>
                 </div>
                 <div class="p-6 border-x border-gray-200 dark:border-white/5">
-                    <div class="text-4xl font-bold text-pink-400 mb-2">47%</div>
+                    <div class="text-4xl font-bold text-cyan-400 mb-2">47%</div>
                     <div class="text-gray-500 dark:text-gray-400 text-sm">of collectors discover shows too late</div>
                 </div>
                 <div class="p-6">
@@ -96,12 +96,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Exhibition Announcements (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-100 to-pink-100 dark:from-fuchsia-900 dark:to-pink-900 border border-fuchsia-200 dark:border-white/10 p-8 lg:p-10">
-                    <div class="absolute top-0 right-0 w-96 h-96 bg-fuchsia-500/5 rounded-full blur-[100px]"></div>
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900 border border-sky-200 dark:border-white/10 p-8 lg:p-10">
+                    <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/5 rounded-full blur-[100px]"></div>
 
                     <div class="relative flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900/40 text-fuchsia-700 dark:text-fuchsia-300 text-sm font-medium mb-5 border border-fuchsia-200 dark:border-fuchsia-800/30">
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 text-sm font-medium mb-5 border border-sky-200 dark:border-sky-800/30">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
@@ -117,18 +117,18 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-fuchsia-100 to-pink-100 dark:from-fuchsia-950 dark:to-pink-950 rounded-2xl border border-fuchsia-300 dark:border-fuchsia-400/30 p-4 max-w-xs">
+                                <div class="bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-950 dark:to-cyan-950 rounded-2xl border border-sky-300 dark:border-sky-400/30 p-4 max-w-xs">
                                     <div class="flex items-center gap-3 mb-3">
-                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-fuchsia-500 to-pink-500 flex items-center justify-center text-white text-sm font-semibold">EM</div>
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center text-white text-sm font-semibold">EM</div>
                                         <div>
                                             <div class="text-gray-900 dark:text-white font-semibold text-sm">Elena Martinez</div>
-                                            <div class="text-fuchsia-600 dark:text-fuchsia-300 text-xs">Upcoming Exhibition</div>
+                                            <div class="text-sky-600 dark:text-sky-300 text-xs">Upcoming Exhibition</div>
                                         </div>
                                     </div>
-                                    <div class="bg-gradient-to-br from-fuchsia-600/30 to-pink-600/30 rounded-xl p-3 border border-fuchsia-400/20">
+                                    <div class="bg-gradient-to-br from-sky-600/30 to-cyan-600/30 rounded-xl p-3 border border-sky-400/20">
                                         <div class="text-center">
                                             <div class="text-gray-900 dark:text-white text-xs font-semibold mb-1">OPENING RECEPTION</div>
-                                            <div class="text-fuchsia-700 dark:text-fuchsia-300 text-sm font-bold">Fragments of Light</div>
+                                            <div class="text-sky-700 dark:text-sky-300 text-sm font-bold">Fragments of Light</div>
                                             <div class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Gallery Row / Sat 6-9 PM</div>
                                         </div>
                                     </div>
@@ -172,8 +172,8 @@
                 </div>
 
                 <!-- One Link -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900 dark:to-blue-900 border border-indigo-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-sm font-medium mb-5 border border-indigo-200 dark:border-indigo-800/30">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-sky-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 text-sm font-medium mb-5 border border-sky-200 dark:border-sky-800/30">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                         </svg>
@@ -183,25 +183,25 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Put it in your website, Instagram bio, or artist statement. All your exhibitions in one place.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-indigo-500/20 border border-indigo-400/30 mb-3">
-                            <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-sky-500/20 border border-sky-400/30 mb-3">
+                            <svg class="w-4 h-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                             </svg>
                             <span class="text-gray-900 dark:text-white text-xs font-mono">eventschedule.com/yourart</span>
                         </div>
                         <div class="grid grid-cols-3 gap-1 text-center">
-                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-indigo-300 text-[10px]">Website</div>
-                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-indigo-300 text-[10px]">Instagram</div>
-                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-indigo-300 text-[10px]">CV</div>
+                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-sky-300 text-[10px]">Website</div>
+                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-sky-300 text-[10px]">Instagram</div>
+                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-sky-300 text-[10px]">CV</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Venue Sync (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 border border-violet-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-blue-100 dark:from-blue-900 dark:to-blue-900 border border-blue-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-sm font-medium mb-5 border border-violet-200 dark:border-violet-800/30">
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-sm font-medium mb-5 border border-blue-200 dark:border-blue-800/30">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
@@ -212,31 +212,31 @@
                         </div>
                         <div class="flex items-center justify-center">
                             <div class="flex items-center gap-4">
-                                <div class="bg-violet-500/20 rounded-xl border border-violet-400/30 p-4 w-32">
-                                    <div class="text-violet-300 text-xs text-center mb-2 font-semibold">Gallery</div>
+                                <div class="bg-blue-500/20 rounded-xl border border-blue-400/30 p-4 w-32">
+                                    <div class="text-blue-300 text-xs text-center mb-2 font-semibold">Gallery</div>
                                     <div class="space-y-1.5">
                                         <div class="h-2 bg-white/20 rounded"></div>
-                                        <div class="h-2 bg-violet-400/40 rounded w-3/4"></div>
+                                        <div class="h-2 bg-blue-400/40 rounded w-3/4"></div>
                                         <div class="h-2 bg-white/10 rounded w-1/2"></div>
                                     </div>
-                                    <div class="mt-3 p-2 rounded-lg bg-violet-400/20 border border-violet-400/30">
+                                    <div class="mt-3 p-2 rounded-lg bg-blue-400/20 border border-blue-400/30">
                                         <div class="text-[10px] text-white text-center font-medium">+ Your Show</div>
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-center gap-1">
-                                    <svg class="w-6 h-6 text-violet-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="w-6 h-6 text-blue-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                     </svg>
-                                    <span class="text-violet-400 text-[10px]">auto-sync</span>
+                                    <span class="text-blue-400 text-[10px]">auto-sync</span>
                                 </div>
                                 <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-4 w-32">
                                     <div class="text-gray-600 dark:text-gray-300 text-xs text-center mb-2 font-semibold">You</div>
                                     <div class="space-y-1.5">
                                         <div class="h-2 bg-white/20 rounded"></div>
-                                        <div class="h-2 bg-fuchsia-400/40 rounded w-3/4"></div>
+                                        <div class="h-2 bg-sky-400/40 rounded w-3/4"></div>
                                         <div class="h-2 bg-white/10 rounded w-1/2"></div>
                                     </div>
-                                    <div class="mt-3 p-2 rounded-lg bg-fuchsia-400/20 border border-fuchsia-400/30">
+                                    <div class="mt-3 p-2 rounded-lg bg-sky-400/20 border border-sky-400/30">
                                         <div class="text-[10px] text-gray-900 dark:text-white text-center font-medium">New show!</div>
                                     </div>
                                 </div>
@@ -258,10 +258,10 @@
 
                     <div class="flex justify-center">
                         <div class="relative">
-                            <div class="w-32 h-32 bg-gradient-to-br from-fuchsia-800 to-pink-900 rounded-lg border border-fuchsia-700 p-3 flex flex-col items-center justify-center text-center">
-                                <div class="text-[8px] text-fuchsia-300 uppercase tracking-wider mb-1">Exhibition</div>
+                            <div class="w-32 h-32 bg-gradient-to-br from-sky-800 to-cyan-900 rounded-lg border border-sky-700 p-3 flex flex-col items-center justify-center text-center">
+                                <div class="text-[8px] text-sky-300 uppercase tracking-wider mb-1">Exhibition</div>
                                 <div class="text-white text-xs font-semibold">Fragments of Light</div>
-                                <div class="text-fuchsia-300 text-[8px] mt-1">Gallery Row / Mar 15</div>
+                                <div class="text-sky-300 text-[8px] mt-1">Gallery Row / Mar 15</div>
                             </div>
                             <div class="absolute -bottom-2 -right-2 w-6 h-6 bg-amber-500/80 rounded-full flex items-center justify-center">
                                 <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -273,7 +273,7 @@
                 </div>
 
                 <!-- Google Calendar -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 border border-blue-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-blue-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-sm font-medium mb-5 border border-blue-200 dark:border-blue-800/30">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -287,7 +287,7 @@
                         <div class="bg-blue-500/20 rounded-xl border border-blue-400/30 p-3 w-20">
                             <div class="text-[10px] text-blue-300 mb-1 text-center">Schedule</div>
                             <div class="space-y-1">
-                                <div class="h-1.5 bg-fuchsia-400/40 rounded text-[6px] text-white px-1">Show</div>
+                                <div class="h-1.5 bg-sky-400/40 rounded text-[6px] text-white px-1">Show</div>
                                 <div class="h-1.5 bg-amber-400/40 rounded text-[6px] text-white px-1">Install</div>
                             </div>
                         </div>
@@ -295,7 +295,7 @@
                             <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
-                            <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-4 h-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
                         </div>
@@ -363,31 +363,31 @@
 
             <div class="relative">
                 <!-- Timeline line -->
-                <div class="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-fuchsia-500/30 via-pink-500/30 to-fuchsia-500/30 -translate-y-1/2"></div>
+                <div class="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-sky-500/30 via-cyan-500/30 to-sky-500/30 -translate-y-1/2"></div>
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <!-- Spring -->
-                    <div class="relative gallery-wall-card bg-gradient-to-br from-fuchsia-50 to-pink-50 dark:from-fuchsia-950/50 dark:to-pink-950/50 rounded-2xl border border-fuchsia-200 dark:border-fuchsia-800/30 p-6 text-center hover:rotate-0 transition-transform shadow-lg" style="transform: rotate(-1deg);">
+                    <div class="relative gallery-wall-card bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-950/50 dark:to-cyan-950/50 rounded-2xl border border-sky-200 dark:border-sky-800/30 p-6 text-center hover:rotate-0 transition-transform shadow-lg" style="transform: rotate(-1deg);">
                         <!-- Hanging wire -->
                         <div class="hidden md:block absolute -top-6 left-1/2 -translate-x-1/2 w-px h-6 bg-gray-400 dark:bg-gray-600"></div>
                         <div class="hidden md:block absolute -top-7 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full border border-gray-400 dark:border-gray-600"></div>
-                        <div class="text-fuchsia-600 dark:text-fuchsia-400 text-xs font-semibold uppercase tracking-wider mb-2">Spring</div>
+                        <div class="text-sky-600 dark:text-sky-400 text-xs font-semibold uppercase tracking-wider mb-2">Spring</div>
                         <div class="text-gray-900 dark:text-white font-bold text-lg mb-1">Open Studio</div>
                         <div class="text-gray-500 dark:text-gray-400 text-sm">Invite collectors into your creative space</div>
                     </div>
 
                     <!-- Summer -->
-                    <div class="relative gallery-wall-card bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/50 dark:to-rose-950/50 rounded-2xl border border-pink-200 dark:border-pink-800/30 p-6 text-center hover:rotate-0 transition-transform shadow-lg" style="transform: rotate(1deg);">
+                    <div class="relative gallery-wall-card bg-gradient-to-br from-cyan-50 to-rose-50 dark:from-cyan-950/50 dark:to-rose-950/50 rounded-2xl border border-cyan-200 dark:border-cyan-800/30 p-6 text-center hover:rotate-0 transition-transform shadow-lg" style="transform: rotate(1deg);">
                         <!-- Hanging wire -->
                         <div class="hidden md:block absolute -top-6 left-1/2 -translate-x-1/2 w-px h-6 bg-gray-400 dark:bg-gray-600"></div>
                         <div class="hidden md:block absolute -top-7 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full border border-gray-400 dark:border-gray-600"></div>
-                        <div class="text-pink-600 dark:text-pink-400 text-xs font-semibold uppercase tracking-wider mb-2">Summer</div>
+                        <div class="text-cyan-600 dark:text-cyan-400 text-xs font-semibold uppercase tracking-wider mb-2">Summer</div>
                         <div class="text-gray-900 dark:text-white font-bold text-lg mb-1">Art Fair</div>
                         <div class="text-gray-500 dark:text-gray-400 text-sm">Booth at a regional or national fair</div>
                     </div>
 
                     <!-- Fall -->
-                    <div class="relative gallery-wall-card bg-gradient-to-br from-rose-50 to-fuchsia-50 dark:from-rose-950/50 dark:to-fuchsia-950/50 rounded-2xl border border-rose-200 dark:border-rose-800/30 p-6 text-center hover:rotate-0 transition-transform shadow-lg" style="transform: rotate(-1deg);">
+                    <div class="relative gallery-wall-card bg-gradient-to-br from-rose-50 to-sky-50 dark:from-rose-950/50 dark:to-sky-950/50 rounded-2xl border border-rose-200 dark:border-rose-800/30 p-6 text-center hover:rotate-0 transition-transform shadow-lg" style="transform: rotate(-1deg);">
                         <!-- Hanging wire -->
                         <div class="hidden md:block absolute -top-6 left-1/2 -translate-x-1/2 w-px h-6 bg-gray-400 dark:bg-gray-600"></div>
                         <div class="hidden md:block absolute -top-7 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full border border-gray-400 dark:border-gray-600"></div>
@@ -397,11 +397,11 @@
                     </div>
 
                     <!-- Winter -->
-                    <div class="relative gallery-wall-card bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-violet-950/50 dark:to-fuchsia-950/50 rounded-2xl border border-violet-200 dark:border-violet-800/30 p-6 text-center hover:rotate-0 transition-transform shadow-lg" style="transform: rotate(1deg);">
+                    <div class="relative gallery-wall-card bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-950/50 dark:to-sky-950/50 rounded-2xl border border-blue-200 dark:border-blue-800/30 p-6 text-center hover:rotate-0 transition-transform shadow-lg" style="transform: rotate(1deg);">
                         <!-- Hanging wire -->
                         <div class="hidden md:block absolute -top-6 left-1/2 -translate-x-1/2 w-px h-6 bg-gray-400 dark:bg-gray-600"></div>
                         <div class="hidden md:block absolute -top-7 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full border border-gray-400 dark:border-gray-600"></div>
-                        <div class="text-violet-600 dark:text-violet-400 text-xs font-semibold uppercase tracking-wider mb-2">Winter</div>
+                        <div class="text-blue-600 dark:text-blue-400 text-xs font-semibold uppercase tracking-wider mb-2">Winter</div>
                         <div class="text-gray-900 dark:text-white font-bold text-lg mb-1">Group Show</div>
                         <div class="text-gray-500 dark:text-gray-400 text-sm">Collaborative exhibition with fellow artists</div>
                     </div>
@@ -431,7 +431,7 @@
                     blog-slug="for-painters-illustrators"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-fuchsia-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                         </svg>
                     </x-slot:icon>
@@ -445,7 +445,7 @@
                     blog-slug="for-sculptors-installation-artists"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         </svg>
                     </x-slot:icon>
@@ -522,7 +522,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="text-center">
-                    <div class="w-14 h-14 bg-gradient-to-br from-fuchsia-600 to-pink-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-fuchsia-600/25">
+                    <div class="w-14 h-14 bg-gradient-to-br from-sky-600 to-cyan-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-sky-600/25">
                         1
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Add your exhibitions</h3>
@@ -532,7 +532,7 @@
                 </div>
 
                 <div class="text-center">
-                    <div class="w-14 h-14 bg-gradient-to-br from-fuchsia-600 to-pink-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-fuchsia-600/25">
+                    <div class="w-14 h-14 bg-gradient-to-br from-sky-600 to-cyan-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-sky-600/25">
                         2
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Share your link</h3>
@@ -542,7 +542,7 @@
                 </div>
 
                 <div class="text-center">
-                    <div class="w-14 h-14 bg-gradient-to-br from-fuchsia-600 to-pink-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-fuchsia-600/25">
+                    <div class="w-14 h-14 bg-gradient-to-br from-sky-600 to-cyan-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-sky-600/25">
                         3
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Build your collector base</h3>
@@ -555,11 +555,11 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-24 overflow-hidden border-t border-fuchsia-200 dark:border-fuchsia-900/20">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-24 overflow-hidden border-t border-sky-200 dark:border-sky-900/20">
         <!-- Mesh gradient background -->
         <div class="absolute inset-0">
-            <div class="absolute top-0 left-[-10%] w-[50%] h-[60%] bg-fuchsia-600/15 rounded-full blur-[120px]"></div>
-            <div class="absolute bottom-0 right-[-10%] w-[50%] h-[60%] bg-pink-600/15 rounded-full blur-[120px]"></div>
+            <div class="absolute top-0 left-[-10%] w-[50%] h-[60%] bg-sky-600/15 rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-0 right-[-10%] w-[50%] h-[60%] bg-cyan-600/15 rounded-full blur-[120px]"></div>
         </div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -570,7 +570,7 @@
             <p class="text-xl text-gray-500 dark:text-gray-400 mb-10 max-w-2xl mx-auto">
                 Stop relying on social media reach. Build your collector base directly.<br class="hidden md:block">Free forever.
             </p>
-            <a href="{{ route('sign_up') }}" class="group inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-fuchsia-600 to-pink-600 rounded-2xl hover:scale-105 transition-transform duration-150 will-change-transform shadow-xl shadow-fuchsia-500/20">
+            <a href="{{ route('sign_up') }}" class="group inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-sky-600 to-cyan-600 rounded-2xl hover:scale-105 transition-transform duration-150 will-change-transform shadow-xl shadow-sky-500/20">
                 Get Started Free
                 <svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -616,11 +616,11 @@
 
     <style>
         .artist-glow-text {
-            background: linear-gradient(135deg, #d946ef, #ec4899, #f43f5e);
+            background: linear-gradient(135deg, #4E81FA, #0EA5E9, #22D3EE);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 40px rgba(217, 70, 239, 0.3);
+            text-shadow: 0 0 40px rgba(78, 129, 250, 0.3);
         }
 
         .artist-frame-badge {

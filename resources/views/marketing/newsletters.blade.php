@@ -156,7 +156,7 @@
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Manual List</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
-                            <div class="w-3 h-3 rounded-full bg-indigo-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-sky-500"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Group Members</span>
                         </div>
                     </div>

@@ -74,6 +74,7 @@
             'description_excerpt' => Str::words(strip_tags($event->translatedDescription()), 25, '...'),
             'duration' => $event->duration,
             'parts' => $event->parts->map(fn($part) => [
+                'id' => \App\Utils\UrlUtils::encodeId($part->id),
                 'name' => $part->name,
                 'start_time' => $part->start_time,
                 'end_time' => $part->end_time,
@@ -97,6 +98,8 @@
             ])->values()->toArray() : [],
             'occurrenceDate' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
             'uniqueKey' => \App\Utils\UrlUtils::encodeId($event->id),
+            'submit_video_url' => isset($role) ? route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : null,
+            'submit_comment_url' => isset($role) ? route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : null,
         ];
     };
 
@@ -146,7 +149,8 @@
 <div>
 
 @if (! request()->graphic)
-<header class="py-4 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+<header class="py-4 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}"
+        :class="currentView === 'list' ? 'bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm px-5 mb-4' : ''">
     {{-- Main container: Stacks content on mobile, aligns in a row on desktop. --}}
     <div class="flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-4">
 
@@ -285,6 +289,25 @@
                 </div>
             @endif
 
+            {{-- Month Navigation Controls --}}
+            <div v-show="currentView === 'calendar'" class="flex items-center bg-white dark:bg-gray-800 rounded-md shadow-sm hidden md:flex">
+                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-s-md border-s border-y border-gray-300 dark:border-gray-600 pe-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:pe-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
+                    <span class="sr-only">{{ __('messages.previous_month') }}</span>
+                    <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+                <a href="{{ $route == 'home' ? route('home') : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => now()->year, 'month' => now()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => now()->year, 'month' => now()->month]) }}" class="flex h-11 items-center justify-center border-y border-gray-300 dark:border-gray-600 px-4 text-base font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 focus:relative">
+                    <span class="h-6 flex items-center">{{ __('messages.this_month') }}</span>
+                </a>
+                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-e-md border-e border-y border-gray-300 dark:border-gray-600 ps-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:ps-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
+                    <span class="sr-only">{{ __('messages.next_month') }}</span>
+                    <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            </div>
+
             {{-- View Toggle (guest route only) --}}
             @if($route == 'guest')
             <div class="flex items-center bg-white dark:bg-gray-800 rounded-md shadow-sm">
@@ -306,25 +329,6 @@
                 </button>
             </div>
             @endif
-
-            {{-- Month Navigation Controls --}}
-            <div v-show="currentView === 'calendar'" class="flex items-center bg-white dark:bg-gray-800 rounded-md shadow-sm hidden md:flex">
-                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-s-md border-s border-y border-gray-300 dark:border-gray-600 pe-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:pe-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
-                    <span class="sr-only">{{ __('messages.previous_month') }}</span>
-                    <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
-                        <path fill-rule="evenodd" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" clip-rule="evenodd" />
-                    </svg>
-                </a>
-                <a href="{{ $route == 'home' ? route('home') : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => now()->year, 'month' => now()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => now()->year, 'month' => now()->month]) }}" class="flex h-11 items-center justify-center border-y border-gray-300 dark:border-gray-600 px-4 text-base font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 focus:relative">
-                    <span class="h-6 flex items-center">{{ __('messages.this_month') }}</span>
-                </a>
-                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-e-md border-e border-y border-gray-300 dark:border-gray-600 ps-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:ps-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
-                    <span class="sr-only">{{ __('messages.next_month') }}</span>
-                    <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
-                        <path fill-rule="evenodd" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" clip-rule="evenodd" />
-                    </svg>
-                </a>
-            </div>
 
             {{-- Add Event Button --}}
             @if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule')
@@ -518,148 +522,344 @@
     </div>
 
 
-{{-- List View --}}
-        <div v-show="currentView === 'list'" class="{{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+{{-- List View (Desktop) --}}
+        <div v-show="currentView === 'list'" class="hidden md:block {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Upcoming Events --}}
-            <div v-if="flatUpcomingEvents.length" class="space-y-6">
+            <div v-if="flatUpcomingEvents.length" class="space-y-4">
                 <template v-for="event in flatUpcomingEvents" :key="'list-' + event.uniqueKey">
                     <div @click="navigateToEvent(event, $event)" class="block cursor-pointer">
                         <div class="rounded-2xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white dark:bg-gray-700">
-                            {{-- Hero Banner --}}
-                            <div v-if="getHeaderImage(event)" class="h-40 relative overflow-hidden">
-                                <img :src="getHeaderImage(event)" class="w-full h-full object-cover" :alt="event.name">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                            </div>
-                            <div v-else class="h-20" style="background: linear-gradient(135deg, {{ $accentColor }}08 0%, {{ $accentColor }}18 100%)"></div>
+                            {{-- Side-by-side layout when flyer image exists --}}
+                            <template v-if="event.image_url">
+                                <div class="flex flex-col md:flex-row" :class="isRtl ? 'md:flex-row-reverse' : ''">
+                                    {{-- Details Column --}}
+                                    <div class="md:flex-1 md:min-w-0 px-5 py-6 md:px-8 lg:px-16 md:py-8 flex flex-col gap-5">
+                                        {{-- Event Title --}}
+                                        <h3 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto" v-text="event.name"></h3>
 
-                            {{-- Content with optional flyer overlap --}}
-                            <div class="px-5 pb-5" :class="event.image_url ? '-mt-12' : 'pt-4'">
-                                {{-- With flyer image --}}
-                                <div v-if="event.image_url" class="flex gap-4 items-end mb-3">
-                                    <img :src="event.image_url" class="w-24 h-36 rounded-xl object-cover shadow-lg border-4 border-white dark:border-gray-700 flex-shrink-0" :alt="event.name">
-                                    <div class="pb-1 min-w-0">
-                                        <h3 class="font-bold text-xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto" v-text="event.name"></h3>
-                                        <div v-if="event.venue_name" class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                            <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-5 h-5 rounded-full object-cover flex-shrink-0 me-2" :alt="event.venue_name">
-                                            <svg v-else class="h-4 w-4 flex-shrink-0 me-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
-                                            </svg>
-                                            <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
-                                        </div>
-                                        <div class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                            <svg class="h-4 w-4 flex-shrink-0 me-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
-                                            </svg>
-                                            <span v-text="getEventTime(event)"></span>
-                                            <span v-if="event.duration" class="ms-1" v-text="'(' + formatDuration(event.duration) + ')'"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                {{-- Without flyer image --}}
-                                <div v-else>
-                                    <h3 class="font-bold text-xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto" v-text="event.name"></h3>
-                                    <div v-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                        <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-5 h-5 rounded-full object-cover flex-shrink-0 me-2" :alt="event.venue_name">
-                                        <svg v-else class="h-4 w-4 flex-shrink-0 me-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
-                                        </svg>
-                                        <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
-                                    </div>
-                                    <div class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                        <svg class="h-4 w-4 flex-shrink-0 me-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
-                                        </svg>
-                                        <span v-text="getEventTime(event)"></span>
-                                        <span v-if="event.duration" class="ms-1" v-text="'(' + formatDuration(event.duration) + ')'"></span>
-                                    </div>
-                                </div>
-
-                                {{-- Date Badge + Talent Header Strip --}}
-                                <div class="mt-3 flex items-center justify-between flex-wrap gap-2">
-                                    <div v-if="event.occurrenceDate" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background-color: {{ $accentColor }}12">
-                                        <span class="text-sm font-bold" style="color: {{ $accentColor }}" v-text="formatDateShort(event.occurrenceDate)"></span>
-                                        <span class="text-xs text-gray-500 dark:text-gray-400 font-normal" v-text="formatDayName(event.occurrenceDate)"></span>
-                                    </div>
-                                    {{-- Talent Header Image Strip --}}
-                                    <div v-if="getTalentHeaderImages(event).length > 0" class="flex gap-1.5">
-                                        <div v-for="(th, thIdx) in getTalentHeaderImages(event).slice(0, 3)" :key="'th-' + thIdx"
-                                             class="w-16 h-10 rounded-lg overflow-hidden shadow-sm" :title="th.name">
-                                            <img :src="th.image" class="w-full h-full object-cover" :alt="th.name">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- Talent Avatars + Names --}}
-                                <div v-if="event.talent && event.talent.length > 0" class="mt-3 flex items-center gap-2">
-                                    <div class="flex items-center -space-x-2" :class="isRtl ? 'space-x-reverse' : ''">
-                                        <template v-for="(t, tIndex) in event.talent.slice(0, 5)" :key="'ta-' + tIndex">
-                                            <img v-if="t.profile_image" :src="t.profile_image" class="w-7 h-7 rounded-full object-cover border-2 border-white dark:border-gray-700" :alt="t.name" :title="t.name">
-                                            <div v-else class="w-7 h-7 rounded-full border-2 border-white dark:border-gray-700 bg-gray-200 dark:bg-gray-600 flex items-center justify-center" :title="t.name">
-                                                <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400" v-text="t.name.charAt(0).toUpperCase()"></span>
+                                        {{-- Date Badge --}}
+                                        <div v-if="event.occurrenceDate" class="flex items-center gap-4">
+                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col items-center justify-center shadow-sm">
+                                                <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1" style="color: {{ $accentColor }}" v-text="getMonthAbbr(event.occurrenceDate)"></span>
+                                                <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none" v-text="getDayNum(event.occurrenceDate)"></span>
                                             </div>
-                                        </template>
-                                    </div>
-                                    <span class="text-sm text-gray-600 dark:text-gray-300 truncate" v-text="event.talent.map(t => t.name).join(', ')"></span>
-                                </div>
+                                            <div class="flex flex-col">
+                                                <span class="text-lg font-semibold text-gray-900 dark:text-white" v-text="formatDayName(event.occurrenceDate)"></span>
+                                                <span class="text-sm text-gray-500 dark:text-gray-400">
+                                                    <span v-text="getEventTime(event)"></span>
+                                                    <span v-if="event.duration" class="ms-1" v-text="'(' + formatDuration(event.duration) + ')'"></span>
+                                                </span>
+                                            </div>
+                                        </div>
 
-                                {{-- Video Thumbnails --}}
-                                <div v-if="event.videos && event.videos.length > 0" class="mt-3 flex gap-2 overflow-x-auto">
-                                    <div v-for="(vid, vidIdx) in event.videos" :key="'vid-' + vidIdx"
-                                         class="relative flex-shrink-0 w-28 h-20 rounded-lg overflow-hidden shadow-sm group/vid">
-                                        <img :src="vid.thumbnail_url" class="w-full h-full object-cover" alt="">
-                                        <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                            <svg class="w-8 h-8 text-white opacity-80 group-hover/vid:opacity-100" viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M8 5v14l11-7z"/>
+                                        {{-- Venue Badge --}}
+                                        <div v-if="event.venue_name" class="flex items-center gap-4">
+                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                                                <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
+                                                <svg v-else width="28" height="28" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
+                                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
+                                                </svg>
+                                            </div>
+                                            <span class="text-lg font-semibold text-gray-900 dark:text-white truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                            <svg class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" :class="isRtl ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
                                             </svg>
                                         </div>
-                                    </div>
-                                </div>
 
-                                {{-- Recent Comments --}}
-                                <div v-if="event.recent_comments && event.recent_comments.length > 0" class="mt-3 space-y-1.5">
-                                    <div v-for="(comment, cIdx) in event.recent_comments" :key="'c-' + cIdx"
-                                         class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
-                                        <svg class="h-4 w-4 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.202 41.202 0 01-5.183.501.78.78 0 00-.528.224l-3.579 3.58A.75.75 0 016 17.25v-3.443a41.033 41.033 0 01-2.57-.33C2.993 13.244 2 11.986 2 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" clip-rule="evenodd" />
-                                        </svg>
-                                        <span>"<span v-text="comment.text"></span>" - <span class="font-medium" v-text="comment.author"></span></span>
-                                    </div>
-                                </div>
+                                        {{-- Talent Avatars + Names --}}
+                                        <div v-if="event.talent && event.talent.length > 0" class="flex items-center gap-2">
+                                            <div class="flex items-center -space-x-2" :class="isRtl ? 'space-x-reverse' : ''">
+                                                <template v-for="(t, tIndex) in event.talent.slice(0, 5)" :key="'ta-' + tIndex">
+                                                    <img v-if="t.profile_image" :src="t.profile_image" class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-gray-700" :alt="t.name" :title="t.name">
+                                                    <div v-else class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-700 bg-gray-200 dark:bg-gray-600 flex items-center justify-center" :title="t.name">
+                                                        <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400" v-text="t.name.charAt(0).toUpperCase()"></span>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            <span class="text-base text-gray-600 dark:text-gray-300 truncate" v-text="event.talent.map(t => t.name).join(', ')"></span>
+                                            <svg class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" :class="isRtl ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
 
-                                {{-- Mini Timeline for Parts --}}
-                                <div v-if="event.parts && event.parts.length > 0" class="mt-3">
-                                    <div class="relative" :class="isRtl ? 'pr-2' : 'pl-2'">
-                                        <div class="absolute top-1 bottom-1 w-0.5" :class="isRtl ? 'right-0' : 'left-0'" :style="'background-color: {{ $accentColor }}30'"></div>
-                                        <div class="space-y-2">
-                                            <div v-for="(part, partIndex) in event.parts.slice(0, 4)" :key="'p-' + partIndex" class="relative flex items-start gap-2" :class="isRtl ? 'flex-row-reverse' : ''">
-                                                <div class="absolute top-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" :class="isRtl ? '-right-[3px]' : '-left-[3px]'" :style="'background-color: {{ $accentColor }}'"></div>
-                                                <div :class="isRtl ? 'pr-3' : 'pl-3'">
-                                                    <span class="text-sm text-gray-700 dark:text-gray-300" v-text="part.name"></span>
-                                                    <span v-if="part.start_time" class="text-xs ms-1 text-gray-400 dark:text-gray-500" v-text="part.start_time"></span>
+                                        {{-- Video Thumbnails --}}
+                                        <div v-if="event.videos && event.videos.length > 0" class="mt-3 flex gap-2 overflow-x-auto">
+                                            <div v-for="(vid, vidIdx) in event.videos" :key="'vid-' + vidIdx"
+                                                 class="relative flex-shrink-0 w-28 h-20 rounded-lg overflow-hidden shadow-sm group/vid">
+                                                <img :src="vid.thumbnail_url" class="w-full h-full object-cover" alt="">
+                                                <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                                    <svg class="w-8 h-8 text-white opacity-80 group-hover/vid:opacity-100" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M8 5v14l11-7z"/>
+                                                    </svg>
                                                 </div>
                                             </div>
-                                            <div v-if="event.parts.length > 4" class="text-xs text-gray-400 dark:text-gray-500" :class="isRtl ? 'pr-3' : 'pl-3'">
-                                                +<span v-text="event.parts.length - 4"></span> {{ __('messages.more') }}
+                                        </div>
+
+                                        {{-- Recent Comments --}}
+                                        <div v-if="event.recent_comments && event.recent_comments.length > 0" class="space-y-1.5">
+                                            <div v-for="(comment, cIdx) in event.recent_comments" :key="'c-' + cIdx"
+                                                 class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                                <svg class="h-4 w-4 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.202 41.202 0 01-5.183.501.78.78 0 00-.528.224l-3.579 3.58A.75.75 0 016 17.25v-3.443a41.033 41.033 0 01-2.57-.33C2.993 13.244 2 11.986 2 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" clip-rule="evenodd" />
+                                                </svg>
+                                                <span>"<span v-text="comment.text"></span>" - <span class="font-medium" v-text="comment.author"></span></span>
+                                            </div>
+                                        </div>
+
+                                        {{-- Mini Timeline for Parts --}}
+                                        <div v-if="event.parts && event.parts.length > 0">
+                                            <div class="relative" :class="isRtl ? 'pr-2' : 'pl-2'">
+                                                <div class="absolute top-1 bottom-1 w-0.5" :class="isRtl ? 'right-0' : 'left-0'" :style="'background-color: {{ $accentColor }}30'"></div>
+                                                <div class="space-y-2">
+                                                    <div v-for="(part, partIndex) in event.parts.slice(0, 4)" :key="'p-' + partIndex" class="relative flex items-start gap-2" :class="isRtl ? 'flex-row-reverse' : ''">
+                                                        <div class="absolute top-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" :class="isRtl ? '-right-[3px]' : '-left-[3px]'" :style="'background-color: {{ $accentColor }}'"></div>
+                                                        <div :class="isRtl ? 'pr-3' : 'pl-3'">
+                                                            <span class="text-sm text-gray-700 dark:text-gray-300" v-text="part.name"></span>
+                                                            <span v-if="part.start_time" class="text-xs ms-1 text-gray-400 dark:text-gray-500" v-text="part.start_time"></span>
+                                                        </div>
+                                                    </div>
+                                                    <div v-if="event.parts.length > 4" class="text-xs text-gray-400 dark:text-gray-500" :class="isRtl ? 'pr-3' : 'pl-3'">
+                                                        +<span v-text="event.parts.length - 4"></span> {{ __('messages.more') }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {{-- Description excerpt --}}
+                                        <p v-if="event.description_excerpt" class="hidden md:block text-base text-gray-500 dark:text-gray-400 line-clamp-2" dir="auto" v-text="event.description_excerpt"></p>
+
+                                        {{-- Action buttons row --}}
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <a v-if="event.can_edit" :href="event.edit_url"
+                                               class="inline-flex items-center px-5 py-2 text-base font-medium rounded-md transition-colors duration-200 border"
+                                               style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
+                                               @mouseenter="$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'"
+                                               @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color='{{ $accentColor }}'"
+                                               @click.stop>
+                                                {{ __('messages.edit') }}
+                                            </a>
+                                            <template v-if="isAuthenticated">
+                                                <button @click.stop="toggleVideoForm(event)"
+                                                        class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-colors"
+                                                        style="color: {{ $accentColor }}; border-color: {{ $accentColor }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                                                    {{ __('messages.add_video') }}
+                                                </button>
+                                                <button @click.stop="toggleCommentForm(event)"
+                                                        class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-colors"
+                                                        style="color: {{ $accentColor }}; border-color: {{ $accentColor }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
+                                                    {{ __('messages.add_comment') }}
+                                                </button>
+                                            </template>
+                                        </div>
+
+                                        {{-- Video form --}}
+                                        <form v-if="openVideoForm[event.uniqueKey]" @click.stop
+                                              method="POST" :action="event.submit_video_url">
+                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                            <div class="flex gap-2">
+                                                <select v-if="event.parts.length > 0" name="event_part_id"
+                                                        class="min-w-[10rem] text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
+                                                    <option value="">{{ __('messages.general') }}</option>
+                                                    <option v-for="part in event.parts" :key="part.id" :value="part.id" v-text="part.name"></option>
+                                                </select>
+                                                <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}"
+                                                       class="flex-1 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
+                                                <button type="submit" class="px-4 py-2 text-sm rounded-lg text-white"
+                                                        style="background-color: {{ $accentColor }}">{{ __('messages.submit') }}</button>
+                                            </div>
+                                        </form>
+
+                                        {{-- Comment form --}}
+                                        <form v-if="openCommentForm[event.uniqueKey]" @click.stop
+                                              method="POST" :action="event.submit_comment_url">
+                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                            <div class="flex gap-2">
+                                                <select v-if="event.parts.length > 0" name="event_part_id"
+                                                        class="min-w-[10rem] text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
+                                                    <option value="">{{ __('messages.general') }}</option>
+                                                    <option v-for="part in event.parts" :key="part.id" :value="part.id" v-text="part.name"></option>
+                                                </select>
+                                                <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000"
+                                                          class="flex-1 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
+                                                <button type="submit" class="px-4 py-2 text-sm rounded-lg text-white self-end"
+                                                        style="background-color: {{ $accentColor }}">{{ __('messages.submit') }}</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    {{-- Flyer Image Column --}}
+                                    <div class="md:w-[35%] md:flex-shrink-0">
+                                        <img :src="event.image_url" class="w-full h-full object-cover" :alt="event.name">
+                                    </div>
+                                </div>
+                            </template>
+
+                            {{-- Stacked layout when no flyer image --}}
+                            <template v-else>
+                                {{-- Hero Banner (only when no flyer) --}}
+                                <div v-if="getHeaderImage(event)" class="h-40 relative overflow-hidden">
+                                    <img :src="getHeaderImage(event)" class="w-full h-full object-cover" :alt="event.name">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                </div>
+
+                                {{-- Content --}}
+                                <div class="px-5 py-6 md:px-8 lg:px-16 md:py-8 flex flex-col gap-5">
+                                    {{-- Event Title --}}
+                                    <h3 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto" v-text="event.name"></h3>
+
+                                    {{-- Date Badge --}}
+                                    <div v-if="event.occurrenceDate" class="flex items-center gap-4">
+                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col items-center justify-center shadow-sm">
+                                            <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1" style="color: {{ $accentColor }}" v-text="getMonthAbbr(event.occurrenceDate)"></span>
+                                            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none" v-text="getDayNum(event.occurrenceDate)"></span>
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span class="text-lg font-semibold text-gray-900 dark:text-white" v-text="formatDayName(event.occurrenceDate)"></span>
+                                            <span class="text-sm text-gray-500 dark:text-gray-400">
+                                                <span v-text="getEventTime(event)"></span>
+                                                <span v-if="event.duration" class="ms-1" v-text="'(' + formatDuration(event.duration) + ')'"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {{-- Venue Badge --}}
+                                    <div v-if="event.venue_name" class="flex items-center gap-4">
+                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                                            <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
+                                            <svg v-else width="28" height="28" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
+                                            </svg>
+                                        </div>
+                                        <span class="text-lg font-semibold text-gray-900 dark:text-white truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                        <svg class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" :class="isRtl ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+
+                                    {{-- Talent Avatars + Names --}}
+                                    <div v-if="event.talent && event.talent.length > 0" class="flex items-center gap-2">
+                                        <div class="flex items-center -space-x-2" :class="isRtl ? 'space-x-reverse' : ''">
+                                            <template v-for="(t, tIndex) in event.talent.slice(0, 5)" :key="'ta-' + tIndex">
+                                                <img v-if="t.profile_image" :src="t.profile_image" class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-gray-700" :alt="t.name" :title="t.name">
+                                                <div v-else class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-700 bg-gray-200 dark:bg-gray-600 flex items-center justify-center" :title="t.name">
+                                                    <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400" v-text="t.name.charAt(0).toUpperCase()"></span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        <span class="text-base text-gray-600 dark:text-gray-300 truncate" v-text="event.talent.map(t => t.name).join(', ')"></span>
+                                        <svg class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" :class="isRtl ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+
+                                    {{-- Video Thumbnails --}}
+                                    <div v-if="event.videos && event.videos.length > 0" class="mt-3 flex gap-2 overflow-x-auto">
+                                        <div v-for="(vid, vidIdx) in event.videos" :key="'vid-' + vidIdx"
+                                             class="relative flex-shrink-0 w-28 h-20 rounded-lg overflow-hidden shadow-sm group/vid">
+                                            <img :src="vid.thumbnail_url" class="w-full h-full object-cover" alt="">
+                                            <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                                <svg class="w-8 h-8 text-white opacity-80 group-hover/vid:opacity-100" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M8 5v14l11-7z"/>
+                                                </svg>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                {{-- Description excerpt --}}
-                                <p v-if="event.description_excerpt" class="mt-3 hidden md:block text-sm text-gray-500 dark:text-gray-400 line-clamp-2" dir="auto" v-text="event.description_excerpt"></p>
+                                    {{-- Recent Comments --}}
+                                    <div v-if="event.recent_comments && event.recent_comments.length > 0" class="space-y-1.5">
+                                        <div v-for="(comment, cIdx) in event.recent_comments" :key="'c-' + cIdx"
+                                             class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                            <svg class="h-4 w-4 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.202 41.202 0 01-5.183.501.78.78 0 00-.528.224l-3.579 3.58A.75.75 0 016 17.25v-3.443a41.033 41.033 0 01-2.57-.33C2.993 13.244 2 11.986 2 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" clip-rule="evenodd" />
+                                            </svg>
+                                            <span>"<span v-text="comment.text"></span>" - <span class="font-medium" v-text="comment.author"></span></span>
+                                        </div>
+                                    </div>
 
-                                {{-- Edit button --}}
-                                <div v-if="event.can_edit" class="mt-3">
-                                    <a :href="event.edit_url"
-                                       class="inline-flex items-center px-4 py-1.5 text-sm font-medium rounded-md transition-colors duration-200 border"
-                                       style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
-                                       @mouseenter="$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'"
-                                       @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color='{{ $accentColor }}'"
-                                       @click.stop>
-                                        {{ __('messages.edit') }}
-                                    </a>
+                                    {{-- Mini Timeline for Parts --}}
+                                    <div v-if="event.parts && event.parts.length > 0">
+                                        <div class="relative" :class="isRtl ? 'pr-2' : 'pl-2'">
+                                            <div class="absolute top-1 bottom-1 w-0.5" :class="isRtl ? 'right-0' : 'left-0'" :style="'background-color: {{ $accentColor }}30'"></div>
+                                            <div class="space-y-2">
+                                                <div v-for="(part, partIndex) in event.parts.slice(0, 4)" :key="'p-' + partIndex" class="relative flex items-start gap-2" :class="isRtl ? 'flex-row-reverse' : ''">
+                                                    <div class="absolute top-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" :class="isRtl ? '-right-[3px]' : '-left-[3px]'" :style="'background-color: {{ $accentColor }}'"></div>
+                                                    <div :class="isRtl ? 'pr-3' : 'pl-3'">
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300" v-text="part.name"></span>
+                                                        <span v-if="part.start_time" class="text-xs ms-1 text-gray-400 dark:text-gray-500" v-text="part.start_time"></span>
+                                                    </div>
+                                                </div>
+                                                <div v-if="event.parts.length > 4" class="text-xs text-gray-400 dark:text-gray-500" :class="isRtl ? 'pr-3' : 'pl-3'">
+                                                    +<span v-text="event.parts.length - 4"></span> {{ __('messages.more') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- Description excerpt --}}
+                                    <p v-if="event.description_excerpt" class="hidden md:block text-base text-gray-500 dark:text-gray-400 line-clamp-2" dir="auto" v-text="event.description_excerpt"></p>
+
+                                    {{-- Action buttons row --}}
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <a v-if="event.can_edit" :href="event.edit_url"
+                                           class="inline-flex items-center px-5 py-2 text-base font-medium rounded-md transition-colors duration-200 border"
+                                           style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
+                                           @mouseenter="$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'"
+                                           @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color='{{ $accentColor }}'"
+                                           @click.stop>
+                                            {{ __('messages.edit') }}
+                                        </a>
+                                        <template v-if="isAuthenticated">
+                                            <button @click.stop="toggleVideoForm(event)"
+                                                    class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-colors"
+                                                    style="color: {{ $accentColor }}; border-color: {{ $accentColor }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                                                {{ __('messages.add_video') }}
+                                            </button>
+                                            <button @click.stop="toggleCommentForm(event)"
+                                                    class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-colors"
+                                                    style="color: {{ $accentColor }}; border-color: {{ $accentColor }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
+                                                {{ __('messages.add_comment') }}
+                                            </button>
+                                        </template>
+                                    </div>
+
+                                    {{-- Video form --}}
+                                    <form v-if="openVideoForm[event.uniqueKey]" @click.stop
+                                          method="POST" :action="event.submit_video_url">
+                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                        <div class="flex gap-2">
+                                            <select v-if="event.parts.length > 0" name="event_part_id"
+                                                    class="min-w-[10rem] text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
+                                                <option value="">{{ __('messages.general') }}</option>
+                                                <option v-for="part in event.parts" :key="part.id" :value="part.id" v-text="part.name"></option>
+                                            </select>
+                                            <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}"
+                                                   class="flex-1 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
+                                            <button type="submit" class="px-4 py-2 text-sm rounded-lg text-white"
+                                                    style="background-color: {{ $accentColor }}">{{ __('messages.submit') }}</button>
+                                        </div>
+                                    </form>
+
+                                    {{-- Comment form --}}
+                                    <form v-if="openCommentForm[event.uniqueKey]" @click.stop
+                                          method="POST" :action="event.submit_comment_url">
+                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                        <div class="flex gap-2">
+                                            <select v-if="event.parts.length > 0" name="event_part_id"
+                                                    class="min-w-[10rem] text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
+                                                <option value="">{{ __('messages.general') }}</option>
+                                                <option v-for="part in event.parts" :key="part.id" :value="part.id" v-text="part.name"></option>
+                                            </select>
+                                            <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000"
+                                                      class="flex-1 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
+                                            <button type="submit" class="px-4 py-2 text-sm rounded-lg text-white self-end"
+                                                    style="background-color: {{ $accentColor }}">{{ __('messages.submit') }}</button>
+                                        </div>
+                                    </form>
                                 </div>
-                            </div>
+                            </template>
                         </div>
                     </div>
                 </template>
@@ -672,69 +872,255 @@
                     <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ __('messages.past_events') }}</h2>
                     <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
                 </div>
-                <div class="space-y-6">
+                <div class="space-y-4">
                     <template v-for="event in flatPastEvents" :key="'past-' + event.uniqueKey">
                         <div @click="navigateToEvent(event, $event)" class="block cursor-pointer">
                             <div class="rounded-2xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white dark:bg-gray-700 opacity-75 hover:opacity-100">
-                                {{-- Hero Banner --}}
-                                <div v-if="getHeaderImage(event)" class="h-32 relative overflow-hidden">
-                                    <img :src="getHeaderImage(event)" class="w-full h-full object-cover" :alt="event.name">
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                </div>
-                                <div v-else class="h-16" style="background: linear-gradient(135deg, {{ $accentColor }}06 0%, {{ $accentColor }}12 100%)"></div>
+                                {{-- Side-by-side layout when flyer image exists --}}
+                                <template v-if="event.image_url">
+                                    <div class="flex flex-col md:flex-row" :class="isRtl ? 'md:flex-row-reverse' : ''">
+                                        {{-- Details Column --}}
+                                        <div class="md:flex-1 md:min-w-0 px-5 py-6 md:px-8 lg:px-16 md:py-8 flex flex-col gap-4">
+                                            {{-- Event Title --}}
+                                            <h3 class="font-bold text-xl md:text-2xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto" v-text="event.name"></h3>
 
-                                {{-- Content with optional flyer overlap --}}
-                                <div class="px-5 pb-5" :class="event.image_url ? '-mt-10' : 'pt-4'">
-                                    {{-- With flyer image --}}
-                                    <div v-if="event.image_url" class="flex gap-4 items-end mb-3">
-                                        <img :src="event.image_url" class="w-20 h-28 rounded-xl object-cover shadow-lg border-4 border-white dark:border-gray-700 flex-shrink-0" :alt="event.name">
-                                        <div class="pb-1 min-w-0">
-                                            <h3 class="font-bold text-lg leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto" v-text="event.name"></h3>
-                                            <div v-if="event.venue_name" class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                                <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-4 h-4 rounded-full object-cover flex-shrink-0 me-1.5" :alt="event.venue_name">
-                                                <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                            {{-- Date Badge --}}
+                                            <div v-if="event.occurrenceDate" class="flex items-center gap-4">
+                                                <div class="flex-shrink-0 w-14 h-14 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col items-center justify-center shadow-sm">
+                                                    <span class="text-[10px] font-bold uppercase tracking-wider leading-none pt-0.5" style="color: {{ $accentColor }}" v-text="getMonthAbbr(event.occurrenceDate)"></span>
+                                                    <span class="text-xl font-bold text-gray-900 dark:text-white leading-none" v-text="getDayNum(event.occurrenceDate)"></span>
+                                                </div>
+                                                <div class="flex flex-col">
+                                                    <span class="text-sm font-semibold text-gray-900 dark:text-white" v-text="formatDayName(event.occurrenceDate)"></span>
+                                                    <span class="text-sm text-gray-500 dark:text-gray-400" v-text="getEventTime(event)"></span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                    {{-- Without flyer image --}}
-                                    <div v-else>
-                                        <h3 class="font-bold text-lg leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto" v-text="event.name"></h3>
-                                        <div v-if="event.venue_name" class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                            <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-4 h-4 rounded-full object-cover flex-shrink-0 me-1.5" :alt="event.venue_name">
-                                            <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
-                                        </div>
-                                    </div>
 
-                                    {{-- Date badge --}}
-                                    <div v-if="event.occurrenceDate" class="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-lg" style="background-color: {{ $accentColor }}12">
-                                        <span class="text-sm font-bold" style="color: {{ $accentColor }}" v-text="formatDateShort(event.occurrenceDate)"></span>
-                                    </div>
-
-                                    {{-- Talent + time row --}}
-                                    <div class="mt-2 flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                                        <span v-text="getEventTime(event)"></span>
-                                        <span v-if="event.talent && event.talent.length > 0" class="truncate" v-text="event.talent.map(t => t.name).join(', ')"></span>
-                                    </div>
-
-                                    {{-- Video thumbnails --}}
-                                    <div v-if="event.videos && event.videos.length > 0" class="mt-3 flex gap-2 overflow-x-auto">
-                                        <div v-for="(vid, vidIdx) in event.videos" :key="'pvid-' + vidIdx"
-                                             class="relative flex-shrink-0 w-24 h-16 rounded-lg overflow-hidden shadow-sm group/vid">
-                                            <img :src="vid.thumbnail_url" class="w-full h-full object-cover" alt="">
-                                            <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                                <svg class="w-6 h-6 text-white opacity-80" viewBox="0 0 24 24" fill="currentColor">
-                                                    <path d="M8 5v14l11-7z"/>
+                                            {{-- Venue Badge --}}
+                                            <div v-if="event.venue_name" class="flex items-center gap-4">
+                                                <div class="flex-shrink-0 w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                                                    <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-10 h-10 rounded-lg object-cover" :alt="event.venue_name">
+                                                    <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
+                                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
+                                                    </svg>
+                                                </div>
+                                                <span class="text-sm font-semibold text-gray-900 dark:text-white truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                                <svg class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" :class="isRtl ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
                                                 </svg>
                                             </div>
+
+                                            {{-- Talent --}}
+                                            <div v-if="event.talent && event.talent.length > 0" class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                                                <span class="truncate" v-text="event.talent.map(t => t.name).join(', ')"></span>
+                                            </div>
+
+                                            {{-- Video thumbnails --}}
+                                            <div v-if="event.videos && event.videos.length > 0" class="flex gap-2 overflow-x-auto">
+                                                <div v-for="(vid, vidIdx) in event.videos" :key="'pvid-' + vidIdx"
+                                                     class="relative flex-shrink-0 w-24 h-16 rounded-lg overflow-hidden shadow-sm group/vid">
+                                                    <img :src="vid.thumbnail_url" class="w-full h-full object-cover" alt="">
+                                                    <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                                        <svg class="w-6 h-6 text-white opacity-80" viewBox="0 0 24 24" fill="currentColor">
+                                                            <path d="M8 5v14l11-7z"/>
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- Recent comments --}}
+                                            <div v-if="event.recent_comments && event.recent_comments.length > 0" class="space-y-1">
+                                                <div v-for="(comment, cIdx) in event.recent_comments" :key="'pc-' + cIdx"
+                                                     class="text-sm text-gray-400 dark:text-gray-500 truncate">
+                                                    "<span v-text="comment.text"></span>" - <span class="font-medium" v-text="comment.author"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {{-- Flyer Image Column --}}
+                                        <div class="md:w-[35%] md:flex-shrink-0">
+                                            <img :src="event.image_url" class="w-full h-full object-cover" :alt="event.name">
                                         </div>
                                     </div>
+                                </template>
 
-                                    {{-- Recent comments --}}
-                                    <div v-if="event.recent_comments && event.recent_comments.length > 0" class="mt-2 space-y-1">
-                                        <div v-for="(comment, cIdx) in event.recent_comments" :key="'pc-' + cIdx"
-                                             class="text-sm text-gray-400 dark:text-gray-500 truncate">
-                                            "<span v-text="comment.text"></span>" - <span class="font-medium" v-text="comment.author"></span>
+                                {{-- Stacked layout when no flyer image --}}
+                                <template v-else>
+                                    {{-- Hero Banner (only when no flyer) --}}
+                                    <div v-if="getHeaderImage(event)" class="h-32 relative overflow-hidden">
+                                        <img :src="getHeaderImage(event)" class="w-full h-full object-cover" :alt="event.name">
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                    </div>
+
+                                    {{-- Content --}}
+                                    <div class="px-5 py-6 md:px-8 md:py-8 flex flex-col gap-4">
+                                        {{-- Event Title --}}
+                                        <h3 class="font-bold text-xl md:text-2xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto" v-text="event.name"></h3>
+
+                                        {{-- Date Badge --}}
+                                        <div v-if="event.occurrenceDate" class="flex items-center gap-4">
+                                            <div class="flex-shrink-0 w-14 h-14 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col items-center justify-center shadow-sm">
+                                                <span class="text-[10px] font-bold uppercase tracking-wider leading-none pt-0.5" style="color: {{ $accentColor }}" v-text="getMonthAbbr(event.occurrenceDate)"></span>
+                                                <span class="text-xl font-bold text-gray-900 dark:text-white leading-none" v-text="getDayNum(event.occurrenceDate)"></span>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="text-sm font-semibold text-gray-900 dark:text-white" v-text="formatDayName(event.occurrenceDate)"></span>
+                                                <span class="text-sm text-gray-500 dark:text-gray-400" v-text="getEventTime(event)"></span>
+                                            </div>
                                         </div>
+
+                                        {{-- Venue Badge --}}
+                                        <div v-if="event.venue_name" class="flex items-center gap-4">
+                                            <div class="flex-shrink-0 w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                                                <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-10 h-10 rounded-lg object-cover" :alt="event.venue_name">
+                                                <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
+                                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
+                                                </svg>
+                                            </div>
+                                            <span class="text-sm font-semibold text-gray-900 dark:text-white truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                            <svg class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" :class="isRtl ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+
+                                        {{-- Talent --}}
+                                        <div v-if="event.talent && event.talent.length > 0" class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                                            <span class="truncate" v-text="event.talent.map(t => t.name).join(', ')"></span>
+                                        </div>
+
+                                        {{-- Video thumbnails --}}
+                                        <div v-if="event.videos && event.videos.length > 0" class="flex gap-2 overflow-x-auto">
+                                            <div v-for="(vid, vidIdx) in event.videos" :key="'pvid-' + vidIdx"
+                                                 class="relative flex-shrink-0 w-24 h-16 rounded-lg overflow-hidden shadow-sm group/vid">
+                                                <img :src="vid.thumbnail_url" class="w-full h-full object-cover" alt="">
+                                                <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                                    <svg class="w-6 h-6 text-white opacity-80" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M8 5v14l11-7z"/>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {{-- Recent comments --}}
+                                        <div v-if="event.recent_comments && event.recent_comments.length > 0" class="space-y-1">
+                                            <div v-for="(comment, cIdx) in event.recent_comments" :key="'pc-' + cIdx"
+                                                 class="text-sm text-gray-400 dark:text-gray-500 truncate">
+                                                "<span v-text="comment.text"></span>" - <span class="font-medium" v-text="comment.author"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                {{-- Load More Button --}}
+                <div v-if="hasMorePastEvents" class="mt-6 text-center">
+                    <button @click.stop="loadMorePastEvents()"
+                            :disabled="loadingPastEvents"
+                            class="inline-flex items-center px-6 py-2.5 text-sm font-semibold rounded-xl border-2 transition-colors duration-200"
+                            style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
+                            @mouseenter="if(!loadingPastEvents){$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'}"
+                            @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color='{{ $accentColor }}'">
+                        <svg v-if="loadingPastEvents" class="animate-spin -ms-1 me-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {{ __('messages.load_more') }}
+                    </button>
+                </div>
+            </div>
+
+            {{-- Empty State --}}
+            <div v-if="flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="py-10 text-center">
+                <div class="text-xl text-gray-500 dark:text-gray-400">
+                    {{ __('messages.no_scheduled_events') }}
+                </div>
+            </div>
+        </div>
+
+        {{-- List View (Mobile) --}}
+        <div v-show="currentView === 'list'" class="md:hidden {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+            {{-- Upcoming events grouped by date --}}
+            <div v-if="listViewUpcomingGroups.length > 0" class="space-y-6">
+                <template v-for="(group, groupIndex) in listViewUpcomingGroups" :key="'list-m-' + group.date">
+                    {{-- Date Header --}}
+                    <div class="sticky top-0 z-10 -mx-4 px-4 bg-white dark:bg-gray-800">
+                        <div class="px-4 pb-5 pt-3 flex items-center gap-4">
+                            <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                            <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></div>
+                            <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                        </div>
+                    </div>
+                    {{-- Compact cards --}}
+                    <div class="space-y-3">
+                        <template v-for="event in group.events" :key="'list-mob-' + event.uniqueKey">
+                            <div v-if="isEventVisible(event)" @click="navigateToEvent(event, $event)" class="block cursor-pointer">
+                                <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    <div class="flex">
+                                        <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
+                                            <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
+                                            <div v-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                                <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                                                </svg>
+                                                <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                            </div>
+                                            <div class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                                <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
+                                                </svg>
+                                                <span v-text="getEventTime(event)"></span>
+                                            </div>
+                                            <div v-if="event.can_edit" class="mt-auto pt-3">
+                                                <a :href="event.edit_url"
+                                                    class="inline-flex items-center px-4 py-1.5 text-sm font-medium bg-transparent border rounded-md transition-colors duration-200"
+                                                    style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
+                                                    @click.stop>
+                                                    {{ __('messages.edit') }}
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div v-if="event.image_url" class="flex-shrink-0 w-24 self-stretch">
+                                            <img :src="event.image_url" class="w-full h-full object-cover" :alt="event.name">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            {{-- Past Events Section --}}
+            <div v-if="flatPastEvents.length > 0" class="mt-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ __('messages.past_events') }}</h2>
+                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                </div>
+                <div class="space-y-3">
+                    <template v-for="event in flatPastEvents" :key="'list-mob-past-' + event.uniqueKey">
+                        <div @click="navigateToEvent(event, $event)" class="block cursor-pointer">
+                            <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-600 opacity-75 hover:opacity-100">
+                                <div class="flex">
+                                    <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
+                                        <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
+                                        <div v-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                            <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                                            </svg>
+                                            <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                        </div>
+                                        <div v-if="event.occurrenceDate" class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                            <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
+                                            </svg>
+                                            <span v-text="formatDateHeader(event.occurrenceDate) + ' ' + getEventTime(event)"></span>
+                                        </div>
+                                    </div>
+                                    <div v-if="event.image_url" class="flex-shrink-0 w-24 self-stretch">
+                                        <img :src="event.image_url" class="w-full h-full object-cover" :alt="event.name">
                                     </div>
                                 </div>
                             </div>
@@ -896,7 +1282,10 @@ const calendarApp = createApp({
             pastEvents: @json($pastEventsForVue ?? []),
             hasMorePastEvents: {{ isset($hasMorePastEvents) && $hasMorePastEvents ? 'true' : 'false' }},
             loadingPastEvents: false,
-            showPastEvents: false
+            showPastEvents: false,
+            isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
+            openVideoForm: {},
+            openCommentForm: {}
         }
     },
     computed: {
@@ -1182,11 +1571,26 @@ const calendarApp = createApp({
     methods: {
         toggleView(view) {
             this.currentView = view;
+            this.updatePanelWrapper(view);
             if (this.subdomain) {
                 try {
                     localStorage.setItem('es_view_' + this.subdomain, view);
                 } catch (e) {
                     // localStorage not available
+                }
+            }
+        },
+        updatePanelWrapper(view) {
+            const wrapper = document.getElementById('calendar-panel-wrapper');
+            if (wrapper) {
+                if (view === 'list') {
+                    wrapper.classList.add('calendar-panel-border-transparent');
+                    wrapper.classList.remove('calendar-panel-border');
+                    wrapper.style.padding = '0';
+                } else {
+                    wrapper.classList.remove('calendar-panel-border-transparent');
+                    wrapper.classList.add('calendar-panel-border');
+                    wrapper.style.padding = '';
                 }
             }
         },
@@ -1273,9 +1677,23 @@ const calendarApp = createApp({
 
             return url;
         },
+        toggleVideoForm(event) {
+            const key = event.uniqueKey;
+            this.openVideoForm = { ...this.openVideoForm, [key]: !this.openVideoForm[key] };
+            if (this.openVideoForm[key]) {
+                this.openCommentForm = { ...this.openCommentForm, [key]: false };
+            }
+        },
+        toggleCommentForm(event) {
+            const key = event.uniqueKey;
+            this.openCommentForm = { ...this.openCommentForm, [key]: !this.openCommentForm[key] };
+            if (this.openCommentForm[key]) {
+                this.openVideoForm = { ...this.openVideoForm, [key]: false };
+            }
+        },
         navigateToEvent(event, e) {
-            // Don't navigate if clicking on the edit link
-            if (e.target.closest('a')) return;
+            // Don't navigate if clicking on the edit link or a form/button
+            if (e.target.closest('a') || e.target.closest('form') || e.target.closest('button')) return;
 
             const url = this.getEventUrl(event);
             const openInNewTab = this.embed || this.route === 'admin';
@@ -1623,6 +2041,9 @@ const calendarApp = createApp({
                 // localStorage not available
             }
         }
+
+        // Update panel wrapper for initial view
+        this.updatePanelWrapper(this.currentView);
 
         // Initialize popup functionality
         this.initPopups();

@@ -9,9 +9,9 @@
     <section class="relative bg-gradient-to-b from-white via-gray-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-950 py-32 overflow-hidden">
         <!-- Flowing gradient shapes suggesting movement -->
         <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute top-0 -left-20 w-[500px] h-[800px] bg-gradient-to-br from-rose-500/20 via-pink-500/10 to-transparent rounded-full blur-3xl transform -rotate-12"></div>
-            <div class="absolute bottom-0 -right-20 w-[600px] h-[600px] bg-gradient-to-tl from-fuchsia-500/15 via-rose-500/10 to-transparent rounded-full blur-3xl"></div>
-            <div class="absolute top-1/3 right-1/4 w-[300px] h-[500px] bg-gradient-to-b from-pink-400/10 to-transparent rounded-full blur-2xl transform rotate-45"></div>
+            <div class="absolute top-0 -left-20 w-[500px] h-[800px] bg-gradient-to-br from-rose-500/20 via-cyan-500/10 to-transparent rounded-full blur-3xl transform -rotate-12"></div>
+            <div class="absolute bottom-0 -right-20 w-[600px] h-[600px] bg-gradient-to-tl from-sky-500/15 via-rose-500/10 to-transparent rounded-full blur-3xl"></div>
+            <div class="absolute top-1/3 right-1/4 w-[300px] h-[500px] bg-gradient-to-b from-cyan-400/10 to-transparent rounded-full blur-2xl transform rotate-45"></div>
         </div>
 
         <!-- Abstract flowing lines suggesting dance movement -->
@@ -20,7 +20,7 @@
                 <path d="M20,100 Q60,20 100,100 T180,100" stroke="currentColor" stroke-width="1" fill="none" opacity="0.5"/>
                 <path d="M20,120 Q70,40 110,120 T180,120" stroke="currentColor" stroke-width="1" fill="none" opacity="0.3"/>
             </svg>
-            <svg class="absolute bottom-32 right-20 w-48 h-48 text-pink-300" viewBox="0 0 200 200" fill="none">
+            <svg class="absolute bottom-32 right-20 w-48 h-48 text-cyan-300" viewBox="0 0 200 200" fill="none">
                 <path d="M100,20 Q180,60 100,100 T100,180" stroke="currentColor" stroke-width="1" fill="none" opacity="0.5"/>
             </svg>
         </div>
@@ -32,14 +32,14 @@
 
             <h1 class="text-5xl md:text-6xl lg:text-7xl font-light text-gray-900 dark:text-white mb-6 leading-tight tracking-tight">
                 From studio<br>
-                <span class="font-normal bg-gradient-to-r from-rose-300 via-pink-300 to-fuchsia-300 bg-clip-text text-transparent">to stage</span>
+                <span class="font-normal bg-gradient-to-r from-rose-300 via-cyan-300 to-sky-300 bg-clip-text text-transparent">to stage</span>
             </h1>
 
             <p class="text-xl md:text-2xl text-stone-500 dark:text-stone-400 max-w-2xl mx-auto mb-12 font-light">
                 One schedule for rehearsals, performances, and classes. One link for your audience to find you.
             </p>
 
-            <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-full hover:scale-105 transition-all shadow-lg shadow-rose-500/25 hover:shadow-rose-500/40">
+            <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-rose-500 to-cyan-600 rounded-full hover:scale-105 transition-all shadow-lg shadow-rose-500/25 hover:shadow-rose-500/40">
                 Create your schedule
                 <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -136,9 +136,9 @@
                                     <div class="text-stone-500 dark:text-stone-500 text-xs">Historic Opera House</div>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-pink-500/10 to-transparent border-l-2 border-pink-400">
+                            <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-cyan-500/10 to-transparent border-l-2 border-cyan-400">
                                 <div class="text-center w-12">
-                                    <div class="text-pink-700 dark:text-pink-300 text-xs">MAR</div>
+                                    <div class="text-cyan-700 dark:text-cyan-300 text-xs">MAR</div>
                                     <div class="text-gray-900 dark:text-white font-medium">14-16</div>
                                 </div>
                                 <div>
@@ -146,9 +146,9 @@
                                     <div class="text-stone-500 dark:text-stone-500 text-xs">Black Box Studio</div>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-fuchsia-500/10 to-transparent border-l-2 border-fuchsia-400">
+                            <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-sky-500/10 to-transparent border-l-2 border-sky-400">
                                 <div class="text-center w-12">
-                                    <div class="text-fuchsia-700 dark:text-fuchsia-300 text-xs">MAY</div>
+                                    <div class="text-sky-700 dark:text-sky-300 text-xs">MAY</div>
                                     <div class="text-gray-900 dark:text-white font-medium">30-31</div>
                                 </div>
                                 <div>
@@ -174,7 +174,7 @@
                         <div class="space-y-2">
                             <div class="flex items-center justify-between p-3 rounded-lg bg-gray-100 dark:bg-stone-800/50">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-2 h-2 rounded-full bg-pink-400"></div>
+                                    <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
                                     <span class="text-gray-900 dark:text-white text-sm">Ballet Fundamentals</span>
                                 </div>
                                 <div class="text-right">
@@ -184,7 +184,7 @@
                             </div>
                             <div class="flex items-center justify-between p-3 rounded-lg bg-gray-100 dark:bg-stone-800/50">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-2 h-2 rounded-full bg-violet-400"></div>
+                                    <div class="w-2 h-2 rounded-full bg-blue-400"></div>
                                     <span class="text-gray-900 dark:text-white text-sm">Contemporary Technique</span>
                                 </div>
                                 <div class="text-right">
@@ -205,7 +205,7 @@
                         </div>
                         <div class="mt-4 pt-4 border-t border-gray-200 dark:border-stone-700">
                             <div class="text-stone-500 dark:text-stone-400 text-xs uppercase tracking-wider mb-3">Upcoming Workshops</div>
-                            <div class="p-3 rounded-lg bg-gradient-to-r from-rose-500/10 to-fuchsia-500/10 border border-rose-500/20">
+                            <div class="p-3 rounded-lg bg-gradient-to-r from-rose-500/10 to-sky-500/10 border border-rose-500/20">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <div class="text-gray-900 dark:text-white text-sm font-medium">Partnering Intensive</div>
@@ -218,12 +218,12 @@
                     </div>
                 </div>
                 <div class="order-1 lg:order-2">
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/10 dark:text-fuchsia-300 text-sm font-medium mb-6 border border-fuchsia-500/20">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300 text-sm font-medium mb-6 border border-sky-500/20">
                         Classes & Workshops
                     </div>
                     <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
                         Teach and perform<br>
-                        <span class="text-fuchsia-300">from one schedule</span>
+                        <span class="text-sky-300">from one schedule</span>
                     </h2>
                     <p class="text-lg text-stone-500 dark:text-stone-400 mb-8 leading-relaxed">
                         Most dance groups teach alongside performing. List your weekly classes, drop-ins, and intensive workshops. Sell registrations with zero platform fees - you keep everything.
@@ -284,22 +284,22 @@
     <section class="bg-gray-50 dark:bg-[#0f0f14] py-24 border-t border-gray-200 dark:border-stone-800/50">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/features/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-gray-100 dark:from-stone-900 to-gray-50 dark:to-stone-800 rounded-3xl border border-gray-200 dark:border-stone-700 p-8 lg:p-12 hover:border-indigo-500/30 transition-all duration-300">
+                <div class="bg-gradient-to-br from-gray-100 dark:from-stone-900 to-gray-50 dark:to-stone-800 rounded-3xl border border-gray-200 dark:border-stone-700 p-8 lg:p-12 hover:border-sky-500/30 transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 text-sm font-medium mb-4 border border-indigo-500/20">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300 text-sm font-medium mb-4 border border-sky-500/20">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
                                 Livestream
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-light text-gray-900 dark:text-white mb-3 group-hover:text-indigo-200 transition-colors">
+                            <h3 class="text-2xl lg:text-3xl font-light text-gray-900 dark:text-white mb-3 group-hover:text-sky-200 transition-colors">
                                 Perform for audiences anywhere
                             </h3>
                             <p class="text-stone-500 dark:text-stone-400 text-lg mb-4">
                                 Livestream your showcase. Host a virtual masterclass. Reach audiences who can't make it to the theater - and sell tickets to viewers worldwide.
                             </p>
-                            <span class="inline-flex items-center text-indigo-400 text-sm font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center text-sky-400 text-sm font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn about online events
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -308,7 +308,7 @@
                         </div>
                         <div class="flex-shrink-0">
                             <div class="w-48 h-32 bg-gray-50 dark:bg-stone-950 rounded-xl border border-gray-200 dark:border-stone-700 flex items-center justify-center relative overflow-hidden">
-                                <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-fuchsia-500/10"></div>
+                                <div class="absolute inset-0 bg-gradient-to-br from-sky-500/10 to-sky-500/10"></div>
                                 <div class="relative text-center">
                                     <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center mx-auto mb-2 animate-pulse">
                                         <div class="w-2 h-2 rounded-full bg-white"></div>
@@ -329,27 +329,27 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300 text-sm font-medium mb-6 border border-violet-500/20">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300 text-sm font-medium mb-6 border border-blue-500/20">
                         Company Management
                     </div>
                     <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
                         Coordinate your<br>
-                        <span class="text-violet-300">entire company</span>
+                        <span class="text-blue-300">entire company</span>
                     </h2>
                     <p class="text-lg text-stone-500 dark:text-stone-400 mb-8 leading-relaxed">
                         Invite your artistic director, choreographers, rehearsal directors, and company managers. Everyone can update the schedule. Changes sync everywhere instantly.
                     </p>
                     <div class="space-y-3">
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-stone-800/50 border border-gray-200 dark:border-stone-700">
-                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium">AD</div>
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-sm font-medium">AD</div>
                             <div class="flex-1">
                                 <div class="text-gray-900 dark:text-white text-sm">Sarah Chen</div>
                                 <div class="text-stone-500 dark:text-stone-500 text-xs">Artistic Director</div>
                             </div>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-xs">Owner</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-xs">Owner</span>
                         </div>
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-stone-800/30 border border-gray-200/50 dark:border-stone-700/50">
-                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white text-sm font-medium">MR</div>
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-500 to-cyan-600 flex items-center justify-center text-white text-sm font-medium">MR</div>
                             <div class="flex-1">
                                 <div class="text-stone-600 dark:text-stone-300 text-sm">Marcus Rivera</div>
                                 <div class="text-stone-500 dark:text-stone-500 text-xs">Choreographer</div>
@@ -371,7 +371,7 @@
                         <div class="text-stone-500 dark:text-stone-400 text-xs uppercase tracking-wider mb-4">Recent Activity</div>
                         <div class="space-y-4">
                             <div class="flex gap-3">
-                                <div class="w-1 rounded-full bg-violet-500"></div>
+                                <div class="w-1 rounded-full bg-blue-500"></div>
                                 <div>
                                     <div class="text-gray-900 dark:text-white text-sm">Sarah added "Spring Gala"</div>
                                     <div class="text-stone-500 dark:text-stone-500 text-xs">2 hours ago</div>
@@ -522,17 +522,17 @@
                     </ul>
                 </div>
                 <div class="flex justify-center gap-4">
-                    <div class="w-36 h-36 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl border border-rose-200 p-3 flex flex-col items-center justify-center text-center shadow-lg transform rotate-[-4deg]">
+                    <div class="w-36 h-36 bg-gradient-to-br from-rose-100 to-cyan-100 rounded-xl border border-rose-200 p-3 flex flex-col items-center justify-center text-center shadow-lg transform rotate-[-4deg]">
                         <div class="text-[10px] text-rose-600 uppercase tracking-wider mb-1">Spring Gala</div>
                         <div class="text-stone-800 text-sm font-semibold">City Dance Co.</div>
                         <div class="text-stone-500 text-[10px] mt-1">May 30 • 7:30pm</div>
                         <div class="text-rose-600 text-[10px] font-medium mt-2">Tickets Available</div>
                     </div>
-                    <div class="w-24 h-40 bg-gradient-to-br from-fuchsia-100 to-purple-100 rounded-xl border border-fuchsia-200 p-2 flex flex-col items-center justify-center text-center shadow-lg transform rotate-[4deg] mt-8">
-                        <div class="text-[8px] text-fuchsia-600 uppercase tracking-wider mb-1">Story</div>
+                    <div class="w-24 h-40 bg-gradient-to-br from-sky-100 to-blue-100 rounded-xl border border-sky-200 p-2 flex flex-col items-center justify-center text-center shadow-lg transform rotate-[4deg] mt-8">
+                        <div class="text-[8px] text-sky-600 uppercase tracking-wider mb-1">Story</div>
                         <div class="text-stone-800 text-xs font-semibold">Tonight!</div>
                         <div class="text-stone-500 text-[8px] mt-1">Nutcracker</div>
-                        <div class="text-fuchsia-600 text-[8px] mt-2">Swipe up</div>
+                        <div class="text-sky-600 text-[8px] mt-2">Swipe up</div>
                     </div>
                 </div>
             </div>
@@ -550,7 +550,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="text-center">
-                    <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-pink-600 text-white text-xl font-medium rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-rose-500/25">
+                    <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-cyan-600 text-white text-xl font-medium rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-rose-500/25">
                         1
                     </div>
                     <h3 class="text-lg font-medium text-stone-900 dark:text-white mb-2">Add your season</h3>
@@ -560,7 +560,7 @@
                 </div>
 
                 <div class="text-center">
-                    <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-pink-600 text-white text-xl font-medium rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-rose-500/25">
+                    <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-cyan-600 text-white text-xl font-medium rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-rose-500/25">
                         2
                     </div>
                     <h3 class="text-lg font-medium text-stone-900 dark:text-white mb-2">Share your link</h3>
@@ -570,7 +570,7 @@
                 </div>
 
                 <div class="text-center">
-                    <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-pink-600 text-white text-xl font-medium rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-rose-500/25">
+                    <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-cyan-600 text-white text-xl font-medium rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-rose-500/25">
                         3
                     </div>
                     <h3 class="text-lg font-medium text-stone-900 dark:text-white mb-2">Fill your seats</h3>
@@ -587,7 +587,7 @@
         <!-- Flowing gradient background -->
         <div class="absolute inset-0 overflow-hidden">
             <div class="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-rose-500/15 to-transparent rounded-full blur-3xl"></div>
-            <div class="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-gradient-to-tl from-fuchsia-500/15 to-transparent rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-gradient-to-tl from-sky-500/15 to-transparent rounded-full blur-3xl"></div>
         </div>
 
         <div class="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -595,14 +595,14 @@
 
             <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
                 Let audiences find<br>
-                <span class="bg-gradient-to-r from-rose-300 via-pink-300 to-fuchsia-300 bg-clip-text text-transparent">your next performance</span>
+                <span class="bg-gradient-to-r from-rose-300 via-cyan-300 to-sky-300 bg-clip-text text-transparent">your next performance</span>
             </h2>
 
             <p class="text-lg text-stone-500 dark:text-stone-400 mb-10 max-w-xl mx-auto">
                 Join dance companies, studios, and troupes who've simplified how they share their schedule.
             </p>
 
-            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-full hover:scale-105 transition-all shadow-lg shadow-rose-500/25 hover:shadow-rose-500/40">
+            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-rose-500 to-cyan-600 rounded-full hover:scale-105 transition-all shadow-lg shadow-rose-500/25 hover:shadow-rose-500/40">
                 Create Your Schedule
                 <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

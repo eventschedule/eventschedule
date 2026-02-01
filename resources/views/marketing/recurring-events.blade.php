@@ -313,7 +313,7 @@
 
                 <!-- Next feature -->
                 <a href="{{ marketing_url('/features/calendar-sync') }}" class="group block">
-                    <div class="h-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 rounded-3xl border border-blue-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                    <div class="h-full bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-3xl border border-blue-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                         <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Calendar Sync</h3>
                         <p class="text-gray-500 dark:text-white/80 text-lg mb-4">Two-way sync with Google Calendar. Changes flow in both directions automatically.</p>
                         <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
