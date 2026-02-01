@@ -149,7 +149,7 @@
 <div>
 
 @if (! request()->graphic)
-<header class="py-4 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}"
+<header class="pt-4 pb-4 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}"
         :class="currentView === 'list' ? 'bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm px-5 md:px-8 lg:px-16 mb-4' : ''">
     {{-- Main container: Stacks content on mobile, aligns in a row on desktop. --}}
     <div class="flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-4">
@@ -533,7 +533,7 @@
             <div v-if="flatUpcomingEvents.length" class="space-y-4">
                 <template v-for="event in flatUpcomingEvents" :key="'list-' + event.uniqueKey">
                     <div @click="navigateToEvent(event, $event)" class="block cursor-pointer">
-                        <div class="rounded-2xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white dark:bg-gray-700">
+                        <div class="rounded-2xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white dark:bg-gray-800">
                             {{-- Side-by-side layout when flyer image exists --}}
                             <template v-if="event.image_url">
                                 <div class="flex flex-col md:flex-row" :class="isRtl ? 'md:flex-row-reverse' : ''">
@@ -890,7 +890,7 @@
                 <div class="space-y-4">
                     <template v-for="event in flatPastEvents" :key="'past-' + event.uniqueKey">
                         <div @click="navigateToEvent(event, $event)" class="block cursor-pointer">
-                            <div class="rounded-2xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white dark:bg-gray-700 opacity-75 hover:opacity-100">
+                            <div class="rounded-2xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white dark:bg-gray-800 opacity-75 hover:opacity-100">
                                 {{-- Side-by-side layout when flyer image exists --}}
                                 <template v-if="event.image_url">
                                     <div class="flex flex-col md:flex-row" :class="isRtl ? 'md:flex-row-reverse' : ''">
@@ -1071,7 +1071,7 @@
                     <div class="space-y-3">
                         <template v-for="event in group.events" :key="'list-mob-' + event.uniqueKey">
                             <div v-if="isEventVisible(event)" @click="navigateToEvent(event, $event)" class="block cursor-pointer">
-                                <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-600">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <div class="flex">
                                         <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
                                             <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
@@ -1117,7 +1117,7 @@
                 <div class="space-y-3">
                     <template v-for="event in flatPastEvents" :key="'list-mob-past-' + event.uniqueKey">
                         <div @click="navigateToEvent(event, $event)" class="block cursor-pointer">
-                            <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-600 opacity-75 hover:opacity-100">
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 opacity-75 hover:opacity-100">
                                 <div class="flex">
                                     <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
                                         <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
@@ -1601,11 +1601,15 @@ const calendarApp = createApp({
                 if (view === 'list') {
                     wrapper.classList.add('calendar-panel-border-transparent');
                     wrapper.classList.remove('calendar-panel-border');
-                    wrapper.style.padding = '0';
+                    wrapper.style.paddingLeft = '0';
+                    wrapper.style.paddingRight = '0';
+                    wrapper.style.paddingBottom = '0';
                 } else {
                     wrapper.classList.remove('calendar-panel-border-transparent');
                     wrapper.classList.add('calendar-panel-border');
-                    wrapper.style.padding = '';
+                    wrapper.style.paddingLeft = '';
+                    wrapper.style.paddingRight = '';
+                    wrapper.style.paddingBottom = '';
                 }
             }
         },
