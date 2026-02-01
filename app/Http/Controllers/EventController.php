@@ -8,6 +8,8 @@ use App\Jobs\SendQueuedEmail;
 use App\Mail\EventAccepted;
 use App\Mail\EventDeclined;
 use App\Models\Event;
+use App\Models\EventComment;
+use App\Models\EventVideo;
 use App\Models\Role;
 use App\Models\Ticket;
 use App\Models\User;
@@ -460,6 +462,11 @@ class EventController extends Controller
         $currencies = file_get_contents(base_path('storage/currencies.json'));
         $currencies = json_decode($currencies);
 
+        $pendingVideos = $event->exists ? $event->pendingVideos()->with(['eventPart', 'user'])->get() : collect();
+        $approvedVideos = $event->exists ? $event->approvedVideos()->with(['eventPart', 'user'])->get() : collect();
+        $pendingComments = $event->exists ? $event->pendingComments()->with(['eventPart', 'user'])->get() : collect();
+        $approvedComments = $event->exists ? $event->approvedComments()->with(['eventPart', 'user'])->get() : collect();
+
         return view('event/edit', [
             'role' => $role,
             'effectiveRole' => $effectiveRole,
@@ -474,6 +481,10 @@ class EventController extends Controller
             'members' => $members,
             'currencies' => $currencies,
             'event_categories' => get_translated_categories(),
+            'pendingVideos' => $pendingVideos,
+            'approvedVideos' => $approvedVideos,
+            'pendingComments' => $pendingComments,
+            'approvedComments' => $approvedComments,
         ]);
     }
 
@@ -1137,5 +1148,144 @@ class EventController extends Controller
         }
 
         return redirect($redirectUrl);
+    }
+
+    public function submitVideo(Request $request, $subdomain, $event_hash)
+    {
+        $event_id = UrlUtils::decodeId($event_hash);
+        $event = Event::with('parts')->findOrFail($event_id);
+
+        $request->validate([
+            'youtube_url' => ['required', 'string', 'url', 'max:500'],
+            'event_part_id' => ['nullable', 'integer'],
+        ]);
+
+        $youtubeUrl = trim($request->input('youtube_url'));
+        $embedUrl = UrlUtils::getYouTubeEmbed($youtubeUrl);
+
+        if (! $embedUrl) {
+            return redirect()->back()->with('error', __('messages.invalid_youtube_url'));
+        }
+
+        $eventPartId = $request->input('event_part_id');
+        if ($eventPartId) {
+            $part = $event->parts->firstWhere('id', $eventPartId);
+            if (! $part) {
+                return redirect()->back()->with('error', __('messages.not_authorized'));
+            }
+        }
+
+        // Check for duplicate
+        $query = EventVideo::where('event_id', $event->id)
+            ->where('youtube_url', $youtubeUrl);
+        if ($eventPartId) {
+            $query->where('event_part_id', $eventPartId);
+        } else {
+            $query->whereNull('event_part_id');
+        }
+        $exists = $query->exists();
+
+        if ($exists) {
+            return redirect()->back()->with('error', __('messages.video_already_submitted'));
+        }
+
+        EventVideo::create([
+            'event_id' => $event->id,
+            'event_part_id' => $eventPartId ?: null,
+            'user_id' => $request->user()->id,
+            'youtube_url' => $youtubeUrl,
+            'is_approved' => false,
+        ]);
+
+        return redirect()->back()->with('message', __('messages.video_submitted'));
+    }
+
+    public function submitComment(Request $request, $subdomain, $event_hash)
+    {
+        $event_id = UrlUtils::decodeId($event_hash);
+        $event = Event::with('parts')->findOrFail($event_id);
+
+        $request->validate([
+            'comment' => ['required', 'string', 'max:1000'],
+            'event_part_id' => ['nullable', 'integer'],
+        ]);
+
+        $comment = strip_tags(trim($request->input('comment')));
+
+        $eventPartId = $request->input('event_part_id');
+        if ($eventPartId) {
+            $part = $event->parts->firstWhere('id', $eventPartId);
+            if (! $part) {
+                return redirect()->back()->with('error', __('messages.not_authorized'));
+            }
+        }
+
+        EventComment::create([
+            'event_id' => $event->id,
+            'event_part_id' => $eventPartId ?: null,
+            'user_id' => $request->user()->id,
+            'comment' => $comment,
+            'is_approved' => false,
+        ]);
+
+        return redirect()->back()->with('message', __('messages.comment_submitted'));
+    }
+
+    public function approveVideo(Request $request, $subdomain, $hash)
+    {
+        $id = UrlUtils::decodeId($hash);
+        $video = EventVideo::with('event')->findOrFail($id);
+
+        if (! $request->user()->canEditEvent($video->event)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $video->is_approved = true;
+        $video->save();
+
+        return redirect()->back()->with('message', __('messages.video_approved'));
+    }
+
+    public function rejectVideo(Request $request, $subdomain, $hash)
+    {
+        $id = UrlUtils::decodeId($hash);
+        $video = EventVideo::with('event')->findOrFail($id);
+
+        if (! $request->user()->canEditEvent($video->event)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $video->delete();
+
+        return redirect()->back()->with('message', __('messages.video_rejected'));
+    }
+
+    public function approveComment(Request $request, $subdomain, $hash)
+    {
+        $id = UrlUtils::decodeId($hash);
+        $comment = EventComment::with('event')->findOrFail($id);
+
+        if (! $request->user()->canEditEvent($comment->event)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $comment->is_approved = true;
+        $comment->save();
+
+        return redirect()->back()->with('message', __('messages.comment_approved'));
+    }
+
+    public function rejectComment(Request $request, $subdomain, $hash)
+    {
+        $id = UrlUtils::decodeId($hash);
+        $comment = EventComment::with('event')->findOrFail($id);
+
+        if (! $request->user()->canEditEvent($comment->event)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $comment->delete();
+
+        return redirect()->back()->with('message', __('messages.comment_rejected'));
     }
 }
