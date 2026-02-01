@@ -35,24 +35,30 @@
                             </div>
                         </div>
 
-                        <!-- Block Palette -->
+                        <!-- Blocks section -->
                         <div>
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 px-5 py-4">{{ t.add_block }}</h3>
-                            <div class="px-5 pb-5">
-                                <div ref="blockPalette" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                    <div v-for="bt in blockTypes" :key="bt.type"
-                                        class="palette-item border border-gray-200 dark:border-gray-600 rounded-lg p-2 text-center cursor-grab hover:border-[#4E81FA] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors select-none"
-                                        :data-block-type="bt.type">
-                                        <div class="text-lg mb-1">{{ bt.icon }}</div>
-                                        <div class="text-xs text-gray-700 dark:text-gray-300">{{ bt.label }}</div>
+                            <div class="flex items-center justify-between px-5 py-4">
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                    {{ t.blocks }} ({{ blocks.length }})
+                                </h3>
+                                <button type="button" @click="toggleBlockPalette()"
+                                    class="text-sm text-[#4E81FA] hover:text-blue-700 font-medium">
+                                    {{ showBlockPalette ? t.done : t.add_block }}
+                                </button>
+                            </div>
+                            <div :class="showBlockPalette ? 'grid grid-cols-2 gap-4' : ''">
+                                <!-- Left: Block palette (only when visible) -->
+                                <div v-show="showBlockPalette" class="px-4 pb-4">
+                                    <div ref="blockPalette" class="grid grid-cols-2 gap-2">
+                                        <div v-for="bt in blockTypes" :key="bt.type"
+                                            class="palette-item border border-gray-200 dark:border-gray-600 rounded-lg p-2 text-center cursor-grab hover:border-[#4E81FA] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors select-none"
+                                            :data-block-type="bt.type">
+                                            <div class="text-lg mb-1">{{ bt.icon }}</div>
+                                            <div class="text-xs text-gray-700 dark:text-gray-300">{{ bt.label }}</div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Block Canvas with inline settings -->
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 px-5 py-4">{{ t.blocks }} ({{ blocks.length }})</h3>
+                                <!-- Right: Block canvas (always visible) -->
                             <div ref="blockCanvas" class="px-4 pb-4 min-h-[100px] space-y-2">
                                 <div v-for="block in blocks" :key="block.id"
                                     class="block-item group relative border rounded-lg transition-colors"
@@ -60,14 +66,14 @@
                                     :class="selectedBlockId === block.id ? 'border-[#4E81FA] bg-blue-50 dark:bg-blue-900/20 ring-2 ring-[#4E81FA]' : 'border-gray-200 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-400'">
 
                                     <!-- Block header: drag handle + label + actions -->
-                                    <div class="flex items-center justify-between px-3 py-2 cursor-pointer" @click="selectBlock(block.id)">
+                                    <div class="flex items-center justify-between px-3 py-2 cursor-pointer" @click="!showBlockPalette && selectBlock(block.id)">
                                         <div class="flex items-center gap-2">
                                             <span class="cursor-grab text-gray-400 drag-handle">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
                                             </span>
                                             <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ blockLabel(block.type) }}</span>
                                         </div>
-                                        <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div v-show="!showBlockPalette" class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button type="button" @click.stop="duplicateBlock(block.id)" class="p-1 text-gray-400 hover:text-[#4E81FA]" :title="t.duplicate_block">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                             </button>
@@ -78,7 +84,7 @@
                                     </div>
 
                                     <!-- Compact snippet: shown when NOT selected -->
-                                    <div v-show="selectedBlockId !== block.id" class="px-3 pb-2 text-sm text-gray-600 dark:text-gray-300 truncate">
+                                    <div v-show="selectedBlockId !== block.id && !showBlockPalette" class="px-3 pb-2 text-sm text-gray-600 dark:text-gray-300 truncate">
                                         <span v-if="block.type === 'heading'">{{ block.data.text || t.heading_text + '...' }}</span>
                                         <span v-else-if="block.type === 'text'">{{ (block.data.content || t.content + '...').substring(0, 80) }}</span>
                                         <span v-else-if="block.type === 'events'">{{ block.data.useAllEvents ? t.all_upcoming_events : (block.data.eventIds ? block.data.eventIds.length + ' ' + t.events : t.events) }}</span>
@@ -92,7 +98,7 @@
                                     </div>
 
                                     <!-- Inline settings: shown when selected -->
-                                    <div v-show="selectedBlockId === block.id" class="px-3 pb-3 border-t border-gray-100 dark:border-gray-700 mt-1 pt-3">
+                                    <div v-show="selectedBlockId === block.id && !showBlockPalette" class="px-3 pb-3 border-t border-gray-100 dark:border-gray-700 mt-1 pt-3">
 
                                         <!-- Heading block settings -->
                                         <div v-if="block.type === 'heading'" class="space-y-3">
@@ -307,6 +313,7 @@
                                     <p class="text-sm">{{ t.drag_blocks_here }}</p>
                                 </div>
                             </div>
+                            </div>
                         </div>
 
                     </div>
@@ -513,17 +520,21 @@
                 <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden">
                     <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                         <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ t.preview }}</h3>
-                        <span v-show="previewLoading" class="text-xs text-gray-400 flex items-center gap-1">
-                            <svg class="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                        </span>
                     </div>
-                    <iframe ref="livePreviewFrame" class="w-full border-0 bg-white"
-                            style="height: calc(100vh - 10rem); min-height: 500px;"
-                            srcdoc="<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;color:#999;font-family:sans-serif'>Loading preview...</body></html>">
-                    </iframe>
+                    <div class="relative">
+                        <div v-show="previewLoading" class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 flex items-center justify-center z-10">
+                            <div class="flex flex-col items-center gap-2">
+                                <svg class="animate-spin h-6 w-6 text-[#4E81FA]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <iframe ref="livePreviewFrame" class="w-full border-0 bg-white"
+                                style="height: calc(100vh - 10rem); min-height: 500px;"
+                                srcdoc="<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;color:#999;font-family:sans-serif'>Loading preview...</body></html>">
+                        </iframe>
+                    </div>
                 </div>
             </div>
         </div>
@@ -612,6 +623,7 @@ const template = ref(props.initialTemplate);
 const subject = ref(props.initialSubject);
 const styleSettings = reactive({ ...props.initialStyleSettings });
 const selectedSegmentIds = ref([...props.initialSegmentIds]);
+const showBlockPalette = ref(false);
 const showPreview = ref(false);
 const showTestSend = ref(false);
 const showSchedule = ref(false);
@@ -716,6 +728,15 @@ function generateId() {
 function blockLabel(type) {
     const bt = blockTypes.find(b => b.type === type);
     return bt ? bt.label : type;
+}
+
+function toggleBlockPalette() {
+    showBlockPalette.value = !showBlockPalette.value;
+    if (showBlockPalette.value) {
+        destroyAllEasyMDE();
+        selectedBlockId.value = null;
+        nextTick(() => initSortable());
+    }
 }
 
 function selectBlock(blockId) {
@@ -907,7 +928,7 @@ function initSortable() {
                     };
                     evt.item.remove();
                     blocks.value.splice(evt.newIndex, 0, newBlock);
-                    selectedBlockId.value = newBlock.id;
+                    showBlockPalette.value = false;
                 }
             },
             onEnd(evt) {
