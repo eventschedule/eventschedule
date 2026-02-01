@@ -81,7 +81,7 @@
                         </div>
                     </div>
                     <div class="flex gap-2 items-start">
-                        <div class="w-6 h-6 rounded-full bg-pink-500/30 flex-shrink-0"></div>
+                        <div class="w-6 h-6 rounded-full bg-cyan-500/30 flex-shrink-0"></div>
                         <div class="bg-gray-200 dark:bg-white/10 rounded-xl px-3 py-2">
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Where are you guys today??</span>
                         </div>
@@ -93,7 +93,7 @@
                         </div>
                     </div>
                     <div class="flex gap-2 items-start">
-                        <div class="w-6 h-6 rounded-full bg-purple-500/30 flex-shrink-0"></div>
+                        <div class="w-6 h-6 rounded-full bg-blue-500/30 flex-shrink-0"></div>
                         <div class="bg-gray-200 dark:bg-white/10 rounded-xl px-3 py-2">
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Where will you be tomorrow?</span>
                         </div>
@@ -355,8 +355,8 @@
                 </div>
 
                 <!-- Promo Graphics -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-100 to-pink-100 dark:from-fuchsia-900 dark:to-pink-900 border border-fuchsia-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/20 dark:text-fuchsia-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900 border border-sky-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -366,15 +366,15 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Auto-generate Instagram-ready graphics with your location. One click to download and post.</p>
 
                     <div class="flex justify-center">
-                        <div class="relative w-32 h-32 bg-gradient-to-br from-fuchsia-500/30 to-pink-500/30 rounded-xl border border-fuchsia-400/30 p-2">
+                        <div class="relative w-32 h-32 bg-gradient-to-br from-sky-500/30 to-cyan-500/30 rounded-xl border border-sky-400/30 p-2">
                             <div class="w-full h-full bg-gradient-to-br from-orange-600/40 to-amber-600/40 rounded-lg flex flex-col items-center justify-center">
                                 <svg class="w-8 h-8 text-white mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 </svg>
                                 <div class="text-white text-xs font-semibold">FIND US TODAY</div>
-                                <div class="text-fuchsia-300 text-[10px] mt-0.5">Downtown Food Park</div>
+                                <div class="text-sky-300 text-[10px] mt-0.5">Downtown Food Park</div>
                             </div>
-                            <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-fuchsia-500 rounded-full flex items-center justify-center shadow-lg">
+                            <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center shadow-lg">
                                 <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                 </svg>
@@ -495,7 +495,7 @@
                     blog-slug="for-popup-kitchens"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                         </svg>
                     </x-slot:icon>

@@ -69,6 +69,7 @@
         .marquee-container:hover .animate-marquee {
             animation-play-state: paused;
         }
+
     </style>
 
     <x-slot name="structuredData">
@@ -106,8 +107,8 @@
     <section class="relative min-h-screen flex items-center overflow-hidden bg-white dark:bg-[#0a0a0f] noise">
         <!-- Animated gradient orbs -->
         <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-violet-600/30 to-indigo-600/30 rounded-full blur-[100px] animate-pulse-slow"></div>
-            <div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-gradient-to-r from-fuchsia-600/20 to-pink-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-blue-600/30 to-blue-500/30 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-gradient-to-r from-sky-600/20 to-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-blue-600/10 to-cyan-600/10 rounded-full blur-[120px]"></div>
         </div>
 
@@ -140,7 +141,7 @@
 
                     <!-- CTA Buttons -->
                     <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-reveal delay-300">
-                        <a href="{{ route('sign_up') }}" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl overflow-hidden transition-all hover:scale-105 hover:shadow-2xl hover:shadow-violet-500/25">
+                        <a href="{{ route('sign_up') }}" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl overflow-hidden transition-all hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25">
                             <span class="relative z-10 flex items-center gap-2">
                                 Start for free
                                 <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -184,19 +185,19 @@
             @for($i = 0; $i < 2; $i++)
             <span class="mx-8 text-2xl font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-3">
                 <span class="text-gray-900 dark:text-white">Musicians</span>
-                <svg class="w-2 h-2 text-violet-500" fill="currentColor" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4"/></svg>
+                <svg class="w-2 h-2 text-blue-500" fill="currentColor" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4"/></svg>
             </span>
             <span class="mx-8 text-2xl font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-3">
                 <span class="text-gray-900 dark:text-white">Venues</span>
-                <svg class="w-2 h-2 text-fuchsia-500" fill="currentColor" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4"/></svg>
+                <svg class="w-2 h-2 text-sky-500" fill="currentColor" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4"/></svg>
             </span>
             <span class="mx-8 text-2xl font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-3">
                 <span class="text-gray-900 dark:text-white">DJs</span>
-                <svg class="w-2 h-2 text-pink-500" fill="currentColor" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4"/></svg>
+                <svg class="w-2 h-2 text-cyan-500" fill="currentColor" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4"/></svg>
             </span>
             <span class="mx-8 text-2xl font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-3">
                 <span class="text-gray-900 dark:text-white">Promoters</span>
-                <svg class="w-2 h-2 text-indigo-500" fill="currentColor" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4"/></svg>
+                <svg class="w-2 h-2 text-blue-400" fill="currentColor" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4"/></svg>
             </span>
             <span class="mx-8 text-2xl font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-3">
                 <span class="text-gray-900 dark:text-white">Food Trucks</span>
@@ -235,13 +236,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
                 <!-- Ticketing & Check-ins -->
-                <a href="{{ marketing_url('/features/ticketing') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-violet-200 dark:hover:border-violet-500/30 transition-all" aria-label="Learn more about ticketing and QR check-ins">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-500/20 mb-4">
-                        <svg class="w-6 h-6 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <a href="{{ marketing_url('/features/ticketing') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-500/30 transition-all" aria-label="Learn more about ticketing and QR check-ins">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 mb-4">
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">Ticketing & QR Check-ins</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Ticketing & QR Check-ins</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-sm">Sell tickets online with multiple types (GA, VIP), set limits, and scan QR codes for fast check-ins.</p>
                     <div class="flex items-center gap-1.5 mt-2 text-xs text-gray-500 dark:text-gray-400">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -249,22 +250,22 @@
                         </svg>
                         <span>Secure payments by Stripe</span>
                     </div>
-                    <span class="inline-flex items-center mt-3 text-sm font-medium text-violet-600 group-hover:gap-2 gap-1 transition-all">
+                    <span class="inline-flex items-center mt-3 text-sm font-medium text-blue-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
                 </a>
 
                 <!-- AI Features -->
-                <a href="{{ marketing_url('/features/ai') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-fuchsia-200 dark:hover:border-fuchsia-500/30 transition-all" aria-label="Learn more about AI-powered features">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-fuchsia-100 dark:bg-fuchsia-500/20 mb-4">
-                        <svg class="w-6 h-6 text-fuchsia-600 dark:text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <a href="{{ marketing_url('/features/ai') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-sky-200 dark:hover:border-sky-500/30 transition-all" aria-label="Learn more about AI-powered features">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-sky-100 dark:bg-sky-500/20 mb-4">
+                        <svg class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">AI-Powered</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">AI-Powered</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-sm">Auto-extract event details with AI parsing. Translate your entire schedule instantly.</p>
-                    <span class="inline-flex items-center mt-3 text-sm font-medium text-fuchsia-600 group-hover:gap-2 gap-1 transition-all">
+                    <span class="inline-flex items-center mt-3 text-sm font-medium text-sky-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
@@ -361,15 +362,15 @@
                 </a>
 
                 <!-- Embed Calendar -->
-                <a href="{{ marketing_url('/features/embed-calendar') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-purple-200 dark:hover:border-purple-500/30 transition-all" aria-label="Learn more about embed calendar">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 mb-4">
-                        <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <a href="{{ marketing_url('/features/embed-calendar') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-500/30 transition-all" aria-label="Learn more about embed calendar">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 mb-4">
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Embed Calendar</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Embed Calendar</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-sm">Add your event calendar to any website with one line of code. Responsive and multilingual.</p>
-                    <span class="inline-flex items-center mt-3 text-sm font-medium text-purple-600 group-hover:gap-2 gap-1 transition-all">
+                    <span class="inline-flex items-center mt-3 text-sm font-medium text-blue-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
@@ -391,15 +392,15 @@
                 </a>
 
                 <!-- Online Events -->
-                <a href="{{ marketing_url('/features/online-events') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all" aria-label="Learn more about online events">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 mb-4">
-                        <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <a href="{{ marketing_url('/features/online-events') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-sky-200 dark:hover:border-sky-500/30 transition-all" aria-label="Learn more about online events">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-sky-100 dark:bg-sky-500/20 mb-4">
+                        <svg class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Online Events</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">Online Events</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-sm">Sell tickets to virtual events. Share streaming links with ticket holders automatically.</p>
-                    <span class="inline-flex items-center mt-3 text-sm font-medium text-indigo-600 group-hover:gap-2 gap-1 transition-all">
+                    <span class="inline-flex items-center mt-3 text-sm font-medium text-sky-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
@@ -529,9 +530,9 @@
                 </div>
 
                 <!-- No Platform Fees -->
-                <div class="bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-900/30 dark:to-indigo-900/30 border border-violet-200 dark:border-violet-500/20 rounded-2xl p-6 text-center">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-violet-500/20 mb-4">
-                        <svg class="w-6 h-6 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <div class="bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30 border border-blue-200 dark:border-blue-500/20 rounded-2xl p-6 text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 mb-4">
+                        <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
@@ -540,9 +541,9 @@
                 </div>
 
                 <!-- Open Source -->
-                <div class="bg-gradient-to-br from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30 border border-fuchsia-200 dark:border-fuchsia-500/20 rounded-2xl p-6 text-center">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-fuchsia-500/20 mb-4">
-                        <svg class="w-6 h-6 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <div class="bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30 border border-sky-200 dark:border-sky-500/20 rounded-2xl p-6 text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-sky-500/20 mb-4">
+                        <svg class="w-6 h-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                         </svg>
                     </div>
@@ -643,12 +644,12 @@
                             <!-- Event cards -->
                             <div class="grid grid-cols-2 gap-3">
                                 <div class="rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 p-3">
-                                    <div class="h-16 rounded-lg bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/30 dark:to-indigo-900/30 mb-2"></div>
+                                    <div class="h-16 rounded-lg bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900/30 dark:to-sky-900/30 mb-2"></div>
                                     <div class="h-2.5 bg-gray-200 dark:bg-white/10 rounded-full w-3/4 mb-1.5"></div>
                                     <div class="h-2 bg-gray-100 dark:bg-white/5 rounded-full w-1/2"></div>
                                 </div>
                                 <div class="rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 p-3">
-                                    <div class="h-16 rounded-lg bg-gradient-to-br from-fuchsia-100 to-pink-100 dark:from-fuchsia-900/30 dark:to-pink-900/30 mb-2"></div>
+                                    <div class="h-16 rounded-lg bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900/30 dark:to-cyan-900/30 mb-2"></div>
                                     <div class="h-2.5 bg-gray-200 dark:bg-white/10 rounded-full w-3/4 mb-1.5"></div>
                                     <div class="h-2 bg-gray-100 dark:bg-white/5 rounded-full w-1/2"></div>
                                 </div>
@@ -668,7 +669,7 @@
     <section class="relative bg-gray-50 py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <span class="inline-block px-4 py-1.5 rounded-full text-sm font-medium bg-violet-100 text-violet-600 border border-violet-200 mb-6">
+                <span class="inline-block px-4 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-600 border border-blue-200 mb-6">
                     Trusted by event organizers
                 </span>
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -693,7 +694,7 @@
                         "Event Schedule has completely transformed how we manage our venue calendar. Our patrons love being able to see what's coming up."
                     </p>
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white font-semibold text-sm">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-400 flex items-center justify-center text-white font-semibold text-sm">
                             MJ
                         </div>
                         <div>
@@ -716,7 +717,7 @@
                         "Finally, a simple way to share my gig schedule with fans. The QR check-in feature is a game changer for my shows."
                     </p>
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-fuchsia-500 to-pink-500 flex items-center justify-center text-white font-semibold text-sm">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center text-white font-semibold text-sm">
                             SR
                         </div>
                         <div>
@@ -774,11 +775,11 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Step 1 -->
                 <div class="relative group">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-violet-400 to-indigo-400 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-400 to-blue-300 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
                     <div class="relative bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl p-8 h-full shadow-sm">
                         <div class="flex items-center gap-4 mb-6">
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white font-bold text-xl">1</div>
-                            <div class="h-px flex-1 bg-gradient-to-r from-violet-300 dark:from-violet-500/50 to-transparent"></div>
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-400 flex items-center justify-center text-white font-bold text-xl">1</div>
+                            <div class="h-px flex-1 bg-gradient-to-r from-blue-300 dark:from-blue-500/50 to-transparent"></div>
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Create your schedule</h3>
                         <p class="text-gray-600 dark:text-gray-400">Sign up free. Add your events manually or import from Google Calendar.</p>
@@ -787,11 +788,11 @@
 
                 <!-- Step 2 -->
                 <div class="relative group">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-fuchsia-400 to-pink-400 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
+                    <div class="absolute -inset-1 bg-gradient-to-r from-sky-400 to-cyan-400 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
                     <div class="relative bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl p-8 h-full shadow-sm">
                         <div class="flex items-center gap-4 mb-6">
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-pink-500 flex items-center justify-center text-white font-bold text-xl">2</div>
-                            <div class="h-px flex-1 bg-gradient-to-r from-fuchsia-300 dark:from-fuchsia-500/50 to-transparent"></div>
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xl">2</div>
+                            <div class="h-px flex-1 bg-gradient-to-r from-sky-300 dark:from-sky-500/50 to-transparent"></div>
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Share your link</h3>
                         <p class="text-gray-600 dark:text-gray-400">Get your custom URL. Put it in your bio, website, or anywhere you want.</p>
@@ -818,7 +819,7 @@
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Background effects -->
         <div class="absolute inset-0">
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-violet-600/20 to-transparent rounded-full blur-[100px]"></div>
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-blue-600/20 to-transparent rounded-full blur-[100px]"></div>
         </div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -829,7 +830,7 @@
             <p class="text-xl text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
                 Join musicians, venues, and organizers who use Event Schedule to connect with their audience.
             </p>
-            <a href="{{ route('sign_up') }}" class="group relative inline-flex items-center justify-center px-12 py-6 text-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl overflow-hidden transition-all hover:scale-105 hover:shadow-2xl hover:shadow-violet-500/30">
+            <a href="{{ route('sign_up') }}" class="group relative inline-flex items-center justify-center px-12 py-6 text-xl font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl overflow-hidden transition-all hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/30">
                 <span class="relative z-10 flex items-center gap-3">
                     Get started free
                     <svg class="w-6 h-6 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">

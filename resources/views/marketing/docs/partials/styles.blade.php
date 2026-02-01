@@ -1,13 +1,13 @@
 <style>
     /* Doc-specific gradient text variants */
     .text-gradient-blue {
-        background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #4f46e5 100%);
+        background: linear-gradient(135deg, #3b82f6 0%, #0EA5E9 50%, #4E81FA 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
     .text-gradient-violet {
-        background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #7c3aed 100%);
+        background: linear-gradient(135deg, #4E81FA 0%, #0EA5E9 50%, #3b82f6 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;

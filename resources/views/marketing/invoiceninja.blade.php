@@ -274,8 +274,8 @@
                 </div>
 
                 <!-- Webhook Sync -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 border border-violet-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-blue-100 dark:from-blue-900 dark:to-blue-900 border border-blue-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
@@ -286,8 +286,8 @@
 
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-3 border border-gray-200 dark:border-white/10">
                         <div class="flex items-center gap-2">
-                            <div class="w-2 h-2 rounded-full bg-violet-400 animate-pulse"></div>
-                            <span class="text-violet-600 dark:text-violet-300 text-xs font-mono">invoice.paid</span>
+                            <div class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
+                            <span class="text-blue-600 dark:text-blue-300 text-xs font-mono">invoice.paid</span>
                         </div>
                     </div>
                 </div>

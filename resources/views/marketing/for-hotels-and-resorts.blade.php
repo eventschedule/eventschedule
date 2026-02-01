@@ -73,9 +73,9 @@
             <div class="mt-12 flex flex-wrap justify-center gap-2">
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300 text-xs font-medium border border-slate-200 dark:border-slate-500/30">Pool Parties</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-xs font-medium border border-amber-200 dark:border-amber-500/30">Live Entertainment</span>
-                <span class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-xs font-medium border border-indigo-200 dark:border-indigo-500/30">Conferences</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-xs font-medium border border-sky-200 dark:border-sky-500/30">Conferences</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-xs font-medium border border-teal-200 dark:border-teal-500/30">Spa Events</span>
-                <span class="inline-flex items-center px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-500/30">Wine Tastings</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-xs font-medium border border-blue-200 dark:border-blue-500/30">Wine Tastings</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-xs font-medium border border-rose-200 dark:border-rose-500/30">Wedding Receptions</span>
             </div>
         </div>
@@ -123,7 +123,7 @@
                                             <span class="text-gray-600 dark:text-gray-300 text-xs">Sunset Pool Party - Fri 6PM</span>
                                         </div>
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
-                                            <div class="w-2 h-2 rounded-full bg-violet-400"></div>
+                                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
                                             <span class="text-gray-600 dark:text-gray-300 text-xs">Wine Tasting - Sat 7PM</span>
                                         </div>
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
@@ -138,8 +138,8 @@
                 </div>
 
                 <!-- Multi-Space Management -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900 dark:to-violet-900 border border-indigo-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-sky-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
@@ -149,13 +149,13 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Pool, ballroom, spa, restaurant. Filter by space and avoid double-bookings across your property.</p>
 
                     <div class="space-y-2">
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-indigo-500/20 border border-indigo-500/30">
-                            <div class="w-2 h-2 rounded-full bg-indigo-400"></div>
+                        <div class="flex items-center gap-2 p-2 rounded-lg bg-sky-500/20 border border-sky-500/30">
+                            <div class="w-2 h-2 rounded-full bg-sky-400"></div>
                             <span class="text-gray-900 dark:text-white text-sm">Pool Deck</span>
-                            <span class="ml-auto text-indigo-700 dark:text-indigo-300 text-xs">8 events</span>
+                            <span class="ml-auto text-sky-700 dark:text-sky-300 text-xs">8 events</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                            <div class="w-2 h-2 rounded-full bg-violet-400"></div>
+                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Grand Ballroom</span>
                             <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">5 events</span>
                         </div>
@@ -310,7 +310,7 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-[10px] font-semibold">SD</div>
+                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-500 flex items-center justify-center text-white text-[10px] font-semibold">SD</div>
                             <div class="flex-1">
                                 <div class="text-gray-600 dark:text-gray-300 text-xs font-medium">Spa Director</div>
                                 <div class="text-gray-500 dark:text-gray-400 text-[10px]">Spa events only</div>
@@ -440,21 +440,21 @@
                 </div>
 
                 <!-- Friday - Concierge Recommends -->
-                <div class="bg-gradient-to-br from-violet-900/40 to-purple-900/40 rounded-xl border border-violet-500/20 p-4 relative overflow-hidden group hover:border-violet-500/40 transition-colors">
+                <div class="bg-gradient-to-br from-blue-900/40 to-blue-900/40 rounded-xl border border-blue-500/20 p-4 relative overflow-hidden group hover:border-blue-500/40 transition-colors">
                     <!-- Concierge Recommends badge -->
                     <div class="absolute -top-1 -right-1 w-8 h-8">
                         <svg viewBox="0 0 32 32" fill="none" class="w-full h-full">
                             <path d="M16,2 L19,11 L28,11 L21,17 L23,26 L16,21 L9,26 L11,17 L4,11 L13,11 Z" fill="#d97706" opacity="0.8"/>
                         </svg>
                     </div>
-                    <div class="text-violet-700 dark:text-violet-300 text-xs font-semibold tracking-wider uppercase mb-3">Fri</div>
+                    <div class="text-blue-700 dark:text-blue-300 text-xs font-semibold tracking-wider uppercase mb-3">Fri</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-1.5">
-                            <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
                             <span class="text-gray-900 dark:text-white text-xs font-medium">Wine Tasting</span>
                         </div>
                         <div class="flex items-center gap-1.5">
-                            <div class="w-1.5 h-1.5 rounded-full bg-purple-400"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
                             <span class="text-gray-500 dark:text-gray-400 text-xs">7:00 PM</span>
                         </div>
                         <div class="text-amber-600 dark:text-amber-400 text-[8px] font-medium mt-1">Concierge Pick</div>
@@ -462,7 +462,7 @@
                 </div>
 
                 <!-- Saturday -->
-                <div class="bg-gradient-to-br from-rose-900/40 to-pink-900/40 rounded-xl border border-rose-500/20 p-4 relative overflow-hidden group hover:border-rose-500/40 transition-colors">
+                <div class="bg-gradient-to-br from-rose-900/40 to-cyan-900/40 rounded-xl border border-rose-500/20 p-4 relative overflow-hidden group hover:border-rose-500/40 transition-colors">
                     <div class="text-rose-700 dark:text-rose-300 text-xs font-semibold tracking-wider uppercase mb-3">Sat</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-1.5">
@@ -470,7 +470,7 @@
                             <span class="text-gray-900 dark:text-white text-xs font-medium">Beach Party</span>
                         </div>
                         <div class="flex items-center gap-1.5">
-                            <div class="w-1.5 h-1.5 rounded-full bg-pink-400"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-cyan-400"></div>
                             <span class="text-gray-500 dark:text-gray-400 text-xs">3:00 PM</span>
                         </div>
                     </div>
@@ -553,7 +553,7 @@
                     blog-slug="for-conference-hotels"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
                         </svg>
                     </x-slot:icon>
@@ -595,7 +595,7 @@
                     blog-slug="for-casino-hotels"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                         </svg>
                     </x-slot:icon>

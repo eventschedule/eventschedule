@@ -12,7 +12,7 @@
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-sky-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
             <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
             <!-- Indigo accent -->
-            <div class="absolute top-40 right-1/3 w-[200px] h-[200px] bg-indigo-500/10 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s;"></div>
+            <div class="absolute top-40 right-1/3 w-[200px] h-[200px] bg-sky-500/10 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s;"></div>
         </div>
 
         <!-- Bookshelf SVG pattern -->
@@ -24,17 +24,17 @@
                         <line x1="0" y1="78" x2="200" y2="78" stroke="#475569" stroke-width="2"/>
                         <!-- Book spines - varying heights and colors -->
                         <rect x="8" y="15" width="10" height="63" rx="1" fill="#0ea5e9"/>
-                        <rect x="22" y="25" width="8" height="53" rx="1" fill="#6366f1"/>
+                        <rect x="22" y="25" width="8" height="53" rx="1" fill="#0EA5E9"/>
                         <rect x="34" y="10" width="12" height="68" rx="1" fill="#3b82f6"/>
-                        <rect x="50" y="20" width="9" height="58" rx="1" fill="#8b5cf6"/>
+                        <rect x="50" y="20" width="9" height="58" rx="1" fill="#4E81FA"/>
                         <rect x="63" y="30" width="11" height="48" rx="1" fill="#0ea5e9"/>
                         <rect x="78" y="8" width="10" height="70" rx="1" fill="#475569"/>
-                        <rect x="92" y="22" width="8" height="56" rx="1" fill="#6366f1"/>
+                        <rect x="92" y="22" width="8" height="56" rx="1" fill="#0EA5E9"/>
                         <rect x="104" y="15" width="12" height="63" rx="1" fill="#3b82f6"/>
                         <rect x="120" y="28" width="9" height="50" rx="1" fill="#0ea5e9"/>
-                        <rect x="133" y="12" width="11" height="66" rx="1" fill="#8b5cf6"/>
+                        <rect x="133" y="12" width="11" height="66" rx="1" fill="#4E81FA"/>
                         <rect x="148" y="18" width="10" height="60" rx="1" fill="#475569"/>
-                        <rect x="162" y="25" width="8" height="53" rx="1" fill="#6366f1"/>
+                        <rect x="162" y="25" width="8" height="53" rx="1" fill="#0EA5E9"/>
                         <rect x="174" y="10" width="12" height="68" rx="1" fill="#3b82f6"/>
                         <rect x="190" y="20" width="8" height="58" rx="1" fill="#0ea5e9"/>
                     </pattern>
@@ -79,8 +79,8 @@
             <div class="mt-12 flex flex-wrap justify-center gap-2">
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-xs font-medium border border-sky-200 dark:border-sky-500/30">Author Readings</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-xs font-medium border border-blue-200 dark:border-blue-500/30">Book Clubs</span>
-                <span class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-xs font-medium border border-indigo-200 dark:border-indigo-500/30">Story Time</span>
-                <span class="inline-flex items-center px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-500/30">Film Screenings</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-xs font-medium border border-sky-200 dark:border-sky-500/30">Story Time</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-xs font-medium border border-blue-200 dark:border-blue-500/30">Film Screenings</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-xs font-medium border border-cyan-200 dark:border-cyan-500/30">Workshops</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-xs font-medium border border-teal-200 dark:border-teal-500/30">Maker Space</span>
             </div>
@@ -133,7 +133,7 @@
                                             <span class="text-gray-600 dark:text-gray-300 text-xs">Summer Reading Kickoff</span>
                                         </div>
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
-                                            <div class="w-2 h-2 rounded-full bg-indigo-400"></div>
+                                            <div class="w-2 h-2 rounded-full bg-sky-400"></div>
                                             <span class="text-gray-600 dark:text-gray-300 text-xs">Teen Maker Space Workshop</span>
                                         </div>
                                     </div>
@@ -144,7 +144,7 @@
                 </div>
 
                 <!-- Recurring Programs -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 border border-blue-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-blue-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -161,7 +161,7 @@
                             <span class="ml-auto text-blue-700 dark:text-blue-300 text-xs">Tue</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                            <div class="w-2 h-2 rounded-full bg-indigo-400"></div>
+                            <div class="w-2 h-2 rounded-full bg-sky-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Teen Book Club</span>
                             <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">Wed</span>
                         </div>
@@ -171,7 +171,7 @@
                             <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">Thu</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                            <div class="w-2 h-2 rounded-full bg-violet-400"></div>
+                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Film Fridays</span>
                             <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">Fri</span>
                         </div>
@@ -179,8 +179,8 @@
                 </div>
 
                 <!-- Author Events -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 border border-violet-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-blue-100 dark:from-blue-900 dark:to-blue-900 border border-blue-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
@@ -190,27 +190,27 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Author readings, book signings, and Q&A sessions. Let patrons register and never miss an event.</p>
 
                     <div class="flex justify-center">
-                        <div class="bg-gradient-to-br from-violet-100 to-purple-50 dark:from-violet-800 dark:to-purple-900 rounded-xl border border-violet-300/50 dark:border-violet-600/30 p-4 w-48 shadow-lg transform -rotate-2 hover:rotate-0 transition-transform">
+                        <div class="bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-800 dark:to-blue-900 rounded-xl border border-blue-300/50 dark:border-blue-600/30 p-4 w-48 shadow-lg transform -rotate-2 hover:rotate-0 transition-transform">
                             <div class="text-center">
-                                <div class="text-violet-800 dark:text-violet-200 text-[10px] tracking-widest uppercase">Author Visit</div>
-                                <div class="text-violet-900 dark:text-violet-100 text-sm font-serif font-semibold mt-1">Jane Smith</div>
-                                <div class="w-16 h-20 bg-gradient-to-br from-violet-200 to-purple-300 dark:from-violet-700 dark:to-purple-800 rounded mx-auto mt-2 flex items-center justify-center">
-                                    <svg class="w-8 h-8 text-violet-600 dark:text-violet-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="text-blue-800 dark:text-blue-200 text-[10px] tracking-widest uppercase">Author Visit</div>
+                                <div class="text-blue-900 dark:text-blue-100 text-sm font-serif font-semibold mt-1">Jane Smith</div>
+                                <div class="w-16 h-20 bg-gradient-to-br from-blue-200 to-blue-300 dark:from-blue-700 dark:to-blue-800 rounded mx-auto mt-2 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-blue-600 dark:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                     </svg>
                                 </div>
-                                <div class="text-violet-600 dark:text-violet-300 text-[10px] mt-2">Sat, Mar 15 &bull; 2 PM</div>
-                                <div class="text-violet-500 dark:text-violet-400 text-[9px] mt-1">Reading & Signing</div>
+                                <div class="text-blue-600 dark:text-blue-300 text-[10px] mt-2">Sat, Mar 15 &bull; 2 PM</div>
+                                <div class="text-blue-500 dark:text-blue-400 text-[9px] mt-1">Reading & Signing</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Community Programs (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900 dark:to-blue-900 border border-indigo-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-sky-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
@@ -229,20 +229,20 @@
                                 <div class="text-gray-900 dark:text-white text-sm font-semibold">Children</div>
                                 <div class="text-sky-700 dark:text-sky-300 text-xs mt-1">12 programs</div>
                             </div>
-                            <div class="bg-indigo-500/20 border border-indigo-400/30 rounded-xl p-4 text-center">
+                            <div class="bg-sky-500/20 border border-sky-400/30 rounded-xl p-4 text-center">
                                 <div class="text-2xl mb-1">&#129680;</div>
                                 <div class="text-gray-900 dark:text-white text-sm font-semibold">Teen</div>
-                                <div class="text-indigo-700 dark:text-indigo-300 text-xs mt-1">8 programs</div>
+                                <div class="text-sky-700 dark:text-sky-300 text-xs mt-1">8 programs</div>
                             </div>
                             <div class="bg-blue-500/20 border border-blue-400/30 rounded-xl p-4 text-center">
                                 <div class="text-2xl mb-1">&#128100;</div>
                                 <div class="text-gray-900 dark:text-white text-sm font-semibold">Adult</div>
                                 <div class="text-blue-700 dark:text-blue-300 text-xs mt-1">10 programs</div>
                             </div>
-                            <div class="bg-violet-500/20 border border-violet-400/30 rounded-xl p-4 text-center">
+                            <div class="bg-blue-500/20 border border-blue-400/30 rounded-xl p-4 text-center">
                                 <div class="text-2xl mb-1">&#128116;</div>
                                 <div class="text-gray-900 dark:text-white text-sm font-semibold">Senior</div>
-                                <div class="text-violet-700 dark:text-violet-300 text-xs mt-1">6 programs</div>
+                                <div class="text-blue-700 dark:text-blue-300 text-xs mt-1">6 programs</div>
                             </div>
                         </div>
                     </div>
@@ -389,20 +389,20 @@
                 </div>
 
                 <!-- Teen Coding Club -->
-                <div class="catalog-card bg-amber-50/80 dark:bg-indigo-900/40 rounded-sm border border-amber-200/60 dark:border-indigo-500/20 p-5 relative overflow-hidden group hover:border-indigo-500/40 transition-colors">
-                    <div class="absolute -top-px left-4 w-12 h-2.5 bg-indigo-400/60 dark:bg-indigo-400/40 rounded-b-sm"></div>
+                <div class="catalog-card bg-amber-50/80 dark:bg-sky-900/40 rounded-sm border border-amber-200/60 dark:border-sky-500/20 p-5 relative overflow-hidden group hover:border-sky-500/40 transition-colors">
+                    <div class="absolute -top-px left-4 w-12 h-2.5 bg-sky-400/60 dark:bg-sky-400/40 rounded-b-sm"></div>
                     <div class="absolute top-2 right-3 text-[9px] font-mono text-gray-400 dark:text-gray-500">005.1</div>
                     <div class="flex items-center gap-2 mb-3 mt-1">
-                        <div class="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+                        <div class="w-8 h-8 rounded-lg bg-sky-500/20 flex items-center justify-center">
                             <span class="text-sm">&#128187;</span>
                         </div>
                         <div>
                             <div class="text-gray-900 dark:text-white text-sm font-semibold">Teen Coding Club</div>
-                            <div class="text-indigo-700 dark:text-indigo-300 text-xs">Wednesdays &bull; 4:00 PM</div>
+                            <div class="text-sky-700 dark:text-sky-300 text-xs">Wednesdays &bull; 4:00 PM</div>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <div class="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
+                        <div class="w-1.5 h-1.5 rounded-full bg-sky-400"></div>
                         <span class="text-gray-500 dark:text-gray-400 text-xs">Ages 13-18 &bull; Maker Space</span>
                     </div>
                 </div>
@@ -446,20 +446,20 @@
                 </div>
 
                 <!-- Author Readings -->
-                <div class="catalog-card bg-amber-50/80 dark:bg-violet-900/40 rounded-sm border border-amber-200/60 dark:border-violet-500/20 p-5 relative overflow-hidden group hover:border-violet-500/40 transition-colors">
-                    <div class="absolute -top-px left-4 w-12 h-2.5 bg-violet-400/60 dark:bg-violet-400/40 rounded-b-sm"></div>
+                <div class="catalog-card bg-amber-50/80 dark:bg-blue-900/40 rounded-sm border border-amber-200/60 dark:border-blue-500/20 p-5 relative overflow-hidden group hover:border-blue-500/40 transition-colors">
+                    <div class="absolute -top-px left-4 w-12 h-2.5 bg-blue-400/60 dark:bg-blue-400/40 rounded-b-sm"></div>
                     <div class="absolute top-2 right-3 text-[9px] font-mono text-gray-400 dark:text-gray-500">808.0</div>
                     <div class="flex items-center gap-2 mb-3 mt-1">
-                        <div class="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
                             <span class="text-sm">&#9997;&#65039;</span>
                         </div>
                         <div>
                             <div class="text-gray-900 dark:text-white text-sm font-semibold">Author Readings</div>
-                            <div class="text-violet-700 dark:text-violet-300 text-xs">Saturdays &bull; 2:00 PM</div>
+                            <div class="text-blue-700 dark:text-blue-300 text-xs">Saturdays &bull; 2:00 PM</div>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
+                        <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
                         <span class="text-gray-500 dark:text-gray-400 text-xs">All Ages &bull; Main Hall</span>
                     </div>
                 </div>
@@ -531,7 +531,7 @@
                     blog-slug="for-university-libraries"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                         </svg>
@@ -560,7 +560,7 @@
                     blog-slug="for-childrens-libraries"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </x-slot:icon>
@@ -648,7 +648,7 @@
     <section class="relative bg-gradient-to-br from-sky-600 to-blue-700 py-24 overflow-hidden">
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
         <!-- Blue accent glow -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-indigo-500/10 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-sky-500/10 rounded-full blur-[100px]"></div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">

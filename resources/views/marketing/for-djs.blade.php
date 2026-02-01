@@ -9,15 +9,15 @@
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background with neon glow -->
         <div class="absolute inset-0">
-            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-indigo-600/30 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-purple-600/30 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-fuchsia-600/10 rounded-full blur-[150px]"></div>
+            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-sky-600/30 rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-blue-600/30 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-600/10 rounded-full blur-[150px]"></div>
         </div>
 
         <!-- Audio waveform background -->
         <div class="absolute bottom-0 left-0 right-0 h-32 opacity-20">
             <svg class="w-full h-full" viewBox="0 0 1200 100" preserveAspectRatio="none">
-                <g fill="currentColor" class="text-indigo-500">
+                <g fill="currentColor" class="text-sky-500">
                     <rect x="0" y="40" width="3" height="20" rx="1.5" class="animate-pulse-slow" />
                     <rect x="20" y="30" width="3" height="40" rx="1.5" class="animate-pulse-slow" style="animation-delay: 0.1s" />
                     <rect x="40" y="20" width="3" height="60" rx="1.5" class="animate-pulse-slow" style="animation-delay: 0.2s" />
@@ -90,7 +90,7 @@
             <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
                 <div class="relative w-6 h-6 animate-spin-slow">
                     <div class="absolute inset-0 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 dark:from-gray-900 dark:to-black border-2 border-gray-300 dark:border-gray-700">
-                        <div class="absolute inset-1 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600"></div>
+                        <div class="absolute inset-1 rounded-full bg-gradient-to-br from-sky-600 to-blue-600"></div>
                         <div class="absolute inset-[40%] rounded-full bg-gray-300 dark:bg-gray-900"></div>
                     </div>
                 </div>
@@ -107,7 +107,7 @@
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl hover:scale-105 transition-all shadow-lg neon-glow">
+                <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-sky-600 to-blue-600 rounded-2xl hover:scale-105 transition-all shadow-lg neon-glow">
                     Create your DJ schedule
                     <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -117,11 +117,11 @@
 
             <!-- Genre tags -->
             <div class="mt-12 flex flex-wrap justify-center gap-2">
-                <span class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-xs font-medium border border-indigo-500/30">House</span>
-                <span class="inline-flex items-center px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-xs font-medium border border-purple-500/30">Techno</span>
-                <span class="inline-flex items-center px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/20 dark:text-fuchsia-300 text-xs font-medium border border-fuchsia-500/30">DnB</span>
-                <span class="inline-flex items-center px-3 py-1 rounded-full bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300 text-xs font-medium border border-pink-500/30">Trance</span>
-                <span class="inline-flex items-center px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-xs font-medium border border-violet-500/30">Dubstep</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-xs font-medium border border-sky-500/30">House</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-xs font-medium border border-blue-500/30">Techno</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-xs font-medium border border-sky-500/30">DnB</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-xs font-medium border border-cyan-500/30">Trance</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-xs font-medium border border-blue-500/30">Dubstep</span>
             </div>
         </div>
     </section>
@@ -132,10 +132,10 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Row 1: Residency Tracker (2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900 border border-indigo-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-sky-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
@@ -151,25 +151,25 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-950 dark:to-purple-950 rounded-2xl border border-indigo-300 dark:border-indigo-400/30 p-4 max-w-xs">
-                                    <div class="text-xs text-indigo-600 dark:text-indigo-300 mb-3 font-semibold">DECEMBER</div>
+                                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-950 dark:to-blue-950 rounded-2xl border border-sky-300 dark:border-sky-400/30 p-4 max-w-xs">
+                                    <div class="text-xs text-sky-600 dark:text-sky-300 mb-3 font-semibold">DECEMBER</div>
                                     <div class="space-y-2">
-                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-indigo-500/20 border border-indigo-400/20">
-                                            <div class="text-indigo-600 dark:text-indigo-300 text-xs font-bold w-12">FRI 6</div>
+                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-sky-500/20 border border-sky-400/20">
+                                            <div class="text-sky-600 dark:text-sky-300 text-xs font-bold w-12">FRI 6</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-900 dark:text-white text-sm font-semibold">Fabric</div>
                                                 <div class="text-gray-500 dark:text-gray-400 text-[10px]">Every Friday</div>
                                             </div>
                                         </div>
-                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-purple-500/20 border border-purple-400/20">
-                                            <div class="text-purple-600 dark:text-purple-300 text-xs font-bold w-12">SAT 14</div>
+                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-blue-500/20 border border-blue-400/20">
+                                            <div class="text-blue-600 dark:text-blue-300 text-xs font-bold w-12">SAT 14</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-900 dark:text-white text-sm font-semibold">Berghain</div>
                                                 <div class="text-gray-500 dark:text-gray-400 text-[10px]">Guest spot</div>
                                             </div>
                                         </div>
-                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-indigo-500/20 border border-indigo-400/20">
-                                            <div class="text-indigo-600 dark:text-indigo-300 text-xs font-bold w-12">FRI 20</div>
+                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-sky-500/20 border border-sky-400/20">
+                                            <div class="text-sky-600 dark:text-sky-300 text-xs font-bold w-12">FRI 20</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-900 dark:text-white text-sm font-semibold">Fabric</div>
                                                 <div class="text-gray-500 dark:text-gray-400 text-[10px]">Every Friday</div>
@@ -183,8 +183,8 @@
                 </div>
 
                 <!-- Row 1: Late Night Ready (1 col) -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900 dark:to-indigo-900 border border-violet-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-blue-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
@@ -195,22 +195,22 @@
 
                     <div class="flex justify-center">
                         <div class="relative">
-                            <div class="bg-violet-500/20 rounded-xl border border-violet-400/30 p-4 text-center">
+                            <div class="bg-blue-500/20 rounded-xl border border-blue-400/30 p-4 text-center">
                                 <div class="flex items-center justify-center gap-2 mb-2">
-                                    <svg class="w-5 h-5 text-violet-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="w-5 h-5 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                                     </svg>
                                 </div>
                                 <div class="text-gray-900 dark:text-white text-2xl font-bold">11 PM - 4 AM</div>
-                                <div class="text-violet-300 text-xs mt-1">Saturday into Sunday</div>
+                                <div class="text-blue-300 text-xs mt-1">Saturday into Sunday</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Row 2: Club Sync (1 col) -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-100 to-purple-100 dark:from-fuchsia-900 dark:to-purple-900 border border-fuchsia-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/20 dark:text-fuchsia-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-sky-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
@@ -220,24 +220,24 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-6">When promoters add you to their lineup, it auto-appears on your schedule. No double-entry.</p>
 
                     <div class="flex items-center justify-center gap-2">
-                        <div class="bg-fuchsia-500/20 rounded-lg border border-fuchsia-400/30 p-2 w-16">
-                            <div class="text-[10px] text-fuchsia-300 text-center mb-1">Club</div>
+                        <div class="bg-sky-500/20 rounded-lg border border-sky-400/30 p-2 w-16">
+                            <div class="text-[10px] text-sky-300 text-center mb-1">Club</div>
                             <div class="h-1.5 bg-white/20 rounded mb-1"></div>
-                            <div class="h-1.5 bg-fuchsia-400/40 rounded w-3/4"></div>
+                            <div class="h-1.5 bg-sky-400/40 rounded w-3/4"></div>
                         </div>
-                        <svg class="w-4 h-4 text-fuchsia-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-4 h-4 text-sky-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                         <div class="bg-gray-200 dark:bg-white/10 rounded-lg border border-gray-300 dark:border-white/20 p-2 w-16">
                             <div class="text-[10px] text-gray-600 dark:text-gray-300 text-center mb-1">You</div>
                             <div class="h-1.5 bg-white/20 rounded mb-1"></div>
-                            <div class="h-1.5 bg-indigo-400/40 rounded w-3/4"></div>
+                            <div class="h-1.5 bg-sky-400/40 rounded w-3/4"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Row 2: One Link Everywhere (2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 border border-blue-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-blue-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
@@ -273,8 +273,8 @@
                 </div>
 
                 <!-- Row 3: Newsletter to Dancefloor (1 col) -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-900 dark:to-rose-900 border border-pink-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-rose-100 dark:from-cyan-900 dark:to-rose-900 border border-cyan-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
@@ -285,22 +285,22 @@
 
                     <div class="flex items-center justify-center">
                         <div class="relative">
-                            <div class="bg-pink-500/20 rounded-lg border border-pink-400/30 p-3 w-24">
-                                <svg class="w-6 h-6 text-pink-300 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="bg-cyan-500/20 rounded-lg border border-cyan-400/30 p-3 w-24">
+                                <svg class="w-6 h-6 text-cyan-300 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
-                                <div class="h-1 bg-pink-400/40 rounded mb-1 w-full"></div>
-                                <div class="h-1 bg-pink-400/30 rounded w-3/4"></div>
+                                <div class="h-1 bg-cyan-400/40 rounded mb-1 w-full"></div>
+                                <div class="h-1 bg-cyan-400/30 rounded w-3/4"></div>
                             </div>
                             <div class="absolute -top-2 -right-2 flex">
-                                <div class="w-4 h-4 rounded-full bg-pink-500 border border-gray-200 dark:border-[#0a0a0f] text-[8px] text-white flex items-center justify-center">1</div>
+                                <div class="w-4 h-4 rounded-full bg-cyan-500 border border-gray-200 dark:border-[#0a0a0f] text-[8px] text-white flex items-center justify-center">1</div>
                             </div>
                         </div>
-                        <svg class="w-4 h-4 text-pink-400 mx-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-4 h-4 text-cyan-400 mx-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                         <div class="flex -space-x-1">
-                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 border border-gray-200 dark:border-[#0a0a0f]"></div>
+                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-rose-500 border border-gray-200 dark:border-[#0a0a0f]"></div>
                             <div class="w-6 h-6 rounded-full bg-gradient-to-br from-rose-500 to-red-500 border border-gray-200 dark:border-[#0a0a0f]"></div>
                             <div class="w-6 h-6 rounded-full bg-gradient-to-br from-red-500 to-orange-500 border border-gray-200 dark:border-[#0a0a0f]"></div>
                         </div>
@@ -320,7 +320,7 @@
 
                     <div class="flex justify-center">
                         <div class="relative w-28 h-36 bg-gradient-to-br from-amber-500/30 to-orange-500/30 rounded-xl border border-amber-400/30 p-2 neon-glow-subtle">
-                            <div class="w-full h-full bg-gradient-to-br from-indigo-600/60 to-purple-600/60 rounded-lg flex flex-col items-center justify-center">
+                            <div class="w-full h-full bg-gradient-to-br from-sky-600/60 to-blue-600/60 rounded-lg flex flex-col items-center justify-center">
                                 <div class="text-gray-900 dark:text-white text-[8px] font-semibold mb-1">THIS SATURDAY</div>
                                 <div class="text-amber-300 text-sm font-bold">DJ NOVA</div>
                                 <div class="text-gray-900 dark:text-white text-[10px] mt-1">@ FABRIC</div>
@@ -390,7 +390,7 @@
                     blog-slug="for-resident-djs"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </x-slot:icon>
@@ -404,7 +404,7 @@
                     blog-slug="for-touring-djs"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </x-slot:icon>
@@ -418,7 +418,7 @@
                     blog-slug="for-b2b-djs"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-fuchsia-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                     </x-slot:icon>
@@ -432,7 +432,7 @@
                     blog-slug="for-underground-djs"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
                     </x-slot:icon>
@@ -446,7 +446,7 @@
                     blog-slug="for-open-format-djs"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
                     </x-slot:icon>
@@ -483,7 +483,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/25">
+                    <div class="w-16 h-16 bg-gradient-to-br from-sky-500 to-blue-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-sky-500/25">
                         1
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Add your sets</h3>
@@ -493,7 +493,7 @@
                 </div>
 
                 <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/25">
+                    <div class="w-16 h-16 bg-gradient-to-br from-sky-500 to-blue-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-sky-500/25">
                         2
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Drop your link</h3>
@@ -503,7 +503,7 @@
                 </div>
 
                 <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/25">
+                    <div class="w-16 h-16 bg-gradient-to-br from-sky-500 to-blue-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-sky-500/25">
                         3
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Pack the dancefloor</h3>
@@ -516,12 +516,12 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="relative bg-gradient-to-br from-indigo-600 to-purple-700 py-24 overflow-hidden">
+    <section class="relative bg-gradient-to-br from-sky-600 to-blue-700 py-24 overflow-hidden">
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
 
         <!-- Neon glow effects -->
-        <div class="absolute top-0 left-1/4 w-64 h-64 bg-fuchsia-500/20 rounded-full blur-[100px]"></div>
-        <div class="absolute bottom-0 right-1/4 w-64 h-64 bg-indigo-500/20 rounded-full blur-[100px]"></div>
+        <div class="absolute top-0 left-1/4 w-64 h-64 bg-sky-500/20 rounded-full blur-[100px]"></div>
+        <div class="absolute bottom-0 right-1/4 w-64 h-64 bg-sky-500/20 rounded-full blur-[100px]"></div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
@@ -530,7 +530,7 @@
             <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
                 Your fans want to dance. Tell them where. Free forever.
             </p>
-            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-indigo-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
+            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-sky-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                 Get Started Free
                 <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

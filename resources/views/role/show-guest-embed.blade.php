@@ -11,9 +11,15 @@
         background: #1f2937 !important;
         border-color: #374151 !important;
       }
+      .calendar-panel-border-transparent {
+        background: transparent !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
     </style>
 
-    <div class="calendar-panel-border px-4 pb-4 max-w-5xl mx-auto pt-2">
+    <div class="calendar-panel-border px-4 pb-4 max-w-5xl mx-auto pt-2" id="calendar-panel-wrapper">
 
         @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'eventLayout' => $role->event_layout ?? 'calendar', 'pastEvents' => $pastEvents ?? collect()])
 

@@ -8,9 +8,9 @@
     <!-- Hero Section - Mesh Gradient Background -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Mesh gradient blobs -->
-        <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-indigo-500/15 rounded-full blur-[150px]"></div>
-        <div class="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-purple-500/15 rounded-full blur-[130px] animate-pulse-slow"></div>
-        <div class="absolute bottom-1/4 left-1/3 w-[350px] h-[350px] bg-violet-500/10 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1s;"></div>
+        <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-sky-500/15 rounded-full blur-[150px]"></div>
+        <div class="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-blue-500/15 rounded-full blur-[130px] animate-pulse-slow"></div>
+        <div class="absolute bottom-1/4 left-1/3 w-[350px] h-[350px] bg-blue-500/10 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1s;"></div>
 
         <!-- Grid pattern -->
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
@@ -19,7 +19,7 @@
             <!-- Badge -->
             <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 backdrop-blur-sm">
                 <div class="relative">
-                    <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
@@ -39,7 +39,7 @@
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-indigo-500/25">
+                <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-sky-600 to-blue-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-sky-500/25">
                     Create your schedule
                     <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -53,7 +53,7 @@
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-xs font-medium border border-amber-500/30">Pottery</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-xs font-medium border border-blue-500/30">Photography</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300 text-xs font-medium border border-yellow-500/30">Woodworking</span>
-                <span class="inline-flex items-center px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/20 dark:text-fuchsia-300 text-xs font-medium border border-fuchsia-500/30">Painting</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-xs font-medium border border-sky-500/30">Painting</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-xs font-medium border border-teal-500/30">Music Lessons</span>
             </div>
         </div>
@@ -103,10 +103,10 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Workshop Announcements - HERO FEATURE (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900 border border-indigo-200 dark:border-indigo-500/30 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-sky-200 dark:border-sky-500/30 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
@@ -122,14 +122,14 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-950 dark:to-purple-950 rounded-2xl border border-indigo-300 dark:border-indigo-400/30 p-4 max-w-xs">
-                                    <div class="text-[10px] text-indigo-600 dark:text-indigo-300 mb-3 font-semibold tracking-wide">UPCOMING WORKSHOPS</div>
+                                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-950 dark:to-blue-950 rounded-2xl border border-sky-300 dark:border-sky-400/30 p-4 max-w-xs">
+                                    <div class="text-[10px] text-sky-600 dark:text-sky-300 mb-3 font-semibold tracking-wide">UPCOMING WORKSHOPS</div>
                                     <div class="space-y-3">
-                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-indigo-500/20 border border-indigo-400/30">
+                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-sky-500/20 border border-sky-400/30">
                                             <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white text-xs font-bold">SAT</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-900 dark:text-white text-sm font-semibold">Italian Pasta Making</div>
-                                                <div class="text-indigo-600 dark:text-indigo-300 text-xs">Sat, Feb 8 - 3 spots left</div>
+                                                <div class="text-sky-600 dark:text-sky-300 text-xs">Sat, Feb 8 - 3 spots left</div>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
@@ -201,10 +201,10 @@
                 </div>
 
                 <!-- Workshop Series / Curriculum (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 border border-violet-200 dark:border-violet-500/30 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-blue-100 dark:from-blue-900 dark:to-blue-900 border border-blue-200 dark:border-blue-500/30 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
@@ -220,35 +220,35 @@
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-950 dark:to-purple-950 rounded-2xl border border-violet-300 dark:border-violet-400/30 p-4 max-w-xs">
+                                <div class="bg-gradient-to-br from-blue-100 to-blue-100 dark:from-blue-950 dark:to-blue-950 rounded-2xl border border-blue-300 dark:border-blue-400/30 p-4 max-w-xs">
                                     <div class="flex items-center justify-between mb-3">
-                                        <div class="text-[10px] text-violet-600 dark:text-violet-300 font-semibold tracking-wide">POTTERY FUNDAMENTALS</div>
+                                        <div class="text-[10px] text-blue-600 dark:text-blue-300 font-semibold tracking-wide">POTTERY FUNDAMENTALS</div>
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-300 text-[10px] font-medium border border-green-300 dark:border-green-500/30">Series Discount</span>
                                     </div>
                                     <div class="space-y-2">
-                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-violet-200 dark:bg-violet-500/20 border border-violet-300 dark:border-violet-400/30">
-                                            <div class="w-8 h-8 rounded-full bg-violet-500/40 flex items-center justify-center text-violet-600 dark:text-violet-200 text-xs font-bold">1</div>
+                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-blue-200 dark:bg-blue-500/20 border border-blue-300 dark:border-blue-400/30">
+                                            <div class="w-8 h-8 rounded-full bg-blue-500/40 flex items-center justify-center text-blue-600 dark:text-blue-200 text-xs font-bold">1</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-900 dark:text-white text-sm font-medium">Hand Building</div>
                                             </div>
                                             <svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                                         </div>
-                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-violet-200 dark:bg-violet-500/20 border border-violet-300 dark:border-violet-400/30">
-                                            <div class="w-8 h-8 rounded-full bg-violet-500/40 flex items-center justify-center text-violet-600 dark:text-violet-200 text-xs font-bold">2</div>
+                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-blue-200 dark:bg-blue-500/20 border border-blue-300 dark:border-blue-400/30">
+                                            <div class="w-8 h-8 rounded-full bg-blue-500/40 flex items-center justify-center text-blue-600 dark:text-blue-200 text-xs font-bold">2</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-900 dark:text-white text-sm font-medium">Wheel Throwing</div>
                                             </div>
                                             <svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                                         </div>
-                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-violet-100 dark:bg-violet-500/10 border border-violet-200 dark:border-violet-400/20">
-                                            <div class="w-8 h-8 rounded-full bg-violet-500/30 flex items-center justify-center text-violet-600 dark:text-violet-300 text-xs font-bold">3</div>
+                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-blue-100 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-400/20">
+                                            <div class="w-8 h-8 rounded-full bg-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-300 text-xs font-bold">3</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Glazing</div>
                                             </div>
-                                            <div class="text-violet-600 dark:text-violet-400 text-[10px]">Next</div>
+                                            <div class="text-blue-600 dark:text-blue-400 text-[10px]">Next</div>
                                         </div>
                                         <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                                            <div class="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center text-violet-500 dark:text-violet-400 text-xs font-bold">4</div>
+                                            <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500 dark:text-blue-400 text-xs font-bold">4</div>
                                             <div class="flex-1">
                                                 <div class="text-gray-600 dark:text-gray-400 text-sm font-medium">Advanced Forms</div>
                                             </div>
@@ -360,7 +360,7 @@
                 <p class="text-xl text-gray-500 dark:text-gray-400">Progressive skill building. Multi-session enrollment. Loyal students.</p>
             </div>
 
-            <div class="relative bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900/60 dark:to-violet-900/60 rounded-3xl border border-indigo-200 dark:border-indigo-500/30 p-8 lg:p-10">
+            <div class="relative bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900/60 dark:to-blue-900/60 rounded-3xl border border-sky-200 dark:border-sky-500/30 p-8 lg:p-10">
                 <div class="flex items-center justify-between mb-8">
                     <div>
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white">Pottery Fundamentals</h3>
@@ -374,11 +374,11 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <!-- Session 1 - Post-it note style -->
-                    <div class="relative postit-card bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-indigo-800/60 dark:to-indigo-700/40 border border-yellow-300 dark:border-indigo-500/30 p-6 text-center" style="transform: rotate(-1.5deg);">
+                    <div class="relative postit-card bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-sky-800/60 dark:to-sky-700/40 border border-yellow-300 dark:border-sky-500/30 p-6 text-center" style="transform: rotate(-1.5deg);">
                         <!-- Fold corner -->
-                        <div class="absolute top-0 right-0 w-6 h-6 bg-gradient-to-bl from-yellow-200/80 to-transparent dark:from-indigo-600/40 dark:to-transparent"></div>
-                        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-indigo-500/30 flex items-center justify-center">
-                            <span class="text-indigo-700 dark:text-indigo-200 text-lg font-bold">1</span>
+                        <div class="absolute top-0 right-0 w-6 h-6 bg-gradient-to-bl from-yellow-200/80 to-transparent dark:from-sky-600/40 dark:to-transparent"></div>
+                        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-sky-500/30 flex items-center justify-center">
+                            <span class="text-sky-700 dark:text-sky-200 text-lg font-bold">1</span>
                         </div>
                         <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Hand Building</h4>
                         <p class="text-gray-600 dark:text-gray-400 text-xs">Feb 1 - Pinch & coil techniques</p>
@@ -386,34 +386,34 @@
 
                     <!-- Arrow connector (hidden on mobile) -->
                     <div class="hidden md:flex absolute top-1/2 left-[24%] transform -translate-y-1/2 z-10">
-                        <svg class="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        <svg class="w-6 h-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </div>
 
                     <!-- Session 2 -->
-                    <div class="relative postit-card bg-gradient-to-br from-orange-100 to-yellow-100 dark:from-violet-800/60 dark:to-violet-700/40 border border-orange-300 dark:border-violet-500/30 p-6 text-center" style="transform: rotate(1deg);">
-                        <div class="absolute top-0 right-0 w-6 h-6 bg-gradient-to-bl from-orange-200/80 to-transparent dark:from-violet-600/40 dark:to-transparent"></div>
-                        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-violet-500/30 flex items-center justify-center">
-                            <span class="text-violet-700 dark:text-violet-200 text-lg font-bold">2</span>
+                    <div class="relative postit-card bg-gradient-to-br from-orange-100 to-yellow-100 dark:from-blue-800/60 dark:to-blue-700/40 border border-orange-300 dark:border-blue-500/30 p-6 text-center" style="transform: rotate(1deg);">
+                        <div class="absolute top-0 right-0 w-6 h-6 bg-gradient-to-bl from-orange-200/80 to-transparent dark:from-blue-600/40 dark:to-transparent"></div>
+                        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-blue-500/30 flex items-center justify-center">
+                            <span class="text-blue-700 dark:text-blue-200 text-lg font-bold">2</span>
                         </div>
                         <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Wheel Throwing</h4>
                         <p class="text-gray-600 dark:text-gray-400 text-xs">Feb 8 - Centering & pulling</p>
                     </div>
 
                     <!-- Session 3 -->
-                    <div class="relative postit-card bg-gradient-to-br from-lime-100 to-green-100 dark:from-purple-800/60 dark:to-purple-700/40 border border-lime-300 dark:border-purple-500/30 p-6 text-center" style="transform: rotate(-0.5deg);">
-                        <div class="absolute top-0 right-0 w-6 h-6 bg-gradient-to-bl from-lime-200/80 to-transparent dark:from-purple-600/40 dark:to-transparent"></div>
-                        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-purple-500/30 flex items-center justify-center">
-                            <span class="text-purple-700 dark:text-purple-200 text-lg font-bold">3</span>
+                    <div class="relative postit-card bg-gradient-to-br from-lime-100 to-green-100 dark:from-blue-800/60 dark:to-blue-700/40 border border-lime-300 dark:border-blue-500/30 p-6 text-center" style="transform: rotate(-0.5deg);">
+                        <div class="absolute top-0 right-0 w-6 h-6 bg-gradient-to-bl from-lime-200/80 to-transparent dark:from-blue-600/40 dark:to-transparent"></div>
+                        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-blue-500/30 flex items-center justify-center">
+                            <span class="text-blue-700 dark:text-blue-200 text-lg font-bold">3</span>
                         </div>
                         <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Glazing</h4>
                         <p class="text-gray-600 dark:text-gray-400 text-xs">Feb 15 - Color & finish</p>
                     </div>
 
                     <!-- Session 4 -->
-                    <div class="relative postit-card bg-gradient-to-br from-sky-100 to-blue-100 dark:from-fuchsia-800/60 dark:to-fuchsia-700/40 border border-sky-300 dark:border-fuchsia-500/30 p-6 text-center" style="transform: rotate(1.5deg);">
-                        <div class="absolute top-0 right-0 w-6 h-6 bg-gradient-to-bl from-sky-200/80 to-transparent dark:from-fuchsia-600/40 dark:to-transparent"></div>
-                        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-fuchsia-500/30 flex items-center justify-center">
-                            <span class="text-fuchsia-700 dark:text-fuchsia-200 text-lg font-bold">4</span>
+                    <div class="relative postit-card bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-800/60 dark:to-sky-700/40 border border-sky-300 dark:border-sky-500/30 p-6 text-center" style="transform: rotate(1.5deg);">
+                        <div class="absolute top-0 right-0 w-6 h-6 bg-gradient-to-bl from-sky-200/80 to-transparent dark:from-sky-600/40 dark:to-transparent"></div>
+                        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-sky-500/30 flex items-center justify-center">
+                            <span class="text-sky-700 dark:text-sky-200 text-lg font-bold">4</span>
                         </div>
                         <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Advanced Forms</h4>
                         <p class="text-gray-600 dark:text-gray-400 text-xs">Feb 22 - Creative projects</p>
@@ -444,7 +444,7 @@
                     blog-slug="for-cooking-class-instructors"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                         </svg>
                     </x-slot:icon>
@@ -458,7 +458,7 @@
                     blog-slug="for-pottery-ceramics-teachers"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                         </svg>
                     </x-slot:icon>
@@ -502,7 +502,7 @@
                     blog-slug="for-art-teachers"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-fuchsia-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </x-slot:icon>
@@ -539,7 +539,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/25">
+                    <div class="w-16 h-16 bg-gradient-to-br from-sky-500 to-blue-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-sky-500/25">
                         1
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">List your workshops</h3>
@@ -549,7 +549,7 @@
                 </div>
 
                 <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/25">
+                    <div class="w-16 h-16 bg-gradient-to-br from-sky-500 to-blue-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-sky-500/25">
                         2
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Share your link</h3>
@@ -559,7 +559,7 @@
                 </div>
 
                 <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/25">
+                    <div class="w-16 h-16 bg-gradient-to-br from-sky-500 to-blue-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-sky-500/25">
                         3
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Fill your classes</h3>
@@ -572,12 +572,12 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="relative bg-gradient-to-br from-indigo-600 to-purple-700 py-24 overflow-hidden">
+    <section class="relative bg-gradient-to-br from-sky-600 to-blue-700 py-24 overflow-hidden">
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
 
         <!-- Glow effects -->
-        <div class="absolute top-0 left-1/4 w-64 h-64 bg-indigo-500/20 rounded-full blur-[100px]"></div>
-        <div class="absolute bottom-0 right-1/4 w-64 h-64 bg-purple-500/20 rounded-full blur-[100px]"></div>
+        <div class="absolute top-0 left-1/4 w-64 h-64 bg-sky-500/20 rounded-full blur-[100px]"></div>
+        <div class="absolute bottom-0 right-1/4 w-64 h-64 bg-blue-500/20 rounded-full blur-[100px]"></div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
@@ -586,7 +586,7 @@
             <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
                 Stop losing students to clunky booking systems. One link, zero fees, full classes. Free forever.
             </p>
-            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-indigo-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
+            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-sky-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                 Get Started Free
                 <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -631,25 +631,25 @@
 
     <style>
         .text-gradient-workshop {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+            background: linear-gradient(135deg, #4E81FA, #0EA5E9, #3b82f6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
         .chalk-text {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+            background: linear-gradient(135deg, #4E81FA, #0EA5E9, #3b82f6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
         .dark .chalk-text {
-            background: linear-gradient(135deg, #c7d2fe, #e0e7ff, #ddd6fe);
+            background: linear-gradient(135deg, #93c5fd, #bae6fd, #a5f3fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 8px rgba(199, 210, 254, 0.3);
+            text-shadow: 0 0 8px rgba(147, 197, 253, 0.3);
             filter: blur(0.2px);
         }
 

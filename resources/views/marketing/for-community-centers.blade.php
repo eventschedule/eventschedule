@@ -51,7 +51,7 @@
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-xs font-medium border border-emerald-200 dark:border-emerald-500/30">Youth Center</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300 text-xs font-medium border border-green-200 dark:border-green-500/30">Cultural Center</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-xs font-medium border border-sky-200 dark:border-sky-500/30">Neighborhood Center</span>
-                <span class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-xs font-medium border border-indigo-200 dark:border-indigo-500/30">Faith-Based Center</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-xs font-medium border border-sky-200 dark:border-sky-500/30">Faith-Based Center</span>
             </div>
         </div>
     </section>
@@ -101,15 +101,15 @@
                 </div>
 
                 <!-- Wednesday -->
-                <div class="bg-gradient-to-br from-violet-900/40 to-purple-900/40 rounded-xl border border-violet-500/20 p-4 relative overflow-hidden group hover:border-violet-500/40 transition-colors">
-                    <div class="text-violet-300 text-xs font-semibold tracking-wider uppercase mb-3">Wed</div>
+                <div class="bg-gradient-to-br from-blue-900/40 to-blue-900/40 rounded-xl border border-blue-500/20 p-4 relative overflow-hidden group hover:border-blue-500/40 transition-colors">
+                    <div class="text-blue-300 text-xs font-semibold tracking-wider uppercase mb-3">Wed</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-1.5">
-                            <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
                             <span class="text-gray-900 dark:text-white text-xs font-medium">Art Classes</span>
                         </div>
                         <div class="flex items-center gap-1.5">
-                            <div class="w-1.5 h-1.5 rounded-full bg-purple-400"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
                             <span class="text-gray-500 dark:text-gray-400 text-xs">Book Club</span>
                         </div>
                     </div>
@@ -131,7 +131,7 @@
                 </div>
 
                 <!-- Friday -->
-                <div class="bg-gradient-to-br from-rose-900/40 to-pink-900/40 rounded-xl border border-rose-500/20 p-4 relative overflow-hidden group hover:border-rose-500/40 transition-colors">
+                <div class="bg-gradient-to-br from-rose-900/40 to-cyan-900/40 rounded-xl border border-rose-500/20 p-4 relative overflow-hidden group hover:border-rose-500/40 transition-colors">
                     <div class="text-rose-300 text-xs font-semibold tracking-wider uppercase mb-3">Fri</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-1.5">
@@ -139,7 +139,7 @@
                             <span class="text-gray-900 dark:text-white text-xs font-medium">Movie Night</span>
                         </div>
                         <div class="flex items-center gap-1.5">
-                            <div class="w-1.5 h-1.5 rounded-full bg-pink-400"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-cyan-400"></div>
                             <span class="text-gray-500 dark:text-gray-400 text-xs">Teen Program</span>
                         </div>
                     </div>
@@ -161,15 +161,15 @@
                 </div>
 
                 <!-- Sunday -->
-                <div class="bg-gradient-to-br from-indigo-900/40 to-violet-900/40 rounded-xl border border-indigo-500/20 p-4 relative overflow-hidden group hover:border-indigo-500/40 transition-colors">
-                    <div class="text-indigo-300 text-xs font-semibold tracking-wider uppercase mb-3">Sun</div>
+                <div class="bg-gradient-to-br from-sky-900/40 to-blue-900/40 rounded-xl border border-sky-500/20 p-4 relative overflow-hidden group hover:border-sky-500/40 transition-colors">
+                    <div class="text-sky-300 text-xs font-semibold tracking-wider uppercase mb-3">Sun</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-1.5">
-                            <div class="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-sky-400"></div>
                             <span class="text-gray-900 dark:text-white text-xs font-medium">Open Gym</span>
                         </div>
                         <div class="flex items-center gap-1.5">
-                            <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
                             <span class="text-gray-500 dark:text-gray-400 text-xs">Craft Fair</span>
                         </div>
                     </div>
@@ -245,8 +245,8 @@
                 </div>
 
                 <!-- Room Booking -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900 dark:to-violet-900 border border-indigo-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-sky-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
@@ -256,11 +256,11 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Groups submit requests online. Review, approve, or decline from your dashboard.</p>
 
                     <div class="space-y-2">
-                        <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-500/20 border border-indigo-400/30">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white text-xs font-semibold">PTA</div>
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-sky-500/20 border border-sky-400/30">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">PTA</div>
                             <div class="flex-1">
                                 <div class="text-gray-900 dark:text-white text-sm font-medium">Lincoln PTA</div>
-                                <div class="text-indigo-700 dark:text-indigo-300 text-xs">Meeting Room &bull; Oct 15</div>
+                                <div class="text-sky-700 dark:text-sky-300 text-xs">Meeting Room &bull; Oct 15</div>
                             </div>
                             <div class="flex gap-1">
                                 <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
@@ -272,7 +272,7 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/5">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold">SC</div>
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">SC</div>
                             <div class="flex-1">
                                 <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Scout Troop 42</div>
                                 <div class="text-gray-500 dark:text-gray-400 text-xs">Gym &bull; Oct 22</div>
@@ -390,8 +390,8 @@
                 </div>
 
                 <!-- QR Check-in -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 border border-violet-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-blue-100 dark:from-blue-900 dark:to-blue-900 border border-blue-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                         </svg>
@@ -405,13 +405,13 @@
                             <div class="w-20 h-20 bg-white rounded-xl p-2 mx-auto mb-2">
                                 <div class="w-full h-full bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2029%2029%22%3E%3Cpath%20d%3D%22M0%200h7v7H0zm2%202v3h3V2zm8%200h1v1h1v1h-1v1h-1V3h-1V2h1zm4%200h1v4h-1V4h-1V3h1V2zm4%200h3v1h-2v1h-1V2zm5%200h7v7h-7zm2%202v3h3V4z%22%2F%3E%3C%2Fsvg%3E')] bg-contain"></div>
                             </div>
-                            <div class="text-violet-700 dark:text-violet-300 text-xs font-medium">Scan with any smartphone</div>
+                            <div class="text-blue-700 dark:text-blue-300 text-xs font-medium">Scan with any smartphone</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Event Graphics - BOTTOM RIGHT -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900 dark:to-pink-900 border border-rose-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-cyan-100 dark:from-rose-900 dark:to-cyan-900 border border-rose-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -422,7 +422,7 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Auto-generate promotional images for your programs. Download and share in seconds.</p>
 
                     <div class="flex justify-center">
-                        <div class="relative w-32 h-32 bg-gradient-to-br from-rose-500/30 to-pink-500/30 rounded-xl border border-rose-400/30 p-2">
+                        <div class="relative w-32 h-32 bg-gradient-to-br from-rose-500/30 to-cyan-500/30 rounded-xl border border-rose-400/30 p-2">
                             <div class="w-full h-full bg-gradient-to-br from-teal-600/40 to-cyan-600/40 rounded-lg flex flex-col items-center justify-center">
                                 <div class="text-gray-900 dark:text-white text-[10px] font-semibold mb-1">THIS SATURDAY</div>
                                 <div class="text-rose-200 text-xs font-bold">Fall Festival</div>
@@ -444,28 +444,28 @@
     <!-- Virtual Events Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
         <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-sky-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/features/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900 dark:to-violet-900 rounded-3xl border border-indigo-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-3xl border border-sky-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
                                 Online Events
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Reach members who can't come in person</h3>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Reach members who can't come in person</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">Virtual town halls, online fitness classes, livestreamed community events. Members can participate from anywhere.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Virtual meetings</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Online classes</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Livestreams</span>
                             </div>
-                            <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -481,7 +481,7 @@
                                         <span class="text-red-400 text-[10px]">LIVE</span>
                                     </div>
                                 </div>
-                                <div class="bg-gradient-to-br from-indigo-600/30 to-violet-600/30 rounded-lg p-4 text-center mb-3">
+                                <div class="bg-gradient-to-br from-sky-600/30 to-blue-600/30 rounded-lg p-4 text-center mb-3">
                                     <div class="text-2xl mb-1">&#127970;</div>
                                     <div class="text-gray-900 dark:text-white text-sm font-medium">Budget Meeting</div>
                                     <div class="text-gray-500 dark:text-gray-400 text-xs">City Council</div>
@@ -564,7 +564,7 @@
                     blog-slug="for-cultural-centers"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                         </svg>
                     </x-slot:icon>
@@ -592,7 +592,7 @@
                     blog-slug="for-faith-based-centers"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                     </x-slot:icon>

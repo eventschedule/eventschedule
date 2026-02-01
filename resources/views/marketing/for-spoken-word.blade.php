@@ -226,16 +226,16 @@
 
                 <!-- Virtual Readings -->
                 <a href="{{ marketing_url('/features/online-events') }}" class="group relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8 hover:border-gray-300 dark:hover:border-stone-700 transition-all">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300/80 text-sm font-medium mb-4 border border-indigo-200 dark:border-indigo-500/20">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300/80 text-sm font-medium mb-4 border border-sky-200 dark:border-sky-500/20">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                         Online
                     </div>
-                    <h3 class="text-2xl font-serif text-gray-900 dark:text-white mb-3 group-hover:text-indigo-200 transition-colors">Read to anywhere</h3>
+                    <h3 class="text-2xl font-serif text-gray-900 dark:text-white mb-3 group-hover:text-sky-200 transition-colors">Read to anywhere</h3>
                     <p class="text-gray-500 dark:text-stone-400 mb-4">Host virtual readings and workshops. Your audience isn't just local - poetry travels well over Zoom.</p>
 
-                    <span class="inline-flex items-center text-indigo-400/80 text-sm font-medium group-hover:gap-2 gap-1 transition-all">
+                    <span class="inline-flex items-center text-sky-400/80 text-sm font-medium group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -336,9 +336,9 @@
                 </div>
 
                 <!-- Bars & Lounges -->
-                <div class="group text-center p-6 rounded-xl bg-gray-100 dark:bg-stone-900/30 border border-gray-200 dark:border-stone-800 hover:border-purple-800/50 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
-                        <svg class="w-5 h-5 text-purple-600 dark:text-purple-500/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="group text-center p-6 rounded-xl bg-gray-100 dark:bg-stone-900/30 border border-gray-200 dark:border-stone-800 hover:border-blue-800/50 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-500/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />
                         </svg>
                     </div>
@@ -367,9 +367,9 @@
                 </div>
 
                 <!-- Virtual -->
-                <div class="group text-center p-6 rounded-xl bg-gray-100 dark:bg-stone-900/30 border border-gray-200 dark:border-stone-800 hover:border-indigo-800/50 transition-all">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
-                        <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-500/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="group text-center p-6 rounded-xl bg-gray-100 dark:bg-stone-900/30 border border-gray-200 dark:border-stone-800 hover:border-sky-800/50 transition-all">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-sky-100 dark:bg-sky-900/30 mb-4 mx-auto group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5 text-sky-600 dark:text-sky-500/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                     </div>
@@ -428,7 +428,7 @@
                     blog-slug="for-page-poets"
                 >
                     <x-slot:icon>
-                        <svg class="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </x-slot:icon>
@@ -456,7 +456,7 @@
                     blog-slug="for-literary-curators"
                 >
                     <x-slot:icon>
-                        <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-5 h-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                     </x-slot:icon>

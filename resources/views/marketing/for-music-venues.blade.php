@@ -9,28 +9,28 @@
     <section class="relative bg-white dark:bg-[#0a0a0f] py-24 lg:py-32 overflow-hidden">
         <!-- Subtle stage lighting effect -->
         <div class="absolute inset-0">
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-violet-600/20 via-violet-600/5 to-transparent blur-[80px]"></div>
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-blue-600/20 via-blue-600/5 to-transparent blur-[80px]"></div>
         </div>
 
         <div class="absolute inset-0 grid-pattern bg-[size:60px_60px]"></div>
 
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-gray-200 dark:border-white/10 mb-6">
-                    <div class="w-2 h-2 rounded-full bg-violet-600 dark:bg-violet-400 animate-pulse"></div>
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-gray-200 dark:border-white/10 mb-6">
+                    <div class="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse"></div>
                     <span class="text-sm text-gray-600 dark:text-gray-300">For Concert Halls & Live Music Venues</span>
                 </div>
 
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
                     The venue calendar that<br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-violet-400">pays you, not Ticketmaster</span>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-400 to-blue-400">pays you, not Ticketmaster</span>
                 </h1>
 
                 <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-10">
                     Bands apply to play. You sell tickets direct. Fans get email updates without you paying for reach. Zero platform fees.
                 </p>
 
-                <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-violet-500/25">
+                <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
                     Create Your Venue Calendar
                     <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -44,7 +44,7 @@
                     <!-- Dashboard header -->
                     <div class="bg-gray-100 dark:bg-[#0d0d12] px-6 py-4 border-b border-gray-200 dark:border-white/5 flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-xs font-bold">TE</div>
+                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-white text-xs font-bold">TE</div>
                             <div>
                                 <div class="text-gray-900 dark:text-white font-semibold text-sm">The Echo</div>
                                 <div class="text-gray-600 dark:text-gray-500 text-xs">Los Angeles, CA</div>
@@ -55,7 +55,7 @@
                                 <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
                                 <span class="text-gray-500 dark:text-gray-400">Calendar live</span>
                             </div>
-                            <div class="inline-flex items-center px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 font-medium">2,847 followers</div>
+                            <div class="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 font-medium">2,847 followers</div>
                         </div>
                     </div>
 
@@ -69,11 +69,11 @@
                             </div>
 
                             <!-- Tonight's show - highlighted -->
-                            <div class="bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 rounded-xl border border-violet-500/30 p-4">
+                            <div class="bg-gradient-to-r from-blue-500/20 to-sky-500/20 rounded-xl border border-blue-500/30 p-4">
                                 <div class="flex items-start justify-between mb-3">
                                     <div>
                                         <div class="flex items-center gap-2 mb-1">
-                                            <span class="text-violet-300 text-xs font-medium">TONIGHT</span>
+                                            <span class="text-blue-300 text-xs font-medium">TONIGHT</span>
                                             <span class="text-gray-500 dark:text-gray-400 text-xs">Doors 8pm</span>
                                         </div>
                                         <div class="text-gray-900 dark:text-white font-semibold">Luna & The Wolves</div>
@@ -131,21 +131,21 @@
                                 </div>
                                 <div class="space-y-2">
                                     <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/5">
-                                        <div class="w-6 h-6 rounded bg-gradient-to-br from-blue-500 to-indigo-500 text-[10px] text-white flex items-center justify-center font-bold">RW</div>
+                                        <div class="w-6 h-6 rounded bg-gradient-to-br from-blue-500 to-sky-500 text-[10px] text-white flex items-center justify-center font-bold">RW</div>
                                         <div class="flex-1 min-w-0">
                                             <div class="text-gray-900 dark:text-white text-xs truncate">River West</div>
                                             <div class="text-gray-600 dark:text-gray-500 text-[10px]">Alt Country</div>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/5">
-                                        <div class="w-6 h-6 rounded bg-gradient-to-br from-rose-500 to-pink-500 text-[10px] text-white flex items-center justify-center font-bold">NK</div>
+                                        <div class="w-6 h-6 rounded bg-gradient-to-br from-rose-500 to-cyan-500 text-[10px] text-white flex items-center justify-center font-bold">NK</div>
                                         <div class="flex-1 min-w-0">
                                             <div class="text-gray-900 dark:text-white text-xs truncate">Neon Kids</div>
                                             <div class="text-gray-600 dark:text-gray-500 text-[10px]">Synth Pop</div>
                                         </div>
                                     </div>
                                 </div>
-                                <button class="w-full mt-3 py-2 rounded-lg bg-violet-500/20 text-violet-300 text-xs font-medium hover:bg-violet-500/30 transition">
+                                <button class="w-full mt-3 py-2 rounded-lg bg-blue-500/20 text-blue-300 text-xs font-medium hover:bg-blue-500/30 transition">
                                     Review all requests
                                 </button>
                             </div>
@@ -273,7 +273,7 @@
             <!-- Feature 1: Artist Booking -->
             <div class="grid lg:grid-cols-2 gap-12 items-center mb-32">
                 <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                         </svg>
@@ -287,19 +287,19 @@
                     </p>
                     <ul class="space-y-3">
                         <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
-                            <svg class="w-5 h-5 text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-5 h-5 text-sky-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Embedded music players (Spotify, SoundCloud, YouTube)
                         </li>
                         <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
-                            <svg class="w-5 h-5 text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-5 h-5 text-sky-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Social follower counts at a glance
                         </li>
                         <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
-                            <svg class="w-5 h-5 text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-5 h-5 text-sky-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             One-click approve or decline
@@ -310,10 +310,10 @@
                     <div class="bg-gray-50 dark:bg-[#12121a] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
                         <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Booking Request</div>
                         <div class="flex items-start gap-4 mb-4">
-                            <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xl font-bold">MS</div>
+                            <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center text-white text-xl font-bold">MS</div>
                             <div class="flex-1">
                                 <div class="text-gray-900 dark:text-white font-semibold text-lg">Midnight Sons</div>
-                                <div class="text-indigo-300 text-sm">Indie Rock / Brooklyn, NY</div>
+                                <div class="text-sky-300 text-sm">Indie Rock / Brooklyn, NY</div>
                                 <div class="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
                                     <span>2.4K Spotify listeners</span>
                                     <span>890 Instagram</span>
@@ -361,10 +361,10 @@
                         </div>
                         <div class="p-4 space-y-3">
                             <!-- Main Stage -->
-                            <div class="bg-gradient-to-r from-violet-500/10 to-transparent rounded-xl border border-violet-500/20 p-4">
+                            <div class="bg-gradient-to-r from-blue-500/10 to-transparent rounded-xl border border-blue-500/20 p-4">
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-2">
-                                        <div class="w-3 h-3 rounded-full bg-violet-500"></div>
+                                        <div class="w-3 h-3 rounded-full bg-blue-500"></div>
                                         <span class="text-gray-900 dark:text-white font-medium">Main Stage</span>
                                     </div>
                                     <span class="text-gray-500 dark:text-gray-400 text-xs">Cap: 350</span>
@@ -376,16 +376,16 @@
                                     </div>
                                     <div class="flex items-center justify-between">
                                         <span class="text-gray-900 dark:text-white font-medium">9:30pm - Midnight Sons</span>
-                                        <span class="text-violet-300">Headliner</span>
+                                        <span class="text-blue-300">Headliner</span>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Back Room -->
-                            <div class="bg-gradient-to-r from-indigo-500/10 to-transparent rounded-xl border border-indigo-500/20 p-4">
+                            <div class="bg-gradient-to-r from-sky-500/10 to-transparent rounded-xl border border-sky-500/20 p-4">
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-2">
-                                        <div class="w-3 h-3 rounded-full bg-indigo-500"></div>
+                                        <div class="w-3 h-3 rounded-full bg-sky-500"></div>
                                         <span class="text-gray-900 dark:text-white font-medium">Back Room</span>
                                     </div>
                                     <span class="text-gray-500 dark:text-gray-400 text-xs">Cap: 75</span>
@@ -412,7 +412,7 @@
                     </div>
                 </div>
                 <div class="order-1 lg:order-2">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
@@ -426,19 +426,19 @@
                     </p>
                     <ul class="space-y-3">
                         <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
-                            <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Separate capacities per room
                         </li>
                         <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
-                            <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Fans filter by their preferred space
                         </li>
                         <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
-                            <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Seasonal rooms (open/close as needed)
@@ -533,9 +533,9 @@
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <div class="order-2 lg:order-1">
                     <div class="bg-gray-50 dark:bg-[#12121a] rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden max-w-md mx-auto">
-                        <div class="bg-gradient-to-r from-fuchsia-500/20 to-violet-500/20 px-5 py-4 border-b border-gray-200 dark:border-white/5">
+                        <div class="bg-gradient-to-r from-sky-500/20 to-blue-500/20 px-5 py-4 border-b border-gray-200 dark:border-white/5">
                             <div class="flex items-center gap-2">
-                                <svg class="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                                 <span class="text-gray-900 dark:text-white font-medium">New Show Announcement</span>
@@ -543,19 +543,19 @@
                         </div>
                         <div class="p-5">
                             <div class="text-gray-500 dark:text-gray-400 text-xs mb-3">To: 2,847 venue followers</div>
-                            <div class="bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 rounded-xl p-4 mb-4">
-                                <div class="text-fuchsia-300 text-xs font-medium mb-1">JUST ANNOUNCED</div>
+                            <div class="bg-gradient-to-br from-blue-500/20 to-sky-500/20 rounded-xl p-4 mb-4">
+                                <div class="text-sky-300 text-xs font-medium mb-1">JUST ANNOUNCED</div>
                                 <div class="text-gray-900 dark:text-white text-xl font-bold mb-1">Phoebe Bridgers</div>
                                 <div class="text-gray-600 dark:text-gray-300 text-sm">Saturday, March 15 / Doors 7pm</div>
                                 <div class="mt-3 flex items-center gap-2">
                                     <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-xs">$45</span>
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-violet-500/30 text-violet-300 text-xs">On Sale Now</span>
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/30 text-blue-300 text-xs">On Sale Now</span>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between text-xs">
                                 <div class="flex items-center gap-4">
                                     <span class="text-emerald-400">2,704 delivered</span>
-                                    <span class="text-fuchsia-300">892 opened</span>
+                                    <span class="text-sky-300">892 opened</span>
                                 </div>
                                 <span class="text-gray-500 dark:text-gray-400">33% open rate</span>
                             </div>
@@ -563,7 +563,7 @@
                     </div>
                 </div>
                 <div class="order-1 lg:order-2">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 text-sm font-medium mb-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                         </svg>
@@ -577,19 +577,19 @@
                     </p>
                     <ul class="space-y-3">
                         <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
-                            <svg class="w-5 h-5 text-fuchsia-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-5 h-5 text-sky-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             One-click announcements to all followers
                         </li>
                         <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
-                            <svg class="w-5 h-5 text-fuchsia-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-5 h-5 text-sky-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             See open rates and engagement
                         </li>
                         <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
-                            <svg class="w-5 h-5 text-fuchsia-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-5 h-5 text-sky-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Never pay to reach your own audience
@@ -609,9 +609,9 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white dark:bg-[#12121a] rounded-xl border border-gray-200 dark:border-white/5 p-5 hover:border-violet-500/30 transition">
-                    <div class="w-10 h-10 rounded-lg bg-violet-500/20 flex items-center justify-center mb-3">
-                        <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="bg-white dark:bg-[#12121a] rounded-xl border border-gray-200 dark:border-white/5 p-5 hover:border-blue-500/30 transition">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3">
+                        <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                         </svg>
                     </div>
@@ -619,9 +619,9 @@
                     <p class="text-gray-600 dark:text-gray-500 text-sm">Use any smartphone. No hardware needed.</p>
                 </div>
 
-                <div class="bg-white dark:bg-[#12121a] rounded-xl border border-gray-200 dark:border-white/5 p-5 hover:border-indigo-500/30 transition">
-                    <div class="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center mb-3">
-                        <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="bg-white dark:bg-[#12121a] rounded-xl border border-gray-200 dark:border-white/5 p-5 hover:border-sky-500/30 transition">
+                    <div class="w-10 h-10 rounded-lg bg-sky-500/20 flex items-center justify-center mb-3">
+                        <svg class="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
@@ -670,9 +670,9 @@
                     <p class="text-gray-600 dark:text-gray-500 text-sm">Share parking, backline, PA details.</p>
                 </div>
 
-                <div class="bg-white dark:bg-[#12121a] rounded-xl border border-gray-200 dark:border-white/5 p-5 hover:border-fuchsia-500/30 transition">
-                    <div class="w-10 h-10 rounded-lg bg-fuchsia-500/20 flex items-center justify-center mb-3">
-                        <svg class="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="bg-white dark:bg-[#12121a] rounded-xl border border-gray-200 dark:border-white/5 p-5 hover:border-sky-500/30 transition">
+                    <div class="w-10 h-10 rounded-lg bg-sky-500/20 flex items-center justify-center mb-3">
+                        <svg class="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                     </div>
@@ -714,7 +714,7 @@
                     blog-slug="for-concert-halls"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </x-slot:icon>
@@ -728,7 +728,7 @@
                     blog-slug="for-small-music-clubs"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                         </svg>
                     </x-slot:icon>
@@ -742,7 +742,7 @@
                     blog-slug="for-mid-size-music-venues"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                         </svg>
                     </x-slot:icon>
@@ -794,11 +794,11 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="relative bg-gradient-to-br from-violet-600 via-fuchsia-600 to-violet-700 py-24 overflow-hidden">
+    <section class="relative bg-gradient-to-br from-blue-600 via-sky-600 to-blue-700 py-24 overflow-hidden">
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
 
         <div class="absolute top-0 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-[100px]"></div>
-        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-fuchsia-500/20 rounded-full blur-[100px]"></div>
+        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-sky-500/20 rounded-full blur-[100px]"></div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
@@ -807,7 +807,7 @@
             <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
                 Your venue. Your calendar. Your ticket revenue. Free forever.
             </p>
-            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-violet-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
+            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                 Create Your Venue Calendar
                 <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

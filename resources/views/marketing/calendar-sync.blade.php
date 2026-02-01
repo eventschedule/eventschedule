@@ -60,7 +60,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Google Calendar Card -->
                 <a href="{{ marketing_url('/google-calendar') }}" class="group block">
-                    <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 h-full">
+                    <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 h-full">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="w-12 h-12 bg-white dark:bg-gray-800 rounded-xl flex items-center justify-center">
                                 <svg class="w-7 h-7" viewBox="0 0 24 24">
@@ -143,10 +143,10 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 <!-- Bidirectional Sync (full width) -->
-                <div class="bento-card md:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900 dark:to-indigo-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card md:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                 </svg>
@@ -164,8 +164,8 @@
                             <div class="relative animate-float">
                                 <div class="flex items-center gap-4">
                                     <!-- Event Schedule side -->
-                                    <div class="bg-gradient-to-br from-violet-500/20 to-indigo-500/20 rounded-2xl border border-violet-400/30 p-4 w-32">
-                                        <div class="text-xs text-violet-300 mb-2 text-center">Event Schedule</div>
+                                    <div class="bg-gradient-to-br from-blue-500/20 to-sky-500/20 rounded-2xl border border-blue-400/30 p-4 w-32">
+                                        <div class="text-xs text-blue-300 mb-2 text-center">Event Schedule</div>
                                         <div class="space-y-2">
                                             <div class="h-2 bg-white/20 rounded"></div>
                                             <div class="h-2 bg-white/20 rounded w-3/4"></div>
@@ -174,10 +174,10 @@
                                     </div>
                                     <!-- Sync arrows -->
                                     <div class="flex flex-col items-center gap-1">
-                                        <svg class="w-6 h-6 text-violet-400 animate-sync" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg class="w-6 h-6 text-blue-400 animate-sync" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                         </svg>
-                                        <svg class="w-6 h-6 text-violet-400 animate-sync" style="animation-delay: 0.5s;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg class="w-6 h-6 text-blue-400 animate-sync" style="animation-delay: 0.5s;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                         </svg>
                                     </div>
@@ -187,7 +187,7 @@
                                         <div class="space-y-2">
                                             <div class="h-2 bg-blue-400/40 rounded"></div>
                                             <div class="h-2 bg-teal-400/40 rounded w-3/4"></div>
-                                            <div class="h-2 bg-violet-400/40 rounded w-1/2"></div>
+                                            <div class="h-2 bg-blue-400/40 rounded w-1/2"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -197,7 +197,7 @@
                 </div>
 
                 <!-- Attendee Calendar Integration -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900 dark:to-pink-900 border border-gray-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-cyan-100 dark:from-rose-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -249,7 +249,7 @@
                             </svg>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
-                            <div class="w-2 h-2 rounded-full bg-violet-400"></div>
+                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Personal</span>
                         </div>
                     </div>

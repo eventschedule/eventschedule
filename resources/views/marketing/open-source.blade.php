@@ -102,10 +102,10 @@
                                     </div>
                                     <div class="code-block text-xs space-y-1">
                                         <div class="text-gray-500 dark:text-gray-400">// Event Schedule</div>
-                                        <div><span class="text-purple-400">git</span> <span class="text-gray-600 dark:text-gray-300">clone</span></div>
+                                        <div><span class="text-blue-400">git</span> <span class="text-gray-600 dark:text-gray-300">clone</span></div>
                                         <div class="text-cyan-400 text-[10px] break-all">github.com/eventschedule</div>
-                                        <div class="mt-2"><span class="text-purple-400">composer</span> <span class="text-gray-600 dark:text-gray-300">install</span></div>
-                                        <div><span class="text-purple-400">npm</span> <span class="text-gray-600 dark:text-gray-300">run build</span></div>
+                                        <div class="mt-2"><span class="text-blue-400">composer</span> <span class="text-gray-600 dark:text-gray-300">install</span></div>
+                                        <div><span class="text-blue-400">npm</span> <span class="text-gray-600 dark:text-gray-300">run build</span></div>
                                     </div>
                                 </div>
                             </div>
@@ -151,8 +151,8 @@
                 </div>
 
                 <!-- REST API -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900 dark:to-indigo-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                         </svg>
@@ -163,16 +163,16 @@
 
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 code-block text-xs">
                         <div class="text-gray-500 dark:text-gray-400 mb-2"># Create an event</div>
-                        <div class="text-violet-400">POST <span class="text-gray-600 dark:text-gray-300">/api/events/myschedule</span></div>
+                        <div class="text-blue-400">POST <span class="text-gray-600 dark:text-gray-300">/api/events/myschedule</span></div>
                         <div class="text-gray-500 dark:text-gray-400 mt-2">X-API-Key: your_api_key</div>
                     </div>
                 </div>
 
                 <!-- API Endpoints (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-start">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
@@ -270,8 +270,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Automated Imports -->
                 <div class="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-500/20 mb-4">
-                        <svg class="w-6 h-6 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/20 mb-4">
+                        <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
                     </div>
@@ -281,8 +281,8 @@
 
                 <!-- Website Integration -->
                 <div class="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-500/20 mb-4">
-                        <svg class="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-sky-500/20 mb-4">
+                        <svg class="w-6 h-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                         </svg>
                     </div>
@@ -318,19 +318,19 @@
     <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
         <!-- Animated background blobs matching Ticketing page's colors -->
         <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-fuchsia-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-sky-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/features/ticketing') }}" class="group block">
-                <div class="bg-gradient-to-br from-fuchsia-100 to-violet-100 dark:from-fuchsia-900 dark:to-violet-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <!-- Text content -->
                         <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-fuchsia-300 transition-colors">Ticketing</h3>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-300 transition-colors">Ticketing</h3>
                             <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Sell tickets directly from your schedule. QR codes for fast check-ins, Stripe payments built-in.</p>
-                            <span class="inline-flex items-center text-fuchsia-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

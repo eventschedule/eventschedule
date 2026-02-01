@@ -354,10 +354,10 @@
                                 <h3 class="text-xl font-bold text-ivory mb-2 font-serif">Event Planner Kit</h3>
                                 <p class="text-ivory/70 text-sm mb-4">One link with your availability, videos, specs, and rates. Perfect for corporate bookers and wedding planners.</p>
                                 <div class="flex flex-wrap gap-2">
-                                    <span class="inline-flex items-center px-2 py-1 rounded-sm bg-indigo-500/10 text-indigo-400 text-xs border border-indigo-500/20">Demo Reel</span>
-                                    <span class="inline-flex items-center px-2 py-1 rounded-sm bg-indigo-500/10 text-indigo-400 text-xs border border-indigo-500/20">Tech Rider</span>
-                                    <span class="inline-flex items-center px-2 py-1 rounded-sm bg-indigo-500/10 text-indigo-400 text-xs border border-indigo-500/20">Rates</span>
-                                    <span class="inline-flex items-center px-2 py-1 rounded-sm bg-indigo-500/10 text-indigo-400 text-xs border border-indigo-500/20">Availability</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-sm bg-sky-500/10 text-sky-400 text-xs border border-sky-500/20">Demo Reel</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-sm bg-sky-500/10 text-sky-400 text-xs border border-sky-500/20">Tech Rider</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-sm bg-sky-500/10 text-sky-400 text-xs border border-sky-500/20">Rates</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-sm bg-sky-500/10 text-sky-400 text-xs border border-sky-500/20">Availability</span>
                                 </div>
                             </div>
                         </div>
@@ -432,9 +432,9 @@
                 </div>
 
                 <!-- Cruise Ships -->
-                <div class="group relative bg-gradient-to-br from-indigo-900/10 to-circus-dark rounded-lg p-6 border border-indigo-900/20 hover:border-gold/40 transition-all text-center">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-indigo-900/20 mb-4 mx-auto group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="group relative bg-gradient-to-br from-sky-900/10 to-circus-dark rounded-lg p-6 border border-sky-900/20 hover:border-gold/40 transition-all text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-sky-900/20 mb-4 mx-auto group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
@@ -530,7 +530,7 @@
                     blog-slug="for-contortionists"
                 >
                     <x-slot:icon>
-                        <svg class="w-7 h-7 text-fuchsia-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="w-7 h-7 text-sky-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="18" cy="14" r="2" fill="currentColor"/>
                             <path d="M16 14C14 14 12 16 10 16C8 16 6 14 6 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                             <path d="M6 12C6 10 7 8 9 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>

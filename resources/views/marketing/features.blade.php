@@ -33,9 +33,9 @@
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->
         <div class="absolute inset-0">
-            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3"></div>
-            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-fuchsia-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.5s;"></div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[150px] parallax-blob" data-parallax-speed="0.2"></div>
+            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3"></div>
+            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-sky-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-600/10 rounded-full blur-[150px] parallax-blob" data-parallax-speed="0.2"></div>
         </div>
 
         <!-- Grid -->
@@ -60,7 +60,7 @@
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-violet-500/25">
+                <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
                     Start for free
                     <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -83,8 +83,8 @@
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
-                <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-fuchsia-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
-                <div class="absolute bottom-10 right-1/3 w-[300px] h-[300px] bg-pink-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1s;"></div>
+                <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-sky-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
+                <div class="absolute bottom-10 right-1/3 w-[300px] h-[300px] bg-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1s;"></div>
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -92,20 +92,20 @@
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/20 dark:text-fuchsia-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                                 </svg>
                                 Ticketing
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-300 transition-colors">Sell tickets online</h2>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Sell tickets online</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Multiple ticket types, limits, and reservations. Accept payments with Stripe. Zero platform fees.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Zero fees</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">QR check-ins</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Stripe payments</span>
                             </div>
-                            <span class="inline-flex items-center text-fuchsia-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -116,7 +116,7 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float">
-                                <div class="bg-gradient-to-br from-fuchsia-50 to-pink-50 dark:from-fuchsia-900 dark:to-pink-900 rounded-2xl border border-fuchsia-200 dark:border-fuchsia-500/30 p-6 w-72 shadow-2xl shadow-fuchsia-500/10">
+                                <div class="bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-900 dark:to-cyan-900 rounded-2xl border border-sky-200 dark:border-sky-500/30 p-6 w-72 shadow-2xl shadow-sky-500/10">
                                     <div class="space-y-3">
                                         <div class="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10">
                                             <div>
@@ -132,10 +132,10 @@
                                             </div>
                                             <div class="text-xl font-bold text-gray-900 dark:text-white">$25</div>
                                         </div>
-                                        <div class="flex items-center justify-between p-3 rounded-xl bg-fuchsia-100 dark:bg-fuchsia-500/20 border border-fuchsia-200 dark:border-fuchsia-400/30">
+                                        <div class="flex items-center justify-between p-3 rounded-xl bg-sky-100 dark:bg-sky-500/20 border border-sky-200 dark:border-sky-400/30">
                                             <div>
                                                 <div class="text-gray-900 dark:text-white font-medium">VIP</div>
-                                                <div class="text-fuchsia-600 dark:text-fuchsia-300 text-xs">38 sold</div>
+                                                <div class="text-sky-600 dark:text-sky-300 text-xs">38 sold</div>
                                             </div>
                                             <div class="text-xl font-bold text-gray-900 dark:text-white">$75</div>
                                         </div>
@@ -152,8 +152,8 @@
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
-                <div class="absolute top-20 right-1/4 w-[400px] h-[400px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
-                <div class="absolute bottom-20 left-1/3 w-[300px] h-[300px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.2s;"></div>
+                <div class="absolute top-20 right-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
+                <div class="absolute bottom-20 left-1/3 w-[300px] h-[300px] bg-sky-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.2s;"></div>
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -161,19 +161,19 @@
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                                 </svg>
                                 AI-Powered
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-colors">Smart event import</h2>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Smart event import</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Paste text or drop an image. AI extracts title, date, time, venue, and description automatically.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Parse any format</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Instant translation</span>
                             </div>
-                            <span class="inline-flex items-center text-violet-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -195,12 +195,12 @@
                                         </div>
                                     </div>
                                     <!-- Arrow -->
-                                    <svg class="w-6 h-6 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                                     </svg>
                                     <!-- Output -->
-                                    <div class="bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-500/20 dark:to-indigo-500/20 rounded-xl border border-violet-200 dark:border-violet-400/30 p-4 w-56">
-                                        <div class="text-xs text-violet-600 dark:text-violet-300 mb-2">Extracted</div>
+                                    <div class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-500/20 dark:to-sky-500/20 rounded-xl border border-blue-200 dark:border-blue-400/30 p-4 w-56">
+                                        <div class="text-xs text-blue-600 dark:text-blue-300 mb-2">Extracted</div>
                                         <div class="space-y-1.5 text-sm">
                                             <div class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Name:</span><span class="text-gray-900 dark:text-white">Jazz Night</span></div>
                                             <div class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Date:</span><span class="text-gray-900 dark:text-white">Mar 15, 8 PM</span></div>
@@ -365,19 +365,19 @@
         <!-- Visual break - Highlight bar -->
         <section class="relative py-16 overflow-hidden">
             <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-3xl p-8 md:p-12 shadow-xl shadow-violet-500/20">
+                <div class="bg-gradient-to-r from-blue-600 to-sky-600 rounded-3xl p-8 md:p-12 shadow-xl shadow-blue-500/20">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                         <div>
                             <div class="text-3xl md:text-4xl font-bold text-white mb-2">100%</div>
-                            <div class="text-violet-200 text-sm">Free and open source</div>
+                            <div class="text-blue-200 text-sm">Free and open source</div>
                         </div>
                         <div>
                             <div class="text-3xl md:text-4xl font-bold text-white mb-2">0%</div>
-                            <div class="text-violet-200 text-sm">Platform fees on tickets</div>
+                            <div class="text-blue-200 text-sm">Platform fees on tickets</div>
                         </div>
                         <div>
                             <div class="text-3xl md:text-4xl font-bold text-white mb-2">9</div>
-                            <div class="text-violet-200 text-sm">Languages supported</div>
+                            <div class="text-blue-200 text-sm">Languages supported</div>
                         </div>
                     </div>
                 </div>
@@ -422,7 +422,7 @@
                             <div class="animate-float" style="animation-delay: 1s;">
                                 <div class="flex items-center gap-4">
                                     <!-- Event Schedule box -->
-                                    <div class="bg-blue-100 dark:bg-gradient-to-br dark:from-blue-500/20 dark:to-indigo-500/20 rounded-xl border border-blue-200 dark:border-blue-400/30 p-4 w-28">
+                                    <div class="bg-blue-100 dark:bg-gradient-to-br dark:from-blue-500/20 dark:to-sky-500/20 rounded-xl border border-blue-200 dark:border-blue-400/30 p-4 w-28">
                                         <div class="text-xs text-blue-600 dark:text-blue-300 mb-2 text-center">Event Schedule</div>
                                         <div class="space-y-1.5">
                                             <div class="h-2 bg-white/20 rounded"></div>
@@ -524,8 +524,8 @@
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
-                <div class="absolute top-10 left-1/3 w-[400px] h-[400px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
-                <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.1s;"></div>
+                <div class="absolute top-10 left-1/3 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
+                <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.1s;"></div>
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -533,20 +533,20 @@
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                                 </svg>
                                 Embed Calendar
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">Add to any website</h2>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Add to any website</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Embed your event calendar on any site with one line of code. Responsive iframe with dark mode and 9 language support.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">One-line embed</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Responsive</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">9 languages</span>
                             </div>
-                            <span class="inline-flex items-center text-purple-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -567,15 +567,15 @@
                                     <!-- Calendar grid -->
                                     <div class="p-3">
                                         <div class="grid grid-cols-5 gap-1 mb-2">
-                                            <div class="h-4 bg-purple-200 dark:bg-purple-500/30 rounded text-[8px] text-purple-700 dark:text-purple-300 flex items-center justify-center">Mon</div>
+                                            <div class="h-4 bg-blue-200 dark:bg-blue-500/30 rounded text-[8px] text-blue-700 dark:text-blue-300 flex items-center justify-center">Mon</div>
                                             <div class="h-4 bg-gray-100 dark:bg-white/5 rounded"></div>
-                                            <div class="h-4 bg-purple-200 dark:bg-purple-500/30 rounded text-[8px] text-purple-700 dark:text-purple-300 flex items-center justify-center">Wed</div>
+                                            <div class="h-4 bg-blue-200 dark:bg-blue-500/30 rounded text-[8px] text-blue-700 dark:text-blue-300 flex items-center justify-center">Wed</div>
                                             <div class="h-4 bg-gray-100 dark:bg-white/5 rounded"></div>
-                                            <div class="h-4 bg-purple-200 dark:bg-purple-500/30 rounded text-[8px] text-purple-700 dark:text-purple-300 flex items-center justify-center">Fri</div>
+                                            <div class="h-4 bg-blue-200 dark:bg-blue-500/30 rounded text-[8px] text-blue-700 dark:text-blue-300 flex items-center justify-center">Fri</div>
                                         </div>
                                         <!-- Code snippet -->
                                         <div class="bg-gray-100 dark:bg-white/5 rounded-lg p-2 mt-2">
-                                            <code class="text-[9px] text-purple-600 dark:text-purple-300 font-mono break-all">&lt;iframe src="..."&gt;</code>
+                                            <code class="text-[9px] text-blue-600 dark:text-blue-300 font-mono break-all">&lt;iframe src="..."&gt;</code>
                                         </div>
                                     </div>
                                 </div>
@@ -726,7 +726,7 @@
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
                 <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-rose-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
-                <div class="absolute bottom-20 left-1/4 w-[300px] h-[300px] bg-pink-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.4s;"></div>
+                <div class="absolute bottom-20 left-1/4 w-[300px] h-[300px] bg-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.4s;"></div>
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -757,7 +757,7 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.4s;">
-                                <div class="bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900 dark:to-pink-900 rounded-xl border border-rose-200 dark:border-rose-500/30 p-4 w-56">
+                                <div class="bg-gradient-to-br from-rose-50 to-cyan-50 dark:from-rose-900 dark:to-cyan-900 rounded-xl border border-rose-200 dark:border-rose-500/30 p-4 w-56">
                                     <div class="text-xs text-gray-500 dark:text-white/70 mb-3">Sub-schedules</div>
                                     <div class="space-y-2">
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-rose-100 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/30">
@@ -765,15 +765,15 @@
                                             <span class="text-gray-900 dark:text-white text-sm">Main Stage</span>
                                         </div>
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
-                                            <div class="w-2 h-2 rounded-full bg-pink-400"></div>
+                                            <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
                                             <span class="text-gray-600 dark:text-gray-300 text-sm">Acoustic Room</span>
                                         </div>
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
-                                            <div class="w-2 h-2 rounded-full bg-fuchsia-400"></div>
+                                            <div class="w-2 h-2 rounded-full bg-sky-400"></div>
                                             <span class="text-gray-600 dark:text-gray-300 text-sm">Outdoor Patio</span>
                                         </div>
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
-                                            <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+                                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
                                             <span class="text-gray-600 dark:text-gray-300 text-sm">Jazz Lounge</span>
                                         </div>
                                     </div>
@@ -789,8 +789,8 @@
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
-                <div class="absolute top-10 left-1/3 w-[400px] h-[400px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
-                <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.1s;"></div>
+                <div class="absolute top-10 left-1/3 w-[400px] h-[400px] bg-sky-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
+                <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.1s;"></div>
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -798,19 +798,19 @@
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
                                 Online Events
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Go live, anywhere</h2>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Go live, anywhere</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Toggle any event to online and add your streaming URL. Works with Zoom, YouTube, or any platform.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Virtual events</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any streaming platform</span>
                             </div>
-                            <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -821,19 +821,19 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.8s;">
-                                <div class="bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900 dark:to-violet-900 rounded-xl border border-indigo-200 dark:border-indigo-500/30 p-4 w-56">
+                                <div class="bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900 dark:to-blue-900 rounded-xl border border-sky-200 dark:border-sky-500/30 p-4 w-56">
                                     <!-- Toggle switch -->
                                     <div class="flex items-center justify-between mb-4">
                                         <span class="text-gray-600 dark:text-gray-300 text-sm">Online Event</span>
-                                        <div class="w-10 h-5 bg-indigo-500 rounded-full relative">
+                                        <div class="w-10 h-5 bg-sky-500 rounded-full relative">
                                             <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow"></div>
                                         </div>
                                     </div>
                                     <!-- URL field -->
                                     <div>
                                         <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">Streaming URL</div>
-                                        <div class="bg-indigo-100 dark:bg-indigo-500/20 rounded-lg px-3 py-2 text-indigo-600 dark:text-indigo-300 text-sm border border-indigo-200 dark:border-indigo-400/30 flex items-center gap-2">
-                                            <svg class="w-4 h-4 text-indigo-500 dark:text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <div class="bg-sky-100 dark:bg-sky-500/20 rounded-lg px-3 py-2 text-sky-600 dark:text-sky-300 text-sm border border-sky-200 dark:border-sky-400/30 flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-sky-500 dark:text-sky-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
                                             </svg>
                                             <span class="truncate">zoom.us/j/123...</span>
@@ -910,7 +910,7 @@
     </div>
 
     <!-- CTA Section -->
-    <section class="relative bg-gradient-to-br from-violet-600 to-indigo-700 py-24 overflow-hidden">
+    <section class="relative bg-gradient-to-br from-blue-600 to-sky-700 py-24 overflow-hidden">
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -920,7 +920,7 @@
             <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
                 Create your free event schedule in seconds. No credit card required.
             </p>
-            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-violet-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
+            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                 Start for free
                 <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

@@ -142,8 +142,8 @@
 
                     <!-- The Run -->
                     <div class="relative text-center group">
-                        <div class="w-16 h-16 mx-auto rounded-full bg-violet-900/40 border-2 border-violet-700/50 flex items-center justify-center mb-3 group-hover:border-violet-500 transition-colors">
-                            <svg class="w-7 h-7 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="w-16 h-16 mx-auto rounded-full bg-blue-900/40 border-2 border-blue-700/50 flex items-center justify-center mb-3 group-hover:border-blue-500 transition-colors">
+                            <svg class="w-7 h-7 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
@@ -204,20 +204,20 @@
 
                     <!-- Performance list -->
                     <div class="p-6 space-y-3">
-                        <div class="flex items-center gap-4 p-4 rounded-xl bg-violet-500/10 border border-violet-500/20 hover:bg-violet-500/15 transition-colors">
+                        <div class="flex items-center gap-4 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/15 transition-colors">
                             <div class="text-center w-14 flex-shrink-0">
-                                <div class="text-violet-300 text-xs uppercase">Fri</div>
+                                <div class="text-blue-300 text-xs uppercase">Fri</div>
                                 <div class="text-white text-xl font-semibold">Mar 7</div>
                             </div>
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
                                     <span class="text-white font-medium">Preview Night</span>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-xs">Discounted</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-xs">Discounted</span>
                                 </div>
                                 <div class="text-stone-500 text-sm">7:30 PM</div>
                             </div>
                             <div class="text-right">
-                                <div class="text-violet-300 font-medium">$15</div>
+                                <div class="text-blue-300 font-medium">$15</div>
                                 <div class="text-stone-500 text-xs">42 left</div>
                             </div>
                         </div>
@@ -337,8 +337,8 @@
                         </div>
 
                         <div class="space-y-4">
-                            <div class="p-4 rounded-xl bg-gradient-to-r from-violet-900/30 to-transparent border-l-2 border-violet-500">
-                                <div class="text-violet-300 text-xs uppercase tracking-wide mb-1">October 2025</div>
+                            <div class="p-4 rounded-xl bg-gradient-to-r from-blue-900/30 to-transparent border-l-2 border-blue-500">
+                                <div class="text-blue-300 text-xs uppercase tracking-wide mb-1">October 2025</div>
                                 <div class="text-white font-medium">The Crucible</div>
                                 <div class="text-stone-500 text-sm">Arthur Miller</div>
                             </div>
@@ -448,8 +448,8 @@
                 </div>
 
                 <!-- Cast & Crew -->
-                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-950/50 dark:to-violet-900/30 border border-violet-200 dark:border-violet-800/30 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/30 border border-blue-200 dark:border-blue-800/30 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
@@ -460,11 +460,11 @@
 
                     <div class="space-y-2">
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
-                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold">SM</div>
+                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">SM</div>
                             <div class="flex-1">
                                 <div class="text-gray-900 dark:text-white text-sm">Stage Manager</div>
                             </div>
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-[10px]">Admin</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-[10px]">Admin</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white text-xs font-semibold">JK</div>
@@ -514,24 +514,24 @@
                 </div>
 
                 <!-- Virtual Performances -->
-                <a href="{{ marketing_url('/features/online-events') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-950/50 dark:to-indigo-900/30 border border-indigo-200 dark:border-indigo-800/30 p-8 hover:scale-[1.02] transition-all">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
+                <a href="{{ marketing_url('/features/online-events') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-950/50 dark:to-sky-900/30 border border-sky-200 dark:border-sky-800/30 p-8 hover:scale-[1.02] transition-all">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                         Livestream
                     </div>
-                    <h3 class="text-2xl font-light text-gray-900 dark:text-white mb-3 group-hover:text-indigo-300 transition-colors">Stream performances worldwide</h3>
+                    <h3 class="text-2xl font-light text-gray-900 dark:text-white mb-3 group-hover:text-sky-300 transition-colors">Stream performances worldwide</h3>
                     <p class="text-gray-500 dark:text-stone-400 mb-6">Reach audiences who can't make it to the theater. Sell tickets to your stream.</p>
 
                     <div class="flex justify-center">
-                        <div class="w-12 h-12 bg-gradient-to-br from-indigo-500/30 to-blue-500/30 rounded-xl flex items-center justify-center border border-indigo-400/30">
-                            <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="w-12 h-12 bg-gradient-to-br from-sky-500/30 to-blue-500/30 rounded-xl flex items-center justify-center border border-sky-400/30">
+                            <svg class="w-6 h-6 text-sky-600 dark:text-sky-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
                     </div>
-                    <span class="inline-flex items-center text-indigo-600 dark:text-indigo-400 text-sm font-medium mt-4 group-hover:gap-2 gap-1 transition-all">
+                    <span class="inline-flex items-center text-sky-600 dark:text-sky-400 text-sm font-medium mt-4 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

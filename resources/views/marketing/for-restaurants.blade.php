@@ -95,7 +95,7 @@
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300 text-xs font-medium border border-red-200 dark:border-red-500/30">Chef's Table</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 text-xs font-medium border border-orange-200 dark:border-orange-500/30">Tasting Menus</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300 text-xs font-medium border border-yellow-200 dark:border-yellow-500/30">Brunch</span>
-                <span class="inline-flex items-center px-3 py-1 rounded-full bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300 text-xs font-medium border border-pink-200 dark:border-pink-500/30">Private Events</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-xs font-medium border border-cyan-200 dark:border-cyan-500/30">Private Events</span>
             </div>
         </div>
     </section>
@@ -115,7 +115,7 @@
             <!-- Seasonal Calendar Grid -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 <!-- Winter/Early Spring (Jan-Mar) -->
-                <div class="bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/40 dark:to-pink-900/40 rounded-2xl border border-rose-200 dark:border-rose-500/20 p-5 relative overflow-hidden group hover:border-rose-300 dark:hover:border-rose-500/40 transition-colors">
+                <div class="bg-gradient-to-br from-rose-100 to-cyan-100 dark:from-rose-900/40 dark:to-cyan-900/40 rounded-2xl border border-rose-200 dark:border-rose-500/20 p-5 relative overflow-hidden group hover:border-rose-300 dark:hover:border-rose-500/40 transition-colors">
                     <div class="absolute top-2 right-2 text-rose-300 dark:text-rose-400/30 text-4xl">&#10084;</div>
                     <div class="text-rose-600 dark:text-rose-300 text-xs font-semibold tracking-wider uppercase mb-3">Jan - Mar</div>
                     <div class="space-y-2">
@@ -140,7 +140,7 @@
                     <div class="text-emerald-600 dark:text-emerald-300 text-xs font-semibold tracking-wider uppercase mb-3">Apr - Jun</div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
-                            <div class="w-1.5 h-1.5 rounded-full bg-pink-400"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-cyan-400"></div>
                             <span class="text-gray-900 dark:text-white text-sm font-medium">Mother's Day Brunch</span>
                         </div>
                         <div class="flex items-center gap-2">
@@ -148,7 +148,7 @@
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Spring Menu Launch</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
                             <span class="text-gray-600 dark:text-gray-300 text-sm">Graduation Dinners</span>
                         </div>
                     </div>
@@ -292,8 +292,8 @@
                 </div>
 
                 <!-- Special Occasion Packages -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-900 dark:to-rose-900 border border-pink-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-rose-100 dark:from-cyan-900 dark:to-rose-900 border border-cyan-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -308,8 +308,8 @@
                             <div class="text-rose-500 dark:text-rose-400 text-lg">&#10084;</div>
                             <div class="text-gray-500 dark:text-gray-400 text-[9px]">V-Day</div>
                         </div>
-                        <div class="text-center p-2 rounded-lg bg-pink-100 dark:bg-pink-500/20 border border-pink-200 dark:border-pink-500/30">
-                            <div class="text-pink-500 dark:text-pink-400 text-lg">&#127800;</div>
+                        <div class="text-center p-2 rounded-lg bg-cyan-100 dark:bg-cyan-500/20 border border-cyan-200 dark:border-cyan-500/30">
+                            <div class="text-cyan-500 dark:text-cyan-400 text-lg">&#127800;</div>
                             <div class="text-gray-500 dark:text-gray-400 text-[9px]">Mom</div>
                         </div>
                         <div class="text-center p-2 rounded-lg bg-orange-100 dark:bg-orange-500/20 border border-orange-200 dark:border-orange-500/30">
@@ -324,10 +324,10 @@
                 </div>
 
                 <!-- Private Dining Inquiries (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900 dark:to-violet-900 border border-indigo-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-sky-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
@@ -344,11 +344,11 @@
                         <div class="bg-white dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10">
                             <div class="text-xs text-gray-500 dark:text-gray-400 mb-3">Private Dining Requests</div>
                             <div class="space-y-2">
-                                <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-400/30">
-                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white text-xs font-semibold">EB</div>
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-sky-100 dark:bg-sky-500/20 border border-sky-200 dark:border-sky-400/30">
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">EB</div>
                                     <div class="flex-1">
                                         <div class="text-gray-900 dark:text-white text-sm font-medium">Emily B. - Company Dinner</div>
-                                        <div class="text-indigo-600 dark:text-indigo-300 text-xs">Dec 15 &bull; Party of 24 &bull; ~$3,500</div>
+                                        <div class="text-sky-600 dark:text-sky-300 text-xs">Dec 15 &bull; Party of 24 &bull; ~$3,500</div>
                                     </div>
                                     <div class="flex gap-1">
                                         <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
@@ -360,7 +360,7 @@
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-white/5">
-                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold">MK</div>
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">MK</div>
                                     <div class="flex-1">
                                         <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Michael K. - 50th Birthday</div>
                                         <div class="text-gray-500 dark:text-gray-400 text-xs">Jan 8 &bull; Party of 16</div>
@@ -430,8 +430,8 @@
                 </div>
 
                 <!-- Event Photos for Instagram - BOTTOM RIGHT -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuchsia-100 to-pink-100 dark:from-fuchsia-900 dark:to-pink-900 border border-fuchsia-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-100 dark:bg-fuchsia-500/20 text-fuchsia-600 dark:text-fuchsia-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900 border border-sky-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -441,13 +441,13 @@
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Auto-generate promo graphics for your events. Download and post in seconds.</p>
 
                     <div class="flex justify-center">
-                        <div class="relative w-32 h-32 bg-fuchsia-100 dark:bg-gradient-to-br dark:from-fuchsia-500/30 dark:to-pink-500/30 rounded-xl border border-fuchsia-200 dark:border-fuchsia-400/30 p-2">
+                        <div class="relative w-32 h-32 bg-sky-100 dark:bg-gradient-to-br dark:from-sky-500/30 dark:to-cyan-500/30 rounded-xl border border-sky-200 dark:border-sky-400/30 p-2">
                             <div class="w-full h-full bg-gradient-to-br from-rose-600/40 to-amber-600/40 rounded-lg flex flex-col items-center justify-center">
                                 <div class="text-white text-[10px] font-semibold mb-1">THIS FRIDAY</div>
-                                <div class="text-fuchsia-200 text-xs font-bold">Harvest Dinner</div>
+                                <div class="text-sky-200 text-xs font-bold">Harvest Dinner</div>
                                 <div class="text-gray-300 dark:text-gray-400 text-[8px] mt-1">5 courses + wine</div>
                             </div>
-                            <div class="absolute -bottom-2 -right-2 w-6 h-6 bg-fuchsia-500 rounded-full flex items-center justify-center">
+                            <div class="absolute -bottom-2 -right-2 w-6 h-6 bg-sky-500 rounded-full flex items-center justify-center">
                                 <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                 </svg>
@@ -524,8 +524,8 @@
 
                     <!-- Step 5: Advocate -->
                     <div class="text-center">
-                        <div class="w-16 h-16 bg-violet-100 dark:bg-gradient-to-br dark:from-violet-500/30 dark:to-purple-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-violet-200 dark:border-violet-500/30">
-                            <svg class="w-7 h-7 text-violet-500 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="w-16 h-16 bg-blue-100 dark:bg-gradient-to-br dark:from-blue-500/30 dark:to-blue-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-200 dark:border-blue-500/30">
+                            <svg class="w-7 h-7 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                             </svg>
                         </div>
@@ -540,28 +540,28 @@
     <!-- Virtual Cooking Classes Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
         <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-sky-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/features/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900 dark:to-violet-900 rounded-3xl border border-indigo-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-3xl border border-sky-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-300 text-sm font-medium mb-4">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
                                 Online Events
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Teach the world your secrets</h3>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Teach the world your secrets</h3>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">Virtual cooking classes. Live wine tastings. Fans anywhere can join, pay, and cook along.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Cooking classes</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Wine tastings</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Global reach</span>
                             </div>
-                            <span class="inline-flex items-center text-indigo-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -577,7 +577,7 @@
                                         <span class="text-red-400 text-[10px]">LIVE</span>
                                     </div>
                                 </div>
-                                <div class="bg-indigo-100 dark:bg-gradient-to-br dark:from-indigo-600/30 dark:to-violet-600/30 rounded-lg p-4 text-center mb-3">
+                                <div class="bg-sky-100 dark:bg-gradient-to-br dark:from-sky-600/30 dark:to-blue-600/30 rounded-lg p-4 text-center mb-3">
                                     <div class="text-2xl mb-1">&#127859;</div>
                                     <div class="text-gray-900 dark:text-white text-sm font-medium">Pasta Making</div>
                                     <div class="text-gray-500 dark:text-gray-400 text-xs">with Chef Marco</div>
@@ -659,7 +659,7 @@
                     blog-slug="for-supper-clubs"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                     </x-slot:icon>
@@ -687,7 +687,7 @@
                     blog-slug="for-chefs-tables"
                 >
                     <x-slot:icon>
-                        <svg class="w-6 h-6 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-6 h-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </x-slot:icon>

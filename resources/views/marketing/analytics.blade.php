@@ -138,7 +138,7 @@
                             <span class="text-gray-900 dark:text-white font-medium">35%</span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <div class="w-3 h-3 rounded-full bg-indigo-400"></div>
+                            <div class="w-3 h-3 rounded-full bg-sky-400"></div>
                             <span class="text-gray-600 dark:text-white/80 text-sm flex-1">Tablet</span>
                             <span class="text-gray-900 dark:text-white font-medium">3%</span>
                         </div>
@@ -146,8 +146,8 @@
                 </div>
 
                 <!-- Traffic Sources -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 border border-gray-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 text-sm font-medium mb-4">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-blue-100 dark:from-blue-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                         </svg>
@@ -159,25 +159,25 @@
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
                             <div class="flex-1 h-2 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
-                                <div class="h-full bg-violet-400 rounded-full" style="width: 45%"></div>
+                                <div class="h-full bg-blue-400 rounded-full" style="width: 45%"></div>
                             </div>
                             <span class="text-gray-500 dark:text-gray-400 text-xs w-16">Direct</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="flex-1 h-2 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
-                                <div class="h-full bg-purple-400 rounded-full" style="width: 30%"></div>
+                                <div class="h-full bg-blue-400 rounded-full" style="width: 30%"></div>
                             </div>
                             <span class="text-gray-500 dark:text-gray-400 text-xs w-16">Social</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="flex-1 h-2 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
-                                <div class="h-full bg-fuchsia-400 rounded-full" style="width: 15%"></div>
+                                <div class="h-full bg-sky-400 rounded-full" style="width: 15%"></div>
                             </div>
                             <span class="text-gray-500 dark:text-gray-400 text-xs w-16">Search</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="flex-1 h-2 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
-                                <div class="h-full bg-pink-400 rounded-full" style="width: 10%"></div>
+                                <div class="h-full bg-cyan-400 rounded-full" style="width: 10%"></div>
                             </div>
                             <span class="text-gray-500 dark:text-gray-400 text-xs w-16">Email</span>
                         </div>
@@ -313,19 +313,19 @@
     <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
         <!-- Animated background blobs matching Embed Calendar page's colors -->
         <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-purple-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ marketing_url('/features/embed-calendar') }}" class="group block">
-                <div class="bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-900 dark:to-violet-900 rounded-3xl border border-purple-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                <div class="bg-gradient-to-br from-blue-100 to-blue-100 dark:from-blue-900 dark:to-blue-900 rounded-3xl border border-blue-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <!-- Text content -->
                         <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">Embed Calendar</h3>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Embed Calendar</h3>
                             <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Add your event calendar to any website with one line of code. Responsive and multilingual.</p>
-                            <span class="inline-flex items-center text-purple-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -343,14 +343,14 @@
                                 </div>
                                 <div class="p-3">
                                     <div class="grid grid-cols-5 gap-0.5 mb-2">
-                                        <div class="h-3 bg-purple-200 dark:bg-purple-500/30 rounded"></div>
+                                        <div class="h-3 bg-blue-200 dark:bg-blue-500/30 rounded"></div>
                                         <div class="h-3 bg-gray-100 dark:bg-white/5 rounded"></div>
-                                        <div class="h-3 bg-purple-200 dark:bg-purple-500/30 rounded"></div>
+                                        <div class="h-3 bg-blue-200 dark:bg-blue-500/30 rounded"></div>
                                         <div class="h-3 bg-gray-100 dark:bg-white/5 rounded"></div>
-                                        <div class="h-3 bg-purple-200 dark:bg-purple-500/30 rounded"></div>
+                                        <div class="h-3 bg-blue-200 dark:bg-blue-500/30 rounded"></div>
                                     </div>
                                     <div class="bg-gray-100 dark:bg-white/5 rounded p-1.5">
-                                        <code class="text-[8px] text-purple-500 dark:text-purple-300 font-mono">&lt;iframe&gt;</code>
+                                        <code class="text-[8px] text-blue-500 dark:text-blue-300 font-mono">&lt;iframe&gt;</code>
                                     </div>
                                 </div>
                             </div>
