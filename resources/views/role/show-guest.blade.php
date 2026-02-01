@@ -487,8 +487,8 @@
           border: 1px solid #d1d5db !important;
         }
         .dark .calendar-panel-border {
-          background: #1f2937 !important;
-          border-color: #374151 !important;
+          background: #252526 !important;
+          border-color: #2d2d30 !important;
         }
         .calendar-panel-border-transparent {
           background: transparent !important;
@@ -499,7 +499,7 @@
       </style>
 
       <div
-        class="calendar-panel-border mb-6 px-6 lg:px-16 pt-2 pb-4"
+        class="calendar-panel-border mb-6 px-6 lg:px-16 pb-6"
         id="calendar-panel-wrapper"
       >
         @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'eventLayout' => $role->event_layout ?? 'calendar', 'pastEvents' => $pastEvents ?? collect()])
