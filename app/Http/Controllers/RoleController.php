@@ -958,10 +958,6 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        if (! is_hosted_or_admin()) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
         $role = new Role;
         $role->type = $type;
         $role->font_family = 'Roboto';
@@ -1043,10 +1039,6 @@ class RoleController extends Controller
     public function store(RoleCreateRequest $request): RedirectResponse
     {
         if (is_demo_mode()) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
-        if (! is_hosted_or_admin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -1234,10 +1226,6 @@ class RoleController extends Controller
 
     public function edit($subdomain)
     {
-        if (! is_hosted_or_admin()) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
         if (! auth()->user()->isMember($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
@@ -1307,10 +1295,6 @@ class RoleController extends Controller
 
     public function update(RoleUpdateRequest $request, $subdomain): RedirectResponse
     {
-        if (! is_hosted_or_admin()) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
         if (! auth()->user()->isMember($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
@@ -2583,10 +2567,6 @@ class RoleController extends Controller
      */
     public function testEmail(Request $request, $subdomain): JsonResponse
     {
-        if (! is_hosted_or_admin()) {
-            return response()->json(['error' => __('messages.not_authorized')], 403);
-        }
-
         if (! auth()->user()->isMember($subdomain)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
