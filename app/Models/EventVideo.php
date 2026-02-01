@@ -9,6 +9,7 @@ class EventVideo extends Model
     protected $fillable = [
         'event_id',
         'event_part_id',
+        'event_date',
         'user_id',
         'youtube_url',
         'is_approved',

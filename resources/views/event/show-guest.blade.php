@@ -733,6 +733,9 @@
                       <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex items-stretch gap-2">
                         @csrf
                         <input type="hidden" name="event_part_id" value="{{ \App\Utils\UrlUtils::encodeId($part->id) }}">
+                        @if ($event->days_of_week && $date)
+                        <input type="hidden" name="event_date" value="{{ $date }}">
+                        @endif
                         <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" required>
                         <button type="submit" class="text-xs px-3 py-1 rounded" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
@@ -741,6 +744,9 @@
                       <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex items-start gap-2">
                         @csrf
                         <input type="hidden" name="event_part_id" value="{{ \App\Utils\UrlUtils::encodeId($part->id) }}">
+                        @if ($event->days_of_week && $date)
+                        <input type="hidden" name="event_date" value="{{ $date }}">
+                        @endif
                         <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" rows="2" required></textarea>
                         <button type="submit" class="text-xs px-3 py-1 rounded self-start" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
@@ -794,6 +800,9 @@
                       <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex items-stretch gap-2">
                         @csrf
                         <input type="hidden" name="event_part_id" value="{{ \App\Utils\UrlUtils::encodeId($part->id) }}">
+                        @if ($event->days_of_week && $date)
+                        <input type="hidden" name="event_date" value="{{ $date }}">
+                        @endif
                         <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" required>
                         <button type="submit" class="text-xs px-3 py-1 rounded" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
@@ -802,6 +811,9 @@
                       <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex items-start gap-2">
                         @csrf
                         <input type="hidden" name="event_part_id" value="{{ \App\Utils\UrlUtils::encodeId($part->id) }}">
+                        @if ($event->days_of_week && $date)
+                        <input type="hidden" name="event_date" value="{{ $date }}">
+                        @endif
                         <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" rows="2" required></textarea>
                         <button type="submit" class="text-xs px-3 py-1 rounded self-start" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
@@ -858,6 +870,9 @@
             <div x-show="showVideo" x-cloak class="w-full mt-2">
               <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex items-stretch gap-2">
                 @csrf
+                @if ($event->days_of_week && $date)
+                <input type="hidden" name="event_date" value="{{ $date }}">
+                @endif
                 <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" required>
                 <button type="submit" class="text-xs px-3 py-1 rounded" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
               </form>
@@ -865,6 +880,9 @@
             <div x-show="showComment" x-cloak class="w-full mt-2">
               <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex items-start gap-2">
                 @csrf
+                @if ($event->days_of_week && $date)
+                <input type="hidden" name="event_date" value="{{ $date }}">
+                @endif
                 <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" rows="2" required></textarea>
                 <button type="submit" class="text-xs px-3 py-1 rounded self-start" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
               </form>
