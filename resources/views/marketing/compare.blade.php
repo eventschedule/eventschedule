@@ -126,9 +126,10 @@
                                     ['Built-in analytics', 'Yes (Free)', 'Yes', 'Yes', 'Yes'],
                                 ],
                                 'Unique Features' => [
-                                    ['AI event parsing', 'Yes (Pro)', 'No', 'No', 'No'],
+                                    ['AI event parsing (incl. agendas)', 'Yes (Pro)', 'No', 'No', 'No'],
                                     ['Event graphics gen', 'Yes (Pro)', 'No', 'No', 'No'],
                                     ['Sub-schedules', 'Yes (Free)', 'No', 'No', 'No'],
+                                    ['Fan videos & comments', 'Yes (Free)', 'No', 'No', 'No'],
                                     ['Team collaboration', 'Yes (Free)', 'Yes', '3 admins (free), 5 (Plus)', 'Yes'],
                                 ],
                                 'Platform' => [

@@ -622,7 +622,7 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Build Your Audience</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-sm">
-                        Fans can follow your schedule and get notified about new shows automatically.
+                        Fans can follow your schedule, get notified about new shows, and add videos and comments to your events.
                     </p>
                 </div>
             </div>
@@ -671,7 +671,8 @@
             "Direct ticket sales",
             "Venue linking",
             "Availability tracking",
-            "Team collaboration"
+            "Team collaboration",
+            "Fan videos and comments on events"
         ],
         "url": "{{ url()->current() }}",
         "provider": {

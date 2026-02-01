@@ -1267,7 +1267,7 @@
         </div>
 
         {{-- List View (Mobile) --}}
-        <div v-show="currentView === 'list'" class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+        <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Upcoming events grouped by date --}}
             <div v-if="listViewUpcomingGroups.length > 0" class="space-y-6">
                 <template v-for="(group, groupIndex) in listViewUpcomingGroups" :key="'list-m-' + group.date">

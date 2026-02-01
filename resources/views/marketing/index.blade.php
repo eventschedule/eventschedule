@@ -264,7 +264,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">AI-Powered</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Auto-extract event details with AI parsing. Translate your entire schedule instantly.</p>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Auto-extract event details from flyers, agendas, and setlists with AI parsing. Translate instantly.</p>
                     <span class="inline-flex items-center mt-3 text-sm font-medium text-sky-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -391,16 +391,16 @@
                     </span>
                 </a>
 
-                <!-- Online Events -->
-                <a href="{{ marketing_url('/features/online-events') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-sky-200 dark:hover:border-sky-500/30 transition-all" aria-label="Learn more about online events">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-sky-100 dark:bg-sky-500/20 mb-4">
-                        <svg class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                <!-- Fan Videos & Comments -->
+                <a href="{{ marketing_url('/features') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-rose-200 dark:hover:border-rose-500/30 transition-all" aria-label="Learn more about fan videos and comments">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-500/20 mb-4">
+                        <svg class="w-6 h-6 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">Online Events</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Sell tickets to virtual events. Share streaming links with ticket holders automatically.</p>
-                    <span class="inline-flex items-center mt-3 text-sm font-medium text-sky-600 group-hover:gap-2 gap-1 transition-all">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">Fan Videos & Comments</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Let fans add YouTube videos and comments to your events. Build community around your shows.</p>
+                    <span class="inline-flex items-center mt-3 text-sm font-medium text-rose-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>

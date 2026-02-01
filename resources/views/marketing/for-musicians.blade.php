@@ -552,7 +552,7 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Grow your fanbase</h3>
                     <p class="text-gray-500 dark:text-gray-400 text-sm">
-                        Fans follow your schedule and get notified about shows near them. Build your audience on your terms.
+                        Fans follow your schedule, get notified about shows near them, and share videos and comments after your gigs. Build your audience on your terms.
                     </p>
                 </div>
             </div>
@@ -607,7 +607,9 @@
             "Google Calendar sync for gigs, rehearsals, sessions",
             "Venue auto-linking for clubs, theaters, festivals",
             "Band and manager collaboration",
-            "Fan notifications for nearby shows"
+            "Fan notifications for nearby shows",
+            "Fan videos and comments on events",
+            "Setlist image parsing"
         ],
         "url": "{{ url()->current() }}",
         "provider": {
