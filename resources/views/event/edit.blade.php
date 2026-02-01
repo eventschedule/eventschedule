@@ -1841,6 +1841,9 @@
                                 </div>
                                 <p class="text-sm text-gray-600 dark:text-gray-400">
                                     {{ $video->eventPart ? $video->eventPart->name : __('messages.general') }}
+                                    @if ($video->event_date)
+                                    &middot; {{ \Carbon\Carbon::parse($video->event_date)->format('M j, Y') }}
+                                    @endif
                                     &middot; {{ __('messages.submitted_by') }} {{ $video->user?->name }}
                                 </p>
                             </div>
@@ -1864,6 +1867,9 @@
                                 <p class="text-gray-800 dark:text-gray-200">{{ $comment->comment }}</p>
                                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                                     {{ $comment->eventPart ? $comment->eventPart->name : __('messages.general') }}
+                                    @if ($comment->event_date)
+                                    &middot; {{ \Carbon\Carbon::parse($comment->event_date)->format('M j, Y') }}
+                                    @endif
                                     &middot; {{ __('messages.submitted_by') }} {{ $comment->user?->name }}
                                 </p>
                             </div>
@@ -1897,6 +1903,9 @@
                                 </div>
                                 <p class="text-sm text-gray-600 dark:text-gray-400">
                                     {{ $video->eventPart ? $video->eventPart->name : __('messages.general') }}
+                                    @if ($video->event_date)
+                                    &middot; {{ \Carbon\Carbon::parse($video->event_date)->format('M j, Y') }}
+                                    @endif
                                     &middot; {{ __('messages.submitted_by') }} {{ $video->user?->name }}
                                 </p>
                             </div>
@@ -1916,6 +1925,9 @@
                                 <p class="text-gray-800 dark:text-gray-200">{{ $comment->comment }}</p>
                                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                                     {{ $comment->eventPart ? $comment->eventPart->name : __('messages.general') }}
+                                    @if ($comment->event_date)
+                                    &middot; {{ \Carbon\Carbon::parse($comment->event_date)->format('M j, Y') }}
+                                    @endif
                                     &middot; {{ __('messages.submitted_by') }} {{ $comment->user?->name }}
                                 </p>
                             </div>
