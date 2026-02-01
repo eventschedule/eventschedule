@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Utils\UrlUtils;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -9,6 +10,11 @@ use Illuminate\Support\Str;
 class BlogPost extends Model
 {
     use HasFactory;
+
+    public function encodeId()
+    {
+        return UrlUtils::encodeId($this->id);
+    }
 
     protected $fillable = [
         'title',

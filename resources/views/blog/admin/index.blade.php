@@ -159,11 +159,11 @@
                                                             {{ __('messages.preview') }}
                                                         </a>
                                                     @endif
-                                                    <a href="{{ route('blog.edit', $post) }}"
+                                                    <a href="{{ route('blog.edit', $post->encodeId()) }}"
                                                        class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors">
                                                         {{ __('messages.edit') }}
                                                     </a>
-                                                    <form method="POST" action="{{ route('blog.destroy', $post) }}"
+                                                    <form method="POST" action="{{ route('blog.destroy', $post->encodeId()) }}"
                                                           onsubmit="return confirm('{{ __('messages.confirm_delete_post') }}')"
                                                           class="inline">
                                                         @csrf

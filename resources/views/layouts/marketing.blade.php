@@ -80,12 +80,7 @@
         "@type": "WebSite",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
-        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}",
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://www.google.com/search?q=site%3Aeventschedule.com+{search_term_string}",
-            "query-input": "required name=search_term_string"
-        }
+        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}"
     }
     </script>
     <script type="application/ld+json">

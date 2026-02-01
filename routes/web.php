@@ -24,7 +24,7 @@ use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/robots.txt', function () {
-    $content = "User-agent: *\nDisallow:\n\nSitemap: ".config('app.url')."/sitemap.xml\n";
+    $content = "User-agent: *\nDisallow: /login\nDisallow: /register\nDisallow: /password\nDisallow: /checkout\nDisallow: /home\n\nSitemap: ".config('app.url')."/sitemap.xml\n";
 
     return response($content, 200)->header('Content-Type', 'text/plain');
 });
@@ -240,7 +240,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/api-settings/show-key', [ApiSettingsController::class, 'showApiKey'])->name('api-settings.show-key');
 
     // Admin routes (only for admin users) - protected by admin middleware for defense-in-depth
-    Route::middleware(['admin'])->group(function () {
+    Route::middleware(['admin', 'throttle:30,1'])->group(function () {
         Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         Route::redirect('/admin', '/admin/dashboard');
         Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
@@ -254,9 +254,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/blog', [BlogController::class, 'adminIndex'])->name('blog.admin.index');
         Route::get('/admin/blog/create', [BlogController::class, 'create'])->name('blog.create');
         Route::post('/admin/blog', [BlogController::class, 'store'])->name('blog.store');
-        Route::get('/admin/blog/{blogPost}/edit', [BlogController::class, 'edit'])->name('blog.edit');
-        Route::put('/admin/blog/{blogPost}', [BlogController::class, 'update'])->name('blog.update');
-        Route::delete('/admin/blog/{blogPost}', [BlogController::class, 'destroy'])->name('blog.destroy');
+        Route::get('/admin/blog/{blog_post}/edit', [BlogController::class, 'edit'])->name('blog.edit');
+        Route::put('/admin/blog/{blog_post}', [BlogController::class, 'update'])->name('blog.update');
+        Route::delete('/admin/blog/{blog_post}', [BlogController::class, 'destroy'])->name('blog.destroy');
         Route::post('/admin/blog/generate-content', [BlogController::class, 'generateContent'])->name('blog.generate-content');
     });
 });

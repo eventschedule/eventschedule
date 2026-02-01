@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
 use App\Utils\GeminiUtils;
+use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -155,11 +156,13 @@ class BlogController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(BlogPost $blogPost)
+    public function edit(string $blogPostId)
     {
         if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
+
+        $blogPost = BlogPost::findOrFail(UrlUtils::decodeId($blogPostId));
 
         return view('blog.edit', compact('blogPost'));
     }
@@ -167,11 +170,13 @@ class BlogController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, BlogPost $blogPost)
+    public function update(Request $request, string $blogPostId)
     {
         if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
+
+        $blogPost = BlogPost::findOrFail(UrlUtils::decodeId($blogPostId));
 
         $request->validate([
             'title' => 'required|string|max:255',
@@ -208,12 +213,13 @@ class BlogController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(BlogPost $blogPost)
+    public function destroy(string $blogPostId)
     {
         if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        $blogPost = BlogPost::findOrFail(UrlUtils::decodeId($blogPostId));
         $blogPost->delete();
 
         return redirect()->route('blog.admin.index')->with('message', 'Blog post deleted successfully.');

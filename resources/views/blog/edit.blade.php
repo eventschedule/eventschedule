@@ -19,7 +19,7 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ route('blog.update', $blogPost) }}" class="mt-8 space-y-8">
+        <form method="POST" action="{{ route('blog.update', $blogPost->encodeId()) }}" class="mt-8 space-y-8">
             @csrf
             @method('PUT')
 
