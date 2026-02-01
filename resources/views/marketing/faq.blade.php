@@ -3,6 +3,209 @@
     <x-slot name="description">Find answers to frequently asked questions about Event Schedule. Learn about pricing, features, ticketing, Google Calendar sync, selfhosting, and more.</x-slot>
     <x-slot name="keywords">event schedule faq, event calendar questions, ticketing faq, google calendar sync help, selfhost event calendar, event management help</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is Event Schedule?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Event Schedule is a free, open-source platform that lets you create beautiful, shareable event calendars and sell tickets. Whether you're a musician sharing gig dates, a venue managing your lineup, or a food truck posting daily locations, Event Schedule gives you a professional calendar your audience can easily access."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is Event Schedule really free?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. The free plan includes unlimited events, mobile-optimized calendars, Google Calendar sync, team collaboration, venue location maps, and more. These features are free forever, not a trial. The Pro plan (which adds ticketing, custom domains, and branding removal) is free for your first year, then $5/month after that."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Do I need technical skills to use it?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. Creating your schedule takes just a few clicks. Add your events, customize the look, and share the link. You can also paste event details or drop an image and our AI will extract the information automatically."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I embed my schedule on my website?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Every schedule has an embed code you can copy and paste into your website. The embedded calendar matches your site and updates automatically when you add or change events."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What's the difference between Free and Pro?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "The Free plan includes everything you need for a professional event calendar: unlimited events, Google Calendar sync, team collaboration, and mobile-optimized design. Pro adds ticketing with QR check-ins, the ability to remove Event Schedule branding, event graphics generation, custom domains, REST API access, and multiple team members."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Do you take a percentage of my ticket sales?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. We never take a cut of your ticket revenue. When you sell tickets through Event Schedule, you pay only Stripe's standard processing fees (approximately 2.9% + $0.30 per transaction). The rest is yours."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What happens when my free Pro year ends?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "After your first year, Pro costs $5/month (or $50/year). You'll receive a reminder before the year ends. If you choose not to continue, your account reverts to the Free plan. You keep all your events and data; you just lose access to Pro features like ticketing and custom domains."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I cancel anytime?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. There are no contracts or cancellation fees. Cancel your Pro subscription whenever you want, and your account stays active on the Free plan."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I start selling tickets?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "First, connect your Stripe account (takes about 2 minutes). Then, when creating or editing an event, add ticket types with names, prices, and quantities. Your attendees can purchase directly from your event page and receive tickets with QR codes via email."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I create different ticket types for one event?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. You can create multiple ticket types per event, such as General Admission, VIP, Early Bird, or Student pricing. Each type can have its own price, quantity limit, and description."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do QR check-ins work?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "When someone buys a ticket, they receive an email with a QR code. At your event, open the check-in screen on any smartphone or tablet, scan the QR code, and the system verifies the ticket and marks it as used. No special hardware required."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I collect additional information from ticket buyers?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. You can add custom fields to your ticket forms, including text fields, dropdowns, date pickers, and yes/no questions. Use these to collect meal preferences, t-shirt sizes, accessibility needs, or any other information."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I offer free tickets alongside paid ones?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. You can mix free and paid ticket types on the same event. This is useful for comp tickets, volunteer passes, or free admission with optional paid upgrades."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Does Event Schedule sync with Google Calendar?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, and it's bidirectional. Events you create in Event Schedule automatically appear in your connected Google Calendar. Events you add to Google Calendar also sync back to Event Schedule. Changes update in real-time via webhooks."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can my audience add events to their personal calendars?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Every event page has \"Add to Calendar\" buttons that let visitors save the event to Google Calendar, Apple Calendar, Outlook, or download an ICS file. This works for both you and your attendees."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What's the difference between a schedule, a sub-schedule, and an event?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "A schedule is your main calendar (like \"The Blue Note\" or \"DJ Sarah\"). Sub-schedules help organize events within that calendar by category, room, or series (like \"Main Stage\" and \"Lounge\"). Events are the individual shows, performances, or happenings on your schedule."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I create recurring events?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. When creating an event, you can set it to repeat daily, weekly, biweekly, or monthly. You can also specify an end date or number of occurrences. Each occurrence can be edited individually if needed."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Who can see my schedule?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "By default, your schedule is public so your audience can find it. However, you control what information appears. You can also make individual events private or require a password."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is payment processing secure?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. We never see or store your customers' credit card numbers. All payment processing happens through Stripe, which is PCI-DSS compliant and uses industry-standard encryption."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Do you sell my data?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. We don't sell, share, or use your data for advertising. Our built-in analytics are privacy-first and don't use external trackers. If you selfhost, your data stays entirely on your own servers."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is Event Schedule open source?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Event Schedule is open source and licensed under the AAL (Attribution Assurance License). You can view the full source code on GitHub, contribute improvements, report issues, or fork it for your own projects."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I selfhost Event Schedule?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Download the code from GitHub and run it on your own server. Selfhosting is completely free and includes all features, including Pro features. This gives you complete control over your data and customization options."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is there an API?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Pro users have access to our REST API, which lets you programmatically create events, manage schedules, retrieve ticket sales, and integrate with your own systems."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What languages does Event Schedule support?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "The interface is available in 9 languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, and Arabic. You can also use AI-powered translation to automatically translate your event descriptions."
+                }
+            }
+        ]
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->
