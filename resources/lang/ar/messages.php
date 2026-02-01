@@ -1378,6 +1378,7 @@ return [
     'left' => 'يسار',
     'center' => 'وسط',
     'right' => 'يمين',
+    'design' => 'التصميم',
 
     // Fan content
     'paste_youtube_url' => '...الصق رابط YouTube',
@@ -1402,4 +1403,5 @@ return [
     'submit' => 'ارسال',
     'general' => 'عام',
     'invalid_input' => 'ادخال غير صالح',
+    'subject' => 'الموضوع',
 ];

@@ -1377,6 +1377,7 @@ return [
     'left' => 'Izquierda',
     'center' => 'Centro',
     'right' => 'Derecha',
+    'design' => 'Diseno',
 
     // Fan content
     'paste_youtube_url' => 'Pegar URL de YouTube...',
@@ -1401,4 +1402,5 @@ return [
     'submit' => 'Enviar',
     'general' => 'General',
     'invalid_input' => 'Entrada no valida',
+    'subject' => 'Asunto',
 ];

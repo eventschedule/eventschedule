@@ -1375,6 +1375,7 @@ return [
     'left' => 'Links',
     'center' => 'Gecentreerd',
     'right' => 'Rechts',
+    'design' => 'Ontwerp',
 
     // Fan content
     'paste_youtube_url' => 'Plak YouTube-URL...',
@@ -1399,4 +1400,5 @@ return [
     'submit' => 'Versturen',
     'general' => 'Algemeen',
     'invalid_input' => 'Ongeldige invoer',
+    'subject' => 'Onderwerp',
 ];

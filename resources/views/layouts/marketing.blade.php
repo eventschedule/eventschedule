@@ -35,7 +35,7 @@
     <meta name="theme-color" content="#0a0a0f" media="(prefers-color-scheme: dark)">
 
     <!-- SEO Meta Tags -->
-    @php $canonicalPath = config('app.url') . '/' . ltrim(request()->path(), '/'); @endphp
+    @php $canonicalPath = config('app.url') . '/' . ltrim(rtrim(request()->path(), '/'), '/'); @endphp
     <link rel="canonical" href="{{ $canonicalPath }}">
     <!-- Hreflang tags for all supported languages -->
     <link rel="alternate" hreflang="x-default" href="{{ $canonicalPath }}">
@@ -71,6 +71,7 @@
     <meta name="twitter:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
     <meta name="twitter:image" content="{{ config('app.url') }}/images/{{ $socialImage ?? 'social/home.png' }}">
     <meta name="twitter:image:alt" content="Event Schedule">
+    <meta name="twitter:site" content="@ScheduleEvent">
 
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -79,7 +80,12 @@
         "@type": "WebSite",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
-        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}"
+        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://www.google.com/search?q=site%3Aeventschedule.com+{search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
     }
     </script>
     <script type="application/ld+json">
@@ -109,8 +115,10 @@
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Event Schedule",
+        "description": "The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.",
         "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
+        "operatingSystem": ["Web", "Android", "iOS"],
+        "screenshot": "{{ config('app.url') }}/images/social/home.png",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -123,23 +131,42 @@
 
     @if (!request()->is('/') && !request()->is(''))
     <!-- BreadcrumbList Schema for subpages -->
+    @php
+        $breadcrumbs = [['name' => 'Home', 'url' => config('app.url')]];
+        $path = request()->path();
+        if (str_starts_with($path, 'docs/selfhost/')) {
+            $breadcrumbs[] = ['name' => 'Documentation', 'url' => url('/docs')];
+            $breadcrumbs[] = ['name' => 'Selfhost', 'url' => url('/docs/selfhost')];
+            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+        } elseif ($path === 'docs/selfhost') {
+            $breadcrumbs[] = ['name' => 'Documentation', 'url' => url('/docs')];
+            $breadcrumbs[] = ['name' => 'Selfhost', 'url' => url()->current()];
+        } elseif (str_starts_with($path, 'docs/developer/')) {
+            $breadcrumbs[] = ['name' => 'Documentation', 'url' => url('/docs')];
+            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+        } elseif (str_starts_with($path, 'docs/') || $path === 'docs') {
+            if ($path !== 'docs') {
+                $breadcrumbs[] = ['name' => 'Documentation', 'url' => url('/docs')];
+            }
+            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+        } else {
+            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+        }
+    @endphp
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
         "itemListElement": [
+            @foreach ($breadcrumbs as $i => $crumb)
+            @if ($i > 0),@endif
             {
                 "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "{{ config('app.url') }}"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "{{ $breadcrumbTitle ?? $title ?? 'Page' }}",
-                "item": "{{ url()->current() }}"
+                "position": {{ $i + 1 }},
+                "name": "{{ $crumb['name'] }}",
+                "item": "{{ $crumb['url'] }}"
             }
+            @endforeach
         ]
     }
     </script>

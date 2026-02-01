@@ -1370,6 +1370,7 @@ return [
     'left' => 'שמאל',
     'center' => 'מרכז',
     'right' => 'ימין',
+    'design' => 'עיצוב',
 
     // Fan content
     'paste_youtube_url' => '...הדבק קישור YouTube',
@@ -1394,4 +1395,5 @@ return [
     'submit' => 'שלח',
     'general' => 'כללי',
     'invalid_input' => 'קלט לא תקין',
+    'subject' => 'נושא',
 ];

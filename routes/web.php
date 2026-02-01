@@ -23,6 +23,11 @@ use App\Http\Controllers\SubscriptionWebhookController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/robots.txt', function () {
+    $content = "User-agent: *\nDisallow:\n\nSitemap: " . config('app.url') . "/sitemap.xml\n";
+    return response($content, 200)->header('Content-Type', 'text/plain');
+});
+
 if (config('app.hosted') && ! config('app.is_testing')) {
     if (config('app.env') != 'local') {
         Route::domain('blog.eventschedule.com')->group(function () {

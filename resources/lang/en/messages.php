@@ -1390,6 +1390,7 @@ return [
     'left' => 'Left',
     'center' => 'Center',
     'right' => 'Right',
+    'design' => 'Design',
 
     // Fan content
     'paste_youtube_url' => 'Paste YouTube URL...',
@@ -1414,4 +1415,5 @@ return [
     'submit' => 'Submit',
     'general' => 'General',
     'invalid_input' => 'Invalid input',
+    'subject' => 'Subject',
 ];

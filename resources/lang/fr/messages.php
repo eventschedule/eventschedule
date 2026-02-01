@@ -1376,6 +1376,7 @@ return [
     'left' => 'Gauche',
     'center' => 'Centre',
     'right' => 'Droite',
+    'design' => 'Design',
 
     // Fan content
     'paste_youtube_url' => 'Coller l\'URL YouTube...',
@@ -1400,4 +1401,5 @@ return [
     'submit' => 'Soumettre',
     'general' => 'General',
     'invalid_input' => 'Saisie invalide',
+    'subject' => 'Objet',
 ];

@@ -1381,6 +1381,7 @@ return [
     'left' => 'Links',
     'center' => 'Zentriert',
     'right' => 'Rechts',
+    'design' => 'Design',
 
     // Fan content
     'paste_youtube_url' => 'YouTube-URL einfuegen...',
@@ -1405,4 +1406,5 @@ return [
     'submit' => 'Absenden',
     'general' => 'Allgemein',
     'invalid_input' => 'Ungueltige Eingabe',
+    'subject' => 'Betreff',
 ];
