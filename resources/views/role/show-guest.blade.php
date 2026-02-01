@@ -33,7 +33,7 @@
             <div class="absolute -top-40 bottom-0 left-1/2 -translate-x-1/2 w-screen bg-cover bg-no-repeat bg-top md:hidden -z-10"
                  style="background-image: url('{{ $mobileBannerUrl }}');"></div>
         @endif
-        <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-xl mb-6 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }}">
+        <div class="bg-white dark:bg-gray-800 rounded-xl mb-6 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }}">
           <div
             class="relative overflow-hidden rounded-t-xl before:block before:absolute before:bg-[#00000033] before:-inset-0 before:rounded-t-xl"
           >
@@ -52,7 +52,7 @@
           </div>
           <div id="schedule-header" class="px-6 lg:px-16 pb-4 relative z-10 {{ $isRtl ? 'rtl' : '' }}">
             @if ($role->profile_image_url)
-            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] {{ $isRtl ? '-mr-2 sm:ml-auto sm:mr-0' : '-ml-2' }} mb-3 sm:mb-6 bg-[#F5F9FE] dark:bg-gray-800 flex items-center justify-center">
+            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] {{ $isRtl ? '-mr-2 sm:ml-auto sm:mr-0' : '-ml-2' }} mb-3 sm:mb-6 bg-white dark:bg-gray-800 flex items-center justify-center">
               <img
                 class="rounded-md w-[120px] h-[120px] object-cover"
                 src="{{ $role->profile_image_url }}"
@@ -419,7 +419,7 @@
         @endphp
         @foreach($upcomingEventsWithVideos as $eventData)
         @endforeach
-        <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6">
           <!-- Carousel Container -->
           <div class="relative group">
             <!-- Carousel Track -->
@@ -516,7 +516,7 @@
         @endphp
         @if ($videoCount > 0)
           <div
-              class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
+              class="bg-white dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
             >
               <div class="grid grid-cols-1 md:grid-cols-{{ $gridCols }} gap-8">
               @foreach ($videoLinks as $link)
