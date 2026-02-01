@@ -1,7 +1,7 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule - Plan, Promote & Share Event Calendars</x-slot>
     <x-slot name="description">Create beautiful event calendars, sell tickets with no platform fees, and check in attendees with QR codes. Free for venues, performers, and communities.</x-slot>
-    <x-slot name="keywords">event schedule, event calendar, free event management, ticketing platform, QR check-in, venue calendar, performer schedule, sell tickets online, event organizer software</x-slot>
+    <x-slot name="keywords">event schedule, event calendar, free event management, ticketing platform, QR check-in, venue calendar, performer schedule, sell tickets online, event organizer software, event newsletters, embed event calendar, recurring events</x-slot>
     <x-slot name="socialImage">social/home.png</x-slot>
 
     <style>
@@ -274,6 +274,21 @@
                     </span>
                 </a>
 
+                <!-- Newsletters -->
+                <a href="{{ marketing_url('/newsletters') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-sky-200 dark:hover:border-sky-500/30 transition-all" aria-label="Learn more about newsletters">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-sky-100 dark:bg-sky-500/20 mb-4">
+                        <svg class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">Newsletters</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Send beautiful emails to followers and ticket buyers with a drag-and-drop editor and A/B testing.</p>
+                    <span class="inline-flex items-center mt-3 text-sm font-medium text-sky-600 group-hover:gap-2 gap-1 transition-all">
+                        Learn more
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                    </span>
+                </a>
+
                 <!-- Calendar Sync -->
                 <a href="{{ marketing_url('/calendar-sync') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-500/30 transition-all" aria-label="Learn more about calendar sync">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 mb-4">
@@ -304,6 +319,21 @@
                     </span>
                 </a>
 
+                <!-- Recurring Events -->
+                <a href="{{ marketing_url('/recurring-events') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-lime-200 dark:hover:border-lime-500/30 transition-all" aria-label="Learn more about recurring events">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-lime-100 dark:bg-lime-500/20 mb-4">
+                        <svg class="w-6 h-6 text-lime-600 dark:text-lime-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-lime-600 dark:group-hover:text-lime-400 transition-colors">Recurring Events</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Set events to repeat weekly on chosen days with flexible end conditions and per-occurrence tickets.</p>
+                    <span class="inline-flex items-center mt-3 text-sm font-medium text-lime-600 group-hover:gap-2 gap-1 transition-all">
+                        Learn more
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                    </span>
+                </a>
+
                 <!-- Custom Fields -->
                 <a href="{{ marketing_url('/custom-fields') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-amber-200 dark:hover:border-amber-500/30 transition-all" aria-label="Learn more about custom fields">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 mb-4">
@@ -329,6 +359,21 @@
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">Team Scheduling</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-sm">Invite team members, manage permissions, and coordinate schedules together.</p>
                     <span class="inline-flex items-center mt-3 text-sm font-medium text-cyan-600 group-hover:gap-2 gap-1 transition-all">
+                        Learn more
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                    </span>
+                </a>
+
+                <!-- Embed Calendar -->
+                <a href="{{ marketing_url('/embed-calendar') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-purple-200 dark:hover:border-purple-500/30 transition-all" aria-label="Learn more about embed calendar">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 mb-4">
+                        <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Embed Calendar</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Add your event calendar to any website with one line of code. Responsive and multilingual.</p>
+                    <span class="inline-flex items-center mt-3 text-sm font-medium text-purple-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
