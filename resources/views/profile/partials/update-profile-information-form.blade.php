@@ -88,7 +88,12 @@
             <x-input-error class="mt-2" :messages="$errors->get('language_code')" />
         </div>
 
-        <!--
+        <div>
+            <x-checkbox name="use_24_hour_time" label="{{ __('messages.use_24_hour_time_format') }}"
+                checked="{{ old('use_24_hour_time', $user->use_24_hour_time) }}"
+                data-custom-attribute="value" />
+        </div>
+
         <div>
             <x-input-label for="profile_image" :value="__('messages.square_profile_image')" />
             <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100"
@@ -99,7 +104,6 @@
             <img src="{{ $user->profile_image_url }}" style="max-height:120px" class="pt-3" />
             @endif
         </div>
-        -->
 
         <div class="flex items-center gap-4">
             @if (is_demo_mode())

@@ -673,16 +673,20 @@ class ListDesign extends AbstractEventDesign
             if ($event->end_date) {
                 $endDate = Carbon::parse($event->end_date);
 
+                $timeFormat = $this->role->use_24_hour_time ? 'H:i' : 'g:i A';
+
                 if ($startDate->isSameDay($endDate)) {
                     // Same day event
-                    return $startDate->translatedFormat('M j, Y').' at '.$startDate->format('g:i A').' - '.$endDate->format('g:i A');
+                    return $startDate->translatedFormat('M j, Y').' at '.$startDate->format($timeFormat).' - '.$endDate->format($timeFormat);
                 } else {
                     // Multi-day event
                     return $startDate->translatedFormat('M j, Y').' - '.$endDate->translatedFormat('M j, Y');
                 }
             } else {
+                $timeFormat = $this->role->use_24_hour_time ? 'H:i' : 'g:i A';
+
                 // Single date event
-                return $startDate->translatedFormat('M j, Y').' at '.$startDate->format('g:i A');
+                return $startDate->translatedFormat('M j, Y').' at '.$startDate->format($timeFormat);
             }
         } catch (\Exception $e) {
             return 'Date TBD';

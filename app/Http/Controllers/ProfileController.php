@@ -60,7 +60,9 @@ class ProfileController extends Controller
                 ->with('error', __('messages.demo_mode_restriction'));
         }
 
-        $request->user()->fill($request->validated());
+        $validated = $request->validated();
+        $validated['use_24_hour_time'] = $request->input('use_24_hour_time') ? true : null;
+        $request->user()->fill($validated);
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
@@ -82,11 +84,14 @@ class ProfileController extends Controller
             }
 
             if ($user->profile_image_url) {
-                $path = $user->getAttributes()['profile_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/'.$path;
+                $rawPath = $user->getAttributes()['profile_image_url'];
+                if (! str_starts_with($rawPath, 'http')) {
+                    $path = $rawPath;
+                    if (config('filesystems.default') == 'local') {
+                        $path = 'public/'.$path;
+                    }
+                    Storage::delete($path);
                 }
-                Storage::delete($path);
             }
 
             $filename = strtolower('profile_'.Str::random(32).'.'.$extension);
@@ -136,11 +141,14 @@ class ProfileController extends Controller
         Auth::logout();
 
         if ($user->profile_image_url) {
-            $path = $user->getAttributes()['profile_image_url'];
-            if (config('filesystems.default') == 'local') {
-                $path = 'public/'.$path;
+            $rawPath = $user->getAttributes()['profile_image_url'];
+            if (! str_starts_with($rawPath, 'http')) {
+                $path = $rawPath;
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/'.$path;
+                }
+                Storage::delete($path);
             }
-            Storage::delete($path);
         }
 
         $roles = $user->owner()->get();

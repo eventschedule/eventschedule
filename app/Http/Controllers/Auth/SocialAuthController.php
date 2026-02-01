@@ -61,6 +61,9 @@ class SocialAuthController extends Controller
 
             // Link Google account to existing user
             $user->google_oauth_id = $googleId;
+            if (! $user->profile_image_url && $googleUser->getAvatar()) {
+                $user->profile_image_url = $googleUser->getAvatar();
+            }
             if (! $user->hasVerifiedEmail()) {
                 $user->email_verified_at = now();
             }
@@ -79,12 +82,28 @@ class SocialAuthController extends Controller
             $utmParams = json_decode(request()->cookie('utm_params'), true) ?? [];
         }
 
+        $browserTimezone = request()->cookie('browser_timezone');
+        $browserLanguage = request()->cookie('browser_language');
+        $googleLocale = $googleUser->user['locale'] ?? null;
+        $languageCode = null;
+
+        if ($googleLocale && is_valid_language_code(substr($googleLocale, 0, 2))) {
+            $languageCode = substr($googleLocale, 0, 2);
+        } elseif ($browserLanguage && is_valid_language_code($browserLanguage)) {
+            $languageCode = $browserLanguage;
+        }
+
+        $timezone = $browserTimezone ?: 'America/New_York';
+
         $user = User::create([
             'name' => $googleUser->getName(),
             'email' => $email,
             'google_oauth_id' => $googleId,
             'email_verified_at' => now(), // Google verified the email
             'password' => null, // No password for Google-only users
+            'timezone' => $timezone,
+            'language_code' => $languageCode ?? 'en',
+            'use_24_hour_time' => detect_24_hour_time($timezone, $languageCode),
             'utm_source' => $utmParams['utm_source'] ?? null,
             'utm_medium' => $utmParams['utm_medium'] ?? null,
             'utm_campaign' => $utmParams['utm_campaign'] ?? null,
@@ -93,6 +112,9 @@ class SocialAuthController extends Controller
             'referrer_url' => session('utm_referrer_url') ?? request()->cookie('utm_referrer_url'),
             'landing_page' => session('utm_landing_page') ?? request()->cookie('utm_landing_page'),
         ]);
+
+        $user->profile_image_url = $googleUser->getAvatar();
+        $user->save();
 
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page']);
 

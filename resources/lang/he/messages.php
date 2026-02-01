@@ -59,6 +59,7 @@ return [
     'unlisted' => 'לא רשום',
     'public' => 'ציבורי',
     'save' => 'שמור',
+    'send' => 'שלח',
     'saving' => 'שומר...',
     'submit' => 'שלח',
     'profile' => 'פרופיל',
@@ -1429,4 +1430,6 @@ return [
     'add_to_existing_segment' => 'הוספה לקטע קיים',
     'select_segment' => 'בחר קטע',
     'file_too_large' => 'File is too large. Maximum size is 10MB.',
+    'test_email_sent_to' => 'אימייל בדיקה יישלח אל :email',
+    'please_wait' => 'אנא המתן לפני שתנסה שוב',
 ];

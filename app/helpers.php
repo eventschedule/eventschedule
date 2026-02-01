@@ -238,6 +238,48 @@ if (! function_exists('accent_contrast_color')) {
     }
 }
 
+if (! function_exists('get_use_24_hour_time')) {
+    /**
+     * Get the effective 24-hour time preference.
+     * If logged-in user has an explicit preference, use it;
+     * otherwise fall back to the role's setting.
+     */
+    function get_use_24_hour_time(?object $role): bool
+    {
+        if (auth()->check()) {
+            $user = auth()->user();
+            if ($user->use_24_hour_time !== null) {
+                return (bool) $user->use_24_hour_time;
+            }
+        }
+
+        return $role && $role->use_24_hour_time ? true : false;
+    }
+}
+
+if (! function_exists('detect_24_hour_time')) {
+    /**
+     * Auto-detect 24-hour time preference based on timezone.
+     * Europe/Asia/Africa timezones return true.
+     * America timezones return false.
+     * Unknown returns null.
+     */
+    function detect_24_hour_time(?string $timezone, ?string $locale): ?bool
+    {
+        if ($timezone) {
+            $prefix = explode('/', $timezone)[0] ?? '';
+            if (in_array($prefix, ['Europe', 'Asia', 'Africa'])) {
+                return true;
+            }
+            if ($prefix === 'America') {
+                return false;
+            }
+        }
+
+        return null;
+    }
+}
+
 if (! function_exists('get_sub_audience_blog')) {
     /**
      * Get a blog post for a sub-audience by slug

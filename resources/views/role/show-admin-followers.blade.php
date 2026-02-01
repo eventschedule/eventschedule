@@ -81,7 +81,7 @@
                                     @endif
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $follower->pivot->created_at->format($role->use_24_hour_time ? 'M jS, Y • g:i' : 'M jS, Y • h:i A') }}
+                                    {{ $follower->pivot->created_at->format(get_use_24_hour_time($role) ? 'M jS, Y • H:i' : 'M jS, Y • g:i A') }}
                                 </td>
                             </tr>
                             @endforeach

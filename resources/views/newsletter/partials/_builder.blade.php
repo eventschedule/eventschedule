@@ -81,7 +81,7 @@ $builderProps = [
     'csrfToken' => csrf_token(),
     'newsletter' => $newsletterData,
     'routes' => $routesData,
-    'userEmail' => auth()->user()->email ?? '',
+    'roleEmail' => $role->email ?? '',
     'abTestHtml' => $abTestHtml,
     'translations' => [
         'add_block' => __('messages.add_block'),
@@ -95,6 +95,7 @@ $builderProps = [
         'preview' => __('messages.preview'),
         'edit_blocks' => __('messages.edit_blocks'),
         'test_send' => __('messages.test_send'),
+        'test_email_sent_to' => __('messages.test_email_sent_to', ['email' => ':email']),
         'send_a_test' => __('messages.send_a_test'),
         'schedule_newsletter' => __('messages.schedule_newsletter'),
         'save' => __('messages.save'),

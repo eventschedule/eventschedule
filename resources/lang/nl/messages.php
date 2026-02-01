@@ -58,6 +58,7 @@ return [
     'unlisted' => 'Niet-gelijst',
     'public' => 'Openbaar',
     'save' => 'Opslaan',
+    'send' => 'Verzenden',
     'saving' => 'Opslaan...',
     'submit' => 'Versturen',
     'profile' => 'Profiel',
@@ -1434,4 +1435,6 @@ return [
     'add_to_existing_segment' => 'Toevoegen aan bestaand segment',
     'select_segment' => 'Segment selecteren',
     'file_too_large' => 'File is too large. Maximum size is 10MB.',
+    'test_email_sent_to' => 'Test e-mail wordt verzonden naar :email',
+    'please_wait' => 'Even geduld voordat u het opnieuw probeert',
 ];

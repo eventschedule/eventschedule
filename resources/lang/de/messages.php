@@ -58,6 +58,7 @@ return [
     'unlisted' => 'Nicht gelistet',
     'public' => 'Öffentlich',
     'save' => 'Speichern',
+    'send' => 'Senden',
     'saving' => 'Wird gespeichert...',
     'submit' => 'Absenden',
     'profile' => 'Profil',
@@ -1440,4 +1441,6 @@ return [
     'add_to_existing_segment' => 'Zu bestehendem Segment hinzufügen',
     'select_segment' => 'Segment auswählen',
     'file_too_large' => 'File is too large. Maximum size is 10MB.',
+    'test_email_sent_to' => 'Test-E-Mail wird an :email gesendet',
+    'please_wait' => 'Bitte warten Sie, bevor Sie es erneut versuchen',
 ];

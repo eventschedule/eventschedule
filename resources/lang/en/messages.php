@@ -63,6 +63,7 @@ return [
     'unlisted' => 'Unlisted',
     'public' => 'Public',
     'save' => 'Save',
+    'send' => 'Send',
     'saving' => 'Saving...',
     'submit' => 'Submit',
     'profile' => 'Profile',
@@ -1451,4 +1452,7 @@ return [
     'add_to_existing_segment' => 'Add to existing segment',
     'select_segment' => 'Select segment',
     'file_too_large' => 'File is too large. Maximum size is 10MB.',
+    'test_email_sent_to' => 'Test email will be sent to :email',
+    'test_email_failed' => 'Failed to send test email. Please check the logs for details.',
+    'please_wait' => 'Please wait before trying again',
 ];

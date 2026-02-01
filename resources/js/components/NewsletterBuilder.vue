@@ -558,10 +558,7 @@
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ t.test_send }}</h3>
                 <form method="POST" :action="routes.test_send">
                     <input type="hidden" name="_token" :value="csrfToken" />
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.email }}</label>
-                    <input id="test_email" name="email" type="email"
-                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
-                        :value="userEmail" required />
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ t.test_email_sent_to.replace(':email', roleEmail) }}</p>
                     <div class="mt-4 flex justify-end gap-3">
                         <button type="button" @click="showTestSend = false" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200">{{ t.cancel }}</button>
                         <button type="submit" class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">{{ t.send }}</button>
@@ -609,7 +606,7 @@ const props = defineProps({
     translations: { type: Object, default: () => ({}) },
     newsletter: { type: Object, default: null },
     routes: { type: Object, default: () => ({}) },
-    userEmail: { type: String, default: '' },
+    roleEmail: { type: String, default: '' },
     abTestHtml: { type: String, default: '' },
     roleSocialLinks: { type: Array, default: () => [] },
 });

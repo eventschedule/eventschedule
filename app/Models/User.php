@@ -51,6 +51,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'utm_term',
         'referrer_url',
         'landing_page',
+        'use_24_hour_time',
     ];
 
     /**
@@ -127,6 +128,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'facebook_token_expires_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'use_24_hour_time' => 'boolean',
             'invoiceninja_api_key' => 'encrypted',
             'invoiceninja_webhook_secret' => 'encrypted',
         ];
@@ -274,6 +276,10 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         if (! $value) {
             return '';
+        }
+
+        if (str_starts_with($value, 'http')) {
+            return $value;
         }
 
         if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {

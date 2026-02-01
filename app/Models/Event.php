@@ -354,7 +354,9 @@ class Event extends Model
         }
 
         if ($user = auth()->user()) {
-            // TODO once we track on user
+            if ($user->use_24_hour_time !== null) {
+                $enable24 = $user->use_24_hour_time;
+            }
         }
 
         $startAt = $this->getStartDateTime($date, true);
@@ -568,7 +570,7 @@ class Event extends Model
         if (! $subdomain) {
             $subdomain = $this->creatorRole ? $this->creatorRole->subdomain : null;
 
-            // Temp fix - remove once curator_id is corrected 
+            // Temp fix - remove once curator_id is corrected
             // Check if the given subdomain matches any of the roles
             if ($subdomain) {
                 $matchingRole = $this->roles->first(function ($role) use ($subdomain) {
@@ -728,6 +730,12 @@ class Event extends Model
 
     public function use24HourTime()
     {
+        if ($user = auth()->user()) {
+            if ($user->use_24_hour_time !== null) {
+                return (bool) $user->use_24_hour_time;
+            }
+        }
+
         return $this->creatorRole && $this->creatorRole->use_24_hour_time;
     }
 

@@ -85,4 +85,8 @@
         </div>
         @endif
     @endif
+    <script {!! nonce_attr() !!}>
+        document.cookie = "browser_timezone=" + Intl.DateTimeFormat().resolvedOptions().timeZone + ";path=/;max-age=3600;SameSite=Lax";
+        document.cookie = "browser_language=" + (navigator.language || "en").substring(0, 2) + ";path=/;max-age=3600;SameSite=Lax";
+    </script>
 </x-auth-layout>

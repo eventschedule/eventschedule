@@ -58,6 +58,7 @@ return [
     'unlisted' => 'غير مدرج',
     'public' => 'عام',
     'save' => 'حفظ',
+    'send' => 'إرسال',
     'saving' => 'جاري الحفظ...',
     'submit' => 'إرسال',
     'profile' => 'الملف الشخصي',
@@ -1437,4 +1438,6 @@ return [
     'add_to_existing_segment' => 'إضافة إلى شريحة موجودة',
     'select_segment' => 'اختر شريحة',
     'file_too_large' => 'File is too large. Maximum size is 10MB.',
+    'test_email_sent_to' => 'سيتم إرسال بريد تجريبي إلى :email',
+    'please_wait' => 'يرجى الانتظار قبل المحاولة مرة أخرى',
 ];

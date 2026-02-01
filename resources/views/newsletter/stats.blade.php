@@ -8,7 +8,7 @@
             <div>
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $newsletter->subject }}</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ __('messages.sent') }}: {{ $newsletter->sent_at ? $newsletter->sent_at->format('M j, Y g:i A') : '-' }}
+                    {{ __('messages.sent') }}: {{ $newsletter->sent_at ? $newsletter->sent_at->format(get_use_24_hour_time($role) ? 'M j, Y H:i' : 'M j, Y g:i A') : '-' }}
                 </p>
             </div>
             <a href="{{ route('newsletter.index', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
@@ -132,13 +132,13 @@
                             <span class="{{ $rStatusColors[$recipient->status] ?? 'text-gray-500' }}">{{ $recipient->status }}</span>
                         </td>
                         <td class="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">
-                            {{ $recipient->opened_at ? $recipient->opened_at->format('M j, g:i A') : '-' }}
+                            {{ $recipient->opened_at ? $recipient->opened_at->format(get_use_24_hour_time($role) ? 'M j, H:i' : 'M j, g:i A') : '-' }}
                             @if ($recipient->open_count > 1)
                             <span class="text-xs text-gray-400">({{ $recipient->open_count }}x)</span>
                             @endif
                         </td>
                         <td class="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">
-                            {{ $recipient->clicked_at ? $recipient->clicked_at->format('M j, g:i A') : '-' }}
+                            {{ $recipient->clicked_at ? $recipient->clicked_at->format(get_use_24_hour_time($role) ? 'M j, H:i' : 'M j, g:i A') : '-' }}
                             @if ($recipient->click_count > 1)
                             <span class="text-xs text-gray-400">({{ $recipient->click_count }}x)</span>
                             @endif
