@@ -24,7 +24,7 @@ use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/robots.txt', function () {
-    $content = "User-agent: *\nDisallow: /login\nDisallow: /register\nDisallow: /password\nDisallow: /checkout\nDisallow: /home\n\nSitemap: ".config('app.url')."/sitemap.xml\n";
+    $content = "User-agent: *\nDisallow: /login\nDisallow: /register\nDisallow: /password\nDisallow: /checkout\nDisallow: /home\nDisallow: /admin\n\nSitemap: ".config('app.url')."/sitemap.xml\n";
 
     return response($content, 200)->header('Content-Type', 'text/plain');
 });

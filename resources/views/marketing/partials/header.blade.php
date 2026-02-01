@@ -3,8 +3,8 @@
         <div class="flex justify-between items-center h-16">
             <!-- Logo -->
             <a href="{{ marketing_url('/') }}" class="flex items-center space-x-2">
-                <img class="h-8 w-auto dark:hidden" src="{{ url('images/dark_logo.png') }}" alt="Event Schedule" />
-                <img class="h-8 w-auto hidden dark:block" src="{{ url('images/light_logo.png') }}" alt="Event Schedule" />
+                <img class="h-8 w-auto dark:hidden" src="{{ url('images/dark_logo.png') }}" alt="Event Schedule" width="163" height="32" />
+                <img class="h-8 w-auto hidden dark:block" src="{{ url('images/light_logo.png') }}" alt="Event Schedule" width="163" height="32" />
             </a>
 
             <!-- Desktop Navigation -->

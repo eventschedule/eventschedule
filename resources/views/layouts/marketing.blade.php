@@ -10,15 +10,11 @@
     <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}">
 
     <!-- Preconnect to external resources -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     @if (config('services.google.analytics'))
     <link rel="preconnect" href="https://www.googletagmanager.com">
     @endif
 
     <!-- DNS prefetch fallback for browsers that don't support preconnect -->
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     @if (config('services.google.analytics'))
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
     @endif
@@ -61,6 +57,7 @@
     <meta property="og:image" content="{{ config('app.url') }}/images/{{ $socialImage ?? 'social/home.png' }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{{ $title ?? 'Event Schedule' }}">
     <meta property="og:site_name" content="Event Schedule">
     <meta property="og:locale" content="{{ str_replace('-', '_', app()->getLocale()) }}">
 

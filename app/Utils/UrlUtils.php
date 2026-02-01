@@ -55,41 +55,61 @@ class UrlUtils
         return ucfirst($parts[0]);
     }
 
-    public static function getYouTubeEmbed($url)
+    public static function getYouTubeThumbnail($url)
+    {
+        $videoId = self::extractYouTubeVideoId($url);
+
+        if ($videoId) {
+            return 'https://img.youtube.com/vi/'.$videoId.'/mqdefault.jpg';
+        }
+
+        return null;
+    }
+
+    public static function extractYouTubeVideoId($url)
     {
         $parsedUrl = parse_url($url);
 
         $host = isset($parsedUrl['host']) ? strtolower($parsedUrl['host']) : '';
-        if (in_array($host, ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'])) {
+        if (! in_array($host, ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'])) {
+            return null;
+        }
 
-            if ($host === 'youtu.be') {
-                $videoId = ltrim($parsedUrl['path'], '/');
-            } else {
-                // Check path for video ID first
-                if (isset($parsedUrl['path'])) {
-                    $path = ltrim($parsedUrl['path'], '/');
-                    $pathParts = explode('/', $path);
+        if ($host === 'youtu.be') {
+            $videoId = ltrim($parsedUrl['path'], '/');
+        } else {
+            if (isset($parsedUrl['path'])) {
+                $path = ltrim($parsedUrl['path'], '/');
+                $pathParts = explode('/', $path);
 
-                    // Handle /watch/VIDEO_ID, /v/VIDEO_ID, /shorts/VIDEO_ID, or /live/VIDEO_ID format
-                    if (count($pathParts) >= 2 && in_array($pathParts[0], ['watch', 'v', 'shorts', 'live'])) {
-                        $videoId = $pathParts[1];
-                    } else {
-                        // Fall back to query parameter
-                        if (isset($parsedUrl['query'])) {
-                            parse_str($parsedUrl['query'], $queryParams);
-                            $videoId = isset($queryParams['v']) ? $queryParams['v'] : null;
-                        } else {
-                            $videoId = null;
-                        }
-                    }
+                if (count($pathParts) >= 2 && in_array($pathParts[0], ['watch', 'v', 'shorts', 'live'])) {
+                    $videoId = $pathParts[1];
                 } else {
-                    $videoId = null;
+                    if (isset($parsedUrl['query'])) {
+                        parse_str($parsedUrl['query'], $queryParams);
+                        $videoId = isset($queryParams['v']) ? $queryParams['v'] : null;
+                    } else {
+                        $videoId = null;
+                    }
                 }
+            } else {
+                $videoId = null;
             }
+        }
 
-            if (isset($videoId) && $videoId && preg_match('/^[a-zA-Z0-9_-]{11}$/', $videoId)) {
-                return 'https://www.youtube-nocookie.com/embed/'.$videoId;
-            }
+        if (isset($videoId) && $videoId && preg_match('/^[a-zA-Z0-9_-]{11}$/', $videoId)) {
+            return $videoId;
+        }
+
+        return null;
+    }
+
+    public static function getYouTubeEmbed($url)
+    {
+        $videoId = self::extractYouTubeVideoId($url);
+
+        if ($videoId) {
+            return 'https://www.youtube-nocookie.com/embed/'.$videoId;
         }
 
         return false;

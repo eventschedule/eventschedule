@@ -440,7 +440,7 @@ class RoleController extends Controller
         $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
 
         if ($role->isCurator()) {
-            $events = Event::with('roles', 'parts')->withCount(['approvedVideos', 'approvedComments'])
+            $events = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
                 ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
                     $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
                         ->orWhereNotNull('days_of_week');
@@ -454,7 +454,7 @@ class RoleController extends Controller
                 ->orderBy('starts_at')
                 ->get();
         } else {
-            $events = Event::with('roles', 'parts')->withCount(['approvedVideos', 'approvedComments'])
+            $events = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
                 ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
                     $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
                         ->orWhereNotNull('days_of_week');
@@ -471,7 +471,7 @@ class RoleController extends Controller
 
         // Fetch past non-recurring events for list view
         if ($role->isCurator()) {
-            $pastEvents = Event::with('roles', 'parts')->withCount(['approvedVideos', 'approvedComments'])
+            $pastEvents = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
                 ->where('starts_at', '<', Carbon::now('UTC'))
                 ->whereNull('days_of_week')
                 ->whereIn('id', function ($query) use ($role) {
@@ -481,16 +481,21 @@ class RoleController extends Controller
                         ->where('is_accepted', true);
                 })
                 ->orderByDesc('starts_at')
-                ->limit(20)
+                ->limit(51)
                 ->get();
         } else {
-            $pastEvents = Event::with('roles', 'parts')->withCount(['approvedVideos', 'approvedComments'])
+            $pastEvents = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
                 ->where('starts_at', '<', Carbon::now('UTC'))
                 ->whereNull('days_of_week')
                 ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
                 ->orderByDesc('starts_at')
-                ->limit(20)
+                ->limit(51)
                 ->get();
+        }
+
+        $hasMorePastEvents = $pastEvents->count() > 50;
+        if ($hasMorePastEvents) {
+            $pastEvents = $pastEvents->take(50);
         }
 
         // Track view for analytics (non-member visits only, skip embeds)
@@ -543,6 +548,7 @@ class RoleController extends Controller
                 'translation',
                 'selectedGroup',
                 'pastEvents',
+                'hasMorePastEvents',
             ));
 
         // Allow embedding when embed parameter is present
@@ -551,6 +557,113 @@ class RoleController extends Controller
         }
 
         return $response;
+    }
+
+    public function listPastEvents(Request $request, $subdomain): JsonResponse
+    {
+        $role = Role::subdomain($subdomain)->with('groups')->first();
+
+        if (! $role || ! $role->isClaimed()) {
+            return response()->json(['events' => [], 'has_more' => false]);
+        }
+
+        $before = $request->input('before');
+        if (! $before) {
+            return response()->json(['events' => [], 'has_more' => false]);
+        }
+
+        $beforeDate = Carbon::parse($before)->setTimezone('UTC');
+
+        if ($role->isCurator()) {
+            $pastEvents = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
+                ->where('starts_at', '<', $beforeDate)
+                ->whereNull('days_of_week')
+                ->whereIn('id', function ($query) use ($role) {
+                    $query->select('event_id')
+                        ->from('event_role')
+                        ->where('role_id', $role->id)
+                        ->where('is_accepted', true);
+                })
+                ->orderByDesc('starts_at')
+                ->limit(51)
+                ->get();
+        } else {
+            $pastEvents = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
+                ->where('starts_at', '<', $beforeDate)
+                ->whereNull('days_of_week')
+                ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
+                ->orderByDesc('starts_at')
+                ->limit(51)
+                ->get();
+        }
+
+        $hasMore = $pastEvents->count() > 50;
+        if ($hasMore) {
+            $pastEvents = $pastEvents->take(50);
+        }
+
+        $eventsData = $pastEvents->map(function ($event) use ($role, $subdomain) {
+            return $this->eventToVueArray($event, $role, $subdomain);
+        })->values()->toArray();
+
+        return response()->json([
+            'events' => $eventsData,
+            'has_more' => $hasMore,
+        ]);
+    }
+
+    private function eventToVueArray(Event $event, ?Role $role, ?string $subdomain): array
+    {
+        $groupId = $role ? $event->getGroupIdForSubdomain($role->subdomain) : null;
+
+        return [
+            'id' => UrlUtils::encodeId($event->id),
+            'group_id' => $groupId ? UrlUtils::encodeId($groupId) : null,
+            'category_id' => $event->category_id,
+            'name' => $event->translatedName(),
+            'venue_name' => $event->getVenueDisplayName(),
+            'starts_at' => $event->starts_at,
+            'days_of_week' => $event->days_of_week,
+            'local_starts_at' => $event->localStartsAt(),
+            'local_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
+            'utc_date' => $event->starts_at ? $event->getStartDateTime(null, false)->format('Y-m-d') : null,
+            'guest_url' => $event->getGuestUrl($subdomain ?? '', ''),
+            'image_url' => $event->getImageUrl(),
+            'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
+            'edit_url' => auth()->user() && auth()->user()->canEditEvent($event)
+                ? ($role ? config('app.url').route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)], false) : config('app.url').route('event.edit_admin', ['hash' => UrlUtils::encodeId($event->id)], false))
+                : null,
+            'recurring_end_type' => $event->recurring_end_type ?? 'never',
+            'recurring_end_value' => $event->recurring_end_value,
+            'start_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
+            'is_online' => ! empty($event->event_url),
+            'description_excerpt' => Str::words(strip_tags($event->translatedDescription()), 25, '...'),
+            'duration' => $event->duration,
+            'parts' => $event->parts->map(fn ($part) => [
+                'name' => $part->name,
+                'start_time' => $part->start_time,
+                'end_time' => $part->end_time,
+            ])->values()->toArray(),
+            'video_count' => $event->approved_videos_count ?? 0,
+            'comment_count' => $event->approved_comments_count ?? 0,
+            'venue_profile_image' => $event->venue?->profile_image_url ?: null,
+            'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && $event->venue->getAttributes()['header_image'] !== 'none') ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
+            'talent' => $event->roles->filter(fn ($r) => $r->type === 'talent')->map(fn ($r) => [
+                'name' => $r->name,
+                'profile_image' => $r->profile_image_url ?: null,
+                'header_image' => ($r->getAttributes()['header_image'] && $r->getAttributes()['header_image'] !== 'none') ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
+            ])->values()->toArray(),
+            'videos' => $event->approvedVideos->take(3)->map(fn ($v) => [
+                'youtube_url' => $v->youtube_url,
+                'thumbnail_url' => UrlUtils::getYouTubeThumbnail($v->youtube_url),
+            ])->values()->toArray(),
+            'recent_comments' => $event->approvedComments->take(2)->map(fn ($c) => [
+                'author' => $c->user ? ($c->user->first_name ?: 'User') : 'User',
+                'text' => Str::limit($c->comment, 80),
+            ])->values()->toArray(),
+            'occurrenceDate' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
+            'uniqueKey' => UrlUtils::encodeId($event->id),
+        ];
     }
 
     public function viewAdmin(Request $request, $subdomain, $tab = 'schedule')
