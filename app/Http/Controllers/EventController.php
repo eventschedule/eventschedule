@@ -1176,6 +1176,7 @@ class EventController extends Controller
         $request->validate([
             'youtube_url' => ['required', 'string', 'url', 'max:500'],
             'event_part_id' => ['nullable', 'string'],
+            'event_date' => ['nullable', 'string', 'date_format:Y-m-d'],
         ]);
 
         $youtubeUrl = trim($request->input('youtube_url'));
@@ -1194,6 +1195,8 @@ class EventController extends Controller
             }
         }
 
+        $eventDate = $event->days_of_week ? $request->input('event_date') : null;
+
         // Check for duplicate by video ID (normalizes different URL formats)
         $submittedVideoId = basename(parse_url($embedUrl, PHP_URL_PATH));
         $query = EventVideo::where('event_id', $event->id);
@@ -1201,6 +1204,9 @@ class EventController extends Controller
             $query->where('event_part_id', $eventPartId);
         } else {
             $query->whereNull('event_part_id');
+        }
+        if ($eventDate) {
+            $query->where('event_date', $eventDate);
         }
         $exists = $query->get()->contains(function ($video) use ($submittedVideoId) {
             $existingEmbed = UrlUtils::getYouTubeEmbed($video->youtube_url);
@@ -1215,6 +1221,7 @@ class EventController extends Controller
         EventVideo::create([
             'event_id' => $event->id,
             'event_part_id' => $eventPartId ?: null,
+            'event_date' => $eventDate,
             'user_id' => $request->user()->id,
             'youtube_url' => $youtubeUrl,
             'is_approved' => false,
@@ -1231,6 +1238,7 @@ class EventController extends Controller
         $request->validate([
             'comment' => ['required', 'string', 'max:1000'],
             'event_part_id' => ['nullable', 'string'],
+            'event_date' => ['nullable', 'string', 'date_format:Y-m-d'],
         ]);
 
         $comment = strip_tags(trim($request->input('comment')));
@@ -1244,9 +1252,12 @@ class EventController extends Controller
             }
         }
 
+        $eventDate = $event->days_of_week ? $request->input('event_date') : null;
+
         EventComment::create([
             'event_id' => $event->id,
             'event_part_id' => $eventPartId ?: null,
+            'event_date' => $eventDate,
             'user_id' => $request->user()->id,
             'comment' => $comment,
             'is_approved' => false,

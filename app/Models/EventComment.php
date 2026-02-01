@@ -9,6 +9,7 @@ class EventComment extends Model
     protected $fillable = [
         'event_id',
         'event_part_id',
+        'event_date',
         'user_id',
         'comment',
         'is_approved',
