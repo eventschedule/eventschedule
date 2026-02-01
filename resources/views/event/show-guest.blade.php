@@ -194,16 +194,25 @@
                   @endif
 
                   @if ($each->isClaimed() && (config('app.hosted') || config('app.is_testing')) && ! is_demo_mode())
-                    <a href="{{ auth()->user() && auth()->user()->isMember($each->subdomain)
-                        ? config('app.url') . route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => 'schedule'], false)
-                        : config('app.url') . route('role.follow', ['subdomain' => $each->subdomain], false) }}"
-                      class="inline-flex items-center justify-center">
-                      <button type="button" name="follow"
-                        style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                        class="inline-flex items-center rounded-md px-4 py-2 hover:opacity-90 text-xs font-semibold shadow-sm">
-                        {{ auth()->user() && auth()->user()->isMember($each->subdomain) ? __('messages.manage') : __('messages.follow') }}
-                      </button>
-                    </a>
+                    @if (auth()->user() && auth()->user()->isMember($each->subdomain))
+                      <a href="{{ config('app.url') . route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => 'schedule'], false) }}"
+                        class="inline-flex items-center justify-center">
+                        <button type="button" name="follow"
+                          style="border-color: {{ $accentColor }}; color: {{ $accentColor }}"
+                          class="inline-flex items-center rounded-md px-4 py-2 text-xs font-semibold bg-transparent border-2 transition-all duration-200 hover:scale-105 hover:shadow-md">
+                          {{ __('messages.manage') }}
+                        </button>
+                      </a>
+                    @else
+                      <a href="{{ config('app.url') . route('role.follow', ['subdomain' => $each->subdomain], false) }}"
+                        class="inline-flex items-center justify-center">
+                        <button type="button" name="follow"
+                          style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
+                          class="inline-flex items-center rounded-md px-4 py-2 hover:opacity-90 text-xs font-semibold shadow-sm">
+                          {{ __('messages.follow') }}
+                        </button>
+                      </a>
+                    @endif
                   @elseif (auth()->user() && auth()->user()->id === $event->user_id && $each->youtube_links)
                     <button type="button"
                       onclick="clearVideos('{{ route('event.clear_videos', ['subdomain' => $role->subdomain, 'event_hash' => App\Utils\UrlUtils::encodeId($event->id), 'role_hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}')"
@@ -506,7 +515,7 @@
             </svg>
           </div>
           <div class="flex flex-col">
-            <span class="font-semibold text-gray-900 dark:text-white">
+            <span>
               @if ($event->venue && $event->venue->translatedName())
                 @if ($event->venue->isClaimed())
                   @php
@@ -529,12 +538,17 @@
                       $venueUrl .= '?' . http_build_query($queryParams);
                     }
                   @endphp
-                  <a href="{{ $venueUrl }}" class="hover:underline">{{ $event->venue->translatedName() }}</a>
+                  <a href="{{ $venueUrl }}" class="group flex items-center gap-1">
+                    <span class="font-semibold text-gray-900 dark:text-white group-hover:underline">{{ $event->venue->translatedName() }}</span>
+                    <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
+                    </svg>
+                  </a>
                 @else
-                  {{ $event->venue->translatedName() }}
+                  <span class="font-semibold text-gray-900 dark:text-white">{{ $event->venue->translatedName() }}</span>
                 @endif
               @else
-                {{ $event->getEventUrlDomain() }}
+                <span class="font-semibold text-gray-900 dark:text-white">{{ $event->getEventUrlDomain() }}</span>
               @endif
             </span>
             @if ($event->venue && $event->venue->shortAddress())

@@ -538,7 +538,7 @@
 
 
 {{-- List View (Desktop) --}}
-        <div v-show="currentView === 'list'" class="hidden md:block {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+        <div v-show="currentView === 'list'" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Upcoming Events --}}
             <div v-if="flatUpcomingEvents.length" class="space-y-4">
                 <template v-for="event in flatUpcomingEvents" :key="'list-' + event.uniqueKey">
@@ -691,6 +691,7 @@
                                         <form v-if="openVideoForm[event.uniqueKey]" @click.stop
                                               method="POST" :action="event.submit_video_url">
                                             <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                            <input v-if="event.days_of_week" type="hidden" name="event_date" :value="event.occurrenceDate">
                                             <div class="flex items-stretch gap-2">
                                                 <select v-if="event.parts.length > 0" name="event_part_id"
                                                         class="min-w-[10rem] text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
@@ -708,6 +709,7 @@
                                         <form v-if="openCommentForm[event.uniqueKey]" @click.stop
                                               method="POST" :action="event.submit_comment_url">
                                             <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                            <input v-if="event.days_of_week" type="hidden" name="event_date" :value="event.occurrenceDate">
                                             <div class="flex items-start gap-2">
                                                 <select v-if="event.parts.length > 0" name="event_part_id"
                                                         class="min-w-[10rem] text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
@@ -880,6 +882,7 @@
                                     <form v-if="openVideoForm[event.uniqueKey]" @click.stop
                                           method="POST" :action="event.submit_video_url">
                                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                        <input v-if="event.days_of_week" type="hidden" name="event_date" :value="event.occurrenceDate">
                                         <div class="flex items-center gap-2">
                                             <select v-if="event.parts.length > 0" name="event_part_id"
                                                     class="min-w-[10rem] text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
@@ -897,6 +900,7 @@
                                     <form v-if="openCommentForm[event.uniqueKey]" @click.stop
                                           method="POST" :action="event.submit_comment_url">
                                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                        <input v-if="event.days_of_week" type="hidden" name="event_date" :value="event.occurrenceDate">
                                         <div class="flex items-start gap-2">
                                             <select v-if="event.parts.length > 0" name="event_part_id"
                                                     class="min-w-[10rem] text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
@@ -1263,7 +1267,7 @@
         </div>
 
         {{-- List View (Mobile) --}}
-        <div v-show="currentView === 'list'" class="md:hidden {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+        <div v-show="currentView === 'list'" class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Upcoming events grouped by date --}}
             <div v-if="listViewUpcomingGroups.length > 0" class="space-y-6">
                 <template v-for="(group, groupIndex) in listViewUpcomingGroups" :key="'list-m-' + group.date">
@@ -1322,7 +1326,7 @@
             </div>
 
             {{-- Past Events Section --}}
-            <div v-if="flatPastEvents.length > 0" class="mt-8">
+            <div v-if="flatPastEvents.length > 0" class="mt-8 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }}">
                 <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm px-4 py-5 mb-3">
                     <h2 class="text-2xl font-semibold leading-6 text-gray-900 dark:text-gray-100">
                         {{ __('messages.past_events') }}
