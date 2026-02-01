@@ -3,6 +3,7 @@
     <x-slot name="description">Your venue's concert calendar without Ticketmaster fees. Let bands apply to play, sell tickets directly to fans. Free forever.</x-slot>
     <x-slot name="keywords">music venue software, concert venue calendar, live music venue booking, venue ticketing system, concert hall management, music venue event calendar, artist booking software, venue newsletter, concert promotion</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For Music Venues</x-slot>
 
     <!-- Hero Section - Venue Dashboard Preview -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-24 lg:py-32 overflow-hidden">

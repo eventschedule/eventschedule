@@ -3,6 +3,7 @@
     <x-slot name="description">Teach what you love. Fill every seat. From pottery to photography, cooking to coding. One link for all your workshops. Reach students directly. Free forever.</x-slot>
     <x-slot name="keywords">workshop scheduling software, class booking system, workshop ticketing, workshop instructor tools, cooking class software, pottery class scheduling, photography workshop booking, craft workshop management, workshop series software, workshop newsletter</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For Workshop Instructors</x-slot>
 
     <!-- Hero Section - Mesh Gradient Background -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">

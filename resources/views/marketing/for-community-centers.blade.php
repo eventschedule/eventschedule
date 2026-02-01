@@ -3,6 +3,7 @@
     <x-slot name="description">Reach your members directly. Manage program registration, room booking, and community events. Email your community directly. Free forever.</x-slot>
     <x-slot name="keywords">community center software, recreation center calendar, program registration, community event management, member communication, room booking software, class registration, community center scheduling</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For Community Centers</x-slot>
 
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">

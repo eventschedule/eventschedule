@@ -77,12 +77,16 @@ class RegisteredUserController extends Controller
 
         $email = strtolower($request->email);
 
-        // Check if email is already registered
-        if (User::where('email', $email)->exists()) {
-            return response()->json([
-                'success' => false,
-                'message' => __('messages.email_already_registered'),
-            ], 422);
+        // Check if email is already registered (allow stub users through)
+        $existingUser = User::where('email', $email)->first();
+        if ($existingUser) {
+            $isStub = is_null($existingUser->password) && is_null($existingUser->google_id) && is_null($existingUser->facebook_id);
+            if (! $isStub) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.email_already_registered'),
+                ], 422);
+            }
         }
 
         // Rate limiting: max 5 codes per hour per email
@@ -111,10 +115,16 @@ class RegisteredUserController extends Controller
         $tempUser->email = $email;
         Notification::route('mail', $email)->notify(new SignupVerificationCode($code));
 
-        return response()->json([
+        $response = [
             'success' => true,
             'message' => __('messages.code_sent'),
-        ]);
+        ];
+
+        if (isset($existingUser) && $existingUser && $existingUser->name) {
+            $response['name'] = $existingUser->name;
+        }
+
+        return response()->json($response);
     }
 
     /**
@@ -225,7 +235,7 @@ class RegisteredUserController extends Controller
         $validationRules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => array_merge(
-                ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
+                ['required', 'string', 'email', 'max:255'],
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
             'password' => ['required', 'string', 'min:8'],
@@ -260,20 +270,47 @@ class RegisteredUserController extends Controller
             $utmParams = json_decode($request->cookie('utm_params'), true) ?? [];
         }
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'timezone' => $request->timezone ?? 'America/New_York',
-            'language_code' => $request->language_code ?? 'en',
-            'utm_source' => $utmParams['utm_source'] ?? null,
-            'utm_medium' => $utmParams['utm_medium'] ?? null,
-            'utm_campaign' => $utmParams['utm_campaign'] ?? null,
-            'utm_content' => $utmParams['utm_content'] ?? null,
-            'utm_term' => $utmParams['utm_term'] ?? null,
-            'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url'),
-            'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
-        ]);
+        $email = strtolower($request->email);
+        $existingUser = User::where('email', $email)->first();
+
+        if ($existingUser) {
+            $isStub = is_null($existingUser->password) && is_null($existingUser->google_id) && is_null($existingUser->facebook_id);
+            if (! $isStub) {
+                throw ValidationException::withMessages([
+                    'email' => [__('messages.email_already_registered')],
+                ]);
+            }
+
+            $existingUser->update([
+                'name' => $request->name,
+                'password' => Hash::make($request->password),
+                'timezone' => $request->timezone ?? 'America/New_York',
+                'language_code' => $request->language_code ?? 'en',
+                'utm_source' => $utmParams['utm_source'] ?? null,
+                'utm_medium' => $utmParams['utm_medium'] ?? null,
+                'utm_campaign' => $utmParams['utm_campaign'] ?? null,
+                'utm_content' => $utmParams['utm_content'] ?? null,
+                'utm_term' => $utmParams['utm_term'] ?? null,
+                'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url'),
+                'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
+            ]);
+            $user = $existingUser;
+        } else {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'timezone' => $request->timezone ?? 'America/New_York',
+                'language_code' => $request->language_code ?? 'en',
+                'utm_source' => $utmParams['utm_source'] ?? null,
+                'utm_medium' => $utmParams['utm_medium'] ?? null,
+                'utm_campaign' => $utmParams['utm_campaign'] ?? null,
+                'utm_content' => $utmParams['utm_content'] ?? null,
+                'utm_term' => $utmParams['utm_term'] ?? null,
+                'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url'),
+                'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
+            ]);
+        }
 
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page']);
 

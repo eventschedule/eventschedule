@@ -360,6 +360,8 @@
                                 <li><a href="{{ route('marketing.docs.event_graphics') }}" class="text-cyan-400 hover:text-cyan-300">Event Graphics</a> - Create promotional images</li>
                             </ul>
                         </section>
+
+                        @include('marketing.docs.partials.navigation')
                     </div>
                 </div>
             </div>

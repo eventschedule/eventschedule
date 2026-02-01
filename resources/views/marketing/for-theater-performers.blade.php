@@ -3,6 +3,7 @@
     <x-slot name="description">Share your theater productions with audiences everywhere. Email your fans directly - no social media algorithms. Sell tickets to your shows with zero platform fees.</x-slot>
     <x-slot name="keywords">theater schedule, show run calendar, theater tickets, play performance schedule, acting schedule app, theater company calendar, stage production tickets, drama performance scheduling</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For Theater Performers</x-slot>
 
     <!-- Hero Section - The Marquee -->
     <section class="relative bg-white dark:bg-[#0a0808] py-32 overflow-hidden">

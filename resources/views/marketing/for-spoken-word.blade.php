@@ -3,6 +3,7 @@
     <x-slot name="description">Share your poetry readings, open mics, and workshops. Sell tickets directly, reach fans with newsletters. Built for spoken word artists, slam poets, and writers. Zero platform fees.</x-slot>
     <x-slot name="keywords">poetry reading schedule, spoken word events, slam poetry calendar, poet schedule, open mic schedule, poetry workshop, literary events, poetry readings</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For Spoken Word</x-slot>
 
     <!-- Hero Section - Typewriter/Literary Theme -->
     <section class="relative bg-white dark:bg-[#0f0e0c] py-32 overflow-hidden">

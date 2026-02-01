@@ -414,6 +414,30 @@ class MarketingController extends Controller
     }
 
     /**
+     * Compare vs Eventbrite page
+     */
+    public function compareEventbrite()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('eventbrite'));
+    }
+
+    /**
+     * Compare vs Luma page
+     */
+    public function compareLuma()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('luma'));
+    }
+
+    /**
+     * Compare vs Ticket Tailor page
+     */
+    public function compareTicketTailor()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('ticket-tailor'));
+    }
+
+    /**
      * Contact page
      */
     public function contact()
@@ -486,7 +510,7 @@ class MarketingController extends Controller
      */
     public function docsGettingStarted()
     {
-        return view('marketing.docs.getting-started');
+        return view('marketing.docs.getting-started', $this->getDocNavigation('marketing.docs.getting_started'));
     }
 
     /**
@@ -494,7 +518,7 @@ class MarketingController extends Controller
      */
     public function docsCreatingSchedules()
     {
-        return view('marketing.docs.creating-schedules');
+        return view('marketing.docs.creating-schedules', $this->getDocNavigation('marketing.docs.creating_schedules'));
     }
 
     /**
@@ -519,9 +543,9 @@ class MarketingController extends Controller
             }
         }
 
-        return view('marketing.docs.schedule-basics', [
+        return view('marketing.docs.schedule-basics', array_merge([
             'customFieldsData' => $customFieldsData,
-        ]);
+        ], $this->getDocNavigation('marketing.docs.schedule_basics')));
     }
 
     /**
@@ -529,7 +553,7 @@ class MarketingController extends Controller
      */
     public function docsScheduleStyling()
     {
-        return view('marketing.docs.schedule-styling');
+        return view('marketing.docs.schedule-styling', $this->getDocNavigation('marketing.docs.schedule_styling'));
     }
 
     /**
@@ -537,7 +561,7 @@ class MarketingController extends Controller
      */
     public function docsCreatingEvents()
     {
-        return view('marketing.docs.creating-events');
+        return view('marketing.docs.creating-events', $this->getDocNavigation('marketing.docs.creating_events'));
     }
 
     /**
@@ -545,7 +569,7 @@ class MarketingController extends Controller
      */
     public function docsSharing()
     {
-        return view('marketing.docs.sharing');
+        return view('marketing.docs.sharing', $this->getDocNavigation('marketing.docs.sharing'));
     }
 
     /**
@@ -553,7 +577,7 @@ class MarketingController extends Controller
      */
     public function docsTickets()
     {
-        return view('marketing.docs.tickets');
+        return view('marketing.docs.tickets', $this->getDocNavigation('marketing.docs.tickets'));
     }
 
     /**
@@ -561,7 +585,7 @@ class MarketingController extends Controller
      */
     public function docsNewsletters()
     {
-        return view('marketing.docs.newsletters');
+        return view('marketing.docs.newsletters', $this->getDocNavigation('marketing.docs.newsletters'));
     }
 
     /**
@@ -587,9 +611,9 @@ class MarketingController extends Controller
             }
         }
 
-        return view('marketing.docs.event-graphics', [
+        return view('marketing.docs.event-graphics', array_merge([
             'customFieldsData' => $customFieldsData,
-        ]);
+        ], $this->getDocNavigation('marketing.docs.event_graphics')));
     }
 
     // ==========================================
@@ -815,6 +839,375 @@ class MarketingController extends Controller
                 'cta' => 'Start Free Trial',
                 'highlighted' => true,
             ],
+        ];
+    }
+
+    /**
+     * Get comparison data for individual competitor pages
+     */
+    private function getComparisonData(string $competitor): array
+    {
+        $competitors = [
+            'eventbrite' => [
+                'name' => 'Eventbrite',
+                'key' => 'eventbrite',
+                'slug' => 'eventbrite-alternative',
+                'tagline' => 'A simpler, more affordable alternative to Eventbrite with zero platform fees.',
+                'description' => 'Compare Event Schedule with Eventbrite. Zero platform fees, open source, and AI-powered event management.',
+                'keywords' => 'eventbrite alternative, eventbrite alternative free, free event platform, no platform fees ticketing, eventbrite competitor',
+                'about' => 'Eventbrite is one of the largest event ticketing platforms, widely used for conferences, festivals, and community events. It offers a comprehensive suite of tools for event promotion and ticket sales.',
+                'competitor_strengths' => [
+                    'Large marketplace with built-in event discovery and audience',
+                    'Comprehensive event promotion and marketing tools',
+                    'Established brand with wide consumer recognition',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'Free to publish events', true],
+                        ['Paid plan price', '$5/mo (first year free)', 'Free (fees on tickets)', true],
+                        ['Platform fees', '0%', '3.7% + $1.79/ticket', true],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in (included above)', false],
+                    ],
+                    'Events & Ticketing' => [
+                        ['Ticketing', 'Yes (Pro)', 'Yes', false],
+                        ['QR check-ins', 'Yes (Pro)', 'Yes', false],
+                        ['Online events', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Integrations' => [
+                        ['Google Calendar sync', 'Yes (Free)', 'No native 2-way sync', true],
+                        ['CalDAV sync', 'Yes (Free)', 'No', true],
+                        ['Newsletters', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Customization' => [
+                        ['Custom domains', 'Yes (Pro)', 'No', true],
+                        ['Remove branding', 'Yes (Pro)', 'No', true],
+                        ['Custom fields', 'Yes (Free)', 'Yes', false],
+                        ['Built-in analytics', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Unique Features' => [
+                        ['AI event parsing', 'Yes (Pro)', 'No', true],
+                        ['Event graphics gen', 'Yes (Pro)', 'No', true],
+                        ['Sub-schedules', 'Yes (Free)', 'No', true],
+                        ['Team collaboration', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Platform' => [
+                        ['REST API', 'Yes (Pro)', 'Yes', false],
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => '0% Platform Fees',
+                        'description' => 'Eventbrite charges 3.7% + $1.79 per ticket. With Event Schedule, you keep 100% of your revenue minus standard Stripe processing.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => 'Custom Domain',
+                        'description' => 'Use your own domain for your event pages. Eventbrite does not offer custom domain support at any price.',
+                        'icon' => 'globe',
+                        'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30',
+                        'border' => 'border-violet-200 dark:border-violet-500/20',
+                        'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20',
+                        'icon_color' => 'text-violet-600 dark:text-violet-400',
+                    ],
+                    [
+                        'title' => 'AI Event Parsing',
+                        'description' => 'Paste event details in any format and our AI extracts all the details automatically. Unique to Event Schedule.',
+                        'icon' => 'ai',
+                        'gradient' => 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30',
+                        'border' => 'border-fuchsia-200 dark:border-fuchsia-500/20',
+                        'icon_bg' => 'bg-fuchsia-100 dark:bg-fuchsia-500/20',
+                        'icon_color' => 'text-fuchsia-600 dark:text-fuchsia-400',
+                    ],
+                    [
+                        'title' => 'Open Source',
+                        'description' => 'Fully open source with no vendor lock-in. Selfhost on your own server or use our hosted platform.',
+                        'icon' => 'code',
+                        'gradient' => 'from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30',
+                        'border' => 'border-indigo-200 dark:border-indigo-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'Calendar Sync',
+                        'description' => 'Two-way Google Calendar and CalDAV sync included free. Eventbrite lacks native two-way calendar sync.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'Event Graphics',
+                        'description' => 'Generate shareable event graphics automatically. No design skills needed, a feature unique to Event Schedule.',
+                        'icon' => 'image',
+                        'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
+                        'border' => 'border-rose-200 dark:border-rose-500/20',
+                        'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20',
+                        'icon_color' => 'text-rose-600 dark:text-rose-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
+                    ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
+                ],
+            ],
+            'luma' => [
+                'name' => 'Luma',
+                'key' => 'luma',
+                'slug' => 'luma-alternative',
+                'tagline' => 'A powerful open source alternative to Luma at a fraction of the price.',
+                'description' => 'Compare Event Schedule with Luma. Get custom domains, zero platform fees, and open source flexibility for $5/mo instead of $59/mo.',
+                'keywords' => 'luma alternative, luma alternative open source, lu.ma alternative, event platform comparison, luma competitor',
+                'about' => 'Luma (lu.ma) is a modern event platform popular with tech communities and creators. It offers sleek event pages, built-in video streaming, and community features.',
+                'competitor_strengths' => [
+                    'Beautiful, modern event page design with strong visual focus',
+                    'Built-in video streaming for virtual events',
+                    'Popular in tech and startup communities with strong network effects',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'Yes (forever)', false],
+                        ['Paid plan price', '$5/mo (first year free)', '$59/mo', true],
+                        ['Platform fees', '0%', '5% (free plan), 0% (Plus)', true],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in', false],
+                    ],
+                    'Events & Ticketing' => [
+                        ['Ticketing', 'Yes (Pro)', 'Yes', false],
+                        ['QR check-ins', 'Yes (Pro)', 'Yes', false],
+                        ['Online events', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Integrations' => [
+                        ['Google Calendar sync', 'Yes (Free)', 'Yes', false],
+                        ['CalDAV sync', 'Yes (Free)', 'No', true],
+                        ['Newsletters', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Customization' => [
+                        ['Custom domains', 'Yes (Pro)', 'Yes (Plus)', true],
+                        ['Remove branding', 'Yes (Pro)', 'Yes (Plus)', true],
+                        ['Custom fields', 'Yes (Free)', 'Yes', false],
+                        ['Built-in analytics', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Unique Features' => [
+                        ['AI event parsing', 'Yes (Pro)', 'No', true],
+                        ['Event graphics gen', 'Yes (Pro)', 'No', true],
+                        ['Sub-schedules', 'Yes (Free)', 'No', true],
+                        ['Team collaboration', 'Yes (Free)', '3 admins (free), 5 (Plus)', true],
+                    ],
+                    'Platform' => [
+                        ['REST API', 'Yes (Pro)', 'Yes (Plus)', true],
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => '12x More Affordable',
+                        'description' => 'Event Schedule Pro costs $5/mo with the first year free. Luma Plus costs $59/mo for comparable features.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => '0% Platform Fees',
+                        'description' => 'Luma charges 5% on their free plan. Event Schedule never takes a cut of your ticket sales at any tier.',
+                        'icon' => 'percent',
+                        'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30',
+                        'border' => 'border-violet-200 dark:border-violet-500/20',
+                        'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20',
+                        'icon_color' => 'text-violet-600 dark:text-violet-400',
+                    ],
+                    [
+                        'title' => 'AI Event Parsing',
+                        'description' => 'Paste event details in any format and our AI extracts all the details automatically. Not available on Luma.',
+                        'icon' => 'ai',
+                        'gradient' => 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30',
+                        'border' => 'border-fuchsia-200 dark:border-fuchsia-500/20',
+                        'icon_bg' => 'bg-fuchsia-100 dark:bg-fuchsia-500/20',
+                        'icon_color' => 'text-fuchsia-600 dark:text-fuchsia-400',
+                    ],
+                    [
+                        'title' => 'Open Source',
+                        'description' => 'Fully open source with no vendor lock-in. Selfhost on your own server for complete data ownership.',
+                        'icon' => 'code',
+                        'gradient' => 'from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30',
+                        'border' => 'border-indigo-200 dark:border-indigo-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'CalDAV Sync',
+                        'description' => 'Sync with any CalDAV-compatible calendar app including Apple Calendar. Not available on Luma.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'Event Graphics',
+                        'description' => 'Generate shareable event graphics automatically. No design skills needed, a feature unique to Event Schedule.',
+                        'icon' => 'image',
+                        'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
+                        'border' => 'border-rose-200 dark:border-rose-500/20',
+                        'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20',
+                        'icon_color' => 'text-rose-600 dark:text-rose-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
+                    ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
+                ],
+            ],
+            'ticket-tailor' => [
+                'name' => 'Ticket Tailor',
+                'key' => 'ticket-tailor',
+                'slug' => 'ticket-tailor-alternative',
+                'tagline' => 'A flat-rate alternative to Ticket Tailor with zero per-ticket fees.',
+                'description' => 'Compare Event Schedule with Ticket Tailor. Get zero platform fees, open source flexibility, and AI features for a flat $5/mo.',
+                'keywords' => 'ticket tailor alternative, ticket tailor alternative free, ticketing platform comparison, no per-ticket fees, ticket tailor competitor',
+                'about' => 'Ticket Tailor is an independent ticketing platform focused on affordable event ticketing. It offers a straightforward per-ticket pricing model and supports various payment processors.',
+                'competitor_strengths' => [
+                    'Simple, transparent per-ticket pricing model',
+                    'Supports multiple payment processors (Stripe, PayPal, Square)',
+                    'Strong focus on ticketing with robust box office features',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'Free events only', true],
+                        ['Paid plan price', '$5/mo (first year free)', 'From $0.28/ticket', true],
+                        ['Platform fees', '0%', '$0.28 to $0.60/ticket', true],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal/Square', false],
+                    ],
+                    'Events & Ticketing' => [
+                        ['Ticketing', 'Yes (Pro)', 'Yes', false],
+                        ['QR check-ins', 'Yes (Pro)', 'Yes', false],
+                        ['Online events', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Integrations' => [
+                        ['Google Calendar sync', 'Yes (Free)', 'No', true],
+                        ['CalDAV sync', 'Yes (Free)', 'No', true],
+                        ['Newsletters', 'Yes (Free)', 'No', true],
+                    ],
+                    'Customization' => [
+                        ['Custom domains', 'Yes (Pro)', 'Yes (paid)', true],
+                        ['Remove branding', 'Yes (Pro)', 'Yes (paid)', true],
+                        ['Custom fields', 'Yes (Free)', 'Yes', false],
+                        ['Built-in analytics', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Unique Features' => [
+                        ['AI event parsing', 'Yes (Pro)', 'No', true],
+                        ['Event graphics gen', 'Yes (Pro)', 'No', true],
+                        ['Sub-schedules', 'Yes (Free)', 'No', true],
+                        ['Team collaboration', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Platform' => [
+                        ['REST API', 'Yes (Pro)', 'Yes', false],
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => 'Flat-Rate Pricing',
+                        'description' => 'Pay $5/mo flat instead of $0.28 to $0.60 per ticket. The more tickets you sell, the more you save.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => 'Calendar Sync',
+                        'description' => 'Two-way Google Calendar and CalDAV sync included free. Ticket Tailor does not offer calendar sync.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30',
+                        'border' => 'border-violet-200 dark:border-violet-500/20',
+                        'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20',
+                        'icon_color' => 'text-violet-600 dark:text-violet-400',
+                    ],
+                    [
+                        'title' => 'AI Event Parsing',
+                        'description' => 'Paste event details in any format and our AI extracts all the details automatically. Not available on Ticket Tailor.',
+                        'icon' => 'ai',
+                        'gradient' => 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30',
+                        'border' => 'border-fuchsia-200 dark:border-fuchsia-500/20',
+                        'icon_bg' => 'bg-fuchsia-100 dark:bg-fuchsia-500/20',
+                        'icon_color' => 'text-fuchsia-600 dark:text-fuchsia-400',
+                    ],
+                    [
+                        'title' => 'Open Source',
+                        'description' => 'Fully open source with no vendor lock-in. Selfhost on your own server for complete data ownership.',
+                        'icon' => 'code',
+                        'gradient' => 'from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30',
+                        'border' => 'border-indigo-200 dark:border-indigo-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'Newsletters',
+                        'description' => 'Built-in newsletter system to keep your audience engaged. Ticket Tailor does not offer newsletters.',
+                        'icon' => 'mail',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'Event Graphics',
+                        'description' => 'Generate shareable event graphics automatically. No design skills needed, a feature unique to Event Schedule.',
+                        'icon' => 'image',
+                        'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
+                        'border' => 'border-rose-200 dark:border-rose-500/20',
+                        'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20',
+                        'icon_color' => 'text-rose-600 dark:text-rose-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
+                    ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
+                ],
+            ],
+        ];
+
+        return $competitors[$competitor];
+    }
+
+    /**
+     * Get prev/next navigation data for a user guide doc page
+     */
+    protected function getDocNavigation(string $currentRoute): array
+    {
+        $pages = [
+            ['route' => 'marketing.docs.getting_started', 'title' => 'Getting Started'],
+            ['route' => 'marketing.docs.schedule_basics', 'title' => 'Schedule Basics'],
+            ['route' => 'marketing.docs.schedule_styling', 'title' => 'Schedule Styling'],
+            ['route' => 'marketing.docs.creating_schedules', 'title' => 'Advanced Schedule Settings'],
+            ['route' => 'marketing.docs.creating_events', 'title' => 'Creating Events'],
+            ['route' => 'marketing.docs.sharing', 'title' => 'Sharing Your Schedule'],
+            ['route' => 'marketing.docs.newsletters', 'title' => 'Newsletters'],
+            ['route' => 'marketing.docs.tickets', 'title' => 'Selling Tickets'],
+            ['route' => 'marketing.docs.event_graphics', 'title' => 'Event Graphics'],
+        ];
+
+        $currentIndex = null;
+        foreach ($pages as $index => $page) {
+            if ($page['route'] === $currentRoute) {
+                $currentIndex = $index;
+                break;
+            }
+        }
+
+        return [
+            'prevDoc' => $currentIndex > 0 ? $pages[$currentIndex - 1] : null,
+            'nextDoc' => $currentIndex < count($pages) - 1 ? $pages[$currentIndex + 1] : null,
         ];
     }
 

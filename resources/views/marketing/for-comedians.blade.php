@@ -3,6 +3,7 @@
     <x-slot name="description">One link for every set. Track your mics, guest spots, and headlines. Email fans directly - algorithms can't bury it. Zero fees when you sell tickets. Free forever.</x-slot>
     <x-slot name="keywords">comedian schedule, stand-up comedy calendar, open mic tracker, comedy show tickets, tight 5, comedy club spots, headliner schedule, improv shows, comedy tour dates</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For Comedians</x-slot>
 
     <!-- Hero Section - Comedy Club Stage Vibe -->
     <section class="relative bg-white dark:bg-[#0f0808] py-32 overflow-hidden">

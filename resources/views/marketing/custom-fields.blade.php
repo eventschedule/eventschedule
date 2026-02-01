@@ -3,6 +3,7 @@
     <x-slot name="description">Define custom event metadata fields and collect attendee information with flexible form fields including text, dropdown, date, and yes/no options.</x-slot>
     <x-slot name="keywords">custom fields, event metadata, ticket forms, event registration, attendee information, form builder, dropdown fields, date picker, event data collection</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">Custom Fields</x-slot>
 
     <style>
         /* Custom amber gradient for this page */

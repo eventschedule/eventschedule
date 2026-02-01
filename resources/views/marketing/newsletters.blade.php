@@ -3,6 +3,7 @@
     <x-slot name="description">Send beautiful newsletters to followers and ticket buyers. Drag-and-drop editor, five professional templates, audience segments, A/B testing, and real-time delivery analytics.</x-slot>
     <x-slot name="keywords">event newsletter, email marketing events, drag and drop email builder, newsletter templates, audience segments, A/B testing, email analytics, event marketing</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">Newsletters</x-slot>
 
     <style>
         /* Custom sky gradient for this page */

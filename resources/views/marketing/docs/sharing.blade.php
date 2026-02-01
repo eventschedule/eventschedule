@@ -86,7 +86,7 @@
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Getting the Embed Code</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Go to your schedule's public page</li>
-                                <li>Click the <strong class="text-white">"Embed"</strong> button (or look for the embed icon)</li>
+                                <li>Click the <strong class="text-gray-900 dark:text-white">"Embed"</strong> button (or look for the embed icon)</li>
                                 <li>Copy the HTML code provided</li>
                                 <li>Paste it into your website where you want the schedule to appear</li>
                             </ol>
@@ -142,7 +142,7 @@
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">How Following Works</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Visitors click <strong class="text-white">"Follow"</strong> on your schedule</li>
+                                <li>Visitors click <strong class="text-gray-900 dark:text-white">"Follow"</strong> on your schedule</li>
                                 <li>They enter their email address</li>
                                 <li>Your schedule appears on their dashboard for easy access</li>
                                 <li>They can subscribe to your calendar feed to see events in their own calendar</li>
@@ -150,7 +150,7 @@
                             </ol>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Managing Followers</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">View and manage your followers from <strong class="text-white">Admin Panel &rarr; Followers</strong>. You can:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">View and manage your followers from <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Followers</strong>. You can:</p>
                             <ul class="doc-list">
                                 <li>See how many followers you have</li>
                                 <li>View follower growth over time</li>
@@ -197,8 +197,8 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Generate a QR code for your schedule to use in printed materials, posters, or at your venue.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to <strong class="text-white">Admin Panel &rarr; Followers</strong></li>
-                                <li>Click <strong class="text-white">"QR Code"</strong></li>
+                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Followers</strong></li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">"QR Code"</strong></li>
                                 <li>Download the QR code image</li>
                                 <li>Use it on flyers, posters, table tents, or anywhere else</li>
                             </ol>
@@ -253,6 +253,8 @@
                                 <li><a href="{{ route('marketing.docs.schedule_styling') }}" class="text-cyan-400 hover:text-cyan-300">Schedule Styling</a> - Customize your schedule's look before sharing</li>
                             </ul>
                         </section>
+
+                        @include('marketing.docs.partials.navigation')
                     </div>
                 </div>
             </div>
@@ -260,4 +262,41 @@
     </section>
 
     @include('marketing.docs.partials.scripts')
+
+    <!-- HowTo Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Share Your Event Schedule",
+        "description": "Learn how to share your schedule with the world. Embed on your website, share on social media, and grow your audience.",
+        "totalTime": "PT5M",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "name": "Share Your Schedule URL",
+                "text": "Every schedule gets a unique, shareable URL. Share this link on your website, social media profiles, email signatures, or printed materials.",
+                "url": "{{ url(route('marketing.docs.sharing')) }}#schedule-url"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Embed on Your Website",
+                "text": "Go to your schedule's public page, click the Embed button, copy the HTML code, and paste it into your website.",
+                "url": "{{ url(route('marketing.docs.sharing')) }}#embed"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Share on Social Media",
+                "text": "Share your schedule or individual event URLs on social media. Event Schedule automatically generates preview cards.",
+                "url": "{{ url(route('marketing.docs.sharing')) }}#social"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Build Your Followers",
+                "text": "Visitors can follow your schedule to get notified about new events. View and manage followers from Admin Panel.",
+                "url": "{{ url(route('marketing.docs.sharing')) }}#followers"
+            }
+        ]
+    }
+    </script>
 </x-marketing-layout>

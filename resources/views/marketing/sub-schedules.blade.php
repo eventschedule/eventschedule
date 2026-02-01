@@ -3,6 +3,7 @@
     <x-slot name="description">Organize events into categories with unlimited sub-schedules. Perfect for venues with multiple rooms, stages, or event series.</x-slot>
     <x-slot name="keywords">sub-schedules, event categories, venue rooms, event series, calendar organization, event filtering, multi-room venues</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">Sub-Schedules</x-slot>
 
     <style>
         /* Custom rose gradient for this page */

@@ -2,6 +2,7 @@
     <x-slot name="title">FAQ | Event Schedule - Common Questions Answered</x-slot>
     <x-slot name="description">Find answers to frequently asked questions about Event Schedule. Learn about pricing, features, ticketing, Google Calendar sync, selfhosting, and more.</x-slot>
     <x-slot name="keywords">event schedule faq, event calendar questions, ticketing faq, google calendar sync help, selfhost event calendar, event management help</x-slot>
+    <x-slot name="breadcrumbTitle">FAQ</x-slot>
 
     <x-slot name="structuredData">
     <script type="application/ld+json">

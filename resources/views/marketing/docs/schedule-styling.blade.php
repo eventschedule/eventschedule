@@ -59,7 +59,7 @@
                         <!-- Overview -->
                         <section id="overview" class="doc-section">
                             <h2 class="doc-heading">Overview</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Make your schedule uniquely yours with extensive styling options. Access styling settings in <strong class="text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>, then scroll to the styling section.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Make your schedule uniquely yours with extensive styling options. Access styling settings in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>, then scroll to the styling section.</p>
 
                             <p class="text-gray-600 dark:text-gray-300 mb-6">All styling changes update in real-time, so you can experiment freely and see exactly how your schedule will look before saving.</p>
 
@@ -175,7 +175,7 @@
                             <div class="space-y-3 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Font Categories</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-white">Sans-serif</strong> (clean, modern), <strong class="text-white">Serif</strong> (classic, elegant), <strong class="text-white">Display</strong> (bold, attention-grabbing), <strong class="text-white">Decorative</strong> (unique, artistic).</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Sans-serif</strong> (clean, modern), <strong class="text-gray-900 dark:text-white">Serif</strong> (classic, elegant), <strong class="text-gray-900 dark:text-white">Display</strong> (bold, attention-grabbing), <strong class="text-gray-900 dark:text-white">Decorative</strong> (unique, artistic).</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Live Preview</h4>
@@ -207,7 +207,7 @@
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
-                                <p>Don't forget to click <strong class="text-white">Save</strong> when you're happy with your changes. The preview is just a preview - nothing is saved until you explicitly save.</p>
+                                <p>Don't forget to click <strong class="text-gray-900 dark:text-white">Save</strong> when you're happy with your changes. The preview is just a preview - nothing is saved until you explicitly save.</p>
                             </div>
                         </section>
 
@@ -221,6 +221,8 @@
                                 <li><a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">Sharing Your Schedule</a> - Embed and share your schedule</li>
                             </ul>
                         </section>
+
+                        @include('marketing.docs.partials.navigation')
                     </div>
                 </div>
             </div>
@@ -228,4 +230,41 @@
     </section>
 
     @include('marketing.docs.partials.scripts')
+
+    <!-- HowTo Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Style Your Event Schedule",
+        "description": "Customize your schedule's appearance with colors, fonts, backgrounds, and more. All changes preview in real-time.",
+        "totalTime": "PT5M",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "name": "Choose Event Layout",
+                "text": "Select grid layout for visual schedules with event images, or list layout for compact, text-heavy schedules.",
+                "url": "{{ url(route('marketing.docs.schedule_styling')) }}#event-layout"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Upload Profile and Header Images",
+                "text": "Upload a square profile image and choose a header from 31 presets, upload a custom header, or opt for no header.",
+                "url": "{{ url(route('marketing.docs.schedule_styling')) }}#profile-image"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Set Background and Colors",
+                "text": "Choose a solid color, gradient from 200+ presets, or background image. Set your accent color for buttons and links.",
+                "url": "{{ url(route('marketing.docs.schedule_styling')) }}#backgrounds"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Choose Typography",
+                "text": "Select from 200+ Google Fonts across sans-serif, serif, display, and decorative categories with live preview.",
+                "url": "{{ url(route('marketing.docs.schedule_styling')) }}#typography"
+            }
+        ]
+    }
+    </script>
 </x-marketing-layout>

@@ -3,6 +3,7 @@
     <x-slot name="description">Host virtual events with ease. Toggle between in-person and online, add your streaming URL, and sell tickets to attendees worldwide.</x-slot>
     <x-slot name="keywords">online events, virtual events, streaming events, webinars, live streaming, zoom events, youtube live events, online ticketing</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">Online Events</x-slot>
 
     <style>
         /* Custom indigo gradient for this page */

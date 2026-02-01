@@ -140,9 +140,12 @@
                             // Hide the guest option
                             var guestOption = document.getElementById('guest-option');
                             if (guestOption) guestOption.style.display = 'none';
-                            // Focus on the name field
+                            // Focus on the name field and pre-fill if available
                             var nameInput = document.getElementById('name');
                             if (nameInput) {
+                                if (data.name) {
+                                    nameInput.value = data.name;
+                                }
                                 nameInput.focus();
                             }
                             // Reset Turnstile widget so user gets a fresh token for form submission

@@ -3,6 +3,7 @@
     <x-slot name="description">Be the stage where comedy careers are made. Manage lineups, sell tickets with zero fees, and build your audience. Free forever.</x-slot>
     <x-slot name="keywords">comedy club software, comedy club calendar, comedy club ticketing, stand-up comedy scheduling, improv theater software, open mic management, comedy club newsletter, comedian booking system, comedy lineup builder</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For Comedy Clubs</x-slot>
 
     <!-- Hero Section - Comedy Club with Neon & Stage Curtains -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">

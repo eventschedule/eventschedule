@@ -3,6 +3,7 @@
     <x-slot name="description">Share your DJ sets, residencies, and guest spots. Reach fans directly - no promoter middleman, no pay-to-play socials. Zero platform fees on tickets. Built for club DJs, festival DJs, and electronic producers.</x-slot>
     <x-slot name="keywords">DJ schedule, DJ set calendar, DJ residency tracker, club DJ calendar, DJ guest spots, DJ ticketing, DJ newsletter, electronic music events, DJ fan engagement, producer live sets</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For DJs</x-slot>
 
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">

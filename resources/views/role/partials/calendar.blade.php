@@ -74,6 +74,20 @@
             'is_online' => !empty($event->event_url),
             'description_excerpt' => Str::words(strip_tags($event->translatedDescription()), 25, '...'),
             'duration' => $event->duration,
+            'parts' => $event->parts->map(fn($part) => [
+                'name' => $part->name,
+                'start_time' => $part->start_time,
+                'end_time' => $part->end_time,
+            ])->values()->toArray(),
+            'video_count' => $event->approved_videos_count ?? 0,
+            'comment_count' => $event->approved_comments_count ?? 0,
+            'venue_profile_image' => $event->venue?->profile_image_url ?: null,
+            'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && $event->venue->getAttributes()['header_image'] !== 'none') ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
+            'talent' => $event->roles->filter(fn($r) => $r->type === 'talent')->map(fn($r) => [
+                'name' => $r->name,
+                'profile_image' => $r->profile_image_url ?: null,
+                'header_image' => ($r->getAttributes()['header_image'] && $r->getAttributes()['header_image'] !== 'none') ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
+            ])->values()->toArray(),
         ];
     }
 
@@ -101,6 +115,20 @@
             'is_online' => !empty($event->event_url),
             'description_excerpt' => Str::words(strip_tags($event->translatedDescription()), 25, '...'),
             'duration' => $event->duration,
+            'parts' => $event->parts->map(fn($part) => [
+                'name' => $part->name,
+                'start_time' => $part->start_time,
+                'end_time' => $part->end_time,
+            ])->values()->toArray(),
+            'video_count' => $event->approved_videos_count ?? 0,
+            'comment_count' => $event->approved_comments_count ?? 0,
+            'venue_profile_image' => $event->venue?->profile_image_url ?: null,
+            'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && $event->venue->getAttributes()['header_image'] !== 'none') ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
+            'talent' => $event->roles->filter(fn($r) => $r->type === 'talent')->map(fn($r) => [
+                'name' => $r->name,
+                'profile_image' => $r->profile_image_url ?: null,
+                'header_image' => ($r->getAttributes()['header_image'] && $r->getAttributes()['header_image'] !== 'none') ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
+            ])->values()->toArray(),
             'occurrenceDate' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
             'uniqueKey' => \App\Utils\UrlUtils::encodeId($event->id),
         ];
@@ -131,7 +159,12 @@
     if (isset($role) && $role->groups && $role->groups->count() > 1) $filterCount++;
     if (count($uniqueCategoryIds ?? []) > 0) $filterCount++;
     if ($hasOnlineEvents) $filterCount++;
+
+    $accentColor = isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA';
 @endphp
+
+{{-- Panel wrapper --}}
+<div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 px-5 lg:px-16 pt-2 pb-4' }}">
 
 @if (! request()->graphic)
 <header class="py-4 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
@@ -277,14 +310,16 @@
             @if($route == 'guest')
             <div class="flex items-center bg-white dark:bg-gray-800 rounded-md shadow-sm">
                 <button @click="toggleView('calendar')"
-                        :class="currentView === 'calendar' ? 'bg-[{{ isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA' }}] text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                        :class="currentView === 'calendar' ? 'text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                        :style="currentView === 'calendar' ? 'background-color: {{ $accentColor }}' : ''"
                         class="flex h-11 w-11 items-center justify-center rounded-s-md border border-gray-300 dark:border-gray-600 transition-colors">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
                     </svg>
                 </button>
                 <button @click="toggleView('list')"
-                        :class="currentView === 'list' ? 'bg-[{{ isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA' }}] text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                        :class="currentView === 'list' ? 'text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                        :style="currentView === 'list' ? 'background-color: {{ $accentColor }}' : ''"
                         class="flex h-11 w-11 items-center justify-center rounded-e-md border border-s-0 border-gray-300 dark:border-gray-600 transition-colors">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M3,4H7V8H3V4M9,5V7H21V5H9M3,10H7V14H3V10M9,11V13H21V11H9M3,16H7V20H3V16M9,17V19H21V17H9"/>
@@ -326,22 +361,21 @@
 </header>
 @endif
 
-    <div v-show="currentView === 'calendar'" class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? '' : 'hidden' }} {{ (isset($force_mobile) && $force_mobile) ? '' : 'md:shadow-sm md:ring-1 md:ring-black md:ring-opacity-5 md:dark:border md:dark:border-gray-700 md:rounded-md md:overflow-hidden md:flex md:flex-auto md:flex-col' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+    <div v-show="currentView === 'calendar'" class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? '' : 'hidden' }} md:block {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
 
         @if (request()->graphic)
             @include('role.partials.calendar-graphic')
         @else
         <div class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }}">
             <div
-                class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-center text-xs font-semibold leading-6 text-gray-700 dark:text-gray-300 rounded-t-md overflow-hidden">
+                class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-center text-xs font-semibold leading-6 text-gray-700 dark:text-gray-300">
                 @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $day)
                 <div class="flex justify-center bg-white dark:bg-gray-800 py-2">
                     {{ __('messages.' . $day) }}
                 </div>
                 @endforeach
             </div>
-        </div>
-        <div class="hidden md:block bg-gray-200 dark:bg-gray-700 text-xs leading-6 text-gray-700 dark:text-gray-300 rounded-b-md overflow-hidden {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }}">
+        <div class="bg-gray-200 dark:bg-gray-700 text-xs leading-6 text-gray-700 dark:text-gray-300">
             @php
             // Get first role for home route (only calculate once)
             $firstRole = null;
@@ -502,6 +536,7 @@
                 </div>
             </div>
         </div>
+    </div>
 
 
 {{-- List View --}}
@@ -512,9 +547,10 @@
                     <template v-for="(group, groupIndex) in listViewUpcomingGroups" :key="'list-date-' + group.date">
                         {{-- Date Header --}}
                         <div :class="groupIndex > 0 ? 'mt-2' : ''">
-                            <div class="px-1 pb-2 pt-3 flex items-center gap-3">
-                                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: {{ isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA' }}"></span>
-                                <span class="font-bold text-gray-900 dark:text-gray-100" v-text="formatDateShort(group.date)"></span>
+                            <div class="flex items-center gap-3 py-3 border-b border-gray-200 dark:border-gray-700"
+                                 :class="isRtl ? 'border-r-[3px] pr-3' : 'border-l-[3px] pl-3'"
+                                 style="border-inline-start-color: {{ $accentColor }}">
+                                <span class="font-bold text-lg text-gray-900 dark:text-gray-100" v-text="formatDateShort(group.date)"></span>
                                 <span class="text-gray-400 dark:text-gray-500 font-normal" v-text="formatDayName(group.date)"></span>
                             </div>
                         </div>
@@ -523,36 +559,123 @@
                             <div v-if="isEventVisible(event)"
                                  @click="navigateToEvent(event, $event)"
                                  class="block cursor-pointer">
-                                <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-shadow hover:shadow-md">
-                                    <div class="flex" :class="isRtl ? 'flex-row-reverse' : ''">
-                                        {{-- Image Section --}}
-                                        <div v-if="event.image_url" class="flex-shrink-0 w-28 md:w-36 self-stretch">
-                                            <img :src="event.image_url" class="w-full h-full object-cover" :alt="event.name">
+                                <div class="rounded-xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-shadow hover:shadow-md relative"
+                                     :class="getHeaderImage(event) ? '' : 'bg-white dark:bg-gray-700'">
+                                    {{-- Full Background Image --}}
+                                    <div v-if="getHeaderImage(event)" class="absolute inset-0">
+                                        <img :src="getHeaderImage(event)" class="w-full h-full object-cover" :alt="event.name">
+                                        <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/70 to-black/50"></div>
+                                    </div>
+                                    {{-- Side-by-side Layout --}}
+                                    <div class="relative flex" :class="isRtl ? 'flex-row-reverse' : ''">
+                                        {{-- Flyer Image --}}
+                                        <div v-if="event.image_url" class="flex-shrink-0 w-40 sm:w-48 md:w-56">
+                                            <img :src="event.image_url" class="w-full aspect-[2/3] object-cover" :alt="event.name">
                                         </div>
                                         {{-- Content Section --}}
                                         <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
-                                            <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base md:text-lg leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
-                                            <div v-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                                <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                            {{-- Date Badge --}}
+                                            <div v-if="event.occurrenceDate" class="mb-2">
+                                                <div class="inline-flex flex-col items-center px-2.5 py-1 rounded-xl"
+                                                     :class="getHeaderImage(event) ? 'bg-white/20' : 'bg-gray-100 dark:bg-gray-600'">
+                                                    <span class="text-[10px] font-bold uppercase leading-tight"
+                                                          :class="getHeaderImage(event) ? 'text-white' : 'text-gray-500 dark:text-gray-400'"
+                                                          :style="!getHeaderImage(event) ? 'color: {{ $accentColor }}' : ''"
+                                                          v-text="getMonthAbbr(event.occurrenceDate)"></span>
+                                                    <span class="text-lg font-bold leading-tight"
+                                                          :class="getHeaderImage(event) ? 'text-white' : 'text-gray-900 dark:text-gray-100'"
+                                                          :style="!getHeaderImage(event) ? 'color: {{ $accentColor }}' : ''"
+                                                          v-text="getDayNum(event.occurrenceDate)"></span>
+                                                </div>
+                                            </div>
+                                            <h3 class="font-bold text-lg md:text-xl leading-snug line-clamp-2"
+                                                :class="getHeaderImage(event) ? 'text-white' : 'text-gray-900 dark:text-gray-100'"
+                                                dir="auto" v-text="event.name"></h3>
+                                            {{-- Venue Row --}}
+                                            <div v-if="event.venue_name" class="mt-1.5 flex items-center text-sm"
+                                                 :class="getHeaderImage(event) ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'">
+                                                <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-5 h-5 rounded-full object-cover flex-shrink-0 me-2" :alt="event.venue_name">
+                                                <svg v-else class="h-4 w-4 flex-shrink-0 me-2" :class="getHeaderImage(event) ? 'text-white/60' : 'text-gray-400'" viewBox="0 0 20 20" fill="currentColor">
                                                     <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
                                                 </svg>
                                                 <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
                                             </div>
-                                            <div class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                                <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                            {{-- Time Row --}}
+                                            <div class="mt-1 flex items-center text-sm"
+                                                 :class="getHeaderImage(event) ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'">
+                                                <svg class="h-4 w-4 flex-shrink-0 me-2" :class="getHeaderImage(event) ? 'text-white/60' : 'text-gray-400'" viewBox="0 0 20 20" fill="currentColor">
                                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
                                                 </svg>
                                                 <span v-text="getEventTime(event)"></span>
                                                 <span v-if="event.duration" class="ms-1" v-text="'(' + formatDuration(event.duration) + ')'"></span>
                                             </div>
-                                            <p v-if="event.description_excerpt" class="mt-2 hidden md:block text-sm text-gray-500 dark:text-gray-400 line-clamp-2" dir="auto" v-text="event.description_excerpt"></p>
-                                            <div v-if="event.can_edit" class="mt-auto pt-3">
-                                                <a :href="event.edit_url"
-                                                    class="inline-flex items-center px-4 py-1.5 text-sm font-medium text-[#4E81FA] bg-transparent border border-[#4E81FA] rounded-md hover:bg-[#4E81FA] hover:text-white transition-colors duration-200"
-                                                    @click.stop>
-                                                    {{ __('messages.edit') }}
-                                                </a>
+                                            {{-- Talent Avatars Row --}}
+                                            <div v-if="event.talent && event.talent.length > 0" class="mt-2 flex items-center">
+                                                <div class="flex items-center -space-x-2" :class="isRtl ? 'space-x-reverse' : ''">
+                                                    <template v-for="(t, tIndex) in event.talent.slice(0, 5)" :key="tIndex">
+                                                        <img v-if="t.profile_image" :src="t.profile_image" class="w-7 h-7 rounded-full object-cover border-2" :class="getHeaderImage(event) ? 'border-black/30' : 'border-white dark:border-gray-700'" :alt="t.name" :title="t.name">
+                                                        <div v-else class="w-7 h-7 rounded-full border-2 flex items-center justify-center"
+                                                             :class="getHeaderImage(event) ? 'bg-white/20 border-black/30' : 'bg-gray-200 dark:bg-gray-600 border-white dark:border-gray-700'" :title="t.name">
+                                                            <span class="text-[11px] font-medium"
+                                                                  :class="getHeaderImage(event) ? 'text-white' : 'text-gray-500 dark:text-gray-400'"
+                                                                  v-text="t.name.charAt(0).toUpperCase()"></span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                                <span v-if="event.talent.length > 5" class="ms-1 text-xs"
+                                                      :class="getHeaderImage(event) ? 'text-white/60' : 'text-gray-400 dark:text-gray-500'">+<span v-text="event.talent.length - 5"></span></span>
                                             </div>
+                                            {{-- Count Badges --}}
+                                            <div v-if="event.video_count > 0 || event.comment_count > 0" class="mt-2 flex items-center gap-3">
+                                                <span v-if="event.video_count > 0" class="inline-flex items-center gap-1 text-xs"
+                                                      :class="getHeaderImage(event) ? 'text-white/60' : 'text-gray-500 dark:text-gray-400'">
+                                                    <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z" />
+                                                    </svg>
+                                                    <span v-text="event.video_count"></span>
+                                                </span>
+                                                <span v-if="event.comment_count > 0" class="inline-flex items-center gap-1 text-xs"
+                                                      :class="getHeaderImage(event) ? 'text-white/60' : 'text-gray-500 dark:text-gray-400'">
+                                                    <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.202 41.202 0 01-5.183.501.78.78 0 00-.528.224l-3.579 3.58A.75.75 0 016 17.25v-3.443a41.033 41.033 0 01-2.57-.33C2.993 13.244 2 11.986 2 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    <span v-text="event.comment_count"></span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {{-- Mini Timeline for Parts --}}
+                                    <div v-if="event.parts && event.parts.length > 0" class="relative px-4 pb-3">
+                                        <div class="relative" :class="isRtl ? 'pr-2' : 'pl-2'">
+                                            {{-- Vertical Line --}}
+                                            <div class="absolute top-1 bottom-1 w-0.5" :class="isRtl ? 'right-0' : 'left-0'" :style="getHeaderImage(event) ? 'background-color: rgba(255,255,255,0.3)' : 'background-color: {{ $accentColor }}30'"></div>
+                                            <div class="space-y-2">
+                                                <div v-for="(part, partIndex) in event.parts.slice(0, 4)" :key="partIndex" class="relative flex items-start gap-2" :class="isRtl ? 'flex-row-reverse' : ''">
+                                                    {{-- Dot --}}
+                                                    <div class="absolute top-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" :class="isRtl ? '-right-[3px]' : '-left-[3px]'" :style="getHeaderImage(event) ? 'background-color: rgba(255,255,255,0.8)' : 'background-color: {{ $accentColor }}'"></div>
+                                                    <div :class="isRtl ? 'pr-3' : 'pl-3'">
+                                                        <span class="text-sm" :class="getHeaderImage(event) ? 'text-white/90' : 'text-gray-700 dark:text-gray-300'" v-text="part.name"></span>
+                                                        <span v-if="part.start_time" class="text-xs ms-1" :class="getHeaderImage(event) ? 'text-white/60' : 'text-gray-400 dark:text-gray-500'" v-text="part.start_time"></span>
+                                                    </div>
+                                                </div>
+                                                <div v-if="event.parts.length > 4" class="text-xs" :class="[isRtl ? 'pr-3' : 'pl-3', getHeaderImage(event) ? 'text-white/60' : 'text-gray-400 dark:text-gray-500']">
+                                                    +<span v-text="event.parts.length - 4"></span> {{ __('messages.more') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {{-- Description & Edit --}}
+                                    <div v-if="event.description_excerpt || event.can_edit" class="relative px-4 pb-3">
+                                        <p v-if="event.description_excerpt" class="hidden md:block text-sm line-clamp-2"
+                                           :class="getHeaderImage(event) ? 'text-white/70' : 'text-gray-500 dark:text-gray-400'"
+                                           dir="auto" v-text="event.description_excerpt"></p>
+                                        <div v-if="event.can_edit" class="mt-2">
+                                            <a :href="event.edit_url"
+                                                class="inline-flex items-center px-4 py-1.5 text-sm font-medium rounded-md transition-colors duration-200"
+                                                :class="getHeaderImage(event) ? 'text-white border border-white/40 hover:bg-white/20' : 'text-[#4E81FA] border border-[#4E81FA] hover:bg-[#4E81FA] hover:text-white'"
+                                                @click.stop>
+                                                {{ __('messages.edit') }}
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -570,9 +693,10 @@
                         <template v-for="(group, groupIndex) in pastEventsGroupedByDate" :key="'past-date-' + group.date">
                             {{-- Date Header --}}
                             <div :class="groupIndex > 0 ? 'mt-2' : ''">
-                                <div class="px-1 pb-2 pt-3 flex items-center gap-3">
-                                    <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: {{ isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA' }}"></span>
-                                    <span class="font-bold text-gray-900 dark:text-gray-100" v-text="formatDateShort(group.date)"></span>
+                                <div class="flex items-center gap-3 py-3 border-b border-gray-200 dark:border-gray-700"
+                                     :class="isRtl ? 'border-r-[3px] pr-3' : 'border-l-[3px] pl-3'"
+                                     style="border-inline-start-color: {{ $accentColor }}">
+                                    <span class="font-bold text-lg text-gray-900 dark:text-gray-100" v-text="formatDateShort(group.date)"></span>
                                     <span class="text-gray-400 dark:text-gray-500 font-normal" v-text="formatDayName(group.date)"></span>
                                 </div>
                             </div>
@@ -580,28 +704,114 @@
                             <template v-for="event in group.events" :key="'past-' + event.uniqueKey">
                                 <div @click="navigateToEvent(event, $event)"
                                      class="block cursor-pointer">
-                                    <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-shadow hover:shadow-md">
-                                        <div class="flex" :class="isRtl ? 'flex-row-reverse' : ''">
-                                            <div v-if="event.image_url" class="flex-shrink-0 w-28 md:w-36 self-stretch">
-                                                <img :src="event.image_url" class="w-full h-full object-cover" :alt="event.name">
+                                    <div class="rounded-xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-shadow hover:shadow-md relative"
+                                         :class="getHeaderImage(event) ? '' : 'bg-white dark:bg-gray-700'">
+                                        {{-- Full Background Image --}}
+                                        <div v-if="getHeaderImage(event)" class="absolute inset-0">
+                                            <img :src="getHeaderImage(event)" class="w-full h-full object-cover" :alt="event.name">
+                                            <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/70 to-black/50"></div>
+                                        </div>
+                                        {{-- Side-by-side Layout --}}
+                                        <div class="relative flex" :class="isRtl ? 'flex-row-reverse' : ''">
+                                            {{-- Flyer Image --}}
+                                            <div v-if="event.image_url" class="flex-shrink-0 w-40 sm:w-48 md:w-56">
+                                                <img :src="event.image_url" class="w-full aspect-[2/3] object-cover" :alt="event.name">
                                             </div>
+                                            {{-- Content Section --}}
                                             <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
-                                                <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base md:text-lg leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
-                                                <div v-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                                    <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                {{-- Date Badge --}}
+                                                <div v-if="event.occurrenceDate" class="mb-2">
+                                                    <div class="inline-flex flex-col items-center px-2.5 py-1 rounded-xl"
+                                                         :class="getHeaderImage(event) ? 'bg-white/20' : 'bg-gray-100 dark:bg-gray-600'">
+                                                        <span class="text-[10px] font-bold uppercase leading-tight"
+                                                              :class="getHeaderImage(event) ? 'text-white' : 'text-gray-500 dark:text-gray-400'"
+                                                              :style="!getHeaderImage(event) ? 'color: {{ $accentColor }}' : ''"
+                                                              v-text="getMonthAbbr(event.occurrenceDate)"></span>
+                                                        <span class="text-lg font-bold leading-tight"
+                                                              :class="getHeaderImage(event) ? 'text-white' : 'text-gray-900 dark:text-gray-100'"
+                                                              :style="!getHeaderImage(event) ? 'color: {{ $accentColor }}' : ''"
+                                                              v-text="getDayNum(event.occurrenceDate)"></span>
+                                                    </div>
+                                                </div>
+                                                <h3 class="font-bold text-lg md:text-xl leading-snug line-clamp-2"
+                                                    :class="getHeaderImage(event) ? 'text-white' : 'text-gray-900 dark:text-gray-100'"
+                                                    dir="auto" v-text="event.name"></h3>
+                                                {{-- Venue Row --}}
+                                                <div v-if="event.venue_name" class="mt-1.5 flex items-center text-sm"
+                                                     :class="getHeaderImage(event) ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'">
+                                                    <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-5 h-5 rounded-full object-cover flex-shrink-0 me-2" :alt="event.venue_name">
+                                                    <svg v-else class="h-4 w-4 flex-shrink-0 me-2" :class="getHeaderImage(event) ? 'text-white/60' : 'text-gray-400'" viewBox="0 0 20 20" fill="currentColor">
                                                         <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
                                                     </svg>
                                                     <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
                                                 </div>
-                                                <div class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                                    <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                {{-- Time Row --}}
+                                                <div class="mt-1 flex items-center text-sm"
+                                                     :class="getHeaderImage(event) ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'">
+                                                    <svg class="h-4 w-4 flex-shrink-0 me-2" :class="getHeaderImage(event) ? 'text-white/60' : 'text-gray-400'" viewBox="0 0 20 20" fill="currentColor">
                                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
                                                     </svg>
                                                     <span v-text="getEventTime(event)"></span>
                                                 </div>
-                                                <p v-if="event.description_excerpt" class="mt-2 hidden md:block text-sm text-gray-500 dark:text-gray-400 line-clamp-2" dir="auto" v-text="event.description_excerpt"></p>
+                                                {{-- Talent Avatars Row --}}
+                                                <div v-if="event.talent && event.talent.length > 0" class="mt-2 flex items-center">
+                                                    <div class="flex items-center -space-x-2" :class="isRtl ? 'space-x-reverse' : ''">
+                                                        <template v-for="(t, tIndex) in event.talent.slice(0, 5)" :key="tIndex">
+                                                            <img v-if="t.profile_image" :src="t.profile_image" class="w-7 h-7 rounded-full object-cover border-2" :class="getHeaderImage(event) ? 'border-black/30' : 'border-white dark:border-gray-700'" :alt="t.name" :title="t.name">
+                                                            <div v-else class="w-7 h-7 rounded-full border-2 flex items-center justify-center"
+                                                                 :class="getHeaderImage(event) ? 'bg-white/20 border-black/30' : 'bg-gray-200 dark:bg-gray-600 border-white dark:border-gray-700'" :title="t.name">
+                                                                <span class="text-[11px] font-medium"
+                                                                      :class="getHeaderImage(event) ? 'text-white' : 'text-gray-500 dark:text-gray-400'"
+                                                                      v-text="t.name.charAt(0).toUpperCase()"></span>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                    <span v-if="event.talent.length > 5" class="ms-1 text-xs"
+                                                          :class="getHeaderImage(event) ? 'text-white/60' : 'text-gray-400 dark:text-gray-500'">+<span v-text="event.talent.length - 5"></span></span>
+                                                </div>
+                                                {{-- Count Badges --}}
+                                                <div v-if="event.video_count > 0 || event.comment_count > 0" class="mt-2 flex items-center gap-3">
+                                                    <span v-if="event.video_count > 0" class="inline-flex items-center gap-1 text-xs"
+                                                          :class="getHeaderImage(event) ? 'text-white/60' : 'text-gray-500 dark:text-gray-400'">
+                                                        <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z" />
+                                                        </svg>
+                                                        <span v-text="event.video_count"></span>
+                                                    </span>
+                                                    <span v-if="event.comment_count > 0" class="inline-flex items-center gap-1 text-xs"
+                                                          :class="getHeaderImage(event) ? 'text-white/60' : 'text-gray-500 dark:text-gray-400'">
+                                                        <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.202 41.202 0 01-5.183.501.78.78 0 00-.528.224l-3.579 3.58A.75.75 0 016 17.25v-3.443a41.033 41.033 0 01-2.57-.33C2.993 13.244 2 11.986 2 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        <span v-text="event.comment_count"></span>
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
+                                        {{-- Mini Timeline for Parts --}}
+                                        <div v-if="event.parts && event.parts.length > 0" class="relative px-4 pb-3">
+                                            <div class="relative" :class="isRtl ? 'pr-2' : 'pl-2'">
+                                                {{-- Vertical Line --}}
+                                                <div class="absolute top-1 bottom-1 w-0.5" :class="isRtl ? 'right-0' : 'left-0'" :style="getHeaderImage(event) ? 'background-color: rgba(255,255,255,0.3)' : 'background-color: {{ $accentColor }}30'"></div>
+                                                <div class="space-y-2">
+                                                    <div v-for="(part, partIndex) in event.parts.slice(0, 4)" :key="partIndex" class="relative flex items-start gap-2" :class="isRtl ? 'flex-row-reverse' : ''">
+                                                        {{-- Dot --}}
+                                                        <div class="absolute top-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" :class="isRtl ? '-right-[3px]' : '-left-[3px]'" :style="getHeaderImage(event) ? 'background-color: rgba(255,255,255,0.8)' : 'background-color: {{ $accentColor }}'"></div>
+                                                        <div :class="isRtl ? 'pr-3' : 'pl-3'">
+                                                            <span class="text-sm" :class="getHeaderImage(event) ? 'text-white/90' : 'text-gray-700 dark:text-gray-300'" v-text="part.name"></span>
+                                                            <span v-if="part.start_time" class="text-xs ms-1" :class="getHeaderImage(event) ? 'text-white/60' : 'text-gray-400 dark:text-gray-500'" v-text="part.start_time"></span>
+                                                        </div>
+                                                    </div>
+                                                    <div v-if="event.parts.length > 4" class="text-xs" :class="[isRtl ? 'pr-3' : 'pl-3', getHeaderImage(event) ? 'text-white/60' : 'text-gray-400 dark:text-gray-500']">
+                                                        +<span v-text="event.parts.length - 4"></span> {{ __('messages.more') }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {{-- Description --}}
+                                        <p v-if="event.description_excerpt" class="relative px-4 pb-3 hidden md:block text-sm line-clamp-2"
+                                           :class="getHeaderImage(event) ? 'text-white/70' : 'text-gray-500 dark:text-gray-400'"
+                                           dir="auto" v-text="event.description_excerpt"></p>
                                     </div>
                                 </div>
                             </template>
@@ -617,6 +827,7 @@
                 </div>
             </div>
         </div>
+    </div>
 
 {{-- Mobile Filters Bottom Sheet Drawer --}}
 @if($filterCount >= 2)
@@ -1022,6 +1233,15 @@ const calendarApp = createApp({
                 }
             }
         },
+        getHeaderImage(event) {
+            if (event.venue_header_image) return event.venue_header_image;
+            if (event.talent && event.talent.length > 0) {
+                for (const t of event.talent) {
+                    if (t.header_image) return t.header_image;
+                }
+            }
+            return null;
+        },
         formatDuration(hours) {
             if (!hours) return '';
             const totalMinutes = Math.round(hours * 60);
@@ -1198,6 +1418,17 @@ const calendarApp = createApp({
             return eventDate.toLocaleDateString(this.languageCode, {
                 weekday: 'long'
             });
+        },
+        getMonthAbbr(dateStr) {
+            if (!dateStr) return '';
+            const [year, month, day] = dateStr.split('-').map(Number);
+            const eventDate = new Date(year, month - 1, day);
+            return eventDate.toLocaleDateString(this.languageCode, { month: 'short' }).toUpperCase();
+        },
+        getDayNum(dateStr) {
+            if (!dateStr) return '';
+            const parts = dateStr.split('-');
+            return parseInt(parts[2], 10);
         },
         getDaySuffix(day) {
             if (day >= 11 && day <= 13) return 'th';

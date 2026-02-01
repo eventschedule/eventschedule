@@ -3,6 +3,7 @@
     <x-slot name="description">Tell customers where to find your food truck today. Share your weekly rotation, email your regulars directly, and take catering bookings with zero platform fees.</x-slot>
     <x-slot name="keywords">food truck schedule, food truck locator, mobile kitchen calendar, food truck booking, where is the food truck, food truck locations, food vendor schedule, taco truck finder, food truck events</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For Food Trucks & Vendors</x-slot>
 
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">

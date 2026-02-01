@@ -3,6 +3,7 @@
     <x-slot name="description">Discover how Event Schedule works for musicians, venues, comedians, restaurants, art galleries, and more. Find your industry and see how to share events, sell tickets, and grow your audience.</x-slot>
     <x-slot name="keywords">event schedule use cases, musician schedule, venue calendar, comedy club events, restaurant events, brewery events, art gallery schedule, community center events</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">Use Cases</x-slot>
 
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">

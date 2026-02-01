@@ -440,7 +440,7 @@ class RoleController extends Controller
         $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
 
         if ($role->isCurator()) {
-            $events = Event::with('roles')
+            $events = Event::with('roles', 'parts')->withCount(['approvedVideos', 'approvedComments'])
                 ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
                     $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
                         ->orWhereNotNull('days_of_week');
@@ -454,7 +454,7 @@ class RoleController extends Controller
                 ->orderBy('starts_at')
                 ->get();
         } else {
-            $events = Event::with('roles')
+            $events = Event::with('roles', 'parts')->withCount(['approvedVideos', 'approvedComments'])
                 ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
                     $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
                         ->orWhereNotNull('days_of_week');
@@ -471,7 +471,7 @@ class RoleController extends Controller
 
         // Fetch past non-recurring events for list view
         if ($role->isCurator()) {
-            $pastEvents = Event::with('roles')
+            $pastEvents = Event::with('roles', 'parts')->withCount(['approvedVideos', 'approvedComments'])
                 ->where('starts_at', '<', Carbon::now('UTC'))
                 ->whereNull('days_of_week')
                 ->whereIn('id', function ($query) use ($role) {
@@ -484,7 +484,7 @@ class RoleController extends Controller
                 ->limit(20)
                 ->get();
         } else {
-            $pastEvents = Event::with('roles')
+            $pastEvents = Event::with('roles', 'parts')->withCount(['approvedVideos', 'approvedComments'])
                 ->where('starts_at', '<', Carbon::now('UTC'))
                 ->whereNull('days_of_week')
                 ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))

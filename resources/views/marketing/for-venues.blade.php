@@ -3,6 +3,7 @@
     <x-slot name="description">Fill your calendar with great events. Accept booking requests, sell tickets with QR check-in, and manage multiple rooms or stages. Built for bars, clubs, and event spaces.</x-slot>
     <x-slot name="keywords">venue calendar, event venue software, bar event calendar, club booking system, venue management, event space calendar, accept bookings, venue ticketing</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For Venues</x-slot>
 
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">

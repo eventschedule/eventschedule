@@ -3,6 +3,7 @@
     <x-slot name="description">Set events to repeat weekly on chosen days with flexible end conditions, per-occurrence tickets, and automatic Google Calendar sync.</x-slot>
     <x-slot name="keywords">recurring events, weekly events, repeat scheduling, event recurrence, weekly calendar, per-occurrence tickets, Google Calendar sync, event series</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">Recurring Events</x-slot>
 
     <style>
         .text-gradient {

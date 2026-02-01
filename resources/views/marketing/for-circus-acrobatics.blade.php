@@ -3,6 +3,7 @@
     <x-slot name="description">Share your circus performances, sell tickets directly, and reach your audience with newsletters. No social media algorithms. Zero platform fees. Built for aerialists, acrobats, and circus performers.</x-slot>
     <x-slot name="keywords">circus schedule, aerialist calendar, acrobat booking, circus performer schedule, aerial show schedule, circus troupe management, sell circus tickets, performer newsletter</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For Circus & Acrobatics</x-slot>
 
     <!-- Hero Section - The Big Top -->
     <section class="relative bg-circus-dark py-32 overflow-hidden">

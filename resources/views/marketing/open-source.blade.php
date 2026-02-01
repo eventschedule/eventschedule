@@ -3,6 +3,7 @@
     <x-slot name="description">Event Schedule is 100% open source under the AAL license. Self-host on your own server or integrate with our REST API. Full control, no vendor lock-in.</x-slot>
     <x-slot name="keywords">open source event calendar, self hosted events, event API, REST API events, AAL license, selfhost calendar, event schedule API, developer API</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">Open Source</x-slot>
 
     <style>
         /* Custom gray gradient for this page */

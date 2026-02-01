@@ -37,19 +37,30 @@ class SendNewsletterBatch implements ShouldQueue
             return;
         }
 
-        $recipients = NewsletterRecipient::whereIn('id', $this->recipientIds)
-            ->where('status', 'pending')
-            ->get();
+        $originalLocale = app()->getLocale();
 
-        foreach ($recipients as $recipient) {
-            try {
-                $service->sendToRecipient($newsletter, $recipient);
-            } catch (\Exception $e) {
-                Log::error('Newsletter batch send error: '.$e->getMessage(), [
-                    'newsletter_id' => $this->newsletterId,
-                    'recipient_id' => $recipient->id,
-                ]);
+        try {
+            $role = $newsletter->role;
+            if ($role && is_valid_language_code($role->language_code)) {
+                app()->setLocale($role->language_code);
             }
+
+            $recipients = NewsletterRecipient::whereIn('id', $this->recipientIds)
+                ->where('status', 'pending')
+                ->get();
+
+            foreach ($recipients as $recipient) {
+                try {
+                    $service->sendToRecipient($newsletter, $recipient);
+                } catch (\Exception $e) {
+                    Log::error('Newsletter batch send error: '.$e->getMessage(), [
+                        'newsletter_id' => $this->newsletterId,
+                        'recipient_id' => $recipient->id,
+                    ]);
+                }
+            }
+        } finally {
+            app()->setLocale($originalLocale);
         }
 
         // Update denormalized counts

@@ -7,6 +7,9 @@
                 <x-secondary-link href="{{ route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
                     {{ __('messages.segments') }}
                 </x-secondary-link>
+                <x-secondary-link href="{{ route('newsletter.import', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
+                    {{ __('messages.import_emails') }}
+                </x-secondary-link>
                 <x-brand-link href="{{ route('newsletter.create', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
                     {{ __('messages.create_newsletter') }}
                 </x-brand-link>
@@ -41,6 +44,7 @@
         </div>
         @endif
 
+        @if ($newsletters->count() > 0)
         <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
@@ -55,8 +59,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                    @forelse ($newsletters as $newsletter)
-                    @if ($newsletter->status !== 'cancelled')
+                    @foreach ($newsletters as $newsletter)
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
                             <a href="{{ in_array($newsletter->status, ['sent', 'sending']) ? route('newsletter.stats', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) : route('newsletter.edit', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
@@ -114,14 +117,7 @@
                             </div>
                         </td>
                     </tr>
-                    @endif
-                    @empty
-                    <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                            {{ __('messages.no_newsletters') }}
-                        </td>
-                    </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -129,6 +125,21 @@
         <div class="mt-4">
             {{ $newsletters->links() }}
         </div>
+        @else
+        <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 8L12 13L4 8V6L12 11L20 6M20 4H4C2.89 4 2 4.89 2 6V18C2 19.1 2.89 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.89 21.1 4 20 4Z" />
+            </svg>
+            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.no_newsletters') }}</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_newsletters_description') }}</p>
+            <div class="mt-6">
+                <a href="{{ route('newsletter.create', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
+                    class="inline-flex items-center rounded-md bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-600">
+                    {{ __('messages.create_newsletter') }}
+                </a>
+            </div>
+        </div>
+        @endif
 
         @else
         {{-- Empty state: no schedules --}}

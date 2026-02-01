@@ -104,14 +104,14 @@
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
-                                <p>You can change your schedule type at any time. Go to <strong class="text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and select a new type. The type affects how your events are displayed and what information is shown.</p>
+                                <p>You can change your schedule type at any time. Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and select a new type. The type affects how your events are displayed and what information is shown.</p>
                             </div>
                         </section>
 
                         <!-- Basic Information -->
                         <section id="basic-information" class="doc-section">
                             <h2 class="doc-heading">Basic Information</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Configure your schedule's core identity in <strong class="text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Configure your schedule's core identity in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>.</p>
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -124,7 +124,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Description</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">A bio or description of your schedule. Supports <strong class="text-white">Markdown formatting</strong> for links, bold text, lists, and more. Tell visitors what you're about and what kind of events they can expect.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">A bio or description of your schedule. Supports <strong class="text-gray-900 dark:text-white">Markdown formatting</strong> for links, bold text, lists, and more. Tell visitors what you're about and what kind of events they can expect.</p>
                                 </div>
                             </div>
                         </section>
@@ -132,7 +132,7 @@
                         <!-- Location & Address -->
                         <section id="location" class="doc-section">
                             <h2 class="doc-heading">Location & Address</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">For <strong class="text-white">Venue</strong> schedules, you can add a full physical address. This enables map integration and helps visitors find your location.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">For <strong class="text-gray-900 dark:text-white">Venue</strong> schedules, you can add a full physical address. This enables map integration and helps visitors find your location.</p>
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -158,12 +158,12 @@
                         <!-- Contact Information -->
                         <section id="contact" class="doc-section">
                             <h2 class="doc-heading">Contact Information</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add contact details in <strong class="text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> so visitors can reach you. These appear on your public schedule page.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add contact details in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> so visitors can reach you. These appear on your public schedule page.</p>
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Email Address</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">A public contact email for inquiries. Use the <strong class="text-white">"Show email"</strong> toggle to control whether this is visible to visitors.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">A public contact email for inquiries. Use the <strong class="text-gray-900 dark:text-white">"Show email"</strong> toggle to control whether this is visible to visitors.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Phone Number</h4>
@@ -183,7 +183,7 @@
                         <!-- Schedule Settings -->
                         <section id="settings" class="doc-section">
                             <h2 class="doc-heading">Schedule Settings</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Configure how your schedule works in <strong class="text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Configure how your schedule works in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>.</p>
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -215,14 +215,14 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Accept Event Requests</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Allow others to submit events to your schedule. Perfect for:</p>
                                     <ul class="text-sm text-gray-500 dark:text-gray-400 list-disc list-inside space-y-1">
-                                        <li><strong class="text-white">Venues:</strong> Accept booking requests from bands and performers</li>
-                                        <li><strong class="text-white">Curators:</strong> Let the community submit local events</li>
-                                        <li><strong class="text-white">Organizations:</strong> Collect event submissions from members</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Venues:</strong> Accept booking requests from bands and performers</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Curators:</strong> Let the community submit local events</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Organizations:</strong> Collect event submissions from members</li>
                                     </ul>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require Approval</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">When enabled, submitted events go to a pending queue for your approval before appearing publicly. Review requests in <strong class="text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong>.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">When enabled, submitted events go to a pending queue for your approval before appearing publicly. Review requests in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong>.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Request Terms</h4>
@@ -493,6 +493,8 @@
                                 <li><a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">Sharing Your Schedule</a> - Embed and share your schedule</li>
                             </ul>
                         </section>
+
+                        @include('marketing.docs.partials.navigation')
                     </div>
                 </div>
             </div>
@@ -500,4 +502,41 @@
     </section>
 
     @include('marketing.docs.partials.scripts')
+
+    <!-- HowTo Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Set Up Your Event Schedule",
+        "description": "Learn the basics of setting up your schedule including type, name, location, contact information, and core settings.",
+        "totalTime": "PT5M",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "name": "Choose Your Schedule Type",
+                "text": "Select the appropriate schedule type: Talent for performers, Venue for event spaces, Curator for promoters, or Vendor for mobile businesses.",
+                "url": "{{ url(route('marketing.docs.schedule_basics')) }}#schedule-types"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Enter Basic Information",
+                "text": "Configure your schedule name, English name (if applicable), and description with Markdown formatting in Admin Panel, then Profile, then Edit.",
+                "url": "{{ url(route('marketing.docs.schedule_basics')) }}#basic-information"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Set Your Location",
+                "text": "For Venue schedules, add your full address including street, city, state, postal code, and country for map integration.",
+                "url": "{{ url(route('marketing.docs.schedule_basics')) }}#location"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Configure Settings",
+                "text": "Set your schedule URL, language, timezone, time format, and configure event request and approval settings.",
+                "url": "{{ url(route('marketing.docs.schedule_basics')) }}#settings"
+            }
+        ]
+    }
+    </script>
 </x-marketing-layout>
