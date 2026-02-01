@@ -185,7 +185,7 @@
                                 Multiple Formats
                             </div>
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Any input works</h3>
-                            <p class="text-gray-500 dark:text-white/80 text-lg">Text, images, screenshots, flyers, agendas, and setlists. Drop it in and AI figures out the rest.</p>
+                            <p class="text-gray-500 dark:text-white/80 text-lg">Text, images, screenshots, and flyers. Drop it in and AI figures out the rest.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
@@ -279,7 +279,7 @@
                     Supported image formats
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-                    Upload event flyers, agendas, setlists, screenshots, or any image containing event details.
+                    Upload event flyers, screenshots, or any image containing event details.
                 </p>
 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
