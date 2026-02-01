@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'google-calendar/webhook',
             'stripe/webhook',
             'invoiceninja/webhook/*',
+            'test_database',
         ]);
 
         // Sanitize user agent before session middleware processes it
