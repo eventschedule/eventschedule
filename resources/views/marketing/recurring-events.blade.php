@@ -1,0 +1,390 @@
+<x-marketing-layout>
+    <x-slot name="title">Recurring Events | Weekly Repeat Scheduling - Event Schedule</x-slot>
+    <x-slot name="description">Set events to repeat weekly on chosen days with flexible end conditions, per-occurrence tickets, and automatic Google Calendar sync.</x-slot>
+    <x-slot name="keywords">recurring events, weekly events, repeat scheduling, event recurrence, weekly calendar, per-occurrence tickets, Google Calendar sync, event series</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
+
+    <style>
+        .text-gradient {
+            background: linear-gradient(135deg, #84cc16 0%, #22c55e 50%, #16a34a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+
+    <!-- Hero Section -->
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
+        <!-- Animated background -->
+        <div class="absolute inset-0">
+            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-lime-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-green-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+        </div>
+
+        <!-- Grid -->
+        <div class="absolute inset-0 grid-pattern"></div>
+
+        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
+                <svg class="w-4 h-4 text-lime-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span class="text-sm text-gray-600 dark:text-gray-300">Recurring Events</span>
+            </div>
+
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
+                Set it and<br>
+                <span class="text-gradient">forget it</span>
+            </h1>
+
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
+                Schedule events to repeat weekly on your chosen days. Set end conditions and let Google Calendar sync handle the rest.
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-lime-600 to-green-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-lime-500/25">
+                    Start for free
+                    <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bento Grid Features -->
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Day Picker (spans 2 cols) -->
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-lime-100 to-green-100 dark:from-lime-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                    <div class="flex flex-col lg:flex-row gap-8 items-center">
+                        <div class="flex-1">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-lime-100 text-lime-700 dark:bg-lime-500/20 dark:text-lime-300 text-sm font-medium mb-4">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                Weekly Schedule
+                            </div>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Pick your days</h3>
+                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Select which days of the week your event repeats. Choose one day or several for a flexible weekly schedule.</p>
+                            <div class="flex flex-wrap gap-3">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any combination</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Weekly repeat</span>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0 w-full lg:w-auto">
+                            <div class="animate-float">
+                                <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-6 border border-gray-200 dark:border-white/10 max-w-xs">
+                                    <div class="text-gray-500 dark:text-gray-400 text-xs mb-3">Repeat on</div>
+                                    <div class="flex gap-2">
+                                        <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-xs">S</div>
+                                        <div class="w-10 h-10 rounded-full bg-lime-500 text-white flex items-center justify-center text-xs font-semibold shadow-lg shadow-lime-500/25">M</div>
+                                        <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-xs">T</div>
+                                        <div class="w-10 h-10 rounded-full bg-lime-500 text-white flex items-center justify-center text-xs font-semibold shadow-lg shadow-lime-500/25">W</div>
+                                        <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-xs">T</div>
+                                        <div class="w-10 h-10 rounded-full bg-lime-500 text-white flex items-center justify-center text-xs font-semibold shadow-lg shadow-lime-500/25">F</div>
+                                        <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-xs">S</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- End Conditions -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        End Conditions
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Control the run</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">Choose when your recurring series stops.</p>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-lime-100 dark:bg-lime-500/20 border border-lime-200 dark:border-lime-500/30">
+                            <div class="w-4 h-4 rounded-full border-4 border-lime-500"></div>
+                            <span class="text-gray-900 dark:text-white text-sm">Never (ongoing)</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
+                            <div class="w-4 h-4 rounded-full border-2 border-gray-400 dark:border-gray-500"></div>
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">On a specific date</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
+                            <div class="w-4 h-4 rounded-full border-2 border-gray-400 dark:border-gray-500"></div>
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">After N occurrences</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Independent Tickets -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                        </svg>
+                        Per-Event Tickets
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sell per event</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">Each occurrence has its own ticket count and sales.</p>
+
+                    <div class="space-y-2">
+                        <div class="p-3 rounded-xl bg-lime-500/10 border border-lime-500/20">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-900 dark:text-white text-sm font-medium">Mon, Feb 3</span>
+                                <span class="text-lime-600 dark:text-lime-300 text-xs">12 sold</span>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600 dark:text-gray-300 text-sm font-medium">Wed, Feb 5</span>
+                                <span class="text-gray-500 dark:text-gray-400 text-xs">8 sold</span>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600 dark:text-gray-300 text-sm font-medium">Fri, Feb 7</span>
+                                <span class="text-gray-500 dark:text-gray-400 text-xs">5 sold</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar Preview (spans 2 cols) -->
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-lime-100 to-emerald-100 dark:from-lime-900 dark:to-emerald-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-lime-100 text-lime-700 dark:bg-lime-500/20 dark:text-lime-300 text-sm font-medium mb-4">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                Calendar View
+                            </div>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">See the series</h3>
+                            <p class="text-gray-600 dark:text-white/80 text-lg">All recurring dates appear on your schedule automatically. Guests see each occurrence individually with its own ticket availability.</p>
+                        </div>
+                        <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10">
+                            <div class="text-gray-500 dark:text-gray-400 text-xs mb-3 font-medium">February 2026</div>
+                            <div class="grid grid-cols-7 gap-1 text-center text-[10px]">
+                                <div class="text-gray-400 dark:text-gray-500 py-1">S</div>
+                                <div class="text-gray-400 dark:text-gray-500 py-1">M</div>
+                                <div class="text-gray-400 dark:text-gray-500 py-1">T</div>
+                                <div class="text-gray-400 dark:text-gray-500 py-1">W</div>
+                                <div class="text-gray-400 dark:text-gray-500 py-1">T</div>
+                                <div class="text-gray-400 dark:text-gray-500 py-1">F</div>
+                                <div class="text-gray-400 dark:text-gray-500 py-1">S</div>
+                                <div class="py-1 text-gray-400 dark:text-gray-600">1</div>
+                                <div class="py-1 rounded bg-lime-500 text-white font-semibold">2</div>
+                                <div class="py-1 text-gray-600 dark:text-gray-300">3</div>
+                                <div class="py-1 rounded bg-lime-500 text-white font-semibold">4</div>
+                                <div class="py-1 text-gray-600 dark:text-gray-300">5</div>
+                                <div class="py-1 rounded bg-lime-500 text-white font-semibold">6</div>
+                                <div class="py-1 text-gray-600 dark:text-gray-300">7</div>
+                                <div class="py-1 text-gray-600 dark:text-gray-300">8</div>
+                                <div class="py-1 rounded bg-lime-500 text-white font-semibold">9</div>
+                                <div class="py-1 text-gray-600 dark:text-gray-300">10</div>
+                                <div class="py-1 rounded bg-lime-500 text-white font-semibold">11</div>
+                                <div class="py-1 text-gray-600 dark:text-gray-300">12</div>
+                                <div class="py-1 rounded bg-lime-500 text-white font-semibold">13</div>
+                                <div class="py-1 text-gray-600 dark:text-gray-300">14</div>
+                                <div class="py-1 text-gray-600 dark:text-gray-300">15</div>
+                                <div class="py-1 rounded bg-lime-500 text-white font-semibold">16</div>
+                                <div class="py-1 text-gray-600 dark:text-gray-300">17</div>
+                                <div class="py-1 rounded bg-lime-500 text-white font-semibold">18</div>
+                                <div class="py-1 text-gray-600 dark:text-gray-300">19</div>
+                                <div class="py-1 rounded bg-lime-500 text-white font-semibold">20</div>
+                                <div class="py-1 text-gray-600 dark:text-gray-300">21</div>
+                                <div class="py-1 text-gray-600 dark:text-gray-300">22</div>
+                                <div class="py-1 rounded bg-lime-500 text-white font-semibold">23</div>
+                                <div class="py-1 text-gray-600 dark:text-gray-300">24</div>
+                                <div class="py-1 rounded bg-lime-500 text-white font-semibold">25</div>
+                                <div class="py-1 text-gray-600 dark:text-gray-300">26</div>
+                                <div class="py-1 rounded bg-lime-500 text-white font-semibold">27</div>
+                                <div class="py-1 text-gray-600 dark:text-gray-300">28</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Google Calendar Sync (spans 2 cols) -->
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-100 to-lime-100 dark:from-green-900 dark:to-lime-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                    <div class="flex flex-col lg:flex-row gap-8 items-center">
+                        <div class="flex-1">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300 text-sm font-medium mb-4">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                Auto Sync
+                            </div>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Syncs automatically</h3>
+                            <p class="text-gray-600 dark:text-white/80 text-lg">Recurring events sync to Google Calendar as individual occurrences. Each date appears separately so attendees see the full series.</p>
+                        </div>
+                        <div class="flex-shrink-0 w-full lg:w-auto">
+                            <div class="animate-float" style="animation-delay: 0.3s;">
+                                <div class="flex items-center gap-4">
+                                    <div class="bg-lime-100 dark:bg-lime-500/20 rounded-xl border border-lime-200 dark:border-lime-400/30 p-4 w-28">
+                                        <div class="text-xs text-lime-600 dark:text-lime-300 mb-2 text-center">Event Schedule</div>
+                                        <div class="space-y-1.5">
+                                            <div class="h-2 bg-lime-400/40 rounded"></div>
+                                            <div class="h-2 bg-lime-400/40 rounded w-3/4"></div>
+                                            <div class="h-2 bg-lime-400/40 rounded w-1/2"></div>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col items-center gap-1">
+                                        <svg class="w-6 h-6 text-lime-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                        </svg>
+                                        <svg class="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                        </svg>
+                                    </div>
+                                    <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-4 w-28">
+                                        <div class="text-xs text-gray-600 dark:text-gray-300 mb-2 text-center">Google Calendar</div>
+                                        <div class="space-y-1.5">
+                                            <div class="h-2 bg-blue-400/40 rounded"></div>
+                                            <div class="h-2 bg-green-400/40 rounded w-3/4"></div>
+                                            <div class="h-2 bg-yellow-400/40 rounded w-1/2"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Use Cases -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-lime-100 to-green-100 dark:from-lime-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-lime-100 text-lime-700 dark:bg-lime-500/20 dark:text-lime-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Use Cases
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Built for regulars</h3>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">Perfect for events that happen on a weekly schedule.</p>
+
+                    <div class="flex flex-wrap gap-2">
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-700 dark:text-lime-300 text-sm">Yoga classes</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-700 dark:text-lime-300 text-sm">Trivia nights</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-700 dark:text-lime-300 text-sm">Open mic</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-700 dark:text-lime-300 text-sm">Workshops</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-700 dark:text-lime-300 text-sm">DJ nights</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-700 dark:text-lime-300 text-sm">Jam sessions</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Next Feature -->
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
+        <div class="absolute inset-0">
+            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+        </div>
+
+        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <a href="{{ marketing_url('/calendar-sync') }}" class="group block">
+                <div class="bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 rounded-3xl border border-blue-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                    <div class="flex flex-col lg:flex-row gap-8 items-center">
+                        <!-- Text content -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Calendar Sync</h3>
+                            <p class="text-gray-500 dark:text-white/80 text-lg mb-4">Two-way sync with Google Calendar. Changes flow in both directions automatically.</p>
+                            <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Mini mockup -->
+                        <div class="flex-shrink-0">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-blue-100 dark:bg-blue-500/20 rounded-xl border border-blue-200 dark:border-blue-400/30 p-3 w-24">
+                                    <div class="text-[10px] text-blue-600 dark:text-blue-300 mb-1 text-center">Event Schedule</div>
+                                    <div class="space-y-1">
+                                        <div class="h-1.5 bg-blue-400/40 rounded"></div>
+                                        <div class="h-1.5 bg-blue-400/40 rounded w-3/4"></div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center gap-0.5">
+                                    <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                    </svg>
+                                    <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                    </svg>
+                                </div>
+                                <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-3 w-24">
+                                    <div class="text-[10px] text-gray-600 dark:text-gray-300 mb-1 text-center">Google Calendar</div>
+                                    <div class="space-y-1">
+                                        <div class="h-1.5 bg-green-400/40 rounded"></div>
+                                        <div class="h-1.5 bg-blue-400/40 rounded w-3/4"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="relative bg-gradient-to-br from-lime-600 to-green-700 py-24 overflow-hidden">
+        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+
+        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+                Automate your schedule
+            </h2>
+            <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
+                Set up recurring events today. Free to use, no credit card required.
+            </p>
+            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-lime-700 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
+                Get Started Free
+                <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule - Recurring Events",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Event Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Set events to repeat weekly on chosen days with flexible end conditions, per-occurrence tickets, and automatic Google Calendar sync.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Included free"
+        },
+        "featureList": [
+            "Weekly day-of-week recurrence",
+            "Three end conditions",
+            "Per-occurrence tickets",
+            "Google Calendar sync",
+            "Automatic series creation",
+            "Individual ticket sales"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
+</x-marketing-layout>
