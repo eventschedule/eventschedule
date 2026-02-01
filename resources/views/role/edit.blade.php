@@ -968,27 +968,6 @@
                         </nav>
                     </div>
 
-                    <!--
-                    <div class="mb-6">
-                        <x-input-label :value="__('messages.layout')" />
-                        <div class="mt-2 space-y-2">
-                            @foreach(['calendar', 'list'] as $layout)
-                            <div class="flex items-center">
-                                <input type="radio"
-                                    id="event_layout_{{ $layout }}"
-                                    name="event_layout"
-                                    value="{{ $layout }}"
-                                    {{ $role->event_layout == $layout ? 'checked' : '' }}
-                                    class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                <label for="event_layout_{{ $layout }}" class="ms-2 text-gray-900 dark:text-gray-100">
-                                    {{ __('messages.' . $layout) }}
-                                </label>
-                            </div>
-                            @endforeach
-                        </div>
-                        <x-input-error class="mt-2" :messages="$errors->get('event_layout')" />
-                    </div>
-                    -->
 
                     <!-- Images Tab Content -->
                     <div id="style-content-images">
@@ -1266,6 +1245,26 @@
                                 <div id="font_preview" class="mt-3 text-2xl text-gray-900 dark:text-gray-100" style="font-family: '{{ $role->font_family }}', sans-serif;">
                                     {{ $role->name }}
                                 </div>
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label :value="__('messages.default_layout')" />
+                                <div class="mt-2 space-y-2">
+                                    @foreach(['calendar', 'list'] as $layout)
+                                    <div class="flex items-center">
+                                        <input type="radio"
+                                            id="event_layout_{{ $layout }}"
+                                            name="event_layout"
+                                            value="{{ $layout }}"
+                                            {{ $role->event_layout == $layout ? 'checked' : '' }}
+                                            class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                        <label for="event_layout_{{ $layout }}" class="ms-2 text-gray-900 dark:text-gray-100">
+                                            {{ __('messages.' . $layout) }}
+                                        </label>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                <x-input-error class="mt-2" :messages="$errors->get('event_layout')" />
                             </div>
 
                             <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">

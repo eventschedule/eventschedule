@@ -94,6 +94,18 @@
                     </div>
                 </a>
 
+                <a href="{{ route('marketing.docs.creating_schedules') }}" class="doc-card block">
+                    <div class="rounded-xl border border-sky-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-sky-50 to-teal-50 dark:from-sky-900 dark:to-teal-900 hover:border-sky-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-3">
+                            <svg class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Creating Schedules</h3>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Set up new schedules for your events and communities.</p>
+                    </div>
+                </a>
+
                 <a href="{{ route('marketing.docs.schedule_basics') }}" class="doc-card block">
                     <div class="rounded-xl border border-teal-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-teal-50 to-blue-50 dark:from-teal-900 dark:to-blue-900 hover:border-teal-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
@@ -103,6 +115,18 @@
                             <h3 class="font-semibold text-gray-900 dark:text-white">Schedule Setup</h3>
                         </div>
                         <p class="text-gray-500 dark:text-gray-400 text-sm">Configure name, type, location, styling, and settings.</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-card block">
+                    <div class="rounded-xl border border-rose-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900 dark:to-pink-900 hover:border-rose-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-3">
+                            <svg class="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                            </svg>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Schedule Styling</h3>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Customize colors, fonts, and branding for your schedule.</p>
                     </div>
                 </a>
 
@@ -127,6 +151,18 @@
                             <h3 class="font-semibold text-gray-900 dark:text-white">Sharing</h3>
                         </div>
                         <p class="text-gray-500 dark:text-gray-400 text-sm">Embed, share on social, and grow followers.</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('marketing.docs.newsletters') }}" class="doc-card block">
+                    <div class="rounded-xl border border-amber-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900 dark:to-orange-900 hover:border-amber-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-3">
+                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Newsletters</h3>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Send beautiful emails to your audience.</p>
                     </div>
                 </a>
 
@@ -298,6 +334,18 @@
                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                     <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Follower</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Someone who follows your schedule to receive updates about new events.</p>
+                </div>
+                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Newsletter</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">An email campaign sent to your followers or ticket buyers to announce events, share updates, or promote your schedule.</p>
+                </div>
+                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Segment</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">A defined audience group for sending newsletters (e.g., all followers, ticket buyers, or a custom list).</p>
+                </div>
+                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Embed</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">A widget that displays your schedule on an external website using an iframe or JavaScript snippet.</p>
                 </div>
                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                     <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Admin Panel</h3>

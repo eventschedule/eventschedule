@@ -469,6 +469,30 @@ class RoleController extends Controller
             $events = $events->orderBy('starts_at')->get();
         }
 
+        // Fetch past non-recurring events for list view
+        if ($role->isCurator()) {
+            $pastEvents = Event::with('roles')
+                ->where('starts_at', '<', Carbon::now('UTC'))
+                ->whereNull('days_of_week')
+                ->whereIn('id', function ($query) use ($role) {
+                    $query->select('event_id')
+                        ->from('event_role')
+                        ->where('role_id', $role->id)
+                        ->where('is_accepted', true);
+                })
+                ->orderByDesc('starts_at')
+                ->limit(20)
+                ->get();
+        } else {
+            $pastEvents = Event::with('roles')
+                ->where('starts_at', '<', Carbon::now('UTC'))
+                ->whereNull('days_of_week')
+                ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
+                ->orderByDesc('starts_at')
+                ->limit(20)
+                ->get();
+        }
+
         // Track view for analytics (non-member visits only, skip embeds)
         if (! request()->embed && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
             app(AnalyticsService::class)->recordView($role, $event, $request);
@@ -518,6 +542,7 @@ class RoleController extends Controller
                 'fonts',
                 'translation',
                 'selectedGroup',
+                'pastEvents',
             ));
 
         // Allow embedding when embed parameter is present

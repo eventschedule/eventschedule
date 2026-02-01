@@ -603,6 +603,7 @@ return [
     'event_already_curated' => 'Veranstaltung ist bereits in Ihrem Zeitplan',
     'name_en' => 'Name (Englisch)',
     'layout' => 'Layout',
+    'default_layout' => 'Standard-Layout',
     'calendar' => 'Kalender',
     'grid' => 'Raster',
     'list' => 'Liste',

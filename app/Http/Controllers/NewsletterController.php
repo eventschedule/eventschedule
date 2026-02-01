@@ -47,6 +47,37 @@ class NewsletterController extends Controller
         return ['role_id' => UrlUtils::encodeId($role->id)];
     }
 
+    protected function sanitizeStyleSettings(?array $settings): array
+    {
+        $defaults = Newsletter::defaultStyleSettings();
+        if (! $settings) {
+            return $defaults;
+        }
+
+        $allowedFonts = ['Arial', 'Georgia', 'Verdana', 'Trebuchet MS', 'Times New Roman', 'Courier New', 'Helvetica', 'Tahoma'];
+        $allowedRadii = ['rounded', 'square'];
+        $allowedLayouts = ['cards', 'list'];
+
+        $sanitized = [];
+        $sanitized['backgroundColor'] = $this->sanitizeHexColor($settings['backgroundColor'] ?? null, $defaults['backgroundColor']);
+        $sanitized['accentColor'] = $this->sanitizeHexColor($settings['accentColor'] ?? null, $defaults['accentColor']);
+        $sanitized['textColor'] = $this->sanitizeHexColor($settings['textColor'] ?? null, $defaults['textColor']);
+        $sanitized['fontFamily'] = in_array($settings['fontFamily'] ?? '', $allowedFonts) ? $settings['fontFamily'] : $defaults['fontFamily'];
+        $sanitized['buttonRadius'] = in_array($settings['buttonRadius'] ?? '', $allowedRadii) ? $settings['buttonRadius'] : $defaults['buttonRadius'];
+        $sanitized['eventLayout'] = in_array($settings['eventLayout'] ?? '', $allowedLayouts) ? $settings['eventLayout'] : $defaults['eventLayout'];
+
+        return $sanitized;
+    }
+
+    protected function sanitizeHexColor(?string $value, string $default): string
+    {
+        if ($value && preg_match('/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $value)) {
+            return $value;
+        }
+
+        return $default;
+    }
+
     protected function parseBlocks(Request $request): ?array
     {
         $blocksJson = $request->input('blocks');
@@ -66,9 +97,41 @@ class NewsletterController extends Controller
 
         // Sanitize blocks
         $allowed = ['profile_image', 'header_banner', 'heading', 'text', 'events', 'button', 'divider', 'spacer', 'image', 'social_links'];
-        return array_values(array_filter($blocks, function ($block) use ($allowed) {
+        $dangerousSchemes = ['javascript:', 'data:', 'vbscript:'];
+
+        $blocks = array_values(array_filter($blocks, function ($block) use ($allowed) {
             return isset($block['type']) && in_array($block['type'], $allowed) && isset($block['id']);
         }));
+
+        // Sanitize URLs in blocks to prevent javascript: and other dangerous URI schemes
+        foreach ($blocks as &$block) {
+            if (isset($block['data']['url'])) {
+                $urlLower = strtolower(trim($block['data']['url']));
+                foreach ($dangerousSchemes as $scheme) {
+                    if (str_starts_with($urlLower, $scheme)) {
+                        $block['data']['url'] = '#';
+                        break;
+                    }
+                }
+            }
+            if (isset($block['data']['links']) && is_array($block['data']['links'])) {
+                foreach ($block['data']['links'] as &$link) {
+                    if (isset($link['url'])) {
+                        $urlLower = strtolower(trim($link['url']));
+                        foreach ($dangerousSchemes as $scheme) {
+                            if (str_starts_with($urlLower, $scheme)) {
+                                $link['url'] = '#';
+                                break;
+                            }
+                        }
+                    }
+                }
+                unset($link);
+            }
+        }
+        unset($block);
+
+        return $blocks;
     }
 
     public function index(Request $request)
@@ -138,7 +201,7 @@ class NewsletterController extends Controller
             'subject' => $validated['subject'],
             'blocks' => $blocks,
             'template' => $validated['template'],
-            'style_settings' => $validated['style_settings'] ?? Newsletter::defaultStyleSettings(),
+            'style_settings' => $this->sanitizeStyleSettings($validated['style_settings'] ?? null),
             'segment_ids' => $validated['segment_ids'] ?? null,
             'status' => 'draft',
         ]);
@@ -199,7 +262,7 @@ class NewsletterController extends Controller
             'subject' => $validated['subject'],
             'blocks' => $blocks,
             'template' => $validated['template'],
-            'style_settings' => $validated['style_settings'] ?? Newsletter::defaultStyleSettings(),
+            'style_settings' => $this->sanitizeStyleSettings($validated['style_settings'] ?? null),
             'segment_ids' => $validated['segment_ids'] ?? null,
         ]);
 
@@ -242,6 +305,13 @@ class NewsletterController extends Controller
             return back()->with('error', __('messages.newsletter_already_sent'));
         }
 
+        if (! $role->canSendNewsletter()) {
+            $limit = $role->newsletterLimit();
+            $used = $role->newslettersSentThisMonth();
+
+            return back()->with('error', __('messages.newsletter_limit_reached', ['used' => $used, 'limit' => $limit]));
+        }
+
         $service->send($newsletter);
 
         return redirect()->route('newsletter.index', $this->roleIdParam($role))
@@ -256,6 +326,13 @@ class NewsletterController extends Controller
         $newsletter = Newsletter::where('role_id', $role->id)
             ->where('id', UrlUtils::decodeId($hash))
             ->firstOrFail();
+
+        if (! $role->canSendNewsletter()) {
+            $limit = $role->newsletterLimit();
+            $used = $role->newslettersSentThisMonth();
+
+            return back()->with('error', __('messages.newsletter_limit_reached', ['used' => $used, 'limit' => $limit]));
+        }
 
         $validated = $request->validate([
             'scheduled_at' => 'required|date|after:now',
@@ -329,7 +406,7 @@ class NewsletterController extends Controller
             'subject' => $request->input('subject', ''),
             'blocks' => $blocks,
             'template' => $request->input('template', 'modern'),
-            'style_settings' => $request->input('style_settings', Newsletter::defaultStyleSettings()),
+            'style_settings' => $this->sanitizeStyleSettings($request->input('style_settings')),
         ]);
         $newsletter->setRelation('role', $role);
 
@@ -352,7 +429,7 @@ class NewsletterController extends Controller
             $newsletter->subject = $request->input('subject');
             $newsletter->blocks = $this->parseBlocks($request);
             $newsletter->template = $request->input('template', 'modern');
-            $newsletter->style_settings = $request->input('style_settings', Newsletter::defaultStyleSettings());
+            $newsletter->style_settings = $this->sanitizeStyleSettings($request->input('style_settings'));
         }
 
         $html = $service->renderPreview($newsletter);
@@ -383,10 +460,12 @@ class NewsletterController extends Controller
         ]);
         $recipient->save();
 
-        $service->sendToRecipient($newsletter, $recipient);
-
-        // Delete the test recipient after sending
-        $recipient->delete();
+        try {
+            $service->sendToRecipient($newsletter, $recipient);
+        } finally {
+            // Delete the test recipient after sending
+            $recipient->delete();
+        }
 
         return back()->with('status', __('messages.test_email_sent'));
     }

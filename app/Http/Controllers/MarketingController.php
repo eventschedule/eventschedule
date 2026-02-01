@@ -557,6 +557,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Newsletters documentation page
+     */
+    public function docsNewsletters()
+    {
+        return view('marketing.docs.newsletters');
+    }
+
+    /**
      * Event Graphics documentation page
      */
     public function docsEventGraphics()

@@ -24,6 +24,11 @@ class NewsletterService
             return false;
         }
 
+        $role = $newsletter->role;
+        if ($role && ! $role->canSendNewsletter()) {
+            return false;
+        }
+
         $sendToken = Str::random(64);
         $newsletter->update([
             'status' => 'sending',
@@ -211,13 +216,16 @@ class NewsletterService
             ? url('/nl/u/'.$recipient->token)
             : '#';
 
+        $role = $newsletter->role;
+
         return view('emails.newsletter', [
             'newsletter' => $newsletter,
             'style' => $style,
             'blocks' => $blocks,
-            'role' => $newsletter->role,
+            'role' => $role,
             'unsubscribeUrl' => $unsubscribeUrl,
             'recipient' => $recipient,
+            'showBranding' => $role ? $role->showBranding() : false,
         ])->render();
     }
 

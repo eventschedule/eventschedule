@@ -598,6 +598,7 @@ return [
     'event_already_curated' => 'O evento já está na sua agenda',
     'name_en' => 'Nome (Inglês)',
     'layout' => 'Layout',
+    'default_layout' => 'Layout Padrão',
     'calendar' => 'Calendário',
     'grid' => 'Grade',
     'list' => 'Lista',

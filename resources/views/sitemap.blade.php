@@ -92,7 +92,7 @@
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>{{ url('/analytics') }}</loc>
+        <loc>{{ route('marketing.analytics') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
@@ -128,7 +128,7 @@
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>{{ url('/newsletters') }}</loc>
+        <loc>{{ route('marketing.newsletters') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
@@ -375,6 +375,12 @@
     </url>
     <url>
         <loc>{{ url('/docs/event-graphics') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>{{ url('/docs/newsletters') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>

@@ -597,6 +597,7 @@ return [
     'event_already_curated' => 'Evenement staat al in je schema',
     'name_en' => 'Naam (Engels)',
     'layout' => 'Layout',
+    'default_layout' => 'Standaard Layout',
     'calendar' => 'Agenda',
     'grid' => 'Raster',
     'list' => 'Lijst',

@@ -405,7 +405,7 @@
     @include('role.show-admin-plan')
     @endif
 
-<script>
+<script {!! nonce_attr() !!}>
 function handleEventsGraphicClick() {
     window.location.href = '{{ route("event.generate_graphic", ["subdomain" => $role->subdomain]) }}';
 }

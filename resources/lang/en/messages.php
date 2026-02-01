@@ -624,6 +624,7 @@ return [
     'results_for' => 'Results for',
     'name_en' => 'Name (English)',
     'layout' => 'Layout',
+    'default_layout' => 'Default Layout',
     'calendar' => 'Calendar',
     'grid' => 'Grid',
     'list' => 'List',
@@ -1422,4 +1423,12 @@ return [
     'invalid_input' => 'Invalid input',
     'subject' => 'Subject',
     'template' => 'Template',
+
+    // Newsletter limits
+    'newsletter_limit_reached' => 'You have reached your monthly newsletter limit (:used/:limit). Upgrade your plan or add custom SMTP settings for unlimited sends.',
+    'newsletters_per_month' => 'newsletters / month',
+    'newsletter_usage' => 'Newsletter Usage',
+    'newsletters_used' => ':used of :limit newsletters used this month',
+    'newsletters_remaining' => ':count remaining',
+    'unlimited_newsletters' => 'Unlimited newsletters',
 ];

@@ -120,6 +120,32 @@
             @endif
         </div>
 
+        {{-- Newsletter Usage --}}
+        @if ($role->newsletterLimit() !== null)
+        @php
+            $newsletterUsed = $role->newslettersSentThisMonth();
+            $newsletterLimit = $role->newsletterLimit();
+            $newsletterPercent = $newsletterLimit > 0 ? min(100, round(($newsletterUsed / $newsletterLimit) * 100)) : 0;
+            $newsletterRemaining = max(0, $newsletterLimit - $newsletterUsed);
+            $barColor = $newsletterPercent > 80 ? 'bg-red-500' : ($newsletterPercent >= 50 ? 'bg-yellow-500' : 'bg-emerald-500');
+            $barBgColor = $newsletterPercent > 80 ? 'bg-red-100 dark:bg-red-900/30' : ($newsletterPercent >= 50 ? 'bg-yellow-100 dark:bg-yellow-900/30' : 'bg-emerald-100 dark:bg-emerald-900/30');
+        @endphp
+        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <h5 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.newsletter_usage') }}</h5>
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm text-gray-600 dark:text-gray-400">
+                    {{ __('messages.newsletters_used', ['used' => $newsletterUsed, 'limit' => $newsletterLimit]) }}
+                </span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ __('messages.newsletters_remaining', ['count' => $newsletterRemaining]) }}
+                </span>
+            </div>
+            <div class="w-full h-2.5 rounded-full {{ $barBgColor }}">
+                <div class="h-2.5 rounded-full {{ $barColor }} transition-all" style="width: {{ $newsletterPercent }}%"></div>
+            </div>
+        </div>
+        @endif
+
         {{-- Action Buttons --}}
         @if ($isOwner)
         <div class="pt-8 space-y-4">

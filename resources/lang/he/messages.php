@@ -588,6 +588,7 @@ return [
     'close' => 'סגור',
     'name_en' => 'שם (אנגלית)',
     'layout' => 'פריסה',
+    'default_layout' => 'פריסת ברירת מחדל',
     'calendar' => 'לוח שנה',
     'grid' => 'רשת',
     'list' => 'רשימה',
