@@ -1412,4 +1412,5 @@ return [
     'general' => 'Allgemein',
     'invalid_input' => 'Ungueltige Eingabe',
     'subject' => 'Betreff',
+    'template' => 'Vorlage',
 ];

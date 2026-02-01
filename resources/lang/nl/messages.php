@@ -1406,4 +1406,5 @@ return [
     'general' => 'Algemeen',
     'invalid_input' => 'Ongeldige invoer',
     'subject' => 'Onderwerp',
+    'template' => 'Sjabloon',
 ];

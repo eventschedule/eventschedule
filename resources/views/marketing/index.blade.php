@@ -94,7 +94,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Grow your audience",
-                "text": "Fans follow your schedule. They get notified when you add new events."
+                "text": "Fans follow your schedule. Send them newsletters, notify them of new events, and build lasting connections."
             }
         ]
     }
@@ -134,7 +134,7 @@
 
                     <!-- Subheadline -->
                     <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-xl mb-12 animate-reveal delay-200">
-                        Event calendars, ticketing, and check-ins for venues, performers, and communities.
+                        Event calendars, ticketing, newsletters, and check-ins for venues, performers, and communities.
                     </p>
 
                     <!-- CTA Buttons -->
@@ -552,6 +552,117 @@
         </div>
     </section>
 
+    <!-- Newsletter Highlight Section -->
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-24 overflow-hidden">
+        <!-- Background accent -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute top-1/2 right-0 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-l from-sky-600/10 to-cyan-600/10 rounded-full blur-[120px]"></div>
+        </div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <!-- Left - Text content -->
+                <div>
+                    <span class="inline-block px-4 py-1.5 rounded-full text-sm font-medium bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-200 dark:border-sky-500/30 mb-6">
+                        Built-in newsletters
+                    </span>
+                    <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+                        Reach your audience<br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-cyan-500">directly</span>
+                    </h2>
+                    <p class="text-lg text-gray-500 dark:text-gray-400 mb-8 max-w-lg">
+                        Send beautiful newsletters to your followers and ticket buyers. No third-party email tools needed.
+                    </p>
+
+                    <!-- Feature badges -->
+                    <div class="flex flex-wrap gap-3">
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-700 dark:text-gray-300">
+                            <svg class="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                            </svg>
+                            Drag-and-drop builder
+                        </span>
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-700 dark:text-gray-300">
+                            <svg class="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                            </svg>
+                            Templates
+                        </span>
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-700 dark:text-gray-300">
+                            <svg class="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            A/B testing
+                        </span>
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-700 dark:text-gray-300">
+                            <svg class="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Audience segments
+                        </span>
+                    </div>
+
+                    <div class="mt-8">
+                        <a href="{{ marketing_url('/newsletters') }}" class="inline-flex items-center gap-2 text-sky-600 dark:text-sky-400 font-semibold hover:gap-3 transition-all">
+                            Learn more about newsletters
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right - Newsletter mockup -->
+                <div class="relative">
+                    <div class="relative bg-white dark:bg-white/5 rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl shadow-sky-500/10 overflow-hidden animate-float">
+                        <!-- Email header mockup -->
+                        <div class="bg-gradient-to-r from-sky-500 to-cyan-500 px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="text-white font-semibold text-sm">This Week's Events</div>
+                                    <div class="text-white/70 text-xs">Your weekly newsletter</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Email body mockup -->
+                        <div class="px-6 py-5 space-y-4">
+                            <!-- Banner placeholder -->
+                            <div class="h-28 rounded-xl bg-gradient-to-r from-sky-100 to-cyan-100 dark:from-sky-900/30 dark:to-cyan-900/30 flex items-center justify-center">
+                                <span class="text-sky-600 dark:text-sky-400 font-bold text-lg">Featured Event</span>
+                            </div>
+                            <!-- Content lines -->
+                            <div class="space-y-2">
+                                <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-full w-full"></div>
+                                <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-full w-4/5"></div>
+                                <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-full w-3/5"></div>
+                            </div>
+                            <!-- Event cards -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 p-3">
+                                    <div class="h-16 rounded-lg bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/30 dark:to-indigo-900/30 mb-2"></div>
+                                    <div class="h-2.5 bg-gray-200 dark:bg-white/10 rounded-full w-3/4 mb-1.5"></div>
+                                    <div class="h-2 bg-gray-100 dark:bg-white/5 rounded-full w-1/2"></div>
+                                </div>
+                                <div class="rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 p-3">
+                                    <div class="h-16 rounded-lg bg-gradient-to-br from-fuchsia-100 to-pink-100 dark:from-fuchsia-900/30 dark:to-pink-900/30 mb-2"></div>
+                                    <div class="h-2.5 bg-gray-200 dark:bg-white/10 rounded-full w-3/4 mb-1.5"></div>
+                                    <div class="h-2 bg-gray-100 dark:bg-white/5 rounded-full w-1/2"></div>
+                                </div>
+                            </div>
+                            <!-- CTA button -->
+                            <div class="flex justify-center pt-2">
+                                <div class="px-6 py-2 rounded-lg bg-gradient-to-r from-sky-500 to-cyan-500 text-white text-sm font-semibold">View All Events</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     {{-- Testimonials Section - Hidden for now
     <section class="relative bg-gray-50 py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -695,7 +806,7 @@
                             <div class="h-px flex-1 bg-gradient-to-r from-emerald-300 dark:from-emerald-500/50 to-transparent"></div>
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Grow your audience</h3>
-                        <p class="text-gray-600 dark:text-gray-400">Fans follow your schedule. They get notified when you add new events.</p>
+                        <p class="text-gray-600 dark:text-gray-400">Fans follow your schedule. Send them newsletters, notify them of new events, and build lasting connections.</p>
                     </div>
                 </div>
             </div>

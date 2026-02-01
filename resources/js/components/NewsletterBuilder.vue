@@ -35,7 +35,7 @@
                             <div class="px-5 pb-5">
                                 <input id="subject" name="subject" type="text"
                                     class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
-                                    v-model="subject" @blur="onSubjectBlur" required />
+                                    v-model="subject" @input="onSubjectInput" required />
                             </div>
                         </div>
 
@@ -120,7 +120,7 @@
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.heading_text }}</label>
                                                 <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
                                                     :value="block.data.text"
-                                                    @input="updateBlockData(block.id, 'text', $event.target.value)" />
+                                                    @input="onHeadingInput(block.id, $event.target.value)" />
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.heading_level }}</label>
@@ -629,6 +629,12 @@ const previewLoading = ref(false);
 
 const activeSection = ref('content');
 
+// Track whether the first heading is auto-synced from the subject field
+const subjectSyncActive = ref((() => {
+    const firstHeading = props.initialBlocks.find(b => b.type === 'heading');
+    return !firstHeading || !firstHeading.data.text || firstHeading.data.text === props.initialSubject;
+})());
+
 function showSection(id) {
     activeSection.value = id;
     if (id) {
@@ -784,11 +790,19 @@ function selectBlock(blockId) {
     }
 }
 
-function onSubjectBlur() {
+function onSubjectInput() {
     const firstHeading = blocks.value.find(b => b.type === 'heading');
-    if (firstHeading && !firstHeading.data.text && subject.value) {
-        updateBlockData(firstHeading.id, 'text', subject.value);
+    if (firstHeading && subjectSyncActive.value) {
+        firstHeading.data.text = subject.value;
     }
+}
+
+function onHeadingInput(blockId, value) {
+    const firstHeading = blocks.value.find(b => b.type === 'heading');
+    if (firstHeading && firstHeading.id === blockId) {
+        subjectSyncActive.value = false;
+    }
+    updateBlockData(blockId, 'text', value);
 }
 
 function updateBlockData(blockId, key, value) {
@@ -864,7 +878,9 @@ function toggleSegment(segmentId) {
 
 function onTemplateChange(tmpl) {
     if (props.templateDefaults[tmpl]) {
+        const preservedLayout = styleSettings.eventLayout;
         Object.assign(styleSettings, props.templateDefaults[tmpl]);
+        styleSettings.eventLayout = preservedLayout;
     }
 }
 
