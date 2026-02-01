@@ -1408,4 +1408,5 @@ return [
     'general' => 'General',
     'invalid_input' => 'Entrada no valida',
     'subject' => 'Asunto',
+    'template' => 'Plantilla',
 ];

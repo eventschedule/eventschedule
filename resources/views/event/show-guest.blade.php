@@ -179,11 +179,11 @@
                         }
                       @endphp
                     @endif
-                    <a href="{{ $talentUrl }}" class="group flex items-center gap-2">
+                    <a href="{{ $talentUrl }}" class="group flex items-center gap-2 {{ $role->isRtl() ? 'rtl' : '' }}">
                       <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ $each->font_family }}', sans-serif;">
                         {{ $each->translatedName() }}
                       </h2>
-                      <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" aria-hidden="true">
+                      <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                       </svg>
                     </a>
@@ -276,11 +276,11 @@
                 @php
                   $venuePanelUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
                 @endphp
-                <a href="{{ $venuePanelUrl }}" class="group flex items-center gap-2 hover:opacity-80 transition-opacity duration-200">
+                <a href="{{ $venuePanelUrl }}" class="group flex items-center gap-2 hover:opacity-80 transition-opacity duration-200 {{ $role->isRtl() ? 'rtl' : '' }}">
                   <h2 class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ $event->venue->font_family }}', sans-serif;">
                     {{ $event->venue->translatedName() }}
                   </h2>
-                  <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" aria-hidden="true">
+                  <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                   </svg>
                 </a>
@@ -307,7 +307,7 @@
               @endif
               <div class="flex flex-col gap-4">
                 @if ($event->venue->phone)
-                <div class="flex flex-row gap-2 items-center relative duration-300 text-gray-700 dark:text-gray-300 fill-gray-700 dark:fill-gray-300">
+                <div class="flex flex-row gap-2 items-center relative duration-300 text-gray-700 dark:text-gray-300 fill-gray-700 dark:fill-gray-300 {{ $role->isRtl() ? 'rtl' : '' }}">
                   <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path d="M10.0376 5.31617L10.6866 6.4791C11.2723 7.52858 11.0372 8.90532 10.1147 9.8278C10.1147 9.8278 10.1147 9.8278 10.1147 9.8278C10.1146 9.82792 8.99588 10.9468 11.0245 12.9755C13.0525 15.0035 14.1714 13.8861 14.1722 13.8853C14.1722 13.8853 14.1722 13.8853 14.1722 13.8853C15.0947 12.9628 16.4714 12.7277 17.5209 13.3134L18.6838 13.9624C20.2686 14.8468 20.4557 17.0692 19.0628 18.4622C18.2258 19.2992 17.2004 19.9505 16.0669 19.9934C14.1588 20.0658 10.9183 19.5829 7.6677 16.3323C4.41713 13.0817 3.93421 9.84122 4.00655 7.93309C4.04952 6.7996 4.7008 5.77423 5.53781 4.93723C6.93076 3.54428 9.15317 3.73144 10.0376 5.31617Z" />
                   </svg>
@@ -315,7 +315,7 @@
                 </div>
                 @endif
                 @if ($event->venue->email && $event->venue->show_email)
-                <div class="flex flex-row gap-2 items-center relative duration-300 text-gray-700 dark:text-gray-300 fill-gray-700 dark:fill-gray-300">
+                <div class="flex flex-row gap-2 items-center relative duration-300 text-gray-700 dark:text-gray-300 fill-gray-700 dark:fill-gray-300 {{ $role->isRtl() ? 'rtl' : '' }}">
                   <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M3.17157 5.17157C2 6.34315 2 8.22876 2 12C2 15.7712 2 17.6569 3.17157 18.8284C4.34315 20 6.22876 20 10 20H14C17.7712 20 19.6569 20 20.8284 18.8284C22 17.6569 22 15.7712 22 12C22 8.22876 22 6.34315 20.8284 5.17157C19.6569 4 17.7712 4 14 4H10C6.22876 4 4.34315 4 3.17157 5.17157ZM18.5762 7.51986C18.8413 7.83807 18.7983 8.31099 18.4801 8.57617L16.2837 10.4066C15.3973 11.1452 14.6789 11.7439 14.0448 12.1517C13.3843 12.5765 12.7411 12.8449 12 12.8449C11.2589 12.8449 10.6157 12.5765 9.95518 12.1517C9.32112 11.7439 8.60271 11.1452 7.71636 10.4066L5.51986 8.57617C5.20165 8.31099 5.15866 7.83807 5.42383 7.51986C5.68901 7.20165 6.16193 7.15866 6.48014 7.42383L8.63903 9.22291C9.57199 10.0004 10.2197 10.5384 10.7666 10.8901C11.2959 11.2306 11.6549 11.3449 12 11.3449C12.3451 11.3449 12.7041 11.2306 13.2334 10.8901C13.7803 10.5384 14.428 10.0004 15.361 9.22291L17.5199 7.42383C17.8381 7.15866 18.311 7.20165 18.5762 7.51986Z" />
                   </svg>
@@ -323,7 +323,7 @@
                 </div>
                 @endif
                 @if ($event->venue->website)
-                <div class="flex flex-row gap-2 items-center relative duration-300 text-gray-700 dark:text-gray-300 fill-gray-700 dark:fill-gray-300">
+                <div class="flex flex-row gap-2 items-center relative duration-300 text-gray-700 dark:text-gray-300 fill-gray-700 dark:fill-gray-300 {{ $role->isRtl() ? 'rtl' : '' }}">
                   <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M2.02783 11.25C2.41136 6.07745 6.72957 2 12.0001 2C11.1693 2 10.4295 2.36421 9.82093 2.92113C9.21541 3.47525 8.70371 4.24878 8.28983 5.16315C7.87352 6.08292 7.55013 7.15868 7.33126 8.32611C7.1558 9.26194 7.04903 10.2485 7.01344 11.25H2.02783ZM2.02783 12.75H7.01344C7.04903 13.7515 7.1558 14.7381 7.33126 15.6739C7.55013 16.8413 7.87351 17.9171 8.28983 18.8368C8.70371 19.7512 9.21541 20.5247 9.82093 21.0789C10.4295 21.6358 11.1693 22 12.0001 22C6.72957 22 2.41136 17.9226 2.02783 12.75Z" />
                     <path d="M12.0001 3.39535C11.7251 3.39535 11.3699 3.51236 10.9567 3.89042C10.5406 4.27126 10.1239 4.86815 9.75585 5.68137C9.3902 6.4892 9.09329 7.46441 8.88897 8.55419C8.72806 9.41242 8.62824 10.3222 8.59321 11.25H15.4071C15.372 10.3222 15.2722 9.41242 15.1113 8.5542C14.907 7.46441 14.6101 6.48921 14.2444 5.68137C13.8763 4.86815 13.4597 4.27126 13.0435 3.89042C12.6304 3.51236 12.2751 3.39535 12.0001 3.39535Z" />
@@ -339,7 +339,7 @@
               </div>
 
               @if ($event->venue->social_links)
-              <div class="flex flex-row gap-3 items-center mt-2">
+              <div class="flex flex-row gap-3 items-center mt-2 {{ $role->isRtl() ? 'rtl' : '' }}">
                 @foreach (json_decode($event->venue->social_links) as $link)
                   @if ($link)
                   <a
@@ -445,9 +445,9 @@
             $backUrl .= '?' . http_build_query($queryParams);
           }
         @endphp
-        <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+        <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 {{ $role->isRtl() ? 'rtl' : '' }}">
           <a href="{{ $backUrl }}" class="px-3 py-2 -mx-3 hover:underline hover:text-gray-700 dark:hover:text-gray-200">
-            ← {{ __('messages.back_to_schedule') }}
+            {{ $role->isRtl() ? '→' : '←' }} {{ __('messages.back_to_schedule') }}
           </a>
           @if (auth()->user() && auth()->user()->canEditEvent($event))
             <span>|</span>
@@ -459,14 +459,13 @@
 
         {{-- Event title --}}
         <h1
-          class="text-gray-900 dark:text-gray-100 text-[28px] sm:text-[36px] lg:text-[44px] leading-snug font-bold"
-          dir="auto"
+          class="text-gray-900 dark:text-gray-100 text-[28px] sm:text-[36px] lg:text-[44px] leading-snug font-bold {{ $role->isRtl() ? 'rtl text-right' : '' }}"
         >
           {{ $translation ? $translation->name_translated : $event->translatedName() }}
         </h1>
 
         {{-- Calendar date badge + time --}}
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
           <div class="flex-shrink-0 w-14 h-14 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-800 flex flex-col items-center justify-center shadow-sm">
             <span class="text-[10px] font-bold uppercase tracking-wider leading-none pt-1"
@@ -499,7 +498,7 @@
 
         {{-- Location icon badge --}}
         @if (($event->venue && $event->venue->name) || $event->getEventUrlDomain())
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
           <div class="flex-shrink-0 w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-700/50
                       flex items-center justify-center">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
@@ -550,7 +549,7 @@
         @endif
 
         {{-- CTA buttons --}}
-        <div style="font-family: sans-serif" class="relative inline-block text-left hidden sm:block">
+        <div style="font-family: sans-serif" class="relative inline-block text-left hidden sm:block {{ $role->isRtl() ? 'rtl' : '' }}">
         @if ($event->canSellTickets($date) || $event->registration_url)
           @if (request()->get('tickets') !== 'true')
             <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank"' : '' }}
@@ -608,7 +607,7 @@
                 <div class="flex justify-center py-3">
                   <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
                 </div>
-                <div class="px-6 pb-6 space-y-1">
+                <div class="px-6 pb-6 space-y-1 {{ $role->isRtl() ? 'rtl' : '' }}">
                   <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
                     <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                       <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
@@ -631,6 +630,7 @@
               </div>
             </div>
         @endif
+        </div>
         </div>
 
         {{-- Flyer image --}}
@@ -687,13 +687,13 @@
           @if ($hasTimes)
             {{-- Timed agenda: vertical timeline --}}
             <div class="relative {{ $role->isRtl() ? 'pr-8' : 'pl-8' }}">
-              <div class="absolute {{ $role->isRtl() ? 'right-[11px]' : 'left-[11px]' }} top-2 bottom-2 w-0.5" style="background-color: {{ $accentColor }}33;"></div>
+              <div class="absolute {{ $role->isRtl() ? 'right-[11px]' : 'left-[11px]' }} top-2 bottom-2 w-[3px] rounded-full" style="background-color: {{ $accentColor }}33;"></div>
               @foreach ($event->parts as $part)
-              <div class="relative mb-5 last:mb-0">
-                <div class="absolute {{ $role->isRtl() ? '-right-8' : '-left-8' }} top-1.5 w-3 h-3 rounded-full border-2" style="background-color: {{ $accentColor }}; border-color: {{ $accentColor }};"></div>
-                <div class="flex flex-col">
+              <div class="relative mb-6 last:mb-0">
+                <div class="absolute {{ $role->isRtl() ? '-right-8' : '-left-8' }} top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-900" style="background-color: {{ $accentColor }}; box-shadow: 0 0 0 2px {{ $accentColor }}33;"></div>
+                <div class="flex flex-col bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
                   @if ($part->start_time)
-                  <span class="text-xs font-medium mb-0.5" style="color: {{ $accentColor }};">
+                  <span class="text-xs font-medium mb-1 inline-flex {{ $role->isRtl() ? 'self-end' : 'self-start' }} rounded-full px-2.5 py-0.5" style="color: {{ $accentColor }}; background-color: {{ $accentColor }}10;">
                     {{ $part->start_time }}@if ($part->end_time) - {{ $part->end_time }}@endif
                   </span>
                   @endif
@@ -753,10 +753,10 @@
             </div>
           @else
             {{-- Untimed setlist: numbered list --}}
-            <div class="space-y-2">
+            <div class="space-y-3">
               @foreach ($event->parts as $index => $part)
-              <div class="flex items-start gap-3">
-                <span class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background-color: {{ $accentColor }};">{{ $index + 1 }}</span>
+              <div class="flex items-start gap-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 {{ $role->isRtl() ? 'rtl' : '' }}">
+                <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background-color: {{ $accentColor }};">{{ $index + 1 }}</span>
                 <div class="flex-1">
                   <span class="text-gray-900 dark:text-gray-100 font-medium">{{ $part->name }}</span>
                   @if ($part->description)
@@ -878,7 +878,6 @@
         @endif
         {{-- End of tickets/content conditional --}}
 
-        </div>
       </div>
       {{-- End RIGHT COLUMN --}}
 

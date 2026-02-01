@@ -1421,4 +1421,5 @@ return [
     'general' => 'General',
     'invalid_input' => 'Invalid input',
     'subject' => 'Subject',
+    'template' => 'Template',
 ];

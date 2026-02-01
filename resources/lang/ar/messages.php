@@ -1409,4 +1409,5 @@ return [
     'general' => 'عام',
     'invalid_input' => 'ادخال غير صالح',
     'subject' => 'الموضوع',
+    'template' => 'قالب',
 ];

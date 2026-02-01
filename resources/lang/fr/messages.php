@@ -1407,4 +1407,5 @@ return [
     'general' => 'General',
     'invalid_input' => 'Saisie invalide',
     'subject' => 'Objet',
+    'template' => 'Modele',
 ];

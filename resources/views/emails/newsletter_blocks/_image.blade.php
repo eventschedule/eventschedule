@@ -9,19 +9,19 @@
 @if ($template === 'classic')
 <tr>
     <td align="{{ $align }}" style="padding: 10px 30px;">
-        <img src="{{ $url }}" alt="{{ $alt }}" style="max-width: 600px; width: {{ $width }}; height: auto; display: block; border: 1px solid #ddd;" />
+        <img src="{{ $url }}" alt="{{ $alt }}" width="600" style="max-width: 600px; width: {{ $width }}; height: auto; display: block; border: 1px solid #ddd;" />
     </td>
 </tr>
 @elseif ($template === 'bold')
 <tr>
     <td align="{{ $align }}" style="padding: 10px 30px;">
-        <img src="{{ $url }}" alt="{{ $alt }}" style="max-width: 600px; width: {{ $width }}; height: auto; display: block; border-radius: 8px;" />
+        <img src="{{ $url }}" alt="{{ $alt }}" width="600" style="max-width: 600px; width: {{ $width }}; height: auto; display: block; border-radius: 8px;" />
     </td>
 </tr>
 @else
 <tr>
     <td align="{{ $align }}" style="padding: 10px 30px;">
-        <img src="{{ $url }}" alt="{{ $alt }}" style="max-width: 600px; width: {{ $width }}; height: auto; display: block;" />
+        <img src="{{ $url }}" alt="{{ $alt }}" width="600" style="max-width: 600px; width: {{ $width }}; height: auto; display: block;" />
     </td>
 </tr>
 @endif

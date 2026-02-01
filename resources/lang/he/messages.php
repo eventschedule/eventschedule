@@ -1401,4 +1401,5 @@ return [
     'general' => 'כללי',
     'invalid_input' => 'קלט לא תקין',
     'subject' => 'נושא',
+    'template' => 'תבנית',
 ];
