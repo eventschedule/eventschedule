@@ -17,7 +17,7 @@
         <form method="POST" action="{{ route('newsletter.store', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
             @csrf
             @php
-                $newsletter = new \App\Models\Newsletter(['template' => 'modern', 'style_settings' => \App\Models\Newsletter::defaultStyleSettingsForRole($role)]);
+                $newsletter = new \App\Models\Newsletter(['template' => $defaultTemplate, 'style_settings' => $defaultStyleSettings, 'segment_ids' => $defaultSegmentIds]);
             @endphp
             @include('newsletter.partials._builder')
         </form>

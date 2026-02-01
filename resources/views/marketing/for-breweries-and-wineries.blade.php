@@ -3,6 +3,7 @@
     <x-slot name="description">Fill your tasting room with fans. Announce releases, host tastings, and sell tickets to brewery events. Email your fans directly. Free forever.</x-slot>
     <x-slot name="keywords">brewery event calendar, winery events, tasting room software, beer release party, wine tasting tickets, brewery tour booking, taproom events, craft brewery calendar, vineyard event management</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For Breweries & Wineries</x-slot>
 
     <!-- Hero Section with Floating Release Card -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">

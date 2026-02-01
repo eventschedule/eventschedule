@@ -3,6 +3,7 @@
     <x-slot name="description">Share your exhibitions, open studios, and art fairs. Sell tickets directly, build your collector base with newsletters. Built for painters, sculptors, photographers, and visual artists. Zero platform fees.</x-slot>
     <x-slot name="keywords">visual artist schedule, art exhibition calendar, open studio events, art fair schedule, gallery show calendar, artist portfolio events, painting exhibition, sculpture show, photography exhibition</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For Visual Artists</x-slot>
 
     <!-- Hero Section - Mesh Gradient -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">

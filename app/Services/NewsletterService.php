@@ -219,16 +219,26 @@ class NewsletterService
         $role = $newsletter->role;
         $isRtl = $role && $role->isRtl();
 
-        return view('emails.newsletter', [
-            'newsletter' => $newsletter,
-            'style' => $style,
-            'blocks' => $blocks,
-            'role' => $role,
-            'unsubscribeUrl' => $unsubscribeUrl,
-            'recipient' => $recipient,
-            'showBranding' => $role ? $role->showBranding() : false,
-            'isRtl' => $isRtl,
-        ])->render();
+        $originalLocale = app()->getLocale();
+
+        try {
+            if ($role && is_valid_language_code($role->language_code)) {
+                app()->setLocale($role->language_code);
+            }
+
+            return view('emails.newsletter', [
+                'newsletter' => $newsletter,
+                'style' => $style,
+                'blocks' => $blocks,
+                'role' => $role,
+                'unsubscribeUrl' => $unsubscribeUrl,
+                'recipient' => $recipient,
+                'showBranding' => $role ? $role->showBranding() : false,
+                'isRtl' => $isRtl,
+            ])->render();
+        } finally {
+            app()->setLocale($originalLocale);
+        }
     }
 
     public function renderPreview(Newsletter $newsletter): string

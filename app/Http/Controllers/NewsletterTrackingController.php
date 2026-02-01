@@ -74,9 +74,15 @@ class NewsletterTrackingController extends Controller
             abort(404);
         }
 
+        $role = $recipient->newsletter->role;
+
+        if (is_valid_language_code($role->language_code)) {
+            app()->setLocale($role->language_code);
+        }
+
         return view('newsletter.unsubscribe', [
             'recipient' => $recipient,
-            'role' => $recipient->newsletter->role,
+            'role' => $role,
         ]);
     }
 
@@ -89,6 +95,10 @@ class NewsletterTrackingController extends Controller
         }
 
         $role = $recipient->newsletter->role;
+
+        if (is_valid_language_code($role->language_code)) {
+            app()->setLocale($role->language_code);
+        }
 
         NewsletterUnsubscribe::firstOrCreate(
             ['role_id' => $role->id, 'email' => strtolower($recipient->email)],

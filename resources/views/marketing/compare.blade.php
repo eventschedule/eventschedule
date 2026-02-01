@@ -3,6 +3,7 @@
     <x-slot name="description">Compare Event Schedule with Eventbrite, Luma, and Ticket Tailor. See how our 0% platform fees, open source platform, and AI features stack up.</x-slot>
     <x-slot name="keywords">event schedule comparison, eventbrite alternative, luma alternative, ticket tailor alternative, free event platform, no platform fees ticketing</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">Compare</x-slot>
 
     <x-slot name="structuredData">
     <script type="application/ld+json">
@@ -133,7 +134,7 @@
                                 'Platform' => [
                                     ['REST API', 'Yes (Pro)', 'Yes', 'Yes (Plus)', 'Yes'],
                                     ['Open source', 'Yes', 'No', 'No', 'No'],
-                                    ['Self-hosting', 'Yes', 'No', 'No', 'No'],
+                                    ['Selfhosting', 'Yes', 'No', 'No', 'No'],
                                 ],
                             ];
                         @endphp
@@ -180,8 +181,63 @@
         </div>
     </section>
 
-    <!-- Why Event Schedule -->
+    <!-- Detailed Comparisons -->
     <section class="bg-white dark:bg-[#0a0a0f] py-24">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Detailed Comparisons
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+                    Dive deeper into how Event Schedule compares with each platform.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <a href="{{ route('marketing.compare_eventbrite') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-violet-300 dark:hover:border-violet-500/30 hover:bg-violet-50/50 dark:hover:bg-violet-500/5 transition-all">
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors mb-3">Eventbrite</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">0% platform fees vs 3.7% + $1.79/ticket. Plus custom domains, AI features, and open source.</p>
+                    <span class="inline-flex items-center text-sm font-medium text-violet-600 dark:text-violet-400 group-hover:gap-2 transition-all">
+                        Compare
+                        <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </span>
+                </a>
+
+                <a href="{{ route('marketing.compare_luma') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-violet-300 dark:hover:border-violet-500/30 hover:bg-violet-50/50 dark:hover:bg-violet-500/5 transition-all">
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors mb-3">Luma</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">$5/mo vs $59/mo for comparable features. Zero platform fees and fully open source.</p>
+                    <span class="inline-flex items-center text-sm font-medium text-violet-600 dark:text-violet-400 group-hover:gap-2 transition-all">
+                        Compare
+                        <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </span>
+                </a>
+
+                <a href="{{ route('marketing.compare_ticket_tailor') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-violet-300 dark:hover:border-violet-500/30 hover:bg-violet-50/50 dark:hover:bg-violet-500/5 transition-all">
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors mb-3">Ticket Tailor</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Flat $5/mo vs per-ticket fees. Plus calendar sync, newsletters, and selfhosting.</p>
+                    <span class="inline-flex items-center text-sm font-medium text-violet-600 dark:text-violet-400 group-hover:gap-2 transition-all">
+                        Compare
+                        <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Transition -->
+    <div class="section-fade-to-gray h-24"></div>
+
+    <!-- Why Event Schedule -->
+    <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">

@@ -3,6 +3,7 @@
     <x-slot name="description">Two-way sync with Google Calendar and CalDAV. Real-time webhook updates. Let attendees add events to Apple, Google, or Outlook calendars instantly.</x-slot>
     <x-slot name="keywords">Google Calendar sync, CalDAV sync, calendar integration, two-way sync, Apple Calendar, Outlook calendar, event sync, calendar webhook, automatic sync</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">Calendar Sync</x-slot>
 
 
     <!-- Hero Section -->

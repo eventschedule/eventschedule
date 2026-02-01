@@ -3,6 +3,7 @@
     <x-slot name="description">Launch your own white-label ticketing SaaS platform at zero cost. Set your own prices, keep 100% of revenue through your branded platform.</x-slot>
     <x-slot name="keywords">white label ticketing, saas reseller, ticketing platform, event management saas, white label events, reseller program</x-slot>
     <x-slot name="socialImage">social/saas.png</x-slot>
+    <x-slot name="breadcrumbTitle">SaaS</x-slot>
 
     <style>
         /* Custom blue gradient for this page */

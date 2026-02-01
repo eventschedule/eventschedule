@@ -204,6 +204,8 @@
                                 <li><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Selling Tickets</a> - Set up ticketing for your events</li>
                             </ul>
                         </section>
+
+                        @include('marketing.docs.partials.navigation')
                     </div>
                 </div>
             </div>

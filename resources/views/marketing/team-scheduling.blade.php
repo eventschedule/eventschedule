@@ -3,6 +3,7 @@
     <x-slot name="description">Invite team members, manage permissions, and coordinate schedules together. Collaborate on events with your team using flexible role-based access.</x-slot>
     <x-slot name="keywords">team scheduling, team collaboration, event management, shared calendar, team permissions, role-based access, member availability, team coordination</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">Team Scheduling</x-slot>
 
     <style>
         /* Custom cyan gradient for this page */

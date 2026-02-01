@@ -3,6 +3,7 @@
     <x-slot name="description">Event Schedule helps talent, venues, and organizers share events and sell tickets. Open source, privacy-focused, and community-driven.</x-slot>
     <x-slot name="keywords">about event schedule, event management platform, open source event calendar, performer schedule app, venue calendar software, event curator tools</x-slot>
     <x-slot name="socialImage">social/about.png</x-slot>
+    <x-slot name="breadcrumbTitle">About</x-slot>
 
     <x-slot name="structuredData">
     <script type="application/ld+json">

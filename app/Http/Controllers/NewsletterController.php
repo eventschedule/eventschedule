@@ -8,23 +8,41 @@ use App\Models\NewsletterAbTest;
 use App\Models\NewsletterRecipient;
 use App\Models\NewsletterSegment;
 use App\Models\NewsletterSegmentUser;
+use App\Models\User;
 use App\Services\NewsletterService;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class NewsletterController extends Controller
 {
     protected function authorize()
     {
-        if (! auth()->user()->isAdmin()) {
+        if (auth()->user()->isAdmin()) {
+            return;
+        }
+
+        // Allow owners/members of enterprise roles
+        $hasEnterpriseRole = auth()->user()->roles()
+            ->wherePivot('level', '!=', 'follower')
+            ->get()
+            ->contains(fn ($role) => $role->isEnterprise());
+
+        if (! $hasEnterpriseRole) {
             abort(403, __('messages.not_authorized'));
         }
     }
 
     protected function getRoles()
     {
-        return auth()->user()->roles()->wherePivot('level', '!=', 'follower')->get();
+        $roles = auth()->user()->roles()->wherePivot('level', '!=', 'follower')->get();
+
+        if (! auth()->user()->isAdmin()) {
+            $roles = $roles->filter(fn ($role) => $role->isEnterprise());
+        }
+
+        return $roles;
     }
 
     protected function getRole(Request $request)
@@ -37,6 +55,12 @@ class NewsletterController extends Controller
         $role = auth()->user()->roles()->where('roles.id', $roleId)->first();
         if (! $role) {
             abort(404);
+        }
+
+        if (! auth()->user()->isAdmin()) {
+            if ($role->pivot->level === 'follower' || ! $role->isEnterprise()) {
+                abort(403);
+            }
         }
 
         return $role;
@@ -156,6 +180,7 @@ class NewsletterController extends Controller
         if ($selectedRoleId) {
             $role = $roles->firstWhere('id', $selectedRoleId);
             $newsletters = Newsletter::where('role_id', $selectedRoleId)
+                ->where('status', '!=', 'cancelled')
                 ->orderBy('created_at', 'desc')
                 ->paginate(20);
         }
@@ -176,7 +201,16 @@ class NewsletterController extends Controller
 
         $defaultBlocks = Newsletter::defaultBlocks($role);
 
-        return view('newsletter.create', compact('role', 'segments', 'events', 'defaultBlocks'));
+        $lastNewsletter = Newsletter::where('role_id', $role->id)
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $defaultTemplate = $lastNewsletter ? $lastNewsletter->template : 'modern';
+        $defaultStyleSettings = $lastNewsletter ? $lastNewsletter->style_settings : Newsletter::defaultStyleSettingsForRole($role);
+        $defaultSegmentIds = $lastNewsletter ? ($lastNewsletter->segment_ids ?? []) : [];
+
+        return view('newsletter.create', compact('role', 'segments', 'events', 'defaultBlocks', 'defaultTemplate', 'defaultStyleSettings', 'defaultSegmentIds'));
     }
 
     public function store(Request $request)
@@ -756,5 +790,162 @@ class NewsletterController extends Controller
 
         return redirect()->route('newsletter.index', $this->roleIdParam($role))
             ->with('status', __('messages.ab_test_sending'));
+    }
+
+    public function importForm(Request $request)
+    {
+        $this->authorize();
+        $role = $this->getRole($request);
+
+        $manualSegments = NewsletterSegment::where('role_id', $role->id)
+            ->where('type', 'manual')
+            ->get();
+
+        return view('newsletter.import', compact('role', 'manualSegments'));
+    }
+
+    public function importStore(Request $request)
+    {
+        $this->authorize();
+        $role = $this->getRole($request);
+
+        $validated = $request->validate([
+            'segment_target' => 'required|in:new,existing',
+            'segment_name' => 'required_if:segment_target,new|nullable|string|max:255',
+            'segment_id' => 'required_if:segment_target,existing|nullable|string',
+            'entries' => 'required|array|min:1|max:10000',
+            'entries.*.email' => 'required|email',
+            'entries.*.name' => 'nullable|string|max:255',
+        ]);
+
+        if ($validated['segment_target'] === 'new') {
+            $segment = NewsletterSegment::create([
+                'role_id' => $role->id,
+                'name' => $validated['segment_name'],
+                'type' => 'manual',
+            ]);
+        } else {
+            $segment = NewsletterSegment::where('role_id', $role->id)
+                ->where('id', UrlUtils::decodeId($validated['segment_id']))
+                ->where('type', 'manual')
+                ->firstOrFail();
+        }
+
+        $imported = DB::transaction(function () use ($segment, $validated, $role) {
+            $existingEmails = $segment->segmentUsers()
+                ->pluck('email')
+                ->map(fn ($e) => strtolower($e))
+                ->toArray();
+
+            $allEmails = collect($validated['entries'])->pluck('email')->map(fn ($e) => strtolower(trim($e)))->unique();
+            $existingUsers = User::whereIn('email', $allEmails)->get()->keyBy('email');
+            $existingFollowerIds = DB::table('role_user')->where('role_id', $role->id)
+                ->whereIn('user_id', $existingUsers->pluck('id'))->pluck('user_id')->flip();
+
+            $imported = 0;
+            $seen = [];
+            foreach ($validated['entries'] as $entry) {
+                $email = strtolower(trim($entry['email']));
+                if (in_array($email, $seen) || in_array($email, $existingEmails)) {
+                    continue;
+                }
+                $seen[] = $email;
+
+                $user = $existingUsers->get($email);
+                if (! $user) {
+                    $user = User::create([
+                        'email' => $email,
+                        'name' => $entry['name'] ?? null,
+                        'is_subscribed' => true,
+                    ]);
+                    $existingUsers->put($email, $user);
+                }
+
+                if (! $existingFollowerIds->has($user->id)) {
+                    $role->followers()->attach($user->id, ['level' => 'follower', 'created_at' => now()]);
+                    $existingFollowerIds->put($user->id, true);
+                }
+
+                NewsletterSegmentUser::create([
+                    'newsletter_segment_id' => $segment->id,
+                    'user_id' => $user->id,
+                    'email' => $email,
+                    'name' => $entry['name'] ?? null,
+                    'created_at' => now(),
+                ]);
+                $imported++;
+            }
+
+            return $imported;
+        });
+
+        if ($imported === 0) {
+            return back()->with('error', __('messages.no_valid_emails'));
+        }
+
+        return redirect()->route('newsletter.segments', $this->roleIdParam($role))
+            ->with('status', __('messages.emails_imported', ['count' => $imported]));
+    }
+
+    protected function parseEmailInput(string $text): array
+    {
+        $results = [];
+        $seen = [];
+
+        $lines = preg_split('/\r?\n/', $text);
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (empty($line)) {
+                continue;
+            }
+
+            // Try "Name <email>" format
+            if (preg_match('/^(.+?)\s*<([^>]+)>/', $line, $matches)) {
+                $name = trim($matches[1]);
+                $email = strtolower(trim($matches[2]));
+                if (filter_var($email, FILTER_VALIDATE_EMAIL) && ! isset($seen[$email])) {
+                    $seen[$email] = true;
+                    $results[] = ['email' => $email, 'name' => $name];
+                }
+
+                continue;
+            }
+
+            // Split by comma for CSV-style or comma-separated
+            $parts = array_map('trim', explode(',', $line));
+
+            if (count($parts) === 2 && filter_var($parts[0], FILTER_VALIDATE_EMAIL) && ! filter_var($parts[1], FILTER_VALIDATE_EMAIL)) {
+                // "email, Name" format
+                $email = strtolower($parts[0]);
+                $name = $parts[1];
+                if (! isset($seen[$email])) {
+                    $seen[$email] = true;
+                    $results[] = ['email' => $email, 'name' => $name];
+                }
+            } else {
+                // Comma-separated emails or single email
+                foreach ($parts as $part) {
+                    $part = trim($part);
+                    // Check for "Name <email>" within comma-separated list
+                    if (preg_match('/^(.+?)\s*<([^>]+)>/', $part, $matches)) {
+                        $name = trim($matches[1]);
+                        $email = strtolower(trim($matches[2]));
+                        if (filter_var($email, FILTER_VALIDATE_EMAIL) && ! isset($seen[$email])) {
+                            $seen[$email] = true;
+                            $results[] = ['email' => $email, 'name' => $name];
+                        }
+                    } elseif (filter_var($part, FILTER_VALIDATE_EMAIL)) {
+                        $email = strtolower($part);
+                        if (! isset($seen[$email])) {
+                            $seen[$email] = true;
+                            $results[] = ['email' => $email, 'name' => null];
+                        }
+                    }
+                }
+            }
+        }
+
+        return $results;
     }
 }

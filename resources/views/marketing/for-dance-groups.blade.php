@@ -3,6 +3,7 @@
     <x-slot name="description">Share your dance performances with fans worldwide. Email your fans directly and sell tickets to recitals and workshops with zero fees. Free forever.</x-slot>
     <x-slot name="keywords">dance group schedule, dance company calendar, dance performance tickets, dance recital software, dance studio events, dance ensemble scheduling, dance troupe calendar, dance workshop tickets</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For Dance Groups</x-slot>
 
     <!-- Hero Section - Movement/Flow Theme -->
     <section class="relative bg-gradient-to-b from-white via-gray-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-950 py-32 overflow-hidden">

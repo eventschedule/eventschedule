@@ -104,7 +104,7 @@
                             <div class="grid md:grid-cols-2 gap-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Example Input</h4>
-                                    <p class="text-sm text-gray-400 code-block">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 code-block">
                                         Live Jazz Night<br>
                                         Friday, March 15th at 8pm<br>
                                         The Blue Note, 123 Main Street<br>
@@ -112,7 +112,7 @@
                                         Tickets: $20
                                     </p>
                                 </div>
-                                <div class="bg-white/5 rounded-xl p-4 border border-emerald-500/30">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-emerald-500/30">
                                     <h4 class="font-semibold text-emerald-400 mb-2">AI Extracts</h4>
                                     <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
                                         <li><strong class="text-gray-900 dark:text-white">Name:</strong> Live Jazz Night</li>
@@ -287,6 +287,8 @@
                                 <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="text-cyan-400 hover:text-cyan-300">Advanced Schedule Settings</a> - Subschedules, auto-import, and calendar sync</li>
                             </ul>
                         </section>
+
+                        @include('marketing.docs.partials.navigation')
                     </div>
                 </div>
             </div>

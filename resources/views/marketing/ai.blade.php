@@ -3,6 +3,7 @@
     <x-slot name="description">Smart event import with AI. Paste text or drop an image and AI extracts all the details automatically. Instant translation included.</x-slot>
     <x-slot name="keywords">AI event import, smart event parsing, image to event, text to event, event translation, automatic event creation, AI calendar, event extraction</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">AI Import</x-slot>
 
     <style>
         /* Page-specific typing animation */

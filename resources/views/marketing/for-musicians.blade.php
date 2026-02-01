@@ -3,6 +3,7 @@
     <x-slot name="description">Share your tour dates, sell tickets, and reach fans directly with newsletters. No algorithm blocking your content. Zero platform fees. Built for musicians, bands, and solo artists.</x-slot>
     <x-slot name="keywords">musician schedule, band tour dates, artist gig calendar, tour schedule app, band booking, sell concert tickets, musician newsletter, fan newsletter, artist fan email</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For Musicians</x-slot>
 
     <!-- Hero Section - Mesh Gradient -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">

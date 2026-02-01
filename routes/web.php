@@ -137,6 +137,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/newsletter-segments', [NewsletterController::class, 'storeSegment'])->name('newsletter.segment.store');
     Route::put('/newsletter-segments/{hash}', [NewsletterController::class, 'updateSegment'])->name('newsletter.segment.update');
     Route::delete('/newsletter-segments/{hash}', [NewsletterController::class, 'deleteSegment'])->name('newsletter.segment.delete');
+    Route::get('/newsletter-import', [NewsletterController::class, 'importForm'])->name('newsletter.import');
+    Route::post('/newsletter-import', [NewsletterController::class, 'importStore'])->name('newsletter.import.store');
 
     Route::get('/settings', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/settings', [ProfileController::class, 'update'])->name('profile.update');
@@ -353,6 +355,9 @@ if (config('app.is_nexus')) {
         Route::get('/for-libraries', [MarketingController::class, 'forLibraries'])->name('marketing.for_libraries');
         Route::get('/use-cases', [MarketingController::class, 'useCases'])->name('marketing.use_cases');
         Route::get('/compare', [MarketingController::class, 'compare'])->name('marketing.compare');
+        Route::get('/eventbrite-alternative', [MarketingController::class, 'compareEventbrite'])->name('marketing.compare_eventbrite');
+        Route::get('/luma-alternative', [MarketingController::class, 'compareLuma'])->name('marketing.compare_luma');
+        Route::get('/ticket-tailor-alternative', [MarketingController::class, 'compareTicketTailor'])->name('marketing.compare_ticket_tailor');
         Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
         Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
         Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
@@ -452,6 +457,9 @@ if (config('app.is_nexus')) {
             Route::get('/for-libraries', [MarketingController::class, 'forLibraries'])->name('marketing.for_libraries');
             Route::get('/use-cases', [MarketingController::class, 'useCases'])->name('marketing.use_cases');
             Route::get('/compare', [MarketingController::class, 'compare'])->name('marketing.compare');
+            Route::get('/eventbrite-alternative', [MarketingController::class, 'compareEventbrite'])->name('marketing.compare_eventbrite');
+            Route::get('/luma-alternative', [MarketingController::class, 'compareLuma'])->name('marketing.compare_luma');
+            Route::get('/ticket-tailor-alternative', [MarketingController::class, 'compareTicketTailor'])->name('marketing.compare_ticket_tailor');
             Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
             Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
             Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');

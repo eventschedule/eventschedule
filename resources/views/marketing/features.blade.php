@@ -3,6 +3,7 @@
     <x-slot name="description">Discover all the features that make Event Schedule the best way to manage events, sell tickets, and engage your audience.</x-slot>
     <x-slot name="keywords">event management features, online ticketing, QR code check-in, Google Calendar sync, AI event parsing, custom domain events, recurring events, event API</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">Features</x-slot>
 
     <style>
         /* Parallax utility classes */

@@ -3,6 +3,7 @@
     <x-slot name="description">Share your class schedule, sell drop-in passes, and reach students directly with newsletters. No algorithm blocking your content. Zero platform fees. Built for yoga teachers, personal trainers, and fitness instructors.</x-slot>
     <x-slot name="keywords">fitness class schedule, yoga class calendar, personal trainer booking, group fitness schedule, yoga studio app, pilates schedule, CrossFit class times, HIIT class booking, meditation class schedule, fitness instructor newsletter</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For Fitness & Yoga</x-slot>
 
     <!-- Hero Section - Mesh Gradient -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">

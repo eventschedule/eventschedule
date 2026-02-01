@@ -3,6 +3,7 @@
     <x-slot name="description">Build the ultimate local guide. Use AI-powered import, aggregate events from multiple sources, and grow your following. Built for bloggers, community orgs, and event aggregators.</x-slot>
     <x-slot name="keywords">event curator, local event guide, event aggregator, community calendar, event blog, city events, local happenings, event discovery, curated events</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="breadcrumbTitle">For Curators</x-slot>
 
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
