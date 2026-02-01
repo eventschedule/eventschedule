@@ -4,16 +4,6 @@
     <x-slot name="keywords">Stripe payments, event tickets, credit card payments, Apple Pay, Google Pay, Stripe Connect, ticket sales, payment processing</x-slot>
     <x-slot name="breadcrumbTitle">Stripe</x-slot>
 
-    <style>
-        /* Custom violet gradient for this page */
-        .text-gradient {
-            background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 50%, #4F46E5 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-    </style>
-
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->

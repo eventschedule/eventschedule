@@ -25,6 +25,14 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **AP** - Admin portal
 - **CP** - Guest portal / Client portal
 
+## Brand Colors
+
+- **WP primary blue:** `#4E81FA`
+- **WP gradient:** `#4E81FA` -> `#0EA5E9` -> `#22D3EE`
+- Shared `.text-gradient` class is defined in `resources/css/marketing.css`
+- Never use purple/violet/indigo/fuchsia/pink as WP brand colors
+- Icon accent colors (on sub-audience-cards) are decorative and exempt
+
 ## Build & Development Commands
 
 ```bash

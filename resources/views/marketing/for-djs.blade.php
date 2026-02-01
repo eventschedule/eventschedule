@@ -573,15 +573,15 @@
 
     <style>
         .text-gradient-neon {
-            background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+            background: linear-gradient(135deg, #4E81FA, #0EA5E9, #22D3EE);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
         .neon-glow {
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5),
-                        0 0 40px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 0 20px rgba(78, 129, 250, 0.5),
+                        0 0 40px rgba(14, 165, 233, 0.3);
         }
 
         .neon-glow-subtle {

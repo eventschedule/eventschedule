@@ -6,12 +6,6 @@
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
-    .text-gradient-violet {
-        background: linear-gradient(135deg, #4E81FA 0%, #0EA5E9 50%, #3b82f6 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
     .text-gradient-emerald {
         background: linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #059669 100%);
         -webkit-background-clip: text;
