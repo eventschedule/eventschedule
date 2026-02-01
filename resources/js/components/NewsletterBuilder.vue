@@ -1,5 +1,5 @@
 <template>
-    <div class="lg:grid lg:grid-cols-[7fr_5fr] lg:gap-6">
+    <div class="lg:grid lg:grid-cols-2 lg:gap-6">
 
         <!-- Left: Tabs + Sections + Action buttons -->
         <div>
@@ -19,6 +19,10 @@
                     class="px-4 py-3 text-sm font-medium border-b-2 transition-colors"
                     :class="activeSection === 'settings' ? 'border-[#4E81FA] text-[#4E81FA] font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'">
                     {{ t.settings }}
+                </button>
+                <button type="button" @click="openPreviewInNewTab()"
+                    class="lg:hidden px-4 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                    {{ t.preview }}
                 </button>
             </div>
 
@@ -42,7 +46,7 @@
                                     {{ t.blocks }} ({{ blocks.length }})
                                 </h3>
                                 <button type="button" @click="toggleBlockPalette()"
-                                    class="text-sm text-[#4E81FA] hover:text-blue-700 font-medium">
+                                    :class="showBlockPalette ? 'text-sm px-3 py-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 font-medium' : 'text-sm px-3 py-1 bg-[#4E81FA] text-white rounded-md hover:bg-blue-600 font-medium'">
                                     {{ showBlockPalette ? t.done : t.add_block }}
                                 </button>
                             </div>
@@ -52,7 +56,8 @@
                                     <div ref="blockPalette" class="grid grid-cols-2 gap-2">
                                         <div v-for="bt in blockTypes" :key="bt.type"
                                             class="palette-item border border-gray-200 dark:border-gray-600 rounded-lg p-2 text-center cursor-grab hover:border-[#4E81FA] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors select-none"
-                                            :data-block-type="bt.type">
+                                            :data-block-type="bt.type"
+                                            @click="addBlockFromPalette(bt)">
                                             <div class="text-lg mb-1">{{ bt.icon }}</div>
                                             <div class="text-xs text-gray-700 dark:text-gray-300">{{ bt.label }}</div>
                                         </div>
@@ -71,7 +76,7 @@
                                             <span class="cursor-grab text-gray-400 drag-handle">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
                                             </span>
-                                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ blockLabel(block.type) }}</span>
+                                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ blockIcon(block.type) }} {{ blockLabel(block.type) }}</span>
                                         </div>
                                         <div v-show="!showBlockPalette" class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button type="button" @click.stop="duplicateBlock(block.id)" class="p-1 text-gray-400 hover:text-[#4E81FA]" :title="t.duplicate_block">
@@ -84,7 +89,7 @@
                                     </div>
 
                                     <!-- Compact snippet: shown when NOT selected -->
-                                    <div v-show="selectedBlockId !== block.id && !showBlockPalette" class="px-3 pb-2 text-sm text-gray-600 dark:text-gray-300 truncate">
+                                    <div v-show="selectedBlockId !== block.id && !showBlockPalette" class="px-3 pb-2 text-sm text-gray-600 dark:text-gray-300 truncate cursor-pointer" @click="selectBlock(block.id)">
                                         <span v-if="block.type === 'heading'">{{ block.data.text || t.heading_text + '...' }}</span>
                                         <span v-else-if="block.type === 'text'">{{ (block.data.content || t.content + '...').substring(0, 80) }}</span>
                                         <span v-else-if="block.type === 'events'">{{ block.data.useAllEvents ? t.all_upcoming_events : (block.data.eventIds ? block.data.eventIds.length + ' ' + t.events : t.events) }}</span>
@@ -137,7 +142,7 @@
                                                 <textarea :ref="el => setTextBlockRef(block.id, el)" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm" rows="6"
                                                     :value="block.data.content"
                                                     @input="updateBlockData(block.id, 'content', $event.target.value)"></textarea>
-                                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t.markdown_supported }}</p>
+                
                                             </div>
                                         </div>
 
@@ -491,26 +496,25 @@
             <input type="hidden" v-for="segmentId in selectedSegmentIds" :key="'seg_' + segmentId" name="segment_ids[]" :value="segmentId" />
 
             <!-- Action Buttons -->
-            <div class="mt-4 flex flex-wrap gap-3 justify-end">
-                <!-- Preview: mobile only -->
-                <button type="button" @click="openPreview()" class="lg:hidden inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
-                    {{ t.preview }}
-                </button>
+            <div class="mt-4 flex flex-wrap gap-3 justify-between">
+                <div>
+                    <button v-if="newsletter && newsletter.exists" type="button" @click="showTestSend = true" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                        {{ t.send_a_test }}
+                    </button>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button v-if="newsletter && newsletter.exists" type="button" @click="showSchedule = true" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-yellow-600">
+                        {{ t.schedule_newsletter }}
+                    </button>
 
-                <button v-if="newsletter && newsletter.exists" type="button" @click="showTestSend = true" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
-                    {{ t.test_send }}
-                </button>
-                <button v-if="newsletter && newsletter.exists" type="button" @click="showSchedule = true" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-yellow-600">
-                    {{ t.schedule_newsletter }}
-                </button>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">
+                        {{ t.save }}
+                    </button>
 
-                <button type="submit" class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">
-                    {{ t.save }}
-                </button>
-
-                <button v-if="newsletter && newsletter.exists && newsletter.canSend" type="button" @click="confirmSend()" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-700">
-                    {{ t.send_now }}
-                </button>
+                    <button v-if="newsletter && newsletter.exists && newsletter.canSend" type="button" @click="confirmSend()" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-700">
+                        {{ t.send_now }}
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -531,25 +535,10 @@
                             </div>
                         </div>
                         <iframe ref="livePreviewFrame" class="w-full border-0 bg-white"
-                                style="height: calc(100vh - 10rem); min-height: 500px;"
+                                style="height: calc(100vh - 14rem); min-height: 400px;"
                                 srcdoc="<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;color:#999;font-family:sans-serif'>Loading preview...</body></html>">
                         </iframe>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Preview Modal (mobile) -->
-        <div v-show="showPreview" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="showPreview = false">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] flex flex-col">
-                <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ t.preview }}</h3>
-                    <button @click="showPreview = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-                <div class="flex-1 overflow-auto p-4">
-                    <iframe ref="previewFrame" class="w-full border-0" style="height: 600px;"></iframe>
                 </div>
             </div>
         </div>
@@ -613,6 +602,7 @@ const props = defineProps({
     routes: { type: Object, default: () => ({}) },
     userEmail: { type: String, default: '' },
     abTestHtml: { type: String, default: '' },
+    roleSocialLinks: { type: Array, default: () => [] },
 });
 
 const t = props.translations;
@@ -624,7 +614,6 @@ const subject = ref(props.initialSubject);
 const styleSettings = reactive({ ...props.initialStyleSettings });
 const selectedSegmentIds = ref([...props.initialSegmentIds]);
 const showBlockPalette = ref(false);
-const showPreview = ref(false);
 const showTestSend = ref(false);
 const showSchedule = ref(false);
 const previewLoading = ref(false);
@@ -650,7 +639,7 @@ const blockTypes = [
     { type: 'image', label: t.block_image, icon: '\ud83d\uddbc', defaultData: { url: '', alt: '', width: '100%', align: 'center' } },
     { type: 'divider', label: t.block_divider, icon: '\u2014', defaultData: { style: 'solid' } },
     { type: 'spacer', label: t.block_spacer, icon: '\u2195', defaultData: { height: 20 } },
-    { type: 'social_links', label: t.block_social_links, icon: '@', defaultData: { links: [{ platform: 'website', url: '' }] } },
+    { type: 'social_links', label: t.block_social_links, icon: '@', defaultData: { links: props.roleSocialLinks.length ? JSON.parse(JSON.stringify(props.roleSocialLinks)) : [{ platform: 'website', url: '' }] } },
     { type: 'profile_image', label: t.block_profile_image, icon: '\ud83d\udc64', defaultData: {} },
     { type: 'header_banner', label: t.block_header_banner, icon: '\ud83c\udff3', defaultData: {} },
 ];
@@ -658,7 +647,6 @@ const blockTypes = [
 const blockPalette = ref(null);
 const blockCanvas = ref(null);
 const livePreviewFrame = ref(null);
-const previewFrame = ref(null);
 
 const textBlockRefs = {};
 const easyMDEInstances = {};
@@ -730,6 +718,22 @@ function blockLabel(type) {
     return bt ? bt.label : type;
 }
 
+function blockIcon(type) {
+    const bt = blockTypes.find(b => b.type === type);
+    return bt ? bt.icon : '';
+}
+
+function addBlockFromPalette(bt) {
+    const newBlock = {
+        id: generateId(),
+        type: bt.type,
+        data: JSON.parse(JSON.stringify(bt.defaultData)),
+    };
+    blocks.value.push(newBlock);
+    showBlockPalette.value = false;
+    selectBlock(newBlock.id);
+}
+
 function toggleBlockPalette() {
     showBlockPalette.value = !showBlockPalette.value;
     if (showBlockPalette.value) {
@@ -748,12 +752,25 @@ function selectBlock(blockId) {
         destroyEasyMDE(prevId);
     }
 
-    // Init EasyMDE on newly selected text block
+    // Init EasyMDE on newly selected text block, and focus primary input
     const newId = selectedBlockId.value;
     if (newId) {
         const block = blocks.value.find(b => b.id === newId);
         if (block && block.type === 'text') {
-            nextTick(() => initEasyMDE(newId));
+            nextTick(() => {
+                initEasyMDE(newId);
+                if (easyMDEInstances[newId]) {
+                    easyMDEInstances[newId].codemirror.focus();
+                }
+            });
+        } else if (block) {
+            nextTick(() => {
+                const blockEl = document.querySelector(`[data-block-id="${newId}"]`);
+                const input = blockEl?.querySelector('input[type=text], input[type=url], input[type=number]');
+                if (input) {
+                    input.focus();
+                }
+            });
         }
     }
 }
@@ -864,23 +881,18 @@ function fetchPreview() {
     .catch(e => { if (e.name !== 'AbortError') previewLoading.value = false; });
 }
 
-function openPreview() {
-    showPreview.value = true;
+function openPreviewInNewTab() {
     const form = document.querySelector('#newsletter-builder')?.closest('form');
     if (!form) return;
-
     const formData = new FormData(form);
     formData.delete('_method');
     formData.append('_token', props.csrfToken);
-
-    fetch(props.previewUrl, {
-        method: 'POST',
-        body: formData,
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (previewFrame.value) previewFrame.value.srcdoc = data.html;
-    });
+    fetch(props.previewUrl, { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(data => {
+            const w = window.open('', '_blank');
+            if (w) { w.document.write(data.html); w.document.close(); }
+        });
 }
 
 function confirmSend() {
@@ -929,6 +941,7 @@ function initSortable() {
                     evt.item.remove();
                     blocks.value.splice(evt.newIndex, 0, newBlock);
                     showBlockPalette.value = false;
+                    selectBlock(newBlock.id);
                 }
             },
             onEnd(evt) {
