@@ -72,6 +72,37 @@
             'recurring_end_value' => $event->recurring_end_value,
             'start_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
             'is_online' => !empty($event->event_url),
+            'description_excerpt' => Str::words(strip_tags($event->translatedDescription()), 25, '...'),
+            'duration' => $event->duration,
+        ];
+    }
+
+    // Prepare past events for Vue (list view)
+    $pastEventsForVue = [];
+    foreach (($pastEvents ?? collect()) as $event) {
+        $groupId = isset($role) ? $event->getGroupIdForSubdomain($role->subdomain) : null;
+        $pastEventsForVue[] = [
+            'id' => \App\Utils\UrlUtils::encodeId($event->id),
+            'group_id' => $groupId ? \App\Utils\UrlUtils::encodeId($groupId) : null,
+            'category_id' => $event->category_id,
+            'name' => $event->translatedName(),
+            'venue_name' => $event->getVenueDisplayName(),
+            'starts_at' => $event->starts_at,
+            'days_of_week' => $event->days_of_week,
+            'local_starts_at' => $event->localStartsAt(),
+            'local_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
+            'utc_date' => $event->starts_at ? $event->getStartDateTime(null, false)->format('Y-m-d') : null,
+            'guest_url' => $event->getGuestUrl(isset($subdomain) ? $subdomain : '', ''),
+            'image_url' => $event->getImageUrl(),
+            'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
+            'edit_url' => auth()->user() && auth()->user()->canEditEvent($event)
+                ? (isset($role) ? config('app.url') . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false) : config('app.url') . route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($event->id)], false))
+                : null,
+            'is_online' => !empty($event->event_url),
+            'description_excerpt' => Str::words(strip_tags($event->translatedDescription()), 25, '...'),
+            'duration' => $event->duration,
+            'occurrenceDate' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
+            'uniqueKey' => \App\Utils\UrlUtils::encodeId($event->id),
         ];
     }
 
@@ -107,16 +138,16 @@
     {{-- Main container: Stacks content on mobile, aligns in a row on desktop. --}}
     <div class="flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-4">
 
-        {{-- Month and Year Title: Always visible and positioned first. --}}
-        <h1 class="text-2xl font-semibold leading-6 flex-shrink-0 hidden md:block text-gray-900 dark:text-gray-100">
+        {{-- Month and Year Title: Always visible and positioned first (hidden in list view). --}}
+        <h1 v-show="currentView === 'calendar'" class="text-2xl font-semibold leading-6 flex-shrink-0 hidden md:block text-gray-900 dark:text-gray-100">
             <time datetime="{{ sprintf('%04d-%02d', $year, $month) }}">{{ Carbon\Carbon::create($year, $month, 1)->locale($isAdminRoute && auth()->check() ? app()->getLocale() : (session()->has('translate') ? 'en' : (isset($role) && $role->language_code ? $role->language_code : 'en')))->translatedFormat('F Y') }}</time>
         </h1>
 
         {{-- All Controls Wrapper: Groups all interactive elements. Stacks on mobile, row on desktop. --}}
         <div class="flex flex-col md:flex-row md:items-center md:ms-auto gap-3">
 
-            {{-- Schedule and Category Selects Container (desktop only) --}}
-            <div class="hidden md:flex flex-row gap-2 w-full md:w-auto">
+            {{-- Schedule and Category Selects Container (desktop only, or always when in list view) --}}
+            <div :class="currentView === 'list' ? '!flex' : ''" class="hidden md:flex flex-row gap-2 w-full md:w-auto">
                 {{-- Schedule Select --}}
                 @if(isset($role) && $role->groups && $role->groups->count() > 1)
                     <select v-model="selectedGroup" style="font-family: sans-serif" class="py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 min-w-[180px] hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
@@ -144,9 +175,9 @@
                 @endif
             </div>
 
-            {{-- Mobile Filters (mobile only) --}}
+            {{-- Mobile Filters (mobile only, hidden in list view since desktop filters are shown) --}}
             @if($filterCount > 0)
-            <div class="md:hidden flex flex-col gap-2 w-full">
+            <div v-show="currentView === 'calendar'" class="md:hidden flex flex-col gap-2 w-full">
                 @if($filterCount == 1)
                     {{-- Single filter: show directly without button --}}
                     @if($hasOnlineEvents && !(isset($role) && $role->groups && $role->groups->count() > 1) && count($uniqueCategoryIds ?? []) == 0)
@@ -242,8 +273,28 @@
                 </div>
             @endif
 
+            {{-- View Toggle (guest route only) --}}
+            @if($route == 'guest')
+            <div class="flex items-center bg-white dark:bg-gray-800 rounded-md shadow-sm">
+                <button @click="toggleView('calendar')"
+                        :class="currentView === 'calendar' ? 'bg-[{{ isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA' }}] text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                        class="flex h-11 w-11 items-center justify-center rounded-s-md border border-gray-300 dark:border-gray-600 transition-colors">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
+                    </svg>
+                </button>
+                <button @click="toggleView('list')"
+                        :class="currentView === 'list' ? 'bg-[{{ isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA' }}] text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                        class="flex h-11 w-11 items-center justify-center rounded-e-md border border-s-0 border-gray-300 dark:border-gray-600 transition-colors">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3,4H7V8H3V4M9,5V7H21V5H9M3,10H7V14H3V10M9,11V13H21V11H9M3,16H7V20H3V16M9,17V19H21V17H9"/>
+                    </svg>
+                </button>
+            </div>
+            @endif
+
             {{-- Month Navigation Controls --}}
-            <div class="flex items-center bg-white dark:bg-gray-800 rounded-md shadow-sm hidden md:flex">
+            <div v-show="currentView === 'calendar'" class="flex items-center bg-white dark:bg-gray-800 rounded-md shadow-sm hidden md:flex">
                 <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-s-md border-s border-y border-gray-300 dark:border-gray-600 pe-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:pe-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
                     <span class="sr-only">{{ __('messages.previous_month') }}</span>
                     <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
@@ -275,7 +326,7 @@
 </header>
 @endif
 
-    <div class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? '' : 'hidden' }} {{ (isset($force_mobile) && $force_mobile) ? '' : 'md:shadow-sm md:ring-1 md:ring-black md:ring-opacity-5 md:dark:border md:dark:border-gray-700 md:rounded-md md:overflow-hidden md:flex md:flex-auto md:flex-col' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+    <div v-show="currentView === 'calendar'" class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? '' : 'hidden' }} {{ (isset($force_mobile) && $force_mobile) ? '' : 'md:shadow-sm md:ring-1 md:ring-black md:ring-opacity-5 md:dark:border md:dark:border-gray-700 md:rounded-md md:overflow-hidden md:flex md:flex-auto md:flex-col' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
 
         @if (request()->graphic)
             @include('role.partials.calendar-graphic')
@@ -383,7 +434,7 @@
         @endif
 
 
-        <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">            
+        <div v-show="currentView === 'calendar'" class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
             <div v-if="mobileEventsList.length">
                 <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden mb-4 w-full text-center">
                     {{ __('messages.show_past_events') }}
@@ -452,6 +503,130 @@
             </div>
         </div>
 
+
+{{-- List View --}}
+        <div v-show="currentView === 'list'" class="{{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+            {{-- Upcoming Events --}}
+            <div v-if="listViewUpcomingGroups.length">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <template v-for="(group, groupIndex) in listViewUpcomingGroups" :key="'list-date-' + group.date">
+                        {{-- Date Header (spans full width) --}}
+                        <div class="col-span-1 md:col-span-2" :class="groupIndex > 0 ? 'mt-2' : ''">
+                            <div class="px-4 pb-3 pt-3 flex items-center gap-4">
+                                <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                                <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></div>
+                                <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                            </div>
+                        </div>
+                        {{-- Event Cards --}}
+                        <template v-for="event in group.events" :key="'list-' + event.uniqueKey">
+                            <div v-if="isEventVisible(event)"
+                                 @click="navigateToEvent(event, $event)"
+                                 class="block cursor-pointer">
+                                <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-shadow hover:shadow-md">
+                                    <div class="flex" :class="isRtl ? 'flex-row-reverse' : ''">
+                                        {{-- Image Section --}}
+                                        <div v-if="event.image_url" class="flex-shrink-0 w-28 md:w-36 self-stretch">
+                                            <img :src="event.image_url" class="w-full h-full object-cover" :alt="event.name">
+                                        </div>
+                                        {{-- Content Section --}}
+                                        <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
+                                            <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base md:text-lg leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
+                                            <div v-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                                <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                                                </svg>
+                                                <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                            </div>
+                                            <div class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                                <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
+                                                </svg>
+                                                <span v-text="getEventTime(event)"></span>
+                                                <span v-if="event.duration" class="ms-1" v-text="'(' + formatDuration(event.duration) + ')'"></span>
+                                            </div>
+                                            <p v-if="event.description_excerpt" class="mt-2 hidden md:block text-sm text-gray-500 dark:text-gray-400 line-clamp-2" dir="auto" v-text="event.description_excerpt"></p>
+                                            <div v-if="event.can_edit" class="mt-auto pt-3">
+                                                <a :href="event.edit_url"
+                                                    class="inline-flex items-center px-4 py-1.5 text-sm font-medium text-[#4E81FA] bg-transparent border border-[#4E81FA] rounded-md hover:bg-[#4E81FA] hover:text-white transition-colors duration-200"
+                                                    @click.stop>
+                                                    {{ __('messages.edit') }}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                </div>
+            </div>
+
+            {{-- Past Events Section --}}
+            <div v-if="filteredPastEventsCount > 0" class="mt-6">
+                <button @click="showPastEvents = !showPastEvents"
+                        class="w-full flex items-center gap-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                    <span class="font-medium text-sm whitespace-nowrap">
+                        {{ __('messages.show_past_events') }} (@{{ filteredPastEventsCount }})
+                        <svg :class="showPastEvents ? 'rotate-180' : ''" class="inline-block w-4 h-4 ms-1 transition-transform" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
+                        </svg>
+                    </span>
+                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                </button>
+                <div v-show="showPastEvents" class="mt-4 opacity-60">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <template v-for="(group, groupIndex) in pastEventsGroupedByDate" :key="'past-date-' + group.date">
+                            {{-- Date Header --}}
+                            <div class="col-span-1 md:col-span-2" :class="groupIndex > 0 ? 'mt-2' : ''">
+                                <div class="px-4 pb-3 pt-3 flex items-center gap-4">
+                                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                                    <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></div>
+                                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                                </div>
+                            </div>
+                            {{-- Past Event Cards --}}
+                            <template v-for="event in group.events" :key="'past-' + event.uniqueKey">
+                                <div @click="navigateToEvent(event, $event)"
+                                     class="block cursor-pointer">
+                                    <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-shadow hover:shadow-md">
+                                        <div class="flex" :class="isRtl ? 'flex-row-reverse' : ''">
+                                            <div v-if="event.image_url" class="flex-shrink-0 w-28 md:w-36 self-stretch">
+                                                <img :src="event.image_url" class="w-full h-full object-cover" :alt="event.name">
+                                            </div>
+                                            <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
+                                                <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base md:text-lg leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
+                                                <div v-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                                    <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                                </div>
+                                                <div class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                                    <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    <span v-text="getEventTime(event)"></span>
+                                                </div>
+                                                <p v-if="event.description_excerpt" class="mt-2 hidden md:block text-sm text-gray-500 dark:text-gray-400 line-clamp-2" dir="auto" v-text="event.description_excerpt"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Empty State --}}
+            <div v-if="listViewUpcomingGroups.length === 0 && pastEvents.length === 0" class="py-10 text-center">
+                <div class="text-xl text-gray-500 dark:text-gray-400">
+                    {{ __('messages.no_scheduled_events') }}
+                </div>
+            </div>
+        </div>
 
 {{-- Mobile Filters Bottom Sheet Drawer --}}
 @if($filterCount >= 2)
@@ -576,7 +751,10 @@ const calendarApp = createApp({
             userTimezone: '{{ auth()->check() && auth()->user()->timezone ? auth()->user()->timezone : null }}',
             popupTimeout: null,
             showFiltersDrawer: false,
-            showOnlineOnly: false
+            showOnlineOnly: false,
+            currentView: '{{ $eventLayout ?? "calendar" }}',
+            pastEvents: @json($pastEventsForVue ?? []),
+            showPastEvents: false
         }
     },
     computed: {
@@ -805,6 +983,31 @@ const calendarApp = createApp({
                 date: date,
                 events: grouped[date]
             }));
+        },
+        listViewUpcomingGroups() {
+            // Filter eventsGroupedByDate to only non-past dates
+            return this.eventsGroupedByDate.filter(group => !this.isPastEvent(group.date));
+        },
+        filteredPastEventsCount() {
+            return this.pastEvents.filter(event => this.isEventVisible(event)).length;
+        },
+        pastEventsGroupedByDate() {
+            // Group past events by date, sorted reverse-chronologically
+            const grouped = {};
+            this.pastEvents.forEach(event => {
+                if (!event.occurrenceDate) return;
+                // Apply filters
+                if (!this.isEventVisible(event)) return;
+                const date = event.occurrenceDate;
+                if (!grouped[date]) {
+                    grouped[date] = [];
+                }
+                grouped[date].push(event);
+            });
+            return Object.keys(grouped).sort().reverse().map(date => ({
+                date: date,
+                events: grouped[date]
+            }));
         }
     },
     watch: {
@@ -819,6 +1022,25 @@ const calendarApp = createApp({
         }
     },
     methods: {
+        toggleView(view) {
+            this.currentView = view;
+            if (this.subdomain) {
+                try {
+                    localStorage.setItem('es_view_' + this.subdomain, view);
+                } catch (e) {
+                    // localStorage not available
+                }
+            }
+        },
+        formatDuration(hours) {
+            if (!hours) return '';
+            const totalMinutes = Math.round(hours * 60);
+            const h = Math.floor(totalMinutes / 60);
+            const m = totalMinutes % 60;
+            if (h > 0 && m > 0) return h + 'h ' + m + 'm';
+            if (h > 0) return h + 'h';
+            return m + 'm';
+        },
         clearFilters() {
             this.selectedGroup = '';
             this.selectedCategory = '';
@@ -1169,6 +1391,18 @@ const calendarApp = createApp({
         }
     },
     mounted() {
+        // Check localStorage for saved view preference
+        if (this.subdomain) {
+            try {
+                const saved = localStorage.getItem('es_view_' + this.subdomain);
+                if (saved && ['calendar', 'list'].includes(saved)) {
+                    this.currentView = saved;
+                }
+            } catch (e) {
+                // localStorage not available
+            }
+        }
+
         // Initialize popup functionality
         this.initPopups();
         

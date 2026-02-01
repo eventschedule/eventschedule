@@ -856,6 +856,56 @@ class Role extends Model implements MustVerifyEmail
         return $value;
     }
 
+    public function newsletters()
+    {
+        return $this->hasMany(\App\Models\Newsletter::class);
+    }
+
+    public function newsletterLimit(): ?int
+    {
+        if (! config('app.hosted') || $this->hasEmailSettings()) {
+            return null;
+        }
+
+        if ($this->isEnterprise()) {
+            return 1000;
+        }
+
+        if ($this->isPro()) {
+            return 100;
+        }
+
+        return 10;
+    }
+
+    public function newslettersSentThisMonth(): int
+    {
+        return $this->newsletters()
+            ->whereIn('status', ['sending', 'sent'])
+            ->where(function ($query) {
+                $query->where(function ($q) {
+                    $q->whereNotNull('sent_at')
+                        ->where('sent_at', '>=', now()->startOfMonth());
+                })->orWhere(function ($q) {
+                    $q->whereNull('sent_at')
+                        ->where('status', 'sending')
+                        ->where('created_at', '>=', now()->startOfMonth());
+                });
+            })
+            ->count();
+    }
+
+    public function canSendNewsletter(): bool
+    {
+        $limit = $this->newsletterLimit();
+
+        if (is_null($limit)) {
+            return true;
+        }
+
+        return $this->newslettersSentThisMonth() < $limit;
+    }
+
     public function groups()
     {
         return $this->hasMany(\App\Models\Group::class);

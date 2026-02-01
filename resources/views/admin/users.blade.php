@@ -301,23 +301,23 @@
             new Chart(signupMethodTrendCtx, {
                 type: 'bar',
                 data: {
-                    labels: {!! json_encode($trendData['labels']) !!},
+                    labels: @json($trendData['labels']),
                     datasets: [
                         {
                             label: @json(__('messages.email')),
-                            data: {!! json_encode($trendData['emailUsers']) !!},
+                            data: @json($trendData['emailUsers']),
                             backgroundColor: '#3B82F6',
                             stack: 'signups'
                         },
                         {
                             label: @json(__('messages.google')),
-                            data: {!! json_encode($trendData['googleUsers']) !!},
+                            data: @json($trendData['googleUsers']),
                             backgroundColor: '#EF4444',
                             stack: 'signups'
                         },
                         {
                             label: @json(__('messages.hybrid')),
-                            data: {!! json_encode($trendData['hybridUsers']) !!},
+                            data: @json($trendData['hybridUsers']),
                             backgroundColor: '#F59E0B',
                             stack: 'signups'
                         }
@@ -367,10 +367,10 @@
                 new Chart(utmSourcesCtx, {
                     type: 'bar',
                     data: {
-                        labels: {!! json_encode($utmSourcesInPeriod->pluck('utm_source')->toArray()) !!},
+                        labels: @json($utmSourcesInPeriod->pluck('utm_source')->toArray()),
                         datasets: [{
                             label: @json(__('messages.users')),
-                            data: {!! json_encode($utmSourcesInPeriod->pluck('count')->toArray()) !!},
+                            data: @json($utmSourcesInPeriod->pluck('count')->toArray()),
                             backgroundColor: '#8B5CF6'
                         }]
                     },
@@ -402,10 +402,10 @@
                 new Chart(utmTopSourcesCtx, {
                     type: 'bar',
                     data: {
-                        labels: {!! json_encode($topUtmSources->pluck('utm_source')->toArray()) !!},
+                        labels: @json($topUtmSources->pluck('utm_source')->toArray()),
                         datasets: [{
                             label: @json(__('messages.users')),
-                            data: {!! json_encode($topUtmSources->pluck('count')->toArray()) !!},
+                            data: @json($topUtmSources->pluck('count')->toArray()),
                             backgroundColor: '#8B5CF6'
                         }]
                     },
@@ -437,10 +437,10 @@
                 new Chart(topReferrersCtx, {
                     type: 'bar',
                     data: {
-                        labels: {!! json_encode($topReferrerDomains->pluck('domain')->toArray()) !!},
+                        labels: @json($topReferrerDomains->pluck('domain')->toArray()),
                         datasets: [{
                             label: @json(__('messages.users')),
-                            data: {!! json_encode($topReferrerDomains->pluck('count')->toArray()) !!},
+                            data: @json($topReferrerDomains->pluck('count')->toArray()),
                             backgroundColor: '#10B981'
                         }]
                     },

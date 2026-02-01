@@ -482,7 +482,7 @@
       <div
         class="bg-[#F5F9FE] dark:bg-gray-800 rounded-none lg:rounded-lg px-5 lg:px-16 py-6 flex flex-col gap-6 mb-6 lg:mx-0 max-lg:w-screen max-lg:ml-[calc(-50vw+50%)]"
       >  
-        @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule')])
+        @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'eventLayout' => $role->event_layout ?? 'calendar', 'pastEvents' => $pastEvents ?? collect()])
       </div>
 
       @if ($role->youtube_links && $role->youtube_links != '[]')

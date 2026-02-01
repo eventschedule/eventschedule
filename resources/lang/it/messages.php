@@ -600,6 +600,7 @@ return [
     'event_already_curated' => 'L\'evento è già nel tuo programma',
     'name_en' => 'Nome (Inglese)',
     'layout' => 'Layout',
+    'default_layout' => 'Layout Predefinito',
     'calendar' => 'Calendario',
     'grid' => 'Griglia',
     'list' => 'Lista',

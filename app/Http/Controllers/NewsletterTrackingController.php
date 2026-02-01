@@ -45,20 +45,22 @@ class NewsletterTrackingController extends Controller
 
         $recipient = NewsletterRecipient::where('token', $token)->first();
 
-        if ($recipient) {
-            $recipient->recordClick(
-                $url,
-                request()->ip(),
-                request()->userAgent()
-            );
+        if (! $recipient) {
+            abort(404);
+        }
 
-            // Update denormalized count on newsletter
-            $newsletter = $recipient->newsletter;
-            if ($newsletter) {
-                $newsletter->update([
-                    'click_count' => $newsletter->recipients()->where('click_count', '>', 0)->count(),
-                ]);
-            }
+        $recipient->recordClick(
+            $url,
+            request()->ip(),
+            request()->userAgent()
+        );
+
+        // Update denormalized count on newsletter
+        $newsletter = $recipient->newsletter;
+        if ($newsletter) {
+            $newsletter->update([
+                'click_count' => $newsletter->recipients()->where('click_count', '>', 0)->count(),
+            ]);
         }
 
         return redirect($url, 302);

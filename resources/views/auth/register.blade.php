@@ -162,7 +162,11 @@
                                 errorMessage = Array.isArray(data.errors['cf-turnstile-response']) ? data.errors['cf-turnstile-response'][0] : data.errors['cf-turnstile-response'];
                             }
 
-                            codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + errorMessage + '</span>';
+                            var errorSpan = document.createElement('span');
+                            errorSpan.className = 'text-red-600 dark:text-red-400';
+                            errorSpan.textContent = errorMessage;
+                            codeMessage.innerHTML = '';
+                            codeMessage.appendChild(errorSpan);
 
                             // Reset Turnstile widget on failure
                             if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
@@ -171,7 +175,11 @@
                         }
                     }).catch(function(jsonError) {
                         // If JSON parsing fails, show generic error
-                        codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + '{{ __('messages.error_sending_code') }}' + '</span>';
+                        var errorSpan = document.createElement('span');
+                        errorSpan.className = 'text-red-600 dark:text-red-400';
+                        errorSpan.textContent = '{{ __('messages.error_sending_code') }}';
+                        codeMessage.innerHTML = '';
+                        codeMessage.appendChild(errorSpan);
                         // Reset Turnstile widget on failure
                         if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
                             turnstile.reset(turnstileWidgetId);
@@ -294,7 +302,9 @@
                             @endif
                         }
                     } else {
-                        document.getElementById('test-result').innerHTML = '<span class="text-red-600 dark:text-red-400"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg> ' + data.error + '</span>';
+                        var testResult = document.getElementById('test-result');
+                        testResult.innerHTML = '<span class="text-red-600 dark:text-red-400"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg> <span id="test-error-text"></span></span>';
+                        document.getElementById('test-error-text').textContent = data.error;
                         // Disable register button on failed connection
                         document.querySelector('button[type="submit"]').disabled = true;
                         @if (! config('app.url'))

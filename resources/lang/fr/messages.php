@@ -599,6 +599,7 @@ return [
     'custom_domain_help' => 'Entrez votre domaine personnalisé (ex., https://example.com) pour l\'utiliser à la place de l\'URL du sous-domaine',
     'name_en' => 'Nom (Anglais)',
     'layout' => 'Disposition',
+    'default_layout' => 'Disposition par défaut',
     'calendar' => 'Calendrier',
     'grid' => 'Grille',
     'list' => 'Liste',

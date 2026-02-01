@@ -931,12 +931,17 @@ class EventController extends Controller
         $event = $this->eventRepo->saveEvent($role, $request, null);
 
         if ($request->social_image) {
-            $file = new \Illuminate\Http\UploadedFile($request->social_image, basename($request->social_image));
-            $filename = strtolower('flyer_'.Str::random(32).'.'.$file->getClientOriginalExtension());
-            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+            $tempDir = storage_path('app/temp');
+            $imagePath = $tempDir.'/'.basename($request->social_image);
+            $realPath = realpath($imagePath);
+            if ($realPath && str_starts_with($realPath, $tempDir.DIRECTORY_SEPARATOR) && file_exists($realPath)) {
+                $file = new \Illuminate\Http\UploadedFile($realPath, basename($realPath));
+                $filename = strtolower('flyer_'.Str::random(32).'.'.$file->getClientOriginalExtension());
+                $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
-            $event->flyer_image_url = $filename;
-            $event->save();
+                $event->flyer_image_url = $filename;
+                $event->save();
+            }
         }
 
         // Get venue data to return to client for future imports
@@ -968,12 +973,17 @@ class EventController extends Controller
         $event = $this->eventRepo->saveEvent($role, $request, null);
 
         if ($request->social_image) {
-            $file = new \Illuminate\Http\UploadedFile($request->social_image, basename($request->social_image));
-            $filename = strtolower('flyer_'.Str::random(32)).'.'.$file->getClientOriginalExtension();
-            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+            $tempDir = storage_path('app/temp');
+            $imagePath = $tempDir.'/'.basename($request->social_image);
+            $realPath = realpath($imagePath);
+            if ($realPath && str_starts_with($realPath, $tempDir.DIRECTORY_SEPARATOR) && file_exists($realPath)) {
+                $file = new \Illuminate\Http\UploadedFile($realPath, basename($realPath));
+                $filename = strtolower('flyer_'.Str::random(32)).'.'.$file->getClientOriginalExtension();
+                $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
-            $event->flyer_image_url = $filename;
-            $event->save();
+                $event->flyer_image_url = $filename;
+                $event->save();
+            }
         }
 
         // Clear the pending request session
@@ -1076,10 +1086,11 @@ class EventController extends Controller
             mkdir($tempDir, 0700, true);
         }
 
-        $filename = $tempDir.'/event_'.strtolower(Str::random(32)).'.'.$extension;
+        $basename = 'event_'.strtolower(Str::random(32)).'.'.$extension;
+        $filename = $tempDir.'/'.$basename;
         move_uploaded_file($file->getPathname(), $filename);
 
-        return response()->json(['success' => true, 'filename' => $filename]);
+        return response()->json(['success' => true, 'filename' => $basename]);
     }
 
     public function guestUploadImage(Request $request, $subdomain)
@@ -1120,10 +1131,11 @@ class EventController extends Controller
             mkdir($tempDir, 0700, true);
         }
 
-        $filename = $tempDir.'/event_'.strtolower(Str::random(32)).'.'.$extension;
+        $basename = 'event_'.strtolower(Str::random(32)).'.'.$extension;
+        $filename = $tempDir.'/'.$basename;
         move_uploaded_file($file->getPathname(), $filename);
 
-        return response()->json(['success' => true, 'filename' => $filename]);
+        return response()->json(['success' => true, 'filename' => $basename]);
     }
 
     /**

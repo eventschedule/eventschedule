@@ -21,6 +21,9 @@ class Newsletter extends Model
         'ab_test_id',
         'ab_variant',
         'send_token',
+        'sent_count',
+        'open_count',
+        'click_count',
     ];
 
     protected $casts = [

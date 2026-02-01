@@ -179,7 +179,10 @@ class TicketController extends Controller
                 }
 
                 $sale = new Sale;
-                $sale->fill($request->all());
+                $sale->name = $request->input('name');
+                $sale->email = $request->input('email');
+                $sale->event_date = $request->input('event_date');
+                $sale->subdomain = $request->input('subdomain');
                 $sale->event_id = $event->id;
                 $sale->user_id = $user ? $user->id : null;
                 $sale->secret = strtolower(Str::random(32));
