@@ -626,10 +626,8 @@ if (config('app.is_nexus')) {
     Route::get('/team-scheduling', fn () => redirect()->route('home'));
     Route::get('/sub-schedules', fn () => redirect()->route('home'));
     Route::get('/online-events', fn () => redirect()->route('home'));
-    Route::get('/newsletters', fn () => redirect()->route('home'));
     Route::get('/recurring-events', fn () => redirect()->route('home'));
     Route::get('/embed-calendar', fn () => redirect()->route('home'));
-    Route::get('/analytics', fn () => redirect()->route('home'));
     Route::get('/for-talent', fn () => redirect()->route('home'));
     Route::get('/for-venues', fn () => redirect()->route('home'));
     Route::get('/for-curators', fn () => redirect()->route('home'));
