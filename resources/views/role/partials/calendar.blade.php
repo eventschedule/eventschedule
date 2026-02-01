@@ -1516,6 +1516,7 @@ const calendarApp = createApp({
             startOfMonth: '{{ $startOfMonth->format('Y-m-d') }}',
             endOfMonth: '{{ $endOfMonth->format('Y-m-d') }}',
             use24Hour: {{ get_use_24_hour_time($role ?? null) ? 'true' : 'false' }},
+            maxEvents: {{ isset($max_events) ? $max_events : 0 }},
             subdomain: '{{ isset($subdomain) ? $subdomain : '' }}',
             route: '{{ $route }}',
             embed: {{ isset($embed) && $embed ? 'true' : 'false' }},
@@ -1746,7 +1747,7 @@ const calendarApp = createApp({
                     return new Date(a.local_starts_at) - new Date(b.local_starts_at);
                 }
                 return 0;
-            }).slice(0, 100);
+            }).slice(0, this.maxEvents || 100);
         },
         eventsGroupedByDate() {
             const grouped = {};
@@ -1836,7 +1837,7 @@ const calendarApp = createApp({
                     return new Date(a.local_starts_at) - new Date(b.local_starts_at);
                 }
                 return 0;
-            }).slice(0, 50);
+            }).slice(0, this.maxEvents || 50);
         },
         pastEventsGroupedByDate() {
             // Group past events by date, sorted reverse-chronologically
