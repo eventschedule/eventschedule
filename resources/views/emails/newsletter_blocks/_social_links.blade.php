@@ -10,11 +10,11 @@
             <tr>
                 @foreach ($links as $link)
                 @if (!empty($link['url']) && !empty($link['platform']))
-                @php $label = ucfirst($link['platform']); @endphp
+                @php $label = ucfirst($link['platform']); $initial = $link['platform'] === 'website' ? '🔗' : strtoupper(substr($link['platform'], 0, 1)); @endphp
                 @if ($template === 'classic')
                 <td style="padding: 0 8px;">
                     <a href="{{ $link['url'] }}" style="text-decoration: none;">
-                        <span style="display: inline-block; width: 32px; height: 32px; background-color: {{ $style['accentColor'] }}; border-radius: 4px; text-align: center; line-height: 32px; color: #ffffff; font-size: 14px; font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ strtoupper(substr($link['platform'], 0, 1)) }}</span>
+                        <span style="display: inline-block; width: 32px; height: 32px; background-color: {{ $style['accentColor'] }}; border-radius: 4px; text-align: center; line-height: 32px; color: #ffffff; font-size: 14px; font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ $initial }}</span>
                     </a>
                 </td>
                 @elseif ($template === 'minimal')
@@ -24,20 +24,20 @@
                 @elseif ($template === 'bold')
                 <td style="padding: 0 8px;">
                     <a href="{{ $link['url'] }}" style="text-decoration: none;">
-                        <span style="display: inline-block; width: 40px; height: 40px; background-color: {{ $style['accentColor'] }}; border-radius: 50%; text-align: center; line-height: 40px; color: #ffffff; font-size: 18px; font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ strtoupper(substr($link['platform'], 0, 1)) }}</span>
+                        <span style="display: inline-block; width: 40px; height: 40px; background-color: {{ $style['accentColor'] }}; border-radius: 50%; text-align: center; line-height: 40px; color: #ffffff; font-size: 18px; font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ $initial }}</span>
                     </a>
                 </td>
                 @elseif ($template === 'compact')
                 <td style="padding: 0 5px;">
                     <a href="{{ $link['url'] }}" style="text-decoration: none;">
-                        <span style="display: inline-block; width: 24px; height: 24px; background-color: {{ $style['accentColor'] }}; border-radius: 50%; text-align: center; line-height: 24px; color: #ffffff; font-size: 11px; font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ strtoupper(substr($link['platform'], 0, 1)) }}</span>
+                        <span style="display: inline-block; width: 24px; height: 24px; background-color: {{ $style['accentColor'] }}; border-radius: 50%; text-align: center; line-height: 24px; color: #ffffff; font-size: 11px; font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ $initial }}</span>
                     </a>
                 </td>
                 @else
                 {{-- Modern (default) --}}
                 <td style="padding: 0 8px;">
                     <a href="{{ $link['url'] }}" style="text-decoration: none;">
-                        <span style="display: inline-block; width: 32px; height: 32px; background-color: {{ $style['accentColor'] }}; border-radius: 50%; text-align: center; line-height: 32px; color: #ffffff; font-size: 14px; font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ strtoupper(substr($link['platform'], 0, 1)) }}</span>
+                        <span style="display: inline-block; width: 32px; height: 32px; background-color: {{ $style['accentColor'] }}; border-radius: 50%; text-align: center; line-height: 32px; color: #ffffff; font-size: 14px; font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ $initial }}</span>
                     </a>
                 </td>
                 @endif
