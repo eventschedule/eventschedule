@@ -45,8 +45,8 @@
             </div>
 
             <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
-                Know your<br>
-                <span class="text-gradient">audience</span>
+                Event<br>
+                <span class="text-gradient">analytics</span>
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
@@ -67,6 +67,8 @@
     <!-- Bento Grid Features -->
     <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-12 text-center">Analytics at a glance</h2>
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Views Over Time (spans 2 cols) -->
@@ -308,21 +310,21 @@
 
     <!-- Next Feature -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
-        <!-- Animated background blobs matching Custom Fields page's colors -->
+        <!-- Animated background blobs matching Embed Calendar page's colors -->
         <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-amber-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-orange-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-purple-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/custom-fields') }}" class="group block">
-                <div class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+            <a href="{{ marketing_url('/embed-calendar') }}" class="group block">
+                <div class="bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-900 dark:to-violet-900 rounded-3xl border border-purple-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <!-- Text content -->
                         <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-amber-300 transition-colors">Custom Fields</h3>
-                            <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Collect dietary preferences, t-shirt sizes, or any info you need from ticket buyers.</p>
-                            <span class="inline-flex items-center text-amber-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">Embed Calendar</h3>
+                            <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Add your event calendar to any website with one line of code. Responsive and multilingual.</p>
+                            <span class="inline-flex items-center text-purple-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -330,28 +332,24 @@
                             </span>
                         </div>
 
-                        <!-- Mini mockup: Form with dropdown/text fields -->
+                        <!-- Mini mockup: Browser with embed code -->
                         <div class="flex-shrink-0">
-                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48 space-y-3">
-                                <!-- Text field -->
-                                <div>
-                                    <div class="text-[10px] text-gray-400 dark:text-gray-400 mb-1">Company Name</div>
-                                    <div class="bg-gray-200 dark:bg-white/10 rounded-lg px-2 py-1.5 text-gray-900 dark:text-white text-xs border border-gray-200 dark:border-white/10">Acme Corp</div>
+                            <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border border-gray-300 dark:border-white/20 overflow-hidden w-48">
+                                <div class="flex items-center gap-1.5 px-3 py-2 bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
+                                    <div class="w-2 h-2 rounded-full bg-red-500/70"></div>
+                                    <div class="w-2 h-2 rounded-full bg-yellow-500/70"></div>
+                                    <div class="w-2 h-2 rounded-full bg-green-500/70"></div>
                                 </div>
-                                <!-- Dropdown field -->
-                                <div>
-                                    <div class="text-[10px] text-gray-400 dark:text-gray-400 mb-1">T-Shirt Size</div>
-                                    <div class="bg-gray-200 dark:bg-white/10 rounded-lg px-2 py-1.5 text-gray-900 dark:text-white text-xs border border-gray-200 dark:border-white/10 flex items-center justify-between">
-                                        <span>Large</span>
-                                        <svg class="w-3 h-3 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                <div class="p-3">
+                                    <div class="grid grid-cols-5 gap-0.5 mb-2">
+                                        <div class="h-3 bg-purple-200 dark:bg-purple-500/30 rounded"></div>
+                                        <div class="h-3 bg-gray-100 dark:bg-white/5 rounded"></div>
+                                        <div class="h-3 bg-purple-200 dark:bg-purple-500/30 rounded"></div>
+                                        <div class="h-3 bg-gray-100 dark:bg-white/5 rounded"></div>
+                                        <div class="h-3 bg-purple-200 dark:bg-purple-500/30 rounded"></div>
                                     </div>
-                                </div>
-                                <!-- Yes/No field -->
-                                <div>
-                                    <div class="text-[10px] text-gray-400 dark:text-gray-400 mb-1">Vegetarian?</div>
-                                    <div class="bg-amber-500/20 rounded-lg px-2 py-1.5 text-amber-300 text-xs border border-amber-400/30 flex items-center justify-between">
-                                        <span>Yes</span>
-                                        <svg class="w-3 h-3 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                    <div class="bg-gray-100 dark:bg-white/5 rounded p-1.5">
+                                        <code class="text-[8px] text-purple-500 dark:text-purple-300 font-mono">&lt;iframe&gt;</code>
                                     </div>
                                 </div>
                             </div>

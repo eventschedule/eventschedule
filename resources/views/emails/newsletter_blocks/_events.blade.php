@@ -7,8 +7,7 @@
 <tr>
     <td style="background-color: {{ $template === 'bold' ? '#16213e' : ($template === 'classic' ? '#faf9f6' : '#ffffff') }}; padding: {{ $template === 'compact' ? '10px 30px' : '20px 30px' }};">
         <div style="margin-bottom: 10px;">
-            @if ($template === 'minimal' || ($template === 'compact') || $layout === 'list')
-                {{-- Minimal and Compact always use list layout --}}
+            @if ($layout === 'list')
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
                     @foreach ($blockEvents as $event)
                     <tr>

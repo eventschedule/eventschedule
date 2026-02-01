@@ -178,15 +178,26 @@
             </div>
         </div>
 
-        {{-- Top UTM Sources (All Time) --}}
-        @if($topUtmSources->count() > 0)
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_sources') (@lang('messages.all_time'))</h3>
-                <div class="h-64">
-                    <canvas id="utmTopSourcesChart"></canvas>
+        {{-- Top UTM Sources & Top Referrers (All Time) --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            @if($topUtmSources->count() > 0)
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_sources') (@lang('messages.all_time'))</h3>
+                    <div class="h-64">
+                        <canvas id="utmTopSourcesChart"></canvas>
+                    </div>
                 </div>
-            </div>
-        @endif
+            @endif
+
+            @if($topReferrerDomains->count() > 0)
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_referrers') (@lang('messages.all_time'))</h3>
+                    <div class="h-64">
+                        <canvas id="topReferrersChart"></canvas>
+                    </div>
+                </div>
+            @endif
+        </div>
 
         {{-- Recent Signups --}}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
@@ -202,7 +213,11 @@
                                 <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.date')</th>
                                 <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.source')</th>
                                 <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.medium')</th>
-                                <th class="text-start py-2 font-medium text-gray-500 dark:text-gray-400">@lang('messages.campaign')</th>
+                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.campaign')</th>
+                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.content')</th>
+                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.term')</th>
+                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.referrer')</th>
+                                <th class="text-start py-2 font-medium text-gray-500 dark:text-gray-400">@lang('messages.landing_page')</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -210,14 +225,28 @@
                                 <tr class="border-b border-gray-100 dark:border-gray-700/50">
                                     <td class="py-2 pe-4 text-gray-900 dark:text-white">{{ $signup->name }}</td>
                                     <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->email }}</td>
-                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->created_at->format('M j, Y') }}</td>
+                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ $signup->created_at->format('M j, Y') }}</td>
                                     <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_source ?? '-' }}</td>
                                     <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_medium ?? '-' }}</td>
-                                    <td class="py-2 text-gray-600 dark:text-gray-400">{{ $signup->utm_campaign ?? '-' }}</td>
+                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_campaign ?? '-' }}</td>
+                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_content ?? '-' }}</td>
+                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_term ?? '-' }}</td>
+                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400" title="{{ $signup->referrer_url }}">
+                                        @if($signup->referrer_url)
+                                            {{ parse_url($signup->referrer_url, PHP_URL_HOST) ?? '-' }}
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    <td class="py-2 text-gray-600 dark:text-gray-400" title="{{ $signup->landing_page }}">{{ Str::limit($signup->landing_page ?? '-', 30) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+
+                <div class="mt-4">
+                    {{ $recentSignups->links() }}
                 </div>
             @else
                 <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_data')</p>
@@ -378,6 +407,41 @@
                             label: @json(__('messages.users')),
                             data: {!! json_encode($topUtmSources->pluck('count')->toArray()) !!},
                             backgroundColor: '#8B5CF6'
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: { color: gridColor },
+                                ticks: { color: textColor, precision: 0 }
+                            },
+                            y: {
+                                grid: { display: false },
+                                ticks: { color: textColor }
+                            }
+                        }
+                    }
+                });
+            @endif
+
+            // Top Referrer Domains Bar Chart (all time)
+            @if($topReferrerDomains->count() > 0)
+                const topReferrersCtx = document.getElementById('topReferrersChart').getContext('2d');
+                new Chart(topReferrersCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: {!! json_encode($topReferrerDomains->pluck('domain')->toArray()) !!},
+                        datasets: [{
+                            label: @json(__('messages.users')),
+                            data: {!! json_encode($topReferrerDomains->pluck('count')->toArray()) !!},
+                            backgroundColor: '#10B981'
                         }]
                     },
                     options: {

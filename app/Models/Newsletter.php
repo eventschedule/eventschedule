@@ -96,7 +96,63 @@ class Newsletter extends Model
             'data' => ['content' => ''],
         ];
 
+        $socialLinks = self::buildSocialLinksForRole($role);
+        if (! empty($socialLinks)) {
+            $blocks[] = [
+                'id' => \Illuminate\Support\Str::uuid()->toString(),
+                'type' => 'social_links',
+                'data' => ['links' => $socialLinks],
+            ];
+        }
+
         return $blocks;
+    }
+
+    public static function buildSocialLinksForRole(Role $role): array
+    {
+        $links = [];
+
+        if ($role->website) {
+            $links[] = ['platform' => 'website', 'url' => $role->website];
+        }
+
+        $socialLinks = is_string($role->social_links) ? json_decode($role->social_links, true) : $role->social_links;
+        if (is_array($socialLinks)) {
+            foreach ($socialLinks as $link) {
+                $url = $link['url'] ?? '';
+                if ($url) {
+                    $links[] = ['platform' => self::detectPlatform($url), 'url' => $url];
+                }
+            }
+        }
+
+        return $links;
+    }
+
+    public static function detectPlatform(string $url): string
+    {
+        $host = strtolower(parse_url($url, PHP_URL_HOST) ?? '');
+        $host = preg_replace('/^www\./', '', $host);
+
+        $map = [
+            'facebook.com' => 'facebook',
+            'fb.com' => 'facebook',
+            'instagram.com' => 'instagram',
+            'twitter.com' => 'twitter',
+            'x.com' => 'twitter',
+            'youtube.com' => 'youtube',
+            'youtu.be' => 'youtube',
+            'tiktok.com' => 'tiktok',
+            'linkedin.com' => 'linkedin',
+        ];
+
+        foreach ($map as $domain => $platform) {
+            if ($host === $domain || str_ends_with($host, '.'.$domain)) {
+                return $platform;
+            }
+        }
+
+        return 'website';
     }
 
     public static function defaultStyleSettings(): array
@@ -117,6 +173,7 @@ class Newsletter extends Model
         if ($role->accent_color) {
             $defaults['accentColor'] = $role->accent_color;
         }
+
         return $defaults;
     }
 

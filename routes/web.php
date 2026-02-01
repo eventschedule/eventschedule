@@ -24,7 +24,8 @@ use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/robots.txt', function () {
-    $content = "User-agent: *\nDisallow:\n\nSitemap: " . config('app.url') . "/sitemap.xml\n";
+    $content = "User-agent: *\nDisallow:\n\nSitemap: ".config('app.url')."/sitemap.xml\n";
+
     return response($content, 200)->header('Content-Type', 'text/plain');
 });
 
@@ -126,7 +127,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/newsletters/{hash}/send', [NewsletterController::class, 'send'])->name('newsletter.send');
     Route::post('/newsletters/{hash}/schedule', [NewsletterController::class, 'schedule'])->name('newsletter.schedule');
     Route::post('/newsletters/{hash}/cancel', [NewsletterController::class, 'cancel'])->name('newsletter.cancel');
-    Route::post('/newsletters/{hash}/duplicate', [NewsletterController::class, 'duplicate'])->name('newsletter.duplicate');
+    Route::post('/newsletters/{hash}/clone', [NewsletterController::class, 'cloneNewsletter'])->name('newsletter.clone');
     Route::post('/newsletters/{hash}/preview', [NewsletterController::class, 'preview'])->name('newsletter.preview');
     Route::post('/newsletters/{hash}/test-send', [NewsletterController::class, 'testSend'])->name('newsletter.test_send');
     Route::get('/newsletters/{hash}/stats', [NewsletterController::class, 'stats'])->name('newsletter.stats');
@@ -307,6 +308,9 @@ if (config('app.is_nexus')) {
         Route::get('/sub-schedules', [MarketingController::class, 'subSchedules'])->name('marketing.sub_schedules');
         Route::get('/online-events', [MarketingController::class, 'onlineEvents'])->name('marketing.online_events');
         Route::get('/open-source', [MarketingController::class, 'openSource'])->name('marketing.open_source');
+        Route::get('/wp/newsletters', [MarketingController::class, 'newsletters'])->name('marketing.newsletters');
+        Route::get('/recurring-events', [MarketingController::class, 'recurringEvents'])->name('marketing.recurring_events');
+        Route::get('/embed-calendar', [MarketingController::class, 'embedCalendar'])->name('marketing.embed_calendar');
         Route::get('/for-talent', [MarketingController::class, 'forTalent'])->name('marketing.for_talent');
         Route::get('/for-venues', [MarketingController::class, 'forVenues'])->name('marketing.for_venues');
         Route::get('/for-curators', [MarketingController::class, 'forCurators'])->name('marketing.for_curators');
@@ -389,6 +393,9 @@ if (config('app.is_nexus')) {
             Route::get('/sub-schedules', [MarketingController::class, 'subSchedules'])->name('marketing.sub_schedules');
             Route::get('/online-events', [MarketingController::class, 'onlineEvents'])->name('marketing.online_events');
             Route::get('/open-source', [MarketingController::class, 'openSource'])->name('marketing.open_source');
+            Route::get('/newsletters', [MarketingController::class, 'newsletters'])->name('marketing.newsletters');
+            Route::get('/recurring-events', [MarketingController::class, 'recurringEvents'])->name('marketing.recurring_events');
+            Route::get('/embed-calendar', [MarketingController::class, 'embedCalendar'])->name('marketing.embed_calendar');
             Route::get('/for-talent', [MarketingController::class, 'forTalent'])->name('marketing.for_talent');
             Route::get('/for-venues', [MarketingController::class, 'forVenues'])->name('marketing.for_venues');
             Route::get('/for-curators', [MarketingController::class, 'forCurators'])->name('marketing.for_curators');
@@ -472,6 +479,9 @@ if (config('app.is_nexus')) {
             Route::get('/sub-schedules', fn () => redirect('https://eventschedule.com/sub-schedules', 301));
             Route::get('/online-events', fn () => redirect('https://eventschedule.com/online-events', 301));
             Route::get('/open-source', fn () => redirect('https://eventschedule.com/open-source', 301));
+            Route::get('/newsletters', fn () => redirect('https://eventschedule.com/newsletters', 301));
+            Route::get('/recurring-events', fn () => redirect('https://eventschedule.com/recurring-events', 301));
+            Route::get('/embed-calendar', fn () => redirect('https://eventschedule.com/embed-calendar', 301));
             Route::get('/for-talent', fn () => redirect('https://eventschedule.com/for-talent', 301));
             Route::get('/for-venues', fn () => redirect('https://eventschedule.com/for-venues', 301));
             Route::get('/for-curators', fn () => redirect('https://eventschedule.com/for-curators', 301));
@@ -553,6 +563,9 @@ if (config('app.is_nexus')) {
     Route::get('/team-scheduling', fn () => redirect()->route('home'));
     Route::get('/sub-schedules', fn () => redirect()->route('home'));
     Route::get('/online-events', fn () => redirect()->route('home'));
+    Route::get('/newsletters', fn () => redirect()->route('home'));
+    Route::get('/recurring-events', fn () => redirect()->route('home'));
+    Route::get('/embed-calendar', fn () => redirect()->route('home'));
     Route::get('/for-talent', fn () => redirect()->route('home'));
     Route::get('/for-venues', fn () => redirect()->route('home'));
     Route::get('/for-curators', fn () => redirect()->route('home'));

@@ -148,11 +148,6 @@
                             </span>
                             <div class="absolute inset-0 animate-shimmer"></div>
                         </a>
-                        @if (!Auth::check() || \App\Services\DemoService::isDemoUser(Auth::user()))
-                        <a href="{{ demo_url() }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-900 dark:text-white glass rounded-2xl hover:bg-gray-200 dark:hover:bg-white/10 transition-all">
-                            View demo
-                        </a>
-                        @endif
                     </div>
                 </div>
 

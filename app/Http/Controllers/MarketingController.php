@@ -118,6 +118,30 @@ class MarketingController extends Controller
     }
 
     /**
+     * Newsletters page
+     */
+    public function newsletters()
+    {
+        return view('marketing.newsletters');
+    }
+
+    /**
+     * Recurring Events page
+     */
+    public function recurringEvents()
+    {
+        return view('marketing.recurring-events');
+    }
+
+    /**
+     * Embed Calendar page
+     */
+    public function embedCalendar()
+    {
+        return view('marketing.embed-calendar');
+    }
+
+    /**
      * Custom Fields page
      */
     public function customFields()

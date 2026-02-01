@@ -7,7 +7,11 @@
         An open-source platform to share events, sell tickets and bring communities together.
     </p>
     <p>
-        <a href="https://demo.eventschedule.com">View Demo</a> · <a href="https://www.eventschedule.com">Hosted Version</a> · <a href="https://eventschedule.com/docs/installation">Self-Host Guide</a>
+        <a href="https://demo.eventschedule.com">Admin Portal Demo</a> · <a href="https://simpsons.eventschedule.com">Client Portal Demo</a> · <a href="https://www.eventschedule.com">Hosted Version</a> · <a href="https://eventschedule.com/docs/installation">Self-Host Guide</a>
+    </p>
+    <p>
+        The <strong>Admin Portal</strong> is where schedule owners manage events, tickets, and settings.<br>
+        The <strong>Client Portal</strong> is the public-facing events calendar that attendees see.
     </p>
 </div>
 
@@ -73,6 +77,7 @@
 - 📊 **Built-in Analytics:** Track page views with an integrated analytics dashboard showing views over time, device breakdown, and top events—no external services required.
 - 👁️ **Follow Schedules:** Users can follow schedules to stay updated on new events.
 - 📧 **Email Notifications:** Automatic ticket confirmation emails sent to buyers.
+- 📧 **Newsletters:** Send newsletters to followers and ticket buyers with a drag-and-drop block editor, five professional templates, audience segments, A/B testing, and real-time delivery analytics.
 
 ### Customization
 - 📝 **Custom Fields:** Collect additional information from ticket buyers with customizable form fields at both event and ticket levels. Supports text, dropdown, date, and yes/no field types.
