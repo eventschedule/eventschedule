@@ -343,7 +343,7 @@ https://example.com/event/summer-concert</code></pre>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Custom Fields</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                If you have defined <a href="{{ marketing_url('/custom-fields') }}" class="text-rose-400 hover:text-rose-300">Event Custom Fields</a> in your schedule settings, you can include their values in graphics using numbered variables.
+                                If you have defined <a href="{{ marketing_url('/features/custom-fields') }}" class="text-rose-400 hover:text-rose-300">Event Custom Fields</a> in your schedule settings, you can include their values in graphics using numbered variables.
                             </p>
 
                             @if (!empty($customFieldsData))

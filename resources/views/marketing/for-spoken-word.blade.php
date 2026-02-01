@@ -224,7 +224,7 @@
                 </div>
 
                 <!-- Virtual Readings -->
-                <a href="{{ marketing_url('/online-events') }}" class="group relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8 hover:border-gray-300 dark:hover:border-stone-700 transition-all">
+                <a href="{{ marketing_url('/features/online-events') }}" class="group relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-stone-900/50 border border-gray-200 dark:border-stone-800 p-8 hover:border-gray-300 dark:hover:border-stone-700 transition-all">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300/80 text-sm font-medium mb-4 border border-indigo-200 dark:border-indigo-500/20">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />

@@ -487,6 +487,7 @@ return [
     'curator_schedules' => 'Kurator Zeitpläne',
     'event_created_by' => 'Veranstaltung erstellt von :user',
     'show_past_events' => 'Vergangene Events anzeigen',
+    'past_events' => 'Vergangene Events',
     'category' => 'Kategorie',
     'all_categories' => 'Alle Kategorien',
     'search_events' => 'Veranstaltungen suchen...',
@@ -1414,4 +1415,12 @@ return [
     'invalid_input' => 'Ungueltige Eingabe',
     'subject' => 'Betreff',
     'template' => 'Vorlage',
+
+    // Newsletter limits
+    'newsletter_limit_reached' => 'You have reached your monthly newsletter limit (:used/:limit). Upgrade your plan or add custom SMTP settings for unlimited sends.',
+    'newsletters_per_month' => 'newsletters / month',
+    'newsletter_usage' => 'Newsletter Usage',
+    'newsletters_used' => ':used of :limit newsletters used this month',
+    'newsletters_remaining' => ':count remaining',
+    'unlimited_newsletters' => 'Unlimited newsletters',
 ];

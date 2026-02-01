@@ -594,7 +594,7 @@
             <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-fuchsia-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/online-events') }}" class="group block">
+            <a href="{{ marketing_url('/features/online-events') }}" class="group block">
                 <div class="bg-gradient-to-br from-pink-100 to-fuchsia-100 dark:from-pink-900 dark:to-fuchsia-900 rounded-3xl border border-pink-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">

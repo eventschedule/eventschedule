@@ -234,7 +234,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
                 <!-- Ticketing & Check-ins -->
-                <a href="{{ marketing_url('/ticketing') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-violet-200 dark:hover:border-violet-500/30 transition-all" aria-label="Learn more about ticketing and QR check-ins">
+                <a href="{{ marketing_url('/features/ticketing') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-violet-200 dark:hover:border-violet-500/30 transition-all" aria-label="Learn more about ticketing and QR check-ins">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-500/20 mb-4">
                         <svg class="w-6 h-6 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
@@ -255,7 +255,7 @@
                 </a>
 
                 <!-- AI Features -->
-                <a href="{{ marketing_url('/ai') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-fuchsia-200 dark:hover:border-fuchsia-500/30 transition-all" aria-label="Learn more about AI-powered features">
+                <a href="{{ marketing_url('/features/ai') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-fuchsia-200 dark:hover:border-fuchsia-500/30 transition-all" aria-label="Learn more about AI-powered features">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-fuchsia-100 dark:bg-fuchsia-500/20 mb-4">
                         <svg class="w-6 h-6 text-fuchsia-600 dark:text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -285,7 +285,7 @@
                 </a>
 
                 <!-- Calendar Sync -->
-                <a href="{{ marketing_url('/calendar-sync') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-500/30 transition-all" aria-label="Learn more about calendar sync">
+                <a href="{{ marketing_url('/features/calendar-sync') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-500/30 transition-all" aria-label="Learn more about calendar sync">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 mb-4">
                         <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -315,7 +315,7 @@
                 </a>
 
                 <!-- Recurring Events -->
-                <a href="{{ marketing_url('/recurring-events') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-lime-200 dark:hover:border-lime-500/30 transition-all" aria-label="Learn more about recurring events">
+                <a href="{{ marketing_url('/features/recurring-events') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-lime-200 dark:hover:border-lime-500/30 transition-all" aria-label="Learn more about recurring events">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-lime-100 dark:bg-lime-500/20 mb-4">
                         <svg class="w-6 h-6 text-lime-600 dark:text-lime-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -330,7 +330,7 @@
                 </a>
 
                 <!-- Custom Fields -->
-                <a href="{{ marketing_url('/custom-fields') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-amber-200 dark:hover:border-amber-500/30 transition-all" aria-label="Learn more about custom fields">
+                <a href="{{ marketing_url('/features/custom-fields') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-amber-200 dark:hover:border-amber-500/30 transition-all" aria-label="Learn more about custom fields">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 mb-4">
                         <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -345,7 +345,7 @@
                 </a>
 
                 <!-- Team & Permissions -->
-                <a href="{{ marketing_url('/team-scheduling') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-cyan-200 dark:hover:border-cyan-500/30 transition-all" aria-label="Learn more about team scheduling">
+                <a href="{{ marketing_url('/features/team-scheduling') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-cyan-200 dark:hover:border-cyan-500/30 transition-all" aria-label="Learn more about team scheduling">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-100 dark:bg-cyan-500/20 mb-4">
                         <svg class="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -360,7 +360,7 @@
                 </a>
 
                 <!-- Embed Calendar -->
-                <a href="{{ marketing_url('/embed-calendar') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-purple-200 dark:hover:border-purple-500/30 transition-all" aria-label="Learn more about embed calendar">
+                <a href="{{ marketing_url('/features/embed-calendar') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-purple-200 dark:hover:border-purple-500/30 transition-all" aria-label="Learn more about embed calendar">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 mb-4">
                         <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
@@ -375,7 +375,7 @@
                 </a>
 
                 <!-- Sub-schedules -->
-                <a href="{{ marketing_url('/sub-schedules') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-rose-200 dark:hover:border-rose-500/30 transition-all" aria-label="Learn more about sub-schedules">
+                <a href="{{ marketing_url('/features/sub-schedules') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-rose-200 dark:hover:border-rose-500/30 transition-all" aria-label="Learn more about sub-schedules">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-500/20 mb-4">
                         <svg class="w-6 h-6 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -390,7 +390,7 @@
                 </a>
 
                 <!-- Online Events -->
-                <a href="{{ marketing_url('/online-events') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all" aria-label="Learn more about online events">
+                <a href="{{ marketing_url('/features/online-events') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all" aria-label="Learn more about online events">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 mb-4">
                         <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -477,7 +477,7 @@
                     <span class="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">CalDAV</span>
                 </a>
                 <!-- Apple Calendar -->
-                <a href="{{ marketing_url('/calendar-sync') }}" class="group flex flex-col items-center gap-2">
+                <a href="{{ marketing_url('/features/calendar-sync') }}" class="group flex flex-col items-center gap-2">
                     <svg class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
                         <rect x="3" y="5" width="18" height="17" rx="3" class="fill-gray-400 group-hover:fill-white dark:fill-gray-500 dark:group-hover:fill-gray-800"/>
                         <rect x="3" y="5" width="18" height="6" rx="3" class="fill-gray-500 group-hover:fill-[#EF4444] dark:fill-gray-600 dark:group-hover:fill-[#EF4444]"/>
@@ -489,7 +489,7 @@
                     <span class="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Apple Calendar</span>
                 </a>
                 <!-- Outlook -->
-                <a href="{{ marketing_url('/calendar-sync') }}" class="group flex flex-col items-center gap-2">
+                <a href="{{ marketing_url('/features/calendar-sync') }}" class="group flex flex-col items-center gap-2">
                     <svg class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
                         <rect x="3" y="4" width="18" height="17" rx="2" class="fill-gray-400 group-hover:fill-[#0078D4] dark:fill-gray-500 dark:group-hover:fill-[#0078D4]"/>
                         <rect x="12" y="4" width="9" height="8.5" rx="1" class="fill-gray-500 group-hover:fill-[#0063B1] dark:fill-gray-600 dark:group-hover:fill-[#0063B1]"/>

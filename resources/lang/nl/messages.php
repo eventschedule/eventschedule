@@ -334,6 +334,7 @@ return [
     'curator_schedules' => 'Curator roosters',
     'event_created_by' => 'Evenement aangemaakt door :user',
     'show_past_events' => 'Toon eerdere evenementen',
+    'past_events' => 'Eerdere evenementen',
     'category' => 'Categorie',
     'all_categories' => 'Alle Categorieën',
     'search_events' => 'Zoek evenementen...',
@@ -1408,4 +1409,12 @@ return [
     'invalid_input' => 'Ongeldige invoer',
     'subject' => 'Onderwerp',
     'template' => 'Sjabloon',
+
+    // Newsletter limits
+    'newsletter_limit_reached' => 'You have reached your monthly newsletter limit (:used/:limit). Upgrade your plan or add custom SMTP settings for unlimited sends.',
+    'newsletters_per_month' => 'newsletters / month',
+    'newsletter_usage' => 'Newsletter Usage',
+    'newsletters_used' => ':used of :limit newsletters used this month',
+    'newsletters_remaining' => ':count remaining',
+    'unlimited_newsletters' => 'Unlimited newsletters',
 ];

@@ -5,7 +5,7 @@
 @endphp
 @if ($blockEvents->isNotEmpty())
 <tr>
-    <td style="background-color: {{ $template === 'bold' ? '#16213e' : ($template === 'classic' ? '#faf9f6' : '#ffffff') }}; padding: {{ $template === 'compact' ? '10px 30px' : '20px 30px' }};">
+    <td style="{{ $template === 'bold' ? 'background-color: #16213e;' : ($template === 'classic' ? 'background-color: #faf9f6;' : '') }} padding: {{ $template === 'compact' ? '10px 30px' : '20px 30px' }};">
         <div style="margin-bottom: 10px;">
             @if ($layout === 'list')
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
@@ -14,7 +14,7 @@
                         <td style="padding: {{ $template === 'compact' ? '8px 0' : '12px 0' }}; border-bottom: 1px solid {{ $template === 'bold' ? '#2a3a5c' : '#eee' }};">
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
-                                    <td style="width: {{ $template === 'compact' ? '100px' : '120px' }}; font-size: {{ $template === 'compact' ? '12px' : '13px' }}; color: {{ $template === 'bold' ? '#e0e0e0' : $style['accentColor'] }}; font-weight: bold; font-family: {{ $style['fontFamily'] }}, sans-serif; vertical-align: top; padding-right: 15px;">
+                                    <td style="width: {{ $template === 'compact' ? '100px' : '120px' }}; font-size: {{ $template === 'compact' ? '12px' : '13px' }}; color: {{ $template === 'bold' ? '#e0e0e0' : $style['accentColor'] }}; font-weight: bold; font-family: {{ $style['fontFamily'] }}, sans-serif; vertical-align: top; {{ $endPadding ?? 'padding-right' }}: 15px;">
                                         {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format('M j, Y') : '' }}
                                         @if ($event->starts_at)
                                         <br><span style="font-weight: normal; font-size: {{ $template === 'compact' ? '11px' : '12px' }}; color: {{ $template === 'bold' ? '#888' : '#999' }};">{{ \Carbon\Carbon::parse($event->starts_at)->format('g:i A') }}</span>
@@ -34,7 +34,7 @@
                                         @endif
                                     </td>
                                     @if ($template !== 'minimal')
-                                    <td style="width: 60px; text-align: right; vertical-align: top;">
+                                    <td style="width: 60px; text-align: {{ $endAlign ?? 'right' }}; vertical-align: top;">
                                         <a href="{{ $role->getGuestUrl() }}" style="display: inline-block; padding: {{ $template === 'compact' ? '4px 10px' : '6px 12px' }}; background-color: {{ $style['accentColor'] }}; color: #ffffff; text-decoration: none; font-size: {{ $template === 'compact' ? '11px' : '12px' }}; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 4px;' : '' }} font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ __('messages.view') }}</a>
                                     </td>
                                     @endif
@@ -60,7 +60,7 @@
                             @if ($venue)
                             <p style="margin: 0 0 6px 0; font-size: 13px; color: #888;">{{ $venue->name }}</p>
                             @endif
-                            <a href="{{ $role->getGuestUrl() }}" style="color: {{ $style['accentColor'] }}; text-decoration: underline; font-size: 13px; font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ __('messages.view_event') ?: 'View Event' }} &rarr;</a>
+                            <a href="{{ $role->getGuestUrl() }}" style="color: {{ $style['accentColor'] }}; text-decoration: underline; font-size: 13px; font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ __('messages.view_event') ?: 'View Event' }} {!! $arrow ?? '&rarr;' !!}</a>
                         </td>
                     </tr>
                 </table>
@@ -92,7 +92,7 @@
                 @php
                     $cardBorder = '1px solid #eee';
                     $cardBg = '';
-                    $cardExtra = $template === 'modern' ? 'box-shadow: 0 1px 3px rgba(0,0,0,0.08);' : '';
+                    $cardExtra = '';
                     $titleColor = $style['textColor'];
                     $btnStyle = "background-color: {$style['accentColor']}; color: #ffffff;";
                     if ($template === 'classic') {
@@ -103,11 +103,11 @@
                     } elseif ($template === 'bold') {
                         $cardBorder = 'none';
                         $cardBg = 'background-color: #1e2d50;';
-                        $cardExtra = 'border-left: 4px solid ' . $style['accentColor'] . ';';
+                        $cardExtra = ($startBorder ?? 'border-left') . ': 4px solid ' . $style['accentColor'] . ';';
                         $titleColor = '#ffffff';
                     }
                 @endphp
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 16px; border: {{ $cardBorder }}; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 8px;' : '' }} overflow: hidden; {{ $cardBg }} {{ $cardExtra }}">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 16px; border: {{ $cardBorder }}; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 8px;' : '' }} {{ $cardBg }} {{ $cardExtra }}">
                     <tr>
                         @if ($event->getImageUrl() && $template !== 'classic')
                         <td style="width: 120px; vertical-align: top;">

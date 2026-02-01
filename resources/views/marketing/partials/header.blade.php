@@ -15,7 +15,7 @@
                 <a href="{{ marketing_url('/pricing') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/pricing') || request()->is('pricing') ? 'text-violet-600 dark:text-violet-400 font-medium border-b-2 border-violet-600 dark:border-violet-400 pb-0.5' : '' }}">
                     Pricing
                 </a>
-                <a href="{{ marketing_url('/integrations') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/integrations') || request()->is('integrations') ? 'text-violet-600 dark:text-violet-400 font-medium border-b-2 border-violet-600 dark:border-violet-400 pb-0.5' : '' }}">
+                <a href="{{ marketing_url('/features/integrations') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/integrations') || request()->is('integrations') ? 'text-violet-600 dark:text-violet-400 font-medium border-b-2 border-violet-600 dark:border-violet-400 pb-0.5' : '' }}">
                     Integrations
                 </a>
                 <a href="{{ marketing_url('/selfhost') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/selfhost') || request()->is('selfhost') ? 'text-violet-600 dark:text-violet-400 font-medium border-b-2 border-violet-600 dark:border-violet-400 pb-0.5' : '' }}">
@@ -98,7 +98,7 @@
                 <a href="{{ marketing_url('/pricing') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
                     Pricing
                 </a>
-                <a href="{{ marketing_url('/integrations') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
+                <a href="{{ marketing_url('/features/integrations') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
                     Integrations
                 </a>
                 <a href="{{ marketing_url('/selfhost') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">

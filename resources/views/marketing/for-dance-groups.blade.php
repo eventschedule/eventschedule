@@ -282,7 +282,7 @@
     <!-- Virtual Performances - Link to online events -->
     <section class="bg-gray-50 dark:bg-[#0f0f14] py-24 border-t border-gray-200 dark:border-stone-800/50">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/online-events') }}" class="group block">
+            <a href="{{ marketing_url('/features/online-events') }}" class="group block">
                 <div class="bg-gradient-to-br from-gray-100 dark:from-stone-900 to-gray-50 dark:to-stone-800 rounded-3xl border border-gray-200 dark:border-stone-700 p-8 lg:p-12 hover:border-indigo-500/30 transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">

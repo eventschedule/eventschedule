@@ -29,7 +29,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ marketing_url('/integrations') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                        <a href="{{ marketing_url('/features/integrations') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
                             Integrations
                         </a>
                     </li>

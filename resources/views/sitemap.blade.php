@@ -38,13 +38,13 @@
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>{{ url('/ticketing') }}</loc>
+        <loc>{{ url('/features/ticketing') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>{{ url('/integrations') }}</loc>
+        <loc>{{ url('/features/integrations') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
@@ -56,13 +56,13 @@
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>{{ url('/ai') }}</loc>
+        <loc>{{ url('/features/ai') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>{{ url('/calendar-sync') }}</loc>
+        <loc>{{ url('/features/calendar-sync') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
@@ -98,25 +98,25 @@
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>{{ url('/custom-fields') }}</loc>
+        <loc>{{ url('/features/custom-fields') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>{{ url('/team-scheduling') }}</loc>
+        <loc>{{ url('/features/team-scheduling') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>{{ url('/sub-schedules') }}</loc>
+        <loc>{{ url('/features/sub-schedules') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>{{ url('/online-events') }}</loc>
+        <loc>{{ url('/features/online-events') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
@@ -134,13 +134,13 @@
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>{{ url('/recurring-events') }}</loc>
+        <loc>{{ url('/features/recurring-events') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>{{ url('/embed-calendar') }}</loc>
+        <loc>{{ url('/features/embed-calendar') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>

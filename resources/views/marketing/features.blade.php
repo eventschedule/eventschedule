@@ -87,7 +87,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/ticketing') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/ticketing') }}" class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -156,7 +156,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/ai') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/ai') }}" class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -306,7 +306,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/recurring-events') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/recurring-events') }}" class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -392,7 +392,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/calendar-sync') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/calendar-sync') }}" class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -528,7 +528,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/embed-calendar') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/embed-calendar') }}" class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -594,7 +594,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/custom-fields') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/custom-fields') }}" class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -660,7 +660,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/team-scheduling') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/team-scheduling') }}" class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -729,7 +729,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/sub-schedules') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/sub-schedules') }}" class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -793,7 +793,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/online-events') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/online-events') }}" class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">

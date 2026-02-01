@@ -483,6 +483,7 @@ return [
     'curator_schedules' => 'جداول المنسق',
     'event_created_by' => 'تم إنشاء الحدث بواسطة :user',
     'show_past_events' => 'عرض الأحداث السابقة',
+    'past_events' => 'الأحداث السابقة',
     'category' => 'الفئة',
     'all_categories' => 'جميع الفئات',
     'search_events' => 'البحث عن الفعاليات...',
@@ -1411,4 +1412,12 @@ return [
     'invalid_input' => 'ادخال غير صالح',
     'subject' => 'الموضوع',
     'template' => 'قالب',
+
+    // Newsletter limits
+    'newsletter_limit_reached' => 'You have reached your monthly newsletter limit (:used/:limit). Upgrade your plan or add custom SMTP settings for unlimited sends.',
+    'newsletters_per_month' => 'newsletters / month',
+    'newsletter_usage' => 'Newsletter Usage',
+    'newsletters_used' => ':used of :limit newsletters used this month',
+    'newsletters_remaining' => ':count remaining',
+    'unlimited_newsletters' => 'Unlimited newsletters',
 ];

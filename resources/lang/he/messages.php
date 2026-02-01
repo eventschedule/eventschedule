@@ -303,6 +303,7 @@ return [
     'curator_schedules' => 'לוחות זמנים של אוֹצֵר',
     'event_created_by' => 'אירוע נוצר ע"י המשתמש',
     'show_past_events' => 'הצג אירועים קודמים',
+    'past_events' => 'אירועים קודמים',
     'category' => 'קטגוריה',
     'all_categories' => 'כל הקטגוריות',
     'search_events' => 'חפש אירועים...',
@@ -1403,4 +1404,12 @@ return [
     'invalid_input' => 'קלט לא תקין',
     'subject' => 'נושא',
     'template' => 'תבנית',
+
+    // Newsletter limits
+    'newsletter_limit_reached' => 'You have reached your monthly newsletter limit (:used/:limit). Upgrade your plan or add custom SMTP settings for unlimited sends.',
+    'newsletters_per_month' => 'newsletters / month',
+    'newsletter_usage' => 'Newsletter Usage',
+    'newsletters_used' => ':used of :limit newsletters used this month',
+    'newsletters_remaining' => ':count remaining',
+    'unlimited_newsletters' => 'Unlimited newsletters',
 ];

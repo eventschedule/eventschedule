@@ -189,7 +189,7 @@
                         </div>
                     </div>
 
-                    <a href="{{ url('/online-events') }}" class="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-crimson hover:bg-crimson/80 text-ivory font-semibold rounded-sm transition-colors">
+                    <a href="{{ url('/features/online-events') }}" class="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-crimson hover:bg-crimson/80 text-ivory font-semibold rounded-sm transition-colors">
                         Learn about online events
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
