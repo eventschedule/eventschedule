@@ -701,18 +701,26 @@
                   @if ($part->description)
                   <span class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ $part->description }}</span>
                   @endif
-                  @if ($part->approvedVideos->count() > 0)
+                  @php
+                    $partVideos = $part->approvedVideos;
+                    $partComments = $part->approvedComments;
+                    if ($event->days_of_week && $date) {
+                      $partVideos = $partVideos->filter(fn($v) => $v->event_date === $date || $v->event_date === null);
+                      $partComments = $partComments->filter(fn($c) => $c->event_date === $date || $c->event_date === null);
+                    }
+                  @endphp
+                  @if ($partVideos->count() > 0)
                   <div class="mt-2 space-y-2">
-                    @foreach ($part->approvedVideos as $video)
+                    @foreach ($partVideos as $video)
                     <div class="rounded overflow-hidden">
                       <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                     </div>
                     @endforeach
                   </div>
                   @endif
-                  @if ($part->approvedComments->count() > 0)
+                  @if ($partComments->count() > 0)
                   <div class="mt-2 space-y-1">
-                    @foreach ($part->approvedComments as $comment)
+                    @foreach ($partComments as $comment)
                     <div class="text-sm text-gray-600 dark:text-gray-400">
                       <span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user->first_name ?? $comment->user->name }}</span>: {{ $comment->comment }}
                     </div>
@@ -768,18 +776,26 @@
                   @if ($part->description)
                   <span class="text-sm text-gray-500 dark:text-gray-400 block mt-0.5">{{ $part->description }}</span>
                   @endif
-                  @if ($part->approvedVideos->count() > 0)
+                  @php
+                    $partVideos = $part->approvedVideos;
+                    $partComments = $part->approvedComments;
+                    if ($event->days_of_week && $date) {
+                      $partVideos = $partVideos->filter(fn($v) => $v->event_date === $date || $v->event_date === null);
+                      $partComments = $partComments->filter(fn($c) => $c->event_date === $date || $c->event_date === null);
+                    }
+                  @endphp
+                  @if ($partVideos->count() > 0)
                   <div class="mt-2 space-y-2">
-                    @foreach ($part->approvedVideos as $video)
+                    @foreach ($partVideos as $video)
                     <div class="rounded overflow-hidden">
                       <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                     </div>
                     @endforeach
                   </div>
                   @endif
-                  @if ($part->approvedComments->count() > 0)
+                  @if ($partComments->count() > 0)
                   <div class="mt-2 space-y-1">
-                    @foreach ($part->approvedComments as $comment)
+                    @foreach ($partComments as $comment)
                     <div class="text-sm text-gray-600 dark:text-gray-400">
                       <span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user->first_name ?? $comment->user->name }}</span>: {{ $comment->comment }}
                     </div>
@@ -832,6 +848,10 @@
         @php
           $eventLevelVideos = $event->approvedVideos->whereNull('event_part_id');
           $eventLevelComments = $event->approvedComments->whereNull('event_part_id');
+          if ($event->days_of_week && $date) {
+            $eventLevelVideos = $eventLevelVideos->filter(fn($v) => $v->event_date === $date || $v->event_date === null);
+            $eventLevelComments = $eventLevelComments->filter(fn($c) => $c->event_date === $date || $c->event_date === null);
+          }
         @endphp
         @if ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || (auth()->check() && $event->parts->count() == 0))
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
