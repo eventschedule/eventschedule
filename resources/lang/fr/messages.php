@@ -493,6 +493,7 @@ return [
     'event_created_by' => 'Événement créé par :user',
     'show_past_events' => 'Afficher les événements passés',
     'past_events' => 'Événements passés',
+    'load_more' => 'Charger Plus',
     'category' => 'Catégorie',
     'all_categories' => 'Toutes les Catégories',
     'search_events' => 'Rechercher des événements...',

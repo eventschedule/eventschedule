@@ -485,6 +485,7 @@ return [
     'event_created_by' => 'تم إنشاء الحدث بواسطة :user',
     'show_past_events' => 'عرض الأحداث السابقة',
     'past_events' => 'الأحداث السابقة',
+    'load_more' => 'تحميل المزيد',
     'category' => 'الفئة',
     'all_categories' => 'جميع الفئات',
     'search_events' => 'البحث عن الفعاليات...',

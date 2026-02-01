@@ -493,6 +493,7 @@ return [
     'event_created_by' => 'Evento creado por :user',
     'show_past_events' => 'Mostrar eventos pasados',
     'past_events' => 'Eventos pasados',
+    'load_more' => 'Cargar Más',
     'category' => 'Categoría',
     'all_categories' => 'Todas las Categorías',
     'search_events' => 'Buscar eventos...',

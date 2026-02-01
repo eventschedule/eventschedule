@@ -305,6 +305,7 @@ return [
     'event_created_by' => 'אירוע נוצר ע"י המשתמש',
     'show_past_events' => 'הצג אירועים קודמים',
     'past_events' => 'אירועים קודמים',
+    'load_more' => 'טען עוד',
     'category' => 'קטגוריה',
     'all_categories' => 'כל הקטגוריות',
     'search_events' => 'חפש אירועים...',

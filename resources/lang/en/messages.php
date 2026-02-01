@@ -539,6 +539,7 @@ return [
     'event_created_by' => 'Event created by :user',
     'show_past_events' => 'Show Past Events',
     'past_events' => 'Past Events',
+    'load_more' => 'Load More',
     'category' => 'Category',
     'all_categories' => 'All Categories',
     'subschedules' => 'Subschedules',

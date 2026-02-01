@@ -489,6 +489,7 @@ return [
     'event_created_by' => 'Veranstaltung erstellt von :user',
     'show_past_events' => 'Vergangene Events anzeigen',
     'past_events' => 'Vergangene Events',
+    'load_more' => 'Mehr Laden',
     'category' => 'Kategorie',
     'all_categories' => 'Alle Kategorien',
     'search_events' => 'Veranstaltungen suchen...',

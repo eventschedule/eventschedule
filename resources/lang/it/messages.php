@@ -344,6 +344,7 @@ return [
     'event_created_by' => 'Evento creato da :user',
     'show_past_events' => 'Mostra eventi passati',
     'past_events' => 'Eventi passati',
+    'load_more' => 'Carica Altro',
     'category' => 'Categoria',
     'all_categories' => 'Tutte le Categorie',
     'search_events' => 'Cerca eventi...',
