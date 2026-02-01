@@ -70,8 +70,8 @@ class UrlUtils
                     $path = ltrim($parsedUrl['path'], '/');
                     $pathParts = explode('/', $path);
 
-                    // Handle /watch/VIDEO_ID or /v/VIDEO_ID format
-                    if (count($pathParts) >= 2 && ($pathParts[0] === 'watch' || $pathParts[0] === 'v')) {
+                    // Handle /watch/VIDEO_ID, /v/VIDEO_ID, /shorts/VIDEO_ID, or /live/VIDEO_ID format
+                    if (count($pathParts) >= 2 && in_array($pathParts[0], ['watch', 'v', 'shorts', 'live'])) {
                         $videoId = $pathParts[1];
                     } else {
                         // Fall back to query parameter
@@ -88,7 +88,7 @@ class UrlUtils
             }
 
             if (isset($videoId) && $videoId && preg_match('/^[a-zA-Z0-9_-]{11}$/', $videoId)) {
-                return 'https://www.youtube.com/embed/'.$videoId;
+                return 'https://www.youtube-nocookie.com/embed/'.$videoId;
             }
         }
 

@@ -312,7 +312,7 @@
     <!-- Stripe Link -->
     <section class="bg-white dark:bg-[#0a0a0f] py-16">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <a href="https://stripe.com" target="_blank" rel="noopener" class="group block">
+            <a href="https://stripe.com" target="_blank" rel="noopener noreferrer" class="group block">
                 <div class="bg-gradient-to-br from-violet-900/30 to-indigo-900/30 rounded-3xl border border-gray-200 dark:border-white/10 p-8 hover:border-gray-300 dark:hover:border-white/20 transition-all">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-700 dark:text-violet-300 text-sm font-medium mb-4">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

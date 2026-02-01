@@ -70,6 +70,37 @@
         }
     </style>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to share your event schedule",
+        "description": "Get your event schedule live and shared with your audience in three simple steps.",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "position": 1,
+                "name": "Create your schedule",
+                "text": "Sign up free. Add your events manually or import from Google Calendar."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 2,
+                "name": "Share your link",
+                "text": "Get your custom URL. Put it in your bio, website, or anywhere you want."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 3,
+                "name": "Grow your audience",
+                "text": "Fans follow your schedule. They get notified when you add new events."
+            }
+        ]
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section - Side by side with carousel -->
     <section class="relative min-h-screen flex items-center overflow-hidden bg-white dark:bg-[#0a0a0f] noise">
         <!-- Animated gradient orbs -->
@@ -142,7 +173,7 @@
                         @endphp
                         @foreach($screenshots as $index => $screenshot)
                         <div class="flex-shrink-0 w-full overflow-hidden">
-                            <img src="{{ url($screenshot[0]) }}" alt="{{ $screenshot[1] }}" class="block w-full h-auto scale-[1.05]" @if($index === 0) fetchpriority="high" @else loading="lazy" @endif />
+                            <img src="{{ url($screenshot[0]) }}" alt="{{ $screenshot[1] }}" width="1872" height="2560" class="block w-full h-auto scale-[1.05]" @if($index === 0) fetchpriority="high" @else loading="lazy" @endif />
                         </div>
                         @endforeach
                     </div>

@@ -16,6 +16,16 @@
     <link rel="preconnect" href="https://www.googletagmanager.com">
     @endif
 
+    <!-- DNS prefetch fallback for browsers that don't support preconnect -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    @if (config('services.google.analytics'))
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    @endif
+    @if (config('app.hosted') || config('app.report_errors'))
+    <link rel="dns-prefetch" href="https://browser.sentry-cdn.com">
+    @endif
+
     @if (config('app.hosted') || config('app.report_errors'))
         <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous" defer></script>
     @endif
@@ -25,18 +35,19 @@
     <meta name="theme-color" content="#0a0a0f" media="(prefers-color-scheme: dark)">
 
     <!-- SEO Meta Tags -->
-    <link rel="canonical" href="{{ url()->current() }}">
+    @php $canonicalPath = config('app.url') . '/' . ltrim(request()->path(), '/'); @endphp
+    <link rel="canonical" href="{{ $canonicalPath }}">
     <!-- Hreflang tags for all supported languages -->
-    <link rel="alternate" hreflang="x-default" href="{{ url()->current() }}">
-    <link rel="alternate" hreflang="en" href="{{ url()->current() }}?lang=en">
-    <link rel="alternate" hreflang="es" href="{{ url()->current() }}?lang=es">
-    <link rel="alternate" hreflang="de" href="{{ url()->current() }}?lang=de">
-    <link rel="alternate" hreflang="fr" href="{{ url()->current() }}?lang=fr">
-    <link rel="alternate" hreflang="it" href="{{ url()->current() }}?lang=it">
-    <link rel="alternate" hreflang="pt" href="{{ url()->current() }}?lang=pt">
-    <link rel="alternate" hreflang="he" href="{{ url()->current() }}?lang=he">
-    <link rel="alternate" hreflang="nl" href="{{ url()->current() }}?lang=nl">
-    <link rel="alternate" hreflang="ar" href="{{ url()->current() }}?lang=ar">
+    <link rel="alternate" hreflang="x-default" href="{{ $canonicalPath }}">
+    <link rel="alternate" hreflang="en" href="{{ $canonicalPath }}?lang=en">
+    <link rel="alternate" hreflang="es" href="{{ $canonicalPath }}?lang=es">
+    <link rel="alternate" hreflang="de" href="{{ $canonicalPath }}?lang=de">
+    <link rel="alternate" hreflang="fr" href="{{ $canonicalPath }}?lang=fr">
+    <link rel="alternate" hreflang="it" href="{{ $canonicalPath }}?lang=it">
+    <link rel="alternate" hreflang="pt" href="{{ $canonicalPath }}?lang=pt">
+    <link rel="alternate" hreflang="he" href="{{ $canonicalPath }}?lang=he">
+    <link rel="alternate" hreflang="nl" href="{{ $canonicalPath }}?lang=nl">
+    <link rel="alternate" hreflang="ar" href="{{ $canonicalPath }}?lang=ar">
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
     <meta name="robots" content="index, follow">
     <meta name="author" content="Event Schedule">
