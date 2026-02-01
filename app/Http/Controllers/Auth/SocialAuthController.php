@@ -74,6 +74,11 @@ class SocialAuthController extends Controller
         // New user - create account
         $utmParams = session('utm_params', []);
 
+        // Fall back to cookie if session has no UTM data
+        if (empty($utmParams) && request()->cookie('utm_params')) {
+            $utmParams = json_decode(request()->cookie('utm_params'), true) ?? [];
+        }
+
         $user = User::create([
             'name' => $googleUser->getName(),
             'email' => $email,
@@ -85,10 +90,11 @@ class SocialAuthController extends Controller
             'utm_campaign' => $utmParams['utm_campaign'] ?? null,
             'utm_content' => $utmParams['utm_content'] ?? null,
             'utm_term' => $utmParams['utm_term'] ?? null,
-            'referrer_url' => session('utm_referrer_url'),
+            'referrer_url' => session('utm_referrer_url') ?? request()->cookie('utm_referrer_url'),
+            'landing_page' => session('utm_landing_page') ?? request()->cookie('utm_landing_page'),
         ]);
 
-        session()->forget(['utm_params', 'utm_referrer_url']);
+        session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page']);
 
         Auth::login($user, true);
 

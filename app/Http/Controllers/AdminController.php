@@ -318,12 +318,23 @@ class AdminController extends Controller
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
-        // Recent signups with UTM data
+        // Top referrer domains (all time)
+        $topReferrerDomains = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('referrer_url')
+            ->where('referrer_url', '!=', '')
+            ->select(DB::raw("SUBSTRING_INDEX(SUBSTRING_INDEX(REPLACE(REPLACE(referrer_url, 'https://', ''), 'http://', ''), '/', 1), '?', 1) as domain"), DB::raw('COUNT(*) as count'))
+            ->groupBy('domain')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get();
+
+        // Recent signups with UTM data (paginated)
         $recentSignups = User::whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
             ->orderByDesc('created_at')
-            ->limit(20)
-            ->get(['name', 'email', 'created_at', 'utm_source', 'utm_medium', 'utm_campaign']);
+            ->paginate(20, ['name', 'email', 'created_at', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'referrer_url', 'landing_page'])
+            ->withQueryString();
 
         return view('admin.users', compact(
             'totalUsers',
@@ -344,6 +355,7 @@ class AdminController extends Controller
             'utmSourcesInPeriod',
             'usersWithUtmInPeriod',
             'usersWithoutUtmInPeriod',
+            'topReferrerDomains',
             'recentSignups'
         ));
     }

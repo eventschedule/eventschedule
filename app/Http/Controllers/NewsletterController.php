@@ -290,7 +290,7 @@ class NewsletterController extends Controller
         return back()->with('status', __('messages.newsletter_cancelled'));
     }
 
-    public function duplicate(Request $request, string $hash)
+    public function cloneNewsletter(Request $request, string $hash)
     {
         $this->authorize();
         $role = $this->getRole($request);
@@ -314,7 +314,7 @@ class NewsletterController extends Controller
         return redirect()->route('newsletter.edit', [
             'hash' => UrlUtils::encodeId($copy->id),
             'role_id' => UrlUtils::encodeId($role->id),
-        ])->with('status', __('messages.newsletter_duplicated'));
+        ])->with('status', __('messages.newsletter_cloned'));
     }
 
     public function previewDraft(Request $request, NewsletterService $service)

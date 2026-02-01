@@ -127,7 +127,7 @@ $builderProps = [
         'add_link' => __('messages.add_link'),
         'auto_populated_from_schedule' => __('messages.auto_populated_from_schedule'),
         'drag_blocks_here' => __('messages.drag_blocks_here'),
-        'duplicate_block' => __('messages.duplicate_block'),
+        'clone_block' => __('messages.clone_block'),
         'remove_block' => __('messages.remove_block'),
         'profile_image' => __('messages.profile_image'),
         'header_image' => __('messages.header_image'),
@@ -161,6 +161,7 @@ $builderProps = [
         'style' => __('messages.style'),
         'settings' => __('messages.settings'),
         'done' => __('messages.done'),
+        'no_content' => __('messages.no_content'),
     ],
 ];
 @endphp

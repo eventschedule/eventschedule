@@ -50,6 +50,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'utm_content',
         'utm_term',
         'referrer_url',
+        'landing_page',
     ];
 
     /**

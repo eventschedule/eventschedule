@@ -55,6 +55,8 @@
     <!-- Bento Grid Features -->
     <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-12 text-center">AI-powered features</h2>
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Smart Event Parsing (spans 2 cols) -->
@@ -117,7 +119,7 @@
                         Translation
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Instant translation</h3>
-                    <p class="text-gray-500 dark:text-white/80 mb-6">Translate your entire schedule to English automatically. Perfect for international audiences.</p>
+                    <p class="text-gray-500 dark:text-white/80 mb-6">Translate your entire schedule automatically. Support for 9 languages including English, Spanish, French, German, and more.</p>
 
                     <div class="flex flex-wrap gap-2 justify-center">
                         <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">EN</span>
@@ -301,21 +303,21 @@
 
     <!-- Next Feature -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
-        <!-- Animated background blobs matching Calendar Sync page's colors -->
+        <!-- Animated background blobs matching Newsletters page's colors -->
         <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-sky-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
             <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/calendar-sync') }}" class="group block">
-                <div class="bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 rounded-3xl border border-blue-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+            <a href="{{ marketing_url('/newsletters') }}" class="group block">
+                <div class="bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900 rounded-3xl border border-sky-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <!-- Text content -->
                         <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Calendar Sync</h3>
-                            <p class="text-gray-500 dark:text-white/80 text-lg mb-4">Two-way sync with Google Calendar. Changes flow in both directions automatically.</p>
-                            <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Newsletters</h3>
+                            <p class="text-gray-500 dark:text-white/80 text-lg mb-4">Send beautiful newsletters to followers and ticket buyers with drag-and-drop building and A/B testing.</p>
+                            <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -323,34 +325,26 @@
                             </span>
                         </div>
 
-                        <!-- Mini mockup: Bidirectional sync arrows -->
+                        <!-- Mini mockup: Newsletter stats -->
                         <div class="flex-shrink-0">
-                            <div class="flex items-center gap-3">
-                                <!-- Event Schedule box -->
-                                <div class="bg-blue-500/20 rounded-xl border border-blue-400/30 p-3 w-24">
-                                    <div class="text-[10px] text-blue-700 dark:text-blue-300 mb-2 text-center">Event Schedule</div>
-                                    <div class="space-y-1">
-                                        <div class="h-1.5 bg-white/20 rounded"></div>
-                                        <div class="h-1.5 bg-white/20 rounded w-3/4"></div>
-                                        <div class="h-1.5 bg-white/20 rounded w-1/2"></div>
+                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
+                                <div class="text-[10px] text-gray-400 dark:text-gray-400 mb-2 font-medium">Newsletter Stats</div>
+                                <div class="mb-2">
+                                    <div class="flex justify-between text-[10px] mb-1">
+                                        <span class="text-gray-400">Open rate</span>
+                                        <span class="text-sky-400 font-medium">42%</span>
+                                    </div>
+                                    <div class="h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                                        <div class="h-full bg-sky-500 rounded-full" style="width: 42%"></div>
                                     </div>
                                 </div>
-                                <!-- Sync arrows -->
-                                <div class="flex flex-col items-center gap-1">
-                                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                    </svg>
-                                    <svg class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                    </svg>
-                                </div>
-                                <!-- Google Calendar box -->
-                                <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-3 w-24">
-                                    <div class="text-[10px] text-gray-600 dark:text-gray-300 mb-2 text-center">Google Calendar</div>
-                                    <div class="space-y-1">
-                                        <div class="h-1.5 bg-blue-400/40 rounded"></div>
-                                        <div class="h-1.5 bg-green-400/40 rounded w-3/4"></div>
-                                        <div class="h-1.5 bg-yellow-400/40 rounded w-1/2"></div>
+                                <div>
+                                    <div class="flex justify-between text-[10px] mb-1">
+                                        <span class="text-gray-400">Click rate</span>
+                                        <span class="text-cyan-400 font-medium">18%</span>
+                                    </div>
+                                    <div class="h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                                        <div class="h-full bg-cyan-500 rounded-full" style="width: 18%"></div>
                                     </div>
                                 </div>
                             </div>

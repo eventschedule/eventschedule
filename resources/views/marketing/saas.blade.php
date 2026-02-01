@@ -57,6 +57,12 @@
                     </svg>
                     GitHub Repository
                 </a>
+                <a href="{{ demo_url() }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-gray-900 dark:text-white glass border border-gray-200 dark:border-white/10 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all">
+                    Admin Portal Demo
+                </a>
+                <a href="https://simpsons.eventschedule.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-gray-900 dark:text-white glass border border-gray-200 dark:border-white/10 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all">
+                    Client Portal Demo
+                </a>
             </div>
         </div>
     </section>

@@ -106,6 +106,11 @@ class TicketController extends Controller
 
             $utmParams = session('utm_params', []);
 
+            // Fall back to cookie if session has no UTM data
+            if (empty($utmParams) && $request->cookie('utm_params')) {
+                $utmParams = json_decode($request->cookie('utm_params'), true) ?? [];
+            }
+
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -117,10 +122,11 @@ class TicketController extends Controller
                 'utm_campaign' => $utmParams['utm_campaign'] ?? null,
                 'utm_content' => $utmParams['utm_content'] ?? null,
                 'utm_term' => $utmParams['utm_term'] ?? null,
-                'referrer_url' => session('utm_referrer_url'),
+                'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url'),
+                'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
             ]);
 
-            session()->forget(['utm_params', 'utm_referrer_url']);
+            session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page']);
 
             $role = Role::subdomain($subdomain)->firstOrFail();
             $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);

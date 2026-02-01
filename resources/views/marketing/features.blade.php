@@ -214,7 +214,176 @@
             </div>
         </section>
 
-        <!-- Banner 3: Calendar Sync (Text Left, Visual Right) -->
+        <!-- Banner 3: Newsletters (Text Left, Visual Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-10 left-1/3 w-[400px] h-[400px] bg-sky-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
+                <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.4s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ marketing_url('/newsletters') }}" class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                Newsletters
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Engage your audience</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Send beautiful newsletters to followers and ticket buyers. Drag-and-drop builder, audience segments, A/B testing, and delivery analytics.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Drag-and-drop builder</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">A/B testing</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Open & click tracking</span>
+                            </div>
+                            <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float" style="animation-delay: 0.9s;">
+                                <div class="bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900 rounded-xl border border-sky-200 dark:border-sky-500/30 p-5 w-64">
+                                    <div class="text-xs text-gray-500 dark:text-white/70 mb-3 font-medium">Newsletter Stats</div>
+                                    <div class="text-sm text-gray-900 dark:text-white font-medium mb-3 truncate">Weekly Event Roundup</div>
+                                    <!-- Open rate -->
+                                    <div class="mb-2">
+                                        <div class="flex justify-between text-xs mb-1">
+                                            <span class="text-gray-500 dark:text-gray-400">Open rate</span>
+                                            <span class="text-sky-600 dark:text-sky-300 font-medium">42%</span>
+                                        </div>
+                                        <div class="h-2 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                                            <div class="h-full bg-sky-500 rounded-full" style="width: 42%"></div>
+                                        </div>
+                                    </div>
+                                    <!-- Click rate -->
+                                    <div class="mb-3">
+                                        <div class="flex justify-between text-xs mb-1">
+                                            <span class="text-gray-500 dark:text-gray-400">Click rate</span>
+                                            <span class="text-cyan-600 dark:text-cyan-300 font-medium">18%</span>
+                                        </div>
+                                        <div class="h-2 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                                            <div class="h-full bg-cyan-500 rounded-full" style="width: 18%"></div>
+                                        </div>
+                                    </div>
+                                    <!-- Stats row -->
+                                    <div class="flex justify-between text-center pt-2 border-t border-gray-200 dark:border-white/10">
+                                        <div>
+                                            <div class="text-lg font-bold text-gray-900 dark:text-white">1,248</div>
+                                            <div class="text-[10px] text-gray-500 dark:text-gray-400">Sent</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-lg font-bold text-gray-900 dark:text-white">524</div>
+                                            <div class="text-[10px] text-gray-500 dark:text-gray-400">Opens</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-lg font-bold text-gray-900 dark:text-white">225</div>
+                                            <div class="text-[10px] text-gray-500 dark:text-gray-400">Clicks</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Banner 4: Recurring Events (Visual Left, Text Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-20 right-1/4 w-[400px] h-[400px] bg-lime-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
+                <div class="absolute bottom-20 left-1/3 w-[300px] h-[300px] bg-green-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.2s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ marketing_url('/recurring-events') }}" class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-lime-100 text-lime-700 dark:bg-lime-500/20 dark:text-lime-300 text-sm font-medium mb-4">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                Recurring Events
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-lime-600 dark:group-hover:text-lime-300 transition-colors">Automate your week</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Set events to repeat weekly on your chosen days. Three end conditions, per-occurrence tickets, and Google Calendar sync.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Weekly recurrence</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Per-event tickets</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Google Sync</span>
+                            </div>
+                            <span class="inline-flex items-center text-lime-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float" style="animation-delay: 0.5s;">
+                                <div class="bg-gradient-to-br from-lime-50 to-green-50 dark:from-lime-900 dark:to-green-900 rounded-xl border border-lime-200 dark:border-lime-500/30 p-5 w-56">
+                                    <!-- Day picker -->
+                                    <div class="text-xs text-gray-500 dark:text-white/70 mb-2">Repeat on</div>
+                                    <div class="flex gap-1.5 mb-3">
+                                        <div class="w-7 h-7 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-[10px]">S</div>
+                                        <div class="w-7 h-7 rounded-full bg-lime-500 text-white flex items-center justify-center text-[10px] font-medium">M</div>
+                                        <div class="w-7 h-7 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-[10px]">T</div>
+                                        <div class="w-7 h-7 rounded-full bg-lime-500 text-white flex items-center justify-center text-[10px] font-medium">W</div>
+                                        <div class="w-7 h-7 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-[10px]">T</div>
+                                        <div class="w-7 h-7 rounded-full bg-lime-500 text-white flex items-center justify-center text-[10px] font-medium">F</div>
+                                        <div class="w-7 h-7 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-[10px]">S</div>
+                                    </div>
+                                    <!-- Repeats badge -->
+                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-lime-100 dark:bg-lime-500/20 text-lime-700 dark:text-lime-300 text-xs">
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Repeats: Weekly
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Visual break - Highlight bar -->
+        <section class="relative py-16 overflow-hidden">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-3xl p-8 md:p-12 shadow-xl shadow-violet-500/20">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                        <div>
+                            <div class="text-3xl md:text-4xl font-bold text-white mb-2">100%</div>
+                            <div class="text-violet-200 text-sm">Free and open source</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl md:text-4xl font-bold text-white mb-2">0%</div>
+                            <div class="text-violet-200 text-sm">Platform fees on tickets</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl md:text-4xl font-bold text-white mb-2">9</div>
+                            <div class="text-violet-200 text-sm">Languages supported</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Banner 5: Calendar Sync (Text Left, Visual Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
@@ -286,7 +455,7 @@
             </div>
         </section>
 
-        <!-- Banner 4: Analytics (Visual Left, Text Right) -->
+        <!-- Banner 6: Analytics (Visual Left, Text Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
@@ -350,39 +519,83 @@
             </div>
         </section>
 
-        <!-- Visual break - Highlight bar -->
-        <section class="relative py-16 overflow-hidden">
-            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-3xl p-8 md:p-12 shadow-xl shadow-violet-500/20">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                        <div>
-                            <div class="text-3xl md:text-4xl font-bold text-white mb-2">100%</div>
-                            <div class="text-violet-200 text-sm">Free and open source</div>
-                        </div>
-                        <div>
-                            <div class="text-3xl md:text-4xl font-bold text-white mb-2">0%</div>
-                            <div class="text-violet-200 text-sm">Platform fees on tickets</div>
-                        </div>
-                        <div>
-                            <div class="text-3xl md:text-4xl font-bold text-white mb-2">9</div>
-                            <div class="text-violet-200 text-sm">Languages supported</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Banner 5: Custom Fields (Text Left, Visual Right) -->
+        <!-- Banner 7: Embed Calendar (Text Left, Visual Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
-                <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-amber-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
-                <div class="absolute bottom-10 right-1/3 w-[300px] h-[300px] bg-orange-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.2s;"></div>
+                <div class="absolute top-10 left-1/3 w-[400px] h-[400px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
+                <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.1s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ marketing_url('/embed-calendar') }}" class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-sm font-medium mb-4">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                </svg>
+                                Embed Calendar
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">Add to any website</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Embed your event calendar on any site with one line of code. Responsive iframe with dark mode and 9 language support.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">One-line embed</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Responsive</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">9 languages</span>
+                            </div>
+                            <span class="inline-flex items-center text-purple-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float" style="animation-delay: 0.7s;">
+                                <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border border-gray-300 dark:border-white/20 overflow-hidden w-60">
+                                    <!-- Browser header -->
+                                    <div class="flex items-center gap-1.5 px-3 py-2 bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-red-500/70"></div>
+                                        <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/70"></div>
+                                        <div class="w-2.5 h-2.5 rounded-full bg-green-500/70"></div>
+                                    </div>
+                                    <!-- Calendar grid -->
+                                    <div class="p-3">
+                                        <div class="grid grid-cols-5 gap-1 mb-2">
+                                            <div class="h-4 bg-purple-200 dark:bg-purple-500/30 rounded text-[8px] text-purple-700 dark:text-purple-300 flex items-center justify-center">Mon</div>
+                                            <div class="h-4 bg-gray-100 dark:bg-white/5 rounded"></div>
+                                            <div class="h-4 bg-purple-200 dark:bg-purple-500/30 rounded text-[8px] text-purple-700 dark:text-purple-300 flex items-center justify-center">Wed</div>
+                                            <div class="h-4 bg-gray-100 dark:bg-white/5 rounded"></div>
+                                            <div class="h-4 bg-purple-200 dark:bg-purple-500/30 rounded text-[8px] text-purple-700 dark:text-purple-300 flex items-center justify-center">Fri</div>
+                                        </div>
+                                        <!-- Code snippet -->
+                                        <div class="bg-gray-100 dark:bg-white/5 rounded-lg p-2 mt-2">
+                                            <code class="text-[9px] text-purple-600 dark:text-purple-300 font-mono break-all">&lt;iframe src="..."&gt;</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Banner 8: Custom Fields (Visual Left, Text Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-amber-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
+                <div class="absolute bottom-20 left-1/4 w-[300px] h-[300px] bg-orange-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.2s;"></div>
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <a href="{{ marketing_url('/custom-fields') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm font-medium mb-4">
@@ -438,17 +651,17 @@
             </div>
         </section>
 
-        <!-- Banner 6: Team Scheduling (Visual Left, Text Right) -->
+        <!-- Banner 9: Team Scheduling (Text Left, Visual Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
-                <div class="absolute top-20 right-1/4 w-[400px] h-[400px] bg-cyan-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
-                <div class="absolute bottom-20 left-1/3 w-[300px] h-[300px] bg-teal-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 0.9s;"></div>
+                <div class="absolute top-10 left-1/3 w-[400px] h-[400px] bg-cyan-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
+                <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-teal-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 0.9s;"></div>
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <a href="{{ marketing_url('/team-scheduling') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
+                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-sm font-medium mb-4">
@@ -507,17 +720,17 @@
             </div>
         </section>
 
-        <!-- Banner 7: Sub-schedules (Text Left, Visual Right) -->
+        <!-- Banner 10: Sub-schedules (Visual Left, Text Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
-                <div class="absolute top-10 left-1/3 w-[400px] h-[400px] bg-rose-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
-                <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-pink-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.4s;"></div>
+                <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-rose-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
+                <div class="absolute bottom-20 left-1/4 w-[300px] h-[300px] bg-pink-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.4s;"></div>
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <a href="{{ marketing_url('/sub-schedules') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
@@ -571,17 +784,17 @@
             </div>
         </section>
 
-        <!-- Banner 8: Online Events (Visual Left, Text Right) -->
+        <!-- Banner 11: Online Events (Text Left, Visual Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
-                <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
-                <div class="absolute bottom-20 left-1/4 w-[300px] h-[300px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.1s;"></div>
+                <div class="absolute top-10 left-1/3 w-[400px] h-[400px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
+                <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.1s;"></div>
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <a href="{{ marketing_url('/online-events') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
+                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 text-sm font-medium mb-4">
@@ -633,17 +846,17 @@
             </div>
         </section>
 
-        <!-- Banner 9: Open Source (Text Left, Visual Right) -->
+        <!-- Banner 12: Open Source (Visual Left, Text Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
-                <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-gray-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
-                <div class="absolute bottom-10 right-1/3 w-[300px] h-[300px] bg-slate-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.3s;"></div>
+                <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-gray-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
+                <div class="absolute bottom-20 left-1/4 w-[300px] h-[300px] bg-slate-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.3s;"></div>
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <a href="{{ marketing_url('/open-source') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-500/20 text-gray-600 dark:text-gray-300 text-sm font-medium mb-4">

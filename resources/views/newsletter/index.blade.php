@@ -4,14 +4,12 @@
             <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.newsletters') }}</h2>
             @if ($roles->isNotEmpty() && $role)
             <div class="flex gap-3">
-                <a href="{{ route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                    class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                <x-secondary-link href="{{ route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
                     {{ __('messages.segments') }}
-                </a>
-                <a href="{{ route('newsletter.create', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                    class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">
+                </x-secondary-link>
+                <x-brand-link href="{{ route('newsletter.create', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
                     {{ __('messages.create_newsletter') }}
-                </a>
+                </x-brand-link>
             </div>
             @endif
         </div>
@@ -102,9 +100,9 @@
                                 <a href="{{ route('newsletter.stats', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
                                     class="text-[#4E81FA] hover:text-blue-800">{{ __('messages.newsletter_stats') }}</a>
                                 @endif
-                                <form method="POST" action="{{ route('newsletter.duplicate', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="inline">
+                                <form method="POST" action="{{ route('newsletter.clone', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="inline">
                                     @csrf
-                                    <button type="submit" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">{{ __('messages.duplicate') }}</button>
+                                    <button type="submit" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">{{ __('messages.clone') }}</button>
                                 </form>
                                 @if ($newsletter->status === 'draft')
                                 <form method="POST" action="{{ route('newsletter.delete', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
