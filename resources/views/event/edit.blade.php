@@ -52,6 +52,14 @@
     .mobile-section-header.validation-error {
       border-color: #dc2626 !important;
     }
+    @media (prefers-color-scheme: dark) {
+      .mobile-section-header.validation-error {
+        border-color: #ef4444 !important;
+      }
+    }
+    .dark .mobile-section-header.validation-error {
+      border-color: #ef4444 !important;
+    }
   </style>
   <script src="{{ asset('js/vue.global.prod.js') }}"></script>
   <script {!! nonce_attr() !!}>
@@ -63,8 +71,8 @@
             allowInput: true,
             enableTime: true,
             altInput: true,
-            time_24hr: {{ $role && $role->use_24_hour_time ? 'true' : 'false' }},
-            altFormat: "{{ $role && $role->use_24_hour_time ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
+            time_24hr: {{ get_use_24_hour_time($role ?? null) ? 'true' : 'false' }},
+            altFormat: "{{ get_use_24_hour_time($role ?? null) ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
             dateFormat: "Y-m-d H:i:S",
         }, localeConfig));
         // https://github.com/flatpickr/flatpickr/issues/892#issuecomment-604387030
@@ -2967,9 +2975,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Function to clear section error highlight
-        function clearSectionError(fieldId) {
-            const sectionId = findSectionForField(fieldId);
+        // Function to clear section error highlight by section ID
+        function clearSectionErrorById(sectionId) {
             if (!sectionId) return;
 
             const sectionLink = document.querySelector(`.section-nav-link[data-section="${sectionId}"]`);
@@ -2982,48 +2989,40 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Handle invalid event on required fields
-        const requiredFields = ['event_name', 'starts_at'];
-
-        requiredFields.forEach(fieldId => {
-            const field = document.getElementById(fieldId);
-            if (field) {
-                field.addEventListener('invalid', function(e) {
-                    const sectionId = findSectionForField(fieldId);
-                    if (sectionId) {
-                        highlightSectionError(sectionId);
-                    }
-                }, true);
+        // Handle invalid event on ANY required field (including custom fields)
+        form.addEventListener('invalid', function(e) {
+            const field = e.target;
+            const sectionContent = field.closest('.section-content');
+            if (sectionContent) {
+                highlightSectionError(sectionContent.id);
             }
-        });
+        }, true); // Use capture phase since invalid doesn't bubble
 
         // Form submit handler - check validity before submission
         form.addEventListener('submit', function(e) {
-
-            // Check if form is valid
             if (!form.checkValidity()) {
                 e.preventDefault();
                 e.stopPropagation();
 
-                // Find first invalid field
+                // Find first invalid field across ALL form elements
                 let firstInvalidField = null;
                 let firstInvalidSection = null;
+                const allFields = form.querySelectorAll('input, select, textarea');
 
-                for (const fieldId of requiredFields) {
-                    const field = document.getElementById(fieldId);
-                    if (field && !field.checkValidity()) {
-                        firstInvalidField = field;
-                        firstInvalidSection = findSectionForField(fieldId);
-                        break;
+                for (const field of allFields) {
+                    if (!field.checkValidity()) {
+                        if (!firstInvalidField) {
+                            firstInvalidField = field;
+                            const sectionContent = field.closest('.section-content');
+                            firstInvalidSection = sectionContent ? sectionContent.id : null;
+                        }
                     }
                 }
 
                 if (firstInvalidField && firstInvalidSection) {
-                    // Show the section containing the invalid field
                     showSection(firstInvalidSection);
                     highlightSectionError(firstInvalidSection);
 
-                    // Trigger validation on the field to show browser message
                     setTimeout(() => {
                         firstInvalidField.focus();
                         firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -3033,22 +3032,23 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Add input listeners to clear error state when fields become valid
-        const monitoredFields = ['event_name', 'starts_at'];
-        monitoredFields.forEach(fieldId => {
-            const field = document.getElementById(fieldId);
-            if (field) {
-                field.addEventListener('input', function() {
-                    if (this.checkValidity()) {
-                        clearSectionError(fieldId);
+        // Clear error state when any required field becomes valid
+        const allRequiredFields = form.querySelectorAll('[required]');
+        allRequiredFields.forEach(field => {
+            const handler = function() {
+                if (this.checkValidity()) {
+                    const sectionContent = this.closest('.section-content');
+                    if (sectionContent) {
+                        const sectionFields = sectionContent.querySelectorAll('[required]');
+                        const allValid = Array.from(sectionFields).every(f => f.checkValidity());
+                        if (allValid) {
+                            clearSectionErrorById(sectionContent.id);
+                        }
                     }
-                });
-                field.addEventListener('change', function() {
-                    if (this.checkValidity()) {
-                        clearSectionError(fieldId);
-                    }
-                });
-            }
+                }
+            };
+            field.addEventListener('input', handler);
+            field.addEventListener('change', handler);
         });
     }
     

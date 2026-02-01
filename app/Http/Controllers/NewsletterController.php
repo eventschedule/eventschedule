@@ -13,6 +13,7 @@ use App\Services\NewsletterService;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
 class NewsletterController extends Controller
@@ -476,32 +477,43 @@ class NewsletterController extends Controller
         $this->authorize();
         $role = $this->getRole($request);
 
+        if (empty($role->email)) {
+            return back()->with('error', __('messages.email_required'));
+        }
+
+        $rateLimitKey = 'test-newsletter-' . $role->id;
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
+            return back()->with('error', __('messages.please_wait') . '...');
+        }
+
         $newsletter = Newsletter::where('role_id', $role->id)
             ->where('id', UrlUtils::decodeId($hash))
             ->firstOrFail();
 
-        $validated = $request->validate([
-            'email' => 'required|email',
-        ]);
-
         // Create a temporary recipient for the test
         $recipient = new NewsletterRecipient([
             'newsletter_id' => $newsletter->id,
-            'email' => $validated['email'],
-            'name' => auth()->user()->name,
+            'email' => $role->email,
+            'name' => $role->name,
             'token' => Str::random(64),
             'status' => 'pending',
         ]);
         $recipient->save();
 
         try {
-            $service->sendToRecipient($newsletter, $recipient);
+            $result = $service->sendToRecipient($newsletter, $recipient);
         } finally {
             // Delete the test recipient after sending
             $recipient->delete();
         }
 
-        return back()->with('status', __('messages.test_email_sent'));
+        RateLimiter::hit($rateLimitKey, 60);
+
+        if (! $result) {
+            return back()->with('error', __('messages.test_email_failed'));
+        }
+
+        return back()->with('status', __('messages.test_email_sent_to', ['email' => $role->email]));
     }
 
     public function stats(Request $request, string $hash)

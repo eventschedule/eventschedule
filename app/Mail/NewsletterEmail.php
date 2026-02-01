@@ -57,8 +57,10 @@ class NewsletterEmail extends Mailable
             \App\Models\Newsletter::defaultStyleSettings(),
             $this->newsletter->style_settings ?? []
         );
-        $events = app(\App\Services\NewsletterService::class)
+        $newsletterService = app(\App\Services\NewsletterService::class);
+        $events = $newsletterService
             ->getUpcomingEvents($this->newsletter->role, $this->newsletter->event_ids);
+        $blocks = $newsletterService->processBlocks($this->newsletter);
         $unsubscribeUrl = url('/nl/u/'.$this->recipient->token);
 
         return new Content(
@@ -71,6 +73,7 @@ class NewsletterEmail extends Mailable
                 'events' => $events,
                 'style' => $style,
                 'unsubscribeUrl' => $unsubscribeUrl,
+                'blocks' => $blocks,
             ],
         );
     }

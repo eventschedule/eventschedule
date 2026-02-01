@@ -25,6 +25,7 @@ class ProfileUpdateRequest extends FormRequest
             'timezone' => ['required', 'string', 'max:255'],
             'language_code' => ['required', 'string', 'in:'.implode(',', config('app.supported_languages', ['en']))],
             'profile_image' => ['image', 'max:2500'],
+            'use_24_hour_time' => ['nullable', 'boolean'],
         ];
     }
 }

@@ -1,3 +1,24 @@
+@if($route == 'guest')
+<style {!! nonce_attr() !!}>
+.calendar-border-panel {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    padding: 0.5rem 1.25rem 1rem;
+}
+.dark .calendar-border-panel {
+    background: #252526;
+    border-color: #2d2d30;
+}
+@media (min-width: 1024px) {
+    .calendar-border-panel {
+        padding-left: 4rem;
+        padding-right: 4rem;
+    }
+}
+</style>
+@endif
 <div class="flex h-full flex-col pt-1" id="calendar-app">
 @php
     $isAdminRoute = $route == 'admin';
@@ -161,10 +182,11 @@
     if ($hasOnlineEvents) $filterCount++;
 
     $accentColor = isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA';
+    $contrastColor = accent_contrast_color($accentColor);
 @endphp
 
 {{-- Panel wrapper --}}
-<div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 px-5 lg:px-16 pt-2 pb-4' }}">
+<div class="{{ $route == 'guest' ? 'calendar-border-panel' : '' }}">
 
 @if (! request()->graphic)
 <header class="py-4 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
@@ -310,16 +332,16 @@
             @if($route == 'guest')
             <div class="flex items-center bg-white dark:bg-gray-800 rounded-md shadow-sm">
                 <button @click="toggleView('calendar')"
-                        :class="currentView === 'calendar' ? 'text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
-                        :style="currentView === 'calendar' ? 'background-color: {{ $accentColor }}' : ''"
+                        :class="currentView === 'calendar' ? '' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                        :style="currentView === 'calendar' ? 'background-color: {{ $accentColor }}; color: {{ $contrastColor }}' : ''"
                         class="flex h-11 w-11 items-center justify-center rounded-s-md border border-gray-300 dark:border-gray-600 transition-colors">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
                     </svg>
                 </button>
                 <button @click="toggleView('list')"
-                        :class="currentView === 'list' ? 'text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
-                        :style="currentView === 'list' ? 'background-color: {{ $accentColor }}' : ''"
+                        :class="currentView === 'list' ? '' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                        :style="currentView === 'list' ? 'background-color: {{ $accentColor }}; color: {{ $contrastColor }}' : ''"
                         class="flex h-11 w-11 items-center justify-center rounded-e-md border border-s-0 border-gray-300 dark:border-gray-600 transition-colors">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M3,4H7V8H3V4M9,5V7H21V5H9M3,10H7V14H3V10M9,11V13H21V11H9M3,16H7V20H3V16M9,17V19H21V17H9"/>
@@ -486,7 +508,7 @@
                                 </div>
                             </div>
                             {{-- Events for this date --}}
-                            <div class="space-y-4">
+                            <div class="space-y-6">
                                 <template v-for="event in group.events" :key="'mobile-' + event.uniqueKey">
                                     <div v-if="isEventVisible(event)"
                                          @click="navigateToEvent(event, $event)"
@@ -543,7 +565,7 @@
         <div v-show="currentView === 'list'" class="{{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Upcoming Events --}}
             <div v-if="listViewUpcomingGroups.length">
-                <div class="space-y-4">
+                <div class="space-y-6">
                     <template v-for="(group, groupIndex) in listViewUpcomingGroups" :key="'list-date-' + group.date">
                         {{-- Date Header --}}
                         <div :class="groupIndex > 0 ? 'mt-2' : ''">
@@ -689,7 +711,7 @@
             <div v-if="filteredPastEventsCount > 0" class="mt-6">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 px-1 mb-4">{{ __('messages.past_events') }}</h2>
                 <div class="mt-4">
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                         <template v-for="(group, groupIndex) in pastEventsGroupedByDate" :key="'past-date-' + group.date">
                             {{-- Date Header --}}
                             <div :class="groupIndex > 0 ? 'mt-2' : ''">
@@ -943,7 +965,7 @@ const calendarApp = createApp({
             categories: @json(get_translated_categories()),
             startOfMonth: '{{ $startOfMonth->format('Y-m-d') }}',
             endOfMonth: '{{ $endOfMonth->format('Y-m-d') }}',
-            use24Hour: {{ isset($role) && $role->use_24_hour_time ? 'true' : 'false' }},
+            use24Hour: {{ get_use_24_hour_time($role ?? null) ? 'true' : 'false' }},
             subdomain: '{{ isset($subdomain) ? $subdomain : '' }}',
             route: '{{ $route }}',
             embed: {{ isset($embed) && $embed ? 'true' : 'false' }},

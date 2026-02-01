@@ -490,7 +490,7 @@
             </span>
             @if (!$event->isMultiDay())
             <span class="text-sm text-gray-500 dark:text-gray-400">
-              <time>{{ $event->getStartEndTime($date, $role->use_24_hour_time) }}</time>
+              <time>{{ $event->getStartEndTime($date, get_use_24_hour_time($role)) }}</time>
             </span>
             @endif
           </div>

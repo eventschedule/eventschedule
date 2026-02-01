@@ -788,8 +788,8 @@
                 allowInput: true,
                 enableTime: true,
                 altInput: true,
-                time_24hr: {{ $role && $role->use_24_hour_time ? 'true' : 'false' }},
-                altFormat: "{{ $role && $role->use_24_hour_time ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
+                time_24hr: {{ get_use_24_hour_time($role ?? null) ? 'true' : 'false' }},
+                altFormat: "{{ get_use_24_hour_time($role ?? null) ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
                 dateFormat: "Y-m-d H:i:S",
             }, localeConfig));
 
