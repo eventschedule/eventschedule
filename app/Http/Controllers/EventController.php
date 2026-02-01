@@ -15,6 +15,7 @@ use App\Notifications\DeletedEventNotification;
 use App\Repos\EventRepo;
 use App\Rules\NoFakeEmail;
 use App\Utils\GeminiUtils;
+use App\Utils\ImageUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -257,6 +258,9 @@ class EventController extends Controller
         // Check if this is a cloned event
         $isCloned = $clonedData !== null;
 
+        // Get cloned parts if available
+        $clonedParts = ($clonedData && isset($clonedData['parts'])) ? $clonedData['parts'] : [];
+
         return view('event/edit', [
             'role' => $role,
             'effectiveRole' => $role,
@@ -274,6 +278,7 @@ class EventController extends Controller
             'clonedCurators' => $clonedCurators,
             'clonedCuratorGroups' => $clonedCuratorGroups,
             'isCloned' => $isCloned,
+            'clonedParts' => $clonedParts,
         ]);
     }
 
@@ -301,7 +306,7 @@ class EventController extends Controller
         }
 
         $event_id = UrlUtils::decodeId($hash);
-        $event = Event::with(['tickets', 'roles', 'creatorRole', 'curators'])->findOrFail($event_id);
+        $event = Event::with(['tickets', 'roles', 'creatorRole', 'curators', 'parts'])->findOrFail($event_id);
         $user = $request->user();
 
         if (! $user->canEditEvent($event)) {
@@ -362,6 +367,17 @@ class EventController extends Controller
             }
         }
 
+        // Clone event parts
+        $clonedParts = [];
+        foreach ($event->parts as $part) {
+            $clonedParts[] = [
+                'name' => $part->name,
+                'description' => $part->description,
+                'start_time' => $part->start_time,
+                'end_time' => $part->end_time,
+            ];
+        }
+
         // Store cloned data in session
         session([
             'cloned_event' => [
@@ -371,6 +387,7 @@ class EventController extends Controller
                 'selected_members' => $selectedMembers,
                 'curators' => $curatorIds,
                 'curator_groups' => $curatorGroups,
+                'parts' => $clonedParts,
             ],
         ]);
 
@@ -384,7 +401,7 @@ class EventController extends Controller
         }
 
         $event_id = UrlUtils::decodeId($hash);
-        $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
+        $event = Event::with(['creatorRole', 'curators', 'parts'])->findOrFail($event_id);
         $user = $request->user();
 
         if (! $user->canEditEvent($event)) {
@@ -836,6 +853,32 @@ class EventController extends Controller
             \Log::error('Event parsing failed: '.$e->getMessage(), [
                 'role_id' => $role->id,
             ]);
+
+            return response()->json(['error' => __('messages.event_parsing_failed')], 500);
+        }
+    }
+
+    public function parseEventParts(Request $request, $subdomain)
+    {
+        $imageData = null;
+        $textDescription = $request->input('parts_text');
+
+        if ($request->hasFile('parts_image')) {
+            $file = $request->file('parts_image');
+            ImageUtils::validateUploadedFile($file);
+            $imageData = file_get_contents($file->getRealPath());
+        }
+
+        if (! $imageData && ! $textDescription) {
+            return response()->json(['error' => __('messages.provide_image_or_text')], 422);
+        }
+
+        try {
+            $parts = GeminiUtils::parseEventParts($imageData, $textDescription);
+
+            return response()->json($parts);
+        } catch (\Exception $e) {
+            \Log::error('Event parts parsing failed: '.$e->getMessage());
 
             return response()->json(['error' => __('messages.event_parsing_failed')], 500);
         }
