@@ -110,7 +110,7 @@
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>{{ route('marketing.analytics') }}</loc>
+        <loc>{{ url('/features/analytics') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
@@ -146,7 +146,7 @@
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>{{ route('marketing.newsletters') }}</loc>
+        <loc>{{ url('/features/newsletters') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>

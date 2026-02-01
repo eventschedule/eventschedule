@@ -33,6 +33,21 @@
                             Integrations
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ marketing_url('/features/ticketing') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                            Ticketing
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ marketing_url('/features/ai') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                            AI Import
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ marketing_url('/features/calendar-sync') }}" class="text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                            Calendar Sync
+                        </a>
+                    </li>
                 </ul>
             </div>
 
