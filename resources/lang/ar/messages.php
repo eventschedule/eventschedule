@@ -1439,5 +1439,6 @@ return [
     'select_segment' => 'اختر شريحة',
     'file_too_large' => 'File is too large. Maximum size is 10MB.',
     'test_email_sent_to' => 'سيتم إرسال بريد تجريبي إلى :email',
+    'test_email_failed' => 'Failed to send test email. Please check the logs for details.',
     'please_wait' => 'يرجى الانتظار قبل المحاولة مرة أخرى',
 ];

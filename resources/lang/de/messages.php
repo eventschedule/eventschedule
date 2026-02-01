@@ -1442,5 +1442,6 @@ return [
     'select_segment' => 'Segment auswählen',
     'file_too_large' => 'File is too large. Maximum size is 10MB.',
     'test_email_sent_to' => 'Test-E-Mail wird an :email gesendet',
+    'test_email_failed' => 'Failed to send test email. Please check the logs for details.',
     'please_wait' => 'Bitte warten Sie, bevor Sie es erneut versuchen',
 ];

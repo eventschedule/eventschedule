@@ -82,6 +82,7 @@ $builderProps = [
     'newsletter' => $newsletterData,
     'routes' => $routesData,
     'roleEmail' => $role->email ?? '',
+    'roleName' => $role->name ?? '',
     'abTestHtml' => $abTestHtml,
     'translations' => [
         'add_block' => __('messages.add_block'),
@@ -163,6 +164,7 @@ $builderProps = [
         'settings' => __('messages.settings'),
         'done' => __('messages.done'),
         'no_content' => __('messages.no_content'),
+        'footer_text' => __('messages.footer_text'),
     ],
 ];
 @endphp

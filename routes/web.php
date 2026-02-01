@@ -79,8 +79,8 @@ Route::get('/user/unsubscribe', [RoleController::class, 'unsubscribeUser'])->nam
 Route::post('/clear-pending-request', [EventController::class, 'clearPendingRequest'])->name('event.clear_pending_request');
 
 // Newsletter tracking routes (public, no auth)
-Route::get('/nl/o/{token}', [NewsletterTrackingController::class, 'trackOpen'])->name('newsletter.track_open');
-Route::get('/nl/c/{token}/{url}', [NewsletterTrackingController::class, 'trackClick'])->name('newsletter.track_click')->where('url', '.*');
+Route::get('/nl/o/{token}', [NewsletterTrackingController::class, 'trackOpen'])->name('newsletter.track_open')->middleware('throttle:60,1');
+Route::get('/nl/c/{token}/{url}', [NewsletterTrackingController::class, 'trackClick'])->name('newsletter.track_click')->where('url', '.*')->middleware('throttle:60,1');
 Route::get('/nl/u/{token}', [NewsletterTrackingController::class, 'showUnsubscribe'])->name('newsletter.show_unsubscribe');
 Route::post('/nl/u/{token}', [NewsletterTrackingController::class, 'unsubscribe'])->name('newsletter.unsubscribe')->middleware('throttle:2,2');
 

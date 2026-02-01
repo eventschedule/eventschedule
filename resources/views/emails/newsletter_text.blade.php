@@ -1,7 +1,7 @@
 {{ $newsletter->subject }}
 {{ str_repeat('=', strlen($newsletter->subject)) }}
 
-{{ $role->name }}
+{{ !empty($style['footerText']) ? $style['footerText'] : $role->name }}
 
 @foreach ($blocks as $block)
 @php $blockType = $block['type'] ?? ''; @endphp

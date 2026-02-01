@@ -167,6 +167,7 @@ class Newsletter extends Model
             'fontFamily' => 'Arial',
             'buttonRadius' => 'rounded',
             'eventLayout' => 'cards',
+            'footerText' => '',
         ];
     }
 
@@ -190,6 +191,7 @@ class Newsletter extends Model
                 'fontFamily' => 'Georgia',
                 'buttonRadius' => 'square',
                 'eventLayout' => 'cards',
+                'footerText' => '',
             ],
             'minimal' => [
                 'backgroundColor' => '#ffffff',
@@ -198,6 +200,7 @@ class Newsletter extends Model
                 'fontFamily' => 'Verdana',
                 'buttonRadius' => 'rounded',
                 'eventLayout' => 'list',
+                'footerText' => '',
             ],
             'bold' => [
                 'backgroundColor' => '#1a1a2e',
@@ -206,6 +209,7 @@ class Newsletter extends Model
                 'fontFamily' => 'Arial',
                 'buttonRadius' => 'rounded',
                 'eventLayout' => 'cards',
+                'footerText' => '',
             ],
             'compact' => [
                 'backgroundColor' => '#f5f5f5',
@@ -214,6 +218,7 @@ class Newsletter extends Model
                 'fontFamily' => 'Trebuchet MS',
                 'buttonRadius' => 'square',
                 'eventLayout' => 'list',
+                'footerText' => '',
             ],
             default => self::defaultStyleSettings(), // 'modern'
         };

@@ -199,7 +199,7 @@
                         : config('app.url') . route('role.follow', ['subdomain' => $each->subdomain], false) }}"
                       class="inline-flex items-center justify-center">
                       <button type="button" name="follow"
-                        style="background-color: {{ $each->accent_color ?? '#4E81FA' }}; color: {{ accent_contrast_color($each->accent_color ?? '#4E81FA') }}"
+                        style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
                         class="inline-flex items-center rounded-md px-4 py-2 hover:opacity-90 text-xs font-semibold shadow-sm">
                         {{ auth()->user() && auth()->user()->isMember($each->subdomain) ? __('messages.manage') : __('messages.follow') }}
                       </button>
@@ -549,7 +549,7 @@
         @endif
 
         {{-- CTA buttons --}}
-        <div style="font-family: sans-serif" class="relative inline-block text-left hidden sm:block {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div style="font-family: sans-serif" class="relative inline-block text-left hidden sm:block self-start {{ $role->isRtl() ? 'rtl' : '' }}">
         @if ($event->canSellTickets($date) || $event->registration_url)
           @if (request()->get('tickets') !== 'true')
             <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank"' : '' }}
@@ -566,7 +566,7 @@
           @endif
         @else
               <button type="button"
-                  onclick="onPopUpClick('calendar-pop-up-menu', event)"
+                  onclick="event.stopPropagation(); var m = document.getElementById('calendar-pop-up-menu'); m.classList.toggle('hidden')"
                   class="inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm hover:opacity-90"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
                   id="menu-button" aria-expanded="true" aria-haspopup="true">
@@ -577,8 +577,8 @@
               </button>
 
             {{-- Desktop calendar dropdown --}}
-            <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-56 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-                <div class="py-1" role="none" onclick="onPopUpClick('calendar-pop-up-menu', event)">
+            <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute top-full end-0 z-10 mt-2 w-56 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                <div class="py-1" role="none" onclick="event.stopPropagation()">
                     <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-0">
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
@@ -920,6 +920,13 @@
         window.location.href = url;
       }
     }
+
+    document.addEventListener('click', function() {
+      var m = document.getElementById('calendar-pop-up-menu');
+      if (m && !m.classList.contains('hidden')) {
+        m.classList.add('hidden');
+      }
+    });
   </script>
 
 </x-app-guest-layout>
