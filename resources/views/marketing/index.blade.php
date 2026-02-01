@@ -140,9 +140,9 @@
                             ['/images/screenshots/marketing_1.jpg', 'Event Schedule calendar view showing upcoming events in a clean grid layout'], // duplicate for seamless loop
                         ];
                         @endphp
-                        @foreach($screenshots as $screenshot)
+                        @foreach($screenshots as $index => $screenshot)
                         <div class="flex-shrink-0 w-full overflow-hidden">
-                            <img src="{{ url($screenshot[0]) }}" alt="{{ $screenshot[1] }}" class="block w-full h-auto scale-[1.05]" loading="lazy" />
+                            <img src="{{ url($screenshot[0]) }}" alt="{{ $screenshot[1] }}" class="block w-full h-auto scale-[1.05]" @if($index === 0) fetchpriority="high" @else loading="lazy" @endif />
                         </div>
                         @endforeach
                     </div>

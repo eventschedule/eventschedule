@@ -17,8 +17,12 @@
     @endif
 
     @if (config('app.hosted') || config('app.report_errors'))
-        <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous"></script>
+        <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous" defer></script>
     @endif
+
+    <!-- Theme color -->
+    <meta name="theme-color" content="#7c3aed" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a0a0f" media="(prefers-color-scheme: dark)">
 
     <!-- SEO Meta Tags -->
     <link rel="canonical" href="{{ url()->current() }}">
@@ -47,7 +51,7 @@
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:site_name" content="Event Schedule">
-    <meta property="og:locale" content="en_US">
+    <meta property="og:locale" content="{{ str_replace('-', '_', app()->getLocale()) }}">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
@@ -64,12 +68,7 @@
         "@type": "WebSite",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
-        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}",
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": "{{ config('app.url') }}/search?q={search_term_string}",
-            "query-input": "required name=search_term_string"
-        }
+        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}"
     }
     </script>
     <script type="application/ld+json">
@@ -105,11 +104,6 @@
             "@type": "Offer",
             "price": "0",
             "priceCurrency": "USD"
-        },
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "5",
-            "ratingCount": "1"
         }
     }
     </script>
