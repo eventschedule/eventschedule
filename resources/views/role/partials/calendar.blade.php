@@ -113,7 +113,7 @@
         </h1>
 
         {{-- All Controls Wrapper: Groups all interactive elements. Stacks on mobile, row on desktop. --}}
-        <div class="flex flex-col md:flex-row md:items-center md:ml-auto gap-3">
+        <div class="flex flex-col md:flex-row md:items-center md:ms-auto gap-3">
 
             {{-- Schedule and Category Selects Container (desktop only) --}}
             <div class="hidden md:flex flex-row gap-2 w-full md:w-auto">
@@ -182,7 +182,7 @@
                         </svg>
                         {{ __('messages.filters') }}
                         <span v-if="activeFilterCount > 0"
-                              class="ml-1 px-1.5 py-0.5 text-xs bg-[#4E81FA] text-white rounded-full">
+                              class="ms-1 px-1.5 py-0.5 text-xs bg-[#4E81FA] text-white rounded-full">
                             @{{ activeFilterCount }}
                         </span>
                     </button>
@@ -194,7 +194,7 @@
             @if ($route == 'admin' && $role->email_verified_at)
                 @if ($tab == 'availability')
                     <x-brand-button id="saveButton" :disabled="true" class="w-full md:w-auto">
-                        <svg class="-ml-0.5 mr-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+                        <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M6.5 20Q4.22 20 2.61 18.43 1 16.85 1 14.58 1 12.63 2.17 11.1 3.35 9.57 5.25 9.15 5.88 6.85 7.75 5.43 9.63 4 12 4 14.93 4 16.96 6.04 19 8.07 19 11 20.73 11.2 21.86 12.5 23 13.78 23 15.5 23 17.38 21.69 18.69 20.38 20 18.5 20H13Q12.18 20 11.59 19.41 11 18.83 11 18V12.85L9.4 14.4L8 13L12 9L16 13L14.6 14.4L13 12.85V18H18.5Q19.55 18 20.27 17.27 21 16.55 21 15.5 21 14.45 20.27 13.73 19.55 13 18.5 13H17V11Q17 8.93 15.54 7.46 14.08 6 12 6 9.93 6 8.46 7.46 7 8.93 7 11H6.5Q5.05 11 4.03 12.03 3 13.05 3 14.5 3 15.95 4.03 17 5.05 18 6.5 18H9V20M12 13Z" />
                         </svg>
                         {{ __('messages.save') }}
@@ -204,14 +204,14 @@
                 <div style="font-family: sans-serif" class="relative inline-block text-left w-full md:w-auto">
                     <button type="button" onclick="onPopUpClick('calendar-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-5 py-3 text-base font-bold text-gray-500 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700" id="menu-button" aria-expanded="true" aria-haspopup="true">
                         {{ __('messages.new_schedule') }}
-                        <svg class="{{ rtl_class($role ?? null, '-ml-1', '-mr-1', $isAdminRoute) }} h-6 w-6 text-gray-400 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <svg class="-me-1 h-6 w-6 text-gray-400 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
                     </button>
-                    <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute {{ rtl_class($role ?? null, 'left-0', 'right-0', $isAdminRoute) }} z-10 mt-2 w-64 {{ rtl_class($role ?? null, 'origin-top-left', 'origin-top-right', $isAdminRoute) }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                    <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                         <div class="py-1" role="none" onclick="onPopUpClick('calendar-pop-up-menu', event)">
                         <a href="{{ route('new', ['type' => 'talent']) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700" role="menuitem" tabindex="-1">
-                                <svg class="{{ rtl_class($role ?? null, 'ml-3', 'mr-3', $isAdminRoute) }} h-5 w-5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                 <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
                                 </svg>
                                 <div>
@@ -220,7 +220,7 @@
                                 </div>
                             </a>
                             <a href="{{ route('new', ['type' => 'venue']) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700" role="menuitem" tabindex="-1">
-                                <svg class="mr-3 h-5 w-5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                 <path d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z" />
                                 </svg>
                                 <div>
@@ -229,7 +229,7 @@
                                 </div>
                             </a>
                             <a href="{{ route('new', ['type' => 'curator']) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700" role="menuitem" tabindex="-1">
-                                <svg class="mr-3 h-5 w-5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                 <path d="M12,19.2C9.5,19.2 7.29,17.92 6,16C6.03,14 10,12.9 12,12.9C14,12.9 17.97,14 18,16C16.71,17.92 14.5,19.2 12,19.2M12,5A3,3 0 0,1 15,8A3,3 0 0,1 12,11A3,3 0 0,1 9,8A3,3 0 0,1 12,5M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,6.47 17.5,2 12,2Z" />
                                 </svg>
                                 <div>
@@ -244,18 +244,18 @@
 
             {{-- Month Navigation Controls --}}
             <div class="flex items-center bg-white dark:bg-gray-800 rounded-md shadow-sm hidden md:flex">
-                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center {{ rtl_class($role ?? null, 'rounded-r-md border-r', 'rounded-l-md border-l', $isAdminRoute) }} border-y border-gray-300 dark:border-gray-600 {{ rtl_class($role ?? null, 'pl-1', 'pr-1', $isAdminRoute) }} text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 {{ rtl_class($role ?? null, 'md:pl-0', 'md:pr-0', $isAdminRoute) }} md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
+                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-s-md border-s border-y border-gray-300 dark:border-gray-600 pe-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:pe-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
                     <span class="sr-only">{{ __('messages.previous_month') }}</span>
-                    <svg class="h-6 w-6 {{ rtl_class($role ?? null, 'rotate-180', '', $isAdminRoute) }}" viewBox="0 0 24 24" fill="currentColor">
+                    <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
                         <path fill-rule="evenodd" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" clip-rule="evenodd" />
                     </svg>
                 </a>
                 <a href="{{ $route == 'home' ? route('home') : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => now()->year, 'month' => now()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => now()->year, 'month' => now()->month]) }}" class="flex h-11 items-center justify-center border-y border-gray-300 dark:border-gray-600 px-4 text-base font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 focus:relative">
                     <span class="h-6 flex items-center">{{ __('messages.this_month') }}</span>
                 </a>
-                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center {{ rtl_class($role ?? null, 'rounded-l-md border-l', 'rounded-r-md border-r', $isAdminRoute) }} border-y border-gray-300 dark:border-gray-600 {{ rtl_class($role ?? null, 'pr-1', 'pl-1', $isAdminRoute) }} text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 {{ rtl_class($role ?? null, 'md:pr-0', 'md:pl-0', $isAdminRoute) }} md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
+                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-e-md border-e border-y border-gray-300 dark:border-gray-600 ps-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:ps-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
                     <span class="sr-only">{{ __('messages.next_month') }}</span>
-                    <svg class="h-6 w-6 {{ rtl_class($role ?? null, 'rotate-180', '', $isAdminRoute) }}" viewBox="0 0 24 24" fill="currentColor">
+                    <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
                         <path fill-rule="evenodd" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" clip-rule="evenodd" />
                     </svg>
                 </a>
@@ -264,7 +264,7 @@
             {{-- Add Event Button --}}
             @if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule')
                 <x-brand-link href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}" class="w-full md:w-auto">
-                    <svg class="{{ rtl_class($role ?? null, '-mr-0.5 ml-1.5', '-ml-0.5 mr-1.5', $isAdminRoute) }} h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+                    <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
                     </svg>
                     {{ __('messages.add_event') }}
@@ -352,7 +352,7 @@
                         <ol class="mt-4 divide-y divide-gray-100 dark:divide-gray-700 text-sm leading-6 md:col-span-7 xl:col-span-8">
                             <li v-for="event in getEventsForDate('{{ $currentDate->format('Y-m-d') }}')" :key="event.id" 
                                 class="relative group" 
-                                :class="event.can_edit ? '{{ rtl_class($role ?? null, 'hover:pl-8', 'hover:pr-8', $isAdminRoute) }}' : ''"
+                                :class="event.can_edit ? 'hover:pe-8' : ''"
                                 v-show="isEventVisible(event)">
                                 <a :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')"
                                     class="flex event-link-popup" 
@@ -368,7 +368,7 @@
                                     </p>
                                 </a>
                                 <a v-if="event.can_edit" :href="event.edit_url"
-                                    class="absolute {{ rtl_class($role ?? null, 'left-0', 'right-0', $isAdminRoute) }} top-0 hidden group-hover:inline-block text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
+                                    class="absolute end-0 top-0 hidden group-hover:inline-block text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
                                     @click.stop>
                                     {{ __('messages.edit') }}
                                 </a>
@@ -408,18 +408,18 @@
                                          class="block cursor-pointer">
                                         <div class="event-item bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-600"
                                             :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
-                                            <div class="flex {{ rtl_class($role ?? null, 'flex-row-reverse', '', $isAdminRoute) }}">
+                                            <div class="flex">
                                                 {{-- Content Section --}}
-                                                <div class="flex-1 py-3 px-4 flex flex-col min-w-0 {{ rtl_class($role ?? null, 'text-right', '', $isAdminRoute) }}">
+                                                <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
                                                     <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
-                                                    <div v-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 {{ rtl_class($role ?? null, 'flex-row-reverse', '', $isAdminRoute) }}">
-                                                        <svg class="h-4 w-4 text-gray-400 flex-shrink-0 {{ rtl_class($role ?? null, 'ml-2', 'mr-2', $isAdminRoute) }}" viewBox="0 0 20 20" fill="currentColor">
+                                                    <div v-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                                        <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
                                                             <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
                                                         </svg>
                                                         <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
                                                     </div>
-                                                    <div class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400 {{ rtl_class($role ?? null, 'flex-row-reverse', '', $isAdminRoute) }}">
-                                                        <svg class="h-4 w-4 text-gray-400 flex-shrink-0 {{ rtl_class($role ?? null, 'ml-2', 'mr-2', $isAdminRoute) }}" viewBox="0 0 20 20" fill="currentColor">
+                                                    <div class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                                        <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
                                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
                                                         </svg>
                                                         <span v-text="getEventTime(event)"></span>
@@ -483,7 +483,7 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.schedule') }}</label>
             <select v-model="selectedGroup" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
+                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
                 <option value="">{{ __('messages.all_schedules') }} (@{{ eventCountByGroup[''] }})</option>
                 <option v-for="group in groups" :key="group.slug" :value="group.slug">
                     @{{ group.name }} (@{{ eventCountByGroup[group.slug] || 0 }})

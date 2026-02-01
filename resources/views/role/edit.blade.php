@@ -64,17 +64,17 @@
         }
 
         .section-nav-link.validation-error {
-            border-left-color: #dc2626 !important;
+            border-inline-start-color: #dc2626 !important;
         }
 
         @media (prefers-color-scheme: dark) {
             .section-nav-link.validation-error {
-                border-left-color: #ef4444 !important;
+                border-inline-start-color: #ef4444 !important;
             }
         }
 
         .dark .section-nav-link.validation-error {
-            border-left-color: #ef4444 !important;
+            border-inline-start-color: #ef4444 !important;
         }
 
         /* Mobile accordion styles */
@@ -568,7 +568,7 @@
                 </a>
             </div>
 
-            <div class="text-right">
+            <div class="text-end">
                 <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
                     {{ $title }}
                 </h2>
@@ -604,14 +604,14 @@
                 <div class="hidden lg:block lg:col-span-3">
                     <div class="sticky top-6">
                         <nav class="space-y-1">
-                            <a href="#section-details" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-details">
+                            <a href="#section-details" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-details">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                                 </svg>
                                 {{ __('messages.details') }}
                             </a>
                             @if ($role->isVenue())
-                            <a href="#section-address" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-address">
+                            <a href="#section-address" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-address">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
@@ -619,19 +619,19 @@
                                 {{ __('messages.venue_address') }}
                             </a>
                             @endif
-                            <a href="#section-contact-info" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-contact-info">
+                            <a href="#section-contact-info" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-contact-info">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                                 </svg>
                                 {{ __('messages.contact_info') }}
                             </a>
-                            <a href="#section-style" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-style">
+                            <a href="#section-style" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-style">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 3 3 0 005.78-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
                                 </svg>
                                 {{ __('messages.schedule_style') }}
                             </a>
-                            <a href="#section-settings" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-settings">
+                            <a href="#section-settings" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-settings">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -639,7 +639,7 @@
                                 {{ __('messages.schedule_settings') }}
                             </a>
                             @if (! config('app.hosted'))
-                            <a href="#section-auto-import" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-auto-import">
+                            <a href="#section-auto-import" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-auto-import">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                                 </svg>
@@ -647,7 +647,7 @@
                             </a>
                             @endif
                             @if (! $role->exists || $role->user_id == auth()->user()->id)
-                            <a href="#section-integrations" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-integrations">
+                            <a href="#section-integrations" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-integrations">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                                 </svg>
@@ -655,7 +655,7 @@
                             </a>
                             @endif
                             @if (config('app.hosted'))
-                            <a href="#section-email-settings" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-email-settings">
+                            <a href="#section-email-settings" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-email-settings">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                                 </svg>
@@ -954,15 +954,15 @@
                     <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
                         <nav class="-mb-px flex space-x-2 sm:space-x-6">
                             <button type="button" onclick="showStyleTab('images')" id="style-tab-images"
-                                class="style-tab-button flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-[#4E81FA] text-[#4E81FA]">
+                                class="style-tab-button flex-1 sm:flex-initial text-center sm:text-start whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-[#4E81FA] text-[#4E81FA]">
                                 {{ __('messages.images') }}
                             </button>
                             <button type="button" onclick="showStyleTab('background')" id="style-tab-background"
-                                class="style-tab-button flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
+                                class="style-tab-button flex-1 sm:flex-initial text-center sm:text-start whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
                                 {{ __('messages.background') }}
                             </button>
                             <button type="button" onclick="showStyleTab('settings')" id="style-tab-settings"
-                                class="style-tab-button flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
+                                class="style-tab-button flex-1 sm:flex-initial text-center sm:text-start whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
                                 {{ __('messages.settings') }}
                             </button>
                         </nav>
@@ -980,7 +980,7 @@
                                     value="{{ $layout }}"
                                     {{ $role->event_layout == $layout ? 'checked' : '' }}
                                     class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                <label for="event_layout_{{ $layout }}" class="ml-2 text-gray-900 dark:text-gray-100">
+                                <label for="event_layout_{{ $layout }}" class="ms-2 text-gray-900 dark:text-gray-100">
                                     {{ __('messages.' . $layout) }}
                                 </label>
                             </div>
@@ -1090,7 +1090,7 @@
                                             {{ $role->background == $background ? 'checked' : '' }}
                                             class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4"
                                             onchange="onChangeBackground(); updatePreview();">
-                                        <label for="background_type_{{ $background }}" class="ml-2 text-gray-900 dark:text-gray-100">
+                                        <label for="background_type_{{ $background }}" class="ms-2 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.' . $background) }}
                                         </label>
                                     </div>
@@ -1216,7 +1216,7 @@
                                             class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
                                             oninput="updatePreview(); document.getElementById('rotation_value').textContent = this.value + '°'"
                                             value="{{ old('background_rotation', $role->background_rotation ?? 0) }}" min="0" max="360" />
-                                        <span id="rotation_value" class="text-sm text-gray-600 dark:text-gray-400 w-12 text-right">{{ old('background_rotation', $role->background_rotation ?? 0) }}°</span>
+                                        <span id="rotation_value" class="text-sm text-gray-600 dark:text-gray-400 w-12 text-end">{{ old('background_rotation', $role->background_rotation ?? 0) }}°</span>
                                     </div>
                                     <x-input-error class="mt-2" :messages="$errors->get('background_rotation')" />
                                 </div>
@@ -1324,13 +1324,13 @@
                         <!-- Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
                             <nav class="flex space-x-2 sm:space-x-4" aria-label="Tabs">
-                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="general">
+                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center sm:text-start whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="general">
                                     {{ __('messages.general') }}
                                 </button>
-                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
+                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center sm:text-start whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
                                     {{ __('messages.custom_fields') }}
                                 </button>
-                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="subschedules">
+                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center sm:text-start whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="subschedules">
                                     {{ __('messages.subschedules') }}
                                 </button>
                             </nav>
@@ -1498,7 +1498,7 @@
                                             value="1"
                                             {{ !empty($field['required']) ? 'checked' : '' }}
                                             class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                        <label for="event_field_required_{{ $fieldKey }}" class="ml-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
+                                        <label for="event_field_required_{{ $fieldKey }}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
                                     </div>
                                     <x-secondary-button type="button" onclick="removeEventCustomField(this)" class="text-xs py-1 px-2">
                                         {{ __('messages.remove') }}
@@ -1750,7 +1750,7 @@
                                                    value="to"
                                                    {{ $role->sync_direction === 'to' ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.to_google_calendar') }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.to_google_calendar_description') }}</div>
                                             </div>
@@ -1761,7 +1761,7 @@
                                                    value="from"
                                                    {{ $role->sync_direction === 'from' ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.from_google_calendar') }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.from_google_calendar_description') }}</div>
                                             </div>
@@ -1772,7 +1772,7 @@
                                                    value="both"
                                                    {{ $role->sync_direction === 'both' ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.bidirectional_sync') }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.bidirectional_sync_description') }}</div>
                                             </div>
@@ -1783,7 +1783,7 @@
                                                    value=""
                                                    {{ !$role->sync_direction ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.no_sync') }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.no_sync_description') }}</div>
                                             </div>
@@ -1800,7 +1800,7 @@
 
                                 <div id="sync-status" class="hidden">
                                     <div class="flex items-center text-blue-600 dark:text-blue-400">
-                                        <svg class="animate-spin -ml-1 mr-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <svg class="animate-spin -ms-1 me-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
@@ -1859,7 +1859,7 @@
                                                    value="to"
                                                    {{ $role->caldav_sync_direction === 'to' ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.to_caldav') }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.to_caldav_description') }}</div>
                                             </div>
@@ -1870,7 +1870,7 @@
                                                    value="from"
                                                    {{ $role->caldav_sync_direction === 'from' ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.from_caldav') }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.from_caldav_description') }}</div>
                                             </div>
@@ -1881,7 +1881,7 @@
                                                    value="both"
                                                    {{ $role->caldav_sync_direction === 'both' ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.bidirectional_sync') }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.bidirectional_sync_description') }}</div>
                                             </div>
@@ -1892,7 +1892,7 @@
                                                    value=""
                                                    {{ !$role->caldav_sync_direction ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.no_sync') }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.no_sync_description') }}</div>
                                             </div>
@@ -1952,21 +1952,21 @@
                                         <label class="flex items-center">
                                             <input type="radio" name="caldav_sync_direction_new" value="to" checked
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.to_caldav') }}</div>
                                             </div>
                                         </label>
                                         <label class="flex items-center">
                                             <input type="radio" name="caldav_sync_direction_new" value="from"
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.from_caldav') }}</div>
                                             </div>
                                         </label>
                                         <label class="flex items-center">
                                             <input type="radio" name="caldav_sync_direction_new" value="both"
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                            <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.bidirectional_sync') }}</div>
                                             </div>
                                         </label>
@@ -2331,7 +2331,7 @@ function showImportOutput(output, message, isSuccess = true) {
                     
                     <div class="mb-4">
                         <div class="flex items-center mb-2">
-                            <div class="w-3 h-3 rounded-full ${isSuccess ? 'bg-green-500' : 'bg-red-500'} mr-2"></div>
+                            <div class="w-3 h-3 rounded-full ${isSuccess ? 'bg-green-500' : 'bg-red-500'} me-2"></div>
                             <span class="font-medium ${isSuccess ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}">
                                 ${message}
                             </span>
@@ -3338,7 +3338,7 @@ function addEventCustomField() {
                         id="event_field_required_${fieldKey}"
                         value="1"
                         class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                    <label for="event_field_required_${fieldKey}" class="ml-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{!! __('messages.field_required') !!}</label>
+                    <label for="event_field_required_${fieldKey}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{!! __('messages.field_required') !!}</label>
                 </div>
                 <button type="button" onclick="removeEventCustomField(this)" class="inline-flex items-center justify-center px-2 py-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
                     {!! __('messages.remove') !!}

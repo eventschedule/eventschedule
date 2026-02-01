@@ -13,6 +13,8 @@ use App\Http\Controllers\GraphicController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvoiceNinjaController;
 use App\Http\Controllers\MarketingController;
+use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\NewsletterTrackingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StripeController;
@@ -70,6 +72,12 @@ Route::post('/unsubscribe', [RoleController::class, 'unsubscribe'])->name('role.
 Route::get('/user/unsubscribe', [RoleController::class, 'unsubscribeUser'])->name('user.unsubscribe')->middleware('throttle:2,2');
 Route::post('/clear-pending-request', [EventController::class, 'clearPendingRequest'])->name('event.clear_pending_request');
 
+// Newsletter tracking routes (public, no auth)
+Route::get('/nl/o/{token}', [NewsletterTrackingController::class, 'trackOpen'])->name('newsletter.track_open');
+Route::get('/nl/c/{token}/{url}', [NewsletterTrackingController::class, 'trackClick'])->name('newsletter.track_click')->where('url', '.*');
+Route::get('/nl/u/{token}', [NewsletterTrackingController::class, 'showUnsubscribe'])->name('newsletter.show_unsubscribe');
+Route::post('/nl/u/{token}', [NewsletterTrackingController::class, 'unsubscribe'])->name('newsletter.unsubscribe')->middleware('throttle:2,2');
+
 Route::post('/stripe/webhook', [StripeController::class, 'webhook'])->name('stripe.webhook')->middleware('throttle:60,1');
 Route::post('/stripe/subscription-webhook', [SubscriptionWebhookController::class, 'handleWebhook'])->name('stripe.subscription_webhook')->middleware('throttle:60,1');
 Route::post('/invoiceninja/webhook/{secret?}', [InvoiceNinjaController::class, 'webhook'])->name('invoiceninja.webhook')->middleware('throttle:60,1');
@@ -100,6 +108,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
     Route::post('/sales/resend-email/{sale_id}', [TicketController::class, 'resendEmail'])->name('sales.resend_email');
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
+
+    // Newsletter routes (flat, like analytics - schedule selected via ?role_id= query param)
+    Route::get('/newsletters', [NewsletterController::class, 'index'])->name('newsletter.index');
+    Route::get('/newsletters/create', [NewsletterController::class, 'create'])->name('newsletter.create');
+    Route::post('/newsletters', [NewsletterController::class, 'store'])->name('newsletter.store');
+    Route::post('/newsletters/preview-draft', [NewsletterController::class, 'previewDraft'])->name('newsletter.preview_draft');
+    Route::get('/newsletters/events', [NewsletterController::class, 'getEvents'])->name('newsletter.events');
+    Route::get('/newsletters/{hash}/edit', [NewsletterController::class, 'edit'])->name('newsletter.edit');
+    Route::put('/newsletters/{hash}', [NewsletterController::class, 'update'])->name('newsletter.update');
+    Route::delete('/newsletters/{hash}', [NewsletterController::class, 'delete'])->name('newsletter.delete');
+    Route::post('/newsletters/{hash}/send', [NewsletterController::class, 'send'])->name('newsletter.send');
+    Route::post('/newsletters/{hash}/schedule', [NewsletterController::class, 'schedule'])->name('newsletter.schedule');
+    Route::post('/newsletters/{hash}/cancel', [NewsletterController::class, 'cancel'])->name('newsletter.cancel');
+    Route::post('/newsletters/{hash}/duplicate', [NewsletterController::class, 'duplicate'])->name('newsletter.duplicate');
+    Route::post('/newsletters/{hash}/preview', [NewsletterController::class, 'preview'])->name('newsletter.preview');
+    Route::post('/newsletters/{hash}/test-send', [NewsletterController::class, 'testSend'])->name('newsletter.test_send');
+    Route::get('/newsletters/{hash}/stats', [NewsletterController::class, 'stats'])->name('newsletter.stats');
+    Route::post('/newsletters/{hash}/ab-test', [NewsletterController::class, 'createAbTest'])->name('newsletter.ab_test');
+    Route::post('/newsletters/{hash}/ab-send', [NewsletterController::class, 'sendAbTest'])->name('newsletter.ab_send');
+    Route::get('/newsletter-segments', [NewsletterController::class, 'segments'])->name('newsletter.segments');
+    Route::post('/newsletter-segments', [NewsletterController::class, 'storeSegment'])->name('newsletter.segment.store');
+    Route::put('/newsletter-segments/{hash}', [NewsletterController::class, 'updateSegment'])->name('newsletter.segment.update');
+    Route::delete('/newsletter-segments/{hash}', [NewsletterController::class, 'deleteSegment'])->name('newsletter.segment.delete');
 
     Route::get('/settings', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/settings', [ProfileController::class, 'update'])->name('profile.update');
@@ -176,12 +207,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/{subdomain}/uncurate-event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
     Route::get('/{subdomain}/import', [EventController::class, 'showImport'])->name('event.show_import');
     Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');
+    Route::post('/{subdomain}/parse-event-parts', [EventController::class, 'parseEventParts'])->name('event.parse_parts');
     Route::post('/{subdomain}/import', [EventController::class, 'import'])->name('event.import');
     Route::post('/{subdomain}/test-import', [RoleController::class, 'testImport'])->name('role.test_import');
     Route::get('/{subdomain}/search-youtube', [RoleController::class, 'searchYouTube'])->name('role.search_youtube');
     Route::get('/{subdomain}/match-videos', [RoleController::class, 'getTalentRolesWithoutVideos'])->name('role.talent_roles_without_videos');
     Route::post('/{subdomain}/save-video', [RoleController::class, 'saveVideo'])->name('role.save_video');
     Route::post('/{subdomain}/save-videos', [RoleController::class, 'saveVideos'])->name('role.save_videos');
+
+    Route::post('/{subdomain}/submit-video/{event_hash}', [EventController::class, 'submitVideo'])->name('event.submit_video')->middleware('throttle:10,60');
+    Route::post('/{subdomain}/submit-comment/{event_hash}', [EventController::class, 'submitComment'])->name('event.submit_comment')->middleware('throttle:20,60');
+    Route::post('/{subdomain}/approve-video/{hash}', [EventController::class, 'approveVideo'])->name('event.approve_video');
+    Route::delete('/{subdomain}/reject-video/{hash}', [EventController::class, 'rejectVideo'])->name('event.reject_video');
+    Route::post('/{subdomain}/approve-comment/{hash}', [EventController::class, 'approveComment'])->name('event.approve_comment');
+    Route::delete('/{subdomain}/reject-comment/{hash}', [EventController::class, 'rejectComment'])->name('event.reject_comment');
+
     Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|profile|followers|team|plan|videos');
 
     Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image');

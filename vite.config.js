@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
+import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
     server: {
@@ -21,6 +22,7 @@ export default defineConfig({
             input: [
                 'resources/js/app.js',
                 'resources/js/countrySelect.min.js',
+                'resources/js/newsletter-builder.js',
                 //'resources/js/leaflet.js',
                 'resources/css/app.css',
                 'resources/css/marketing.css',
@@ -29,5 +31,6 @@ export default defineConfig({
             ],
             refresh: true,
         }),
+        vue(),
     ],
 });

@@ -678,6 +678,61 @@ class GeminiUtils
         return $data;
     }
 
+    public static function parseEventParts($imageData = null, $textDescription = null)
+    {
+        $prompt = 'Extract the agenda items, schedule parts, or setlist songs from this ';
+        if ($imageData && $textDescription) {
+            $prompt .= 'image and text';
+        } elseif ($imageData) {
+            $prompt .= 'image';
+        } else {
+            $prompt .= 'text';
+        }
+        $prompt .= ".\n\n";
+        $prompt .= "Return a JSON array of objects, each with these keys:\n";
+        $prompt .= "- name: the title or name of the part/song/session (required)\n";
+        $prompt .= "- description: optional details or speaker name\n";
+        $prompt .= "- start_time: in HH:MM 24-hour format, or null if no times are shown\n";
+        $prompt .= "- end_time: in HH:MM 24-hour format, or null if no times are shown\n\n";
+        $prompt .= "If the content is a setlist or numbered list without times, set start_time and end_time to null for all items.\n";
+        $prompt .= "Preserve the original order. Return only the JSON array.\n";
+
+        if ($textDescription) {
+            $prompt .= "\nText:\n".$textDescription;
+        }
+
+        $data = self::sendRequest($prompt, $imageData);
+
+        if ($data === null || empty($data)) {
+            return [];
+        }
+
+        // Normalize: sendRequest wraps single objects in an array
+        $parts = [];
+        if (isset($data[0]) && is_array($data[0])) {
+            if (isset($data[0]['name'])) {
+                $parts = $data;
+            } elseif (isset($data[0][0])) {
+                $parts = $data[0];
+            }
+        }
+
+        $normalized = [];
+        foreach ($parts as $part) {
+            if (! is_array($part) || empty($part['name'])) {
+                continue;
+            }
+            $normalized[] = [
+                'name' => trim($part['name']),
+                'description' => ! empty($part['description']) ? trim($part['description']) : null,
+                'start_time' => ! empty($part['start_time']) ? $part['start_time'] : null,
+                'end_time' => ! empty($part['end_time']) ? $part['end_time'] : null,
+            ];
+        }
+
+        return $normalized;
+    }
+
     public static function translate($text, $from = 'auto', $to = 'en')
     {
         if (empty($text)) {

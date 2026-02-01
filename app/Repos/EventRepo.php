@@ -6,6 +6,7 @@ use App\Jobs\SendQueuedEmail;
 use App\Mail\ClaimRole;
 use App\Mail\ClaimVenue;
 use App\Models\Event;
+use App\Models\EventPart;
 use App\Models\Role;
 use App\Models\Ticket;
 use App\Models\User;
@@ -38,7 +39,7 @@ class EventRepo
     {
         [$startOfDay, $endOfDay] = $this->getUtcDateRange($eventDate);
 
-        return Event::with('roles')
+        return Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user'])
             ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id))
             ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id))
             ->where(function ($query) use ($startOfDay, $endOfDay, $eventDate) {
@@ -60,7 +61,7 @@ class EventRepo
     {
         [$startOfDay, $endOfDay] = $this->getUtcDateRange($eventDate);
 
-        return Event::with('roles')
+        return Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user'])
             ->where('slug', $slug)
             ->where(function ($query) use ($startOfDay, $endOfDay, $eventDate) {
                 $query->whereBetween('starts_at', [$startOfDay, $endOfDay])
@@ -85,7 +86,7 @@ class EventRepo
     {
         [$startOfDay, $endOfDay] = $this->getUtcDateRange($eventDate);
 
-        return Event::with('roles')
+        return Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user'])
             ->whereBetween('starts_at', [$startOfDay, $endOfDay])
             ->where(function ($query) use ($subdomain) {
                 $query->whereHas('roles', function ($q) use ($subdomain) {
@@ -594,6 +595,40 @@ class EventRepo
             $event->tickets()->update(['is_deleted' => true]);
         }
 
+        // Save event parts
+        $partsData = $request->input('event_parts', []);
+        $partIds = [];
+        foreach ($partsData as $index => $partData) {
+            if (empty($partData['name'])) {
+                continue;
+            }
+            if (! empty($partData['id'])) {
+                $part = EventPart::find($partData['id']);
+                if ($part && $part->event_id == $event->id) {
+                    $part->update([
+                        'name' => $partData['name'],
+                        'description' => $partData['description'] ?? null,
+                        'start_time' => $partData['start_time'] ?? null,
+                        'end_time' => $partData['end_time'] ?? null,
+                        'sort_order' => $index,
+                    ]);
+                    $partIds[] = $part->id;
+                }
+            } else {
+                $part = EventPart::create([
+                    'event_id' => $event->id,
+                    'name' => $partData['name'],
+                    'description' => $partData['description'] ?? null,
+                    'start_time' => $partData['start_time'] ?? null,
+                    'end_time' => $partData['end_time'] ?? null,
+                    'sort_order' => $index,
+                ]);
+                $partIds[] = $part->id;
+            }
+        }
+        // Delete removed parts
+        $event->parts()->whereNotIn('id', $partIds)->delete();
+
         $event->load(['tickets', 'roles']);
 
         // Sync to Google Calendar for the current role
@@ -632,7 +667,7 @@ class EventRepo
         $eventDateUtc = $date ? Carbon::parse($date, 'UTC') : null;
 
         if ($subdomainRole && $lookupEventId) {
-            $event = Event::with('roles')
+            $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user'])
                 ->where('id', $lookupEventId)
                 ->first();
 
@@ -655,7 +690,7 @@ class EventRepo
 
             // No date provided - find most recent/upcoming
             if (! $event && ! $date) {
-                $event = Event::with('roles')
+                $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user'])
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id))
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id))
                     ->where('starts_at', '>=', now()->subDay())
@@ -663,7 +698,7 @@ class EventRepo
                     ->first();
 
                 if (! $event) {
-                    $event = Event::with('roles')
+                    $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user'])
                         ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id))
                         ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id))
                         ->where('starts_at', '<', now())
@@ -686,7 +721,7 @@ class EventRepo
                 $event = $this->findEventBySlug($subdomain, $slug, $eventDateUtc);
             }
         } else {
-            $event = Event::with('roles')
+            $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user'])
                 ->where('slug', $slug)
                 ->where('starts_at', '>=', now()->subDay())
                 ->where(function ($query) use ($subdomain) {
@@ -698,7 +733,7 @@ class EventRepo
                 ->first();
 
             if (! $event) {
-                $event = Event::with('roles')
+                $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user'])
                     ->where('slug', $slug)
                     ->where('starts_at', '<', now())
                     ->where(function ($query) use ($subdomain) {

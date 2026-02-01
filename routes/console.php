@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\ProcessScheduledNewsletters;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 
@@ -44,3 +45,5 @@ Schedule::call(function () {
         Artisan::call('app:generate-sub-audience-blog');
     }
 })->daily()->at('03:00')->appendOutputTo(storage_path('logs/sub-audience-blog.log'));
+
+Schedule::call(new ProcessScheduledNewsletters)->everyMinute()->appendOutputTo(storage_path('logs/scheduler.log'));

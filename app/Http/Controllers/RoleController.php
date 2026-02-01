@@ -481,6 +481,7 @@ class RoleController extends Controller
             $view = 'role/show-guest-embed';
         } elseif ($event) {
             $view = 'event/show-guest';
+            $event->load(['approvedVideos.user', 'approvedComments.user']);
         }
 
         $fonts = [];

@@ -6,7 +6,7 @@
         <div id="videos-app">
             <div v-if="loading" class="text-center py-8">
                 <div class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-blue-500 hover:bg-blue-400 transition ease-in-out duration-150">
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg class="animate-spin -ms-1 me-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -31,7 +31,7 @@
                     </div>
                     
                     <div class="mt-4">
-                        <div v-if="role.searching" class="flex items-center space-x-2">
+                        <div v-if="role.searching" class="flex items-center gap-x-2">
                             <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
                             <span class="text-sm text-gray-500">{{ __('messages.searching_youtube') }}</span>
                         </div>
@@ -55,15 +55,15 @@
                                     
                                     <!-- Video stats and watch button -->
                                     <div class="flex items-center justify-between mt-2">
-                                        <div class="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
-                                            <div class="flex items-center space-x-2">
+                                        <div class="flex items-center gap-x-4 text-xs text-gray-500 dark:text-gray-400">
+                                            <div class="flex items-center gap-x-2">
                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                     <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
                                                     <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
                                                 </svg>
                                                 <span>@{{ formatNumber(video.viewCount) }}</span>
                                             </div>
-                                            <div class="flex items-center space-x-2">
+                                            <div class="flex items-center gap-x-2">
                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
                                                 </svg>
@@ -75,7 +75,7 @@
                                         <a :href="video.url" target="_blank" 
                                             class="inline-flex items-center text-xs text-red-600 hover:text-red-700 font-medium transition-colors"
                                             @click.stop>
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-3 h-3 me-1" fill="currentColor" viewBox="0 0 24 24">
                                                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                                             </svg>
                                             Watch
@@ -83,7 +83,7 @@
                                     </div>
                                     
                                     <!-- Selection indicator -->
-                                    <div v-if="isVideoSelected(role, video)" class="absolute top-2 right-2">
+                                    <div v-if="isVideoSelected(role, video)" class="absolute top-2 end-2">
                                         <div class="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
@@ -95,7 +95,7 @@
                             
                             <div v-if="role.selectedVideos && role.selectedVideos.length > 0" class="mt-4">
                                 <div class="flex items-center justify-between">
-                                    <div class="flex items-center space-x-3">
+                                    <div class="flex items-center gap-x-3">
                                         <button @click="skipRole(role)" 
                                                 class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
                                             {{ __('messages.skip') }}
@@ -128,7 +128,7 @@
                         <div v-else class="text-sm text-gray-500 dark:text-gray-400">
                             {{ __('messages.no_videos_found') }}
                             <button @click="skipRole(role)" 
-                                    class="ml-3 inline-flex items-center px-3 py-1 border border-gray-300 dark:border-gray-600 text-xs font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
+                                    class="ms-3 inline-flex items-center px-3 py-1 border border-gray-300 dark:border-gray-600 text-xs font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
                                 {{ __('messages.skip') }}
                             </button>
                         </div>

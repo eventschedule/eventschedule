@@ -20,7 +20,7 @@
 <div class="flex justify-end pt-5">
     <x-success-link href="{{ route('event.accept_all', ['subdomain' => $role->subdomain]) }}"
         onclick="return confirm('{{ __('messages.accept_all_confirm', ['count' => count($requests)]) }}')">
-        <svg class="-ml-0.5 mr-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <svg class="-ms-0.5 me-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd"
                 d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
                 clip-rule="evenodd" />
@@ -94,7 +94,7 @@
                 <div class="flex w-0 flex-1 cursor-pointer test-accept-event"
                     onclick="location.href = '{{ route('event.accept', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}'; return false;">
                     <div
-                        class="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        class="relative -me-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bs-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd"
                                 d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
@@ -103,10 +103,10 @@
                         {{ __('messages.accept') }}
                     </div>
                 </div>
-                <div class="-ml-px flex w-0 flex-1 cursor-pointer"
+                <div class="-ms-px flex w-0 flex-1 cursor-pointer"
                     onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'redirect_to' => 'requests']) }}'; } return false;">
                     <div
-                        class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-be-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path
                                 d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z" />

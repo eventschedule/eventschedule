@@ -154,6 +154,41 @@ class Event extends Model
         return $this->hasMany(Ticket::class)->where('is_deleted', false)->orderBy('price', 'desc');
     }
 
+    public function parts()
+    {
+        return $this->hasMany(EventPart::class)->orderBy('sort_order');
+    }
+
+    public function videos()
+    {
+        return $this->hasMany(EventVideo::class);
+    }
+
+    public function approvedVideos()
+    {
+        return $this->hasMany(EventVideo::class)->where('is_approved', true);
+    }
+
+    public function pendingVideos()
+    {
+        return $this->hasMany(EventVideo::class)->where('is_approved', false);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(EventComment::class);
+    }
+
+    public function approvedComments()
+    {
+        return $this->hasMany(EventComment::class)->where('is_approved', true);
+    }
+
+    public function pendingComments()
+    {
+        return $this->hasMany(EventComment::class)->where('is_approved', false);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -806,6 +841,15 @@ class Event extends Model
                 'youtube_url' => $member->getFirstVideoUrl(),
             ]];
         });
+
+        $data->parts = $this->parts->map(function ($part) {
+            return [
+                'name' => $part->name,
+                'description' => $part->description,
+                'start_time' => $part->start_time,
+                'end_time' => $part->end_time,
+            ];
+        })->values();
 
         return $data;
     }
