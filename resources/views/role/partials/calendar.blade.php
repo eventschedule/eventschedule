@@ -83,10 +83,12 @@
             'comment_count' => $event->approved_comments_count ?? 0,
             'venue_profile_image' => $event->venue?->profile_image_url ?: null,
             'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && $event->venue->getAttributes()['header_image'] !== 'none') ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
+            'venue_guest_url' => $event->venue?->getGuestUrl() ?: null,
             'talent' => $event->roles->filter(fn($r) => $r->type === 'talent')->map(fn($r) => [
                 'name' => $r->name,
                 'profile_image' => $r->profile_image_url ?: null,
                 'header_image' => ($r->getAttributes()['header_image'] && $r->getAttributes()['header_image'] !== 'none') ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
+                'guest_url' => $r->getGuestUrl() ?: null,
             ])->values()->toArray(),
             'videos' => $event->relationLoaded('approvedVideos') ? $event->approvedVideos->take(3)->map(fn($v) => [
                 'youtube_url' => $v->youtube_url,
@@ -481,11 +483,17 @@
                                          class="block cursor-pointer">
                                         <div class="event-item bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-600"
                                             :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
-                                            <div class="flex">
+                                            <div class="flex" :class="isRtl ? 'flex-row-reverse' : ''">
                                                 {{-- Content Section --}}
                                                 <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
                                                     <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
-                                                    <div v-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                                    <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 hover:opacity-80 transition-opacity">
+                                                        <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                                    </a>
+                                                    <div v-else-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
                                                         <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
                                                             <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
                                                         </svg>
@@ -558,7 +566,7 @@
                                         </div>
 
                                         {{-- Venue Badge --}}
-                                        <div v-if="event.venue_name" class="flex items-center gap-4">
+                                        <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="flex items-center gap-4 hover:opacity-80 transition-opacity">
                                             <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
                                                 <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
                                                 <svg v-else width="28" height="28" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
@@ -569,6 +577,15 @@
                                             <svg class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" :class="isRtl ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
                                             </svg>
+                                        </a>
+                                        <div v-else-if="event.venue_name" class="flex items-center gap-4">
+                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                                                <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
+                                                <svg v-else width="28" height="28" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
+                                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
+                                                </svg>
+                                            </div>
+                                            <span class="text-lg font-semibold text-gray-900 dark:text-white truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
                                         </div>
 
                                         {{-- Talent Avatars + Names --}}
@@ -581,7 +598,11 @@
                                                     </div>
                                                 </template>
                                             </div>
-                                            <span class="text-base text-gray-600 dark:text-gray-300 truncate" v-text="event.talent.map(t => t.name).join(', ')"></span>
+                                            <template v-for="(t, tIndex) in event.talent" :key="'tn-' + tIndex">
+                                                <span v-if="tIndex > 0" class="text-base text-gray-600 dark:text-gray-300">, </span>
+                                                <a v-if="t.guest_url" :href="t.guest_url" class="text-base text-gray-600 dark:text-gray-300 hover:opacity-80 transition-opacity truncate" v-text="t.name"></a>
+                                                <span v-else class="text-base text-gray-600 dark:text-gray-300 truncate" v-text="t.name"></span>
+                                            </template>
                                             <svg class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" :class="isRtl ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
                                             </svg>
@@ -601,7 +622,7 @@
                                         </div>
 
                                         {{-- Recent Comments --}}
-                                        <div v-if="event.recent_comments && event.recent_comments.length > 0" class="space-y-1.5">
+                                        <div v-if="event.recent_comments && event.recent_comments.length > 0" class="space-y-1.5" :dir="isRtl ? 'rtl' : 'ltr'">
                                             <div v-for="(comment, cIdx) in event.recent_comments" :key="'c-' + cIdx"
                                                  class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
                                                 <svg class="h-4 w-4 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
@@ -612,18 +633,18 @@
                                         </div>
 
                                         {{-- Mini Timeline for Parts --}}
-                                        <div v-if="event.parts && event.parts.length > 0">
-                                            <div class="relative" :class="isRtl ? 'pr-2' : 'pl-2'">
-                                                <div class="absolute top-1 bottom-1 w-0.5" :class="isRtl ? 'right-0' : 'left-0'" :style="'background-color: {{ $accentColor }}30'"></div>
+                                        <div v-if="event.parts && event.parts.length > 0" :dir="isRtl ? 'rtl' : 'ltr'">
+                                            <div class="relative ps-2">
+                                                <div class="absolute top-1 bottom-1 w-0.5 start-0" :style="'background-color: {{ $accentColor }}30'"></div>
                                                 <div class="space-y-2">
-                                                    <div v-for="(part, partIndex) in event.parts.slice(0, 4)" :key="'p-' + partIndex" class="relative flex items-start gap-2" :class="isRtl ? 'flex-row-reverse' : ''">
-                                                        <div class="absolute top-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" :class="isRtl ? '-right-[3px]' : '-left-[3px]'" :style="'background-color: {{ $accentColor }}'"></div>
-                                                        <div :class="isRtl ? 'pr-3' : 'pl-3'">
+                                                    <div v-for="(part, partIndex) in event.parts.slice(0, 4)" :key="'p-' + partIndex" class="relative flex items-start gap-2">
+                                                        <div class="absolute top-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 -start-[3px]" :style="'background-color: {{ $accentColor }}'"></div>
+                                                        <div class="ps-3">
                                                             <span class="text-sm text-gray-700 dark:text-gray-300" v-text="part.name"></span>
                                                             <span v-if="part.start_time" class="text-xs ms-1 text-gray-400 dark:text-gray-500" v-text="part.start_time"></span>
                                                         </div>
                                                     </div>
-                                                    <div v-if="event.parts.length > 4" class="text-xs text-gray-400 dark:text-gray-500" :class="isRtl ? 'pr-3' : 'pl-3'">
+                                                    <div v-if="event.parts.length > 4" class="text-xs text-gray-400 dark:text-gray-500 ps-3">
                                                         +<span v-text="event.parts.length - 4"></span> {{ __('messages.more') }}
                                                     </div>
                                                 </div>
@@ -734,7 +755,7 @@
                                     </div>
 
                                     {{-- Venue Badge --}}
-                                    <div v-if="event.venue_name" class="flex items-center gap-4">
+                                    <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="flex items-center gap-4 hover:opacity-80 transition-opacity">
                                         <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
                                             <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
                                             <svg v-else width="28" height="28" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
@@ -745,6 +766,15 @@
                                         <svg class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" :class="isRtl ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
                                         </svg>
+                                    </a>
+                                    <div v-else-if="event.venue_name" class="flex items-center gap-4">
+                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                                            <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
+                                            <svg v-else width="28" height="28" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
+                                            </svg>
+                                        </div>
+                                        <span class="text-lg font-semibold text-gray-900 dark:text-white truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
                                     </div>
 
                                     {{-- Talent Avatars + Names --}}
@@ -757,7 +787,11 @@
                                                 </div>
                                             </template>
                                         </div>
-                                        <span class="text-base text-gray-600 dark:text-gray-300 truncate" v-text="event.talent.map(t => t.name).join(', ')"></span>
+                                        <template v-for="(t, tIndex) in event.talent" :key="'tn2-' + tIndex">
+                                            <span v-if="tIndex > 0" class="text-base text-gray-600 dark:text-gray-300">, </span>
+                                            <a v-if="t.guest_url" :href="t.guest_url" class="text-base text-gray-600 dark:text-gray-300 hover:opacity-80 transition-opacity truncate" v-text="t.name"></a>
+                                            <span v-else class="text-base text-gray-600 dark:text-gray-300 truncate" v-text="t.name"></span>
+                                        </template>
                                         <svg class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" :class="isRtl ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
                                         </svg>
@@ -777,7 +811,7 @@
                                     </div>
 
                                     {{-- Recent Comments --}}
-                                    <div v-if="event.recent_comments && event.recent_comments.length > 0" class="space-y-1.5">
+                                    <div v-if="event.recent_comments && event.recent_comments.length > 0" class="space-y-1.5" :dir="isRtl ? 'rtl' : 'ltr'">
                                         <div v-for="(comment, cIdx) in event.recent_comments" :key="'c-' + cIdx"
                                              class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
                                             <svg class="h-4 w-4 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
@@ -788,18 +822,18 @@
                                     </div>
 
                                     {{-- Mini Timeline for Parts --}}
-                                    <div v-if="event.parts && event.parts.length > 0">
-                                        <div class="relative" :class="isRtl ? 'pr-2' : 'pl-2'">
-                                            <div class="absolute top-1 bottom-1 w-0.5" :class="isRtl ? 'right-0' : 'left-0'" :style="'background-color: {{ $accentColor }}30'"></div>
+                                    <div v-if="event.parts && event.parts.length > 0" :dir="isRtl ? 'rtl' : 'ltr'">
+                                        <div class="relative ps-2">
+                                            <div class="absolute top-1 bottom-1 w-0.5 start-0" :style="'background-color: {{ $accentColor }}30'"></div>
                                             <div class="space-y-2">
-                                                <div v-for="(part, partIndex) in event.parts.slice(0, 4)" :key="'p-' + partIndex" class="relative flex items-start gap-2" :class="isRtl ? 'flex-row-reverse' : ''">
-                                                    <div class="absolute top-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" :class="isRtl ? '-right-[3px]' : '-left-[3px]'" :style="'background-color: {{ $accentColor }}'"></div>
-                                                    <div :class="isRtl ? 'pr-3' : 'pl-3'">
+                                                <div v-for="(part, partIndex) in event.parts.slice(0, 4)" :key="'p-' + partIndex" class="relative flex items-start gap-2">
+                                                    <div class="absolute top-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 -start-[3px]" :style="'background-color: {{ $accentColor }}'"></div>
+                                                    <div class="ps-3">
                                                         <span class="text-sm text-gray-700 dark:text-gray-300" v-text="part.name"></span>
                                                         <span v-if="part.start_time" class="text-xs ms-1 text-gray-400 dark:text-gray-500" v-text="part.start_time"></span>
                                                     </div>
                                                 </div>
-                                                <div v-if="event.parts.length > 4" class="text-xs text-gray-400 dark:text-gray-500" :class="isRtl ? 'pr-3' : 'pl-3'">
+                                                <div v-if="event.parts.length > 4" class="text-xs text-gray-400 dark:text-gray-500 ps-3">
                                                     +<span v-text="event.parts.length - 4"></span> {{ __('messages.more') }}
                                                 </div>
                                             </div>
@@ -882,15 +916,13 @@
 
             {{-- Past Events Section --}}
             <div v-if="flatPastEvents.length > 0" class="mt-8">
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                    <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ __('messages.past_events') }}</h2>
-                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                </div>
+                <h2 class="text-2xl font-semibold leading-6 text-gray-900 dark:text-gray-100 mb-6">
+                    {{ __('messages.past_events') }}
+                </h2>
                 <div class="space-y-4">
                     <template v-for="event in flatPastEvents" :key="'past-' + event.uniqueKey">
                         <div @click="navigateToEvent(event, $event)" class="block cursor-pointer">
-                            <div class="rounded-2xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white dark:bg-gray-800 opacity-75 hover:opacity-100">
+                            <div class="rounded-2xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white dark:bg-gray-800">
                                 {{-- Side-by-side layout when flyer image exists --}}
                                 <template v-if="event.image_url">
                                     <div class="flex flex-col md:flex-row" :class="isRtl ? 'md:flex-row-reverse' : ''">
@@ -912,7 +944,7 @@
                                             </div>
 
                                             {{-- Venue Badge --}}
-                                            <div v-if="event.venue_name" class="flex items-center gap-4">
+                                            <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="flex items-center gap-4 hover:opacity-80 transition-opacity">
                                                 <div class="flex-shrink-0 w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
                                                     <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-10 h-10 rounded-lg object-cover" :alt="event.venue_name">
                                                     <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
@@ -923,11 +955,24 @@
                                                 <svg class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" :class="isRtl ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
                                                     <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
                                                 </svg>
+                                            </a>
+                                            <div v-else-if="event.venue_name" class="flex items-center gap-4">
+                                                <div class="flex-shrink-0 w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                                                    <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-10 h-10 rounded-lg object-cover" :alt="event.venue_name">
+                                                    <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
+                                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
+                                                    </svg>
+                                                </div>
+                                                <span class="text-sm font-semibold text-gray-900 dark:text-white truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
                                             </div>
 
                                             {{-- Talent --}}
                                             <div v-if="event.talent && event.talent.length > 0" class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                                                <span class="truncate" v-text="event.talent.map(t => t.name).join(', ')"></span>
+                                                <template v-for="(t, tIndex) in event.talent" :key="'ptn-' + tIndex">
+                                                    <span v-if="tIndex > 0">, </span>
+                                                    <a v-if="t.guest_url" :href="t.guest_url" class="hover:opacity-80 transition-opacity truncate" v-text="t.name"></a>
+                                                    <span v-else class="truncate" v-text="t.name"></span>
+                                                </template>
                                             </div>
 
                                             {{-- Video thumbnails --}}
@@ -984,7 +1029,7 @@
                                         </div>
 
                                         {{-- Venue Badge --}}
-                                        <div v-if="event.venue_name" class="flex items-center gap-4">
+                                        <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="flex items-center gap-4 hover:opacity-80 transition-opacity">
                                             <div class="flex-shrink-0 w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
                                                 <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-10 h-10 rounded-lg object-cover" :alt="event.venue_name">
                                                 <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
@@ -995,11 +1040,24 @@
                                             <svg class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" :class="isRtl ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
                                             </svg>
+                                        </a>
+                                        <div v-else-if="event.venue_name" class="flex items-center gap-4">
+                                            <div class="flex-shrink-0 w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                                                <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-10 h-10 rounded-lg object-cover" :alt="event.venue_name">
+                                                <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
+                                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
+                                                </svg>
+                                            </div>
+                                            <span class="text-sm font-semibold text-gray-900 dark:text-white truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
                                         </div>
 
                                         {{-- Talent --}}
                                         <div v-if="event.talent && event.talent.length > 0" class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                                            <span class="truncate" v-text="event.talent.map(t => t.name).join(', ')"></span>
+                                            <template v-for="(t, tIndex) in event.talent" :key="'ptn2-' + tIndex">
+                                                <span v-if="tIndex > 0">, </span>
+                                                <a v-if="t.guest_url" :href="t.guest_url" class="hover:opacity-80 transition-opacity truncate" v-text="t.name"></a>
+                                                <span v-else class="truncate" v-text="t.name"></span>
+                                            </template>
                                         </div>
 
                                         {{-- Video thumbnails --}}
@@ -1075,7 +1133,13 @@
                                     <div class="flex">
                                         <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
                                             <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
-                                            <div v-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                            <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 hover:opacity-80 transition-opacity">
+                                                <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                                                </svg>
+                                                <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                            </a>
+                                            <div v-else-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
                                                 <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
                                                     <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
                                                 </svg>
@@ -1109,19 +1173,23 @@
 
             {{-- Past Events Section --}}
             <div v-if="flatPastEvents.length > 0" class="mt-8">
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                    <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ __('messages.past_events') }}</h2>
-                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                </div>
+                <h2 class="text-2xl font-semibold leading-6 text-gray-900 dark:text-gray-100 mb-6">
+                    {{ __('messages.past_events') }}
+                </h2>
                 <div class="space-y-3">
                     <template v-for="event in flatPastEvents" :key="'list-mob-past-' + event.uniqueKey">
                         <div @click="navigateToEvent(event, $event)" class="block cursor-pointer">
-                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 opacity-75 hover:opacity-100">
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700">
                                 <div class="flex">
                                     <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
                                         <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
-                                        <div v-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                        <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 hover:opacity-80 transition-opacity">
+                                            <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                                            </svg>
+                                            <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                        </a>
+                                        <div v-else-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
                                             <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
                                             </svg>
@@ -1535,7 +1603,7 @@ const calendarApp = createApp({
             return this.eventsGroupedByDate.filter(group => !this.isPastEvent(group.date));
         },
         filteredPastEventsCount() {
-            return this.pastEvents.filter(event => this.isEventVisible(event)).length;
+            return this.flatPastEvents.length;
         },
         flatUpcomingEvents() {
             const events = [];
@@ -1551,15 +1619,66 @@ const calendarApp = createApp({
             return events;
         },
         flatPastEvents() {
-            return this.pastEvents.filter(event => this.isEventVisible(event));
+            // Start with server-provided past events (one-time)
+            const events = this.pastEvents.filter(event => this.isEventVisible(event));
+
+            // Also generate past occurrences from recurring events
+            let today = new Date();
+            if (this.userTimezone) {
+                const userNow = new Date().toLocaleString("en-US", {timeZone: this.userTimezone});
+                today = new Date(userNow);
+            }
+            today.setHours(0, 0, 0, 0);
+
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            this.filteredEvents.forEach(event => {
+                if (event.days_of_week && event.days_of_week.length > 0 && event.start_date) {
+                    const startDate = new Date(event.start_date + 'T00:00:00');
+                    // Go back max 90 days from today, but not before the event's start_date
+                    const ninetyDaysAgo = new Date(today);
+                    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+                    const rangeStart = new Date(Math.max(startDate.getTime(), ninetyDaysAgo.getTime()));
+
+                    const currentDate = new Date(rangeStart);
+
+                    while (currentDate <= yesterday) {
+                        const dayOfWeek = currentDate.getDay();
+                        if (event.days_of_week[dayOfWeek] === '1') {
+                            const dateStr = currentDate.getFullYear() + '-' +
+                                String(currentDate.getMonth() + 1).padStart(2, '0') + '-' +
+                                String(currentDate.getDate()).padStart(2, '0');
+
+                            // Check recurring end conditions
+                            if (this.shouldIncludePastDate(event, dateStr)) {
+                                events.push({
+                                    ...event,
+                                    occurrenceDate: dateStr,
+                                    uniqueKey: `${event.id}-past-${dateStr}`
+                                });
+                            }
+                        }
+                        currentDate.setDate(currentDate.getDate() + 1);
+                    }
+                }
+            });
+
+            // Sort reverse-chronologically, then by time within same date
+            return events.sort((a, b) => {
+                const dateComparison = (b.occurrenceDate || '').localeCompare(a.occurrenceDate || '');
+                if (dateComparison !== 0) return dateComparison;
+                if (a.local_starts_at && b.local_starts_at) {
+                    return new Date(a.local_starts_at) - new Date(b.local_starts_at);
+                }
+                return 0;
+            }).slice(0, 50);
         },
         pastEventsGroupedByDate() {
             // Group past events by date, sorted reverse-chronologically
             const grouped = {};
-            this.pastEvents.forEach(event => {
+            this.flatPastEvents.forEach(event => {
                 if (!event.occurrenceDate) return;
-                // Apply filters
-                if (!this.isEventVisible(event)) return;
                 const date = event.occurrenceDate;
                 if (!grouped[date]) {
                     grouped[date] = [];
@@ -1752,6 +1871,40 @@ const calendarApp = createApp({
             // This would need to be determined server-side and passed to the frontend
             // For now, return false as a placeholder
             return false;
+        },
+        shouldIncludePastDate(event, dateStr) {
+            const recurringEndType = event.recurring_end_type || 'never';
+
+            if (recurringEndType === 'never') {
+                return true;
+            }
+
+            if (recurringEndType === 'on_date' && event.recurring_end_value) {
+                const endDate = new Date(event.recurring_end_value + 'T00:00:00');
+                const checkDate = new Date(dateStr + 'T00:00:00');
+                return checkDate <= endDate;
+            }
+
+            if (recurringEndType === 'after_events' && event.recurring_end_value && event.start_date) {
+                const maxOccurrences = parseInt(event.recurring_end_value);
+                const startDate = new Date(event.start_date + 'T00:00:00');
+                const checkDate = new Date(dateStr + 'T00:00:00');
+
+                let occurrenceCount = 0;
+                const currentDate = new Date(startDate);
+
+                while (currentDate <= checkDate) {
+                    const dayOfWeek = currentDate.getDay();
+                    if (event.days_of_week && event.days_of_week[dayOfWeek] === '1') {
+                        occurrenceCount++;
+                    }
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+
+                return occurrenceCount <= maxOccurrences;
+            }
+
+            return true;
         },
         isPastEvent(dateStr) {
             // Parse the date string manually to avoid timezone issues
