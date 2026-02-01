@@ -8,6 +8,45 @@
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": ["Web", "Android", "iOS"],
+        "offers": [
+            {
+                "@type": "Offer",
+                "name": "Free",
+                "price": "0",
+                "priceCurrency": "USD",
+                "description": "Beautiful event calendars, mobile-optimized design, custom schedule URLs, team collaboration, venue maps, and Google Calendar sync.",
+                "availability": "https://schema.org/InStock"
+            },
+            {
+                "@type": "Offer",
+                "name": "Pro",
+                "price": "5.00",
+                "priceCurrency": "USD",
+                "billingIncrement": "MON",
+                "description": "Everything in Free plus remove branding, ticketing with QR check-ins, Stripe payments, multiple account users, event graphics, and REST API access.",
+                "availability": "https://schema.org/InStock",
+                "priceSpecification": {
+                    "@type": "UnitPriceSpecification",
+                    "price": "5.00",
+                    "priceCurrency": "USD",
+                    "unitText": "MONTH",
+                    "referenceQuantity": {
+                        "@type": "QuantitativeValue",
+                        "value": "1",
+                        "unitCode": "MON"
+                    }
+                }
+            }
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
             {

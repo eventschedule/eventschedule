@@ -1,5 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Creating Events - Event Schedule</x-slot>
+    <x-slot name="breadcrumbTitle">Creating Events</x-slot>
     <x-slot name="description">Learn how to add events to your schedule. Create events manually, import from text or images using AI, or sync from Google Calendar.</x-slot>
     <x-slot name="keywords">create events, add events, import events, AI event parsing, event calendar, flyer import</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>

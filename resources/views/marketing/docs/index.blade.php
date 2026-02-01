@@ -1,5 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Documentation - Event Schedule</x-slot>
+    <x-slot name="breadcrumbTitle">Documentation</x-slot>
     <x-slot name="description">Complete documentation for Event Schedule. User guides, selfhost installation, and developer resources.</x-slot>
     <x-slot name="keywords">event schedule documentation, user guide, selfhost installation, api documentation, developer docs</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>

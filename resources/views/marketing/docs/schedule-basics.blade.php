@@ -1,5 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Schedule Basics - Event Schedule</x-slot>
+    <x-slot name="breadcrumbTitle">Schedule Basics</x-slot>
     <x-slot name="description">Learn the basics of setting up your schedule in Event Schedule. Configure name, location, contact info, and schedule settings.</x-slot>
     <x-slot name="keywords">schedule setup, schedule settings, schedule configuration, event calendar basics, schedule types</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>

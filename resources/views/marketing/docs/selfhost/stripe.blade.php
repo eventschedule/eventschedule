@@ -1,5 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Stripe Integration Documentation - Event Schedule</x-slot>
+    <x-slot name="breadcrumbTitle">Stripe Integration</x-slot>
     <x-slot name="description">Set up Stripe payments for Event Schedule based on your deployment type: selfhosted or SaaS operator.</x-slot>
     <x-slot name="keywords">stripe integration, stripe connect, direct payments, laravel cashier, payment processing, ticket sales, subscription billing, selfhosted, invoice ninja</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>

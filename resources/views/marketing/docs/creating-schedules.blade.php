@@ -1,5 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Advanced Schedule Settings - Event Schedule</x-slot>
+    <x-slot name="breadcrumbTitle">Advanced Schedule Settings</x-slot>
     <x-slot name="description">Learn about advanced schedule features including subschedules, auto import, calendar integrations, and email settings.</x-slot>
     <x-slot name="keywords">subschedules, categories, auto import, google calendar, caldav, email settings, schedule configuration</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>

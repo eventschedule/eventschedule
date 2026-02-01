@@ -1,5 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Graphics Documentation - Event Schedule</x-slot>
+    <x-slot name="breadcrumbTitle">Event Graphics</x-slot>
     <x-slot name="description">Learn how to use the Event Graphics feature to generate shareable images and text for your upcoming events.</x-slot>
     <x-slot name="keywords">event graphics, social media sharing, event promotion, text templates, event schedule</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>

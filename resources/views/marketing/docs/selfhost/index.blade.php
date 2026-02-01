@@ -1,5 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Selfhost Documentation - Event Schedule</x-slot>
+    <x-slot name="breadcrumbTitle">Selfhost</x-slot>
     <x-slot name="description">Technical documentation for selfhosting Event Schedule. Learn how to install, configure SaaS mode, set up Stripe payments, and enable Google Calendar sync.</x-slot>
     <x-slot name="keywords">selfhost event schedule, installation guide, saas setup, stripe integration, google calendar sync</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>

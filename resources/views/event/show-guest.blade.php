@@ -34,7 +34,7 @@
   @endif
 
     {{-- Breadcrumb Row --}}
-    <div class="container mx-auto px-5 pt-8">
+    <div class="container mx-auto px-5 pt-4 pb-2">
       @php
         $backUrl = route('role.view_guest', ['subdomain' => $role->subdomain]);
         $queryParams = [];
@@ -66,202 +66,172 @@
           </a>
         @endif
       </div>
-
-      {{-- Title + CTA Row --}}
-      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mt-3 mb-8">
-        <h1
-          class="text-gray-900 dark:text-gray-100 text-[32px] sm:text-[44px] leading-snug font-semibold"
-          dir="auto"
-        >
-          {{ $translation ? $translation->name_translated : $event->translatedName() }}
-        </h1>
-
-        <div style="font-family: sans-serif" class="relative inline-block text-left flex-shrink-0 hidden sm:block">
-        @if ($event->canSellTickets($date) || $event->registration_url)
-          @if (request()->get('tickets') !== 'true')
-            <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank"' : '' }}
-              @if ($event->payment_method === 'payment_url' && $event->user && $event->user->paymentUrlMobileOnly() && ! is_mobile())
-                onclick="alert('{{ __('messages.payment_url_mobile_only') }}'); return false;"
-              @endif
-            >
-                <button type="button"
-                      class="min-w-[180px] inline-flex w-full justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm hover:opacity-90"
-                      style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-                  {{ $event->registration_url ? __('messages.view_event') : ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets')) }}
-              </button>
-            </a>
-          @endif
-        @else
-              <button type="button"
-                  onclick="onPopUpClick('calendar-pop-up-menu', event)"
-                  class="inline-flex w-full justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm hover:opacity-90"
-                  style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
-                  id="menu-button" aria-expanded="true" aria-haspopup="true">
-              {{ __('messages.add_to_calendar') }}
-              <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-              </svg>
-              </button>
-
-            {{-- Desktop calendar dropdown --}}
-            <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-56 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-                <div class="py-1" role="none" onclick="onPopUpClick('calendar-pop-up-menu', event)">
-                    <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-0">
-                        <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
-                        </svg>
-                        Google Calendar
-                    </a>
-                    <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-1">
-                        <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
-                        </svg>
-                        Apple Calendar
-                    </a>
-                    <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-2">
-                        <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
-                        </svg>
-                        Microsoft Outlook
-                    </a>
-                </div>
-            </div>
-
-            {{-- Mobile calendar bottom sheet --}}
-            <div id="calendar-mobile-sheet" class="hidden fixed inset-0 z-50 sm:hidden">
-              <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75" onclick="document.getElementById('calendar-mobile-sheet').classList.add('hidden')"></div>
-              <div class="fixed inset-x-0 bottom-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl">
-                <div class="flex justify-center py-3">
-                  <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
-                </div>
-                <div class="px-6 pb-6 space-y-1">
-                  <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                      <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
-                    </svg>
-                    Google Calendar
-                  </a>
-                  <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                      <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
-                    </svg>
-                    Apple Calendar
-                  </a>
-                  <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                      <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
-                    </svg>
-                    Microsoft Outlook
-                  </a>
-                </div>
-              </div>
-            </div>
-        @endif
-        </div>
-      </div>
     </div>
 
-    {{-- Event Details Strip --}}
+    {{-- Hero Image Banner --}}
+    @if ($event->flyer_image_url && request()->get('tickets') !== 'true')
+    <div class="container mx-auto px-5 mb-6">
+      <img src="{{ $event->flyer_image_url }}" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}" class="w-full rounded-xl max-h-[400px] object-cover"/>
+    </div>
+    @endif
+
+    {{-- Event Header --}}
     <div class="container mx-auto px-5 mb-10">
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 sm:p-6">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          @if (($event->venue && $event->venue->name) || $event->getEventUrlDomain())
-          <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ $accentColor }}15;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
-                <path d="M8.17 2.76C9.39 2.26 10.69 2 12 2C13.31 2 14.61 2.26 15.83 2.76C17.04 3.26 18.14 4 19.07 4.93C20 5.86 20.74 6.96 21.24 8.17C21.74 9.39 22 10.69 22 12C22 14.65 20.95 17.2 19.07 19.07C17.2 20.95 14.65 22 12 22C10.69 22 9.39 21.74 8.17 21.24C6.96 20.74 5.86 20 4.93 19.07C3.05 17.2 2 14.65 2 12C2 9.35 3.05 6.8 4.93 4.93C5.86 4 6.96 3.26 8.17 2.76M12 17L13.56 13.58L17 12L13.56 10.44L12 7L10.43 10.44L7 12L10.43 13.58L12 17Z" />
-              </svg>
-            </div>
-            <div class="min-w-0">
-              <p class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('messages.venue') }}</p>
-              @if ($event->venue && $event->venue->translatedName())
-                @if ($event->venue->isClaimed())
-                  @php
-                    $venueUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
-                    $queryParams = [];
-                    if (request('category')) $queryParams['category'] = request('category');
-                    if (request('schedule')) $queryParams['schedule'] = request('schedule');
-                    if (request('date')) {
-                      $date = request('date');
-                      if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-                        $dateParts = explode('-', $date);
-                        $queryParams['month'] = (int)$dateParts[1];
-                        $queryParams['year'] = (int)$dateParts[0];
-                      }
-                    } else {
-                      if (request('month')) $queryParams['month'] = request('month');
-                      if (request('year')) $queryParams['year'] = request('year');
-                    }
-                    if (!empty($queryParams)) {
-                      $venueUrl .= '?' . http_build_query($queryParams);
-                    }
-                  @endphp
-                  <a href="{{ $venueUrl }}" class="text-sm font-medium text-gray-900 dark:text-gray-100 hover:underline">
-                    {{ $event->venue->translatedName() }}
+      <h1
+        class="text-gray-900 dark:text-gray-100 text-[32px] sm:text-[44px] leading-snug font-semibold mb-4"
+        dir="auto"
+      >
+        {{ $translation ? $translation->name_translated : $event->translatedName() }}
+      </h1>
+
+      {{-- Date/Time --}}
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-base text-gray-700 dark:text-gray-300 mb-2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="{{ $accentColor }}" class="flex-shrink-0" aria-hidden="true">
+          <path d="M7.75 2.5C7.75 2.08579 7.41421 1.75 7 1.75C6.58579 1.75 6.25 2.08579 6.25 2.5V4.07926C4.81067 4.19451 3.86577 4.47737 3.17157 5.17157C2.47737 5.86577 2.19451 6.81067 2.07926 8.25H21.9207C21.8055 6.81067 21.5226 5.86577 20.8284 5.17157C20.1342 4.47737 19.1893 4.19451 17.75 4.07926V2.5C17.75 2.08579 17.4142 1.75 17 1.75C16.5858 1.75 16.25 2.08579 16.25 2.5V4.0129C15.5847 4 14.839 4 14 4H10C9.16097 4 8.41527 4 7.75 4.0129V2.5Z" />
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M2 12C2 11.161 2 10.4153 2.0129 9.75H21.9871C22 10.4153 22 11.161 22 12V14C22 17.7712 22 19.6569 20.8284 20.8284C19.6569 22 17.7712 22 14 22H10C6.22876 22 4.34315 22 3.17157 20.8284C2 19.6569 2 17.7712 2 14V12ZM17 14C17.5523 14 18 13.5523 18 13C18 12.4477 17.5523 12 17 12C16.4477 12 16 12.4477 16 13C16 13.5523 16.4477 14 17 14ZM17 18C17.5523 18 18 17.5523 18 17C18 16.4477 17.5523 16 17 16C16.4477 16 16 16.4477 16 17C16 17.5523 16.4477 18 17 18ZM13 13C13 13.5523 12.5523 14 12 14C11.4477 14 11 13.5523 11 13C11 12.4477 11.4477 12 12 12C12.5523 12 13 12.4477 13 13ZM13 17C13 17.5523 12.5523 18 12 18C11.4477 18 11 17.5523 11 17C11 16.4477 11.4477 16 12 16C12.5523 16 13 16.4477 13 17ZM7 14C7.55228 14 8 13.5523 8 13C8 12.4477 7.55228 12 7 12C6.44772 12 6 12.4477 6 13C6 13.5523 6.44772 14 7 14ZM7 18C7.55228 18 8 17.5523 8 17C8 16.4477 7.55228 16 7 16C6.44772 16 6 16.4477 6 17C6 17.5523 6.44772 18 7 18Z" />
+        </svg>
+        @if ($event->isMultiDay())
+          <time datetime="{{ $event->getStartDateTime($date, true)->format('Y-m-d') }}">
+            {{ $event->getStartDateTime($date, true)->format($event->getDateTimeFormat(true)) }} - {{ $event->getStartDateTime($date, true)->addHours($event->duration)->format($event->getDateTimeFormat()) }}
+          </time>
+        @else
+          <time datetime="{{ $event->getStartDateTime($date, true)->format('Y-m-d') }}">
+            {{ $event->getStartDateTime($date, true)->format('F j, Y') }}
+          </time>
+          <span class="text-gray-400 dark:text-gray-500">|</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="{{ $accentColor }}" class="flex-shrink-0" aria-hidden="true">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM12.75 8C12.75 7.58579 12.4142 7.25 12 7.25C11.5858 7.25 11.25 7.58579 11.25 8V12C11.25 12.1989 11.329 12.3897 11.4697 12.5303L13.9697 15.0303C14.2626 15.3232 14.7374 15.3232 15.0303 15.0303C15.3232 14.7374 15.3232 14.2626 15.0303 13.9697L12.75 11.6893V8Z" />
+          </svg>
+          <time>{{ $event->getStartEndTime($date, $role->use_24_hour_time) }}</time>
+        @endif
+      </div>
+
+      {{-- Venue/Location --}}
+      @if (($event->venue && $event->venue->name) || $event->getEventUrlDomain())
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-base text-gray-700 dark:text-gray-300 mb-6">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="{{ $accentColor }}" class="flex-shrink-0" aria-hidden="true">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
+        </svg>
+        @if ($event->venue && $event->venue->translatedName())
+          @if ($event->venue->isClaimed())
+            @php
+              $venueUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
+              $queryParams = [];
+              if (request('category')) $queryParams['category'] = request('category');
+              if (request('schedule')) $queryParams['schedule'] = request('schedule');
+              if (request('date')) {
+                $date = request('date');
+                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                  $dateParts = explode('-', $date);
+                  $queryParams['month'] = (int)$dateParts[1];
+                  $queryParams['year'] = (int)$dateParts[0];
+                }
+              } else {
+                if (request('month')) $queryParams['month'] = request('month');
+                if (request('year')) $queryParams['year'] = request('year');
+              }
+              if (!empty($queryParams)) {
+                $venueUrl .= '?' . http_build_query($queryParams);
+              }
+            @endphp
+            <a href="{{ $venueUrl }}" class="hover:underline">{{ $event->venue->translatedName() }}</a>
+          @else
+            <span>{{ $event->venue->translatedName() }}</span>
+          @endif
+        @else
+          <span>{{ $event->getEventUrlDomain() }}</span>
+        @endif
+        @if ($event->venue && $event->venue->shortAddress())
+          <span class="text-gray-400 dark:text-gray-500">|</span>
+          <x-link href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank" hideIcon>
+            {{ $event->venue->shortAddress() }}
+          </x-link>
+        @endif
+      </div>
+      @endif
+
+      {{-- CTA Button --}}
+      <div style="font-family: sans-serif" class="relative inline-block text-left hidden sm:block">
+      @if ($event->canSellTickets($date) || $event->registration_url)
+        @if (request()->get('tickets') !== 'true')
+          <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank"' : '' }}
+            @if ($event->payment_method === 'payment_url' && $event->user && $event->user->paymentUrlMobileOnly() && ! is_mobile())
+              onclick="alert('{{ __('messages.payment_url_mobile_only') }}'); return false;"
+            @endif
+          >
+              <button type="button"
+                    class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm hover:opacity-90"
+                    style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                {{ $event->registration_url ? __('messages.view_event') : ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets')) }}
+            </button>
+          </a>
+        @endif
+      @else
+            <button type="button"
+                onclick="onPopUpClick('calendar-pop-up-menu', event)"
+                class="inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm hover:opacity-90"
+                style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
+                id="menu-button" aria-expanded="true" aria-haspopup="true">
+            {{ __('messages.add_to_calendar') }}
+            <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            </svg>
+            </button>
+
+          {{-- Desktop calendar dropdown --}}
+          <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-56 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+              <div class="py-1" role="none" onclick="onPopUpClick('calendar-pop-up-menu', event)">
+                  <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-0">
+                      <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
+                      </svg>
+                      Google Calendar
                   </a>
-                @else
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $event->venue->translatedName() }}</p>
-                @endif
-              @else
-                <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $event->getEventUrlDomain() }}</p>
-              @endif
-            </div>
-          </div>
-          @endif
-
-          @if ($event->venue)
-          <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ $accentColor }}15;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
-              </svg>
-            </div>
-            <div class="min-w-0">
-              <p class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('messages.location') }}</p>
-              <x-link href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank" hideIcon class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                {{ $event->venue->shortAddress() }}
-              </x-link>
-            </div>
-          </div>
-          @endif
-
-          <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ $accentColor }}15;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
-                <path d="M7.75 2.5C7.75 2.08579 7.41421 1.75 7 1.75C6.58579 1.75 6.25 2.08579 6.25 2.5V4.07926C4.81067 4.19451 3.86577 4.47737 3.17157 5.17157C2.47737 5.86577 2.19451 6.81067 2.07926 8.25H21.9207C21.8055 6.81067 21.5226 5.86577 20.8284 5.17157C20.1342 4.47737 19.1893 4.19451 17.75 4.07926V2.5C17.75 2.08579 17.4142 1.75 17 1.75C16.5858 1.75 16.25 2.08579 16.25 2.5V4.0129C15.5847 4 14.839 4 14 4H10C9.16097 4 8.41527 4 7.75 4.0129V2.5Z" />
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M2 12C2 11.161 2 10.4153 2.0129 9.75H21.9871C22 10.4153 22 11.161 22 12V14C22 17.7712 22 19.6569 20.8284 20.8284C19.6569 22 17.7712 22 14 22H10C6.22876 22 4.34315 22 3.17157 20.8284C2 19.6569 2 17.7712 2 14V12ZM17 14C17.5523 14 18 13.5523 18 13C18 12.4477 17.5523 12 17 12C16.4477 12 16 12.4477 16 13C16 13.5523 16.4477 14 17 14ZM17 18C17.5523 18 18 17.5523 18 17C18 16.4477 17.5523 16 17 16C16.4477 16 16 16.4477 16 17C16 17.5523 16.4477 18 17 18ZM13 13C13 13.5523 12.5523 14 12 14C11.4477 14 11 13.5523 11 13C11 12.4477 11.4477 12 12 12C12.5523 12 13 12.4477 13 13ZM13 17C13 17.5523 12.5523 18 12 18C11.4477 18 11 17.5523 11 17C11 16.4477 11.4477 16 12 16C12.5523 16 13 16.4477 13 17ZM7 14C7.55228 14 8 13.5523 8 13C8 12.4477 7.55228 12 7 12C6.44772 12 6 12.4477 6 13C6 13.5523 6.44772 14 7 14ZM7 18C7.55228 18 8 17.5523 8 17C8 16.4477 7.55228 16 7 16C6.44772 16 6 16.4477 6 17C6 17.5523 6.44772 18 7 18Z" />
-              </svg>
-            </div>
-            <div class="min-w-0">
-              <p class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('messages.date') }}</p>
-              @if ($event->isMultiDay())
-                <time datetime="{{ $event->getStartDateTime($date, true)->format('Y-m-d') }}" class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  {{ $event->getStartDateTime($date, true)->format($event->getDateTimeFormat(true)) }} - {{ $event->getStartDateTime($date, true)->addHours($event->duration)->format($event->getDateTimeFormat()) }}
-                </time>
-              @else
-                <time datetime="{{ $event->getStartDateTime($date, true)->format('Y-m-d') }}" class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  {{ $event->getStartDateTime($date, true)->format('F j, Y') }}
-                </time>
-              @endif
-            </div>
+                  <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-1">
+                      <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
+                      </svg>
+                      Apple Calendar
+                  </a>
+                  <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-2">
+                      <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
+                      </svg>
+                      Microsoft Outlook
+                  </a>
+              </div>
           </div>
 
-          @if (! $event->isMultiDay())
-          <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ $accentColor }}15;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM12.75 8C12.75 7.58579 12.4142 7.25 12 7.25C11.5858 7.25 11.25 7.58579 11.25 8V12C11.25 12.1989 11.329 12.3897 11.4697 12.5303L13.9697 15.0303C14.2626 15.3232 14.7374 15.3232 15.0303 15.0303C15.3232 14.7374 15.3232 14.2626 15.0303 13.9697L12.75 11.6893V8Z" />
-              </svg>
-            </div>
-            <div class="min-w-0">
-              <p class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('messages.time') }}</p>
-              <time class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                {{ $event->getStartEndTime($date, $role->use_24_hour_time) }}
-              </time>
+          {{-- Mobile calendar bottom sheet --}}
+          <div id="calendar-mobile-sheet" class="hidden fixed inset-0 z-50 sm:hidden">
+            <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75" onclick="document.getElementById('calendar-mobile-sheet').classList.add('hidden')"></div>
+            <div class="fixed inset-x-0 bottom-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl">
+              <div class="flex justify-center py-3">
+                <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+              </div>
+              <div class="px-6 pb-6 space-y-1">
+                <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
+                  </svg>
+                  Google Calendar
+                </a>
+                <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
+                  </svg>
+                  Apple Calendar
+                </a>
+                <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
+                  </svg>
+                  Microsoft Outlook
+                </a>
+              </div>
             </div>
           </div>
-          @endif
-        </div>
+      @endif
       </div>
     </div>
 
@@ -619,12 +589,6 @@
           </div>
 
           @endforeach
-
-          @if ($event->flyer_image_url)
-          <div class="mb-6">
-            <img src="{{ $event->flyer_image_url }}" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}" class="block rounded-lg shadow-sm"/>
-          </div>
-          @endif
 
 
         </div>

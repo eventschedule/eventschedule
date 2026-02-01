@@ -154,6 +154,8 @@ $builderProps = [
         'block_social_links' => __('messages.block_social_links'),
         'block_profile_image' => __('messages.block_profile_image'),
         'block_header_banner' => __('messages.block_header_banner'),
+        'style' => __('messages.style'),
+        'settings' => __('messages.settings'),
     ],
 ];
 @endphp

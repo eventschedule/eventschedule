@@ -4,6 +4,29 @@
     <x-slot name="keywords">about event schedule, event management platform, open source event calendar, performer schedule app, venue calendar software, event curator tools</x-slot>
     <x-slot name="socialImage">social/about.png</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Event Schedule",
+        "url": "{{ config('app.url') }}",
+        "logo": "{{ config('app.url') }}/images/dark_logo.png",
+        "foundingDate": "2024",
+        "description": "Event Schedule helps talent, venues, and organizers share events and sell tickets. Open source, privacy-focused, and community-driven.",
+        "knowsAbout": ["Event Management", "Ticketing", "Calendar Synchronization", "Open Source Software"],
+        "sameAs": [
+            "https://github.com/eventschedule/eventschedule",
+            "https://www.facebook.com/appeventschedule",
+            "https://www.instagram.com/eventschedule/",
+            "https://youtube.com/@EventSchedule",
+            "https://x.com/ScheduleEvent",
+            "https://www.linkedin.com/company/eventschedule/"
+        ]
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->

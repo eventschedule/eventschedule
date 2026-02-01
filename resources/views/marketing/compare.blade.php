@@ -2,6 +2,25 @@
     <x-slot name="title">Event Schedule vs Eventbrite, Luma & Ticket Tailor | Comparison</x-slot>
     <x-slot name="description">Compare Event Schedule with Eventbrite, Luma, and Ticket Tailor. See how our 0% platform fees, open source platform, and AI features stack up.</x-slot>
     <x-slot name="keywords">event schedule comparison, eventbrite alternative, luma alternative, ticket tailor alternative, free event platform, no platform fees ticketing</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
+
+    <x-slot name="structuredData">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": ["WebPage", "ItemPage"],
+        "name": "Event Schedule vs Eventbrite, Luma & Ticket Tailor",
+        "description": "Compare Event Schedule with Eventbrite, Luma, and Ticket Tailor. See how our 0% platform fees, open source platform, and AI features stack up.",
+        "url": "{{ config('app.url') }}/compare",
+        "mainEntity": {
+            "@type": "SoftwareApplication",
+            "name": "Event Schedule",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": ["Web", "Android", "iOS"]
+        }
+    }
+    </script>
+    </x-slot>
 
     <style>
         .compare-table-wrapper {
