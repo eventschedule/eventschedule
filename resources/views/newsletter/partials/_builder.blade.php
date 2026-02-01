@@ -65,8 +65,11 @@ if (isset($newsletter) && $newsletter->exists) {
     $abTestHtml = view('newsletter.partials._ab-test-panel', ['newsletter' => $newsletter, 'role' => $role])->render();
 }
 
+$roleSocialLinks = \App\Models\Newsletter::buildSocialLinksForRole($role);
+
 $builderProps = [
     'initialBlocks' => $initialBlocks,
+    'roleSocialLinks' => $roleSocialLinks,
     'initialTemplate' => $newsletter->template ?? 'modern',
     'initialSubject' => $newsletter->subject ?? '',
     'initialStyleSettings' => $newsletter->style_settings ?? \App\Models\Newsletter::defaultStyleSettings(),
@@ -92,6 +95,7 @@ $builderProps = [
         'preview' => __('messages.preview'),
         'edit_blocks' => __('messages.edit_blocks'),
         'test_send' => __('messages.test_send'),
+        'send_a_test' => __('messages.send_a_test'),
         'schedule_newsletter' => __('messages.schedule_newsletter'),
         'save' => __('messages.save'),
         'send_now' => __('messages.send_now'),
@@ -156,6 +160,7 @@ $builderProps = [
         'block_header_banner' => __('messages.block_header_banner'),
         'style' => __('messages.style'),
         'settings' => __('messages.settings'),
+        'done' => __('messages.done'),
     ],
 ];
 @endphp
