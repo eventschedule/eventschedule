@@ -116,27 +116,27 @@
                     style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
                     id="menu-button" aria-expanded="true" aria-haspopup="true">
                 {{ __('messages.add_to_calendar') }}
-                <svg class="-mr-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                 </svg>
                 </button>
 
-              <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute right-0 z-10 mt-2 w-40 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+              <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-40 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                   <div class="py-1" role="none" onclick="onPopUpClick('calendar-pop-up-menu', event)">
                       <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-0">
-                          <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                           <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
                           </svg>
                           Google
                       </a>
                       <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-1">
-                          <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                           <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
                           </svg>
                           Apple
                       </a>
                       <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-1">
-                          <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                           <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
                           </svg>
                           Microsoft
@@ -151,7 +151,7 @@
         <div class="flex flex-col sm:flex-row gap-4 items-center">
           @if (($event->venue && $event->venue->name) || $event->getEventUrlDomain())
           <div
-            class="flex flex-row gap-2 items-center relative text-white fill-white sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-white"
+            class="flex flex-row gap-2 items-center relative text-white fill-white sm:pe-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:end-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-white"
           >
             <svg
               width="24"
@@ -199,7 +199,7 @@
           @endif
           @if ($event->venue)
           <div
-            class="flex flex-row gap-2 items-center relative text-white fill-white sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-white"
+            class="flex flex-row gap-2 items-center relative text-white fill-white sm:pe-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:end-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-white"
           >
             <svg
               width="24"
@@ -221,7 +221,7 @@
           @endif
           @if ($event->isMultiDay())
           <div
-            class="flex flex-row gap-2 items-center relative text-white fill-white sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-white"
+            class="flex flex-row gap-2 items-center relative text-white fill-white sm:pe-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:end-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-white"
           >
             <svg
               width="24"
@@ -243,7 +243,7 @@
 
           @else
           <div
-            class="flex flex-row gap-2 items-center relative text-white fill-white sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-white"
+            class="flex flex-row gap-2 items-center relative text-white fill-white sm:pe-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:end-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-white"
           >
             <svg
               width="24"
@@ -317,7 +317,211 @@
             </div>
           </div>
           @endif
-          
+
+          @if ($event->parts->count() > 0)
+          <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-6 sm:px-8 mb-6 {{ $role->isRtl() ? 'rtl' : '' }}">
+            <h3 class="text-lg font-semibold text-[#33383C] dark:text-gray-100 mb-4 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+              {{ __('messages.agenda') }}
+            </h3>
+            @php
+              $hasTimes = $event->parts->contains(fn($part) => !empty($part->start_time));
+            @endphp
+            @if ($hasTimes)
+              {{-- Timed agenda: vertical timeline --}}
+              <div class="relative {{ $role->isRtl() ? 'pr-8' : 'pl-8' }}">
+                <div class="absolute {{ $role->isRtl() ? 'right-[11px]' : 'left-[11px]' }} top-2 bottom-2 w-0.5" style="background-color: {{ $accentColor }}33;"></div>
+                @foreach ($event->parts as $part)
+                <div class="relative mb-5 last:mb-0">
+                  <div class="absolute {{ $role->isRtl() ? '-right-8' : '-left-8' }} top-1.5 w-3 h-3 rounded-full border-2" style="background-color: {{ $accentColor }}; border-color: {{ $accentColor }};"></div>
+                  <div class="flex flex-col">
+                    @if ($part->start_time)
+                    <span class="text-xs font-medium mb-0.5" style="color: {{ $accentColor }};">
+                      {{ $part->start_time }}@if ($part->end_time) - {{ $part->end_time }}@endif
+                    </span>
+                    @endif
+                    <span class="text-[#33383C] dark:text-gray-100 font-medium">{{ $part->name }}</span>
+                    @if ($part->description)
+                    <span class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ $part->description }}</span>
+                    @endif
+                    @if ($part->approvedVideos->count() > 0)
+                    <div class="mt-2 space-y-2">
+                      @foreach ($part->approvedVideos as $video)
+                      <div class="rounded overflow-hidden">
+                        <iframe class="w-full" style="height:200px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                      </div>
+                      @endforeach
+                    </div>
+                    @endif
+                    @if ($part->approvedComments->count() > 0)
+                    <div class="mt-2 space-y-1">
+                      @foreach ($part->approvedComments as $comment)
+                      <div class="text-sm text-gray-600 dark:text-gray-400">
+                        <span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user?->name }}</span>: {{ $comment->comment }}
+                      </div>
+                      @endforeach
+                    </div>
+                    @endif
+                    @auth
+                    <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false }">
+                      <button @click="showVideo = !showVideo; showComment = false" class="text-xs flex items-center gap-1 hover:underline" style="color: {{ $accentColor }};">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                        {{ __('messages.add_video') }}
+                      </button>
+                      <button @click="showComment = !showComment; showVideo = false" class="text-xs flex items-center gap-1 hover:underline" style="color: {{ $accentColor }};">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
+                        {{ __('messages.add_comment') }}
+                      </button>
+                      <div x-show="showVideo" x-cloak class="mt-2 w-full">
+                        <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex gap-2">
+                          @csrf
+                          <input type="hidden" name="event_part_id" value="{{ $part->id }}">
+                          <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" required>
+                          <button type="submit" class="text-xs px-3 py-1 rounded text-white" style="background-color: {{ $accentColor }};">{{ __('messages.submit') }}</button>
+                        </form>
+                      </div>
+                      <div x-show="showComment" x-cloak class="mt-2 w-full">
+                        <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex gap-2">
+                          @csrf
+                          <input type="hidden" name="event_part_id" value="{{ $part->id }}">
+                          <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" rows="2" required></textarea>
+                          <button type="submit" class="text-xs px-3 py-1 rounded text-white self-end" style="background-color: {{ $accentColor }};">{{ __('messages.submit') }}</button>
+                        </form>
+                      </div>
+                    </div>
+                    @endauth
+                  </div>
+                </div>
+                @endforeach
+              </div>
+            @else
+              {{-- Untimed setlist: numbered list --}}
+              <div class="space-y-2">
+                @foreach ($event->parts as $index => $part)
+                <div class="flex items-start gap-3">
+                  <span class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background-color: {{ $accentColor }};">{{ $index + 1 }}</span>
+                  <div class="flex-1">
+                    <span class="text-[#33383C] dark:text-gray-100 font-medium">{{ $part->name }}</span>
+                    @if ($part->description)
+                    <span class="text-sm text-gray-500 dark:text-gray-400 block mt-0.5">{{ $part->description }}</span>
+                    @endif
+                    @if ($part->approvedVideos->count() > 0)
+                    <div class="mt-2 space-y-2">
+                      @foreach ($part->approvedVideos as $video)
+                      <div class="rounded overflow-hidden">
+                        <iframe class="w-full" style="height:200px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                      </div>
+                      @endforeach
+                    </div>
+                    @endif
+                    @if ($part->approvedComments->count() > 0)
+                    <div class="mt-2 space-y-1">
+                      @foreach ($part->approvedComments as $comment)
+                      <div class="text-sm text-gray-600 dark:text-gray-400">
+                        <span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user?->name }}</span>: {{ $comment->comment }}
+                      </div>
+                      @endforeach
+                    </div>
+                    @endif
+                    @auth
+                    <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false }">
+                      <button @click="showVideo = !showVideo; showComment = false" class="text-xs flex items-center gap-1 hover:underline" style="color: {{ $accentColor }};">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                        {{ __('messages.add_video') }}
+                      </button>
+                      <button @click="showComment = !showComment; showVideo = false" class="text-xs flex items-center gap-1 hover:underline" style="color: {{ $accentColor }};">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
+                        {{ __('messages.add_comment') }}
+                      </button>
+                      <div x-show="showVideo" x-cloak class="mt-2 w-full">
+                        <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex gap-2">
+                          @csrf
+                          <input type="hidden" name="event_part_id" value="{{ $part->id }}">
+                          <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" required>
+                          <button type="submit" class="text-xs px-3 py-1 rounded text-white" style="background-color: {{ $accentColor }};">{{ __('messages.submit') }}</button>
+                        </form>
+                      </div>
+                      <div x-show="showComment" x-cloak class="mt-2 w-full">
+                        <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex gap-2">
+                          @csrf
+                          <input type="hidden" name="event_part_id" value="{{ $part->id }}">
+                          <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" rows="2" required></textarea>
+                          <button type="submit" class="text-xs px-3 py-1 rounded text-white self-end" style="background-color: {{ $accentColor }};">{{ __('messages.submit') }}</button>
+                        </form>
+                      </div>
+                    </div>
+                    @endauth
+                  </div>
+                </div>
+                @endforeach
+              </div>
+            @endif
+          </div>
+          @endif
+
+          @php
+            $eventLevelVideos = $event->approvedVideos->whereNull('event_part_id');
+            $eventLevelComments = $event->approvedComments->whereNull('event_part_id');
+          @endphp
+          @if ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || (auth()->check() && $event->parts->count() == 0))
+          <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-6 sm:px-8 mb-6 {{ $role->isRtl() ? 'rtl' : '' }}">
+            <h3 class="text-lg font-semibold text-[#33383C] dark:text-gray-100 mb-4 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+              </svg>
+              {{ __('messages.fan_content') }}
+            </h3>
+            @if ($eventLevelVideos->count() > 0)
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              @foreach ($eventLevelVideos as $video)
+              <div class="rounded overflow-hidden">
+                <iframe class="w-full" style="height:200px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+              </div>
+              @endforeach
+            </div>
+            @endif
+            @if ($eventLevelComments->count() > 0)
+            <div class="space-y-2 mb-4">
+              @foreach ($eventLevelComments as $comment)
+              <div class="text-sm text-gray-600 dark:text-gray-400">
+                <span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user?->name }}</span>: {{ $comment->comment }}
+              </div>
+              @endforeach
+            </div>
+            @endif
+            @auth
+            @if ($event->parts->count() == 0)
+            <div class="flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false }">
+              <button @click="showVideo = !showVideo; showComment = false" class="text-xs flex items-center gap-1 hover:underline" style="color: {{ $accentColor }};">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                {{ __('messages.add_video') }}
+              </button>
+              <button @click="showComment = !showComment; showVideo = false" class="text-xs flex items-center gap-1 hover:underline" style="color: {{ $accentColor }};">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
+                {{ __('messages.add_comment') }}
+              </button>
+              <div x-show="showVideo" x-cloak class="w-full mt-2">
+                <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex gap-2">
+                  @csrf
+                  <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" required>
+                  <button type="submit" class="text-xs px-3 py-1 rounded text-white" style="background-color: {{ $accentColor }};">{{ __('messages.submit') }}</button>
+                </form>
+              </div>
+              <div x-show="showComment" x-cloak class="w-full mt-2">
+                <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex gap-2">
+                  @csrf
+                  <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" rows="2" required></textarea>
+                  <button type="submit" class="text-xs px-3 py-1 rounded text-white self-end" style="background-color: {{ $accentColor }};">{{ __('messages.submit') }}</button>
+                </form>
+              </div>
+            </div>
+            @endif
+            @endauth
+          </div>
+          @endif
+
           @foreach ($event->members() as $each)
             @if (! $each->isClaimed() && ! $each->getFirstVideoUrl())
               @continue       
@@ -592,17 +796,17 @@
           </h4>
           <div class="flex flex-row gap-3">          
           <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" title="Google">
-              <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
               </svg>
             </a>
             <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" title="Apple">
-              <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
               </svg>
             </a>
             <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" title="Microsoft">
-              <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
               </svg>
             </a>

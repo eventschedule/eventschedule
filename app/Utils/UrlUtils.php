@@ -59,9 +59,10 @@ class UrlUtils
     {
         $parsedUrl = parse_url($url);
 
-        if (isset($parsedUrl['host']) && (strpos($parsedUrl['host'], 'youtube.com') !== false || strpos($parsedUrl['host'], 'youtu.be') !== false)) {
+        $host = isset($parsedUrl['host']) ? strtolower($parsedUrl['host']) : '';
+        if (in_array($host, ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'])) {
 
-            if ($parsedUrl['host'] == 'youtu.be') {
+            if ($host === 'youtu.be') {
                 $videoId = ltrim($parsedUrl['path'], '/');
             } else {
                 // Check path for video ID first
@@ -86,7 +87,7 @@ class UrlUtils
                 }
             }
 
-            if (isset($videoId) && $videoId) {
+            if (isset($videoId) && $videoId && preg_match('/^[a-zA-Z0-9_-]{11}$/', $videoId)) {
                 return 'https://www.youtube.com/embed/'.$videoId;
             }
         }
