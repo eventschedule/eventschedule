@@ -68,7 +68,7 @@
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">1. Google Cloud Console Setup</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to the <a href="https://console.cloud.google.com/" target="_blank" class="text-emerald-400 hover:text-emerald-300">Google Cloud Console</a></li>
+                                <li>Go to the <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:text-emerald-300">Google Cloud Console</a></li>
                                 <li>Create a new project or select an existing one</li>
                                 <li>Enable the Google Calendar API:
                                     <ul class="doc-list mt-2 mb-2">

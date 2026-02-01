@@ -1157,7 +1157,7 @@ class EventController extends Controller
 
         $request->validate([
             'youtube_url' => ['required', 'string', 'url', 'max:500'],
-            'event_part_id' => ['nullable', 'integer'],
+            'event_part_id' => ['nullable', 'string'],
         ]);
 
         $youtubeUrl = trim($request->input('youtube_url'));
@@ -1169,21 +1169,26 @@ class EventController extends Controller
 
         $eventPartId = $request->input('event_part_id');
         if ($eventPartId) {
+            $eventPartId = UrlUtils::decodeId($eventPartId);
             $part = $event->parts->firstWhere('id', $eventPartId);
             if (! $part) {
                 return redirect()->back()->with('error', __('messages.not_authorized'));
             }
         }
 
-        // Check for duplicate
-        $query = EventVideo::where('event_id', $event->id)
-            ->where('youtube_url', $youtubeUrl);
+        // Check for duplicate by video ID (normalizes different URL formats)
+        $submittedVideoId = basename(parse_url($embedUrl, PHP_URL_PATH));
+        $query = EventVideo::where('event_id', $event->id);
         if ($eventPartId) {
             $query->where('event_part_id', $eventPartId);
         } else {
             $query->whereNull('event_part_id');
         }
-        $exists = $query->exists();
+        $exists = $query->get()->contains(function ($video) use ($submittedVideoId) {
+            $existingEmbed = UrlUtils::getYouTubeEmbed($video->youtube_url);
+
+            return $existingEmbed && basename(parse_url($existingEmbed, PHP_URL_PATH)) === $submittedVideoId;
+        });
 
         if ($exists) {
             return redirect()->back()->with('error', __('messages.video_already_submitted'));
@@ -1207,13 +1212,14 @@ class EventController extends Controller
 
         $request->validate([
             'comment' => ['required', 'string', 'max:1000'],
-            'event_part_id' => ['nullable', 'integer'],
+            'event_part_id' => ['nullable', 'string'],
         ]);
 
         $comment = strip_tags(trim($request->input('comment')));
 
         $eventPartId = $request->input('event_part_id');
         if ($eventPartId) {
+            $eventPartId = UrlUtils::decodeId($eventPartId);
             $part = $event->parts->firstWhere('id', $eventPartId);
             if (! $part) {
                 return redirect()->back()->with('error', __('messages.not_authorized'));

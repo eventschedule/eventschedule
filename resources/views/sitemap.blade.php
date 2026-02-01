@@ -415,6 +415,12 @@
         <changefreq>yearly</changefreq>
         <priority>0.5</priority>
     </url>
+    <url>
+        <loc>{{ url('/blog') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
     @endif
     @foreach($blogPosts as $post)
         <url>

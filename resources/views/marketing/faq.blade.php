@@ -573,7 +573,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Event Schedule is <a href="{{ marketing_url('/open-source') }}" class="text-violet-600 hover:text-violet-700 underline">open source</a> and licensed under the AAL (Attribution Assurance License). You can view the full source code on <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener" class="text-violet-600 hover:text-violet-700 underline">GitHub</a>, contribute improvements, report issues, or fork it for your own projects.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Event Schedule is <a href="{{ marketing_url('/open-source') }}" class="text-violet-600 hover:text-violet-700 underline">open source</a> and licensed under the AAL (Attribution Assurance License). You can view the full source code on <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener noreferrer" class="text-violet-600 hover:text-violet-700 underline">GitHub</a>, contribute improvements, report issues, or fork it for your own projects.</p>
                         </div>
                     </div>
 
@@ -585,7 +585,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Download the code from <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener" class="text-violet-600 hover:text-violet-700 underline">GitHub</a> and run it on your own server. Selfhosting is completely free and includes all features, including Pro features. This gives you complete control over your data and customization options. <a href="{{ marketing_url('/selfhost') }}" class="text-violet-600 hover:text-violet-700 underline">Learn more about selfhosting</a>.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Download the code from <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener noreferrer" class="text-violet-600 hover:text-violet-700 underline">GitHub</a> and run it on your own server. Selfhosting is completely free and includes all features, including Pro features. This gives you complete control over your data and customization options. <a href="{{ marketing_url('/selfhost') }}" class="text-violet-600 hover:text-violet-700 underline">Learn more about selfhosting</a>.</p>
                         </div>
                     </div>
 

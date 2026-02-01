@@ -115,7 +115,7 @@
                                     <div v-if="block.type === 'text'" class="space-y-3">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.content }}</label>
-                                            <textarea class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm" rows="6"
+                                            <textarea :ref="el => setTextBlockRef(block.id, el)" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm" rows="6"
                                                 :value="block.data.content"
                                                 @input="updateBlockData(block.id, 'content', $event.target.value)"></textarea>
                                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t.markdown_supported }}</p>
@@ -577,7 +577,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import EasyMDE from 'easymde';
+import 'easymde/dist/easymde.min.css';
 
 const props = defineProps({
     initialBlocks: { type: Array, default: () => [] },
@@ -640,8 +642,66 @@ const blockCanvas = ref(null);
 const livePreviewFrame = ref(null);
 const previewFrame = ref(null);
 
+const textBlockRefs = {};
+const easyMDEInstances = {};
+
 let previewDebounceTimer = null;
 let previewAbortController = null;
+
+function setTextBlockRef(blockId, el) {
+    if (el) {
+        textBlockRefs[blockId] = el;
+    } else {
+        delete textBlockRefs[blockId];
+    }
+}
+
+function initEasyMDE(blockId) {
+    destroyEasyMDE(blockId);
+    const el = textBlockRefs[blockId];
+    if (!el) return;
+    const block = blocks.value.find(b => b.id === blockId);
+    if (!block) return;
+
+    const instance = new EasyMDE({
+        element: el,
+        toolbar: [
+            { name: "bold", action: EasyMDE.toggleBold, className: "editor-button-text", title: "Bold", text: "B" },
+            { name: "italic", action: EasyMDE.toggleItalic, className: "editor-button-text", title: "Italic", text: "I" },
+            { name: "heading", action: EasyMDE.toggleHeadingSmaller, className: "editor-button-text", title: "Heading", text: "H" },
+            "|",
+            { name: "link", action: function(editor) { EasyMDE.drawLink(editor); }, className: "editor-button-text", title: "Link", text: "\ud83d\udd17" },
+            { name: "quote", action: EasyMDE.toggleBlockquote, className: "editor-button-text", title: "Quote", text: "\"" },
+            { name: "unordered-list", action: EasyMDE.toggleUnorderedList, className: "editor-button-text", title: "Unordered List", text: "UL" },
+            { name: "ordered-list", action: EasyMDE.toggleOrderedList, className: "editor-button-text", title: "Ordered List", text: "OL" },
+            "|",
+            { name: "preview", action: EasyMDE.togglePreview, className: "editor-button-text no-disable", title: "Toggle Preview", text: "\ud83d\udc41" },
+            { name: "guide", action: "https://www.markdownguide.org/basic-syntax/", className: "editor-button-text", title: "Markdown Guide", text: "?" },
+        ],
+        initialValue: block.data.content || '',
+        minHeight: "200px",
+        spellChecker: true,
+        nativeSpellcheck: true,
+        status: false,
+    });
+
+    instance.codemirror.on('change', () => {
+        updateBlockData(blockId, 'content', instance.value());
+    });
+
+    easyMDEInstances[blockId] = instance;
+}
+
+function destroyEasyMDE(blockId) {
+    if (easyMDEInstances[blockId]) {
+        easyMDEInstances[blockId].toTextArea();
+        delete easyMDEInstances[blockId];
+    }
+}
+
+function destroyAllEasyMDE() {
+    Object.keys(easyMDEInstances).forEach(id => destroyEasyMDE(id));
+}
 
 function generateId() {
     return 'b_' + Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
@@ -653,7 +713,22 @@ function blockLabel(type) {
 }
 
 function selectBlock(blockId) {
+    const prevId = selectedBlockId.value;
     selectedBlockId.value = selectedBlockId.value === blockId ? null : blockId;
+
+    // Destroy EasyMDE on previously selected block
+    if (prevId) {
+        destroyEasyMDE(prevId);
+    }
+
+    // Init EasyMDE on newly selected text block
+    const newId = selectedBlockId.value;
+    if (newId) {
+        const block = blocks.value.find(b => b.id === newId);
+        if (block && block.type === 'text') {
+            nextTick(() => initEasyMDE(newId));
+        }
+    }
 }
 
 function updateBlockData(blockId, key, value) {
@@ -711,6 +786,7 @@ function duplicateBlock(blockId) {
 }
 
 function removeBlock(blockId) {
+    destroyEasyMDE(blockId);
     blocks.value = blocks.value.filter(b => b.id !== blockId);
     if (selectedBlockId.value === blockId) {
         selectedBlockId.value = null;
@@ -850,6 +926,11 @@ watch(
 onMounted(() => {
     nextTick(() => {
         initSortable();
+        fetchPreview();
     });
+});
+
+onBeforeUnmount(() => {
+    destroyAllEasyMDE();
 });
 </script>

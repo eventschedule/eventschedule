@@ -64,7 +64,7 @@
                                     </svg>
                                     <div>
                                         <p class="text-green-300 font-medium mb-1">Recommended: Use Invoice Ninja with Stripe</p>
-                                        <p class="text-gray-400 text-sm">For the best ticket selling experience, we recommend using <a href="https://invoiceninja.com" target="_blank" class="text-green-400 hover:text-green-300">Invoice Ninja</a> alongside Stripe. Invoice Ninja provides additional features like professional invoicing, payment reminders, and detailed financial reporting that complement Stripe's payment processing.</p>
+                                        <p class="text-gray-400 text-sm">For the best ticket selling experience, we recommend using <a href="https://invoiceninja.com" target="_blank" rel="noopener noreferrer" class="text-green-400 hover:text-green-300">Invoice Ninja</a> alongside Stripe. Invoice Ninja provides additional features like professional invoicing, payment reminders, and detailed financial reporting that complement Stripe's payment processing.</p>
                                     </div>
                                 </div>
                             </div>
@@ -129,7 +129,7 @@
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">1. Get Your Stripe API Keys</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to the <a href="https://dashboard.stripe.com/" target="_blank" class="text-violet-400 hover:text-violet-300">Stripe Dashboard</a></li>
+                                <li>Go to the <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" class="text-violet-400 hover:text-violet-300">Stripe Dashboard</a></li>
                                 <li>Navigate to <strong class="text-white">Developers</strong> → <strong class="text-white">API keys</strong></li>
                                 <li>Note your <strong class="text-white">Publishable key</strong> and <strong class="text-white">Secret key</strong></li>
                             </ol>
@@ -212,7 +212,7 @@
 
                             <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">1. Enable Stripe Connect</h4>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to the <a href="https://dashboard.stripe.com/" target="_blank" class="text-violet-400 hover:text-violet-300">Stripe Dashboard</a></li>
+                                <li>Go to the <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" class="text-violet-400 hover:text-violet-300">Stripe Dashboard</a></li>
                                 <li>Navigate to <strong class="text-white">Settings</strong> → <strong class="text-white">Connect</strong> → <strong class="text-white">Settings</strong></li>
                                 <li>Enable Connect for your platform</li>
                                 <li>Configure your branding and platform profile</li>
@@ -453,7 +453,7 @@
                             <p class="text-gray-400 text-sm mb-6">Use any future expiration date and any 3-digit CVC.</p>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Testing Webhooks Locally</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Use the <a href="https://stripe.com/docs/stripe-cli" target="_blank" class="text-violet-400 hover:text-violet-300">Stripe CLI</a> to forward webhooks:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Use the <a href="https://stripe.com/docs/stripe-cli" target="_blank" rel="noopener noreferrer" class="text-violet-400 hover:text-violet-300">Stripe CLI</a> to forward webhooks:</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">

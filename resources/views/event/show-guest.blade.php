@@ -329,7 +329,7 @@
                     <div class="mt-2 space-y-2">
                       @foreach ($part->approvedVideos as $video)
                       <div class="rounded overflow-hidden">
-                        <iframe class="w-full" style="height:200px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       </div>
                       @endforeach
                     </div>
@@ -356,7 +356,7 @@
                       <div x-show="showVideo" x-cloak class="mt-2 w-full">
                         <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex gap-2">
                           @csrf
-                          <input type="hidden" name="event_part_id" value="{{ $part->id }}">
+                          <input type="hidden" name="event_part_id" value="{{ \App\Utils\UrlUtils::encodeId($part->id) }}">
                           <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" required>
                           <button type="submit" class="text-xs px-3 py-1 rounded text-white" style="background-color: {{ $accentColor }};">{{ __('messages.submit') }}</button>
                         </form>
@@ -364,7 +364,7 @@
                       <div x-show="showComment" x-cloak class="mt-2 w-full">
                         <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex gap-2">
                           @csrf
-                          <input type="hidden" name="event_part_id" value="{{ $part->id }}">
+                          <input type="hidden" name="event_part_id" value="{{ \App\Utils\UrlUtils::encodeId($part->id) }}">
                           <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" rows="2" required></textarea>
                           <button type="submit" class="text-xs px-3 py-1 rounded text-white self-end" style="background-color: {{ $accentColor }};">{{ __('messages.submit') }}</button>
                         </form>
@@ -390,7 +390,7 @@
                     <div class="mt-2 space-y-2">
                       @foreach ($part->approvedVideos as $video)
                       <div class="rounded overflow-hidden">
-                        <iframe class="w-full" style="height:200px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       </div>
                       @endforeach
                     </div>
@@ -417,7 +417,7 @@
                       <div x-show="showVideo" x-cloak class="w-full">
                         <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex gap-2">
                           @csrf
-                          <input type="hidden" name="event_part_id" value="{{ $part->id }}">
+                          <input type="hidden" name="event_part_id" value="{{ \App\Utils\UrlUtils::encodeId($part->id) }}">
                           <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" required>
                           <button type="submit" class="text-xs px-3 py-1 rounded text-white" style="background-color: {{ $accentColor }};">{{ __('messages.submit') }}</button>
                         </form>
@@ -425,7 +425,7 @@
                       <div x-show="showComment" x-cloak class="w-full">
                         <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex gap-2">
                           @csrf
-                          <input type="hidden" name="event_part_id" value="{{ $part->id }}">
+                          <input type="hidden" name="event_part_id" value="{{ \App\Utils\UrlUtils::encodeId($part->id) }}">
                           <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" rows="2" required></textarea>
                           <button type="submit" class="text-xs px-3 py-1 rounded text-white self-end" style="background-color: {{ $accentColor }};">{{ __('messages.submit') }}</button>
                         </form>
@@ -456,7 +456,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               @foreach ($eventLevelVideos as $video)
               <div class="rounded overflow-hidden">
-                <iframe class="w-full" style="height:200px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
               </div>
               @endforeach
             </div>

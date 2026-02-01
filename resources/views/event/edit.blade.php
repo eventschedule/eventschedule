@@ -1829,7 +1829,7 @@
                         <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                             <div class="flex-1">
                                 <div class="rounded overflow-hidden mb-2">
-                                    <iframe class="w-full" style="height:200px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                                    <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                                 </div>
                                 <p class="text-sm text-gray-600 dark:text-gray-400">
                                     {{ $video->eventPart ? $video->eventPart->name : __('messages.general') }}
@@ -1885,7 +1885,7 @@
                         <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                             <div class="flex-1">
                                 <div class="rounded overflow-hidden mb-2">
-                                    <iframe class="w-full" style="height:200px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                                    <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                                 </div>
                                 <p class="text-sm text-gray-600 dark:text-gray-400">
                                     {{ $video->eventPart ? $video->eventPart->name : __('messages.general') }}

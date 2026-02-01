@@ -26,7 +26,7 @@
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Installation Guide</h1>
             </div>
             <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
-                Set up Event Schedule on your own server with this step-by-step guide. For automated installation, consider using <a href="https://www.softaculous.com/apps/calendars/Event_Schedule" target="_blank" class="text-cyan-400 hover:text-cyan-300">Softaculous</a> or <a href="https://github.com/eventschedule/dockerfiles" target="_blank" class="text-cyan-400 hover:text-cyan-300">Docker</a>.
+                Set up Event Schedule on your own server with this step-by-step guide. For automated installation, consider using <a href="https://www.softaculous.com/apps/calendars/Event_Schedule" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">Softaculous</a> or <a href="https://github.com/eventschedule/dockerfiles" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">Docker</a>.
             </p>
         </div>
     </section>
@@ -62,8 +62,8 @@
                                 <div class="doc-callout-title">Automated Installation Options</div>
                                 <p>For easier installation, you can use:</p>
                                 <ul class="doc-list mt-2">
-                                    <li><a href="https://www.softaculous.com/apps/calendars/Event_Schedule" target="_blank" class="text-cyan-400 hover:text-cyan-300">Softaculous</a> - One-click installation on cPanel hosts</li>
-                                    <li><a href="https://github.com/eventschedule/dockerfiles" target="_blank" class="text-cyan-400 hover:text-cyan-300">Docker</a> - Containerized deployment with Docker Compose</li>
+                                    <li><a href="https://www.softaculous.com/apps/calendars/Event_Schedule" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">Softaculous</a> - One-click installation on cPanel hosts</li>
+                                    <li><a href="https://github.com/eventschedule/dockerfiles" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">Docker</a> - Containerized deployment with Docker Compose</li>
                                 </ul>
                             </div>
                         </section>
@@ -150,7 +150,7 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Download the latest release and extract it to your web server's document root.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Download <a href="https://github.com/eventschedule/eventschedule/releases/latest" target="_blank" class="text-cyan-400 hover:text-cyan-300">eventschedule.zip</a> from the latest GitHub release</li>
+                                <li>Download <a href="https://github.com/eventschedule/eventschedule/releases/latest" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">eventschedule.zip</a> from the latest GitHub release</li>
                                 <li>Upload the zip file to your server</li>
                                 <li>Extract the contents to your web root directory</li>
                             </ol>
@@ -267,7 +267,7 @@
 
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Need Help?</div>
-                                <p>If you encounter any issues during installation, check the <a href="https://github.com/eventschedule/eventschedule/issues" target="_blank" class="text-cyan-400 hover:text-cyan-300">GitHub Issues</a> or start a <a href="https://github.com/eventschedule/eventschedule/discussions" target="_blank" class="text-cyan-400 hover:text-cyan-300">Discussion</a>.</p>
+                                <p>If you encounter any issues during installation, check the <a href="https://github.com/eventschedule/eventschedule/issues" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">GitHub Issues</a> or start a <a href="https://github.com/eventschedule/eventschedule/discussions" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">Discussion</a>.</p>
                             </div>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Next Steps</h3>
