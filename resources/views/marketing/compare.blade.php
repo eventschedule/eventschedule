@@ -101,58 +101,78 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-white/5">
                         @php
-                            $rows = [
-                                ['Free plan', 'Yes (forever)', 'Free to publish events', 'Yes (forever)', 'Free events only'],
-                                ['Paid plan price', '$5/mo (first year free)', 'Free (fees on tickets)', '$59/mo', 'From $0.28/ticket'],
-                                ['Platform fees', '0%', '3.7% + $1.79/ticket', '5% (free plan), 0% (Plus)', '$0.28-$0.60/ticket'],
-                                ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in (included above)', 'Built-in', 'Stripe/PayPal/Square'],
-                                ['Ticketing', 'Yes (Pro)', 'Yes', 'Yes', 'Yes'],
-                                ['QR check-ins', 'Yes (Pro)', 'Yes', 'Yes', 'Yes'],
-                                ['Google Calendar sync', 'Yes (Free)', 'No native 2-way sync', 'Yes', 'No'],
-                                ['CalDAV sync', 'Yes (Free)', 'No', 'No', 'No'],
-                                ['Custom domains', 'Yes (Pro)', 'No', 'Yes (Plus)', 'Yes (paid)'],
-                                ['Remove branding', 'Yes (Pro)', 'No', 'Yes (Plus)', 'Yes (paid)'],
-                                ['AI event parsing', 'Yes (Pro)', 'No', 'No', 'No'],
-                                ['Built-in analytics', 'Yes (Free)', 'Yes', 'Yes', 'Yes'],
-                                ['Custom fields', 'Yes (Free)', 'Yes', 'Yes', 'Yes'],
-                                ['Team collaboration', 'Yes (Free)', 'Yes', '3 admins (free), 5 (Plus)', 'Yes'],
-                                ['Sub-schedules', 'Yes (Free)', 'No', 'No', 'No'],
-                                ['Online events', 'Yes (Free)', 'Yes', 'Yes', 'Yes'],
-                                ['REST API', 'Yes (Pro)', 'Yes', 'Yes (Plus)', 'Yes'],
-                                ['Open source', 'Yes', 'No', 'No', 'No'],
-                                ['Self-hosting', 'Yes', 'No', 'No', 'No'],
-                                ['Event graphics gen', 'Yes (Pro)', 'No', 'No', 'No'],
+                            $sections = [
+                                'Pricing & Fees' => [
+                                    ['Free plan', 'Yes (forever)', 'Free to publish events', 'Yes (forever)', 'Free events only'],
+                                    ['Paid plan price', '$5/mo (first year free)', 'Free (fees on tickets)', '$59/mo', 'From $0.28/ticket'],
+                                    ['Platform fees', '0%', '3.7% + $1.79/ticket', '5% (free plan), 0% (Plus)', '$0.28-$0.60/ticket'],
+                                    ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in (included above)', 'Built-in', 'Stripe/PayPal/Square'],
+                                ],
+                                'Events & Ticketing' => [
+                                    ['Ticketing', 'Yes (Pro)', 'Yes', 'Yes', 'Yes'],
+                                    ['QR check-ins', 'Yes (Pro)', 'Yes', 'Yes', 'Yes'],
+                                    ['Online events', 'Yes (Free)', 'Yes', 'Yes', 'Yes'],
+                                ],
+                                'Integrations' => [
+                                    ['Google Calendar sync', 'Yes (Free)', 'No native 2-way sync', 'Yes', 'No'],
+                                    ['CalDAV sync', 'Yes (Free)', 'No', 'No', 'No'],
+                                    ['Newsletters', 'Yes (Free)', 'Yes', 'Yes', 'No'],
+                                ],
+                                'Customization' => [
+                                    ['Custom domains', 'Yes (Pro)', 'No', 'Yes (Plus)', 'Yes (paid)'],
+                                    ['Remove branding', 'Yes (Pro)', 'No', 'Yes (Plus)', 'Yes (paid)'],
+                                    ['Custom fields', 'Yes (Free)', 'Yes', 'Yes', 'Yes'],
+                                    ['Built-in analytics', 'Yes (Free)', 'Yes', 'Yes', 'Yes'],
+                                ],
+                                'Unique Features' => [
+                                    ['AI event parsing', 'Yes (Pro)', 'No', 'No', 'No'],
+                                    ['Event graphics gen', 'Yes (Pro)', 'No', 'No', 'No'],
+                                    ['Sub-schedules', 'Yes (Free)', 'No', 'No', 'No'],
+                                    ['Team collaboration', 'Yes (Free)', 'Yes', '3 admins (free), 5 (Plus)', 'Yes'],
+                                ],
+                                'Platform' => [
+                                    ['REST API', 'Yes (Pro)', 'Yes', 'Yes (Plus)', 'Yes'],
+                                    ['Open source', 'Yes', 'No', 'No', 'No'],
+                                    ['Self-hosting', 'Yes', 'No', 'No', 'No'],
+                                ],
                             ];
                         @endphp
-                        @foreach ($rows as $row)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
-                                <td class="bg-white dark:bg-[#0f0f14] px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{{ $row[0] }}</td>
-                                @for ($i = 1; $i <= 4; $i++)
-                                <td class="px-6 py-4 text-sm {{ $i === 1 ? 'bg-violet-50/50 dark:bg-violet-500/5' : '' }}">
-                                    @if (str_starts_with($row[$i], 'Yes'))
-                                        <span class="inline-flex items-center gap-1.5 {{ $i === 1 ? 'font-medium' : '' }}">
-                                            <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                            </svg>
-                                            @if (strlen($row[$i]) > 3)
-                                                <span class="text-emerald-600/70 dark:text-emerald-400/70 text-xs">{{ substr($row[$i], 4) }}</span>
-                                            @endif
-                                        </span>
-                                    @elseif (str_starts_with($row[$i], 'No'))
-                                        <span class="inline-flex items-center gap-1.5">
-                                            <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                            @if (strlen($row[$i]) > 2)
-                                                <span class="text-gray-400 dark:text-gray-500 text-xs">{{ trim(substr($row[$i], 2)) }}</span>
-                                            @endif
-                                        </span>
-                                    @else
-                                        <span class="text-gray-700 dark:text-gray-300">{{ $row[$i] }}</span>
-                                    @endif
+                        @foreach ($sections as $sectionName => $rows)
+                            <tr>
+                                <td colspan="5" class="bg-gray-50 dark:bg-white/[0.03] px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                    {{ $sectionName }}
                                 </td>
-                                @endfor
                             </tr>
+                            @foreach ($rows as $row)
+                                <tr class="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
+                                    <td class="bg-white dark:bg-[#0f0f14] px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{{ $row[0] }}</td>
+                                    @for ($i = 1; $i <= 4; $i++)
+                                    <td class="px-6 py-4 text-sm {{ $i === 1 ? 'bg-violet-50/50 dark:bg-violet-500/5' : '' }}">
+                                        @if (str_starts_with($row[$i], 'Yes'))
+                                            <span class="inline-flex items-center gap-1.5 {{ $i === 1 ? 'font-medium' : '' }}">
+                                                <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                @if (strlen($row[$i]) > 3)
+                                                    <span class="text-emerald-600/70 dark:text-emerald-400/70 text-xs">{{ substr($row[$i], 4) }}</span>
+                                                @endif
+                                            </span>
+                                        @elseif (str_starts_with($row[$i], 'No'))
+                                            <span class="inline-flex items-center gap-1.5">
+                                                <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                                @if (strlen($row[$i]) > 2)
+                                                    <span class="text-gray-400 dark:text-gray-500 text-xs">{{ trim(substr($row[$i], 2)) }}</span>
+                                                @endif
+                                            </span>
+                                        @else
+                                            <span class="text-gray-700 dark:text-gray-300">{{ $row[$i] }}</span>
+                                        @endif
+                                    </td>
+                                    @endfor
+                                </tr>
+                            @endforeach
                         @endforeach
                     </tbody>
                 </table>
