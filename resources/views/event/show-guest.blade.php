@@ -711,9 +711,9 @@
                     {{ $part->start_time }}@if ($part->end_time) - {{ $part->end_time }}@endif
                   </span>
                   @endif
-                  <span class="text-gray-900 dark:text-gray-100 font-medium">{{ $part->name }}</span>
+                  <span class="text-gray-900 dark:text-gray-100 font-medium">{{ $part->translatedName() }}</span>
                   @if ($part->description)
-                  <span class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ $part->description }}</span>
+                  <span class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ $part->translatedDescription() }}</span>
                   @endif
                   @php
                     $partVideos = $part->approvedVideos;
@@ -786,9 +786,9 @@
               <div class="flex items-start gap-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 {{ $role->isRtl() ? 'rtl' : '' }}">
                 <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background-color: {{ $accentColor }};">{{ $index + 1 }}</span>
                 <div class="flex-1">
-                  <span class="text-gray-900 dark:text-gray-100 font-medium">{{ $part->name }}</span>
+                  <span class="text-gray-900 dark:text-gray-100 font-medium">{{ $part->translatedName() }}</span>
                   @if ($part->description)
-                  <span class="text-sm text-gray-500 dark:text-gray-400 block mt-0.5">{{ $part->description }}</span>
+                  <span class="text-sm text-gray-500 dark:text-gray-400 block mt-0.5">{{ $part->translatedDescription() }}</span>
                   @endif
                   @php
                     $partVideos = $part->approvedVideos;

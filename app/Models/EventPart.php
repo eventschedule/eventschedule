@@ -9,11 +9,52 @@ class EventPart extends Model
     protected $fillable = [
         'event_id',
         'name',
+        'name_en',
         'description',
+        'description_en',
         'start_time',
         'end_time',
         'sort_order',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($model) {
+            if ($model->isDirty('name') && $model->exists) {
+                $model->name_en = null;
+            }
+
+            if ($model->isDirty('description') && $model->exists) {
+                $model->description_en = null;
+            }
+        });
+    }
+
+    public function translatedName()
+    {
+        $value = $this->name;
+
+        if ($this->name_en && (session()->has('translate') || request()->lang == 'en')) {
+            $value = $this->name_en;
+        }
+
+        $value = str_ireplace('fuck', 'F@#%', $value);
+
+        return $value;
+    }
+
+    public function translatedDescription()
+    {
+        $value = $this->description;
+
+        if ($this->description_en && (session()->has('translate') || request()->lang == 'en')) {
+            $value = $this->description_en;
+        }
+
+        return $value;
+    }
 
     public function event()
     {

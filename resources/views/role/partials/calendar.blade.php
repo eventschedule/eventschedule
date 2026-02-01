@@ -77,7 +77,7 @@
             'duration' => $event->duration,
             'parts' => $event->parts->map(fn($part) => [
                 'id' => \App\Utils\UrlUtils::encodeId($part->id),
-                'name' => $part->name,
+                'name' => $part->translatedName(),
                 'start_time' => $part->start_time,
                 'end_time' => $part->end_time,
             ])->values()->toArray(),
