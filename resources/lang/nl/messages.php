@@ -336,6 +336,7 @@ return [
     'event_created_by' => 'Evenement aangemaakt door :user',
     'show_past_events' => 'Toon eerdere evenementen',
     'past_events' => 'Eerdere evenementen',
+    'load_more' => 'Meer Laden',
     'category' => 'Categorie',
     'all_categories' => 'Alle Categorieën',
     'search_events' => 'Zoek evenementen...',

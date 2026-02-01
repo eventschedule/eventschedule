@@ -38,6 +38,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     }
 
     Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
+        Route::get('/api/past-events', [RoleController::class, 'listPastEvents'])->name('role.list_past_events');
         Route::get('/request', [RoleController::class, 'request'])->name('role.request');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
@@ -706,6 +707,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     });
 } else {
+    Route::get('/{subdomain}/api/past-events', [RoleController::class, 'listPastEvents'])->name('role.list_past_events');
     Route::get('/{subdomain}/request', [RoleController::class, 'request'])->name('role.request');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     Route::get('/{subdomain}/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
