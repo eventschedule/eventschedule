@@ -27,7 +27,7 @@
     @endif
 
     <!-- Theme color -->
-    <meta name="theme-color" content="#7c3aed" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#4E81FA" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0a0a0f" media="(prefers-color-scheme: dark)">
 
     <!-- SEO Meta Tags -->
