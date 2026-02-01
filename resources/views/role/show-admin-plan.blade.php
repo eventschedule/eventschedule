@@ -121,10 +121,10 @@
         </div>
 
         {{-- Newsletter Usage --}}
-        @if ($role->newsletterLimit() !== null)
+        @php $newsletterLimit = $role->newsletterLimit(); @endphp
+        @if ($newsletterLimit !== null)
         @php
             $newsletterUsed = $role->newslettersSentThisMonth();
-            $newsletterLimit = $role->newsletterLimit();
             $newsletterPercent = $newsletterLimit > 0 ? min(100, round(($newsletterUsed / $newsletterLimit) * 100)) : 0;
             $newsletterRemaining = max(0, $newsletterLimit - $newsletterUsed);
             $barColor = $newsletterPercent > 80 ? 'bg-red-500' : ($newsletterPercent >= 50 ? 'bg-yellow-500' : 'bg-emerald-500');

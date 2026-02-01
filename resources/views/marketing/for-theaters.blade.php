@@ -305,7 +305,7 @@
     <!-- Stream to the World Section -->
     <section class="bg-gray-50 dark:bg-[#0f0f14] py-20">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/online-events') }}" class="group block">
+            <a href="{{ marketing_url('/features/online-events') }}" class="group block">
                 <div class="bg-white dark:bg-[#12121a] rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:border-rose-500/30 transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">

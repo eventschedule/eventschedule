@@ -217,6 +217,7 @@ class NewsletterService
             : '#';
 
         $role = $newsletter->role;
+        $isRtl = $role && $role->isRtl();
 
         return view('emails.newsletter', [
             'newsletter' => $newsletter,
@@ -226,6 +227,7 @@ class NewsletterService
             'unsubscribeUrl' => $unsubscribeUrl,
             'recipient' => $recipient,
             'showBranding' => $role ? $role->showBranding() : false,
+            'isRtl' => $isRtl,
         ])->render();
     }
 

@@ -50,14 +50,6 @@
                 </a>
             </div>
 
-            <div class="mt-6">
-                <a href="{{ route('marketing.docs.tickets') }}" class="inline-flex items-center gap-1.5 text-gray-500 dark:text-gray-400 hover:text-fuchsia-600 dark:hover:text-fuchsia-400 font-medium transition-colors">
-                    Read the guide
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
         </div>
     </section>
 
@@ -318,60 +310,50 @@
         </div>
     </section>
 
-    <!-- Next Feature -->
+    <!-- Guide & Next Feature -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
-        <!-- Animated background blobs matching AI page's colors -->
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
             <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-fuchsia-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/ai') }}" class="group block">
-                <div class="bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900 dark:to-indigo-900 rounded-3xl border border-violet-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
-                    <div class="flex flex-col lg:flex-row gap-8 items-center">
-                        <!-- Text content -->
-                        <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-violet-300 transition-colors">AI-Powered Import</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Paste text or drop an image. AI extracts event details automatically.</p>
-                            <span class="inline-flex items-center text-violet-400 font-medium group-hover:gap-3 gap-2 transition-all">
-                                Learn more
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        <!-- Mini mockup: Input→Output text parsing -->
-                        <div class="flex-shrink-0">
-                            <div class="flex flex-col items-center gap-2">
-                                <!-- Input -->
-                                <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3 w-48">
-                                    <div class="text-[10px] text-gray-400 dark:text-gray-400 mb-1">Raw text</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 font-mono leading-relaxed">
-                                        Jazz Night<br>
-                                        Friday 8pm<br>
-                                        Blue Note
-                                    </div>
-                                </div>
-                                <!-- Arrow -->
-                                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                                </svg>
-                                <!-- Output -->
-                                <div class="bg-violet-500/20 rounded-xl border border-violet-400/30 p-3 w-48">
-                                    <div class="text-[10px] text-violet-600 dark:text-violet-300 mb-1">Extracted</div>
-                                    <div class="space-y-1 text-xs">
-                                        <div class="flex justify-between"><span class="text-gray-400 dark:text-gray-400">Name:</span><span class="text-gray-900 dark:text-white">Jazz Night</span></div>
-                                        <div class="flex justify-between"><span class="text-gray-400 dark:text-gray-400">Time:</span><span class="text-gray-900 dark:text-white">Fri 8 PM</span></div>
-                                        <div class="flex justify-between"><span class="text-gray-400 dark:text-gray-400">Venue:</span><span class="text-gray-900 dark:text-white">Blue Note</span></div>
-                                    </div>
-                                </div>
-                            </div>
+                <!-- Read the guide -->
+                <a href="{{ route('marketing.docs.tickets') }}" class="group block">
+                    <div class="h-full bg-white dark:bg-white/5 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-fuchsia-500/10 border border-fuchsia-500/20 mb-6">
+                            <svg class="w-6 h-6 text-fuchsia-500 dark:text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
                         </div>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">Read the guide</h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Learn how to get the most out of ticketing.</p>
+                        <span class="inline-flex items-center text-fuchsia-500 dark:text-fuchsia-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            Read guide
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </span>
                     </div>
-                </div>
-            </a>
+                </a>
+
+                <!-- Next feature -->
+                <a href="{{ marketing_url('/features/ai') }}" class="group block">
+                    <div class="h-full bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900 dark:to-indigo-900 rounded-3xl border border-violet-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-colors">AI-Powered Import</h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Paste text or drop an image. AI extracts event details automatically.</p>
+                        <span class="inline-flex items-center text-violet-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            Learn more
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </span>
+                    </div>
+                </a>
+
+            </div>
         </div>
     </section>
 

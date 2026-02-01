@@ -14,7 +14,7 @@
 @elseif ($template === 'minimal')
 <tr>
     <td align="{{ $align }}" style="padding: 14px 30px;">
-        <a href="{{ $url }}" style="color: {{ $style['accentColor'] }}; text-decoration: underline; font-size: 14px; font-weight: 600; font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ $text }} &rarr;</a>
+        <a href="{{ $url }}" style="color: {{ $style['accentColor'] }}; text-decoration: underline; font-size: 14px; font-weight: 600; font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ $text }} {!! $arrow ?? '&rarr;' !!}</a>
     </td>
 </tr>
 @elseif ($template === 'bold')

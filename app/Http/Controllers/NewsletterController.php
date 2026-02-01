@@ -691,6 +691,13 @@ class NewsletterController extends Controller
         $this->authorize();
         $role = $this->getRole($request);
 
+        if (! $role->canSendNewsletter()) {
+            $limit = $role->newsletterLimit();
+            $used = $role->newslettersSentThisMonth();
+
+            return back()->with('error', __('messages.newsletter_limit_reached', ['used' => $used, 'limit' => $limit]));
+        }
+
         $newsletter = Newsletter::where('role_id', $role->id)
             ->where('id', UrlUtils::decodeId($hash))
             ->firstOrFail();

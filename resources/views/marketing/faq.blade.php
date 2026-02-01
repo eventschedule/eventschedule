@@ -287,7 +287,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">No. Creating your schedule takes just a few clicks. Add your events, customize the look, and share the link. You can also paste event details or drop an image and our <a href="{{ marketing_url('/ai') }}" class="text-violet-600 hover:text-violet-700 underline">AI will extract the information</a> automatically.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">No. Creating your schedule takes just a few clicks. Add your events, customize the look, and share the link. You can also paste event details or drop an image and our <a href="{{ marketing_url('/features/ai') }}" class="text-violet-600 hover:text-violet-700 underline">AI will extract the information</a> automatically.</p>
                         </div>
                     </div>
 
@@ -387,7 +387,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">First, <a href="{{ marketing_url('/stripe') }}" class="text-violet-600 hover:text-violet-700 underline">connect your Stripe account</a> (takes about 2 minutes). Then, when creating or editing an event, add ticket types with names, prices, and quantities. Your attendees can purchase directly from your event page and receive tickets with QR codes via email. Learn more about <a href="{{ marketing_url('/ticketing') }}" class="text-violet-600 hover:text-violet-700 underline">ticketing</a>.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">First, <a href="{{ marketing_url('/stripe') }}" class="text-violet-600 hover:text-violet-700 underline">connect your Stripe account</a> (takes about 2 minutes). Then, when creating or editing an event, add ticket types with names, prices, and quantities. Your attendees can purchase directly from your event page and receive tickets with QR codes via email. Learn more about <a href="{{ marketing_url('/features/ticketing') }}" class="text-violet-600 hover:text-violet-700 underline">ticketing</a>.</p>
                         </div>
                     </div>
 
@@ -423,7 +423,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. You can add <a href="{{ marketing_url('/custom-fields') }}" class="text-violet-600 hover:text-violet-700 underline">custom fields</a> to your ticket forms, including text fields, dropdowns, date pickers, and yes/no questions. Use these to collect meal preferences, t-shirt sizes, accessibility needs, or any other information.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. You can add <a href="{{ marketing_url('/features/custom-fields') }}" class="text-violet-600 hover:text-violet-700 underline">custom fields</a> to your ticket forms, including text fields, dropdowns, date pickers, and yes/no questions. Use these to collect meal preferences, t-shirt sizes, accessibility needs, or any other information.</p>
                         </div>
                     </div>
 
@@ -485,7 +485,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">A schedule is your main calendar (like "The Blue Note" or "DJ Sarah"). <a href="{{ marketing_url('/sub-schedules') }}" class="text-violet-600 hover:text-violet-700 underline">Sub-schedules</a> help organize events within that calendar by category, room, or series (like "Main Stage" and "Lounge"). Events are the individual shows, performances, or happenings on your schedule.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">A schedule is your main calendar (like "The Blue Note" or "DJ Sarah"). <a href="{{ marketing_url('/features/sub-schedules') }}" class="text-violet-600 hover:text-violet-700 underline">Sub-schedules</a> help organize events within that calendar by category, room, or series (like "Main Stage" and "Lounge"). Events are the individual shows, performances, or happenings on your schedule.</p>
                         </div>
                     </div>
 
@@ -609,7 +609,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">The interface is available in 9 languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, and Arabic. You can also use <a href="{{ marketing_url('/ai') }}" class="text-violet-600 hover:text-violet-700 underline">AI-powered translation</a> to automatically translate your event descriptions.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">The interface is available in 9 languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, and Arabic. You can also use <a href="{{ marketing_url('/features/ai') }}" class="text-violet-600 hover:text-violet-700 underline">AI-powered translation</a> to automatically translate your event descriptions.</p>
                         </div>
                     </div>
                 </div>

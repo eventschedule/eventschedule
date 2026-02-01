@@ -30,8 +30,8 @@
 </tr>
 @elseif ($template === 'compact')
 <tr>
-    <td style="padding: 8px 30px 8px 30px; text-align: left;">
-        <div style="border-left: 4px solid {{ $style['accentColor'] }}; padding-left: 12px;">
+    <td style="padding: 8px 30px 8px 30px; text-align: {{ $startAlign ?? 'left' }};">
+        <div style="{{ $startBorder ?? 'border-left' }}: 4px solid {{ $style['accentColor'] }}; {{ $startPadding ?? 'padding-left' }}: 12px;">
             <{{ $level }} style="margin: 0; font-size: 15px; color: {{ $style['textColor'] }}; font-family: {{ $style['fontFamily'] }}, sans-serif; font-weight: 700;">{{ $text }}</{{ $level }}>
         </div>
     </td>

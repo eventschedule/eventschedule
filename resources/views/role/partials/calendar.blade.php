@@ -277,14 +277,14 @@
             @if($route == 'guest')
             <div class="flex items-center bg-white dark:bg-gray-800 rounded-md shadow-sm">
                 <button @click="toggleView('calendar')"
-                        :class="currentView === 'calendar' ? 'bg-[{{ isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA' }}] text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                        :class="currentView === 'calendar' ? 'bg-[{{ isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA' }}] text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
                         class="flex h-11 w-11 items-center justify-center rounded-s-md border border-gray-300 dark:border-gray-600 transition-colors">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
                     </svg>
                 </button>
                 <button @click="toggleView('list')"
-                        :class="currentView === 'list' ? 'bg-[{{ isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA' }}] text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                        :class="currentView === 'list' ? 'bg-[{{ isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA' }}] text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
                         class="flex h-11 w-11 items-center justify-center rounded-e-md border border-s-0 border-gray-300 dark:border-gray-600 transition-colors">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M3,4H7V8H3V4M9,5V7H21V5H9M3,10H7V14H3V10M9,11V13H21V11H9M3,16H7V20H3V16M9,17V19H21V17H9"/>
@@ -508,14 +508,14 @@
         <div v-show="currentView === 'list'" class="{{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Upcoming Events --}}
             <div v-if="listViewUpcomingGroups.length">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-4">
                     <template v-for="(group, groupIndex) in listViewUpcomingGroups" :key="'list-date-' + group.date">
-                        {{-- Date Header (spans full width) --}}
-                        <div class="col-span-1 md:col-span-2" :class="groupIndex > 0 ? 'mt-2' : ''">
-                            <div class="px-4 pb-3 pt-3 flex items-center gap-4">
-                                <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                                <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></div>
-                                <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                        {{-- Date Header --}}
+                        <div :class="groupIndex > 0 ? 'mt-2' : ''">
+                            <div class="px-1 pb-2 pt-3 flex items-center gap-3">
+                                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: {{ isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA' }}"></span>
+                                <span class="font-bold text-gray-900 dark:text-gray-100" v-text="formatDateShort(group.date)"></span>
+                                <span class="text-gray-400 dark:text-gray-500 font-normal" v-text="formatDayName(group.date)"></span>
                             </div>
                         </div>
                         {{-- Event Cards --}}
@@ -564,26 +564,16 @@
 
             {{-- Past Events Section --}}
             <div v-if="filteredPastEventsCount > 0" class="mt-6">
-                <button @click="showPastEvents = !showPastEvents"
-                        class="w-full flex items-center gap-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                    <span class="font-medium text-sm whitespace-nowrap">
-                        {{ __('messages.show_past_events') }} (@{{ filteredPastEventsCount }})
-                        <svg :class="showPastEvents ? 'rotate-180' : ''" class="inline-block w-4 h-4 ms-1 transition-transform" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
-                        </svg>
-                    </span>
-                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                </button>
-                <div v-show="showPastEvents" class="mt-4 opacity-60">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 px-1 mb-4">{{ __('messages.past_events') }}</h2>
+                <div class="mt-4">
+                    <div class="space-y-4">
                         <template v-for="(group, groupIndex) in pastEventsGroupedByDate" :key="'past-date-' + group.date">
                             {{-- Date Header --}}
-                            <div class="col-span-1 md:col-span-2" :class="groupIndex > 0 ? 'mt-2' : ''">
-                                <div class="px-4 pb-3 pt-3 flex items-center gap-4">
-                                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                                    <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></div>
-                                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                            <div :class="groupIndex > 0 ? 'mt-2' : ''">
+                                <div class="px-1 pb-2 pt-3 flex items-center gap-3">
+                                    <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: {{ isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA' }}"></span>
+                                    <span class="font-bold text-gray-900 dark:text-gray-100" v-text="formatDateShort(group.date)"></span>
+                                    <span class="text-gray-400 dark:text-gray-500 font-normal" v-text="formatDayName(group.date)"></span>
                                 </div>
                             </div>
                             {{-- Past Event Cards --}}
@@ -1189,6 +1179,24 @@ const calendarApp = createApp({
                 weekday: 'long',
                 month: 'long',
                 day: 'numeric'
+            });
+        },
+        formatDateShort(dateStr) {
+            if (!dateStr) return '';
+            const [year, month, day] = dateStr.split('-').map(Number);
+            const eventDate = new Date(year, month - 1, day);
+            return eventDate.toLocaleDateString(this.languageCode, {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        },
+        formatDayName(dateStr) {
+            if (!dateStr) return '';
+            const [year, month, day] = dateStr.split('-').map(Number);
+            const eventDate = new Date(year, month - 1, day);
+            return eventDate.toLocaleDateString(this.languageCode, {
+                weekday: 'long'
             });
         },
         getDaySuffix(day) {

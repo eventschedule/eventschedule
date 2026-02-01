@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html dir="{{ !empty($isRtl) ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
     <title>{{ $newsletter->subject }}</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: {{ $style['fontFamily'] }}, sans-serif; background-color: {{ $style['backgroundColor'] }}; color: {{ $style['textColor'] }};">
@@ -11,11 +13,20 @@
             <td align="center" style="padding: 20px 10px;">
                 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%;">
 
-                    @php $template = $newsletter->template ?? 'modern'; @endphp
+                    @php
+                        $template = $newsletter->template ?? 'modern';
+                        $isRtl = $isRtl ?? false;
+                        $startAlign = $isRtl ? 'right' : 'left';
+                        $endAlign = $isRtl ? 'left' : 'right';
+                        $startBorder = $isRtl ? 'border-right' : 'border-left';
+                        $startPadding = $isRtl ? 'padding-right' : 'padding-left';
+                        $endPadding = $isRtl ? 'padding-left' : 'padding-right';
+                        $arrow = $isRtl ? '&larr;' : '&rarr;';
+                    @endphp
                     @foreach ($blocks as $block)
                         @php $blockType = $block['type'] ?? ''; @endphp
                         @if (view()->exists('emails.newsletter_blocks._' . $blockType))
-                            @include('emails.newsletter_blocks._' . $blockType, ['block' => $block, 'style' => $style, 'role' => $role, 'template' => $template])
+                            @include('emails.newsletter_blocks._' . $blockType, ['block' => $block, 'style' => $style, 'role' => $role, 'template' => $template, 'isRtl' => $isRtl, 'startAlign' => $startAlign, 'endAlign' => $endAlign, 'startBorder' => $startBorder, 'startPadding' => $startPadding, 'endPadding' => $endPadding, 'arrow' => $arrow])
                         @endif
                     @endforeach
 

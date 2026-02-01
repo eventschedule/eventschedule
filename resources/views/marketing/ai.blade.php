@@ -50,14 +50,6 @@
                 </a>
             </div>
 
-            <div class="mt-6">
-                <a href="{{ route('marketing.docs.creating_events') }}" class="inline-flex items-center gap-1.5 text-gray-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 font-medium transition-colors">
-                    Read the guide
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
         </div>
     </section>
 
@@ -310,57 +302,50 @@
         </div>
     </section>
 
-    <!-- Next Feature -->
+    <!-- Guide & Next Feature -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
-        <!-- Animated background blobs matching Newsletters page's colors -->
         <div class="absolute inset-0">
             <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-sky-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
             <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a href="{{ route('marketing.newsletters') }}" class="group block">
-                <div class="bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900 rounded-3xl border border-sky-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
-                    <div class="flex flex-col lg:flex-row gap-8 items-center">
-                        <!-- Text content -->
-                        <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Newsletters</h3>
-                            <p class="text-gray-500 dark:text-white/80 text-lg mb-4">Send beautiful newsletters to followers and ticket buyers with drag-and-drop building and A/B testing.</p>
-                            <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
-                                Learn more
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        <!-- Mini mockup: Newsletter stats -->
-                        <div class="flex-shrink-0">
-                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
-                                <div class="text-[10px] text-gray-400 dark:text-gray-400 mb-2 font-medium">Newsletter Stats</div>
-                                <div class="mb-2">
-                                    <div class="flex justify-between text-[10px] mb-1">
-                                        <span class="text-gray-400">Open rate</span>
-                                        <span class="text-sky-400 font-medium">42%</span>
-                                    </div>
-                                    <div class="h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
-                                        <div class="h-full bg-sky-500 rounded-full" style="width: 42%"></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="flex justify-between text-[10px] mb-1">
-                                        <span class="text-gray-400">Click rate</span>
-                                        <span class="text-cyan-400 font-medium">18%</span>
-                                    </div>
-                                    <div class="h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
-                                        <div class="h-full bg-cyan-500 rounded-full" style="width: 18%"></div>
-                                    </div>
-                                </div>
-                            </div>
+                <!-- Read the guide -->
+                <a href="{{ route('marketing.docs.creating_events') }}" class="group block">
+                    <div class="h-full bg-white dark:bg-white/5 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 mb-6">
+                            <svg class="w-6 h-6 text-violet-500 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
                         </div>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">Read the guide</h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Learn how to get the most out of AI-powered event import.</p>
+                        <span class="inline-flex items-center text-violet-500 dark:text-violet-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            Read guide
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </span>
                     </div>
-                </div>
-            </a>
+                </a>
+
+                <!-- Next feature -->
+                <a href="{{ route('marketing.newsletters') }}" class="group block">
+                    <div class="h-full bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900 rounded-3xl border border-sky-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Newsletters</h3>
+                        <p class="text-gray-500 dark:text-white/80 text-lg mb-4">Send beautiful newsletters to followers and ticket buyers with drag-and-drop building and A/B testing.</p>
+                        <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            Learn more
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </span>
+                    </div>
+                </a>
+
+            </div>
         </div>
     </section>
 

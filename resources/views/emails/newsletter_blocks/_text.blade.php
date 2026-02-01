@@ -12,7 +12,7 @@
 </tr>
 @elseif ($template === 'minimal')
 <tr>
-    <td style="background-color: #ffffff; padding: 14px 30px;">
+    <td style="padding: 14px 30px;">
         <div style="font-size: 15px; line-height: 1.5; color: {{ $style['textColor'] }}; font-family: {{ $style['fontFamily'] }}, sans-serif;">
             {!! $block['data']['contentHtml'] !!}
         </div>
@@ -28,7 +28,7 @@
 </tr>
 @elseif ($template === 'compact')
 <tr>
-    <td style="background-color: #ffffff; padding: 10px 30px;">
+    <td style="padding: 10px 30px;">
         <div style="font-size: 14px; line-height: 1.4; color: {{ $style['textColor'] }}; font-family: {{ $style['fontFamily'] }}, sans-serif;">
             {!! $block['data']['contentHtml'] !!}
         </div>
@@ -37,7 +37,7 @@
 @else
 {{-- Modern (default) --}}
 <tr>
-    <td style="background-color: #ffffff; padding: 20px 30px;">
+    <td style="padding: 20px 30px;">
         <div style="font-size: 15px; line-height: 1.6; color: {{ $style['textColor'] }}; font-family: {{ $style['fontFamily'] }}, sans-serif;">
             {!! $block['data']['contentHtml'] !!}
         </div>
