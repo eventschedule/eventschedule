@@ -194,6 +194,14 @@
                             </div>
                             <span class="text-gray-600 dark:text-gray-300">10 {{ __('messages.newsletters_per_month') }}</span>
                         </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg class="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">Fan videos & comments on events</span>
+                        </li>
                     </ul>
 
                     <a href="{{ route('sign_up') }}" class="mt-auto block w-full text-center px-6 py-4 bg-white dark:bg-white/10 hover:bg-emerald-50 dark:hover:bg-white/20 border-2 border-emerald-300 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-semibold rounded-2xl transition-all">

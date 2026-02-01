@@ -39,7 +39,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-                Paste text or drop an image. AI extracts all the details automatically.
+                Paste text or drop an image, even from multi-event agendas and setlists. AI extracts all the details automatically.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
@@ -72,11 +72,12 @@
                                 Smart Parsing
                             </div>
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Parse any format</h3>
-                            <p class="text-gray-500 dark:text-white/80 text-lg mb-6">Flyers, emails, social posts, screenshots. Paste the text or drop an image and AI extracts event name, date, time, venue, and description.</p>
+                            <p class="text-gray-500 dark:text-white/80 text-lg mb-6">Flyers, emails, agendas, and setlists. Paste the text or drop an image and AI extracts event name, date, time, venue, and description. Multi-event images are parsed into individual events automatically.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Text parsing</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Image recognition</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any language</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Agendas & setlists</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -184,7 +185,7 @@
                                 Multiple Formats
                             </div>
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Any input works</h3>
-                            <p class="text-gray-500 dark:text-white/80 text-lg">Text, images, screenshots, flyers, social media posts. Drop it in and AI figures out the rest.</p>
+                            <p class="text-gray-500 dark:text-white/80 text-lg">Text, images, screenshots, flyers, agendas, and setlists. Drop it in and AI figures out the rest.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
@@ -207,9 +208,9 @@
                             </div>
                             <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
                                 <svg class="w-8 h-8 mx-auto mb-2 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                                 </svg>
-                                <div class="text-gray-900 dark:text-white text-sm font-medium">Social Posts</div>
+                                <div class="text-gray-900 dark:text-white text-sm font-medium">Agendas</div>
                             </div>
                         </div>
                     </div>
@@ -238,7 +239,7 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Paste or Drop</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-sm">
-                        Copy text from anywhere or drop an image of an event flyer or screenshot.
+                        Copy text from anywhere or drop an image of an event flyer, agenda, setlist, or screenshot.
                     </p>
                 </div>
 
@@ -278,7 +279,7 @@
                     Supported image formats
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-                    Upload event flyers, screenshots, or any image containing event details.
+                    Upload event flyers, agendas, setlists, screenshots, or any image containing event details.
                 </p>
 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
@@ -389,6 +390,8 @@
         "featureList": [
             "AI-powered text parsing",
             "Image and flyer import",
+            "Agenda and setlist parsing",
+            "Multi-event image extraction",
             "Automatic event extraction",
             "Instant translation",
             "Bulk import support",
