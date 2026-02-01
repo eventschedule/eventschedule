@@ -28,17 +28,17 @@
     }
 
     .section-nav-link.validation-error {
-      border-left-color: #dc2626 !important;
+      border-inline-start-color: #dc2626 !important;
     }
 
     @media (prefers-color-scheme: dark) {
       .section-nav-link.validation-error {
-        border-left-color: #ef4444 !important;
+        border-inline-start-color: #ef4444 !important;
       }
     }
 
     .dark .section-nav-link.validation-error {
-      border-left-color: #ef4444 !important;
+      border-inline-start-color: #ef4444 !important;
     }
 
     /* Mobile accordion styles */
@@ -237,17 +237,17 @@
 
         @if ($event->exists)
         {{-- Actions dropdown --}}
-        <div class="relative inline-block text-left">
+        <div class="relative inline-block text-start">
             <button type="button" onclick="onPopUpClick('event-actions-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700" id="event-actions-menu-button" aria-expanded="true" aria-haspopup="true">
                 {{ __('messages.actions') }}
-                <svg class="-mr-1 ml-2 h-6 w-6 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <svg class="-me-1 ms-2 h-6 w-6 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                 </svg>
             </button>
-            <div id="event-actions-pop-up-menu" class="pop-up-menu hidden absolute right-0 z-10 mt-2 w-64 origin-top-right divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="event-actions-menu-button" tabindex="-1">
+            <div id="event-actions-pop-up-menu" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="event-actions-menu-button" tabindex="-1">
                 <div class="py-2" role="none" onclick="onPopUpClick('event-actions-pop-up-menu', event)">
                     <a href="{{ route('event.clone', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
-                        <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                         </svg>
                         <div>
@@ -262,7 +262,7 @@
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="w-full group flex items-center px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300 focus:bg-red-50 dark:focus:bg-red-900/20 focus:text-red-700 dark:focus:text-red-300 focus:outline-none transition-colors" role="menuitem" tabindex="0">
-                            <svg class="mr-3 h-5 w-5 text-red-400 group-hover:text-red-500 dark:group-hover:text-red-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <svg class="me-3 h-5 w-5 text-red-400 group-hover:text-red-500 dark:group-hover:text-red-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                 <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
                             </svg>
                             <div>
@@ -304,33 +304,39 @@
                     <div class="sticky top-6">
                         <nav class="space-y-1">
                             @if (! $role->isVenue() || $user->isMember($role->subdomain) || $user->canEditEvent($event))
-                            <a href="#section-details" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-details">
+                            <a href="#section-details" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-details">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                                 </svg>
                                 {{ __('messages.details') }}
                             </a>
                             @endif
-                            <a href="#section-venue" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-venue">
+                            <a href="#section-venue" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-venue">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-1.5-1.5v18m7.5-18v18" />
                                 </svg>
                                 {{ __('messages.venue') }}
                             </a>
-                            <a href="#section-participants" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-participants">
+                            <a href="#section-participants" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-participants">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                                 </svg>
                                 {{ __('messages.participants') }}
                             </a>
                             @if (! $role->isCurator())
-                            <a href="#section-recurring" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-recurring">
+                            <a href="#section-recurring" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-recurring">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                                 </svg>
                                 {{ __('messages.recurring') }}
                             </a>
                             @endif
+                            <a href="#section-agenda" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-agenda">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                </svg>
+                                {{ __('messages.agenda') }}
+                            </a>
                             @php
                                 $curatorsForNav = $user->allCurators();
                                 $curatorsForNav = $curatorsForNav->filter(function($curator) use ($subdomain) {
@@ -338,7 +344,7 @@
                                 });
                             @endphp
                             @if ($curatorsForNav->count() > 0)
-                            <a href="#section-schedules" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-schedules">
+                            <a href="#section-schedules" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-schedules">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                 </svg>
@@ -346,7 +352,7 @@
                             </a>
                             @endif
                             @if ($event->user_id == $user->id)
-                            <a href="#section-tickets" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-tickets">
+                            <a href="#section-tickets" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-tickets">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
                                 </svg>
@@ -354,7 +360,7 @@
                             </a>
                             @endif
                             @if (count($role->getEventCustomFields()) > 0)
-                            <a href="#section-custom-fields" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-custom-fields">
+                            <a href="#section-custom-fields" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-custom-fields">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
@@ -363,7 +369,7 @@
                             </a>
                             @endif
                             @if ($event->exists && $event->canBeSyncedToGoogleCalendarForSubdomain(request()->subdomain))
-                            <a href="#section-google-calendar" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-r-md hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-transparent" data-section="section-google-calendar">
+                            <a href="#section-google-calendar" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-google-calendar">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                 </svg>
@@ -452,7 +458,7 @@
                         @if($effectiveRole->groups && count($effectiveRole->groups))
                         <div class="mb-6">
                             <x-input-label for="current_role_group_id" :value="__('messages.schedule')" />
-                            <select id="current_role_group_id" name="current_role_group_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                            <select id="current_role_group_id" name="current_role_group_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl') }}">
                                 <option value="">{{ __('messages.please_select') }}</option>
                                 @foreach($effectiveRole->groups as $group)
                                     @php
@@ -1061,13 +1067,132 @@
                 </div>
                 @endif
 
+                <!-- Agenda Section -->
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-agenda">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                        </svg>
+                        {{ __('messages.agenda') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="section-agenda" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                    <div class="max-w-xl {{ $role->isRtl() ? 'rtl' : '' }}">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                            </svg>
+                            {{ __('messages.agenda') }}
+                        </h2>
+
+                        <div class="space-y-4">
+                            <template v-for="(part, index) in eventParts" :key="index">
+                                <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">#@{{ index + 1 }}</span>
+                                        <div class="flex items-center gap-1">
+                                            <button type="button" @click="movePartUp(index)" :disabled="index === 0" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                                </svg>
+                                            </button>
+                                            <button type="button" @click="movePartDown(index)" :disabled="index === eventParts.length - 1" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                                </svg>
+                                            </button>
+                                            <button type="button" @click="removePart(index)" class="p-1 text-red-400 hover:text-red-600">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <x-input-label :value="__('messages.part_name') . ' *'" />
+                                        <input type="text" v-model="part.name" :name="'event_parts[' + index + '][name]'" required class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3 mb-3">
+                                        <div>
+                                            <x-input-label :value="__('messages.start_time')" />
+                                            <input type="time" v-model="part.start_time" :name="'event_parts[' + index + '][start_time]'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+                                        </div>
+                                        <div>
+                                            <x-input-label :value="__('messages.end_time')" />
+                                            <input type="time" v-model="part.end_time" :name="'event_parts[' + index + '][end_time]'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <x-input-label :value="__('messages.description')" />
+                                        <textarea v-model="part.description" :name="'event_parts[' + index + '][description]'" rows="2" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                                    </div>
+                                    <input type="hidden" :name="'event_parts[' + index + '][id]'" :value="part.id || ''" />
+                                </div>
+                            </template>
+                        </div>
+
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <x-secondary-button type="button" @click="addPart">
+                                {{ __('messages.add_part') }}
+                            </x-secondary-button>
+
+                            @if (config('services.google.gemini_key'))
+                            <x-secondary-button type="button" @click="$refs.partsImageInput.click()" v-bind:disabled="parsingParts">
+                                <span v-if="parsingParts">{{ __('messages.parsing_image') }}</span>
+                                <span v-else>{{ __('messages.import_from_image') }}</span>
+                            </x-secondary-button>
+                            <input type="file" ref="partsImageInput" @change="parsePartsFromImage($event)" accept="image/*" class="hidden" />
+
+                            <x-secondary-button type="button" @click="showPartsTextInput = !showPartsTextInput">
+                                {{ __('messages.import_from_text') }}
+                            </x-secondary-button>
+                            @endif
+                        </div>
+
+                        @if (config('services.google.gemini_key'))
+                        <div v-if="showPartsTextInput" class="mt-4">
+                            <textarea v-model="partsText" rows="4" class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" placeholder="{{ __('messages.paste_setlist_or_agenda') }}"></textarea>
+                            <div class="mt-2">
+                                <x-secondary-button type="button" @click="parsePartsFromText" v-bind:disabled="parsingParts || !partsText">
+                                    <span v-if="parsingParts">{{ __('messages.parsing_image') }}</span>
+                                    <span v-else>{{ __('messages.import_from_text') }}</span>
+                                </x-secondary-button>
+                            </div>
+                        </div>
+
+                        <!-- Preview Modal -->
+                        <div v-if="showPartsPreview" class="mt-4 border border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.preview_parts') }}</h3>
+                            <div class="space-y-2 mb-4">
+                                <div v-for="(part, index) in parsedPartsPreview" :key="index" class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                    <span class="font-medium text-gray-500">@{{ index + 1 }}.</span>
+                                    <span>@{{ part.name }}</span>
+                                    <span v-if="part.start_time" class="text-gray-400">(@{{ part.start_time }}<span v-if="part.end_time"> - @{{ part.end_time }}</span>)</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <x-secondary-button type="button" @click="acceptParsedParts" class="!bg-blue-600 !text-white hover:!bg-blue-700">
+                                    {{ __('messages.accept_parts') }}
+                                </x-secondary-button>
+                                <x-secondary-button type="button" @click="showPartsPreview = false; parsedPartsPreview = []">
+                                    {{ __('messages.discard') }}
+                                </x-secondary-button>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+
                 @php
                     $curators = $user->allCurators();
                     $curators = $curators->filter(function($curator) use ($subdomain) {
                         return $curator->subdomain !== $subdomain;
                     });
                 @endphp
-                
+
                 @if ($curators->count() > 0)
                 <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-schedules">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -1764,6 +1889,18 @@
         sendEmailToVenue: false,
         sendEmailToMembers: {},
         sendEmailToNewMember: false,
+        eventParts: @json(isset($event->id) ? $event->parts : ($clonedParts ?? [])).map(part => ({
+          id: part.id || '',
+          name: part.name || '',
+          description: part.description || '',
+          start_time: part.start_time || '',
+          end_time: part.end_time || '',
+        })),
+        parsingParts: false,
+        parsedPartsPreview: [],
+        showPartsPreview: false,
+        showPartsTextInput: false,
+        partsText: '',
       }
     },
     methods: {
@@ -2008,6 +2145,96 @@
       },
       clearEventUrl() {
         this.event.event_url = "";
+      },
+      addPart() {
+        this.eventParts.push({ id: '', name: '', description: '', start_time: '', end_time: '' });
+      },
+      removePart(index) {
+        this.eventParts.splice(index, 1);
+      },
+      movePartUp(index) {
+        if (index > 0) {
+          const temp = this.eventParts[index];
+          this.eventParts.splice(index, 1);
+          this.eventParts.splice(index - 1, 0, temp);
+        }
+      },
+      movePartDown(index) {
+        if (index < this.eventParts.length - 1) {
+          const temp = this.eventParts[index];
+          this.eventParts.splice(index, 1);
+          this.eventParts.splice(index + 1, 0, temp);
+        }
+      },
+      parsePartsFromImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        this.parsingParts = true;
+        const formData = new FormData();
+        formData.append('parts_image', file);
+        formData.append('_token', '{{ csrf_token() }}');
+        fetch('/{{ $subdomain }}/parse-event-parts', {
+          method: 'POST',
+          body: formData,
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+          this.parsingParts = false;
+          event.target.value = '';
+          if (data.error) {
+            alert('{{ __('messages.error') }}: ' + data.error);
+          } else if (Array.isArray(data) && data.length > 0) {
+            this.parsedPartsPreview = data;
+            this.showPartsPreview = true;
+          }
+        })
+        .catch(() => {
+          this.parsingParts = false;
+          event.target.value = '';
+          alert('{{ __('messages.error') }}');
+        });
+      },
+      parsePartsFromText() {
+        if (!this.partsText) return;
+        this.parsingParts = true;
+        const formData = new FormData();
+        formData.append('parts_text', this.partsText);
+        formData.append('_token', '{{ csrf_token() }}');
+        fetch('/{{ $subdomain }}/parse-event-parts', {
+          method: 'POST',
+          body: formData,
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+          this.parsingParts = false;
+          if (data.error) {
+            alert('{{ __('messages.error') }}: ' + data.error);
+          } else if (Array.isArray(data) && data.length > 0) {
+            this.parsedPartsPreview = data;
+            this.showPartsPreview = true;
+          }
+        })
+        .catch(() => {
+          this.parsingParts = false;
+          alert('{{ __('messages.error') }}');
+        });
+      },
+      acceptParsedParts() {
+        this.parsedPartsPreview.forEach(part => {
+          this.eventParts.push({
+            id: '',
+            name: part.name || '',
+            description: part.description || '',
+            start_time: part.start_time || '',
+            end_time: part.end_time || '',
+          });
+        });
+        this.parsedPartsPreview = [];
+        this.showPartsPreview = false;
+        this.showPartsTextInput = false;
+        this.partsText = '';
       },
       onChangeVenueType(type) {
         if (type === 'in_person' && !this.isInPerson) {
