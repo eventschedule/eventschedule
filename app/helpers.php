@@ -58,20 +58,6 @@ if (! function_exists('is_valid_language_code')) {
     }
 }
 
-if (! function_exists('is_hosted_or_admin')) {
-    /**
-     * Check if the current instance is the nexus or user is an admin
-     */
-    function is_hosted_or_admin(): bool
-    {
-        if (config('app.is_nexus') || config('app.is_testing')) {
-            return true;
-        }
-
-        return auth()->user() && auth()->user()->isAdmin();
-    }
-}
-
 if (! function_exists('is_mobile')) {
     /**
      * Check if the current user is on a mobile device

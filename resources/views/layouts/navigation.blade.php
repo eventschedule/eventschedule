@@ -66,7 +66,7 @@
                     </a>
                 </li>
 
-                @if (auth()->user()->isAdmin() || !config('app.hosted'))
+                @if (auth()->user()->isAdmin() || auth()->user()->roles()->wherePivot('level', '!=', 'follower')->exists())
                 <li>
                     <a href="{{ route('newsletter.index') }}"
                         class="group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('newsletters*') || request()->is('newsletter-segments*') ? 'bg-gray-800 text-white' : '' }}">
@@ -77,6 +77,9 @@
                         {{ __('messages.newsletters') }}
                     </a>
                 </li>
+                @endif
+
+                @if (config('app.hosted') && auth()->user()->isAdmin())
                 <li>
                     <a href="{{ route('admin.dashboard') }}"
                         class="group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('admin/*') ? 'bg-gray-800 text-white' : '' }}">
