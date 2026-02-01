@@ -17,7 +17,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 flex-1">
+                    <div class="ms-4 flex-1">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_users')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalUsers) }}</p>
                     </div>
@@ -26,7 +26,7 @@
                     <span class="{{ $usersChangePercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
                         {{ $usersChangePercent >= 0 ? '+' : '' }}{{ $usersChangePercent }}%
                     </span>
-                    <span class="text-gray-500 dark:text-gray-400 ml-2">
+                    <span class="text-gray-500 dark:text-gray-400 ms-2">
                         +{{ number_format($usersInPeriod) }} @lang('messages.in_period')
                     </span>
                 </div>
@@ -42,7 +42,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 flex-1">
+                    <div class="ms-4 flex-1">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_schedules')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalSchedules) }}</p>
                     </div>
@@ -51,7 +51,7 @@
                     <span class="{{ $schedulesChangePercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
                         {{ $schedulesChangePercent >= 0 ? '+' : '' }}{{ $schedulesChangePercent }}%
                     </span>
-                    <span class="text-gray-500 dark:text-gray-400 ml-2">
+                    <span class="text-gray-500 dark:text-gray-400 ms-2">
                         +{{ number_format($schedulesInPeriod) }} @lang('messages.in_period')
                     </span>
                 </div>
@@ -67,7 +67,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 flex-1">
+                    <div class="ms-4 flex-1">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_events')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalEvents) }}</p>
                     </div>
@@ -76,7 +76,7 @@
                     <span class="{{ $eventsChangePercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
                         {{ $eventsChangePercent >= 0 ? '+' : '' }}{{ $eventsChangePercent }}%
                     </span>
-                    <span class="text-gray-500 dark:text-gray-400 ml-2">
+                    <span class="text-gray-500 dark:text-gray-400 ms-2">
                         +{{ number_format($eventsInPeriod) }} @lang('messages.in_period')
                     </span>
                 </div>
@@ -104,7 +104,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <p class="ml-2 text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.upcoming_online_events')</p>
+                    <p class="ms-2 text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.upcoming_online_events')</p>
                 </div>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($upcomingOnlineEvents) }}</p>
             </div>
@@ -127,7 +127,7 @@
                                 <div class="bg-indigo-500 h-4 rounded-full" style="width: {{ min(100, ($country->count / $eventsByCountry->max('count')) * 100) }}%"></div>
                             </div>
                         </div>
-                        <div class="w-16 text-right">
+                        <div class="w-16 text-end">
                             <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($country->count) }}</span>
                         </div>
                     </div>
@@ -163,7 +163,7 @@
                                         {{ ucfirst($schedule->type) }} &bull; {{ $schedule->subdomain }}
                                     </p>
                                 </div>
-                                <div class="text-right text-sm text-gray-500 dark:text-gray-400">
+                                <div class="text-end text-sm text-gray-500 dark:text-gray-400">
                                     <p>{{ $schedule->created_at->diffForHumans() }}</p>
                                     @if ($schedule->owner())
                                         <p class="text-xs">@lang('messages.by') {{ $schedule->owner()->name }}</p>
@@ -207,7 +207,7 @@
                                         @endif
                                     </p>
                                 </div>
-                                <div class="text-right text-sm text-gray-500 dark:text-gray-400">
+                                <div class="text-end text-sm text-gray-500 dark:text-gray-400">
                                     <p>{{ $event->created_at->diffForHumans() }}</p>
                                     @if ($event->starts_at)
                                         <p class="text-xs">{{ \Carbon\Carbon::parse($event->starts_at)->format('M d, Y') }}</p>

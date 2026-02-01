@@ -23,32 +23,32 @@
                         @endphp
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
-                                <span class="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
+                                <span class="w-3 h-3 rounded-full bg-blue-500 me-2"></span>
                                 <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.desktop')</span>
                             </div>
-                            <div class="text-right">
+                            <div class="text-end">
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($desktopViews) }}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400 ml-1">({{ $desktopPercent }}%)</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 ms-1">({{ $desktopPercent }}%)</span>
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
-                                <span class="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500 me-2"></span>
                                 <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.mobile')</span>
                             </div>
-                            <div class="text-right">
+                            <div class="text-end">
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($mobileViews) }}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400 ml-1">({{ $mobilePercent }}%)</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 ms-1">({{ $mobilePercent }}%)</span>
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
-                                <span class="w-3 h-3 rounded-full bg-purple-500 mr-2"></span>
+                                <span class="w-3 h-3 rounded-full bg-purple-500 me-2"></span>
                                 <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.tablet')</span>
                             </div>
-                            <div class="text-right">
+                            <div class="text-end">
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($tabletViews) }}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400 ml-1">({{ $tabletPercent }}%)</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 ms-1">({{ $tabletPercent }}%)</span>
                             </div>
                         </div>
                         <div class="pt-2 border-t border-gray-200 dark:border-gray-700">

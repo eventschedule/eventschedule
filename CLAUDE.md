@@ -96,8 +96,7 @@ Routes are defined conditionally in `routes/web.php` based on `config('app.hoste
 - `Group` - Event categories
 
 ### Frontend
-- Use Vue.js for complex JavaScript functionality
-- Alpine.js is available for simple interactivity
+- Use Vue.js for JavaScript functionality
 
 ### Important Integrations
 - **Payments**: Stripe direct integration + Invoice Ninja

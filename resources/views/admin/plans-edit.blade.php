@@ -3,7 +3,7 @@
     {{-- Admin Navigation Tabs --}}
     <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
         <div class="flex justify-between items-center">
-            <nav class="-mb-px flex space-x-8">
+            <nav class="-mb-px flex gap-x-8">
                 <a href="{{ route('admin.dashboard') }}"
                     class="whitespace-nowrap border-b-2 border-transparent px-1 pb-4 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300">
                     @lang('messages.dashboard')
@@ -22,7 +22,7 @@
                 @endif
             </nav>
             <button onclick="window.location.reload()" class="mb-4 inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
                 @lang('messages.refresh')
@@ -54,22 +54,22 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
                     <span class="text-gray-600 dark:text-gray-400">@lang('messages.status'):</span>
-                    <span class="ml-2 font-medium text-gray-900 dark:text-white capitalize">{{ str_replace('_', ' ', $role->subscriptionStatusLabel()) }}</span>
+                    <span class="ms-2 font-medium text-gray-900 dark:text-white capitalize">{{ str_replace('_', ' ', $role->subscriptionStatusLabel()) }}</span>
                 </div>
                 <div>
                     <span class="text-gray-600 dark:text-gray-400">@lang('messages.stripe_customer'):</span>
-                    <span class="ml-2 font-medium text-gray-900 dark:text-white">{{ $role->stripe_id ?: __('messages.none') }}</span>
+                    <span class="ms-2 font-medium text-gray-900 dark:text-white">{{ $role->stripe_id ?: __('messages.none') }}</span>
                 </div>
                 @if ($role->trial_ends_at)
                 <div>
                     <span class="text-gray-600 dark:text-gray-400">@lang('messages.trial_ends'):</span>
-                    <span class="ml-2 font-medium text-gray-900 dark:text-white">{{ $role->trial_ends_at->format('M d, Y') }}</span>
+                    <span class="ms-2 font-medium text-gray-900 dark:text-white">{{ $role->trial_ends_at->format('M d, Y') }}</span>
                 </div>
                 @endif
                 @if ($role->hasActiveSubscription())
                 <div>
                     <span class="text-gray-600 dark:text-gray-400">@lang('messages.active_subscription'):</span>
-                    <span class="ml-2 font-medium text-green-600 dark:text-green-400">@lang('messages.yes')</span>
+                    <span class="ms-2 font-medium text-green-600 dark:text-green-400">@lang('messages.yes')</span>
                 </div>
                 @endif
             </div>

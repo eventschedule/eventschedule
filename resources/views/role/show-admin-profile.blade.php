@@ -16,8 +16,8 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
     <div class="divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-sm shadow ring-1 ring-black dark:ring-gray-700 ring-opacity-5">
-        <div class="relative flex items-center py-6 px-4 space-x-6">
-            <div class="flex-auto pl-4">
+        <div class="relative flex items-center py-6 px-4 gap-x-6">
+            <div class="flex-auto ps-4">
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
                     {{ __('messages.youtube_videos') }}
                     <button type="button"
@@ -35,7 +35,7 @@
                 @if ($link)
                 <li class="py-4">
                     <div class="flex">
-                        <div class="mr-4 flex-shrink-0 text-gray-500">
+                        <div class="me-4 flex-shrink-0 text-gray-500">
                             <x-url-icon>
                                 {{ \App\Utils\UrlUtils::clean($link->url) }}
                             </x-url-icon>
@@ -64,8 +64,8 @@
     </div>
 
     <div class="divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-sm shadow ring-1 ring-black dark:ring-gray-700 ring-opacity-5">
-        <div class="relative flex items-center py-6 px-4 space-x-6">
-            <div class="flex-auto pl-4">
+        <div class="relative flex items-center py-6 px-4 gap-x-6">
+            <div class="flex-auto ps-4">
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
                     {{ __('messages.social_links') }}
                     <button type="button"
@@ -82,7 +82,7 @@
                 @if ($link)
                 <li class="py-4">
                     <div class="flex">
-                        <div class="mr-4 flex-shrink-0 pt-1 text-gray-500">
+                        <div class="me-4 flex-shrink-0 pt-1 text-gray-500">
                             <x-url-icon>
                                 {{ \App\Utils\UrlUtils::clean($link->url) }}
                             </x-url-icon>
@@ -112,8 +112,8 @@
     </div>
 
     <div class="divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-sm shadow ring-1 ring-black dark:ring-gray-700 ring-opacity-5">
-        <div class="relative flex items-center py-6 px-4 space-x-6">
-            <div class="flex-auto pl-4">
+        <div class="relative flex items-center py-6 px-4 gap-x-6">
+            <div class="flex-auto ps-4">
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
                     {{ __('messages.payment_links') }}
                     <button type="button"
@@ -129,7 +129,7 @@
                 @if ($link)
                 <li class="py-4">
                     <div class="flex">
-                        <div class="mr-4 flex-shrink-0 pt-1 text-gray-500">
+                        <div class="me-4 flex-shrink-0 pt-1 text-gray-500">
                             <x-url-icon>
                                 {{ \App\Utils\UrlUtils::clean($link->url) }}
                             </x-url-icon>
@@ -194,7 +194,7 @@ Leaving: "ease-in duration-200"
                 <input type="hidden" id="link_type" name="link_type" />
 
                 <div
-                    class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2x1 sm:p-6">
+                    class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-start shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2x1 sm:p-6">
                     <div>
                         <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
                             <svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5"

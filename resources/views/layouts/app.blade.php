@@ -64,13 +64,24 @@
             var rect = button.getBoundingClientRect();
 
             // Position dropdown with fixed positioning
-            menu.css({
-                'position': 'fixed',
-                'top': (rect.bottom + 4) + 'px',
-                'right': (window.innerWidth - rect.right) + 'px',
-                'left': 'auto',
-                'z-index': '1000'
-            });
+            var isRtl = document.documentElement.dir === 'rtl';
+            if (isRtl) {
+                menu.css({
+                    'position': 'fixed',
+                    'top': (rect.bottom + 4) + 'px',
+                    'left': rect.left + 'px',
+                    'right': 'auto',
+                    'z-index': '1000'
+                });
+            } else {
+                menu.css({
+                    'position': 'fixed',
+                    'top': (rect.bottom + 4) + 'px',
+                    'right': (window.innerWidth - rect.right) + 'px',
+                    'left': 'auto',
+                    'z-index': '1000'
+                });
+            }
 
             menu.show();
             $(document).on('click', hidePopUp);
@@ -133,6 +144,9 @@
             --tw-space-x-reverse: 1;
         }
         .rtl .space-x-10 > :not([hidden]) ~ :not([hidden]) {
+            --tw-space-x-reverse: 1;
+        }
+        .rtl .space-x-8 > :not([hidden]) ~ :not([hidden]) {
             --tw-space-x-reverse: 1;
         }
         

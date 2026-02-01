@@ -15,7 +15,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 flex-1">
+                    <div class="ms-4 flex-1">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.free')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($freeCount) }}</p>
                     </div>
@@ -32,7 +32,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 flex-1">
+                    <div class="ms-4 flex-1">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.pro')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($proCount) }}</p>
                     </div>
@@ -49,7 +49,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 flex-1">
+                    <div class="ms-4 flex-1">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.enterprise')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($enterpriseCount) }}</p>
                     </div>
@@ -66,7 +66,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 flex-1">
+                    <div class="ms-4 flex-1">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_subs')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeSubscriptions) }}</p>
                     </div>
@@ -83,7 +83,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 flex-1">
+                    <div class="ms-4 flex-1">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.expiring_soon')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($expiringSoon) }}</p>
                     </div>
@@ -134,25 +134,25 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 @lang('messages.schedule')
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 @lang('messages.type')
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 @lang('messages.plan')
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 @lang('messages.term')
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 @lang('messages.expires')
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 @lang('messages.status')
                             </th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 @lang('messages.actions')
                             </th>
                         </tr>
@@ -209,7 +209,7 @@
                                         {{ ucfirst(str_replace('_', ' ', $status)) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
                                     <a href="{{ route('admin.plans.edit', ['role' => $role->encodeId()]) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
                                         @lang('messages.edit')
                                     </a>

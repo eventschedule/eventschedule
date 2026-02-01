@@ -6,9 +6,9 @@
             email and role.</p>
         -->
     </div>
-    <div class="mt-6 sm:ml-16 sm:mt-0 sm:flex-none">
+    <div class="mt-6 sm:ms-16 sm:mt-0 sm:flex-none">
         <x-brand-link href="{{ route('role.create_member', ['subdomain' => $role->subdomain]) }}" class="w-full md:w-auto">
-            <svg class="{{ rtl_class($role ?? null, '-mr-0.5 ml-1.5', '-ml-0.5 mr-1.5') }} h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path
                     d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
             </svg>
@@ -25,16 +25,16 @@
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
                                 <th scope="col"
-                                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 sm:pl-6">
+                                    class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 sm:ps-6">
                                     {{ __('messages.name') }}
                                 </th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
                                     {{ __('messages.email') }}
                                 </th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
                                     {{ __('messages.role') }}
                                 </th>
-                                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                <th scope="col" class="relative py-3.5 ps-3 pe-4 sm:pe-6">
                                     <span class="sr-only">{{ __('messages.actions') }}</span>
                                 </th>
                             </tr>
@@ -42,7 +42,7 @@
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                             @foreach ($members as $member)
                             <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:pl-6">
+                                <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
                                     {{ $member->name }}
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
@@ -60,7 +60,7 @@
                                         </a>
                                     @endif
                                 </td>
-                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
                                     @if ($member->pivot->level != 'owner')
                                         <a href="{{ route('role.remove_member', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}"
                                             onclick="return confirm('{{ __('messages.are_you_sure') }}'); return false; "

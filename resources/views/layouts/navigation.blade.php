@@ -68,13 +68,23 @@
 
                 @if (auth()->user()->isAdmin())
                 <li>
+                    <a href="{{ route('newsletter.index') }}"
+                        class="group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('newsletters*') || request()->is('newsletter-segments*') ? 'bg-gray-800 text-white' : '' }}">
+                        <svg class="h-8 w-8 shrink-0" viewBox="0 0 24 24"
+                            fill="{{ request()->is('newsletters*') || request()->is('newsletter-segments*') ? '#ccc' : '#666' }}" aria-hidden="true">
+                            <path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" />
+                        </svg>
+                        {{ __('messages.newsletters') }}
+                    </a>
+                </li>
+                <li>
                     <a href="{{ route('admin.dashboard') }}"
                         class="group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('admin/*') ? 'bg-gray-800 text-white' : '' }}">
                         <svg class="h-8 w-8 shrink-0" viewBox="0 0 24 24"
                             fill="{{ request()->is('admin/*') ? '#ccc' : '#666' }}" aria-hidden="true">
                             <path d="M13,3V9H21V3M13,21H21V11H13M3,21H11V15H3M3,13H11V3H3V13Z" />
                         </svg>
-                        Admin
+                        {{ __('messages.admin') }}
                     </a>
                 </li>
                 @endif

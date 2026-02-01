@@ -16,7 +16,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 flex-1">
+                    <div class="ms-4 flex-1">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_users')</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalUsers) }}</p>
                     </div>
@@ -25,7 +25,7 @@
                     <span class="{{ $usersChangePercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
                         {{ $usersChangePercent >= 0 ? '+' : '' }}{{ $usersChangePercent }}%
                     </span>
-                    <span class="text-gray-500 dark:text-gray-400 ml-2">
+                    <span class="text-gray-500 dark:text-gray-400 ms-2">
                         +{{ number_format($usersInPeriod) }} @lang('messages.in_period')
                     </span>
                 </div>
@@ -60,32 +60,32 @@
                         @endphp
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
-                                <span class="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
+                                <span class="w-3 h-3 rounded-full bg-blue-500 me-2"></span>
                                 <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.email')</span>
                             </div>
-                            <div class="text-right">
+                            <div class="text-end">
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($emailUsers) }}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400 ml-1">({{ $emailPercent }}%)</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 ms-1">({{ $emailPercent }}%)</span>
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
-                                <span class="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+                                <span class="w-3 h-3 rounded-full bg-red-500 me-2"></span>
                                 <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.google')</span>
                             </div>
-                            <div class="text-right">
+                            <div class="text-end">
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($googleUsers) }}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400 ml-1">({{ $googlePercent }}%)</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 ms-1">({{ $googlePercent }}%)</span>
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
-                                <span class="w-3 h-3 rounded-full bg-amber-500 mr-2"></span>
+                                <span class="w-3 h-3 rounded-full bg-amber-500 me-2"></span>
                                 <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.hybrid')</span>
                             </div>
-                            <div class="text-right">
+                            <div class="text-end">
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($hybridUsers) }}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400 ml-1">({{ $hybridPercent }}%)</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 ms-1">({{ $hybridPercent }}%)</span>
                             </div>
                         </div>
                         <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
@@ -154,19 +154,19 @@
                         <table class="min-w-full text-sm">
                             <thead>
                                 <tr class="border-b border-gray-200 dark:border-gray-700">
-                                    <th class="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.source')</th>
-                                    <th class="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.medium')</th>
-                                    <th class="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.campaign')</th>
-                                    <th class="text-right py-2 font-medium text-gray-500 dark:text-gray-400">@lang('messages.users')</th>
+                                    <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.source')</th>
+                                    <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.medium')</th>
+                                    <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.campaign')</th>
+                                    <th class="text-end py-2 font-medium text-gray-500 dark:text-gray-400">@lang('messages.users')</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($topUtmCampaigns as $campaign)
                                     <tr class="border-b border-gray-100 dark:border-gray-700/50">
-                                        <td class="py-2 pr-4 text-gray-900 dark:text-white">{{ $campaign->utm_source ?? '-' }}</td>
-                                        <td class="py-2 pr-4 text-gray-600 dark:text-gray-400">{{ $campaign->utm_medium ?? '-' }}</td>
-                                        <td class="py-2 pr-4 text-gray-600 dark:text-gray-400">{{ $campaign->utm_campaign }}</td>
-                                        <td class="py-2 text-right font-medium text-gray-900 dark:text-white">{{ number_format($campaign->count) }}</td>
+                                        <td class="py-2 pe-4 text-gray-900 dark:text-white">{{ $campaign->utm_source ?? '-' }}</td>
+                                        <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $campaign->utm_medium ?? '-' }}</td>
+                                        <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $campaign->utm_campaign }}</td>
+                                        <td class="py-2 text-end font-medium text-gray-900 dark:text-white">{{ number_format($campaign->count) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -197,22 +197,22 @@
                     <table class="min-w-full text-sm">
                         <thead>
                             <tr class="border-b border-gray-200 dark:border-gray-700">
-                                <th class="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.name')</th>
-                                <th class="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.email')</th>
-                                <th class="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.date')</th>
-                                <th class="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.source')</th>
-                                <th class="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.medium')</th>
-                                <th class="text-left py-2 font-medium text-gray-500 dark:text-gray-400">@lang('messages.campaign')</th>
+                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.name')</th>
+                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.email')</th>
+                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.date')</th>
+                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.source')</th>
+                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.medium')</th>
+                                <th class="text-start py-2 font-medium text-gray-500 dark:text-gray-400">@lang('messages.campaign')</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($recentSignups as $signup)
                                 <tr class="border-b border-gray-100 dark:border-gray-700/50">
-                                    <td class="py-2 pr-4 text-gray-900 dark:text-white">{{ $signup->name }}</td>
-                                    <td class="py-2 pr-4 text-gray-600 dark:text-gray-400">{{ $signup->email }}</td>
-                                    <td class="py-2 pr-4 text-gray-600 dark:text-gray-400">{{ $signup->created_at->format('M j, Y') }}</td>
-                                    <td class="py-2 pr-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_source ?? '-' }}</td>
-                                    <td class="py-2 pr-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_medium ?? '-' }}</td>
+                                    <td class="py-2 pe-4 text-gray-900 dark:text-white">{{ $signup->name }}</td>
+                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->email }}</td>
+                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->created_at->format('M j, Y') }}</td>
+                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_source ?? '-' }}</td>
+                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_medium ?? '-' }}</td>
                                     <td class="py-2 text-gray-600 dark:text-gray-400">{{ $signup->utm_campaign ?? '-' }}</td>
                                 </tr>
                             @endforeach

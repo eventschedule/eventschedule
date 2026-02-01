@@ -2,7 +2,7 @@
 
 @if (count($unscheduled))
 <div class="lg:flex lg:h-full lg:flex-col pt-5">
-    <header class="flex items-center justify-between pl-6 py-4 lg:flex-none">
+    <header class="flex items-center justify-between ps-6 py-4 lg:flex-none">
         <h1 class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-100">
             {{ __('messages.unscheduled') }}
         </h1>
@@ -29,7 +29,7 @@
                     <div class="flex w-0 flex-1 cursor-pointer"
                         onclick="location.href = '{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}'; return false;">
                         <div
-                            class="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            class="relative -me-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-es-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700">
                             <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor"
                                 aria-hidden="true">
                                 <path fill-rule="evenodd"
@@ -39,10 +39,10 @@
                             {{ __('messages.schedule') }}
                         </div>
                     </div>
-                    <div class="-ml-px flex w-0 flex-1 cursor-pointer"
+                    <div class="-ms-px flex w-0 flex-1 cursor-pointer"
                         onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'redirect_to' => 'schedule']) }}'; } return false;">
                         <div
-                            class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-ee-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700">
                             <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor"
                                 aria-hidden="true">
                                 <path

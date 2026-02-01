@@ -1,9 +1,9 @@
 <div class="sm:flex sm:items-center">
     <div class="sm:flex-auto">
     </div>
-    <div class="mt-6 sm:ml-16 sm:mt-0 sm:flex-none">
+    <div class="mt-6 sm:ms-16 sm:mt-0 sm:flex-none">
         <x-brand-link href="{{ route('role.qr_code', ['subdomain' => $role->subdomain]) }}">
-            <svg class="{{ rtl_class($role ?? null, '-mr-0.5 ml-1.5', '-ml-0.5 mr-1.5') }} h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path
                     d="M3,11H5V13H3V11M11,5H13V9H11V5M9,11H13V15H11V13H9V11M15,11H17V13H19V11H21V13H19V15H21V19H19V21H17V19H13V21H11V17H15V15H17V13H15V11M19,19V15H17V19H19M15,3H21V9H15V3M17,5V7H19V5H17M3,3H9V9H3V3M5,5V7H7V5H5M3,15H9V21H3V15M5,17V19H7V17H5Z" />
             </svg>
@@ -51,13 +51,13 @@
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
                                 <th scope="col"
-                                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 sm:pl-6">
+                                    class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 sm:ps-6">
                                     {{ __('messages.name') }}
                                 </th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
                                     {{ __('messages.schedule') }}
                                 </th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
                                     {{ __('messages.date') }}
                                 </th>
                             </tr>
@@ -65,7 +65,7 @@
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                             @foreach ($followersWithRoles as $follower)
                             <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:pl-6">
+                                <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
                                     {{ $follower->name }}
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
@@ -107,11 +107,11 @@
         @endif
 
         @if ($followersWithRoles->hasMorePages())
-            <a href="{{ $followersWithRoles->nextPageUrl() }}" class="ml-3 relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 leading-5 rounded-md hover:text-gray-500 dark:hover:text-gray-400 focus:outline-none focus:ring ring-gray-300 dark:ring-gray-600 focus:border-blue-300 dark:focus:border-blue-500 active:bg-gray-100 dark:active:bg-gray-700 active:text-gray-700 dark:active:text-gray-300 transition ease-in-out duration-150">
+            <a href="{{ $followersWithRoles->nextPageUrl() }}" class="ms-3 relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 leading-5 rounded-md hover:text-gray-500 dark:hover:text-gray-400 focus:outline-none focus:ring ring-gray-300 dark:ring-gray-600 focus:border-blue-300 dark:focus:border-blue-500 active:bg-gray-100 dark:active:bg-gray-700 active:text-gray-700 dark:active:text-gray-300 transition ease-in-out duration-150">
                 {{ __('messages.next') }}
             </a>
         @else
-            <span class="ml-3 relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 cursor-default leading-5 rounded-md">
+            <span class="ms-3 relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 cursor-default leading-5 rounded-md">
                 {{ __('messages.next') }}
             </span>
         @endif

@@ -376,6 +376,18 @@
                                 {{ __('messages.google_calendar_sync') }}
                             </a>
                             @endif
+                            @if ($event->exists)
+                            @php $fanContentPendingCount = ($pendingVideos->count() ?? 0) + ($pendingComments->count() ?? 0); @endphp
+                            <a href="#section-fan-content" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-fan-content">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                                </svg>
+                                {{ __('messages.fan_content') }}
+                                @if ($fanContentPendingCount > 0)
+                                <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $fanContentPendingCount }}</span>
+                                @endif
+                            </a>
+                            @endif
                         </nav>
                         <!-- Sidebar Save Button -->
                         <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
@@ -1795,6 +1807,124 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            @endif
+
+            @if ($event->exists)
+            <div id="section-fan-content" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                    {{ __('messages.fan_content') }}
+                </h2>
+
+                @if ($pendingVideos->count() == 0 && $pendingComments->count() == 0 && $approvedVideos->count() == 0 && $approvedComments->count() == 0)
+                <p class="text-gray-500 dark:text-gray-400">{{ __('messages.no_fan_content') }}</p>
+                @else
+
+                {{-- Pending Section --}}
+                @if ($pendingVideos->count() > 0 || $pendingComments->count() > 0)
+                <div class="mb-8">
+                    <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-4">{{ __('messages.pending_approval') }}</h3>
+                    <div class="space-y-4">
+                        @foreach ($pendingVideos as $video)
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                            <div class="flex-1">
+                                <div class="rounded overflow-hidden mb-2">
+                                    <iframe class="w-full" style="height:200px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    {{ $video->eventPart ? $video->eventPart->name : __('messages.general') }}
+                                    &middot; {{ __('messages.submitted_by') }} {{ $video->user?->name }}
+                                </p>
+                            </div>
+                            <div class="flex gap-2 shrink-0">
+                                <form method="POST" action="{{ route('event.approve_video', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($video->id)]) }}">
+                                    @csrf
+                                    <button type="submit" class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">{{ __('messages.approve') }}</button>
+                                </form>
+                                <form method="POST" action="{{ route('event.reject_video', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($video->id)]) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
+                                </form>
+                            </div>
+                        </div>
+                        @endforeach
+
+                        @foreach ($pendingComments as $comment)
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                            <div class="flex-1">
+                                <p class="text-gray-800 dark:text-gray-200">{{ $comment->comment }}</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    {{ $comment->eventPart ? $comment->eventPart->name : __('messages.general') }}
+                                    &middot; {{ __('messages.submitted_by') }} {{ $comment->user?->name }}
+                                </p>
+                            </div>
+                            <div class="flex gap-2 shrink-0">
+                                <form method="POST" action="{{ route('event.approve_comment', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($comment->id)]) }}">
+                                    @csrf
+                                    <button type="submit" class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">{{ __('messages.approve') }}</button>
+                                </form>
+                                <form method="POST" action="{{ route('event.reject_comment', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($comment->id)]) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
+                                </form>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                {{-- Approved Section --}}
+                @if ($approvedVideos->count() > 0 || $approvedComments->count() > 0)
+                <div>
+                    <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-4">{{ __('messages.approved_content') }}</h3>
+                    <div class="space-y-4">
+                        @foreach ($approvedVideos as $video)
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div class="flex-1">
+                                <div class="rounded overflow-hidden mb-2">
+                                    <iframe class="w-full" style="height:200px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    {{ $video->eventPart ? $video->eventPart->name : __('messages.general') }}
+                                    &middot; {{ __('messages.submitted_by') }} {{ $video->user?->name }}
+                                </p>
+                            </div>
+                            <div class="shrink-0">
+                                <form method="POST" action="{{ route('event.reject_video', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($video->id)]) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
+                                </form>
+                            </div>
+                        </div>
+                        @endforeach
+
+                        @foreach ($approvedComments as $comment)
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div class="flex-1">
+                                <p class="text-gray-800 dark:text-gray-200">{{ $comment->comment }}</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    {{ $comment->eventPart ? $comment->eventPart->name : __('messages.general') }}
+                                    &middot; {{ __('messages.submitted_by') }} {{ $comment->user?->name }}
+                                </p>
+                            </div>
+                            <div class="shrink-0">
+                                <form method="POST" action="{{ route('event.reject_comment', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($comment->id)]) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
+                                </form>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                @endif
             </div>
             @endif
 
