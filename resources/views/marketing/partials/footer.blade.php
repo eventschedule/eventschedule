@@ -149,8 +149,8 @@
         <div class="mt-12 pt-8 border-t border-gray-200 dark:border-white/10">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <a href="{{ marketing_url('/') }}" class="flex items-center space-x-2">
-                    <img class="h-8 w-auto dark:hidden" src="{{ url('images/dark_logo.png') }}" alt="Event Schedule" />
-                    <img class="h-8 w-auto hidden dark:block" src="{{ url('images/light_logo.png') }}" alt="Event Schedule" />
+                    <img class="h-8 w-auto dark:hidden" src="{{ url('images/dark_logo.png') }}" alt="Event Schedule" width="163" height="32" />
+                    <img class="h-8 w-auto hidden dark:block" src="{{ url('images/light_logo.png') }}" alt="Event Schedule" width="163" height="32" />
                 </a>
                 <p class="text-sm text-gray-400 dark:text-gray-500">
                     &copy; {{ date('Y') }} Event Schedule. All rights reserved.
