@@ -169,7 +169,7 @@
                       style="border-color: {{ $role->accent_color ?? '#4E81FA' }}; color: {{ $role->accent_color ?? '#4E81FA' }}"
                       class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold bg-transparent border-2 transition-all duration-200 hover:scale-105 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
-                      {{ __('messages.edit_schedule') }}
+                      {{ __('messages.manage') }}
                     </button>
                   </a>
                   @endif
@@ -305,7 +305,7 @@
                       style="border-color: {{ $role->accent_color ?? '#4E81FA' }}; color: {{ $role->accent_color ?? '#4E81FA' }}"
                       class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold bg-transparent border-2 transition-all duration-200 hover:scale-105 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
-                      {{ __('messages.edit_schedule') }}
+                      {{ __('messages.manage') }}
                     </button>
                   </a>
                   @endif
