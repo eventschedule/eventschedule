@@ -1438,5 +1438,6 @@ return [
     'select_segment' => 'Seleziona segmento',
     'file_too_large' => 'File is too large. Maximum size is 10MB.',
     'test_email_sent_to' => 'L\'email di test verrà inviata a :email',
+    'test_email_failed' => 'Failed to send test email. Please check the logs for details.',
     'please_wait' => 'Attendere prima di riprovare',
 ];

@@ -1,24 +1,3 @@
-@if($route == 'guest')
-<style {!! nonce_attr() !!}>
-.calendar-border-panel {
-    background: white;
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    border: 1px solid #e5e7eb;
-    padding: 0.5rem 1.25rem 1rem;
-}
-.dark .calendar-border-panel {
-    background: #252526;
-    border-color: #2d2d30;
-}
-@media (min-width: 1024px) {
-    .calendar-border-panel {
-        padding-left: 4rem;
-        padding-right: 4rem;
-    }
-}
-</style>
-@endif
 <div class="flex h-full flex-col pt-1" id="calendar-app">
 @php
     $isAdminRoute = $route == 'admin';
@@ -186,7 +165,7 @@
 @endphp
 
 {{-- Panel wrapper --}}
-<div class="{{ $route == 'guest' ? 'calendar-border-panel' : '' }}">
+<div>
 
 @if (! request()->graphic)
 <header class="py-4 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
@@ -388,7 +367,7 @@
         @if (request()->graphic)
             @include('role.partials.calendar-graphic')
         @else
-        <div class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }}">
+        <div class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
             <div
                 class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-center text-xs font-semibold leading-6 text-gray-700 dark:text-gray-300">
                 @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $day)

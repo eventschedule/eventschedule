@@ -1454,5 +1454,6 @@ return [
     'file_too_large' => 'File is too large. Maximum size is 10MB.',
     'test_email_sent_to' => 'Test email will be sent to :email',
     'test_email_failed' => 'Failed to send test email. Please check the logs for details.',
+    'footer_text' => 'Footer Text',
     'please_wait' => 'Please wait before trying again',
 ];

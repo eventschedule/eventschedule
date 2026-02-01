@@ -46,7 +46,7 @@
                     <tr>
                         <td style="background-color: {{ $footerBg }}; padding: {{ $template === 'compact' ? '14px 30px' : '20px 30px' }}; text-align: center; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 0 0 8px 8px;' : '' }} {{ $footerExtra }}">
                                 <p style="margin: 0 0 8px 0; font-size: {{ $template === 'compact' ? '12px' : '13px' }}; color: {{ $footerTextColor }}; font-family: {{ $style['fontFamily'] }}, sans-serif;">
-                                    {{ $role->name }}
+                                    {{ !empty($style['footerText']) ? $style['footerText'] : $role->name }}
                                 </p>
                                 <p style="margin: 0; font-size: {{ $template === 'compact' ? '11px' : '12px' }}; color: {{ $footerTextColor }}; font-family: {{ $style['fontFamily'] }}, sans-serif;">
                                     <a href="{{ $unsubscribeUrl }}" style="color: {{ $footerLinkColor }}; text-decoration: underline;">{{ __('messages.unsubscribe') }}</a>

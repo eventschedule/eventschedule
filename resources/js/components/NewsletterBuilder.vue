@@ -489,6 +489,16 @@
                             <div class="px-5 pb-5" v-html="abTestHtml"></div>
                         </div>
 
+                        <!-- Footer -->
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 px-5 py-4">{{ t.footer_text }}</h3>
+                            <div class="px-5 pb-5">
+                                <textarea v-model="styleSettings.footerText" rows="2"
+                                    class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                    :placeholder="roleName"></textarea>
+                            </div>
+                        </div>
+
                     </div>
 
             </div>
@@ -502,6 +512,7 @@
             <input type="hidden" name="style_settings[fontFamily]" :value="styleSettings.fontFamily" />
             <input type="hidden" name="style_settings[buttonRadius]" :value="styleSettings.buttonRadius" />
             <input type="hidden" name="style_settings[eventLayout]" :value="styleSettings.eventLayout" />
+            <input type="hidden" name="style_settings[footerText]" :value="styleSettings.footerText" />
             <input type="hidden" v-for="segmentId in selectedSegmentIds" :key="'seg_' + segmentId" name="segment_ids[]" :value="segmentId" />
 
             <!-- Action Buttons -->
@@ -609,6 +620,7 @@ const props = defineProps({
     roleEmail: { type: String, default: '' },
     abTestHtml: { type: String, default: '' },
     roleSocialLinks: { type: Array, default: () => [] },
+    roleName: { type: String, default: '' },
 });
 
 const t = props.translations;
@@ -876,8 +888,10 @@ function toggleSegment(segmentId) {
 function onTemplateChange(tmpl) {
     if (props.templateDefaults[tmpl]) {
         const preservedLayout = styleSettings.eventLayout;
+        const preservedFooterText = styleSettings.footerText;
         Object.assign(styleSettings, props.templateDefaults[tmpl]);
         styleSettings.eventLayout = preservedLayout;
+        styleSettings.footerText = preservedFooterText;
     }
 }
 
@@ -992,7 +1006,7 @@ function onHashChange() {
 
 // Watch for changes and trigger debounced preview
 watch(
-    [blocks, () => template.value, () => subject.value, () => styleSettings.backgroundColor, () => styleSettings.accentColor, () => styleSettings.textColor, () => styleSettings.fontFamily, () => styleSettings.buttonRadius, () => styleSettings.eventLayout],
+    [blocks, () => template.value, () => subject.value, () => styleSettings.backgroundColor, () => styleSettings.accentColor, () => styleSettings.textColor, () => styleSettings.fontFamily, () => styleSettings.buttonRadius, () => styleSettings.eventLayout, () => styleSettings.footerText],
     () => {
         debouncedPreview();
     },

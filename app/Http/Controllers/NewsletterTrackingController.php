@@ -43,6 +43,11 @@ class NewsletterTrackingController extends Controller
             abort(404);
         }
 
+        $scheme = parse_url($url, PHP_URL_SCHEME);
+        if (! in_array($scheme, ['http', 'https'])) {
+            abort(404);
+        }
+
         $recipient = NewsletterRecipient::where('token', $token)->first();
 
         if (! $recipient) {

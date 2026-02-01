@@ -479,8 +479,21 @@
         </div>
         @endif
 
+      <style {!! nonce_attr() !!}>
+        .calendar-panel-border {
+          background: white !important;
+          border-radius: 0.75rem !important;
+          box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05) !important;
+          border: 1px solid #d1d5db !important;
+        }
+        .dark .calendar-panel-border {
+          background: #1f2937 !important;
+          border-color: #374151 !important;
+        }
+      </style>
+
       <div
-        class="mb-6"
+        class="calendar-panel-border mb-6 px-5 lg:px-16 pt-2 pb-4"
       >  
         @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'eventLayout' => $role->event_layout ?? 'calendar', 'pastEvents' => $pastEvents ?? collect()])
       </div>

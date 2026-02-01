@@ -1431,5 +1431,6 @@ return [
     'select_segment' => 'בחר קטע',
     'file_too_large' => 'File is too large. Maximum size is 10MB.',
     'test_email_sent_to' => 'אימייל בדיקה יישלח אל :email',
+    'test_email_failed' => 'Failed to send test email. Please check the logs for details.',
     'please_wait' => 'אנא המתן לפני שתנסה שוב',
 ];
