@@ -1242,7 +1242,7 @@
                     </div>
 
                 {{-- Load More Button --}}
-                <div v-if="hasMorePastEvents" class="mt-6 text-center">
+                <div v-if="hasMorePastEvents && (flatUpcomingEvents.length + flatPastEvents.length) < 50" class="mt-6 text-center">
                     <button @click.stop="loadMorePastEvents()"
                             :disabled="loadingPastEvents"
                             class="inline-flex items-center px-6 py-2.5 text-sm font-semibold rounded-xl border-2 transition-colors duration-200"
@@ -1376,7 +1376,7 @@
                     </div>
 
                 {{-- Load More Button --}}
-                <div v-if="hasMorePastEvents" class="mt-6 text-center">
+                <div v-if="hasMorePastEvents && (flatUpcomingEvents.length + flatPastEvents.length) < 50" class="mt-6 text-center">
                     <button @click.stop="loadMorePastEvents()"
                             :disabled="loadingPastEvents"
                             class="inline-flex items-center px-6 py-2.5 text-sm font-semibold rounded-xl border-2 transition-colors duration-200"
@@ -1747,7 +1747,7 @@ const calendarApp = createApp({
                     return new Date(a.local_starts_at) - new Date(b.local_starts_at);
                 }
                 return 0;
-            }).slice(0, this.maxEvents || 100);
+            }).slice(0, 50);
         },
         eventsGroupedByDate() {
             const grouped = {};
@@ -1781,7 +1781,7 @@ const calendarApp = createApp({
                     });
                 }
             });
-            return events;
+            return events.slice(0, 50);
         },
         flatPastEvents() {
             // Start with server-provided past events (one-time)
@@ -1837,7 +1837,7 @@ const calendarApp = createApp({
                     return new Date(a.local_starts_at) - new Date(b.local_starts_at);
                 }
                 return 0;
-            }).slice(0, this.maxEvents || 50);
+            }).slice(0, Math.max(0, 50 - this.flatUpcomingEvents.length));
         },
         pastEventsGroupedByDate() {
             // Group past events by date, sorted reverse-chronologically
