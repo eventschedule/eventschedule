@@ -278,6 +278,12 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Live Q&A Sessions</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-sm">Interactive sessions where speakers answer audience questions in real-time.</p>
+                    <a href="{{ marketing_url('/for-live-qa-sessions') }}" class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
+                        Learn more
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </a>
                 </div>
 
                 <!-- Watch Parties -->
@@ -290,6 +296,12 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Watch Parties</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-sm">Premiere screenings, movie nights, or sports viewing events with your community.</p>
+                    <a href="{{ marketing_url('/for-watch-parties') }}" class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
+                        Learn more
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </a>
                 </div>
             </div>
         </div>

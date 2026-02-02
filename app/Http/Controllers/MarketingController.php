@@ -430,6 +430,22 @@ class MarketingController extends Controller
     }
 
     /**
+     * For Live Q&A Sessions page
+     */
+    public function forLiveQaSessions()
+    {
+        return view('marketing.for-live-qa-sessions');
+    }
+
+    /**
+     * For Watch Parties sub-audience page
+     */
+    public function forWatchParties()
+    {
+        return view('marketing.for-watch-parties');
+    }
+
+    /**
      * Use Cases page
      */
     public function useCases()
