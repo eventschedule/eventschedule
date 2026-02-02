@@ -9,9 +9,10 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
     require $maintenance;
 }
 
-/*
 // Check if .env file exists (selfhosted setup)...
-if (! config('app.hosted') && ! file_exists(__DIR__.'/../.env')) {
+// Skip this check in production where IS_HOSTED is set via environment variables
+$isHosted = filter_var(getenv('IS_HOSTED') ?: ($_ENV['IS_HOSTED'] ?? ''), FILTER_VALIDATE_BOOLEAN);
+if (! $isHosted && ! file_exists(__DIR__.'/../.env')) {
     http_response_code(500);
     echo '<!DOCTYPE html>
 <html lang="en">
@@ -107,7 +108,6 @@ if (! config('app.hosted') && ! file_exists(__DIR__.'/../.env')) {
 </html>';
     exit;
 }
-*/
 
 // Register the Composer autoloader...
 require __DIR__.'/../vendor/autoload.php';
