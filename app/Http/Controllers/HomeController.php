@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Mail\SupportEmail;
 use App\Models\BlogPost;
 use App\Models\Event;
+use App\Models\EventComment;
+use App\Models\EventVideo;
 use App\Models\Role;
+use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -23,6 +26,13 @@ class HomeController extends Controller
 
     public function home(Request $request)
     {
+        if ($pending = session()->pull('pending_fan_content')) {
+            $returnUrl = $this->processPendingFanContent($pending);
+            if ($returnUrl) {
+                return redirect($returnUrl);
+            }
+        }
+
         $subdomain = session('pending_follow');
 
         if (! $subdomain) {
@@ -179,5 +189,97 @@ class HomeController extends Controller
                 'message' => __('messages.feedback_failed'),
             ], 500);
         }
+    }
+
+    private function processPendingFanContent(array $pending): ?string
+    {
+        $eventId = UrlUtils::decodeId($pending['event_hash'] ?? '');
+        if (! $eventId) {
+            return null;
+        }
+
+        $event = Event::with('parts')->find($eventId);
+        if (! $event) {
+            return null;
+        }
+
+        $eventPartId = $pending['event_part_id'] ?? null;
+        if ($eventPartId) {
+            $eventPartId = UrlUtils::decodeId($eventPartId);
+            $part = $event->parts->firstWhere('id', $eventPartId);
+            if (! $part) {
+                $eventPartId = null;
+            }
+        }
+
+        $eventDate = $event->days_of_week ? ($pending['event_date'] ?? null) : null;
+        $returnUrl = $pending['return_url'] ?? null;
+        if ($returnUrl) {
+            $parsedUrl = parse_url($returnUrl);
+            $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+            if (isset($parsedUrl['host']) && $parsedUrl['host'] !== $appHost) {
+                $returnUrl = null;
+            }
+            $lowerUrl = strtolower(trim($returnUrl ?? ''));
+            if (str_starts_with($lowerUrl, 'javascript:') || str_starts_with($lowerUrl, 'data:')) {
+                $returnUrl = null;
+            }
+        }
+
+        if ($pending['type'] === 'video') {
+            $youtubeUrl = $pending['youtube_url'] ?? '';
+            $embedUrl = UrlUtils::getYouTubeEmbed($youtubeUrl);
+            if (! $embedUrl) {
+                return $returnUrl;
+            }
+
+            // Check for duplicate
+            $submittedVideoId = basename(parse_url($embedUrl, PHP_URL_PATH));
+            $query = EventVideo::where('event_id', $event->id);
+            if ($eventPartId) {
+                $query->where('event_part_id', $eventPartId);
+            } else {
+                $query->whereNull('event_part_id');
+            }
+            if ($eventDate) {
+                $query->where('event_date', $eventDate);
+            }
+            $exists = $query->get()->contains(function ($video) use ($submittedVideoId) {
+                $existingEmbed = UrlUtils::getYouTubeEmbed($video->youtube_url);
+
+                return $existingEmbed && basename(parse_url($existingEmbed, PHP_URL_PATH)) === $submittedVideoId;
+            });
+
+            if (! $exists) {
+                EventVideo::create([
+                    'event_id' => $event->id,
+                    'event_part_id' => $eventPartId ?: null,
+                    'event_date' => $eventDate,
+                    'user_id' => auth()->id(),
+                    'youtube_url' => $youtubeUrl,
+                    'is_approved' => false,
+                ]);
+            }
+
+            session()->flash('message', __('messages.video_submitted'));
+        } elseif ($pending['type'] === 'comment') {
+            $comment = $pending['comment'] ?? '';
+            if (! $comment) {
+                return $returnUrl;
+            }
+
+            EventComment::create([
+                'event_id' => $event->id,
+                'event_part_id' => $eventPartId ?: null,
+                'event_date' => $eventDate,
+                'user_id' => auth()->id(),
+                'comment' => $comment,
+                'is_approved' => false,
+            ]);
+
+            session()->flash('message', __('messages.comment_submitted'));
+        }
+
+        return $returnUrl;
     }
 }
