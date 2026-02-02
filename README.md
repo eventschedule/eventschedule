@@ -15,10 +15,15 @@
             <td align="center">Manage events, tickets and settings</td>
             <td align="center">Public-facing events calendar for attendees</td>
         </tr>
+        <tr>
+            <td align="center"><a href="https://www.eventschedule.com"><strong>Hosted Version</strong></a></td>
+            <td align="center"><a href="https://eventschedule.com/docs/installation"><strong>Self-Host Guide</strong></a></td>
+        </tr>
+        <tr>
+            <td align="center">Up and running in under 5 minutes</td>
+            <td align="center">Full control over your infrastructure</td>
+        </tr>
     </table>
-    <p>
-        <a href="https://www.eventschedule.com">Hosted Version</a> · <a href="https://eventschedule.com/docs/installation">Self-Host Guide</a>
-    </p>
 </div>
 
 ---
