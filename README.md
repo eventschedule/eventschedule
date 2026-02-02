@@ -6,16 +6,6 @@
     <p>
         An open-source platform to share events, sell tickets and bring communities together.
     </p>
-    <table>
-        <tr>
-            <td align="center"><a href="https://demo.eventschedule.com"><strong>Admin Portal Demo</strong></a></td>
-            <td align="center"><a href="https://simpsons.eventschedule.com"><strong>Client Portal Demo</strong></a></td>
-        </tr>
-        <tr>
-            <td align="center">Manage events, tickets and settings</td>
-            <td align="center">Public-facing events calendar for attendees</td>
-        </tr>
-    </table>
 </div>
 
 ---
