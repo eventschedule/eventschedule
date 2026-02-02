@@ -33,9 +33,16 @@
             {{-- Current Plan --}}
             <div class="flex items-center">
                 <span class="text-gray-600 dark:text-gray-400 w-40">{{ __('messages.curent_plan') }}</span>
+                @php $planTier = $role->actualPlanTier(); @endphp
                 <span class="font-medium text-gray-700 dark:text-gray-300">
-                    {{ $role->isPro() ? __('messages.pro_plan') : __('messages.free_plan') }}
-                    @if ($role->isPro() && $role->currentPlanTerm())
+                    @if ($planTier === 'enterprise')
+                        {{ __('messages.enterprise') }}
+                    @elseif ($planTier === 'pro')
+                        {{ __('messages.pro_plan') }}
+                    @else
+                        {{ __('messages.free_plan') }}
+                    @endif
+                    @if ($planTier !== 'free' && $role->currentPlanTerm())
                         ({{ $role->currentPlanTerm() == 'yearly' ? __('messages.yearly') : __('messages.monthly') }})
                     @endif
                 </span>
@@ -100,7 +107,7 @@
             @endif
 
             {{-- Legacy: plan_expires for non-subscription users --}}
-            @if (!$subscription && !$role->onGenericTrial() && $role->plan_type == 'pro' && $role->plan_expires)
+            @if (!$subscription && !$role->onGenericTrial() && in_array($role->plan_type, ['pro', 'enterprise']) && $role->plan_expires)
             <div class="flex items-center">
                 <span class="text-gray-600 dark:text-gray-400 w-40">{{ __('messages.expires_on') }}</span>
                 <span class="font-medium text-gray-700 dark:text-gray-300">
