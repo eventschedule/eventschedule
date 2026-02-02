@@ -1113,21 +1113,24 @@
                                 <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                                     <div class="flex items-center justify-between mb-3">
                                         <span class="text-sm font-medium text-gray-500 dark:text-gray-400">#@{{ index + 1 }}</span>
-                                        <div class="flex items-center gap-1">
-                                            <button type="button" @click="movePartUp(index)" :disabled="index === 0" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                        <div class="flex items-center gap-1.5">
+                                            <button type="button" @click="movePartUp(index)" :disabled="index === 0" class="inline-flex items-center justify-center gap-1 px-2 py-1 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
                                                 </svg>
+                                                {{ __('messages.up') }}
                                             </button>
-                                            <button type="button" @click="movePartDown(index)" :disabled="index === eventParts.length - 1" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                            <button type="button" @click="movePartDown(index)" :disabled="index === eventParts.length - 1" class="inline-flex items-center justify-center gap-1 px-2 py-1 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                                                 </svg>
+                                                {{ __('messages.down') }}
                                             </button>
-                                            <button type="button" @click="removePart(index)" class="p-1 text-red-400 hover:text-red-600">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                            <button type="button" @click="removePart(index)" class="inline-flex items-center justify-center gap-1 px-2 py-1 text-xs font-medium rounded-md border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 bg-white dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
+                                                {{ __('messages.remove') }}
                                             </button>
                                         </div>
                                     </div>
@@ -1968,8 +1971,8 @@
         <div class="lg:hidden h-24"></div>
 
         <!-- Mobile Fixed Save Bar -->
-        <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 z-40 shadow-lg"
-             style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
+        <div class="lg:hidden fixed bottom-0 inset-x-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 z-40 shadow-lg"
+             style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
             @if (! $event->exists)
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-3 flex items-center justify-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0">
