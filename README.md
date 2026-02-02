@@ -8,20 +8,23 @@
     </p>
     <table>
         <tr>
-            <td align="center"><a href="https://demo.eventschedule.com"><strong>Admin Portal Demo</strong></a></td>
-            <td align="center"><a href="https://simpsons.eventschedule.com"><strong>Client Portal Demo</strong></a></td>
-        </tr>
-        <tr>
-            <td align="center">Manage events, tickets and settings</td>
-            <td align="center">Public-facing events calendar for attendees</td>
-        </tr>
-        <tr>
             <td align="center"><a href="https://www.eventschedule.com"><strong>Hosted Version</strong></a></td>
             <td align="center"><a href="https://eventschedule.com/docs/installation"><strong>Self-Host Guide</strong></a></td>
         </tr>
         <tr>
             <td align="center">Up and running in under 5 minutes</td>
             <td align="center">Full control over your infrastructure</td>
+        </tr>
+    </table>
+    <h3>Demo</h3>
+    <table>
+        <tr>
+            <td align="center"><a href="https://demo.eventschedule.com"><strong>Admin Portal</strong></a></td>
+            <td align="center"><a href="https://simpsons.eventschedule.com"><strong>Client Portal</strong></a></td>
+        </tr>
+        <tr>
+            <td align="center">Manage events, tickets and settings</td>
+            <td align="center">Public-facing events calendar for attendees</td>
         </tr>
     </table>
 </div>
