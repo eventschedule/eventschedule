@@ -6,12 +6,18 @@
     <p>
         An open-source platform to share events, sell tickets and bring communities together.
     </p>
+    <table>
+        <tr>
+            <td align="center"><a href="https://demo.eventschedule.com"><strong>Admin Portal Demo</strong></a></td>
+            <td align="center"><a href="https://simpsons.eventschedule.com"><strong>Client Portal Demo</strong></a></td>
+        </tr>
+        <tr>
+            <td align="center">Manage events, tickets and settings</td>
+            <td align="center">Public-facing events calendar for attendees</td>
+        </tr>
+    </table>
     <p>
-        <a href="https://demo.eventschedule.com">Admin Portal Demo</a> · <a href="https://simpsons.eventschedule.com">Client Portal Demo</a> · <a href="https://www.eventschedule.com">Hosted Version</a> · <a href="https://eventschedule.com/docs/installation">Self-Host Guide</a>
-    </p>
-    <p>
-        The <strong>Admin Portal</strong> is where schedule owners manage events, tickets, and settings.<br>
-        The <strong>Client Portal</strong> is the public-facing events calendar that attendees see.
+        <a href="https://www.eventschedule.com">Hosted Version</a> · <a href="https://eventschedule.com/docs/installation">Self-Host Guide</a>
     </p>
 </div>
 
