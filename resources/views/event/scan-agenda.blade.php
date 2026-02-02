@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const app = createApp({
         setup() {
-            const state = ref('camera'); // camera, loading, editing, success
+            const state = ref('camera'); // camera, loading, editing
             const events = ref(@json($eventsData));
             const selectedEventId = ref(@json($selectedEventId));
             if (!selectedEventId.value && events.value.length > 0) {
@@ -64,15 +64,21 @@ document.addEventListener('DOMContentLoaded', function() {
             const showAllFields = ref(localStorage.getItem('scanAgendaShowAllFields') === '1');
             const parts = ref([]);
             const errorMessage = ref('');
-            const successEditUrl = ref('');
+
             const cameraError = ref('');
             const videoEl = ref(null);
             const canvasEl = ref(null);
             const cameras = ref([]);
             const selectedCameraId = ref('');
             const cameraStarted = ref(false);
+            const showCameraModal = ref(false);
             const selectCameraLabel = '{{ __("messages.select_camera") }}';
             let stream = null;
+
+            const selectedCameraLabel = computed(() => {
+                const cam = cameras.value.find(c => c.deviceId === selectedCameraId.value);
+                return cam ? (cam.label || selectCameraLabel) : '';
+            });
 
             const selectedEventName = computed(() => {
                 const ev = events.value.find(e => e.id === selectedEventId.value);
@@ -96,11 +102,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                         const savedCameraId = localStorage.getItem('scanAgendaSelectedCamera');
                         const savedCamera = savedCameraId ? cameras.value.find(c => c.deviceId === savedCameraId) : null;
-                        const rear = cameras.value.find(c => c.label.toLowerCase().includes('back') || c.label.toLowerCase().includes('rear') || c.label.toLowerCase().includes('environment'));
-                        const chosen = savedCamera || rear || cameras.value[0];
-                        selectedCameraId.value = chosen.deviceId;
-                        startCamera(chosen.deviceId);
                         localStorage.setItem('scanAgendaCameraGranted', '1');
+                        if (cameras.value.length === 1) {
+                            selectedCameraId.value = cameras.value[0].deviceId;
+                            startCamera(cameras.value[0].deviceId);
+                        } else if (savedCamera) {
+                            selectedCameraId.value = savedCamera.deviceId;
+                            startCamera(savedCamera.deviceId);
+                        } else {
+                            showCameraModal.value = true;
+                        }
                     })
                     .catch(err => {
                         console.error('Camera error:', err);
@@ -133,6 +144,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.setItem('scanAgendaSelectedCamera', deviceId);
                 stopCamera();
                 startCamera(deviceId);
+            }
+
+            function selectCameraFromModal(deviceId) {
+                showCameraModal.value = false;
+                if (deviceId === selectedCameraId.value) return;
+                selectedCameraId.value = deviceId;
+                localStorage.setItem('scanAgendaSelectedCamera', deviceId);
+                stopCamera();
+                startCamera(deviceId);
+            }
+
+            function changeCamera() {
+                showCameraModal.value = true;
             }
 
             function stopCamera() {
@@ -253,6 +277,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 dropTargetIndex.value = null;
             }
 
+            function onContainerDragOver(event) {
+                if (dragIndex.value === null || parts.value.length === 0) return;
+                const container = event.currentTarget;
+                const firstChild = container.children[0];
+                if (firstChild) {
+                    const rect = firstChild.getBoundingClientRect();
+                    if (event.clientY < rect.top + rect.height / 2) {
+                        if (0 !== dragIndex.value && 0 !== dragIndex.value + 1) {
+                            dropTargetIndex.value = 0;
+                        } else {
+                            dropTargetIndex.value = null;
+                        }
+                    }
+                }
+            }
+
             function toggleShowAllFields() {
                 showAllFields.value = !showAllFields.value;
                 localStorage.setItem('scanAgendaShowAllFields', showAllFields.value ? '1' : '0');
@@ -287,8 +327,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         state.value = 'editing';
                         return;
                     }
-                    successEditUrl.value = data.edit_url;
-                    state.value = 'success';
+                    if (data.view_url) {
+                        window.location.href = data.view_url + '#agenda';
+                    } else {
+                        window.location.href = data.edit_url;
+                    }
                 })
                 .catch(err => {
                     console.error('Save error:', err);
@@ -305,7 +348,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             function scanAnother() {
                 parts.value = [];
-                successEditUrl.value = '';
                 state.value = 'camera';
                 cameraStarted.value = false;
             }
@@ -353,15 +395,16 @@ document.addEventListener('DOMContentLoaded', function() {
             return {
                 state, events, selectedEventId, selectedEvent, aiPrompt, saveAsDefault,
                 editingPrompt, showAllFields,
-                parts, errorMessage, successEditUrl, cameraError,
+                parts, errorMessage, cameraError,
                 videoEl, canvasEl, selectedEventName, hasEvents,
                 cameras, selectedCameraId, cameraStarted, selectCameraLabel,
-                dragIndex, dropTargetIndex, onDragStart, onDragOver, onDrop, onDragEnd,
+                showCameraModal, selectedCameraLabel,
+                dragIndex, dropTargetIndex, onDragStart, onDragOver, onDrop, onDragEnd, onContainerDragOver,
                 dropdownOpen, toggleDropdown, closeDropdown,
                 requestCameraAccess, startCamera, switchCamera,
                 captureAndParse, addPart, removePart,
                 saveParts, cancelEditing, scanAnother, onEventChange,
-                toggleShowAllFields,
+                toggleShowAllFields, selectCameraFromModal, changeCamera,
             };
         },
         template: `
@@ -429,23 +472,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p class="mt-4 text-gray-500 dark:text-gray-400">@{{ cameraError }}</p>
             </div>
             <div v-else-if="!cameraStarted" class="text-center py-12">
-                <button @click="requestCameraAccess" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-sm text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                <button v-if="!showCameraModal" @click="requestCameraAccess" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-sm text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                     {{ __('messages.start_camera') }}
                 </button>
+
+                <!-- Camera selection modal (before camera starts) -->
+                <div v-if="showCameraModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" @click.self="showCameraModal = false">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl mx-4 w-full max-w-sm overflow-hidden">
+                        <div class="px-5 pt-5 pb-3">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.select_camera') }}</h3>
+                        </div>
+                        <div class="px-3 pb-4">
+                            <button v-for="cam in cameras" :key="cam.deviceId" @click="selectCameraFromModal(cam.deviceId)"
+                                class="w-full flex items-center gap-3 px-3 py-3 text-left rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span class="flex-1 text-sm text-gray-900 dark:text-gray-100">@{{ cam.label || selectCameraLabel }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div v-else class="relative">
-                <div v-if="cameras.length > 1" class="mb-2">
-                    <select :value="selectedCameraId" @change="switchCamera($event.target.value)" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm">
-                        <option v-for="cam in cameras" :key="cam.deviceId" :value="cam.deviceId">
-                            @{{ cam.label || selectCameraLabel }}
-                        </option>
-                    </select>
-                </div>
-                <video ref="videoEl" autoplay playsinline class="w-full rounded-lg bg-black"></video>
+                <video ref="videoEl" autoplay playsinline class="w-full min-h-[40vh] object-cover rounded-lg bg-black"></video>
                 <canvas ref="canvasEl" class="hidden"></canvas>
                 <div class="absolute bottom-4 left-0 right-0 flex justify-center">
                     <button @click="captureAndParse" :disabled="!selectedEventId"
@@ -453,18 +508,48 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="sr-only">{{ __('messages.capture_photo') }}</span>
                     </button>
                 </div>
+
+                <!-- Camera selection modal -->
+                <div v-if="showCameraModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" @click.self="showCameraModal = false">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl mx-4 w-full max-w-sm overflow-hidden">
+                        <div class="px-5 pt-5 pb-3">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.select_camera') }}</h3>
+                        </div>
+                        <div class="px-3 pb-4">
+                            <button v-for="cam in cameras" :key="cam.deviceId" @click="selectCameraFromModal(cam.deviceId)"
+                                class="w-full flex items-center gap-3 px-3 py-3 text-left rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                :class="cam.deviceId === selectedCameraId ? 'bg-gray-50 dark:bg-gray-700/50' : ''">
+                                <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span class="flex-1 text-sm text-gray-900 dark:text-gray-100">@{{ cam.label || selectCameraLabel }}</span>
+                                <svg v-if="cam.deviceId === selectedCameraId" class="w-5 h-5 text-[#4E81FA] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- AI Prompt (compact) -->
-            <div class="mt-4">
-                <div v-if="!editingPrompt" class="flex items-start justify-between gap-3">
-                    <div class="min-w-0 flex-1">
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            <span v-if="aiPrompt">@{{ aiPrompt }}</span>
-                            <span v-else class="italic">{{ __('messages.no_prompt_set') }}</span>
-                        </p>
-                    </div>
-                    <button @click="editingPrompt = true" class="text-sm font-medium text-[#4E81FA] hover:text-[#3a6de0] whitespace-nowrap border border-[#4E81FA] rounded-md px-3 py-1">{{ __('messages.edit') }}</button>
+            <!-- Buttons row below preview -->
+            <div v-if="cameraStarted" class="mt-3 grid gap-2" :class="cameras.length > 1 ? 'grid-cols-2' : 'grid-cols-1'">
+                <button @click="editingPrompt = !editingPrompt" class="text-sm font-medium text-[#4E81FA] hover:text-[#3a6de0] border border-[#4E81FA] rounded-md px-3 py-2">
+                    {{ __('messages.edit_prompt') }}
+                </button>
+                <button v-if="cameras.length > 1" @click="changeCamera" class="text-sm font-medium text-[#4E81FA] hover:text-[#3a6de0] border border-[#4E81FA] rounded-md px-3 py-2">
+                    {{ __('messages.change_camera') }}
+                </button>
+            </div>
+
+            <!-- AI Prompt (always visible under buttons) -->
+            <div v-if="cameraStarted" class="mt-3">
+                <div v-if="!editingPrompt">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        <span v-if="aiPrompt">@{{ aiPrompt }}</span>
+                        <span v-else class="italic">{{ __('messages.no_prompt_set') }}</span>
+                    </p>
                 </div>
                 <div v-else>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.ai_agenda_prompt') }}</label>
@@ -493,7 +578,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div v-if="state === 'editing'">
             <div :class="showAllFields ? 'space-y-3' : 'space-y-1'" class="mb-24">
                 <!-- Compact layout (name only) -->
-                <div v-if="!showAllFields" @dragover.prevent @drop="onDrop()" class="space-y-1">
+                <div v-if="!showAllFields" @dragover.prevent="onContainerDragOver($event)" @drop="onDrop()" class="space-y-1">
                     <div v-for="(part, index) in parts" :key="'compact-' + index"
                         draggable="true"
                         @dragstart="onDragStart(index)"
@@ -505,7 +590,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-2 shadow-sm">
                         <div class="flex items-center gap-2">
                             <div class="cursor-grab text-gray-400 dark:text-gray-500">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16">
                                     <circle cx="5.5" cy="3.5" r="1.5"/>
                                     <circle cx="10.5" cy="3.5" r="1.5"/>
                                     <circle cx="5.5" cy="8" r="1.5"/>
@@ -517,7 +602,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="flex-1">
                                 <input v-model="part.name" type="text" placeholder="{{ __('messages.name') }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm font-medium">
                             </div>
-                            <button @click="removePart(index)" class="self-stretch rounded-md border border-red-300 dark:border-red-700 px-2 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="{{ __('messages.remove') }}">
+                            <button @click="removePart(index)" class="self-stretch rounded-md border border-red-300 dark:border-red-700 px-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="{{ __('messages.remove') }}">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
@@ -525,7 +610,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
 
                 <!-- Full layout (all fields) -->
-                <div v-else @dragover.prevent @drop="onDrop()" class="space-y-3">
+                <div v-else @dragover.prevent="onContainerDragOver($event)" @drop="onDrop()" class="space-y-3">
                     <div v-for="(part, index) in parts" :key="'full-' + index"
                         draggable="true"
                         @dragstart="onDragStart(index)"
@@ -537,7 +622,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm">
                         <div class="flex items-start gap-2">
                             <div class="cursor-grab text-gray-400 dark:text-gray-500 pt-2">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16">
                                     <circle cx="5.5" cy="3.5" r="1.5"/>
                                     <circle cx="10.5" cy="3.5" r="1.5"/>
                                     <circle cx="5.5" cy="8" r="1.5"/>
@@ -554,18 +639,18 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <input v-model="part.end_time" type="text" placeholder="{{ __('messages.end_time') }}" class="w-1/2 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm">
                                 </div>
                             </div>
-                            <button @click="removePart(index)" class="self-stretch rounded-md border border-red-300 dark:border-red-700 px-2 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="{{ __('messages.remove') }}">
+                            <button @click="removePart(index)" class="self-stretch rounded-md border border-red-300 dark:border-red-700 px-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="{{ __('messages.remove') }}">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <button @click="addPart" class="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                <button @click="addPart" class="w-full py-3 px-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                     + {{ __('messages.add') }}
                 </button>
 
-                <label class="flex items-center text-sm text-gray-600 dark:text-gray-400 pt-2">
+                <label class="flex items-center text-sm text-gray-600 dark:text-gray-400 pt-4 mt-3">
                     <input type="checkbox" :checked="showAllFields" @change="toggleShowAllFields" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] me-2">
                     {{ __('messages.show_all_fields') }}
                 </label>
@@ -584,21 +669,6 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
 
-        <!-- Success state -->
-        <div v-if="state === 'success'" class="text-center py-12">
-            <svg class="mx-auto h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <p class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('messages.agenda_saved') }}</p>
-            <div class="mt-6 flex flex-col gap-3 items-center">
-                <a :href="successEditUrl" class="inline-flex items-center justify-center px-6 py-3 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-sm text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
-                    {{ __('messages.edit_event') }}
-                </a>
-                <button @click="scanAnother" class="inline-flex items-center justify-center px-6 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition ease-in-out duration-150">
-                    {{ __('messages.scan_agenda') }}
-                </button>
-            </div>
-        </div>
     </div>
 </div>
 `
