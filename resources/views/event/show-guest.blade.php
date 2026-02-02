@@ -941,7 +941,7 @@
   </main>
 
   {{-- Sticky mobile CTA --}}
-  <div class="fixed bottom-0 inset-x-0 z-40 sm:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 shadow-lg" style="font-family: sans-serif; padding-bottom: max(0.75rem, env(safe-area-inset-bottom));"
+  <div class="fixed bottom-0 inset-x-0 z-40 sm:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 shadow-lg" style="font-family: sans-serif; padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
     @if ($event->canSellTickets($date) || $event->registration_url)
       @if (request()->get('tickets') !== 'true')
         <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank"' : '' }}
@@ -959,12 +959,9 @@
     @else
       <button type="button"
           onclick="document.getElementById('calendar-mobile-sheet').classList.remove('hidden')"
-          class="w-full justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm hover:opacity-90 flex items-center"
+          class="w-full justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm hover:opacity-90"
           style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
         {{ __('messages.add_to_calendar') }}
-        <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-          <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-        </svg>
       </button>
     @endif
   </div>
