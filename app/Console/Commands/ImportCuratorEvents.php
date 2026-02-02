@@ -654,6 +654,7 @@ class ImportCuratorEvents extends Command
                 'venue_postal_code' => $eventData['event_postal_code'] ?? null,
                 'venue_country_code' => $eventData['event_country_code'] ?? null,
                 'venue_id' => $eventData['venue_id'] ?? null,
+                'venue_website' => $eventData['venue_website'] ?? null,
                 'venue_language_code' => $curator->language_code,
                 'members' => $this->buildMembersData($eventData),
                 'name' => $eventData['event_name'] ?? 'Imported Event',
