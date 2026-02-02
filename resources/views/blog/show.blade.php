@@ -218,6 +218,18 @@
                             'for-dance-groups' => ['from' => 'fuchsia-600', 'to' => 'pink-600', 'shadow' => 'fuchsia-500/25'],
                             'for-theater-performers' => ['from' => 'purple-600', 'to' => 'purple-700', 'shadow' => 'purple-500/25'],
                             'for-food-trucks-and-vendors' => ['from' => 'orange-500', 'to' => 'orange-600', 'shadow' => 'orange-500/25'],
+                            'for-fitness-and-yoga' => ['from' => 'emerald-500', 'to' => 'teal-500', 'shadow' => 'emerald-500/25'],
+                            'for-visual-artists' => ['from' => 'fuchsia-500', 'to' => 'pink-500', 'shadow' => 'fuchsia-500/25'],
+                            'for-workshop-instructors' => ['from' => 'amber-500', 'to' => 'orange-500', 'shadow' => 'amber-500/25'],
+                            'for-farmers-markets' => ['from' => 'emerald-500', 'to' => 'green-500', 'shadow' => 'emerald-500/25'],
+                            'for-hotels-and-resorts' => ['from' => 'sky-500', 'to' => 'blue-500', 'shadow' => 'sky-500/25'],
+                            'for-libraries' => ['from' => 'amber-600', 'to' => 'amber-700', 'shadow' => 'amber-500/25'],
+                            'for-webinars' => ['from' => 'teal-600', 'to' => 'cyan-600', 'shadow' => 'teal-500/25'],
+                            'for-live-concerts' => ['from' => 'rose-500', 'to' => 'amber-500', 'shadow' => 'rose-500/25'],
+                            'for-online-classes' => ['from' => 'emerald-500', 'to' => 'teal-500', 'shadow' => 'emerald-500/25'],
+                            'for-virtual-conferences' => ['from' => 'sky-500', 'to' => 'blue-500', 'shadow' => 'sky-500/25'],
+                            'for-live-qa-sessions' => ['from' => 'violet-500', 'to' => 'purple-500', 'shadow' => 'violet-500/25'],
+                            'for-watch-parties' => ['from' => 'indigo-500', 'to' => 'cyan-500', 'shadow' => 'indigo-500/25'],
                         ];
                         $colors = $colorMap[$subAudienceInfo->parent_page] ?? ['from' => 'violet-500', 'to' => 'purple-500', 'shadow' => 'violet-500/25'];
                     @endphp

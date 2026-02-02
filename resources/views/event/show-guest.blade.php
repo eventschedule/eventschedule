@@ -316,7 +316,7 @@
                   </button>
                 </div>
               @endif
-              <div class="flex flex-col gap-4">
+              <div class="flex flex-col gap-4 mt-2">
                 @if ($event->venue->email && $event->venue->show_email)
                 <div class="flex flex-row gap-2 items-center relative duration-300 text-gray-700 dark:text-gray-300 fill-gray-700 dark:fill-gray-300 {{ $role->isRtl() ? 'rtl' : '' }}">
                   <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -686,12 +686,9 @@
         </div>
         @endif
 
-        {{-- Agenda --}}
+        {{-- Event parts --}}
         @if ($event->parts->count() > 0)
         <div id="agenda" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
-          <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-4">
-            {{ __('messages.agenda') }}
-          </h2>
           @php
             $hasTimes = $event->parts->contains(fn($part) => !empty($part->start_time));
           @endphp
@@ -739,7 +736,34 @@
                     @endforeach
                   </div>
                   @endif
-                  @auth
+                  @php
+                    $myPartPendingVideos = $myPendingVideos->where('event_part_id', $part->id);
+                    $myPartPendingComments = $myPendingComments->where('event_part_id', $part->id);
+                    if ($event->days_of_week && $date) {
+                      $myPartPendingVideos = $myPartPendingVideos->filter(fn($v) => $v->event_date === $date || $v->event_date === null);
+                      $myPartPendingComments = $myPartPendingComments->filter(fn($c) => $c->event_date === $date || $c->event_date === null);
+                    }
+                  @endphp
+                  @if ($myPartPendingVideos->count() > 0)
+                  <div class="mt-2 space-y-2 opacity-60">
+                    @foreach ($myPartPendingVideos as $video)
+                    <div class="rounded overflow-hidden relative">
+                      <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                      <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
+                    </div>
+                    @endforeach
+                  </div>
+                  @endif
+                  @if ($myPartPendingComments->count() > 0)
+                  <div class="mt-2 space-y-1 opacity-60">
+                    @foreach ($myPartPendingComments as $comment)
+                    <div class="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
+                      <span><span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user->first_name ?? $comment->user->name }}</span>: {{ $comment->comment }}</span>
+                      <span class="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
+                    </div>
+                    @endforeach
+                  </div>
+                  @endif
                   <div class="mt-2 flex gap-3" x-data="{ showVideo: false, showComment: false }">
                     <button @click="showVideo = !showVideo; showComment = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-colors" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
@@ -750,29 +774,28 @@
                       {{ __('messages.add_comment') }}
                     </button>
                     <div x-show="showVideo" x-cloak class="mt-2 w-full">
-                      <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex items-stretch gap-2">
+                      <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex flex-col gap-2">
                         @csrf
                         <input type="hidden" name="event_part_id" value="{{ \App\Utils\UrlUtils::encodeId($part->id) }}">
                         @if ($event->days_of_week && $date)
                         <input type="hidden" name="event_date" value="{{ $date }}">
                         @endif
-                        <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" required>
-                        <button type="submit" class="text-xs px-3 py-1 rounded" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                        <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
+                        <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
                     <div x-show="showComment" x-cloak class="mt-2 w-full">
-                      <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex items-start gap-2">
+                      <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex flex-col gap-2">
                         @csrf
                         <input type="hidden" name="event_part_id" value="{{ \App\Utils\UrlUtils::encodeId($part->id) }}">
                         @if ($event->days_of_week && $date)
                         <input type="hidden" name="event_date" value="{{ $date }}">
                         @endif
-                        <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" rows="2" required></textarea>
-                        <button type="submit" class="text-xs px-3 py-1 rounded self-start" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                        <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
+                        <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
                   </div>
-                  @endauth
                   @endif
                 </div>
               </div>
@@ -816,7 +839,34 @@
                     @endforeach
                   </div>
                   @endif
-                  @auth
+                  @php
+                    $myPartPendingVideos = $myPendingVideos->where('event_part_id', $part->id);
+                    $myPartPendingComments = $myPendingComments->where('event_part_id', $part->id);
+                    if ($event->days_of_week && $date) {
+                      $myPartPendingVideos = $myPartPendingVideos->filter(fn($v) => $v->event_date === $date || $v->event_date === null);
+                      $myPartPendingComments = $myPartPendingComments->filter(fn($c) => $c->event_date === $date || $c->event_date === null);
+                    }
+                  @endphp
+                  @if ($myPartPendingVideos->count() > 0)
+                  <div class="mt-2 space-y-2 opacity-60">
+                    @foreach ($myPartPendingVideos as $video)
+                    <div class="rounded overflow-hidden relative">
+                      <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                      <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
+                    </div>
+                    @endforeach
+                  </div>
+                  @endif
+                  @if ($myPartPendingComments->count() > 0)
+                  <div class="mt-2 space-y-1 opacity-60">
+                    @foreach ($myPartPendingComments as $comment)
+                    <div class="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
+                      <span><span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user->first_name ?? $comment->user->name }}</span>: {{ $comment->comment }}</span>
+                      <span class="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
+                    </div>
+                    @endforeach
+                  </div>
+                  @endif
                   <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false }">
                     <button @click="showVideo = !showVideo; showComment = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-colors" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
@@ -827,29 +877,28 @@
                       {{ __('messages.add_comment') }}
                     </button>
                     <div x-show="showVideo" x-cloak class="w-full">
-                      <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex items-stretch gap-2">
+                      <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex flex-col gap-2">
                         @csrf
                         <input type="hidden" name="event_part_id" value="{{ \App\Utils\UrlUtils::encodeId($part->id) }}">
                         @if ($event->days_of_week && $date)
                         <input type="hidden" name="event_date" value="{{ $date }}">
                         @endif
-                        <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" required>
-                        <button type="submit" class="text-xs px-3 py-1 rounded" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                        <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
+                        <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
                     <div x-show="showComment" x-cloak class="w-full">
-                      <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex items-start gap-2">
+                      <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex flex-col gap-2">
                         @csrf
                         <input type="hidden" name="event_part_id" value="{{ \App\Utils\UrlUtils::encodeId($part->id) }}">
                         @if ($event->days_of_week && $date)
                         <input type="hidden" name="event_date" value="{{ $date }}">
                         @endif
-                        <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" rows="2" required></textarea>
-                        <button type="submit" class="text-xs px-3 py-1 rounded self-start" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                        <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
+                        <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
                   </div>
-                  @endauth
                   @endif
                 </div>
               </div>
@@ -863,12 +912,16 @@
         @php
           $eventLevelVideos = $event->approvedVideos->whereNull('event_part_id');
           $eventLevelComments = $event->approvedComments->whereNull('event_part_id');
+          $myEventLevelPendingVideos = $myPendingVideos->whereNull('event_part_id');
+          $myEventLevelPendingComments = $myPendingComments->whereNull('event_part_id');
           if ($event->days_of_week && $date) {
             $eventLevelVideos = $eventLevelVideos->filter(fn($v) => $v->event_date === $date || $v->event_date === null);
             $eventLevelComments = $eventLevelComments->filter(fn($c) => $c->event_date === $date || $c->event_date === null);
+            $myEventLevelPendingVideos = $myEventLevelPendingVideos->filter(fn($v) => $v->event_date === $date || $v->event_date === null);
+            $myEventLevelPendingComments = $myEventLevelPendingComments->filter(fn($c) => $c->event_date === $date || $c->event_date === null);
           }
         @endphp
-        @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || (auth()->check() && $event->parts->count() == 0)))
+        @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $event->parts->count() == 0))
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
           <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-4">
             {{ __('messages.fan_content') }}
@@ -891,7 +944,26 @@
             @endforeach
           </div>
           @endif
-          @auth
+          @if ($myEventLevelPendingVideos->count() > 0)
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 opacity-60">
+            @foreach ($myEventLevelPendingVideos as $video)
+            <div class="rounded overflow-hidden relative">
+              <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+              <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
+            </div>
+            @endforeach
+          </div>
+          @endif
+          @if ($myEventLevelPendingComments->count() > 0)
+          <div class="space-y-2 mb-4 opacity-60">
+            @foreach ($myEventLevelPendingComments as $comment)
+            <div class="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
+              <span><span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user->first_name ?? $comment->user->name }}</span>: {{ $comment->comment }}</span>
+              <span class="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
+            </div>
+            @endforeach
+          </div>
+          @endif
           @if ($event->parts->count() == 0)
           <div class="flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false }">
             <button @click="showVideo = !showVideo; showComment = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-colors" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};">
@@ -903,28 +975,27 @@
               {{ __('messages.add_comment') }}
             </button>
             <div x-show="showVideo" x-cloak class="w-full mt-2">
-              <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex items-stretch gap-2">
+              <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex flex-col gap-2">
                 @csrf
                 @if ($event->days_of_week && $date)
                 <input type="hidden" name="event_date" value="{{ $date }}">
                 @endif
-                <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" required>
-                <button type="submit" class="text-xs px-3 py-1 rounded" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
+                <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
               </form>
             </div>
             <div x-show="showComment" x-cloak class="w-full mt-2">
-              <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex items-start gap-2">
+              <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex flex-col gap-2">
                 @csrf
                 @if ($event->days_of_week && $date)
                 <input type="hidden" name="event_date" value="{{ $date }}">
                 @endif
-                <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="flex-1 text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-2 py-1" rows="2" required></textarea>
-                <button type="submit" class="text-xs px-3 py-1 rounded self-start" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
+                <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
               </form>
             </div>
           </div>
           @endif
-          @endauth
         </div>
         @endif
 

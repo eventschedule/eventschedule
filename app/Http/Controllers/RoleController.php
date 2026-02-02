@@ -503,6 +503,9 @@ class RoleController extends Controller
             app(AnalyticsService::class)->recordView($role, $event, $request);
         }
 
+        $myPendingVideos = collect();
+        $myPendingComments = collect();
+
         $embed = request()->embed;
         $view = 'role/show-guest';
 
@@ -511,6 +514,18 @@ class RoleController extends Controller
         } elseif ($event) {
             $view = 'event/show-guest';
             $event->load(['approvedVideos.user', 'approvedComments.user']);
+
+            if (auth()->check()) {
+                $myPendingVideos = \App\Models\EventVideo::where('event_id', $event->id)
+                    ->where('user_id', auth()->id())
+                    ->where('is_approved', false)
+                    ->get();
+                $myPendingComments = \App\Models\EventComment::where('event_id', $event->id)
+                    ->where('user_id', auth()->id())
+                    ->where('is_approved', false)
+                    ->with('user')
+                    ->get();
+            }
         }
 
         $fonts = [];
@@ -549,6 +564,8 @@ class RoleController extends Controller
                 'selectedGroup',
                 'pastEvents',
                 'hasMorePastEvents',
+                'myPendingVideos',
+                'myPendingComments',
             ));
 
         // Allow embedding when embed parameter is present
