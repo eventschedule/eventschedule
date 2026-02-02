@@ -678,7 +678,7 @@ class GeminiUtils
         return $data;
     }
 
-    public static function parseEventParts($imageData = null, $textDescription = null)
+    public static function parseEventParts($imageData = null, $textDescription = null, $aiPrompt = null)
     {
         $prompt = 'Extract the agenda items, schedule parts, or setlist songs from this ';
         if ($imageData && $textDescription) {
@@ -696,6 +696,10 @@ class GeminiUtils
         $prompt .= "- end_time: in HH:MM 24-hour format, or null if no times are shown\n\n";
         $prompt .= "If the content is a setlist or numbered list without times, set start_time and end_time to null for all items.\n";
         $prompt .= "Preserve the original order. Return only the JSON array.\n";
+
+        if ($aiPrompt) {
+            $prompt .= "\nAdditional instructions: ".$aiPrompt."\n";
+        }
 
         if ($textDescription) {
             $prompt .= "\nText:\n".$textDescription;

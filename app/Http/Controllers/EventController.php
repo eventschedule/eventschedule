@@ -530,6 +530,15 @@ class EventController extends Controller
             $role->save();
         }
 
+        if ($request->has('agenda_ai_prompt')) {
+            $event->agenda_ai_prompt = $request->input('agenda_ai_prompt');
+            $event->save();
+        }
+        if ($request->input('save_ai_prompt_default')) {
+            $role->agenda_ai_prompt = $request->input('agenda_ai_prompt');
+            $role->save();
+        }
+
         if ($event->starts_at) {
             $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
         } else {
@@ -709,6 +718,15 @@ class EventController extends Controller
             $role->save();
         }
 
+        if ($request->input('agenda_ai_prompt')) {
+            $event->agenda_ai_prompt = $request->input('agenda_ai_prompt');
+            $event->save();
+        }
+        if ($request->input('save_ai_prompt_default')) {
+            $role->agenda_ai_prompt = $request->input('agenda_ai_prompt');
+            $role->save();
+        }
+
         session()->forget('pending_request');
 
         if ($event->starts_at) {
@@ -871,8 +889,17 @@ class EventController extends Controller
 
     public function parseEventParts(Request $request, $subdomain)
     {
+        if (! auth()->user()->isMember($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'ai_prompt' => 'nullable|string|max:500',
+        ]);
+
         $imageData = null;
         $textDescription = $request->input('parts_text');
+        $aiPrompt = $request->input('ai_prompt');
 
         if ($request->hasFile('parts_image')) {
             $file = $request->file('parts_image');
@@ -885,7 +912,25 @@ class EventController extends Controller
         }
 
         try {
-            $parts = GeminiUtils::parseEventParts($imageData, $textDescription);
+            $role = Role::subdomain($subdomain)->firstOrFail();
+
+            if ($request->input('save_ai_prompt_default')) {
+                $role->agenda_ai_prompt = $aiPrompt;
+                $role->save();
+            }
+
+            if ($request->input('event_id')) {
+                $event = Event::findOrFail(UrlUtils::decodeId($request->input('event_id')));
+
+                if (! $request->user()->canEditEvent($event)) {
+                    return response()->json(['error' => __('messages.not_authorized')], 403);
+                }
+
+                $event->agenda_ai_prompt = $aiPrompt;
+                $event->save();
+            }
+
+            $parts = GeminiUtils::parseEventParts($imageData, $textDescription, $aiPrompt);
 
             return response()->json($parts);
         } catch (\Exception $e) {
