@@ -10,7 +10,7 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 }
 
 // Check if .env file exists (selfhosted setup)...
-if (! file_exists(__DIR__.'/../.env')) {
+if (! config('app.hosted') && ! file_exists(__DIR__.'/../.env')) {
     http_response_code(500);
     echo '<!DOCTYPE html>
 <html lang="en">
