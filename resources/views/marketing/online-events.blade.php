@@ -210,6 +210,12 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Webinars</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-sm">Host educational sessions, product demos, or training workshops for attendees worldwide.</p>
+                    <a href="{{ marketing_url('/for-webinars') }}" class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
+                        Learn more
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </a>
                 </div>
 
                 <!-- Live Concerts -->
@@ -221,6 +227,12 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Live Concerts</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-sm">Stream live performances to fans who can't make it in person. Sell virtual tickets alongside venue tickets.</p>
+                    <a href="{{ marketing_url('/for-live-concerts') }}" class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
+                        Learn more
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </a>
                 </div>
 
                 <!-- Online Classes -->
@@ -232,6 +244,12 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Online Classes</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-sm">Yoga, cooking, art, or fitness classes. Schedule recurring sessions and manage enrollments.</p>
+                    <a href="{{ marketing_url('/for-online-classes') }}" class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
+                        Learn more
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </a>
                 </div>
 
                 <!-- Virtual Conferences -->
@@ -243,6 +261,12 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Virtual Conferences</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-sm">Host multi-day conferences with different ticket types for keynotes, workshops, and networking sessions.</p>
+                    <a href="{{ marketing_url('/for-virtual-conferences') }}" class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
+                        Learn more
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </a>
                 </div>
 
                 <!-- Live Q&A Sessions -->

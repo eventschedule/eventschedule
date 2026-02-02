@@ -107,6 +107,8 @@ return [
     'social_links' => 'Sociale Links',
     'add' => 'Toevoegen',
     'remove' => 'Verwijderen',
+    'up' => 'Omhoog',
+    'down' => 'Omlaag',
     'payment_links' => 'Betalingslinks',
     'add_link' => 'Link Toevoegen',
     'are_you_sure' => 'Weet je het zeker?',
@@ -1345,6 +1347,7 @@ return [
     'ai_agenda_prompt' => 'AI Prompt',
     'ai_agenda_prompt_placeholder' => 'e.g., Each part name should include the artist name in parentheses',
     'ai_agenda_prompt_help' => 'Custom instructions for AI when parsing the set list',
+    'no_prompt_set' => 'No prompt set',
     'start_time' => 'Starttijd',
     'end_time' => 'Eindtijd',
     'provide_image_or_text' => 'Geef een afbeelding of tekst op om te analyseren.',
@@ -1442,4 +1445,14 @@ return [
     'test_email_sent_to' => 'Test e-mail wordt verzonden naar :email',
     'test_email_failed' => 'Failed to send test email. Please check the logs for details.',
     'please_wait' => 'Even geduld voordat u het opnieuw probeert',
+
+    // Scan agenda
+    'scan_agenda' => 'Scan Agenda',
+    'no_suitable_events' => 'No events found. Create an event first, then scan its agenda.',
+    'capture_photo' => 'Capture Photo',
+    'retake' => 'Retake',
+    'agenda_saved' => 'Agenda saved successfully',
+    'camera_error' => 'Could not access camera. Please check your permissions.',
+    'start_camera' => 'Start Camera',
+    'select_camera' => 'Select Camera',
 ];

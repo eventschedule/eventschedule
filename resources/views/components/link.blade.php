@@ -19,6 +19,9 @@
     @if($target ?? $attributes->get('target'))
         target="{{ $target ?? $attributes->get('target') }}"
     @endif
+    @if($isExternal)
+        rel="noopener noreferrer"
+    @endif
 >
     @if($hasDisplayClass)
         {{ $slot }}

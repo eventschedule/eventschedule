@@ -106,6 +106,8 @@ return [
     'social_links' => 'קישורים חברתיים',
     'add' => 'הוסף',
     'remove' => 'הסר',
+    'up' => 'למעלה',
+    'down' => 'למטה',
     'payment_links' => 'קישורי תשלום',
     'add_link' => 'הוסף קישור',
     'are_you_sure' => 'האם אתה בטוח?',
@@ -1340,6 +1342,7 @@ return [
     'ai_agenda_prompt' => 'AI Prompt',
     'ai_agenda_prompt_placeholder' => 'e.g., Each part name should include the artist name in parentheses',
     'ai_agenda_prompt_help' => 'Custom instructions for AI when parsing the set list',
+    'no_prompt_set' => 'No prompt set',
     'start_time' => 'שעת התחלה',
     'end_time' => 'שעת סיום',
     'provide_image_or_text' => 'נא לספק תמונה או טקסט לניתוח.',
@@ -1437,4 +1440,14 @@ return [
     'test_email_sent_to' => 'אימייל בדיקה יישלח אל :email',
     'test_email_failed' => 'Failed to send test email. Please check the logs for details.',
     'please_wait' => 'אנא המתן לפני שתנסה שוב',
+
+    // Scan agenda
+    'scan_agenda' => 'Scan Agenda',
+    'no_suitable_events' => 'No events found. Create an event first, then scan its agenda.',
+    'capture_photo' => 'Capture Photo',
+    'retake' => 'Retake',
+    'agenda_saved' => 'Agenda saved successfully',
+    'camera_error' => 'Could not access camera. Please check your permissions.',
+    'start_camera' => 'Start Camera',
+    'select_camera' => 'Select Camera',
 ];

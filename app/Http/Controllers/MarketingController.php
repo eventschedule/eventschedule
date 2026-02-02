@@ -398,6 +398,38 @@ class MarketingController extends Controller
     }
 
     /**
+     * For Webinars page
+     */
+    public function forWebinars()
+    {
+        return view('marketing.for-webinars');
+    }
+
+    /**
+     * For Live Concerts page
+     */
+    public function forLiveConcerts()
+    {
+        return view('marketing.for-live-concerts');
+    }
+
+    /**
+     * For Online Classes page
+     */
+    public function forOnlineClasses()
+    {
+        return view('marketing.for-online-classes');
+    }
+
+    /**
+     * For Virtual Conferences page
+     */
+    public function forVirtualConferences()
+    {
+        return view('marketing.for-virtual-conferences');
+    }
+
+    /**
      * Use Cases page
      */
     public function useCases()
