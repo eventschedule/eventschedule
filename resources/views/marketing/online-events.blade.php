@@ -202,7 +202,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Webinars -->
-                <div class="bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30 rounded-2xl p-6 border border-sky-200 dark:border-sky-500/20 shadow-sm text-center">
+                <a href="{{ marketing_url('/for-webinars') }}" class="block bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30 rounded-2xl p-6 border border-sky-200 dark:border-sky-500/20 shadow-sm text-center hover:shadow-lg hover:border-sky-300 dark:hover:border-sky-400/30 transition-all">
                     <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-sky-100 dark:bg-white/10 mb-6">
                         <svg class="w-8 h-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -210,16 +210,16 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Webinars</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-sm">Host educational sessions, product demos, or training workshops for attendees worldwide.</p>
-                    <a href="{{ marketing_url('/for-webinars') }}" class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
+                    <span class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
-                    </a>
-                </div>
+                    </span>
+                </a>
 
                 <!-- Live Concerts -->
-                <div class="bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30 rounded-2xl p-6 border border-sky-200 dark:border-sky-500/20 shadow-sm text-center">
+                <a href="{{ marketing_url('/for-live-concerts') }}" class="block bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30 rounded-2xl p-6 border border-sky-200 dark:border-sky-500/20 shadow-sm text-center hover:shadow-lg hover:border-sky-300 dark:hover:border-sky-400/30 transition-all">
                     <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-sky-100 dark:bg-white/10 mb-6">
                         <svg class="w-8 h-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
@@ -227,16 +227,16 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Live Concerts</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-sm">Stream live performances to fans who can't make it in person. Sell virtual tickets alongside venue tickets.</p>
-                    <a href="{{ marketing_url('/for-live-concerts') }}" class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
+                    <span class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
-                    </a>
-                </div>
+                    </span>
+                </a>
 
                 <!-- Online Classes -->
-                <div class="bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30 rounded-2xl p-6 border border-sky-200 dark:border-sky-500/20 shadow-sm text-center">
+                <a href="{{ marketing_url('/for-online-classes') }}" class="block bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30 rounded-2xl p-6 border border-sky-200 dark:border-sky-500/20 shadow-sm text-center hover:shadow-lg hover:border-sky-300 dark:hover:border-sky-400/30 transition-all">
                     <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-sky-100 dark:bg-white/10 mb-6">
                         <svg class="w-8 h-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -244,16 +244,16 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Online Classes</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-sm">Yoga, cooking, art, or fitness classes. Schedule recurring sessions and manage enrollments.</p>
-                    <a href="{{ marketing_url('/for-online-classes') }}" class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
+                    <span class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
-                    </a>
-                </div>
+                    </span>
+                </a>
 
                 <!-- Virtual Conferences -->
-                <div class="bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30 rounded-2xl p-6 border border-sky-200 dark:border-sky-500/20 shadow-sm text-center">
+                <a href="{{ marketing_url('/for-virtual-conferences') }}" class="block bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30 rounded-2xl p-6 border border-sky-200 dark:border-sky-500/20 shadow-sm text-center hover:shadow-lg hover:border-sky-300 dark:hover:border-sky-400/30 transition-all">
                     <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-sky-100 dark:bg-white/10 mb-6">
                         <svg class="w-8 h-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -261,16 +261,16 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Virtual Conferences</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-sm">Host multi-day conferences with different ticket types for keynotes, workshops, and networking sessions.</p>
-                    <a href="{{ marketing_url('/for-virtual-conferences') }}" class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
+                    <span class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
-                    </a>
-                </div>
+                    </span>
+                </a>
 
                 <!-- Live Q&A Sessions -->
-                <div class="bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30 rounded-2xl p-6 border border-sky-200 dark:border-sky-500/20 shadow-sm text-center">
+                <a href="{{ marketing_url('/for-live-qa-sessions') }}" class="block bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30 rounded-2xl p-6 border border-sky-200 dark:border-sky-500/20 shadow-sm text-center hover:shadow-lg hover:border-sky-300 dark:hover:border-sky-400/30 transition-all">
                     <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-sky-100 dark:bg-white/10 mb-6">
                         <svg class="w-8 h-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -278,16 +278,16 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Live Q&A Sessions</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-sm">Interactive sessions where speakers answer audience questions in real-time.</p>
-                    <a href="{{ marketing_url('/for-live-qa-sessions') }}" class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
+                    <span class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
-                    </a>
-                </div>
+                    </span>
+                </a>
 
                 <!-- Watch Parties -->
-                <div class="bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30 rounded-2xl p-6 border border-sky-200 dark:border-sky-500/20 shadow-sm text-center">
+                <a href="{{ marketing_url('/for-watch-parties') }}" class="block bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30 rounded-2xl p-6 border border-sky-200 dark:border-sky-500/20 shadow-sm text-center hover:shadow-lg hover:border-sky-300 dark:hover:border-sky-400/30 transition-all">
                     <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-sky-100 dark:bg-white/10 mb-6">
                         <svg class="w-8 h-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -296,13 +296,13 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Watch Parties</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-sm">Premiere screenings, movie nights, or sports viewing events with your community.</p>
-                    <a href="{{ marketing_url('/for-watch-parties') }}" class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
+                    <span class="inline-flex items-center text-sky-600 dark:text-sky-400 font-medium hover:gap-3 gap-2 transition-all mt-4 text-sm">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
-                    </a>
-                </div>
+                    </span>
+                </a>
             </div>
         </div>
     </section>
