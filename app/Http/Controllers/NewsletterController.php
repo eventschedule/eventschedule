@@ -35,6 +35,22 @@ class NewsletterController extends Controller
         }
     }
 
+    protected function authorizeImport()
+    {
+        if (auth()->user()->isAdmin()) {
+            return;
+        }
+
+        $hasEnterpriseRole = auth()->user()->roles()
+            ->wherePivot('level', '!=', 'follower')
+            ->get()
+            ->contains(fn ($role) => $role->isEnterprise());
+
+        if (! $hasEnterpriseRole) {
+            abort(403, __('messages.not_authorized'));
+        }
+    }
+
     protected function getRoles()
     {
         $roles = auth()->user()->roles()->wherePivot('level', '!=', 'follower')->get();
@@ -804,6 +820,7 @@ class NewsletterController extends Controller
     public function importForm(Request $request)
     {
         $this->authorize();
+        $this->authorizeImport();
         $role = $this->getRole($request);
 
         $manualSegments = NewsletterSegment::where('role_id', $role->id)
@@ -816,6 +833,7 @@ class NewsletterController extends Controller
     public function importStore(Request $request)
     {
         $this->authorize();
+        $this->authorizeImport();
         $role = $this->getRole($request);
 
         $validated = $request->validate([
