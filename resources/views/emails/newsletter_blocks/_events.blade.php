@@ -22,9 +22,9 @@
                                     </td>
                                     <td style="font-size: {{ $template === 'compact' ? '14px' : '15px' }}; font-family: {{ $style['fontFamily'] }}, sans-serif; vertical-align: top;">
                                         @if ($template === 'minimal')
-                                        <a href="{{ $role->getGuestUrl() }}" style="color: {{ $style['accentColor'] }}; text-decoration: underline; font-weight: bold;">{{ $event->name }}</a>
+                                        <a href="{{ $event->getGuestUrl() }}" style="color: {{ $style['accentColor'] }}; text-decoration: underline; font-weight: bold;">{{ $event->name }}</a>
                                         @else
-                                        <a href="{{ $role->getGuestUrl() }}" style="color: {{ $template === 'bold' ? '#ffffff' : $style['textColor'] }}; text-decoration: none; font-weight: bold;">{{ $event->name }}</a>
+                                        <a href="{{ $event->getGuestUrl() }}" style="color: {{ $template === 'bold' ? '#ffffff' : $style['textColor'] }}; text-decoration: none; font-weight: bold;">{{ $event->name }}</a>
                                         @endif
                                         @php
                                             $venue = $event->venue ?? ($event->roles ? $event->roles->where('type', 'venue')->first() : null);
@@ -35,7 +35,7 @@
                                     </td>
                                     @if ($template !== 'minimal')
                                     <td style="width: 60px; text-align: {{ $endAlign ?? 'right' }}; vertical-align: top;">
-                                        <a href="{{ $role->getGuestUrl() }}" style="display: inline-block; padding: {{ $template === 'compact' ? '4px 10px' : '6px 12px' }}; background-color: {{ $style['accentColor'] }}; color: #ffffff; text-decoration: none; font-size: {{ $template === 'compact' ? '11px' : '12px' }}; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 4px;' : '' }} font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ __('messages.view') }}</a>
+                                        <a href="{{ $event->getGuestUrl() }}" style="display: inline-block; padding: {{ $template === 'compact' ? '4px 10px' : '6px 12px' }}; background-color: {{ $style['accentColor'] }}; color: #ffffff; text-decoration: none; font-size: {{ $template === 'compact' ? '11px' : '12px' }}; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 4px;' : '' }} font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ __('messages.view') }}</a>
                                     </td>
                                     @endif
                                 </tr>
@@ -60,7 +60,7 @@
                             @if ($venue)
                             <p style="margin: 0 0 6px 0; font-size: 13px; color: #888;">{{ $venue->name }}</p>
                             @endif
-                            <a href="{{ $role->getGuestUrl() }}" style="color: {{ $style['accentColor'] }}; text-decoration: underline; font-size: 13px; font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ __('messages.view_event') ?: 'View Event' }} {!! $arrow ?? '&rarr;' !!}</a>
+                            <a href="{{ $event->getGuestUrl() }}" style="color: {{ $style['accentColor'] }}; text-decoration: underline; font-size: 13px; font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ __('messages.view_event') ?: 'View Event' }} {!! $arrow ?? '&rarr;' !!}</a>
                         </td>
                     </tr>
                 </table>
@@ -81,7 +81,7 @@
                             @if ($venue)
                             <p style="margin: 0 0 4px 0; font-size: 11px; color: #888;">{{ $venue->name }}</p>
                             @endif
-                            <a href="{{ $role->getGuestUrl() }}" style="display: inline-block; padding: 4px 10px; background-color: {{ $style['accentColor'] }}; color: #ffffff; text-decoration: none; font-size: 11px; font-weight: bold; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 3px;' : '' }} font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ __('messages.view_event') ?: 'View Event' }}</a>
+                            <a href="{{ $event->getGuestUrl() }}" style="display: inline-block; padding: 4px 10px; background-color: {{ $style['accentColor'] }}; color: #ffffff; text-decoration: none; font-size: 11px; font-weight: bold; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 3px;' : '' }} font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ __('messages.view_event') ?: 'View Event' }}</a>
                         </td>
                     </tr>
                 </table>
@@ -125,7 +125,7 @@
                             @if ($venue)
                             <p style="margin: 0 0 8px 0; font-size: 13px; color: #888;">{{ $venue->name }}</p>
                             @endif
-                            <a href="{{ $role->getGuestUrl() }}" style="display: inline-block; padding: 8px 16px; {{ $btnStyle }} text-decoration: none; font-size: 13px; font-weight: bold; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 4px;' : '' }}">{{ __('messages.view_event') ?: 'View Event' }}</a>
+                            <a href="{{ $event->getGuestUrl() }}" style="display: inline-block; padding: 8px 16px; {{ $btnStyle }} text-decoration: none; font-size: 13px; font-weight: bold; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 4px;' : '' }}">{{ __('messages.view_event') ?: 'View Event' }}</a>
                         </td>
                     </tr>
                 </table>
