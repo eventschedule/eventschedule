@@ -572,7 +572,11 @@ class RoleController extends Controller
             return response()->json(['events' => [], 'has_more' => false]);
         }
 
-        $beforeDate = Carbon::parse($before)->setTimezone('UTC');
+        try {
+            $beforeDate = Carbon::parse($before)->setTimezone('UTC');
+        } catch (\Exception $e) {
+            return response()->json(['events' => [], 'has_more' => false]);
+        }
 
         if ($role->isCurator()) {
             $pastEvents = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
