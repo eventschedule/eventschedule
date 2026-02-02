@@ -63,11 +63,13 @@
           @if ($fallbackImage)
             <img src="{{ $fallbackImage }}"
                  alt="{{ $event->translatedName() }}"
-                 class="w-full aspect-square object-cover"/>
+                 class="w-full aspect-square object-cover"
+                 fetchpriority="high"/>
           @else
             <img src="{{ url('/images/favicon.png') }}"
                  alt="{{ config('app.name') }}"
-                 class="w-full aspect-square object-contain bg-gray-50 dark:bg-gray-800 p-4"/>
+                 class="w-full aspect-square object-contain bg-gray-50 dark:bg-gray-800 p-4"
+                 fetchpriority="high"/>
           @endif
         </div>
         @endif
@@ -231,10 +233,10 @@
                     <div x-show="expanded" x-cloak class="text-sm text-gray-700 dark:text-gray-300 custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
                       {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
                     </div>
-                    <button x-show="!expanded" @click="expanded = true" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
+                    <button x-show="!expanded" :aria-expanded="expanded" @click="expanded = true" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
                       {{ __('messages.read_more') }}
                     </button>
-                    <button x-show="expanded" x-cloak @click="expanded = false" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
+                    <button x-show="expanded" x-cloak :aria-expanded="expanded" @click="expanded = false" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
                       {{ __('messages.show_less') }}
                     </button>
                   </div>
@@ -248,7 +250,7 @@
                   @foreach ($sidebarVideoLinks as $sLink)
                     @if ($sLink)
                       <div class="rounded-lg overflow-hidden">
-                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($sLink->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($sLink->url) }}" title="{{ $each->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       </div>
                     @endif
                   @endforeach
@@ -267,18 +269,18 @@
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden {{ $role->isRtl() ? 'rtl' : '' }}">
           @if ($hasVenueHeader)
             @if ($event->venue->header_image && $event->venue->header_image !== 'none')
-              <img class="block max-h-40 w-full object-cover" src="{{ asset('images/headers') }}/{{ $event->venue->header_image }}.png" alt="{{ $event->venue->translatedName() }}"/>
+              <img class="block max-h-40 w-full object-cover" src="{{ asset('images/headers') }}/{{ $event->venue->header_image }}.png" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
             @elseif ($event->venue->header_image_url)
-              <img class="block max-h-40 w-full object-cover" src="{{ $event->venue->header_image_url }}" alt="{{ $event->venue->translatedName() }}"/>
+              <img class="block max-h-40 w-full object-cover" src="{{ $event->venue->header_image_url }}" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
             @endif
           @endif
           <div class="p-5">
             @if ($event->venue->profile_image_url && $hasVenueHeader)
               <div class="rounded-xl w-[100px] h-[100px] -mt-[60px] bg-white dark:bg-gray-900 p-[5px] mb-3">
-                <img class="rounded-lg w-full h-full object-cover" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->translatedName() }}"/>
+                <img class="rounded-lg w-full h-full object-cover" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
               </div>
             @elseif ($event->venue->profile_image_url)
-              <img class="w-full aspect-square object-cover rounded-xl mb-3" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->translatedName() }}"/>
+              <img class="w-full aspect-square object-cover rounded-xl mb-3" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
             @endif
             <div class="flex flex-col gap-2">
               @if ($event->venue->isClaimed())
@@ -306,10 +308,10 @@
                   <div x-show="expanded" x-cloak class="text-sm text-gray-700 dark:text-gray-300 custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
                     {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->venue->translatedDescription()) !!}
                   </div>
-                  <button x-show="!expanded" @click="expanded = true" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
+                  <button x-show="!expanded" :aria-expanded="expanded" @click="expanded = true" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
                     {{ __('messages.read_more') }}
                   </button>
-                  <button x-show="expanded" x-cloak @click="expanded = false" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
+                  <button x-show="expanded" x-cloak :aria-expanded="expanded" @click="expanded = false" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
                     {{ __('messages.show_less') }}
                   </button>
                 </div>
@@ -344,7 +346,7 @@
                 @foreach (json_decode($event->venue->social_links) as $link)
                   @if ($link)
                   <a
-                    href="{{ $link->url }}" target="_blank"
+                    href="{{ $link->url }}" target="_blank" rel="noopener noreferrer"
                     class="w-10 h-10 rounded-full flex justify-center items-center bg-gray-100 dark:bg-gray-700 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
                     title="{{ App\Utils\UrlUtils::clean($link->url) }}"
                     >
@@ -368,19 +370,19 @@
             {{ __('messages.add_to_calendar') }}
           </h2>
           <div class="flex flex-col divide-y divide-gray-100 dark:divide-gray-700">
-            <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" class="flex items-center gap-3 py-3 text-sm text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100">
+            <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 py-3 text-sm text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100">
               <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
               </svg>
               Google Calendar
             </a>
-            <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" class="flex items-center gap-3 py-3 text-sm text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100">
+            <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 py-3 text-sm text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100">
               <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
               </svg>
               Apple Calendar
             </a>
-            <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" class="flex items-center gap-3 py-3 text-sm text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100">
+            <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 py-3 text-sm text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100">
               <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
               </svg>
@@ -396,7 +398,7 @@
           <h2 class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100">
             {{ __('messages.create_your_own_event_schedule') }}
           </h2>
-          <a href="{{ marketing_url() }}" target="_blank">
+          <a href="{{ marketing_url() }}" target="_blank" rel="noopener noreferrer">
             <button
               type="button"
               name="login"
@@ -446,7 +448,7 @@
             $backUrl .= '?' . http_build_query($queryParams);
           }
         @endphp
-        <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <nav aria-label="Breadcrumb" class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 {{ $role->isRtl() ? 'rtl' : '' }}">
           <a href="{{ $backUrl }}" class="px-3 py-2 -mx-3 hover:underline hover:text-gray-700 dark:hover:text-gray-200">
             {{ $role->isRtl() ? '→' : '←' }} {{ __('messages.back_to_schedule') }}
           </a>
@@ -456,7 +458,7 @@
               {{ __('messages.edit_event') }}
             </a>
           @endif
-        </div>
+        </nav>
 
         {{-- Event title --}}
         <h1
@@ -480,18 +482,18 @@
           <div class="flex flex-col">
             <span class="text-base font-semibold text-gray-900 dark:text-white">
               @if ($event->isMultiDay())
-                <time datetime="{{ $event->getStartDateTime($date, true)->format('Y-m-d') }}">
+                <time datetime="{{ $event->getStartDateTime($date, true)->format('Y-m-d\TH:i:sP') }}">
                   {{ $event->getStartDateTime($date, true)->format($event->getDateTimeFormat(true)) }} - {{ $event->getStartDateTime($date, true)->addHours($event->duration)->format($event->getDateTimeFormat()) }}
                 </time>
               @else
-                <time datetime="{{ $event->getStartDateTime($date, true)->format('Y-m-d') }}">
+                <time datetime="{{ $event->getStartDateTime($date, true)->format('Y-m-d\TH:i:sP') }}">
                   {{ $event->getStartDateTime($date, true)->format('l, F j') }}
                 </time>
               @endif
             </span>
             @if (!$event->isMultiDay())
             <span class="text-sm text-gray-500 dark:text-gray-400">
-              <time>{{ $event->getStartEndTime($date, get_use_24_hour_time($role)) }}</time>
+              <time datetime="{{ $event->getStartDateTime($date, true)->format('Y-m-d\TH:i:sP') }}">{{ $event->getStartEndTime($date, get_use_24_hour_time($role)) }}</time>
             </span>
             @endif
           </div>
@@ -585,19 +587,19 @@
             {{-- Desktop calendar dropdown --}}
             <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute top-full end-0 z-10 mt-2 w-56 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                 <div class="py-1" role="none" onclick="event.stopPropagation()">
-                    <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-0">
+                    <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-0">
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
                         </svg>
                         Google Calendar
                     </a>
-                    <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-1">
+                    <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-1">
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
                         </svg>
                         Apple Calendar
                     </a>
-                    <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-2">
+                    <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-2">
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
                         </svg>
@@ -619,19 +621,19 @@
               <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
             </div>
             <div class="px-6 pb-6 space-y-1 {{ $role->isRtl() ? 'rtl' : '' }}">
-              <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+              <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
                 <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
                 </svg>
                 Google Calendar
               </a>
-              <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+              <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
                 <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
                 </svg>
                 Apple Calendar
               </a>
-              <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+              <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
                 <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
                 </svg>
@@ -645,7 +647,7 @@
         {{-- Flyer image --}}
         @if ($event->flyer_image_url)
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
-          <img src="{{ $event->flyer_image_url }}" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}" class="w-full"/>
+          <img src="{{ $event->flyer_image_url }}" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}" class="w-full" loading="lazy" decoding="async"/>
         </div>
         @endif
 
@@ -664,7 +666,7 @@
           </div>
           <div class="flex-1">
             @if ($event->flyer_image_url)
-              <img src="{{ $event->flyer_image_url }}" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}" class="block rounded-lg"/>
+              <img src="{{ $event->flyer_image_url }}" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}" class="block rounded-lg" loading="lazy" decoding="async"/>
             @endif
           </div>
         </div>
@@ -723,7 +725,7 @@
                   <div class="mt-2 space-y-2">
                     @foreach ($partVideos as $video)
                     <div class="rounded overflow-hidden">
-                      <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                      <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                     </div>
                     @endforeach
                   </div>
@@ -800,7 +802,7 @@
                   <div class="mt-2 space-y-2">
                     @foreach ($partVideos as $video)
                     <div class="rounded overflow-hidden">
-                      <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                      <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                     </div>
                     @endforeach
                   </div>
@@ -875,7 +877,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             @foreach ($eventLevelVideos as $video)
             <div class="rounded overflow-hidden">
-              <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+              <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
             </div>
             @endforeach
           </div>

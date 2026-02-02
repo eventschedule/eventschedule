@@ -56,7 +56,7 @@
               <img
                 class="rounded-md w-[120px] h-[120px] object-cover"
                 src="{{ $role->profile_image_url }}"
-                alt="person"
+                alt="{{ $role->translatedName() }}"
               />
             </div>
             @else
@@ -71,12 +71,12 @@
             <div class="flex sm:hidden flex-col items-center gap-3 mb-5">
               {{-- Name/Location (centered) --}}
               <div class="text-center mb-1">
-                <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ $role->font_family }}', sans-serif;">
+                <h1 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ $role->font_family }}', sans-serif;">
                   {!! str_replace(' , ', '<br>', e($role->translatedName())) !!}
-                </h3>
+                </h1>
                 @if($role->isVenue())
                 <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($role->bestAddress()) }}"
-                   target="_blank"
+                   target="_blank" rel="noopener noreferrer"
                    class="inline-flex items-center gap-1.5 text-sm text-[#33383C] dark:text-gray-300 hover:text-[#4E81FA] hover:underline transition-colors duration-200">
                   <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z"/>
@@ -102,7 +102,7 @@
                     </a>
                     @endif
                     @if($hasWebsite)
-                    <a href="{{ $role->website }}" target="_blank"
+                    <a href="{{ $role->website }}" target="_blank" rel="noopener noreferrer"
                        class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
                        style="background-color: {{ $accentColor }}"
                        title="{{ App\Utils\UrlUtils::clean($role->website) }}">
@@ -114,7 +114,7 @@
                     @if($hasSocial)
                         @foreach (json_decode($role->social_links) as $link)
                         @if ($link)
-                        <a href="{{ $link->url }}" target="_blank"
+                        <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer"
                            class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
                            style="background-color: {{ $accentColor }}"
                            title="{{ App\Utils\UrlUtils::clean($link->url) }}">
@@ -183,7 +183,7 @@
                 <div x-data="{ expanded: false }" class="text-sm text-[#33383C] dark:text-gray-300">
                   <span x-show="!expanded" class="description-collapsed">
                     {{ Str::words(strip_tags($role->translatedDescription()), 5, '') }}...
-                    <button @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap">
+                    <button :aria-expanded="expanded" @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap">
                       {{ __('messages.show_more') }}
                     </button>
                   </span>
@@ -191,7 +191,7 @@
                     <div class="custom-content [&>*:first-child]:mt-0">
                       {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                     </div>
-                    <button @click="expanded = false; window.scrollTo({ top: 0, behavior: 'smooth' })" class="text-[#4E81FA] hover:underline whitespace-nowrap mt-1">
+                    <button :aria-expanded="expanded" @click="expanded = false; window.scrollTo({ top: 0, behavior: 'smooth' })" class="text-[#4E81FA] hover:underline whitespace-nowrap mt-1">
                       {{ __('messages.show_less') }}
                     </button>
                   </div>
@@ -206,12 +206,12 @@
               <div class="flex flex-wrap items-center gap-3">
                 {{-- Name/Location --}}
                 <div class="min-w-0">
-                  <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ $role->font_family }}', sans-serif;">
+                  <h1 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ $role->font_family }}', sans-serif;">
                     {!! str_replace(' , ', '<br>', e($role->translatedName())) !!}
-                  </h3>
+                  </h1>
                   @if($role->isVenue())
                   <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($role->bestAddress()) }}"
-                     target="_blank"
+                     target="_blank" rel="noopener noreferrer"
                      class="flex items-center gap-1.5 text-sm text-[#33383C] dark:text-gray-300 hover:text-[#4E81FA] hover:underline transition-colors duration-200">
                     <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                       <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z"/>
@@ -238,7 +238,7 @@
                     </a>
                     @endif
                     @if($hasWebsite)
-                    <a href="{{ $role->website }}" target="_blank"
+                    <a href="{{ $role->website }}" target="_blank" rel="noopener noreferrer"
                        class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
                        style="background-color: {{ $accentColor }}"
                        title="{{ App\Utils\UrlUtils::clean($role->website) }}">
@@ -250,7 +250,7 @@
                     @if($hasSocial)
                         @foreach (json_decode($role->social_links) as $link)
                         @if ($link)
-                        <a href="{{ $link->url }}" target="_blank"
+                        <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer"
                            class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
                            style="background-color: {{ $accentColor }}"
                            title="{{ App\Utils\UrlUtils::clean($link->url) }}">
@@ -318,7 +318,7 @@
               <div x-data="{ expanded: false }" class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
                 <span x-show="!expanded" class="description-collapsed">
                   {{ Str::words(strip_tags($role->translatedDescription()), 5, '') }}...
-                  <button @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap">
+                  <button :aria-expanded="expanded" @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap">
                     {{ __('messages.show_more') }}
                   </button>
                 </span>
@@ -326,7 +326,7 @@
                   <div class="custom-content [&>*:first-child]:mt-0">
                     {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                   </div>
-                  <button @click="expanded = false; window.scrollTo({ top: 0, behavior: 'smooth' })" class="text-[#4E81FA] hover:underline whitespace-nowrap mt-1">
+                  <button :aria-expanded="expanded" @click="expanded = false; window.scrollTo({ top: 0, behavior: 'smooth' })" class="text-[#4E81FA] hover:underline whitespace-nowrap mt-1">
                     {{ __('messages.show_less') }}
                   </button>
                 </div>
@@ -407,13 +407,15 @@
                 @foreach($eventData['video_roles'] as $videoRole)
                   <div class="carousel-item flex-shrink-0 w-full sm:w-80 bg-white rounded-xl shadow-md overflow-hidden group/card">
                     <!-- Video iframe -->
-                    <iframe 
+                    <iframe
                       class="w-full h-48 object-cover"
-                      src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($videoRole->getFirstVideoUrl()) }}" 
-                      frameborder="0" 
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                      referrerpolicy="strict-origin-when-cross-origin" 
-                      allowfullscreen>
+                      src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($videoRole->getFirstVideoUrl()) }}"
+                      title="{{ $videoRole->translatedName() }} - YouTube video"
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerpolicy="strict-origin-when-cross-origin"
+                      allowfullscreen
+                      loading="lazy">
                     </iframe>
                     
                     <!-- Event details below video -->
@@ -436,12 +438,12 @@
             </div>
             
             <!-- Navigation arrows -->
-            <button id="carousel-prev" class="absolute {{ $isRtl ? 'right-2' : 'left-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-20">
+            <button id="carousel-prev" aria-label="Previous" class="absolute {{ $isRtl ? 'right-2' : 'left-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-20">
               <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $isRtl ? 'M9 5l7 7-7 7' : 'M15 19l-7-7 7-7' }}"></path>
               </svg>
             </button>
-            <button id="carousel-next" class="absolute {{ $isRtl ? 'left-2' : 'right-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-20">
+            <button id="carousel-next" aria-label="Next" class="absolute {{ $isRtl ? 'left-2' : 'right-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-20">
               <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $isRtl ? 'M15 19l-7-7 7-7' : 'M9 5l7 7-7 7' }}"></path>
               </svg>
@@ -513,7 +515,7 @@
               @foreach ($videoLinks as $link)
               @if ($link)
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-                  <iframe class="w-full" style="height:{{ $role->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                  <iframe class="w-full" style="height:{{ $role->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" title="{{ $role->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                 </div>
               @endif
               @endforeach

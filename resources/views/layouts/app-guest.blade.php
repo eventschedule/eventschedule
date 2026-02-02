@@ -1,4 +1,4 @@
-<x-app-layout :title="$role->name . ' | Event Schedule'">
+<x-app-layout :title="($event && $event->exists ? $event->translatedName() . ' | ' : '') . $role->name . ' | Event Schedule'">
 
     <noscript>
       <div style="background: #fff3cd; color: #856404; padding: 16px; text-align: center; font-size: 1rem;">
@@ -14,25 +14,39 @@
     @endphp
 
     <x-slot name="meta">
+        @if (request()->embed)
+            <meta name="robots" content="noindex, nofollow">
+        @else
+            <meta name="robots" content="index, follow">
+        @endif
+
         @if ($role->language_code != 'en')
             <link rel="alternate" hreflang="en" href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => 'en'])) }}">
             <link rel="alternate" hreflang="{{ $role->language_code }}" href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => $role->language_code])) }}">
         @endif
 
-        @if ($event && $event->exists) 
+        @php
+            $localeMap = ['en' => 'en_US', 'es' => 'es_ES', 'de' => 'de_DE', 'fr' => 'fr_FR', 'it' => 'it_IT', 'pt' => 'pt_BR', 'he' => 'he_IL', 'nl' => 'nl_NL', 'ar' => 'ar_SA'];
+            $ogLocale = $localeMap[$role->language_code] ?? 'en_US';
+        @endphp
+        <meta property="og:locale" content="{{ $ogLocale }}">
+
+        @if ($event && $event->exists)
             @if ($role->language_code != 'en')
                 <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}&{{ 'lang=' . (request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code)) }}">
             @else
                 <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}">
             @endif
             @if ($event->description_html)
-            <meta name="description" content="{{ trim(strip_tags($event->translatedDescription())) }}">
+            <meta name="description" content="{{ Str::limit(trim(strip_tags($event->translatedDescription())), 155) }}">
             @elseif ($event->role() && $event->role()->description_html)
-            <meta name="description" content="{{ trim(strip_tags($event->role()->translatedDescription())) }}">
+            <meta name="description" content="{{ Str::limit(trim(strip_tags($event->role()->translatedDescription())), 155) }}">
             @endif
+            <meta property="og:type" content="event">
             <meta property="og:title" content="{{ $event->translatedName() }}">
             <meta property="og:description" content="{{ $event->getMetaDescription($date) }}">
             <meta property="og:image" content="{{ $event->getImageUrl() }}">
+            <meta property="og:image:alt" content="{{ $event->translatedName() }}">
             <meta property="og:url" content="{{ $event->getGuestUrl(false, $date) }}">
             <meta property="og:site_name" content="Event Schedule">
             <meta name="twitter:title" content="{{ $event->translatedName() }}">
@@ -46,7 +60,7 @@
             @else
                 <link rel="canonical" href="{{ $role->getGuestUrl() }}">
             @endif
-            @if ($description = trim(strip_tags($role->translatedDescription())))
+            @if ($description = Str::limit(trim(strip_tags($role->translatedDescription())), 155))
             <meta name="description" content="{{ $description }}">
             <meta property="og:description" content="{{ $description }}">
             <meta name="twitter:description" content="{{ $description }}">
@@ -58,8 +72,10 @@
             @endif
             @if ($image = $role->profile_image_url)
             <meta property="og:image" content="{{ $image }}">
+            <meta property="og:image:alt" content="{{ $name ?? $role->translatedName() }}">
             <meta name="twitter:image" content="{{ $image }}">
             @endif
+            <meta property="og:type" content="website">
             <meta property="og:url" content="{{ $role->getGuestUrl() }}">
             <meta property="og:site_name" content="Event Schedule">
             <meta name="twitter:card" content="summary_large_image">
@@ -68,6 +84,8 @@
 
     <x-slot name="head">
 
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         @foreach($fonts as $font)
             <link href="https://fonts.googleapis.com/css2?family={{ str_replace(['_', ' '], '+', $font) }}:wght@400;700&display=swap" rel="stylesheet">
         @endforeach
@@ -174,6 +192,7 @@
                 $organizer = $event->getSchemaOrganizer();
                 $performers = $event->getSchemaPerformers();
                 $eventStatus = $event->getSchemaEventStatus();
+                $attendanceMode = $event->getSchemaAttendanceMode();
             @endphp
 
             <script type="application/ld+json">
@@ -186,9 +205,12 @@
                 "endDate": {!! json_encode($endDate, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
                 "url": {!! json_encode($eventUrl, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
                 "eventStatus": {!! json_encode($eventStatus, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
+                "eventAttendanceMode": {!! json_encode($attendanceMode, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
                 "organizer": {!! json_encode($organizer, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
                 "offers": {!! json_encode(count($offers) === 1 ? $offers[0] : $offers, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
-                "location": {!! json_encode($location, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                "location": {!! json_encode($location, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
+                "isAccessibleForFree": {{ (!$event->tickets_enabled || $event->areTicketsFree()) ? 'true' : 'false' }},
+                "inLanguage": "{{ $role->language_code }}"
                 @if ($eventImage)
                 ,
                 "image": {!! json_encode($eventImage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
@@ -270,6 +292,58 @@
                 ,
                 "sameAs": {!! json_encode($sameAs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
                 @endif
+                ,
+                "inLanguage": "{{ $role->language_code }}"
+            }
+            </script>
+        @endif
+
+        @if ($event && $event->exists && $event->starts_at)
+            <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Home",
+                        "item": "{{ marketing_url() }}"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": {!! json_encode($role->translatedName(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
+                        "item": "{{ $role->getGuestUrl() }}"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": {!! json_encode($event->translatedName(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
+                        "item": "{{ $event->getGuestUrl(false, $date ?? null) }}"
+                    }
+                ]
+            }
+            </script>
+        @elseif ($role->exists)
+            <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Home",
+                        "item": "{{ marketing_url() }}"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": {!! json_encode($role->translatedName(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
+                        "item": "{{ $role->getGuestUrl() }}"
+                    }
+                ]
             }
             </script>
         @endif
