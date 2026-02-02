@@ -208,7 +208,8 @@ if (! function_exists('is_demo_role')) {
             return false;
         }
 
-        return $role->subdomain === \App\Services\DemoService::DEMO_ROLE_SUBDOMAIN;
+        return $role->subdomain === \App\Services\DemoService::DEMO_ROLE_SUBDOMAIN
+            || ($role->user && $role->user->email === \App\Services\DemoService::DEMO_EMAIL);
     }
 }
 

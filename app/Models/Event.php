@@ -626,17 +626,17 @@ class Event extends Model
 
     public function getMetaDescription($date = null)
     {
-        $str = '';
+        $str = $this->translatedName();
 
         if ($this->venue) {
-            $str .= $this->venue->getDisplayName();
-        } else {
-            $str .= $this->getEventUrlDomain();
+            $str .= ' at '.$this->venue->getDisplayName();
+        } elseif ($this->getEventUrlDomain()) {
+            $str .= ' at '.$this->getEventUrlDomain();
         }
 
         $str .= ' | '.$this->localStartsAt(true, $date);
 
-        return $str;
+        return \Illuminate\Support\Str::limit($str, 155);
     }
 
     public function getGoogleCalendarUrl($date = null)
@@ -1282,6 +1282,20 @@ class Event extends Model
             'name' => $eventName,
             'url' => $eventUrl,
         ];
+    }
+
+    /**
+     * Get event attendance mode for JSON-LD
+     */
+    public function getSchemaAttendanceMode()
+    {
+        if ($this->event_url && $this->venue) {
+            return 'https://schema.org/MixedEventAttendanceMode';
+        } elseif ($this->event_url) {
+            return 'https://schema.org/OnlineEventAttendanceMode';
+        }
+
+        return 'https://schema.org/OfflineEventAttendanceMode';
     }
 
     /**

@@ -231,6 +231,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/{subdomain}/approve-comment/{hash}', [EventController::class, 'approveComment'])->name('event.approve_comment');
     Route::delete('/{subdomain}/reject-comment/{hash}', [EventController::class, 'rejectComment'])->name('event.reject_comment');
 
+    Route::get('/{subdomain}/scan-agenda', [EventController::class, 'scanAgenda'])->name('event.scan_agenda');
+    Route::post('/{subdomain}/save-event-parts', [EventController::class, 'saveEventParts'])->name('event.save_parts');
+
     Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|profile|followers|team|plan|videos');
 
     Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image');
@@ -354,6 +357,10 @@ if (config('app.is_nexus')) {
         Route::get('/for-farmers-markets', [MarketingController::class, 'forFarmersMarkets'])->name('marketing.for_farmers_markets');
         Route::get('/for-hotels-and-resorts', [MarketingController::class, 'forHotelsAndResorts'])->name('marketing.for_hotels_and_resorts');
         Route::get('/for-libraries', [MarketingController::class, 'forLibraries'])->name('marketing.for_libraries');
+        Route::get('/for-webinars', [MarketingController::class, 'forWebinars'])->name('marketing.for_webinars');
+        Route::get('/for-live-concerts', [MarketingController::class, 'forLiveConcerts'])->name('marketing.for_live_concerts');
+        Route::get('/for-online-classes', [MarketingController::class, 'forOnlineClasses'])->name('marketing.for_online_classes');
+        Route::get('/for-virtual-conferences', [MarketingController::class, 'forVirtualConferences'])->name('marketing.for_virtual_conferences');
         Route::get('/use-cases', [MarketingController::class, 'useCases'])->name('marketing.use_cases');
         Route::get('/compare', [MarketingController::class, 'compare'])->name('marketing.compare');
         Route::get('/eventbrite-alternative', [MarketingController::class, 'compareEventbrite'])->name('marketing.compare_eventbrite');
@@ -456,6 +463,9 @@ if (config('app.is_nexus')) {
             Route::get('/for-farmers-markets', [MarketingController::class, 'forFarmersMarkets'])->name('marketing.for_farmers_markets');
             Route::get('/for-hotels-and-resorts', [MarketingController::class, 'forHotelsAndResorts'])->name('marketing.for_hotels_and_resorts');
             Route::get('/for-libraries', [MarketingController::class, 'forLibraries'])->name('marketing.for_libraries');
+            Route::get('/for-webinars', [MarketingController::class, 'forWebinars'])->name('marketing.for_webinars');
+            Route::get('/for-live-concerts', [MarketingController::class, 'forLiveConcerts'])->name('marketing.for_live_concerts');
+            Route::get('/for-online-classes', [MarketingController::class, 'forOnlineClasses'])->name('marketing.for_online_classes');
             Route::get('/use-cases', [MarketingController::class, 'useCases'])->name('marketing.use_cases');
             Route::get('/compare', [MarketingController::class, 'compare'])->name('marketing.compare');
             Route::get('/eventbrite-alternative', [MarketingController::class, 'compareEventbrite'])->name('marketing.compare_eventbrite');
@@ -558,6 +568,10 @@ if (config('app.is_nexus')) {
             Route::get('/for-farmers-markets', fn () => redirect('https://eventschedule.com/for-farmers-markets', 301));
             Route::get('/for-hotels-and-resorts', fn () => redirect('https://eventschedule.com/for-hotels-and-resorts', 301));
             Route::get('/for-libraries', fn () => redirect('https://eventschedule.com/for-libraries', 301));
+            Route::get('/for-webinars', fn () => redirect('https://eventschedule.com/for-webinars', 301));
+            Route::get('/for-live-concerts', fn () => redirect('https://eventschedule.com/for-live-concerts', 301));
+            Route::get('/for-online-classes', fn () => redirect('https://eventschedule.com/for-online-classes', 301));
+            Route::get('/for-virtual-conferences', fn () => redirect('https://eventschedule.com/for-virtual-conferences', 301));
             Route::get('/use-cases', fn () => redirect('https://eventschedule.com/use-cases', 301));
             Route::get('/compare', fn () => redirect('https://eventschedule.com/compare', 301));
             Route::get('/contact', fn () => redirect('https://eventschedule.com/contact', 301));
@@ -655,6 +669,10 @@ if (config('app.is_nexus')) {
     Route::get('/for-farmers-markets', fn () => redirect()->route('home'));
     Route::get('/for-hotels-and-resorts', fn () => redirect()->route('home'));
     Route::get('/for-libraries', fn () => redirect()->route('home'));
+    Route::get('/for-webinars', fn () => redirect()->route('home'));
+    Route::get('/for-live-concerts', fn () => redirect()->route('home'));
+    Route::get('/for-online-classes', fn () => redirect()->route('home'));
+    Route::get('/for-virtual-conferences', fn () => redirect()->route('home'));
     Route::get('/use-cases', fn () => redirect()->route('home'));
     Route::get('/compare', fn () => redirect()->route('home'));
     Route::get('/contact', fn () => redirect()->route('home'));

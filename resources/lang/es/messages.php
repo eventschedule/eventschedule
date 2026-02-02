@@ -107,6 +107,8 @@ return [
     'social_links' => 'Enlaces Sociales',
     'add' => 'Agregar',
     'remove' => 'Eliminar',
+    'up' => 'Subir',
+    'down' => 'Bajar',
     'payment_links' => 'Enlaces de Pago',
     'add_link' => 'Agregar Enlace',
     'are_you_sure' => '¿Estás seguro?',
@@ -1347,6 +1349,7 @@ return [
     'ai_agenda_prompt' => 'AI Prompt',
     'ai_agenda_prompt_placeholder' => 'e.g., Each part name should include the artist name in parentheses',
     'ai_agenda_prompt_help' => 'Custom instructions for AI when parsing the set list',
+    'no_prompt_set' => 'No prompt set',
     'start_time' => 'Hora de inicio',
     'end_time' => 'Hora de fin',
     'provide_image_or_text' => 'Por favor, proporcione una imagen o texto para analizar.',
@@ -1444,4 +1447,14 @@ return [
     'test_email_sent_to' => 'Se enviará un correo de prueba a :email',
     'test_email_failed' => 'Failed to send test email. Please check the logs for details.',
     'please_wait' => 'Por favor espere antes de intentar de nuevo',
+
+    // Scan agenda
+    'scan_agenda' => 'Scan Agenda',
+    'no_suitable_events' => 'No events found. Create an event first, then scan its agenda.',
+    'capture_photo' => 'Capture Photo',
+    'retake' => 'Retake',
+    'agenda_saved' => 'Agenda saved successfully',
+    'camera_error' => 'Could not access camera. Please check your permissions.',
+    'start_camera' => 'Start Camera',
+    'select_camera' => 'Select Camera',
 ];
