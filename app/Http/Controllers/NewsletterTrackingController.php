@@ -37,7 +37,7 @@ class NewsletterTrackingController extends Controller
 
     public function trackClick(string $token, string $encodedUrl)
     {
-        $url = base64_decode($encodedUrl);
+        $url = base64_decode(strtr($encodedUrl, '-_', '+/'));
 
         if (! $url || ! filter_var($url, FILTER_VALIDATE_URL)) {
             abort(404);

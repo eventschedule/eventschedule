@@ -256,7 +256,7 @@ class NewsletterService
                 if (str_contains($url, '/nl/u/') || str_starts_with($url, 'mailto:') || $url === '#') {
                     return $matches[0];
                 }
-                $encodedUrl = base64_encode($url);
+                $encodedUrl = rtrim(strtr(base64_encode($url), '+/', '-_'), '=');
                 $trackingUrl = url('/nl/c/'.$recipient->token.'/'.$encodedUrl);
 
                 return '<a '.$matches[1].'href="'.$trackingUrl.'"';
