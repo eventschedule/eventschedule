@@ -7,9 +7,11 @@
                 <x-secondary-link href="{{ route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
                     {{ __('messages.segments') }}
                 </x-secondary-link>
+                @if (auth()->user()->isAdmin() || auth()->user()->roles()->wherePivot('level', '!=', 'follower')->get()->contains(fn ($role) => $role->isEnterprise()))
                 <x-secondary-link href="{{ route('newsletter.import', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
                     {{ __('messages.import_emails') }}
                 </x-secondary-link>
+                @endif
                 <x-brand-link href="{{ route('newsletter.create', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
                     {{ __('messages.create_newsletter') }}
                 </x-brand-link>
