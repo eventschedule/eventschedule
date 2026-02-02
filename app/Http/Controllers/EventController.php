@@ -1237,6 +1237,20 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.invalid_youtube_url'));
         }
 
+        if (! auth()->check()) {
+            session()->put('pending_fan_content', [
+                'type' => 'video',
+                'subdomain' => $subdomain,
+                'event_hash' => $event_hash,
+                'youtube_url' => $youtubeUrl,
+                'event_part_id' => $request->input('event_part_id'),
+                'event_date' => $request->input('event_date'),
+                'return_url' => url()->previous(),
+            ]);
+
+            return redirect()->route('sign_up');
+        }
+
         $eventPartId = $request->input('event_part_id');
         if ($eventPartId) {
             $eventPartId = UrlUtils::decodeId($eventPartId);
@@ -1298,6 +1312,20 @@ class EventController extends Controller
         ]);
 
         $comment = strip_tags(trim($request->input('comment')));
+
+        if (! auth()->check()) {
+            session()->put('pending_fan_content', [
+                'type' => 'comment',
+                'subdomain' => $subdomain,
+                'event_hash' => $event_hash,
+                'comment' => $comment,
+                'event_part_id' => $request->input('event_part_id'),
+                'event_date' => $request->input('event_date'),
+                'return_url' => url()->previous(),
+            ]);
+
+            return redirect()->route('sign_up');
+        }
 
         $eventPartId = $request->input('event_part_id');
         if ($eventPartId) {
