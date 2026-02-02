@@ -421,7 +421,7 @@
 
         {{-- Calendar widget --}}
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5 flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
-          <div class="w-full overflow-hidden">
+          <div class="w-full">
             @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'force_mobile' => true, 'max_events' => 20])
           </div>
         </div>
