@@ -501,12 +501,8 @@ class NewsletterController extends Controller
         ]);
         $recipient->save();
 
-        try {
-            $result = $service->sendToRecipient($newsletter, $recipient);
-        } finally {
-            // Delete the test recipient after sending
-            $recipient->delete();
-        }
+        $result = $service->sendToRecipient($newsletter, $recipient);
+        $recipient->update(['status' => 'test']);
 
         RateLimiter::hit($rateLimitKey, 60);
 

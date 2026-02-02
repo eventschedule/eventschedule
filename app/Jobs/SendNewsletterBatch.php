@@ -71,8 +71,8 @@ class SendNewsletterBatch implements ShouldQueue
     {
         $newsletter->update([
             'sent_count' => $newsletter->recipients()->where('status', 'sent')->count(),
-            'open_count' => $newsletter->recipients()->where('open_count', '>', 0)->count(),
-            'click_count' => $newsletter->recipients()->where('click_count', '>', 0)->count(),
+            'open_count' => $newsletter->recipients()->where('status', '!=', 'test')->where('open_count', '>', 0)->count(),
+            'click_count' => $newsletter->recipients()->where('status', '!=', 'test')->where('click_count', '>', 0)->count(),
         ]);
 
         // Check if all recipients have been processed

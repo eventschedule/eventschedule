@@ -19,7 +19,7 @@ class NewsletterTrackingController extends Controller
             $newsletter = $recipient->newsletter;
             if ($newsletter) {
                 $newsletter->update([
-                    'open_count' => $newsletter->recipients()->where('open_count', '>', 0)->count(),
+                    'open_count' => $newsletter->recipients()->where('status', '!=', 'test')->where('open_count', '>', 0)->count(),
                 ]);
             }
         }
@@ -53,8 +53,7 @@ class NewsletterTrackingController extends Controller
         $recipient = NewsletterRecipient::where('token', $token)->first();
 
         if (! $recipient) {
-            \Log::warning('Newsletter click: recipient not found', ['token' => $token]);
-            abort(404);
+            return redirect($url, 302);
         }
 
         $recipient->recordClick(
@@ -67,7 +66,7 @@ class NewsletterTrackingController extends Controller
         $newsletter = $recipient->newsletter;
         if ($newsletter) {
             $newsletter->update([
-                'click_count' => $newsletter->recipients()->where('click_count', '>', 0)->count(),
+                'click_count' => $newsletter->recipients()->where('status', '!=', 'test')->where('click_count', '>', 0)->count(),
             ]);
         }
 
