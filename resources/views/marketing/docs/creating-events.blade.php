@@ -44,6 +44,8 @@
                         <a href="#ai-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">AI Import</a>
                         <a href="#text-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">From Text</a>
                         <a href="#image-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">From Images/Flyers</a>
+                        <a href="#agenda-scanning" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">Agenda Scanning</a>
+                        <a href="#custom-prompts" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">Custom AI Prompts</a>
                         <a href="#calendar-sync" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Calendar Sync</a>
                         <a href="#recurring" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Recurring Events</a>
                         <a href="#event-details" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Event Details</a>
@@ -146,6 +148,40 @@
                                 <div class="doc-callout-title">Image Tips</div>
                                 <p>For best results, use clear, high-contrast images where text is easily readable. The AI works best with images that have legible text.</p>
                             </div>
+                        </section>
+
+                        <!-- Agenda Scanning -->
+                        <section id="agenda-scanning" class="doc-section">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Scanning Printed Agendas</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Have a printed conference program, setlist, or event schedule? You can scan it to automatically populate your event's parts (sessions, acts, segments).</p>
+
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Open an event and go to the <strong class="text-gray-900 dark:text-white">"Parts"</strong> section</li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">"Scan agenda"</strong></li>
+                                <li>Take a photo with your camera or upload an image of the printed agenda</li>
+                                <li>AI reads each line item and creates parts automatically</li>
+                                <li>Review the extracted parts and make any corrections</li>
+                            </ol>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Best for</div>
+                                <p>Conference programs, concert setlists, workshop agendas, and any printed schedule with line items and times.</p>
+                            </div>
+                        </section>
+
+                        <!-- Custom AI Prompts -->
+                        <section id="custom-prompts" class="doc-section">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Custom AI Prompts</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">You can add custom instructions to help AI understand your specific agenda format. This is useful when your agenda uses a non-standard layout.</p>
+
+                            <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
+                                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Example Prompt</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 code-block">
+                                    Each line is a session. Format: time - speaker - topic. Ignore lunch breaks.
+                                </p>
+                            </div>
+
+                            <p class="text-gray-600 dark:text-gray-300">You can set a custom prompt per event, or set a default prompt for your entire schedule under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>.</p>
                         </section>
 
                         <!-- Calendar Sync -->
