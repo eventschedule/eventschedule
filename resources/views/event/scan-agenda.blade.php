@@ -216,6 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const dragIndex = ref(null);
+            const dropTargetIndex = ref(null);
 
             function onDragStart(index) {
                 dragIndex.value = index;
@@ -223,17 +224,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
             function onDragOver(index, event) {
                 event.preventDefault();
+                if (dragIndex.value === null) return;
+                const rect = event.currentTarget.getBoundingClientRect();
+                const midpoint = rect.top + rect.height / 2;
+                const target = event.clientY < midpoint ? index : index + 1;
+                if (target === dragIndex.value || target === dragIndex.value + 1) {
+                    dropTargetIndex.value = null;
+                } else {
+                    dropTargetIndex.value = target;
+                }
             }
 
-            function onDrop(index) {
-                if (dragIndex.value === null || dragIndex.value === index) return;
+            function onDrop() {
+                if (dragIndex.value === null || dropTargetIndex.value === null) {
+                    dragIndex.value = null;
+                    dropTargetIndex.value = null;
+                    return;
+                }
                 const item = parts.value.splice(dragIndex.value, 1)[0];
-                parts.value.splice(index, 0, item);
+                const insertAt = dropTargetIndex.value > dragIndex.value ? dropTargetIndex.value - 1 : dropTargetIndex.value;
+                parts.value.splice(insertAt, 0, item);
                 dragIndex.value = null;
+                dropTargetIndex.value = null;
             }
 
             function onDragEnd() {
                 dragIndex.value = null;
+                dropTargetIndex.value = null;
             }
 
             function toggleShowAllFields() {
@@ -293,9 +310,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 cameraStarted.value = false;
             }
 
-            function onEventChange(e) {
-                selectedEventId.value = e.target.value;
+            const dropdownOpen = ref(false);
+
+            function toggleDropdown() {
+                dropdownOpen.value = !dropdownOpen.value;
             }
+
+            function closeDropdown() {
+                dropdownOpen.value = false;
+            }
+
+            function onEventChange(eventId) {
+                selectedEventId.value = eventId;
+                closeDropdown();
+            }
+
+            function handleClickOutside(e) {
+                const el = document.getElementById('event-dropdown');
+                if (el && !el.contains(e.target)) {
+                    closeDropdown();
+                }
+            }
+
+            function handleEscape(e) {
+                if (e.key === 'Escape') {
+                    closeDropdown();
+                }
+            }
+
+            document.addEventListener('click', handleClickOutside);
+            document.addEventListener('keydown', handleEscape);
+
+            const selectedEvent = computed(() => {
+                return events.value.find(e => e.id === selectedEventId.value) || null;
+            });
 
             // Auto-start camera if permission was previously granted
             if (localStorage.getItem('scanAgendaCameraGranted')) {
@@ -303,12 +351,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             return {
-                state, events, selectedEventId, aiPrompt, saveAsDefault,
+                state, events, selectedEventId, selectedEvent, aiPrompt, saveAsDefault,
                 editingPrompt, showAllFields,
                 parts, errorMessage, successEditUrl, cameraError,
                 videoEl, canvasEl, selectedEventName, hasEvents,
                 cameras, selectedCameraId, cameraStarted, selectCameraLabel,
-                dragIndex, onDragStart, onDragOver, onDrop, onDragEnd,
+                dragIndex, dropTargetIndex, onDragStart, onDragOver, onDrop, onDragEnd,
+                dropdownOpen, toggleDropdown, closeDropdown,
                 requestCameraAccess, startCamera, switchCamera,
                 captureAndParse, addPart, removePart,
                 saveParts, cancelEditing, scanAnother, onEventChange,
@@ -327,12 +376,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <div v-else>
         <!-- Event selector -->
-        <div class="mb-4">
-            <select :value="selectedEventId" @change="onEventChange" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
-                <option v-for="event in events" :key="event.id" :value="event.id">
-                    @{{ event.name }} <span v-if="event.starts_at">- @{{ event.starts_at }}</span>
-                </option>
-            </select>
+        <div class="mb-4 relative" id="event-dropdown">
+            <button @click="toggleDropdown" type="button" tabindex="0"
+                class="w-full flex items-center gap-3 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 shadow-sm focus:border-[#4E81FA] focus:ring-2 focus:ring-[#4E81FA] focus:outline-none text-left">
+                <template v-if="selectedEvent">
+                    <img v-if="selectedEvent.image_url" :src="selectedEvent.image_url" class="w-10 h-10 rounded object-cover flex-shrink-0">
+                    <span v-else class="w-10 h-10 rounded bg-gray-100 dark:bg-gray-600 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </span>
+                    <span class="flex-1 truncate text-gray-900 dark:text-gray-100 text-sm">
+                        @{{ selectedEvent.name }}<span v-if="selectedEvent.starts_at"> - @{{ selectedEvent.starts_at }}</span>
+                    </span>
+                </template>
+                <svg class="w-5 h-5 text-gray-400 flex-shrink-0 ms-auto" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4" />
+                </svg>
+            </button>
+            <div v-if="dropdownOpen" class="absolute z-50 mt-1 w-full rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-lg max-h-72 overflow-y-auto">
+                <button v-for="event in events" :key="event.id" @click="onEventChange(event.id)" type="button"
+                    class="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                    :class="event.id === selectedEventId ? 'bg-gray-50 dark:bg-gray-600/50' : ''">
+                    <img v-if="event.image_url" :src="event.image_url" class="w-10 h-10 rounded object-cover flex-shrink-0">
+                    <span v-else class="w-10 h-10 rounded bg-gray-100 dark:bg-gray-600 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </span>
+                    <span class="flex-1 truncate text-gray-900 dark:text-gray-100 text-sm">
+                        @{{ event.name }}<span v-if="event.starts_at"> - @{{ event.starts_at }}</span>
+                    </span>
+                    <svg v-if="event.id === selectedEventId" class="w-5 h-5 text-[#4E81FA] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </button>
+            </div>
         </div>
 
         <!-- Error message -->
@@ -414,14 +493,15 @@ document.addEventListener('DOMContentLoaded', function() {
         <div v-if="state === 'editing'">
             <div :class="showAllFields ? 'space-y-3' : 'space-y-1'" class="mb-24">
                 <!-- Compact layout (name only) -->
-                <template v-if="!showAllFields">
+                <div v-if="!showAllFields" @dragover.prevent @drop="onDrop()" class="space-y-1">
                     <div v-for="(part, index) in parts" :key="'compact-' + index"
                         draggable="true"
                         @dragstart="onDragStart(index)"
                         @dragover="onDragOver(index, $event)"
-                        @drop="onDrop(index)"
+                        @drop="onDrop()"
                         @dragend="onDragEnd"
                         :class="{ 'opacity-50': dragIndex === index }"
+                        :style="{ marginTop: dropTargetIndex === index && dragIndex !== null && dragIndex !== index ? '3rem' : '', transition: 'margin 150ms ease' }"
                         class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-2 shadow-sm">
                         <div class="flex items-center gap-2">
                             <div class="cursor-grab text-gray-400 dark:text-gray-500">
@@ -435,24 +515,25 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <input v-model="part.name" type="text" placeholder="{{ __('messages.part_name') }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm font-medium">
+                                <input v-model="part.name" type="text" placeholder="{{ __('messages.name') }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm font-medium">
                             </div>
-                            <button @click="removePart(index)" class="rounded-md border border-red-300 dark:border-red-700 p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="{{ __('messages.remove') }}">
+                            <button @click="removePart(index)" class="self-stretch rounded-md border border-red-300 dark:border-red-700 px-2 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="{{ __('messages.remove') }}">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
                     </div>
-                </template>
+                </div>
 
                 <!-- Full layout (all fields) -->
-                <template v-else>
+                <div v-else @dragover.prevent @drop="onDrop()" class="space-y-3">
                     <div v-for="(part, index) in parts" :key="'full-' + index"
                         draggable="true"
                         @dragstart="onDragStart(index)"
                         @dragover="onDragOver(index, $event)"
-                        @drop="onDrop(index)"
+                        @drop="onDrop()"
                         @dragend="onDragEnd"
                         :class="{ 'opacity-50': dragIndex === index }"
+                        :style="{ marginTop: dropTargetIndex === index && dragIndex !== null && dragIndex !== index ? '3rem' : '', transition: 'margin 150ms ease' }"
                         class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm">
                         <div class="flex items-start gap-2">
                             <div class="cursor-grab text-gray-400 dark:text-gray-500 pt-2">
@@ -466,22 +547,22 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </svg>
                             </div>
                             <div class="flex-1 space-y-2">
-                                <input v-model="part.name" type="text" placeholder="{{ __('messages.part_name') }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm font-medium">
+                                <input v-model="part.name" type="text" placeholder="{{ __('messages.name') }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm font-medium">
                                 <textarea v-model="part.description" rows="2" placeholder="{{ __('messages.description') }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm"></textarea>
                                 <div class="flex gap-2">
                                     <input v-model="part.start_time" type="text" placeholder="{{ __('messages.start_time') }}" class="w-1/2 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm">
                                     <input v-model="part.end_time" type="text" placeholder="{{ __('messages.end_time') }}" class="w-1/2 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm">
                                 </div>
                             </div>
-                            <button @click="removePart(index)" class="rounded-md border border-red-300 dark:border-red-700 p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="{{ __('messages.remove') }}">
+                            <button @click="removePart(index)" class="self-stretch rounded-md border border-red-300 dark:border-red-700 px-2 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="{{ __('messages.remove') }}">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
                     </div>
-                </template>
+                </div>
 
-                <button @click="addPart" class="w-full py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                    + {{ __('messages.add_part') }}
+                <button @click="addPart" class="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                    + {{ __('messages.add') }}
                 </button>
 
                 <label class="flex items-center text-sm text-gray-600 dark:text-gray-400 pt-2">
