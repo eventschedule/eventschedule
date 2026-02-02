@@ -9,14 +9,24 @@
                 </button>
             </div>
             
-            <div class="text-right">
+            <div class="flex items-center text-right">
+                @if ($role->profile_image_url)
+                    <div class="pe-4">
+                        <img src="{{ $role->profile_image_url }}" class="rounded-lg h-14 w-14 flex-none">
+                    </div>
+                @endif
                 <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
                     {{ __('messages.import_events') }}
                 </h2>
             </div>
         @else
             <!-- LTR Layout: Title on left, cancel button on right -->
-            <div>
+            <div class="flex items-center">
+                @if ($role->profile_image_url)
+                    <div class="pe-4">
+                        <img src="{{ $role->profile_image_url }}" class="rounded-lg h-14 w-14 flex-none">
+                    </div>
+                @endif
                 <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
                     {{ __('messages.import_events') }}
                 </h2>
