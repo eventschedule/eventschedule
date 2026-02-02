@@ -467,63 +467,61 @@
                 </button>
                 <div id="mobileEventsList" class="space-y-6">
                     <template v-for="(group, groupIndex) in eventsGroupedByDate" :key="'date-' + group.date">
-                        {{-- Date Group --}}
-                        <div :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
-                            {{-- Date Header --}}
-                            <div class="sticky top-0 z-10 -mx-4 px-4 {{ (isset($force_mobile) && $force_mobile) ? 'bg-[#F5F9FE] dark:bg-gray-800' : 'bg-white dark:bg-gray-800' }}">
-                                <div class="px-4 pb-5 pt-3 flex items-center gap-4">
-                                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                                    <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></div>
-                                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                                </div>
+                        {{-- Date Header --}}
+                        <div class="sticky top-0 z-10 -mx-4 px-4 {{ (isset($force_mobile) && $force_mobile) ? 'bg-[#F5F9FE] dark:bg-gray-800' : 'bg-white dark:bg-gray-800' }}"
+                            :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
+                            <div class="px-4 pb-5 pt-3 flex items-center gap-4">
+                                <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                                <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></div>
+                                <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
                             </div>
-                            {{-- Events for this date --}}
-                            <div class="space-y-6">
-                                <template v-for="event in group.events" :key="'mobile-' + event.uniqueKey">
-                                    <div v-if="isEventVisible(event)"
-                                         @click="navigateToEvent(event, $event)"
-                                         class="block cursor-pointer">
-                                        <div class="event-item bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-600"
-                                            :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
-                                            <div class="flex" :class="isRtl ? 'flex-row-reverse' : ''">
-                                                {{-- Content Section --}}
-                                                <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
-                                                    <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
-                                                    <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 hover:opacity-80 transition-opacity">
-                                                        <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
-                                                            <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
-                                                        </svg>
-                                                        <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                        </div>
+                        {{-- Events for this date --}}
+                        <div class="space-y-6" :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
+                            <template v-for="event in group.events" :key="'mobile-' + event.uniqueKey">
+                                <div v-if="isEventVisible(event)"
+                                     @click="navigateToEvent(event, $event)"
+                                     class="block cursor-pointer">
+                                    <div class="event-item bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-600"
+                                        :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
+                                        <div class="flex" :class="isRtl ? 'flex-row-reverse' : ''">
+                                            {{-- Content Section --}}
+                                            <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
+                                                <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
+                                                <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 hover:opacity-80 transition-opacity">
+                                                    <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                                </a>
+                                                <div v-else-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                                    <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                                </div>
+                                                <div class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                                    <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    <span v-text="getEventTime(event)"></span>
+                                                </div>
+                                                <div v-if="event.can_edit" class="mt-auto pt-3">
+                                                    <a :href="event.edit_url"
+                                                        class="inline-flex items-center px-4 py-1.5 text-sm font-medium text-[#4E81FA] bg-transparent border border-[#4E81FA] rounded-md hover:bg-[#4E81FA] hover:text-white transition-colors duration-200"
+                                                        @click.stop>
+                                                        {{ __('messages.edit') }}
                                                     </a>
-                                                    <div v-else-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                                        <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
-                                                            <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
-                                                        </svg>
-                                                        <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
-                                                    </div>
-                                                    <div class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                                        <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
-                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
-                                                        </svg>
-                                                        <span v-text="getEventTime(event)"></span>
-                                                    </div>
-                                                    <div v-if="event.can_edit" class="mt-auto pt-3">
-                                                        <a :href="event.edit_url"
-                                                            class="inline-flex items-center px-4 py-1.5 text-sm font-medium text-[#4E81FA] bg-transparent border border-[#4E81FA] rounded-md hover:bg-[#4E81FA] hover:text-white transition-colors duration-200"
-                                                            @click.stop>
-                                                            {{ __('messages.edit') }}
-                                                        </a>
-                                                    </div>
                                                 </div>
-                                                {{-- Image Section --}}
-                                                <div v-if="event.image_url" class="flex-shrink-0 w-24 self-stretch">
-                                                    <img :src="event.image_url" class="w-full h-full object-cover" :alt="event.name">
-                                                </div>
+                                            </div>
+                                            {{-- Image Section --}}
+                                            <div v-if="event.image_url" class="flex-shrink-0 w-24 self-stretch">
+                                                <img :src="event.image_url" class="w-full h-full object-cover" :alt="event.name">
                                             </div>
                                         </div>
                                     </div>
-                                </template>
-                            </div>
+                                </div>
+                            </template>
                         </div>
                     </template>
                 </div>

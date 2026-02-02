@@ -279,6 +279,7 @@
     
     @php
         $isRtl = $role->isRtl();
+        $isRoleRtl = in_array($role->language_code, ['ar', 'he']);
     @endphp
 
     <div class="flex-grow relative">
@@ -300,8 +301,8 @@
         @endphp
 
         @if (! request()->embed && $role->language_code != 'en')
-            <div class="container mx-auto flex {{ $isRtl ? 'justify-start pl-5' : 'justify-end pr-5' }} pt-4">
-                <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-800 p-1 text-sm shadow-md z-50 {{ $isRtl ? 'flex-row-reverse' : '' }}" translate="no">
+            <div class="container mx-auto flex {{ $isRoleRtl ? 'justify-start pl-5' : 'justify-end pr-5' }} pt-4">
+                <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-800 p-1 text-sm shadow-md z-50 {{ $isRoleRtl ? 'flex-row-reverse' : '' }}" translate="no">
                     @if(session()->has('translate') || request()->lang == 'en')
                         <span class="bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm px-3 py-1.5 rounded-full font-medium">EN</span>
                         <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang={{ $role->language_code }}"
