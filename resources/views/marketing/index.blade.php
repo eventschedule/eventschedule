@@ -264,7 +264,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">AI-Powered</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Auto-extract event details from flyers, agendas, and setlists with AI parsing. Translate instantly.</p>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Auto-extract event details from flyers, agendas, and setlists. Scan printed agendas to populate event parts. Translate instantly.</p>
                     <span class="inline-flex items-center mt-3 text-sm font-medium text-sky-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -399,7 +399,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">Fan Videos & Comments</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Let fans add YouTube videos and comments to your events. Build community around your shows.</p>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Fans add YouTube videos and comments to your events. All submissions need your approval. Build community around your shows.</p>
                     <span class="inline-flex items-center mt-3 text-sm font-medium text-rose-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>

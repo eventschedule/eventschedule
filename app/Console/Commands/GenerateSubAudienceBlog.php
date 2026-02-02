@@ -178,7 +178,7 @@ class GenerateSubAudienceBlog extends Command
      */
     protected function sendReviewEmail(BlogPost $post)
     {
-        $adminEmail = config('mail.admin_email');
+        $adminEmail = config('app.support_email');
 
         if (! $adminEmail) {
             $this->warn('  No admin email configured - skipping review email');

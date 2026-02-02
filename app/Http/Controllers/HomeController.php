@@ -217,7 +217,7 @@ class HomeController extends Controller
         if ($returnUrl) {
             $parsedUrl = parse_url($returnUrl);
             $appHost = parse_url(config('app.url'), PHP_URL_HOST);
-            if (isset($parsedUrl['host']) && $parsedUrl['host'] !== $appHost) {
+            if (isset($parsedUrl['host']) && $parsedUrl['host'] !== $appHost && !str_ends_with($parsedUrl['host'], '.' . $appHost)) {
                 $returnUrl = null;
             }
             $lowerUrl = strtolower(trim($returnUrl ?? ''));
