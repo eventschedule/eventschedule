@@ -165,7 +165,7 @@
                 </div>
             </main>
 
-            <div class="mt-auto pb-8 px-8 text-sm text-gray-500 dark:text-gray-400" dir="{{ is_rtl() ? 'rtl' : 'ltr' }}">
+            <div class="mt-auto pb-8 px-4 sm:px-6 lg:px-8 text-sm text-gray-500 dark:text-gray-400" dir="{{ is_rtl() ? 'rtl' : 'ltr' }}">
                 @if (config('app.hosted'))
                     {!! str_replace(':email', '<bdi dir="ltr"><a href="mailto:contact@eventschedule.com?subject=Feedback" class="hover:underline">contact@eventschedule.com</a></bdi>', __('messages.questions_or_suggestions')) !!}
                 @else
