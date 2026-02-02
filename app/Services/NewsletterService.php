@@ -243,7 +243,12 @@ class NewsletterService
 
     public function renderPreview(Newsletter $newsletter): string
     {
-        return $this->renderHtml($newsletter, null);
+        $html = $this->renderHtml($newsletter, null);
+
+        $style = '<style>a { pointer-events: none !important; cursor: default !important; }</style>';
+        $html = str_replace('</head>', $style . '</head>', $html);
+
+        return $html;
     }
 
     public function rewriteLinks(string $html, NewsletterRecipient $recipient): string

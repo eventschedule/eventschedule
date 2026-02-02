@@ -861,17 +861,48 @@ class Role extends Model implements MustVerifyEmail
         return $this->hasMany(\App\Models\Newsletter::class);
     }
 
+    public function actualPlanTier(): string
+    {
+        if (! config('app.hosted')) {
+            return 'enterprise';
+        }
+
+        if ($this->hasActiveEnterpriseSubscription()) {
+            return 'enterprise';
+        }
+
+        if ($this->plan_type === 'enterprise' && $this->plan_expires >= now()->format('Y-m-d')) {
+            return 'enterprise';
+        }
+
+        if ($this->hasActiveSubscription()) {
+            return 'pro';
+        }
+
+        if ($this->onGenericTrial()) {
+            return 'pro';
+        }
+
+        if ($this->plan_type === 'pro' && $this->plan_expires >= now()->format('Y-m-d')) {
+            return 'pro';
+        }
+
+        return 'free';
+    }
+
     public function newsletterLimit(): ?int
     {
         if (! config('app.hosted') || $this->hasEmailSettings()) {
             return null;
         }
 
-        if ($this->isEnterprise()) {
+        $tier = $this->actualPlanTier();
+
+        if ($tier === 'enterprise') {
             return 1000;
         }
 
-        if ($this->isPro()) {
+        if ($tier === 'pro') {
             return 100;
         }
 
