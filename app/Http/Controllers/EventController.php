@@ -9,6 +9,7 @@ use App\Mail\EventAccepted;
 use App\Mail\EventDeclined;
 use App\Models\Event;
 use App\Models\EventComment;
+use App\Models\EventPart;
 use App\Models\EventVideo;
 use App\Models\Role;
 use App\Models\Ticket;
@@ -1215,6 +1216,11 @@ class EventController extends Controller
 
     public function submitVideo(Request $request, $subdomain, $event_hash)
     {
+        $role = Role::where('subdomain', $subdomain)->firstOrFail();
+        if (is_demo_role($role)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
         $event_id = UrlUtils::decodeId($event_hash);
         $event = Event::with('parts')->findOrFail($event_id);
 
@@ -1277,6 +1283,11 @@ class EventController extends Controller
 
     public function submitComment(Request $request, $subdomain, $event_hash)
     {
+        $role = Role::where('subdomain', $subdomain)->firstOrFail();
+        if (is_demo_role($role)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
         $event_id = UrlUtils::decodeId($event_hash);
         $event = Event::with('parts')->findOrFail($event_id);
 
@@ -1367,5 +1378,105 @@ class EventController extends Controller
         $comment->delete();
 
         return redirect()->back()->with('message', __('messages.comment_rejected'));
+    }
+
+    public function scanAgenda(Request $request, $subdomain)
+    {
+        if (! auth()->user()->isMember($subdomain)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        // Auto-select event: most recent event in past month with no parts
+        $selectedEvent = Event::whereHas('roles', function ($query) use ($role) {
+            $query->where('role_id', $role->id);
+        })
+            ->where('starts_at', '>=', now()->subMonth())
+            ->where('starts_at', '<=', now())
+            ->whereDoesntHave('parts')
+            ->orderBy('starts_at', 'desc')
+            ->first();
+
+        // Fallback: next upcoming event with no parts
+        if (! $selectedEvent) {
+            $selectedEvent = Event::whereHas('roles', function ($query) use ($role) {
+                $query->where('role_id', $role->id);
+            })
+                ->where('starts_at', '>', now())
+                ->whereDoesntHave('parts')
+                ->orderBy('starts_at', 'asc')
+                ->first();
+        }
+
+        // Load all recent events for manual selection
+        $events = Event::whereHas('roles', function ($query) use ($role) {
+            $query->where('role_id', $role->id);
+        })
+            ->whereDoesntHave('parts')
+            ->orderBy('starts_at', 'desc')
+            ->limit(50)
+            ->get();
+
+        $eventsData = $events->map(function ($e) {
+            return [
+                'id' => UrlUtils::encodeId($e->id),
+                'name' => $e->name,
+                'starts_at' => $e->starts_at ? Carbon::parse($e->starts_at)->format('M j, Y') : null,
+                'image_url' => $e->getImageUrl(),
+            ];
+        });
+
+        return view('event.scan-agenda', [
+            'role' => $role,
+            'subdomain' => $subdomain,
+            'selectedEventId' => $selectedEvent ? UrlUtils::encodeId($selectedEvent->id) : null,
+            'eventsData' => $eventsData,
+            'aiPrompt' => $selectedEvent?->agenda_ai_prompt ?? $role->agenda_ai_prompt ?? '',
+        ]);
+    }
+
+    public function saveEventParts(Request $request, $subdomain)
+    {
+        if (! auth()->user()->isMember($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'event_id' => 'required|string',
+            'parts' => 'required|array',
+            'parts.*.name' => 'required|string|max:255',
+            'parts.*.description' => 'nullable|string|max:1000',
+            'parts.*.start_time' => 'nullable|string|max:10',
+            'parts.*.end_time' => 'nullable|string|max:10',
+        ]);
+
+        $eventId = UrlUtils::decodeId($request->input('event_id'));
+        $event = Event::findOrFail($eventId);
+
+        if (! $request->user()->canEditEvent($event)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        // Delete existing parts
+        $event->parts()->delete();
+
+        // Create new parts
+        foreach ($request->input('parts') as $index => $partData) {
+            EventPart::create([
+                'event_id' => $event->id,
+                'name' => $partData['name'],
+                'description' => $partData['description'] ?? null,
+                'start_time' => $partData['start_time'] ?? null,
+                'end_time' => $partData['end_time'] ?? null,
+                'sort_order' => $index,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.agenda_saved'),
+            'edit_url' => route('event.edit', ['subdomain' => $subdomain, 'hash' => UrlUtils::encodeId($event->id)]),
+        ]);
     }
 }
