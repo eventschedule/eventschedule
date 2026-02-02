@@ -232,38 +232,41 @@
                     </div>
                 </div>
 
-                <!-- Google Calendar Sync -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-blue-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-700 dark:text-blue-300 text-sm font-medium mb-4">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        Calendar Sync
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Google Calendar sync</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Two-way sync keeps your venue calendar and Google Calendar in perfect harmony.</p>
-
-                    <div class="flex items-center justify-center gap-3">
-                        <div class="bg-blue-500/20 rounded-xl border border-blue-400/30 p-3 w-20">
-                            <div class="text-[10px] text-blue-700 dark:text-blue-300 mb-1 text-center">Venue</div>
-                            <div class="space-y-1">
-                                <div class="h-1.5 bg-white/20 rounded"></div>
-                                <div class="h-1.5 bg-white/20 rounded w-3/4"></div>
+                <!-- Google Calendar Sync (spans 2 cols) -->
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-blue-200 dark:border-white/10 p-8 lg:p-10">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-700 dark:text-blue-300 text-sm font-medium mb-4">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                Calendar Sync
                             </div>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Google Calendar sync</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg">Two-way sync keeps your venue calendar and Google Calendar in perfect harmony. Changes flow both ways automatically.</p>
                         </div>
-                        <div class="flex flex-col items-center gap-0.5">
-                            <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                            </svg>
-                            <svg class="w-4 h-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
-                        </div>
-                        <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-3 w-20">
-                            <div class="text-[10px] text-gray-600 dark:text-gray-300 mb-1 text-center">Google</div>
-                            <div class="space-y-1">
-                                <div class="h-1.5 bg-blue-400/40 rounded"></div>
-                                <div class="h-1.5 bg-green-400/40 rounded w-3/4"></div>
+                        <div class="flex items-center justify-center gap-3">
+                            <div class="bg-blue-500/20 rounded-xl border border-blue-400/30 p-3 w-20">
+                                <div class="text-[10px] text-blue-700 dark:text-blue-300 mb-1 text-center">Venue</div>
+                                <div class="space-y-1">
+                                    <div class="h-1.5 bg-sky-400/80 dark:bg-sky-400/40 rounded text-[6px] text-white px-1">Jazz</div>
+                                    <div class="h-1.5 bg-blue-400/80 dark:bg-blue-400/40 rounded text-[6px] text-white px-1">Open Mic</div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center gap-0.5">
+                                <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                                <svg class="w-4 h-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                </svg>
+                            </div>
+                            <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-3 w-20">
+                                <div class="text-[10px] text-gray-600 dark:text-gray-300 mb-1 text-center">Google</div>
+                                <div class="space-y-1">
+                                    <div class="h-1.5 bg-blue-400/40 rounded"></div>
+                                    <div class="h-1.5 bg-green-400/40 rounded"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -291,6 +294,56 @@
                                 <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                 </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fan Videos & Comments (spans 2 cols) -->
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-orange-100 dark:from-rose-900 dark:to-orange-900 border border-rose-200 dark:border-white/10 p-8 lg:p-10">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-700 dark:text-rose-300 text-sm font-medium mb-4">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                                Fan Engagement
+                            </div>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Fan videos & comments</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">After the show, fans share YouTube clips and comments on your events. You approve what goes live. Build a gallery of great nights at your venue.</p>
+                            <div class="flex flex-wrap gap-3">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">YouTube videos</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Comments</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Organizer approval</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <div class="bg-gradient-to-br from-rose-50 to-orange-50 dark:from-rose-950 dark:to-orange-950 rounded-2xl border border-rose-300 dark:border-rose-400/30 p-4 max-w-xs">
+                                <div class="text-xs text-gray-500 dark:text-white/70 mb-2">Jazz Night</div>
+                                <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-3">Fri, Mar 15 at 9 PM</div>
+                                <div class="bg-gray-800 rounded-lg p-3 mb-3 flex items-center justify-center">
+                                    <div class="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M8 5v14l11-7z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-start gap-2">
+                                        <div class="w-5 h-5 rounded-full bg-rose-300 dark:bg-rose-500/40 flex-shrink-0"></div>
+                                        <div class="bg-white dark:bg-white/10 rounded-lg px-2 py-1 text-[10px] text-gray-600 dark:text-gray-300">Incredible show!</div>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <div class="w-5 h-5 rounded-full bg-orange-300 dark:bg-orange-500/40 flex-shrink-0"></div>
+                                        <div class="bg-white dark:bg-white/10 rounded-lg px-2 py-1 text-[10px] text-gray-600 dark:text-gray-300">Best venue in town</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1 mt-2 pt-1">
+                                    <svg class="w-3 h-3 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span class="text-rose-600 dark:text-rose-400 text-[10px]">Approved by venue</span>
+                                </div>
                             </div>
                         </div>
                     </div>

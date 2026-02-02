@@ -39,7 +39,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-                Paste text or drop an image, even from multi-event agendas and setlists. AI extracts all the details automatically.
+                Paste text or drop an image, even from multi-event agendas and setlists. AI extracts all the details automatically. Or scan a printed agenda to populate your event's parts.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
@@ -212,6 +212,98 @@
                                 </svg>
                                 <div class="text-gray-900 dark:text-white text-sm font-medium">Agendas</div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scan a Printed Agenda (spans 2 cols) -->
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 border border-amber-200 dark:border-white/10 p-8 lg:p-10">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm font-medium mb-4">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                                Agenda Scanning
+                            </div>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Scan a printed agenda</h3>
+                            <p class="text-gray-500 dark:text-white/80 text-lg mb-6">Point your camera at a printed agenda or upload an image. AI reads each line item and populates your event's parts automatically - sessions, acts, segments, and more.</p>
+                            <div class="flex flex-wrap gap-3">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Camera capture</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Image upload</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Auto-populate parts</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <div class="relative">
+                                <!-- Printed agenda -->
+                                <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-2xl border border-gray-200 dark:border-white/10 p-4 max-w-xs mb-4">
+                                    <div class="text-xs text-gray-400 dark:text-gray-400 mb-2">Printed agenda</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-300 font-mono leading-relaxed">
+                                        9:00 AM - Opening Keynote<br>
+                                        10:30 AM - Panel Discussion<br>
+                                        12:00 PM - Lunch Break<br>
+                                        1:30 PM - Workshop A
+                                    </div>
+                                </div>
+                                <!-- Arrow -->
+                                <div class="flex justify-center my-2">
+                                    <svg class="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                    </svg>
+                                </div>
+                                <!-- Extracted parts -->
+                                <div class="bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-2xl border border-amber-400/30 p-4 max-w-xs">
+                                    <div class="text-xs text-amber-700 dark:text-amber-300 mb-2">Event parts</div>
+                                    <div class="space-y-1.5">
+                                        <div class="flex items-center gap-2 p-1.5 rounded-lg bg-amber-400/20">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                                            <span class="text-gray-900 dark:text-white text-xs">Opening Keynote</span>
+                                            <span class="ml-auto text-amber-700 dark:text-amber-300 text-[10px]">9:00 AM</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 p-1.5 rounded-lg bg-amber-400/10">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
+                                            <span class="text-gray-600 dark:text-gray-300 text-xs">Panel Discussion</span>
+                                            <span class="ml-auto text-gray-500 dark:text-gray-400 text-[10px]">10:30 AM</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 p-1.5 rounded-lg bg-amber-400/10">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                                            <span class="text-gray-600 dark:text-gray-300 text-xs">Workshop A</span>
+                                            <span class="ml-auto text-gray-500 dark:text-gray-400 text-[10px]">1:30 PM</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom AI Prompts -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-blue-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Custom Prompts
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Guide the AI</h3>
+                    <p class="text-gray-500 dark:text-white/80 mb-6">Add custom instructions to help AI understand your agenda format. Set prompts per event or as a default for your entire schedule.</p>
+
+                    <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">Custom prompt</div>
+                        <div class="bg-blue-500/10 rounded-lg p-3 border border-blue-400/20">
+                            <div class="text-blue-900 dark:text-blue-200 text-xs font-mono leading-relaxed">
+                                "Each line is a session.<br>
+                                Format: time - speaker - topic.<br>
+                                Ignore lunch breaks."
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 mt-3 text-[10px] text-gray-500 dark:text-gray-400">
+                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Per-event or schedule-wide
                         </div>
                     </div>
                 </div>
@@ -393,6 +485,8 @@
             "Agenda and setlist parsing",
             "Multi-event image extraction",
             "Automatic event extraction",
+            "AI agenda scanning for event parts",
+            "Custom AI prompts",
             "Instant translation",
             "Bulk import support",
             "Google Gemini powered"

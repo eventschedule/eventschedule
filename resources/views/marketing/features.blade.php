@@ -168,11 +168,12 @@
                                 AI-Powered
                             </div>
                             <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Smart event import</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Paste text or drop an image of a flyer, agenda, or setlist. AI extracts title, date, time, venue, and description automatically.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Paste text or drop an image of a flyer, agenda, or setlist. AI extracts title, date, time, venue, and description automatically. Or scan a printed agenda to populate event parts.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Parse any format</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Instant translation</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Agendas & setlists</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Agenda scanning</span>
                             </div>
                             <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
@@ -868,11 +869,13 @@
                                 Fan Engagement
                             </div>
                             <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">Build community around events</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Fans and attendees can add YouTube videos and comments to your events. Turn every show into a shared memory.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Fans and attendees can add YouTube videos and comments to your events, including on individual agenda items. All submissions need your approval before they go live. Turn every show into a shared memory.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">YouTube videos</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Comments</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Community</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Organizer approval</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Per-segment feedback</span>
                             </div>
                         </div>
 

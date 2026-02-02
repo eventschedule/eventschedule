@@ -103,11 +103,12 @@
                                 Multi-Day Agenda
                             </div>
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Multi-day conference schedule</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Organize keynotes, breakout sessions, and workshops across multiple days of your virtual conference. Attendees browse the full agenda and find the sessions they care about.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Organize keynotes, breakout sessions, and workshops across multiple days of your virtual conference. Attendees browse the full agenda and find the sessions they care about. Have a printed conference program? Scan it with AI to populate all your sessions automatically.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Keynotes</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Breakout sessions</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Workshops</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">AI agenda scanning</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -250,29 +251,32 @@
                 </div>
 
                 <!-- Email all attendees -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-sky-100 dark:from-amber-900 dark:to-sky-900 border border-amber-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-sm font-medium mb-5 border border-amber-200 dark:border-amber-800/30">
-                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        Email Attendees
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Email all attendees</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Send updates, schedule changes, speaker announcements, and post-conference resources directly to attendees.</p>
-
-                    <div class="bg-amber-500/20 rounded-xl border border-amber-400/30 p-3">
-                        <div class="space-y-1.5">
-                            <div class="flex items-center gap-2 p-1.5 rounded bg-amber-400/20">
-                                <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-                                <span class="text-gray-900 dark:text-white text-[10px] font-medium">Schedule update</span>
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-sky-100 dark:from-amber-900 dark:to-sky-900 border border-amber-200 dark:border-white/10 p-8 lg:p-10">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-sm font-medium mb-5 border border-amber-200 dark:border-amber-800/30">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                Email Attendees
                             </div>
-                            <div class="flex items-center gap-2 p-1.5 rounded bg-amber-400/10">
-                                <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-                                <span class="text-gray-600 dark:text-gray-300 text-[10px]">Speaker announcement</span>
-                            </div>
-                            <div class="flex items-center gap-2 p-1.5 rounded bg-amber-400/10">
-                                <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-                                <span class="text-gray-600 dark:text-gray-300 text-[10px]">Post-conference resources</span>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Email all attendees</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg">Send updates, schedule changes, speaker announcements, and post-conference resources directly to attendees.</p>
+                        </div>
+                        <div class="bg-amber-500/20 rounded-xl border border-amber-400/30 p-3">
+                            <div class="space-y-1.5">
+                                <div class="flex items-center gap-2 p-1.5 rounded bg-amber-400/20">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                                    <span class="text-gray-900 dark:text-white text-[10px] font-medium">Schedule update</span>
+                                </div>
+                                <div class="flex items-center gap-2 p-1.5 rounded bg-amber-400/10">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                                    <span class="text-gray-600 dark:text-gray-300 text-[10px]">Speaker announcement</span>
+                                </div>
+                                <div class="flex items-center gap-2 p-1.5 rounded bg-amber-400/10">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                                    <span class="text-gray-600 dark:text-gray-300 text-[10px]">Post-conference resources</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -335,6 +339,47 @@
                         </div>
                     </div>
                     <div class="text-center mt-3 text-slate-600 dark:text-slate-400 text-xs">523 attendees following your conference</div>
+                </div>
+
+                <!-- Attendee Feedback (spans 2 cols) -->
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-orange-100 dark:from-rose-900 dark:to-orange-900 border border-rose-200 dark:border-white/10 p-8 lg:p-10">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 text-sm font-medium mb-5 border border-rose-200 dark:border-rose-800/30">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                                Attendee Feedback
+                            </div>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Attendee feedback</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Let attendees leave comments on individual sessions. All feedback is approved by you before going live.</p>
+                            <div class="flex flex-wrap gap-3">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Per-session comments</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Organizer approval</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <div class="bg-gradient-to-br from-rose-50 to-orange-50 dark:from-rose-950 dark:to-orange-950 rounded-2xl border border-rose-300 dark:border-rose-400/30 p-4 max-w-xs">
+                                <div class="text-xs text-gray-500 dark:text-white/70 mb-2">AI Workshop - Day 2</div>
+                                <div class="space-y-2">
+                                    <div class="flex items-start gap-2">
+                                        <div class="w-5 h-5 rounded-full bg-rose-300 dark:bg-rose-500/40 flex-shrink-0 mt-0.5"></div>
+                                        <div class="bg-white dark:bg-white/10 rounded-lg px-2 py-1 text-[10px] text-gray-600 dark:text-gray-300">Great session on LLMs!</div>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <div class="w-5 h-5 rounded-full bg-orange-300 dark:bg-orange-500/40 flex-shrink-0 mt-0.5"></div>
+                                        <div class="bg-white dark:bg-white/10 rounded-lg px-2 py-1 text-[10px] text-gray-600 dark:text-gray-300">Very practical demos</div>
+                                    </div>
+                                    <div class="flex items-center gap-1 pt-1">
+                                        <svg class="w-3 h-3 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span class="text-rose-600 dark:text-rose-400 text-[10px]">Approved by organizer</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>

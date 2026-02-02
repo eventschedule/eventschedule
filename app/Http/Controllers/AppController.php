@@ -139,13 +139,10 @@ class AppController extends Controller
             \Artisan::call('app:send-graphic-emails');
             \Artisan::call('google:refresh-webhooks');
 
-            $currentHourUtc = (int) now('UTC')->format('H');
-            if ($currentHourUtc === 12) {
-                \Artisan::call('app:notify-request-changes');
+            \Artisan::call('app:notify-request-changes');
 
-                if (config('app.is_nexus')) {
-                    \Artisan::call('app:generate-sub-audience-blog');
-                }
+            if (config('app.hosted')) {
+                \Artisan::call('app:generate-sub-audience-blog');
             }
 
             if (! config('app.hosted')) {
