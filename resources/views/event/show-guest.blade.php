@@ -688,7 +688,7 @@
 
         {{-- Agenda --}}
         @if ($event->parts->count() > 0)
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="agenda" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
           <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-4">
             {{ __('messages.agenda') }}
           </h2>
@@ -977,6 +977,13 @@
         m.classList.add('hidden');
       }
     });
+
+    if (window.location.hash === '#agenda') {
+        const el = document.getElementById('agenda');
+        if (el) {
+            setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+        }
+    }
   </script>
 
 </x-app-guest-layout>
