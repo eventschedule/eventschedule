@@ -9,6 +9,7 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
     require $maintenance;
 }
 
+/*
 // Check if .env file exists (selfhosted setup)...
 if (! config('app.hosted') && ! file_exists(__DIR__.'/../.env')) {
     http_response_code(500);
@@ -106,6 +107,7 @@ if (! config('app.hosted') && ! file_exists(__DIR__.'/../.env')) {
 </html>';
     exit;
 }
+*/
 
 // Register the Composer autoloader...
 require __DIR__.'/../vendor/autoload.php';
