@@ -304,6 +304,7 @@
         <x-text-input name="venue_state" type="hidden" v-model="venueState" />                                                                
         <x-text-input name="venue_postal_code" type="hidden" v-model="venuePostalCode" />                                                                
         <x-text-input name="venue_country_code" type="hidden" v-model="venueCountryCode" />
+        <x-text-input name="venue_website" type="hidden" v-model="venueWebsite" />
 
         <div class="py-5">
             <div class="mx-auto lg:grid lg:grid-cols-12 lg:gap-6">
@@ -661,6 +662,13 @@
                                             </div>
                                         </div>
                                         @endif
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <x-input-label for="venue_website" :value="__('messages.website')" />
+                                        <x-text-input id="venue_website" name="venue_website" type="url"
+                                            class="mt-1 block w-full" v-model="venueWebsite" autocomplete="off" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('venue_website')" />
                                     </div>
 
                                     <div v-if="venueSearchResults.length" class="mb-6">
@@ -2016,6 +2024,7 @@
         venueState: @json($selectedVenue ? $selectedVenue->state : ''),
         venuePostalCode: @json($selectedVenue ? $selectedVenue->postal_code : ''),
         venueCountryCode: @json($selectedVenue ? $selectedVenue->country_code : ''),
+        venueWebsite: @json($selectedVenue ? $selectedVenue->website : ''),
         venueSearchEmail: "",
         venueSearchResults: [],
         selectedVenue: @json($selectedVenue ? $selectedVenue->toData() : ""),
@@ -2123,6 +2132,7 @@
         this.venueState = venue.state;
         this.venuePostalCode = venue.postal_code;
         this.venueCountryCode = venue.country_code;
+        this.venueWebsite = venue.website;
       },
       setFocusBasedOnVenueType() {
         this.$nextTick(() => {
@@ -2424,8 +2434,9 @@
             this.venueCity = '';
             this.venueState = '';
             this.venuePostalCode = '';
+            this.venueWebsite = '';
         }
-        
+
         this.savePreferences();
       },
       savePreferences() {
@@ -2678,6 +2689,7 @@
         this.venueState = this.selectedVenue ? this.selectedVenue.state : "";
         this.venuePostalCode = this.selectedVenue ? this.selectedVenue.postal_code : "";
         this.venueCountryCode = this.selectedVenue ? this.selectedVenue.country_code : "";
+        this.venueWebsite = this.selectedVenue ? this.selectedVenue.website : "";
         this.venueSearchEmail = "";
         this.venueSearchResults = [];
       },

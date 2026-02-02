@@ -112,7 +112,7 @@ class EventRepo
             $user = $currentRole->user;
         }
 
-        if ($request->venue_name || $request->venue_address1 || $request->venue_address2 || $request->venue_city || $request->venue_state || $request->venue_postal_code || $request->venue_email) {
+        if ($request->venue_name || $request->venue_address1 || $request->venue_address2 || $request->venue_city || $request->venue_state || $request->venue_postal_code || $request->venue_email || $request->venue_website) {
             if (! $venue) {
                 $venue = new Role;
                 $venue->name = $request->venue_name ?? null;
@@ -130,6 +130,7 @@ class EventRepo
                 $venue->country_code = $countryCode ? strtolower($countryCode) : null;
                 $venue->language_code = $request->venue_language_code ? $request->venue_language_code : $currentRole->language_code;
                 $venue->timezone = $currentRole->timezone;
+                $venue->website = $request->venue_website;
                 $venue->background_colors = ColorUtils::randomGradient();
                 $venue->background_rotation = rand(0, 359);
                 $venue->font_color = '#ffffff';
@@ -161,6 +162,7 @@ class EventRepo
                 $venue->state = $request->venue_state;
                 $venue->postal_code = $request->venue_postal_code;
                 $venue->country_code = $request->venue_country_code ? strtolower($request->venue_country_code) : null;
+                $venue->website = $request->venue_website;
                 $venue->save();
             }
         }
