@@ -1477,6 +1477,7 @@ class EventController extends Controller
             'success' => true,
             'message' => __('messages.agenda_saved'),
             'edit_url' => route('event.edit', ['subdomain' => $subdomain, 'hash' => UrlUtils::encodeId($event->id)]),
+            'view_url' => route('event.view_guest', ['subdomain' => $subdomain, 'slug' => $event->slug]),
         ]);
     }
 }
