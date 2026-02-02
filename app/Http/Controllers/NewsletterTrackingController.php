@@ -40,17 +40,20 @@ class NewsletterTrackingController extends Controller
         $url = base64_decode(strtr($encodedUrl, '-_', '+/'));
 
         if (! $url || ! filter_var($url, FILTER_VALIDATE_URL)) {
+            \Log::warning('Newsletter click: invalid URL', ['encodedUrl' => $encodedUrl, 'decoded' => $url]);
             abort(404);
         }
 
         $scheme = parse_url($url, PHP_URL_SCHEME);
         if (! in_array($scheme, ['http', 'https'])) {
+            \Log::warning('Newsletter click: invalid scheme', ['url' => $url, 'scheme' => $scheme]);
             abort(404);
         }
 
         $recipient = NewsletterRecipient::where('token', $token)->first();
 
         if (! $recipient) {
+            \Log::warning('Newsletter click: recipient not found', ['token' => $token]);
             abort(404);
         }
 
