@@ -2101,8 +2101,8 @@
         <div class="lg:hidden h-24"></div>
 
         <!-- Mobile Fixed Save Bar -->
-        <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 z-40 shadow-lg"
-             style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
+        <div class="lg:hidden fixed bottom-0 inset-x-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 z-40 shadow-lg"
+             style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
             @if (! $role->exists)
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-3 flex items-center justify-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0">
