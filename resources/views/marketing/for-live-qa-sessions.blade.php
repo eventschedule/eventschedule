@@ -286,8 +286,8 @@
                         <div class="bg-blue-500/20 rounded-xl border border-blue-400/30 p-3 w-20">
                             <div class="text-[10px] text-blue-700 dark:text-blue-300 mb-1 text-center">Schedule</div>
                             <div class="space-y-1">
-                                <div class="h-1.5 bg-violet-400/40 rounded text-[6px] text-white px-1">Q&A</div>
-                                <div class="h-1.5 bg-amber-400/40 rounded text-[6px] text-white px-1">Prep</div>
+                                <div class="h-1.5 bg-violet-400/80 dark:bg-violet-400/40 rounded text-[6px] text-white px-1">Q&A</div>
+                                <div class="h-1.5 bg-amber-400/80 dark:bg-amber-400/40 rounded text-[6px] text-white px-1">Prep</div>
                             </div>
                         </div>
                         <div class="flex flex-col items-center gap-0.5">
