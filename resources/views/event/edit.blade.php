@@ -1183,6 +1183,19 @@
                             </div>
                         </div>
 
+                        <div class="mt-4">
+                            <x-input-label :value="__('messages.ai_agenda_prompt')" />
+                            <textarea v-model="partsAiPrompt" rows="3" maxlength="500" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" dir="auto"
+                                placeholder="{{ __('messages.ai_agenda_prompt_placeholder') }}"></textarea>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ai_agenda_prompt_help') }}</p>
+                            <label class="flex items-center mt-2">
+                                <input type="checkbox" v-model="savePartsAiPromptDefault" class="rounded border-gray-300 dark:border-gray-700 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800" />
+                                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.save_as_default') }}</span>
+                            </label>
+                            <input type="hidden" name="agenda_ai_prompt" :value="partsAiPrompt" />
+                            <input type="hidden" name="save_ai_prompt_default" :value="savePartsAiPromptDefault ? '1' : '0'" />
+                        </div>
+
                         <!-- Preview Modal -->
                         <div v-if="showPartsPreview" class="mt-4 border border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
                             <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.preview_parts') }}</h3>
@@ -2039,7 +2052,7 @@
         sendEmailToVenue: false,
         sendEmailToMembers: {},
         sendEmailToNewMember: false,
-        eventParts: @json(isset($event->id) ? $event->parts : ($clonedParts ?? [])).map(part => ({
+        eventParts: @json($event->exists ? $event->parts : ($clonedParts ?? [])).map(part => ({
           id: part.id || '',
           name: part.name || '',
           description: part.description || '',
@@ -2051,6 +2064,8 @@
         showPartsPreview: false,
         showPartsTextInput: false,
         partsText: '',
+        partsAiPrompt: @json($event->agenda_ai_prompt ?? $role->agenda_ai_prompt ?? ''),
+        savePartsAiPromptDefault: false,
       }
     },
     methods: {
@@ -2322,6 +2337,11 @@
         this.parsingParts = true;
         const formData = new FormData();
         formData.append('parts_image', file);
+        formData.append('ai_prompt', this.partsAiPrompt);
+        formData.append('save_ai_prompt_default', this.savePartsAiPromptDefault ? '1' : '0');
+        @if($event->exists)
+        formData.append('event_id', '{{ \App\Utils\UrlUtils::encodeId($event->id) }}');
+        @endif
         formData.append('_token', '{{ csrf_token() }}');
         fetch('/{{ $subdomain }}/parse-event-parts', {
           method: 'POST',
@@ -2350,6 +2370,11 @@
         this.parsingParts = true;
         const formData = new FormData();
         formData.append('parts_text', this.partsText);
+        formData.append('ai_prompt', this.partsAiPrompt);
+        formData.append('save_ai_prompt_default', this.savePartsAiPromptDefault ? '1' : '0');
+        @if($event->exists)
+        formData.append('event_id', '{{ \App\Utils\UrlUtils::encodeId($event->id) }}');
+        @endif
         formData.append('_token', '{{ csrf_token() }}');
         fetch('/{{ $subdomain }}/parse-event-parts', {
           method: 'POST',

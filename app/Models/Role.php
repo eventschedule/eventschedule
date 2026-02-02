@@ -78,6 +78,7 @@ class Role extends Model implements MustVerifyEmail
         'caldav_sync_direction',
         'caldav_sync_token',
         'caldav_last_sync_at',
+        'agenda_ai_prompt',
         'slug_pattern',
     ];
 

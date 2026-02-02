@@ -37,6 +37,7 @@ class Event extends Model
         'recurring_end_value',
         'custom_fields',
         'custom_field_values',
+        'agenda_ai_prompt',
     ];
 
     protected $casts = [
