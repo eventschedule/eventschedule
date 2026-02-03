@@ -1,7 +1,7 @@
 @props(['currentTitle', 'section' => null, 'sectionTitle' => null, 'sectionRoute' => null])
 
 <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-sm mb-6">
-    <script type="application/ld+json">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",

@@ -225,6 +225,7 @@ return [
     'curator' => 'منظم',
     'register_curator' => 'تسجيل منظم',
     'deleted_curator' => 'تم حذف المنظم بنجاح',
+    'flyer' => 'نشرة إعلانية',
     'flyer_image' => 'صورة الإعلان',
     'event_added' => 'تمت إضافة الحدث بنجاح',
     'please_select' => 'يرجى الاختيار',

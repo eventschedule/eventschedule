@@ -226,6 +226,7 @@ return [
     'register_curator' => 'Enregistrer un Conservateur',
     'updated_curator' => 'Conservateur mis à jour avec succès',
     'deleted_curator' => 'Conservateur supprimé avec succès',
+    'flyer' => 'Flyer',
     'flyer_image' => 'Image du Flyer',
     'events_graphic' => 'Graphique des Événements',
     'graphic' => 'Graphique',

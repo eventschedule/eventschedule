@@ -364,6 +364,7 @@ return [
     'curator' => 'אוֹצֵר',
     'register_curator' => 'להרשמת אוֹצֵר',
     'deleted_curator' => 'האוֹצֵר נמחק בהצלחה',
+    'flyer' => 'פלייר',
     'flyer_image' => 'תמונת פלייר',
     'event_added' => 'האירוע נוסף בהצלחה',
     'please_select' => 'אנא בחר',

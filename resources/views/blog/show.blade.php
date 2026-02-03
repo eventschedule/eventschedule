@@ -19,7 +19,7 @@
     @endif
 
     <!-- BlogPosting Structured Data -->
-    <script type="application/ld+json">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "BlogPosting",
@@ -51,7 +51,7 @@
     </script>
 
     <!-- BreadcrumbList Structured Data -->
-    <script type="application/ld+json">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",

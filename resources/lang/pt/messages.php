@@ -467,6 +467,7 @@ return [
     'curators' => 'Curadores',
     'curator' => 'Curador',
     'register_curator' => 'Registrar curador',
+    'flyer' => 'Flyer',
     'flyer_image' => 'Imagem do flyer',
     'event_added' => 'Evento adicionado com sucesso',
     'please_select' => 'Por favor selecione',
