@@ -64,7 +64,7 @@
                             <ul class="doc-list mb-6">
                                 <li>Social media posts (Instagram, Facebook, Twitter)</li>
                                 <li>WhatsApp and Telegram messages</li>
-                                <li>Email newsletters</li>
+                                <li>Email <a href="{{ route('marketing.docs.newsletters') }}" class="text-cyan-400 hover:text-cyan-300">newsletters</a></li>
                                 <li>Website embeds</li>
                             </ul>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
@@ -316,7 +316,7 @@ https://example.com/event/summer-concert</code></pre>
                                 </table>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Ticket Information</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4"><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Ticket</a> Information</h3>
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>
@@ -495,7 +495,7 @@ https://example.com/event/summer-concert</code></pre>
                             <h2 class="doc-heading">Email Scheduling</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500/20 text-blue-300 mr-2">Enterprise Feature</span>
-                                Automatically send event graphics to your followers on a schedule.
+                                Automatically send event graphics to your followers on a schedule. For designed email campaigns with more formatting options, see <a href="{{ route('marketing.docs.newsletters') }}" class="text-cyan-400 hover:text-cyan-300">Newsletters</a>.
                             </p>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Configuration Options</h3>
@@ -542,6 +542,7 @@ https://example.com/event/summer-concert</code></pre>
                                 <li><a href="{{ route('marketing.docs.creating_events') }}" class="text-cyan-400 hover:text-cyan-300">Creating Events</a> - Add events to generate graphics for</li>
                                 <li><a href="{{ route('marketing.docs.schedule_styling') }}" class="text-cyan-400 hover:text-cyan-300">Schedule Styling</a> - Customize your schedule's appearance</li>
                                 <li><a href="{{ route('marketing.docs.analytics') }}" class="text-cyan-400 hover:text-cyan-300">Analytics</a> - Track views and engagement from shared graphics</li>
+                                <li><a href="{{ route('marketing.docs.newsletters') }}" class="text-cyan-400 hover:text-cyan-300">Newsletters</a> - Send designed email campaigns to your audience</li>
                             </ul>
                         </section>
 

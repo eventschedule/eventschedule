@@ -49,6 +49,7 @@
                         <a href="#create-event" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Create Event</a>
                         <a href="#create-sale" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Create Sale</a>
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 mt-6">Reference</div>
+                        <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                         <a href="#error-handling" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Error Handling</a>
                     </nav>
                 </aside>
@@ -59,7 +60,7 @@
                         <!-- Authentication -->
                         <section id="authentication" class="doc-section">
                             <h2 class="doc-heading">Authentication</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">All API requests must include your API key in the <code class="doc-inline-code">X-API-Key</code> header. You can generate an API key from your account settings.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">All API requests must include your API key in the <code class="doc-inline-code">X-API-Key</code> header. You can generate an API key from your <a href="{{ route('marketing.docs.account_settings') }}#api" class="text-cyan-400 hover:text-cyan-300">account settings</a>.</p>
 
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
@@ -482,6 +483,16 @@
     }
 }</code></pre>
                             </div>
+                        </section>
+
+                        <!-- See Also -->
+                        <section id="see-also" class="doc-section">
+                            <h2 class="doc-heading">See Also</h2>
+                            <ul class="doc-list">
+                                <li><a href="{{ route('marketing.docs.account_settings') }}#api" class="text-cyan-400 hover:text-cyan-300">Account Settings</a> - Enable API and manage your API key</li>
+                                <li><a href="{{ route('marketing.docs.creating_events') }}" class="text-cyan-400 hover:text-cyan-300">Creating Events</a> - Understand event fields and details</li>
+                                <li><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Selling Tickets</a> - Understand tickets and sales</li>
+                            </ul>
                         </section>
 
                         <!-- Error Handling -->

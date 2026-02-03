@@ -123,7 +123,7 @@
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
-                                <p>Auto-imported events go to your pending queue if you have "Require Approval" enabled, so you can review them before they appear publicly.</p>
+                                <p>Auto-imported events go to your pending queue if you have <a href="{{ route('marketing.docs.schedule_basics') }}#settings" class="text-cyan-400 hover:text-cyan-300">Require Approval</a> enabled, so you can review them before they appear publicly.</p>
                             </div>
                         </section>
 
@@ -148,6 +148,7 @@
                             </div>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Connecting Google Calendar</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">First, make sure you've connected your Google account in <a href="{{ route('marketing.docs.account_settings') }}#google" class="text-cyan-400 hover:text-cyan-300">Account Settings</a>. Then:</p>
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong></li>
                                 <li>Scroll to <strong class="text-gray-900 dark:text-white">Calendar Sync</strong></li>
@@ -182,6 +183,8 @@
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Send emails from your own domain (e.g., <code class="doc-inline-code">events@yourdomain.com</code>) instead of the default Event Schedule address.</p>
                                 </div>
                             </div>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Custom email settings also apply to <a href="{{ route('marketing.docs.newsletters') }}" class="text-cyan-400 hover:text-cyan-300">newsletters</a> sent from your schedule.</p>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Setting Up Custom Email</h3>
                             <ol class="doc-list doc-list-numbered mb-6">

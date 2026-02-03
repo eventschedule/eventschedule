@@ -97,7 +97,7 @@
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Stripe</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Accept credit card payments directly. Money goes straight to your Stripe account.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Accept credit card payments directly. Money goes straight to your Stripe account. Set up Stripe in <a href="{{ route('marketing.docs.account_settings') }}#payments" class="text-cyan-400 hover:text-cyan-300">Account Settings</a>.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Invoice Ninja</h4>
@@ -360,6 +360,7 @@
                                 <li><a href="{{ route('marketing.docs.event_graphics') }}" class="text-cyan-400 hover:text-cyan-300">Event Graphics</a> - Create promotional images</li>
                                 <li><a href="{{ route('marketing.docs.analytics') }}" class="text-cyan-400 hover:text-cyan-300">Analytics</a> - Track conversion rates and revenue per view</li>
                                 <li><a href="{{ route('marketing.docs.account_settings') }}" class="text-cyan-400 hover:text-cyan-300">Account Settings</a> - Set up your payment method</li>
+                                <li><a href="{{ route('marketing.docs.newsletters') }}" class="text-cyan-400 hover:text-cyan-300">Newsletters</a> - Send newsletters to promote ticket sales</li>
                             </ul>
                         </section>
 

@@ -192,7 +192,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Custom Domain</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400"><span class="text-cyan-400 text-xs font-medium">PRO</span> Use your own domain (e.g., <code class="doc-inline-code">events.yourbrand.com</code>) instead of a subdomain. Requires DNS configuration.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><span class="text-cyan-400 text-xs font-medium">PRO</span> Use your own domain (e.g., <code class="doc-inline-code">events.yourbrand.com</code>) instead of a subdomain. Requires DNS configuration. A custom domain gives your <a href="{{ route('marketing.docs.sharing') }}#schedule-url" class="text-cyan-400 hover:text-cyan-300">shared schedule URL</a> a more professional look.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Language</h4>
@@ -213,7 +213,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Accept Event Requests</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Allow others to submit events to your schedule. Perfect for:</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Allow others to submit events to your schedule. Submitted events can be reviewed in the <a href="{{ route('marketing.docs.creating_events') }}#managing" class="text-cyan-400 hover:text-cyan-300">pending queue</a>. Perfect for:</p>
                                     <ul class="text-sm text-gray-500 dark:text-gray-400 list-disc list-inside space-y-1">
                                         <li><strong class="text-gray-900 dark:text-white">Venues:</strong> Accept booking requests from bands and performers</li>
                                         <li><strong class="text-gray-900 dark:text-white">Curators:</strong> Let the community submit local events</li>
@@ -222,7 +222,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require Approval</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">When enabled, submitted events go to a pending queue for your approval before appearing publicly. Review requests in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong>.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">When enabled, submitted events go to a <a href="{{ route('marketing.docs.creating_events') }}#managing" class="text-cyan-400 hover:text-cyan-300">pending queue</a> for your approval before appearing publicly. Review requests in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong>.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Request Terms</h4>
@@ -387,7 +387,7 @@
                                 </table>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Ticket Information</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4"><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Ticket</a> Information</h3>
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>

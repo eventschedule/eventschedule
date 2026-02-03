@@ -147,11 +147,11 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Display Settings</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose your timezone, date format, and language preferences.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose your timezone, date format, and language preferences. See <a href="{{ route('marketing.docs.schedule_basics') }}#settings" class="text-cyan-400 hover:text-cyan-300">Schedule Basics</a> for all available settings.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Subschedules</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Create subschedules to organize your events (e.g., "Live Music", "DJ Nights", "Comedy").</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Create <a href="{{ route('marketing.docs.creating_schedules') }}#subschedules" class="text-cyan-400 hover:text-cyan-300">subschedules</a> to organize your events (e.g., "Live Music", "DJ Nights", "Comedy").</p>
                                 </div>
                             </div>
 
@@ -172,7 +172,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How do I change my schedule URL?</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and update the URL/subdomain field. Note that changing your URL may break existing links.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and update the URL/subdomain field. See <a href="{{ route('marketing.docs.schedule_basics') }}#settings" class="text-cyan-400 hover:text-cyan-300">Schedule Settings</a> for details. Note that changing your URL may break existing links.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">What's the difference between schedule types?</h4>
@@ -180,7 +180,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Can I import events from my existing calendar?</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Yes! Event Schedule supports Google Calendar and CalDAV sync. Connect your calendar in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> under Calendar Sync. You can also import events using AI from text or images.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Yes! Event Schedule supports <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-integrations" class="text-cyan-400 hover:text-cyan-300">Google Calendar and CalDAV sync</a>. Connect your calendar in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> under Calendar Sync. You can also <a href="{{ route('marketing.docs.creating_events') }}#ai-import" class="text-cyan-400 hover:text-cyan-300">import events using AI</a> from text or images.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Is Event Schedule free?</h4>

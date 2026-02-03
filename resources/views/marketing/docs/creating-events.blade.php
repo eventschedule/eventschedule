@@ -192,15 +192,15 @@
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Google Calendar</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect your Google Calendar for bidirectional sync. Events added in either place will appear in both.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect your Google Calendar for bidirectional sync. Events added in either place will appear in both. See <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-integrations" class="text-cyan-400 hover:text-cyan-300">Calendar Integrations</a> for setup details.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">CalDAV</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect any CalDAV-compatible calendar (Apple Calendar, Outlook, Fastmail, etc.).</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect any CalDAV-compatible calendar (Apple Calendar, Outlook, Fastmail, etc.). See <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-integrations" class="text-cyan-400 hover:text-cyan-300">Calendar Integrations</a> for setup details.</p>
                                 </div>
                             </div>
 
-                            <p class="text-gray-600 dark:text-gray-300">To set up calendar sync, go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and scroll to the Calendar Sync section.</p>
+                            <p class="text-gray-600 dark:text-gray-300">To set up calendar sync, go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and scroll to the <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-integrations" class="text-cyan-400 hover:text-cyan-300">Calendar Sync</a> section.</p>
                         </section>
 
                         <!-- Recurring Events -->
@@ -228,7 +228,7 @@
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Pro Tip: Use Google Calendar for True Recurrence</div>
-                                <p>For events with complex recurrence patterns (every Tuesday and Thursday, first Monday of the month, etc.), create a recurring event in Google Calendar and sync it to Event Schedule. The calendar sync handles all the pattern logic automatically.</p>
+                                <p>For events with complex recurrence patterns (every Tuesday and Thursday, first Monday of the month, etc.), create a recurring event in <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-integrations" class="text-cyan-400 hover:text-cyan-300">Google Calendar</a> and sync it to Event Schedule. The calendar sync handles all the pattern logic automatically.</p>
                             </div>
                         </section>
 
@@ -272,11 +272,11 @@
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Subschedule</span></td>
-                                            <td>Organize events by type (e.g., "Live Music", "Comedy")</td>
+                                            <td>Organize events by type (e.g., "Live Music", "Comedy"). See <a href="{{ route('marketing.docs.creating_schedules') }}#subschedules" class="text-cyan-400 hover:text-cyan-300">Subschedules</a></td>
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Registration URL</span></td>
-                                            <td>Link to external registration or ticketing</td>
+                                            <td>Link to external registration or <a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">ticketing</a></td>
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Members</span></td>
@@ -303,13 +303,13 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Deleting Events</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Delete events from the event edit page. <strong class="text-gray-900 dark:text-white">Warning:</strong> If the event has sold tickets, you should refund ticket holders before deleting.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Delete events from the event edit page. <strong class="text-gray-900 dark:text-white">Warning:</strong> If the event has sold tickets, you should <a href="{{ route('marketing.docs.tickets') }}#financial" class="text-cyan-400 hover:text-cyan-300">refund ticket holders</a> before deleting.</p>
                                 </div>
                             </div>
 
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Pending Events</div>
-                                <p>If you have "Require Approval" enabled, submitted events appear in a pending queue. Review them in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong> and approve or reject each one.</p>
+                                <p>If you have <a href="{{ route('marketing.docs.schedule_basics') }}#settings" class="text-cyan-400 hover:text-cyan-300">Require Approval</a> enabled, submitted events appear in a pending queue. Review them in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong> and approve or reject each one.</p>
                             </div>
                         </section>
 

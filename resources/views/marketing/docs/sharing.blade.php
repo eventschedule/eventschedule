@@ -74,7 +74,7 @@
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Pro Feature: Custom Domain</div>
-                                <p>With a Pro plan, you can use your own domain (e.g., <code class="doc-inline-code">events.yourdomain.com</code>) for a more professional look.</p>
+                                <p>With a Pro plan, you can use your own domain (e.g., <code class="doc-inline-code">events.yourdomain.com</code>) for a more professional look. Configure this in <a href="{{ route('marketing.docs.schedule_basics') }}#settings" class="text-cyan-400 hover:text-cyan-300">Schedule Settings</a>.</p>
                             </div>
                         </section>
 
@@ -156,6 +156,8 @@
                                 <li>View follower growth over time</li>
                                 <li>Export your follower list</li>
                             </ul>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Send <a href="{{ route('marketing.docs.newsletters') }}" class="text-cyan-400 hover:text-cyan-300">newsletters</a> to your followers to keep them engaged and promote upcoming events.</p>
 
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Privacy</div>
@@ -252,6 +254,8 @@
                                 <li><a href="{{ route('marketing.docs.creating_events') }}" class="text-cyan-400 hover:text-cyan-300">Creating Events</a> - Add events to your schedule</li>
                                 <li><a href="{{ route('marketing.docs.schedule_styling') }}" class="text-cyan-400 hover:text-cyan-300">Schedule Styling</a> - Customize your schedule's look before sharing</li>
                                 <li><a href="{{ route('marketing.docs.analytics') }}" class="text-cyan-400 hover:text-cyan-300">Analytics</a> - Track how sharing drives views and engagement</li>
+                                <li><a href="{{ route('marketing.docs.newsletters') }}" class="text-cyan-400 hover:text-cyan-300">Newsletters</a> - Send newsletters to engage your followers</li>
+                                <li><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Selling Tickets</a> - Sell tickets for your events</li>
                             </ul>
                         </section>
 

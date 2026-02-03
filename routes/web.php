@@ -39,6 +39,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
 
     Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
         Route::get('/api/past-events', [RoleController::class, 'listPastEvents'])->name('role.list_past_events');
+        Route::get('/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
         Route::get('/request', [RoleController::class, 'request'])->name('role.request');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
@@ -103,6 +104,7 @@ Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view']
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/events', [HomeController::class, 'home'])->name('home');
+    Route::get('/events/api/calendar-events', [HomeController::class, 'calendarEvents'])->name('home.calendar_events');
     Route::post('/events/feedback', [HomeController::class, 'submitFeedback'])->name('home.feedback');
     Route::get('/new/{type}', [RoleController::class, 'create'])->name('new');
     Route::post('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:25,1440');
@@ -175,6 +177,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/scan', [TicketController::class, 'scan'])->name('ticket.scan');
     Route::post('/ticket/view/{event_id}/{secret}', [TicketController::class, 'scanned'])->name('ticket.scanned');
 
+    Route::get('/{subdomain}/api/admin-calendar-events', [RoleController::class, 'adminCalendarEvents'])->name('role.admin_calendar_events');
     Route::get('/{subdomain}/change-plan/{plan_type}', [RoleController::class, 'changePlan'])->name('role.change_plan');
     Route::post('/{subdomain}/availability', [RoleController::class, 'availability'])->name('role.availability');
     Route::get('/{subdomain}/edit', [RoleController::class, 'edit'])->name('role.edit');
@@ -758,6 +761,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     });
 } else {
     Route::get('/{subdomain}/api/past-events', [RoleController::class, 'listPastEvents'])->name('role.list_past_events');
+    Route::get('/{subdomain}/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
     Route::get('/{subdomain}/request', [RoleController::class, 'request'])->name('role.request');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     Route::get('/{subdomain}/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');

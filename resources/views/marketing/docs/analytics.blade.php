@@ -65,7 +65,7 @@
                                 <li>Schedule and event page views over time</li>
                                 <li>Device and browser breakdown (desktop, mobile, tablet)</li>
                                 <li>Traffic sources and referrers</li>
-                                <li>Revenue and conversion metrics (if selling tickets)</li>
+                                <li>Revenue and conversion metrics (if <a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">selling tickets</a>)</li>
                                 <li>Top-performing events and appearances</li>
                             </ul>
                             <div class="doc-callout doc-callout-info">
@@ -210,7 +210,7 @@
                                 <li>You are filtering by a schedule that has no traffic</li>
                             </ul>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                Try adjusting the date range or sharing your schedule link to start collecting analytics data.
+                                Try adjusting the date range or <a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">sharing your schedule link</a> to start collecting analytics data.
                             </p>
                         </section>
 
