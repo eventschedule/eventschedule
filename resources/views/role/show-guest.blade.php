@@ -490,6 +490,7 @@
           border-radius: 0.75rem !important;
           box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05) !important;
           border: 1px solid #d1d5db !important;
+          margin-top: 1rem;
         }
         .dark .calendar-panel-border {
           background: #252526 !important;
