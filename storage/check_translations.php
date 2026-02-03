@@ -5,6 +5,7 @@ $langFiles = [
     'resources/lang/ar/messages.php',
     'resources/lang/de/messages.php',
     'resources/lang/es/messages.php',
+    'resources/lang/et/messages.php',
     'resources/lang/fr/messages.php',
     'resources/lang/he/messages.php',
     'resources/lang/it/messages.php',
