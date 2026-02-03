@@ -427,7 +427,7 @@
         @endphp
         @foreach($upcomingEventsWithVideos as $eventData)
         @endforeach
-        <div class="bg-white dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto" :style="{ maxWidth: listView ? '56rem' : '200rem' }">
           <!-- Carousel Container -->
           <div class="relative group">
             <!-- Carousel Track -->
@@ -540,7 +540,7 @@
         @endphp
         @if ($videoCount > 0)
           <div
-              class="bg-white dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
+              class="bg-white dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto" :style="{ maxWidth: listView ? '56rem' : '200rem' }"
             >
               <div class="grid grid-cols-1 md:grid-cols-{{ $gridCols }} gap-8">
               @foreach ($videoLinks as $link)

@@ -255,6 +255,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/plans/{role}/edit', [AdminController::class, 'editPlan'])->name('admin.plans.edit');
         Route::put('/admin/plans/{role}', [AdminController::class, 'updatePlan'])->name('admin.plans.update');
 
+        // Admin queue routes
+        Route::get('/admin/queue', [AdminController::class, 'queue'])->name('admin.queue');
+        Route::post('/admin/queue/retry/{id}', [AdminController::class, 'queueRetry'])->name('admin.queue.retry');
+        Route::post('/admin/queue/delete/{id}', [AdminController::class, 'queueDelete'])->name('admin.queue.delete');
+        Route::post('/admin/queue/retry-all', [AdminController::class, 'queueRetryAll'])->name('admin.queue.retry-all');
+        Route::post('/admin/queue/clear-failed', [AdminController::class, 'queueClearFailed'])->name('admin.queue.clear-failed');
+        Route::post('/admin/queue/flush-pending', [AdminController::class, 'queueFlushPending'])->name('admin.queue.flush-pending');
+
         // Admin blog routes
         Route::get('/admin/blog', [BlogController::class, 'adminIndex'])->name('blog.admin.index');
         Route::get('/admin/blog/create', [BlogController::class, 'create'])->name('blog.create');
