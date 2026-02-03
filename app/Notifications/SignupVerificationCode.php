@@ -2,17 +2,15 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Notifications\Notification;
 use Illuminate\Queue\SerializesModels;
 
+// This notification must NOT implement ShouldQueue - user is waiting for the verification code
 class SignupVerificationCode extends Notification
 {
-    use Queueable;
-
     protected $code;
 
     /**

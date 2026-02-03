@@ -19,8 +19,6 @@
   <main>
     <div>
       <div class="container mx-auto pt-6 md:pt-4 pb-6 md:pb-10 px-5 md:mt-0 relative z-10"
-        x-data="{ listView: '{{ $role->event_layout ?? 'calendar' }}' === 'list' }"
-        x-init="window.addEventListener('calendar-view-changed', e => listView = e.detail === 'list')"
       >
         {{-- Mobile background wrapper - covers header and carousel only --}}
         @php
@@ -36,8 +34,9 @@
             <div class="absolute -top-40 bottom-0 left-1/2 -translate-x-1/2 w-screen bg-cover bg-no-repeat bg-top md:hidden -z-10"
                  style="background-image: url('{{ $mobileBannerUrl }}');"></div>
         @endif
-        <div class="bg-white dark:bg-gray-800 rounded-xl mb-3 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} transition-[max-width] duration-300 ease-in-out mx-auto"
-          :style="{ maxWidth: listView ? '56rem' : '200rem' }"
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl mb-3 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} transition-[max-width] duration-300 ease-in-out mx-auto"
+          data-view-width
+          style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
         >
           <div
             class="relative overflow-hidden rounded-t-xl before:block before:absolute before:bg-[#00000033] before:-inset-0 before:rounded-t-xl"
@@ -57,7 +56,7 @@
           </div>
           <div id="schedule-header" class="px-6 lg:px-16 pb-4 relative z-10 {{ $isRtl ? 'rtl' : '' }}">
             @if ($role->profile_image_url)
-            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] {{ $isRtl ? '-mr-2 sm:ml-auto sm:mr-0' : '-ml-2' }} mb-3 sm:mb-6 bg-white dark:bg-gray-800 flex items-center justify-center">
+            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] {{ $isRtl ? '-mr-2 sm:ml-auto sm:mr-0' : '-ml-2' }} mb-3 sm:mb-6 bg-white dark:bg-gray-900 flex items-center justify-center">
               <img
                 class="rounded-md w-[120px] h-[120px] object-cover"
                 src="{{ $role->profile_image_url }}"
@@ -87,6 +86,7 @@
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z"/>
                   </svg>
                   {{ $role->shortAddress() }}
+                  <svg class="ml-1 h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                 </a>
                 @endif
               </div>
@@ -185,6 +185,7 @@
               {{-- Description below --}}
               @if($role->translatedDescription())
               <div class="text-start w-full mt-2">
+                @if(str_word_count(strip_tags($role->translatedDescription())) > 5)
                 <div x-data="{ expanded: false }" class="text-sm text-[#33383C] dark:text-gray-300">
                   <span x-show="!expanded" class="description-collapsed">
                     {{ Str::words(strip_tags($role->translatedDescription()), 5, '') }}...
@@ -201,6 +202,11 @@
                     </button>
                   </div>
                 </div>
+                @else
+                <div class="text-sm text-[#33383C] dark:text-gray-300 custom-content [&>*:first-child]:mt-0">
+                  {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
+                </div>
+                @endif
               </div>
               @endif
             </div>
@@ -222,6 +228,7 @@
                       <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z"/>
                     </svg>
                     {{ $role->shortAddress() }}
+                    <svg class="ml-1 h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                   </a>
                   @endif
                 </div>
@@ -231,21 +238,21 @@
 
                 {{-- Calendar/List View Toggle (desktop only, not on single event pages) --}}
                 @if(!$event)
-                <div x-data="{ heroView: '{{ $role->event_layout ?? 'calendar' }}' }"
-                     x-init="window.addEventListener('calendar-view-changed', e => heroView = e.detail)"
-                     class="hidden md:flex items-center rounded-md shadow-sm">
-                    <button @click="heroView = 'list'; if(window.calendarVueApp) window.calendarVueApp.toggleView('list')"
-                            :class="heroView === 'list' ? '' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
-                            :style="heroView === 'list' ? 'background-color: {{ $accentColor }}; color: {{ $contrastColor }}' : ''"
-                            class="w-10 h-10 flex items-center justify-center rounded-s-md border border-gray-300 dark:border-gray-600 transition-colors">
+                <div class="hidden md:flex items-center rounded-md shadow-sm">
+                    <button id="toggle-list-btn"
+                            onclick="if(window.calendarVueApp) window.calendarVueApp.toggleView('list')"
+                            data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
+                            class="w-10 h-10 flex items-center justify-center rounded-s-md border border-gray-300 dark:border-gray-600 transition-colors {{ ($role->event_layout ?? 'calendar') === 'list' ? '' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}"
+                            style="{{ ($role->event_layout ?? 'calendar') === 'list' ? 'background-color: ' . $accentColor . '; color: ' . $contrastColor : '' }}">
                         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M3,4H7V8H3V4M9,5V7H21V5H9M3,10H7V14H3V10M9,11V13H21V11H9M3,16H7V20H3V16M9,17V19H21V17H9"/>
                         </svg>
                     </button>
-                    <button @click="heroView = 'calendar'; if(window.calendarVueApp) window.calendarVueApp.toggleView('calendar')"
-                            :class="heroView === 'calendar' ? '' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
-                            :style="heroView === 'calendar' ? 'background-color: {{ $accentColor }}; color: {{ $contrastColor }}' : ''"
-                            class="w-10 h-10 flex items-center justify-center rounded-e-md border border-s-0 border-gray-300 dark:border-gray-600 transition-colors">
+                    <button id="toggle-calendar-btn"
+                            onclick="if(window.calendarVueApp) window.calendarVueApp.toggleView('calendar')"
+                            data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
+                            class="w-10 h-10 flex items-center justify-center rounded-e-md border border-s-0 border-gray-300 dark:border-gray-600 transition-colors {{ ($role->event_layout ?? 'calendar') === 'calendar' ? '' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}"
+                            style="{{ ($role->event_layout ?? 'calendar') === 'calendar' ? 'background-color: ' . $accentColor . '; color: ' . $contrastColor : '' }}">
                         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
                         </svg>
@@ -344,6 +351,7 @@
 
               {{-- Description below (full width) --}}
               @if($role->translatedDescription())
+              @if(str_word_count(strip_tags($role->translatedDescription())) > 5)
               <div x-data="{ expanded: false }" class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
                 <span x-show="!expanded" class="description-collapsed">
                   {{ Str::words(strip_tags($role->translatedDescription()), 5, '') }}...
@@ -360,6 +368,11 @@
                   </button>
                 </div>
               </div>
+              @else
+              <div class="mt-2 text-sm text-[#33383C] dark:text-gray-300 custom-content [&>*:first-child]:mt-0">
+                {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
+              </div>
+              @endif
               @endif
             </div>
             <!--
@@ -427,14 +440,14 @@
         @endphp
         @foreach($upcomingEventsWithVideos as $eventData)
         @endforeach
-        <div class="bg-white dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6">
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}">
           <!-- Carousel Container -->
           <div class="relative group">
             <!-- Carousel Track -->
             <div id="events-carousel" class="flex overflow-x-auto scrollbar-hide gap-6 pb-4 pt-4 {{ $isRtl ? 'rtl' : '' }}">
               @foreach($upcomingEventsWithVideos as $eventData)
                 @foreach($eventData['video_roles'] as $videoRole)
-                  <div class="carousel-item flex-shrink-0 w-full sm:w-80 bg-white rounded-xl shadow-md overflow-hidden group/card">
+                  <div class="carousel-item flex-shrink-0 w-full sm:w-80 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden group/card">
                     <!-- Video iframe -->
                     <iframe
                       class="w-full h-48 object-cover"
@@ -450,13 +463,13 @@
                     <!-- Event details below video -->
                     <div class="p-4">
                       <a href="{{ $eventData['event']->getGuestUrl($role->subdomain) }}" class="block">
-                        <h3 class="text-gray-900 font-semibold text-lg mb-2 line-clamp-1 group-hover/card:text-blue-600 transition-colors duration-200">
+                        <h3 class="text-gray-900 dark:text-gray-100 font-semibold text-lg mb-2 line-clamp-1 group-hover/card:text-blue-600 transition-colors duration-200">
                           {{ $eventData['event']->translatedName() }}
                         </h3>
-                        <p class="text-gray-600 text-sm mb-1 group-hover/card:text-gray-700 transition-colors duration-200">
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-1 group-hover/card:text-gray-700 dark:group-hover/card:text-gray-300 transition-colors duration-200">
                           {{ $eventData['event']->getVenueDisplayName() }}
                         </p>
-                        <p class="text-gray-500 text-xs group-hover/card:text-gray-600 transition-colors duration-200">
+                        <p class="text-gray-500 dark:text-gray-400 text-xs group-hover/card:text-gray-600 dark:group-hover/card:text-gray-300 transition-colors duration-200">
                           {{ $eventData['event']->localStartsAt(true, request()->date) }}
                         </p>
                       </a>
@@ -467,13 +480,13 @@
             </div>
             
             <!-- Navigation arrows -->
-            <button id="carousel-prev" aria-label="Previous" class="absolute {{ $isRtl ? 'right-2' : 'left-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-20">
-              <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button id="carousel-prev" aria-label="Previous" class="absolute {{ $isRtl ? 'right-2' : 'left-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-20">
+              <svg class="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $isRtl ? 'M9 5l7 7-7 7' : 'M15 19l-7-7 7-7' }}"></path>
               </svg>
             </button>
-            <button id="carousel-next" aria-label="Next" class="absolute {{ $isRtl ? 'left-2' : 'right-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-20">
-              <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button id="carousel-next" aria-label="Next" class="absolute {{ $isRtl ? 'left-2' : 'right-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-20">
+              <svg class="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $isRtl ? 'M15 19l-7-7 7-7' : 'M9 5l7 7-7 7' }}"></path>
               </svg>
             </button>
@@ -491,15 +504,13 @@
 
       <style {!! nonce_attr() !!}>
         .calendar-panel-border {
-          background: white !important;
-          border-radius: 0.75rem !important;
-          box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05) !important;
-          border: 1px solid #d1d5db !important;
+          background: rgba(255,255,255,0.95) !important;
+          backdrop-filter: blur(4px) !important;
+          border-radius: 1rem !important;
           margin-top: 1rem;
         }
         .dark .calendar-panel-border {
-          background: #252526 !important;
-          border-color: #2d2d30 !important;
+          background: rgba(30,30,30,0.95) !important;
         }
         .calendar-panel-border-transparent {
           background: transparent !important;
@@ -522,9 +533,10 @@
       </style>
 
       <div
-        class="calendar-panel-border mb-6 px-0 md:px-6 lg:px-16 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
+        class="calendar-panel-border mb-6 px-0 md:px-6 lg:px-16 pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
         id="calendar-panel-wrapper"
-        :style="{ maxWidth: listView ? '56rem' : '200rem' }"
+        data-view-width
+        style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
       >
         @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'eventLayout' => $role->event_layout ?? 'calendar', 'pastEvents' => $pastEvents ?? collect()])
       </div>
@@ -540,12 +552,12 @@
         @endphp
         @if ($videoCount > 0)
           <div
-              class="bg-white dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
+              class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
             >
               <div class="grid grid-cols-1 md:grid-cols-{{ $gridCols }} gap-8">
               @foreach ($videoLinks as $link)
               @if ($link)
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
                   <iframe class="w-full" style="height:{{ $role->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" title="{{ $role->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                 </div>
               @endif
@@ -609,6 +621,10 @@
 #carousel-prev:hover,
 #carousel-next:hover {
   background-color: white !important;
+}
+.dark #carousel-prev:hover,
+.dark #carousel-next:hover {
+  background-color: rgb(31 41 55) !important;
 }
 
 /* Disabled state for navigation buttons */
@@ -786,17 +802,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // For RTL, we don't need to set initial scroll position since scrollBy will work correctly
-        if (isRtl && carouselItems.length > 1) {
-            console.log('RTL carousel initialized');
-        }
-        
-        // Debug logging
-        console.log('Carousel initialized:', {
-            isRtl: isRtl,
-            itemCount: carouselItems.length,
-            scrollWidth: carousel.scrollWidth,
-            clientWidth: carousel.clientWidth
-        });
     }
 });
 </script>

@@ -138,7 +138,7 @@
     </nav>
 </header>
 
-<script>
+<script {!! nonce_attr() !!}>
 function toggleMobileMenu() {
     const menu = document.getElementById('mobile-menu');
     const button = document.getElementById('mobile-menu-button');
