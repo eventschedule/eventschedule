@@ -85,12 +85,12 @@
             'comment_count' => $event->approved_comments_count ?? 0,
             'venue_profile_image' => $event->venue?->profile_image_url ?: null,
             'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && $event->venue->getAttributes()['header_image'] !== 'none') ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
-            'venue_guest_url' => $event->venue?->getGuestUrl() ?: null,
+            'venue_guest_url' => ($event->venue && isset($role) && $event->venue->subdomain === $role->subdomain) ? null : ($event->venue?->getGuestUrl() ?: null),
             'talent' => $event->roles->filter(fn($r) => $r->type === 'talent')->map(fn($r) => [
                 'name' => $r->name,
                 'profile_image' => $r->profile_image_url ?: null,
                 'header_image' => ($r->getAttributes()['header_image'] && $r->getAttributes()['header_image'] !== 'none') ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
-                'guest_url' => $r->getGuestUrl() ?: null,
+                'guest_url' => (isset($role) && $r->subdomain === $role->subdomain) ? null : ($r->getGuestUrl() ?: null),
             ])->values()->toArray(),
             'videos' => $event->relationLoaded('approvedVideos') ? $event->approvedVideos->take(3)->map(fn($v) => [
                 'youtube_url' => $v->youtube_url,
@@ -577,7 +577,7 @@
                                                 <a v-if="t.guest_url" :href="t.guest_url" class="text-base text-gray-600 dark:text-gray-300 hover:opacity-80 hover:underline transition-opacity truncate" v-text="t.name"></a>
                                                 <span v-else class="text-base text-gray-600 dark:text-gray-300 truncate" v-text="t.name"></span>
                                             </template>
-                                            <svg class="w-5 h-5 flex-shrink-0 fill-gray-900 dark:fill-gray-100 opacity-70" :class="isRtl ? 'scale-x-[-1]' : ''" viewBox="0 0 24 24" aria-hidden="true">
+                                            <svg v-if="event.talent.some(t => t.guest_url)" class="w-5 h-5 flex-shrink-0 fill-gray-900 dark:fill-gray-100 opacity-70" :class="isRtl ? 'scale-x-[-1]' : ''" viewBox="0 0 24 24" aria-hidden="true">
                                                 <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                                             </svg>
                                         </div>
@@ -768,7 +768,7 @@
                                             <a v-if="t.guest_url" :href="t.guest_url" class="text-base text-gray-600 dark:text-gray-300 hover:opacity-80 hover:underline transition-opacity truncate" v-text="t.name"></a>
                                             <span v-else class="text-base text-gray-600 dark:text-gray-300 truncate" v-text="t.name"></span>
                                         </template>
-                                        <svg class="w-5 h-5 flex-shrink-0 fill-gray-900 dark:fill-gray-100 opacity-70" :class="isRtl ? 'scale-x-[-1]' : ''" viewBox="0 0 24 24" aria-hidden="true">
+                                        <svg v-if="event.talent.some(t => t.guest_url)" class="w-5 h-5 flex-shrink-0 fill-gray-900 dark:fill-gray-100 opacity-70" :class="isRtl ? 'scale-x-[-1]' : ''" viewBox="0 0 24 24" aria-hidden="true">
                                             <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                                         </svg>
                                     </div>
