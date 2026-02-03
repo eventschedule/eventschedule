@@ -315,7 +315,6 @@ class CalDAVService
                     if ($newUid) {
                         $event->setCalDAVEventUidForRole($role->id, $newUid);
                         $results['created']++;
-                        UsageTrackingService::track(UsageTrackingService::CALDAV_SYNC, $role->id);
                     } else {
                         $results['errors']++;
                     }
