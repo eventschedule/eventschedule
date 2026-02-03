@@ -73,7 +73,7 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Self-hosted</span></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Selfhosted</span></td>
                                             <td>Path-based <code class="doc-inline-code">/schedule-name/...</code></td>
                                             <td>Single organization or personal use</td>
                                         </tr>

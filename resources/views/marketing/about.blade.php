@@ -169,7 +169,7 @@
                     Free and open source
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-                    Event Schedule is AAL licensed. Selfhost on your own server, contribute to the codebase, or just use it free forever.
+                    Event Schedule is open source under the Attribution Assurance License (AAL). Selfhost on your own server, contribute to the codebase, or just use it free forever.
                 </p>
 
                 <div class="flex flex-wrap justify-center gap-4">
