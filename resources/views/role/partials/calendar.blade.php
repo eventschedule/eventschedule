@@ -142,8 +142,12 @@
     // Calculate filter count for mobile display logic
     $filterCount = 0;
     if (isset($role) && $role->groups && $role->groups->count() > 1) $filterCount++;
-    if (count($uniqueCategoryIds ?? []) > 0) $filterCount++;
+    if (count($uniqueCategoryIds ?? []) > 1) $filterCount++;
     if ($hasOnlineEvents) $filterCount++;
+
+    $hasDesktopFilters = (isset($role) && $role->groups && $role->groups->count() > 1)
+        || count($uniqueCategoryIds ?? []) > 1
+        || $hasOnlineEvents;
 
     $accentColor = isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA';
     $contrastColor = accent_contrast_color($accentColor);
@@ -153,7 +157,7 @@
 <div>
 
 @if (! request()->graphic)
-<header class="{{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}" :class="currentView === 'list' ? 'pt-0 pb-0' : 'pt-2 pb-4'">
+<header class="{{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}" :class="currentView === 'list' ? '{{ $hasDesktopFilters ? 'pt-2 pb-4' : 'pt-0 pb-0' }}' : 'pt-2 pb-4'">
     {{-- Main container: Stacks content on mobile, aligns in a row on desktop. --}}
     <div class="flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-4">
 
@@ -179,7 +183,7 @@
                 @endif
 
                 {{-- Category Select --}}
-                @if(count($uniqueCategoryIds ?? []) > 0)
+                @if(count($uniqueCategoryIds ?? []) > 1)
                     <select v-model="selectedCategory" style="font-family: sans-serif" class="py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 min-w-[180px] hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
                         <option value="">{{ __('messages.all_categories') }}</option>
                         <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
@@ -200,13 +204,13 @@
             <div class="md:hidden flex flex-col gap-2 w-full">
                 @if($filterCount == 1)
                     {{-- Single filter: show directly without button --}}
-                    @if($hasOnlineEvents && !(isset($role) && $role->groups && $role->groups->count() > 1) && count($uniqueCategoryIds ?? []) == 0)
+                    @if($hasOnlineEvents && !(isset($role) && $role->groups && $role->groups->count() > 1) && count($uniqueCategoryIds ?? []) <= 1)
                         {{-- Only online filter --}}
                         <label class="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
                             <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
                             <span class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.online') }}</span>
                         </label>
-                    @elseif(isset($role) && $role->groups && $role->groups->count() > 1 && !$hasOnlineEvents && count($uniqueCategoryIds ?? []) == 0)
+                    @elseif(isset($role) && $role->groups && $role->groups->count() > 1 && !$hasOnlineEvents && count($uniqueCategoryIds ?? []) <= 1)
                         {{-- Only schedule filter --}}
                         <select v-model="selectedGroup" style="font-family: sans-serif" class="w-full py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
                             <option value="">{{ __('messages.all_schedules') }}</option>
@@ -214,7 +218,7 @@
                                 <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
                             @endforeach
                         </select>
-                    @elseif(count($uniqueCategoryIds ?? []) > 0 && !$hasOnlineEvents && !(isset($role) && $role->groups && $role->groups->count() > 1))
+                    @elseif(count($uniqueCategoryIds ?? []) > 1 && !$hasOnlineEvents && !(isset($role) && $role->groups && $role->groups->count() > 1))
                         {{-- Only category filter --}}
                         <select v-model="selectedCategory" style="font-family: sans-serif" class="w-full py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
                             <option value="">{{ __('messages.all_categories') }}</option>
@@ -513,7 +517,15 @@
         <div v-show="currentView === 'list'" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Upcoming Events --}}
             <div v-if="allListEvents.length" class="space-y-4">
-                <template v-for="event in allListEvents" :key="'list-' + event.uniqueKey">
+                <template v-for="(event, eventIndex) in allListEvents" :key="'list-' + event.uniqueKey">
+                    <div v-if="event._isPast && (eventIndex === 0 || !allListEvents[eventIndex - 1]._isPast)"
+                         class="py-4 flex items-center gap-4">
+                        <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-full px-4 py-1 bg-white dark:bg-gray-800">
+                            {{ __('messages.past_events') }}
+                        </span>
+                        <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                    </div>
                     <div @click="navigateToEvent(event, $event)" class="block cursor-pointer">
                         <div class="rounded-2xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white dark:bg-gray-800">
                             {{-- Side-by-side layout when flyer image exists --}}
@@ -696,7 +708,7 @@
                                         </form>
                                     </div>
                                     {{-- Flyer Image Column --}}
-                                    <div class="md:w-[38%] md:flex-shrink-0">
+                                    <div class="md:w-[35%] md:flex-shrink-0">
                                         <img :src="event.image_url" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name">
                                     </div>
                                 </div>
@@ -922,6 +934,15 @@
             {{-- All events grouped by date --}}
             <div v-if="allMobileListGroups.length > 0" class="space-y-6">
                 <template v-for="(group, groupIndex) in allMobileListGroups" :key="'list-m-' + group.date">
+                    {{-- Past Events Divider --}}
+                    <div v-if="group.events.every(e => e._isPast) && (groupIndex === 0 || !allMobileListGroups[groupIndex - 1].events.every(e => e._isPast))"
+                         class="py-1 flex items-center gap-4">
+                        <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-full px-4 py-1 bg-white dark:bg-gray-800">
+                            {{ __('messages.past_events') }}
+                        </span>
+                        <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                    </div>
                     {{-- Date Header --}}
                     <div class="sticky top-0 z-10 -mx-4 px-4 bg-white dark:bg-gray-800">
                         <div class="px-4 pb-5 pt-3 flex items-center gap-4">
@@ -1051,7 +1072,7 @@
         @endif
 
         {{-- Category Filter --}}
-        @if(count($uniqueCategoryIds ?? []) > 0)
+        @if(count($uniqueCategoryIds ?? []) > 1)
         <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.category') }}</label>
             <select v-model="selectedCategory" style="font-family: sans-serif"

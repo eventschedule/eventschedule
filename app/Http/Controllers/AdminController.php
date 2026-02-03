@@ -16,6 +16,7 @@ use App\Services\DemoService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Laravel\Cashier\Subscription;
 
@@ -1139,5 +1140,174 @@ class AdminController extends Controller
         $role->save();
 
         return redirect()->route('admin.plans')->with('success', 'Plan updated successfully for '.$role->name);
+    }
+
+    /**
+     * Display the admin queue management page.
+     */
+    public function queue()
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // Count totals
+        $pendingJobsCount = DB::table('jobs')->count();
+        $failedJobsCount = DB::table('failed_jobs')->count();
+        $jobBatchesCount = DB::table('job_batches')->count();
+
+        // Oldest pending job age
+        $oldestPendingJob = DB::table('jobs')->orderBy('created_at')->first();
+        $oldestJobAge = $oldestPendingJob ? Carbon::createFromTimestamp($oldestPendingJob->created_at) : null;
+
+        // Group pending jobs by queue
+        $pendingByQueue = DB::table('jobs')
+            ->select('queue', DB::raw('COUNT(*) as count'))
+            ->groupBy('queue')
+            ->orderByDesc('count')
+            ->get();
+
+        // Group pending jobs by class name
+        $pendingJobs = DB::table('jobs')->orderByDesc('id')->limit(100)->get();
+        $pendingByClass = $pendingJobs->groupBy(function ($job) {
+            return $this->extractJobClassName($job->payload);
+        })->map->count()->sortDesc();
+
+        // Parse pending jobs for table
+        $pendingJobsTable = $pendingJobs->map(function ($job) {
+            return (object) [
+                'id' => $job->id,
+                'class_name' => $this->extractJobClassName($job->payload),
+                'queue' => $job->queue,
+                'attempts' => $job->attempts,
+                'created_at' => Carbon::createFromTimestamp($job->created_at),
+                'available_at' => Carbon::createFromTimestamp($job->available_at),
+            ];
+        });
+
+        // Failed jobs for table
+        $failedJobs = DB::table('failed_jobs')->orderByDesc('failed_at')->limit(100)->get()->map(function ($job) {
+            return (object) [
+                'id' => $job->id,
+                'uuid' => $job->uuid,
+                'class_name' => $this->extractJobClassName($job->payload),
+                'queue' => $job->queue,
+                'exception' => $job->exception,
+                'exception_excerpt' => \Illuminate\Support\Str::limit($job->exception, 200),
+                'failed_at' => Carbon::parse($job->failed_at),
+            ];
+        });
+
+        // Job batches
+        $jobBatches = DB::table('job_batches')->orderByDesc('created_at')->limit(50)->get()->map(function ($batch) {
+            $progress = $batch->total_jobs > 0
+                ? round((($batch->total_jobs - $batch->pending_jobs) / $batch->total_jobs) * 100, 1)
+                : 0;
+
+            return (object) [
+                'id' => $batch->id,
+                'name' => $batch->name,
+                'total_jobs' => $batch->total_jobs,
+                'pending_jobs' => $batch->pending_jobs,
+                'failed_jobs' => $batch->failed_jobs,
+                'progress' => $progress,
+                'created_at' => Carbon::createFromTimestamp($batch->created_at),
+                'finished_at' => $batch->finished_at ? Carbon::createFromTimestamp($batch->finished_at) : null,
+            ];
+        });
+
+        return view('admin.queue', compact(
+            'pendingJobsCount',
+            'failedJobsCount',
+            'jobBatchesCount',
+            'oldestJobAge',
+            'pendingByQueue',
+            'pendingByClass',
+            'pendingJobsTable',
+            'failedJobs',
+            'jobBatches'
+        ));
+    }
+
+    /**
+     * Extract the short class name from a job payload.
+     */
+    private function extractJobClassName(string $payload): string
+    {
+        $data = json_decode($payload, true);
+
+        $className = $data['displayName'] ?? $data['data']['commandName'] ?? 'Unknown';
+
+        return class_basename($className);
+    }
+
+    /**
+     * Retry a single failed job.
+     */
+    public function queueRetry($id)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        Artisan::call('queue:retry', ['id' => [$id]]);
+
+        return redirect()->route('admin.queue')->with('success', 'Job queued for retry.');
+    }
+
+    /**
+     * Delete a single failed job.
+     */
+    public function queueDelete($id)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        Artisan::call('queue:forget', ['id' => $id]);
+
+        return redirect()->route('admin.queue')->with('success', 'Failed job deleted.');
+    }
+
+    /**
+     * Retry all failed jobs.
+     */
+    public function queueRetryAll()
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        Artisan::call('queue:retry', ['id' => ['all']]);
+
+        return redirect()->route('admin.queue')->with('success', 'All failed jobs queued for retry.');
+    }
+
+    /**
+     * Clear all failed jobs.
+     */
+    public function queueClearFailed()
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        Artisan::call('queue:flush');
+
+        return redirect()->route('admin.queue')->with('success', 'All failed jobs cleared.');
+    }
+
+    /**
+     * Flush all pending jobs.
+     */
+    public function queueFlushPending()
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        DB::table('jobs')->truncate();
+
+        return redirect()->route('admin.queue')->with('success', 'All pending jobs flushed.');
     }
 }
