@@ -18,12 +18,15 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Support light and dark mode** - Always consider both light mode and dark mode when working on UI
 - **No co-author on commits** - Do not add "Co-Authored-By: Claude" to git commit messages
 - **Never use em-dashes** - Use hyphens, "to", or "or" instead of em-dashes (—) in all written content
+- **Use "schedule" not "role", "sub-schedule" not "group"** - In the code, `Role` = schedule and `Group` = sub-schedule. Always use "schedule" and "sub-schedule" in UI text and conversations, never "role" or "group"
 
 ## Terminology
 
 - **WP** - Marketing site (from WordPress acronym)
 - **AP** - Admin portal
 - **CP** - Guest portal / Client portal
+- **Role** (code) = **schedule** (UI) - The `Role` model represents a schedule. Always refer to it as "schedule" in text
+- **Group** (code) = **sub-schedule** (UI) - The `Group` model represents a sub-schedule. Always refer to it as "sub-schedule" in text
 
 ## Brand Colors
 
@@ -97,11 +100,11 @@ Routes are defined conditionally in `routes/web.php` based on `config('app.hoste
 
 ### Core Models
 - `User` - Authentication (supports Google/Facebook OAuth via Socialite)
-- `Role` - Represents a schedule/calendar (the tenant in multi-tenant)
+- `Role` - Represents a **schedule** (called `Role` in code). The tenant in multi-tenant
 - `Event` - Event details with markdown descriptions
 - `Ticket` - Ticket types for events
 - `Sale` - Purchase records with payment tracking
-- `Group` - Event categories
+- `Group` - Represents a **sub-schedule** (called `Group` in code). Event categories within a schedule
 
 ### Frontend
 - Use Vue.js for JavaScript functionality
