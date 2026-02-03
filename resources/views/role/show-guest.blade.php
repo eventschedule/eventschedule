@@ -171,7 +171,9 @@
                   >
                     <button
                       type="button"
-                      style="border-color: {{ $role->accent_color ?? '#4E81FA' }}; color: {{ $role->accent_color ?? '#4E81FA' }}"
+                      style="border-color: {{ $accentColor }}; color: {{ $accentColor }}"
+                      onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';"
+                      onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';"
                       class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold bg-transparent border-2 transition-all duration-200 hover:scale-105 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                       {{ __('messages.manage') }}
@@ -338,7 +340,9 @@
                   >
                     <button
                       type="button"
-                      style="border-color: {{ $role->accent_color ?? '#4E81FA' }}; color: {{ $role->accent_color ?? '#4E81FA' }}"
+                      style="border-color: {{ $accentColor }}; color: {{ $accentColor }}"
+                      onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';"
+                      onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';"
                       class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold bg-transparent border-2 transition-all duration-200 hover:scale-105 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                       {{ __('messages.manage') }}
@@ -503,6 +507,18 @@
         @endif
 
       <style {!! nonce_attr() !!}>
+        @keyframes view-toggle-bounce-expand {
+            0%   { transform: scaleX(1); }
+            40%  { transform: scaleX(1.008); }
+            70%  { transform: scaleX(0.997); }
+            100% { transform: scaleX(1); }
+        }
+        @keyframes view-toggle-bounce-shrink {
+            0%   { transform: scaleX(1); }
+            40%  { transform: scaleX(0.992); }
+            70%  { transform: scaleX(1.003); }
+            100% { transform: scaleX(1); }
+        }
         .calendar-panel-border {
           background: rgba(255,255,255,0.95) !important;
           backdrop-filter: blur(4px) !important;
