@@ -1867,28 +1867,20 @@ const calendarApp = createApp({
             this.$nextTick(() => {
                 const eventLinks = document.querySelectorAll('.event-link-popup');
                 eventLinks.forEach(el => {
-                    el.addEventListener('mouseenter', (e) => {
+                    el.addEventListener('mouseenter', () => {
                         const eventId = el.getAttribute('data-event-id');
                         const event = this.allEvents.find(ev => ev.id === eventId);
                         if (event) {
-                            this.showEventPopup(event, el, e);
+                            this.showEventPopup(event, el);
                         }
                     });
                     el.addEventListener('mouseleave', () => {
                         this.hideEventPopup();
                     });
-                    el.addEventListener('mousemove', (e) => {
-                        if (this.popupTimeout) {
-                            clearTimeout(this.popupTimeout);
-                        }
-                        this.popupTimeout = setTimeout(() => {
-                            this.updatePopupPosition(e);
-                        }, 10);
-                    });
                 });
             });
         },
-        showEventPopup(event, element, e) {
+        showEventPopup(event, element) {
             // Clear any existing timeout
             if (this.popupTimeout) {
                 clearTimeout(this.popupTimeout);
@@ -1948,8 +1940,9 @@ const calendarApp = createApp({
             }
 
             // Show popup
+            this.popupElement = element;
             popup.classList.add('show');
-            this.updatePopupPosition(e, element);
+            this.updatePopupPosition();
         },
         hideEventPopup() {
             if (this.popupTimeout) {
@@ -1960,9 +1953,9 @@ const calendarApp = createApp({
                 popup.classList.remove('show');
             }
         },
-        updatePopupPosition(e, element = null) {
+        updatePopupPosition() {
             const popup = document.getElementById('event-popup');
-            if (!popup || !popup.classList.contains('show')) return;
+            if (!popup || !popup.classList.contains('show') || !this.popupElement) return;
 
             // 1. One-time setup for performance (GPU acceleration)
             if (popup.style.position !== 'fixed') {
@@ -1975,51 +1968,36 @@ const calendarApp = createApp({
                 });
             }
 
-            // 2. Throttle the update to the browser's refresh rate (rAF)
-            if (popup._ticking) return;
-            popup._ticking = true;
+            const content = popup.querySelector('.event-popup-content') || popup;
+            const rect = this.popupElement.getBoundingClientRect();
 
-            window.requestAnimationFrame(() => {
-                popup._ticking = false;
-                
-                const content = popup.querySelector('.event-popup-content') || popup;
-                
-                // 3. Cache dimensions (Layout Reads)
-                const pW = content.offsetWidth || 320;
-                const pH = content.offsetHeight || 200;
-                const vW = window.innerWidth;
-                const vH = window.innerHeight;
-                const offset = 15;
+            // 2. Cache dimensions
+            const pW = content.offsetWidth || 320;
+            const pH = content.offsetHeight || 200;
+            const vW = window.innerWidth;
+            const vH = window.innerHeight;
+            const gap = 8;
 
-                let left, top;
+            // 3. Position below the element, left-aligned
+            let left = rect.left;
+            let top = rect.bottom + gap;
 
-                // 4. Calculate Raw Position
-                if (e) {
-                    left = e.clientX + offset;
-                    top = e.clientY + offset;
-                } else if (element) {
-                    const rect = element.getBoundingClientRect();
-                    left = rect.left + rect.width / 2;
-                    top = rect.top + rect.height + offset;
-                } else {
-                    return;
-                }
+            // 4. Flip above if not enough space below
+            if (top + pH > vH - 10) {
+                top = rect.top - pH - gap;
+            }
 
-                // 5. Boundary Logic (Flip if hitting right/bottom edges)
-                if (left + pW > vW) {
-                    left = e ? e.clientX - pW - offset : left - pW - (offset * 2);
-                }
-                if (top + pH > vH) {
-                    top = e ? e.clientY - pH - offset : top - pH - (offset * 2);
-                }
+            // 5. Flip left if not enough space on the right
+            if (left + pW > vW - 10) {
+                left = rect.right - pW;
+            }
 
-                // 6. Hard Constraints (Keep inside viewport)
-                left = Math.max(10, Math.min(left, vW - pW - 10));
-                top = Math.max(10, Math.min(top, vH - pH - 10));
+            // 6. Hard Constraints (Keep inside viewport)
+            left = Math.max(10, Math.min(left, vW - pW - 10));
+            top = Math.max(10, Math.min(top, vH - pH - 10));
 
-                // 7. Apply via Transform (GPU Composite instead of Layout/Reflow)
-                popup.style.transform = `translate3d(${Math.round(left)}px, ${Math.round(top)}px, 0)`;
-            });
+            // 7. Apply via Transform (GPU Composite instead of Layout/Reflow)
+            popup.style.transform = `translate3d(${Math.round(left)}px, ${Math.round(top)}px, 0)`;
         },
         getTalentHeaderImages(event) {
             if (!event.talent) return [];
