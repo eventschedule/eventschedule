@@ -2022,6 +2022,7 @@ const calendarApp = createApp({
                 const saved = localStorage.getItem('es_view_' + this.subdomain);
                 if (saved && ['calendar', 'list'].includes(saved)) {
                     this.currentView = saved;
+                    window.dispatchEvent(new CustomEvent('calendar-view-changed', {detail: saved}));
                 }
             } catch (e) {
                 // localStorage not available
