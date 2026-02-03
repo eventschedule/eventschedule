@@ -764,7 +764,7 @@
                   @if ($myPartPendingVideos->count() > 0)
                   <div class="mt-2 space-y-2 opacity-60">
                     @foreach ($myPartPendingVideos as $video)
-                    <div class="rounded-lg overflow-hidden relative">
+                    <div id="pending-video-{{ $video->id }}" class="rounded-lg overflow-hidden relative">
                       <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
                     </div>
@@ -774,7 +774,7 @@
                   @if ($myPartPendingComments->count() > 0)
                   <div class="mt-2 space-y-1 opacity-60">
                     @foreach ($myPartPendingComments as $comment)
-                    <div class="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
+                    <div id="pending-comment-{{ $comment->id }}" class="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
                       <span><span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user->first_name ?? $comment->user->name }}</span>: {{ $comment->comment }}</span>
                       <span class="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
                     </div>
@@ -782,11 +782,11 @@
                   </div>
                   @endif
                   <div class="mt-2 flex gap-3" x-data="{ showVideo: false, showComment: false }">
-                    <button @click="showVideo = !showVideo; showComment = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
+                    <button @click="showVideo = !showVideo; showComment = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                       {{ __('messages.add_video') }}
                     </button>
-                    <button @click="showComment = !showComment; showVideo = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
+                    <button @click="showComment = !showComment; showVideo = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                       {{ __('messages.add_comment') }}
                     </button>
@@ -797,7 +797,7 @@
                         @if ($event->days_of_week && $date)
                         <input type="hidden" name="event_date" value="{{ $date }}">
                         @endif
-                        <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
+                        <input x-ref="videoInput" type="url" name="youtube_url" pattern="https?://(www\.)?((m\.)?youtube\.com|youtu\.be)/.+" title="{{ __('messages.invalid_youtube_url') }}" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
                         <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
@@ -808,7 +808,7 @@
                         @if ($event->days_of_week && $date)
                         <input type="hidden" name="event_date" value="{{ $date }}">
                         @endif
-                        <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
+                        <textarea x-ref="commentInput" name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
                         <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
@@ -867,7 +867,7 @@
                   @if ($myPartPendingVideos->count() > 0)
                   <div class="mt-2 space-y-2 opacity-60">
                     @foreach ($myPartPendingVideos as $video)
-                    <div class="rounded-lg overflow-hidden relative">
+                    <div id="pending-video-{{ $video->id }}" class="rounded-lg overflow-hidden relative">
                       <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
                     </div>
@@ -877,7 +877,7 @@
                   @if ($myPartPendingComments->count() > 0)
                   <div class="mt-2 space-y-1 opacity-60">
                     @foreach ($myPartPendingComments as $comment)
-                    <div class="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
+                    <div id="pending-comment-{{ $comment->id }}" class="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
                       <span><span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user->first_name ?? $comment->user->name }}</span>: {{ $comment->comment }}</span>
                       <span class="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
                     </div>
@@ -885,11 +885,11 @@
                   </div>
                   @endif
                   <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false }">
-                    <button @click="showVideo = !showVideo; showComment = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
+                    <button @click="showVideo = !showVideo; showComment = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                       {{ __('messages.add_video') }}
                     </button>
-                    <button @click="showComment = !showComment; showVideo = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
+                    <button @click="showComment = !showComment; showVideo = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                       {{ __('messages.add_comment') }}
                     </button>
@@ -900,7 +900,7 @@
                         @if ($event->days_of_week && $date)
                         <input type="hidden" name="event_date" value="{{ $date }}">
                         @endif
-                        <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
+                        <input x-ref="videoInput" type="url" name="youtube_url" pattern="https?://(www\.)?((m\.)?youtube\.com|youtu\.be)/.+" title="{{ __('messages.invalid_youtube_url') }}" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
                         <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
@@ -911,7 +911,7 @@
                         @if ($event->days_of_week && $date)
                         <input type="hidden" name="event_date" value="{{ $date }}">
                         @endif
-                        <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
+                        <textarea x-ref="commentInput" name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
                         <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
@@ -964,7 +964,7 @@
           @if ($myEventLevelPendingVideos->count() > 0)
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 opacity-60">
             @foreach ($myEventLevelPendingVideos as $video)
-            <div class="rounded-lg overflow-hidden relative">
+            <div id="pending-video-{{ $video->id }}" class="rounded-lg overflow-hidden relative">
               <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
               <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
             </div>
@@ -974,7 +974,7 @@
           @if ($myEventLevelPendingComments->count() > 0)
           <div class="space-y-2 mb-4 opacity-60">
             @foreach ($myEventLevelPendingComments as $comment)
-            <div class="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
+            <div id="pending-comment-{{ $comment->id }}" class="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
               <span><span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user->first_name ?? $comment->user->name }}</span>: {{ $comment->comment }}</span>
               <span class="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
             </div>
@@ -983,11 +983,11 @@
           @endif
           @if ($event->parts->count() == 0)
           <div class="flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false }">
-            <button @click="showVideo = !showVideo; showComment = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
+            <button @click="showVideo = !showVideo; showComment = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
               {{ __('messages.add_video') }}
             </button>
-            <button @click="showComment = !showComment; showVideo = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
+            <button @click="showComment = !showComment; showVideo = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
               {{ __('messages.add_comment') }}
             </button>
@@ -997,7 +997,7 @@
                 @if ($event->days_of_week && $date)
                 <input type="hidden" name="event_date" value="{{ $date }}">
                 @endif
-                <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
+                <input x-ref="videoInput" type="url" name="youtube_url" pattern="https?://(www\.)?((m\.)?youtube\.com|youtu\.be)/.+" title="{{ __('messages.invalid_youtube_url') }}" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
                 <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
               </form>
             </div>
@@ -1007,7 +1007,7 @@
                 @if ($event->days_of_week && $date)
                 <input type="hidden" name="event_date" value="{{ $date }}">
                 @endif
-                <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
+                <textarea x-ref="commentInput" name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
                 <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
               </form>
             </div>
@@ -1072,6 +1072,13 @@
             setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
         }
     }
+
+    @if (session('scroll_to'))
+    var scrollTarget = document.getElementById('{{ session('scroll_to') }}');
+    if (scrollTarget) {
+        setTimeout(() => scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+    }
+    @endif
   </script>
 
 </x-app-guest-layout>
