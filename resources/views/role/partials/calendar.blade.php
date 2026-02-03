@@ -1519,7 +1519,7 @@ const calendarApp = createApp({
         toggleView(view) {
             this.currentView = view;
             this.updatePanelWrapper(view);
-            window.dispatchEvent(new CustomEvent('calendar-view-changed', {detail: view}));
+            this.updateOuterContainers(view);
             if (this.subdomain) {
                 try {
                     localStorage.setItem('es_view_' + this.subdomain, view);
@@ -1543,6 +1543,42 @@ const calendarApp = createApp({
                     wrapper.style.paddingLeft = '';
                     wrapper.style.paddingRight = '';
                     wrapper.style.paddingBottom = '';
+                }
+            }
+        },
+        updateOuterContainers(view) {
+            const maxWidth = view === 'list' ? '56rem' : '200rem';
+            document.querySelectorAll('[data-view-width]').forEach(el => {
+                el.style.maxWidth = maxWidth;
+            });
+            const listBtn = document.getElementById('toggle-list-btn');
+            const calBtn = document.getElementById('toggle-calendar-btn');
+            const accentColor = (listBtn && listBtn.dataset.accent) || (calBtn && calBtn.dataset.accent) || '{{ $accentColor ?? "#4E81FA" }}';
+            const contrastColor = (listBtn && listBtn.dataset.contrast) || (calBtn && calBtn.dataset.contrast) || '{{ $contrastColor ?? "#FFFFFF" }}';
+            if (listBtn) {
+                if (view === 'list') {
+                    listBtn.style.backgroundColor = accentColor;
+                    listBtn.style.color = contrastColor;
+                    listBtn.className = listBtn.className.replace(/\btext-gray-700\b/g, '').replace(/\bdark:text-gray-300\b/g, '').replace(/\bhover:bg-gray-50\b/g, '').replace(/\bdark:hover:bg-gray-700\b/g, '');
+                } else {
+                    listBtn.style.backgroundColor = '';
+                    listBtn.style.color = '';
+                    if (!listBtn.className.includes('text-gray-700')) {
+                        listBtn.className += ' text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700';
+                    }
+                }
+            }
+            if (calBtn) {
+                if (view === 'calendar') {
+                    calBtn.style.backgroundColor = accentColor;
+                    calBtn.style.color = contrastColor;
+                    calBtn.className = calBtn.className.replace(/\btext-gray-700\b/g, '').replace(/\bdark:text-gray-300\b/g, '').replace(/\bhover:bg-gray-50\b/g, '').replace(/\bdark:hover:bg-gray-700\b/g, '');
+                } else {
+                    calBtn.style.backgroundColor = '';
+                    calBtn.style.color = '';
+                    if (!calBtn.className.includes('text-gray-700')) {
+                        calBtn.className += ' text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700';
+                    }
                 }
             }
         },
@@ -2022,7 +2058,7 @@ const calendarApp = createApp({
                 const saved = localStorage.getItem('es_view_' + this.subdomain);
                 if (saved && ['calendar', 'list'].includes(saved)) {
                     this.currentView = saved;
-                    window.dispatchEvent(new CustomEvent('calendar-view-changed', {detail: saved}));
+                    this.updateOuterContainers(saved);
                 }
             } catch (e) {
                 // localStorage not available
