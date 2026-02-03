@@ -226,6 +226,7 @@ return [
     'register_curator' => 'Enregistrer un Conservateur',
     'updated_curator' => 'Conservateur mis à jour avec succès',
     'deleted_curator' => 'Conservateur supprimé avec succès',
+    'flyer' => 'Flyer',
     'flyer_image' => 'Image du Flyer',
     'events_graphic' => 'Graphique des Événements',
     'graphic' => 'Graphique',
@@ -1456,4 +1457,7 @@ return [
     'camera_error' => 'Could not access camera. Please check your permissions.',
     'start_camera' => 'Start Camera',
     'select_camera' => 'Select Camera',
+    'footer_text' => 'Footer Text',
+    'edit_prompt' => 'Edit Prompt',
+    'change_camera' => 'Change Camera',
 ];

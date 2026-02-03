@@ -364,6 +364,7 @@ return [
     'curator' => 'אוֹצֵר',
     'register_curator' => 'להרשמת אוֹצֵר',
     'deleted_curator' => 'האוֹצֵר נמחק בהצלחה',
+    'flyer' => 'פלייר',
     'flyer_image' => 'תמונת פלייר',
     'event_added' => 'האירוע נוסף בהצלחה',
     'please_select' => 'אנא בחר',
@@ -1450,4 +1451,7 @@ return [
     'camera_error' => 'Could not access camera. Please check your permissions.',
     'start_camera' => 'Start Camera',
     'select_camera' => 'Select Camera',
+    'footer_text' => 'Footer Text',
+    'edit_prompt' => 'Edit Prompt',
+    'change_camera' => 'Change Camera',
 ];

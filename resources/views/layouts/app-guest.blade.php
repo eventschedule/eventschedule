@@ -195,7 +195,7 @@
                 $attendanceMode = $event->getSchemaAttendanceMode();
             @endphp
 
-            <script type="application/ld+json">
+            <script type="application/ld+json" {!! nonce_attr() !!}>
             {
                 "@context": "https://schema.org",
                 "@type": "Event",
@@ -269,7 +269,7 @@
                 }
             @endphp
 
-            <script type="application/ld+json">
+            <script type="application/ld+json" {!! nonce_attr() !!}>
             {
                 "@context": "https://schema.org",
                 "@type": {!! json_encode($schemaType, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
@@ -299,7 +299,7 @@
         @endif
 
         @if ($event && $event->exists && $event->starts_at)
-            <script type="application/ld+json">
+            <script type="application/ld+json" {!! nonce_attr() !!}>
             {
                 "@context": "https://schema.org",
                 "@type": "BreadcrumbList",
@@ -326,7 +326,7 @@
             }
             </script>
         @elseif ($role->exists)
-            <script type="application/ld+json">
+            <script type="application/ld+json" {!! nonce_attr() !!}>
             {
                 "@context": "https://schema.org",
                 "@type": "BreadcrumbList",

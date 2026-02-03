@@ -6,7 +6,7 @@
     <x-slot name="breadcrumbTitle">Pricing</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
@@ -45,7 +45,7 @@
         ]
     }
     </script>
-    <script type="application/ld+json">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "FAQPage",

@@ -225,6 +225,7 @@ return [
     'curator' => 'منظم',
     'register_curator' => 'تسجيل منظم',
     'deleted_curator' => 'تم حذف المنظم بنجاح',
+    'flyer' => 'نشرة إعلانية',
     'flyer_image' => 'صورة الإعلان',
     'event_added' => 'تمت إضافة الحدث بنجاح',
     'please_select' => 'يرجى الاختيار',
@@ -1458,4 +1459,7 @@ return [
     'camera_error' => 'Could not access camera. Please check your permissions.',
     'start_camera' => 'Start Camera',
     'select_camera' => 'Select Camera',
+    'footer_text' => 'Footer Text',
+    'edit_prompt' => 'Edit Prompt',
+    'change_camera' => 'Change Camera',
 ];

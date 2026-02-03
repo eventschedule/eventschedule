@@ -26,7 +26,7 @@
     </style>
 
     <!-- Blog ItemList Structured Data -->
-    <script type="application/ld+json">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "Blog",

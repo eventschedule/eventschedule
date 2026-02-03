@@ -249,6 +249,7 @@ return [
     'curator' => 'Curator',
     'register_curator' => 'Register Curator',
     'deleted_curator' => 'Successfully deleted curator',
+    'flyer' => 'Flyer',
     'flyer_image' => 'Flyer Image',
     'events_graphic' => 'Events Graphic',
     'graphic' => 'Graphic',
