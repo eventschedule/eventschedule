@@ -786,17 +786,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // For RTL, we don't need to set initial scroll position since scrollBy will work correctly
-        if (isRtl && carouselItems.length > 1) {
-            console.log('RTL carousel initialized');
-        }
-        
-        // Debug logging
-        console.log('Carousel initialized:', {
-            isRtl: isRtl,
-            itemCount: carouselItems.length,
-            scrollWidth: carousel.scrollWidth,
-            clientWidth: carousel.clientWidth
-        });
     }
 });
 </script>

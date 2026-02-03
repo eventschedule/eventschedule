@@ -1035,7 +1035,7 @@
     @endif
   </div>
 
-  <script>
+  <script {!! nonce_attr() !!}>
     function clearVideos(url) {
       if (confirm('{{ __("messages.are_you_sure_clear_videos") }}')) {
         window.location.href = url;
