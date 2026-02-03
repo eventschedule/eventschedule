@@ -395,6 +395,9 @@ if (config('app.is_nexus')) {
         Route::get('/docs/tickets', [MarketingController::class, 'docsTickets'])->name('marketing.docs.tickets');
         Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
         Route::get('/docs/newsletters', [MarketingController::class, 'docsNewsletters'])->name('marketing.docs.newsletters');
+        Route::get('/docs/analytics', [MarketingController::class, 'docsAnalytics'])->name('marketing.docs.analytics');
+        Route::get('/docs/account-settings', [MarketingController::class, 'docsAccountSettings'])->name('marketing.docs.account_settings');
+        Route::get('/docs/availability', [MarketingController::class, 'docsAvailability'])->name('marketing.docs.availability');
         // Selfhost section
         Route::get('/docs/selfhost', [MarketingController::class, 'docsSelfhostIndex'])->name('marketing.docs.selfhost');
         Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
@@ -504,6 +507,9 @@ if (config('app.is_nexus')) {
             Route::get('/docs/tickets', [MarketingController::class, 'docsTickets'])->name('marketing.docs.tickets');
             Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
             Route::get('/docs/newsletters', [MarketingController::class, 'docsNewsletters'])->name('marketing.docs.newsletters');
+            Route::get('/docs/analytics', [MarketingController::class, 'docsAnalytics'])->name('marketing.docs.analytics');
+            Route::get('/docs/account-settings', [MarketingController::class, 'docsAccountSettings'])->name('marketing.docs.account_settings');
+            Route::get('/docs/availability', [MarketingController::class, 'docsAvailability'])->name('marketing.docs.availability');
             // Selfhost section
             Route::get('/docs/selfhost', [MarketingController::class, 'docsSelfhostIndex'])->name('marketing.docs.selfhost');
             Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
@@ -610,6 +616,9 @@ if (config('app.is_nexus')) {
             Route::get('/docs/tickets', fn () => redirect('https://eventschedule.com/docs/tickets', 301));
             Route::get('/docs/event-graphics', fn () => redirect('https://eventschedule.com/docs/event-graphics', 301));
             Route::get('/docs/newsletters', fn () => redirect('https://eventschedule.com/docs/newsletters', 301));
+            Route::get('/docs/analytics', fn () => redirect('https://eventschedule.com/docs/analytics', 301));
+            Route::get('/docs/account-settings', fn () => redirect('https://eventschedule.com/docs/account-settings', 301));
+            Route::get('/docs/availability', fn () => redirect('https://eventschedule.com/docs/availability', 301));
             // Selfhost section
             Route::get('/docs/selfhost', fn () => redirect('https://eventschedule.com/docs/selfhost', 301));
             Route::get('/docs/selfhost/installation', fn () => redirect('https://eventschedule.com/docs/selfhost/installation', 301));
@@ -711,6 +720,9 @@ if (config('app.is_nexus')) {
     Route::get('/docs/tickets', fn () => redirect()->route('home'));
     Route::get('/docs/event-graphics', fn () => redirect()->route('home'));
     Route::get('/docs/newsletters', fn () => redirect()->route('home'));
+    Route::get('/docs/analytics', fn () => redirect()->route('home'));
+    Route::get('/docs/account-settings', fn () => redirect()->route('home'));
+    Route::get('/docs/availability', fn () => redirect()->route('home'));
     // Selfhost section
     Route::get('/docs/selfhost', fn () => redirect()->route('home'));
     Route::get('/docs/selfhost/installation', fn () => redirect()->route('home'));

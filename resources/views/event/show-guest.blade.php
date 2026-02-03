@@ -653,7 +653,7 @@
 
         {{-- Ticket section OR Description/Content --}}
         @if (request()->get('tickets') === 'true' && $event->isPro())
-        <div class="flex flex-col xl:flex-row gap-10 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-800 px-5 py-6 sm:p-8">
+        <div class="flex flex-col xl:flex-row gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-100 dark:border-gray-800 px-5 py-6 sm:p-8">
           <div class="flex-1">
             <div class="flex flex-col gap-4">
               <h2 class="text-[28px] leading-snug text-gray-900 dark:text-gray-100">
@@ -699,7 +699,7 @@
               @foreach ($event->parts as $part)
               <div class="relative mb-6 last:mb-0">
                 <div class="absolute {{ $role->isRtl() ? '-right-8' : '-left-8' }} top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-900" style="background-color: {{ $accentColor }}; box-shadow: 0 0 0 2px {{ $accentColor }}33;"></div>
-                <div class="flex flex-col bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                <div class="flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-4">
                   @if ($part->start_time)
                   <span class="text-xs font-medium mb-1 inline-flex {{ $role->isRtl() ? 'self-end' : 'self-start' }} rounded-full px-2.5 py-0.5" style="color: {{ $accentColor }}; background-color: {{ $accentColor }}10;">
                     {{ $part->start_time }}@if ($part->end_time) - {{ $part->end_time }}@endif
@@ -805,7 +805,7 @@
             {{-- Untimed setlist: numbered list --}}
             <div class="space-y-3">
               @foreach ($event->parts as $index => $part)
-              <div class="flex items-start gap-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 {{ $role->isRtl() ? 'rtl' : '' }}">
+              <div class="flex items-start gap-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-4 {{ $role->isRtl() ? 'rtl' : '' }}">
                 <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background-color: {{ $accentColor }};">{{ $index + 1 }}</span>
                 <div class="flex-1">
                   <span class="text-gray-900 dark:text-gray-100 font-medium">{{ $part->translatedName() }}</span>

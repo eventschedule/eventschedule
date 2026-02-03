@@ -491,6 +491,7 @@
                                 <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="text-cyan-400 hover:text-cyan-300">Advanced Schedule Settings</a> - Subschedules, calendar integrations, and auto-import</li>
                                 <li><a href="{{ route('marketing.docs.creating_events') }}" class="text-cyan-400 hover:text-cyan-300">Creating Events</a> - Add events to your schedule</li>
                                 <li><a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">Sharing Your Schedule</a> - Embed and share your schedule</li>
+                                <li><a href="{{ route('marketing.docs.availability') }}" class="text-cyan-400 hover:text-cyan-300">Availability Calendar</a> - Mark available and unavailable dates (Talent and Venue schedules)</li>
                             </ul>
                         </section>
 

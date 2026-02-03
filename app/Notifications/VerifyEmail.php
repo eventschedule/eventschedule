@@ -11,6 +11,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Support\Facades\URL;
 
+// This notification must NOT implement ShouldQueue - user is waiting for the verification email
 class VerifyEmail extends BaseVerifyEmail
 {
     protected $type;

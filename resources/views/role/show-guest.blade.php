@@ -34,7 +34,7 @@
             <div class="absolute -top-40 bottom-0 left-1/2 -translate-x-1/2 w-screen bg-cover bg-no-repeat bg-top md:hidden -z-10"
                  style="background-image: url('{{ $mobileBannerUrl }}');"></div>
         @endif
-        <div class="bg-white dark:bg-gray-800 rounded-xl mb-3 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} transition-[max-width] duration-300 ease-in-out mx-auto"
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl mb-3 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} transition-[max-width] duration-300 ease-in-out mx-auto"
           data-view-width
           style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
         >
@@ -56,7 +56,7 @@
           </div>
           <div id="schedule-header" class="px-6 lg:px-16 pb-4 relative z-10 {{ $isRtl ? 'rtl' : '' }}">
             @if ($role->profile_image_url)
-            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] {{ $isRtl ? '-mr-2 sm:ml-auto sm:mr-0' : '-ml-2' }} mb-3 sm:mb-6 bg-white dark:bg-gray-800 flex items-center justify-center">
+            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] {{ $isRtl ? '-mr-2 sm:ml-auto sm:mr-0' : '-ml-2' }} mb-3 sm:mb-6 bg-white dark:bg-gray-900 flex items-center justify-center">
               <img
                 class="rounded-md w-[120px] h-[120px] object-cover"
                 src="{{ $role->profile_image_url }}"
@@ -426,7 +426,7 @@
         @endphp
         @foreach($upcomingEventsWithVideos as $eventData)
         @endforeach
-        <div class="bg-white dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}">
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}">
           <!-- Carousel Container -->
           <div class="relative group">
             <!-- Carousel Track -->
@@ -490,14 +490,15 @@
 
       <style {!! nonce_attr() !!}>
         .calendar-panel-border {
-          background: white !important;
-          border-radius: 0.75rem !important;
+          background: rgba(255,255,255,0.95) !important;
+          backdrop-filter: blur(4px) !important;
+          border-radius: 1rem !important;
           box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05) !important;
           border: 1px solid #d1d5db !important;
           margin-top: 1rem;
         }
         .dark .calendar-panel-border {
-          background: #252526 !important;
+          background: rgba(17,24,39,0.95) !important;
           border-color: #2d2d30 !important;
         }
         .calendar-panel-border-transparent {
@@ -540,7 +541,7 @@
         @endphp
         @if ($videoCount > 0)
           <div
-              class="bg-white dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
+              class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
             >
               <div class="grid grid-cols-1 md:grid-cols-{{ $gridCols }} gap-8">
               @foreach ($videoLinks as $link)
