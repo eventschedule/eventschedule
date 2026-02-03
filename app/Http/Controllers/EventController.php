@@ -894,6 +894,12 @@ class EventController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->user()->isAdmin() && ! $role->isEnterprise()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
         $request->validate([
             'ai_prompt' => 'nullable|string|max:500',
         ]);
@@ -913,7 +919,6 @@ class EventController extends Controller
         }
 
         try {
-            $role = Role::subdomain($subdomain)->firstOrFail();
 
             if ($request->input('save_ai_prompt_default')) {
                 $role->agenda_ai_prompt = $aiPrompt;
@@ -1416,6 +1421,10 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        if (! auth()->user()->isAdmin() && ! $role->isEnterprise()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
         // Auto-select event: most recent event in past month with no parts
         $selectedEvent = Event::whereHas('roles', function ($query) use ($role) {
             $query->where('role_id', $role->id);
@@ -1467,6 +1476,12 @@ class EventController extends Controller
     public function saveEventParts(Request $request, $subdomain)
     {
         if (! auth()->user()->isMember($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->user()->isAdmin() && ! $role->isEnterprise()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
