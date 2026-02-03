@@ -274,11 +274,11 @@
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">All Followers</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Send to everyone who follows your schedule. Best for general announcements and event digests.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Send to everyone who follows your schedule. Best for general announcements and event digests. Learn how to <a href="{{ route('marketing.docs.sharing') }}#followers" class="text-cyan-400 hover:text-cyan-300">build your follower base</a>.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ticket Buyers</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Target people who have purchased tickets to your events. Ideal for promoting similar upcoming events.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Target people who have purchased <a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">tickets</a> to your events. Ideal for promoting similar upcoming events.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Manual</h4>
@@ -431,6 +431,7 @@
                                 <li><a href="{{ route('marketing.docs.event_graphics') }}" class="text-cyan-400 hover:text-cyan-300">Event Graphics</a> - Generate shareable images for social media</li>
                                 <li><a href="{{ route('marketing.docs.creating_events') }}" class="text-cyan-400 hover:text-cyan-300">Creating Events</a> - Add events that appear in your newsletters</li>
                                 <li><a href="{{ route('marketing.docs.analytics') }}" class="text-cyan-400 hover:text-cyan-300">Analytics</a> - Track how newsletters drive schedule views</li>
+                                <li><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Selling Tickets</a> - Set up ticketing for your events</li>
                             </ul>
                         </section>
 

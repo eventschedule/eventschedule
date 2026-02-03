@@ -110,7 +110,7 @@
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Stripe</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect your Stripe account using Stripe Connect. Payments go directly to your Stripe account with standard processing fees (2.9% + $0.30). Click "Link Stripe Account" to begin the connection process. Selfhosted users configure Stripe at the server level via environment variables rather than through account settings.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect your Stripe account using Stripe Connect. Payments go directly to your Stripe account with standard processing fees (2.9% + $0.30). Click "Link Stripe Account" to begin the connection process. <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="text-cyan-400 hover:text-cyan-300">Selfhosted users</a> configure Stripe at the server level via environment variables rather than through account settings.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Invoice Ninja</h4>
@@ -132,7 +132,7 @@
                         <section id="api" class="doc-section">
                             <h2 class="doc-heading">API Settings</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                The API settings section lets you enable programmatic access to your schedules and events (Pro plan required):
+                                The API settings section lets you enable programmatic access to your schedules and events (Pro plan required). See the <a href="{{ route('marketing.docs.developer.api') }}" class="text-cyan-400 hover:text-cyan-300">API Reference</a> for full endpoint documentation.
                             </p>
 
                             <div class="space-y-4 mb-6">
@@ -166,7 +166,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Google Calendar</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect Google Calendar to enable two-way sync between Event Schedule and Google Calendar. This is a separate integration from the Google Account login above and can be connected or disconnected independently. Events created in either platform are automatically synced to the other.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect Google Calendar to enable two-way sync between Event Schedule and Google Calendar. This is a separate integration from the Google Account login above and can be connected or disconnected independently. Events created in either platform are automatically synced to the other. Once connected, configure sync per schedule in <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-integrations" class="text-cyan-400 hover:text-cyan-300">Calendar Integrations</a>.</p>
                                 </div>
                             </div>
 

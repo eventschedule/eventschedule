@@ -10,11 +10,14 @@ use App\Models\EventVideo;
 use App\Models\Role;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
 class HomeController extends Controller
 {
+    use Traits\CalendarDataTrait;
+
     public function landing($slug = null)
     {
         if ($slug && $role = Role::whereSubdomain($slug)->first()) {
@@ -95,6 +98,11 @@ class HomeController extends Controller
             ->orderBy('starts_at')
             ->get();
 
+        // Events will be loaded via Ajax in the calendar partial
+        if (! request()->graphic) {
+            $events = collect();
+        }
+
         return view('home', compact(
             'events',
             'month',
@@ -102,6 +110,45 @@ class HomeController extends Controller
             'startOfMonth',
             'endOfMonth',
         ));
+    }
+
+    public function calendarEvents(Request $request): JsonResponse
+    {
+        $month = $request->month ?: now()->month;
+        $year = $request->year ?: now()->year;
+
+        $user = $request->user();
+        $timezone = $user->timezone ?? 'UTC';
+
+        $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
+        $endOfMonth = $startOfMonth->copy()->endOfMonth()->endOfDay();
+
+        $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+        $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
+
+        $roleIds = $user->roles()->pluck('roles.id');
+
+        $events = Event::with('roles', 'parts')
+            ->where(function ($query) use ($roleIds, $user) {
+                $query->where(function ($query) use ($roleIds) {
+                    $query->whereIn('id', function ($query) use ($roleIds) {
+                        $query->select('event_id')
+                            ->from('event_role')
+                            ->whereIn('role_id', $roleIds)
+                            ->where('is_accepted', true);
+                    });
+                })->orWhere(function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                });
+            })
+            ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
+                $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                    ->orWhereNotNull('days_of_week');
+            })
+            ->orderBy('starts_at')
+            ->get();
+
+        return $this->buildCalendarResponse($events, collect(), false, null, null, (int) $month, (int) $year, $timezone);
     }
 
     public function sitemap()
@@ -217,7 +264,7 @@ class HomeController extends Controller
         if ($returnUrl) {
             $parsedUrl = parse_url($returnUrl);
             $appHost = parse_url(config('app.url'), PHP_URL_HOST);
-            if (isset($parsedUrl['host']) && $parsedUrl['host'] !== $appHost && !str_ends_with($parsedUrl['host'], '.' . $appHost)) {
+            if (isset($parsedUrl['host']) && $parsedUrl['host'] !== $appHost && ! str_ends_with($parsedUrl['host'], '.'.$appHost)) {
                 $returnUrl = null;
             }
             $lowerUrl = strtolower(trim($returnUrl ?? ''));

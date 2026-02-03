@@ -13,118 +13,118 @@
         ? Carbon\Carbon::now(auth()->user()->timezone)->startOfDay()
         : Carbon\Carbon::now()->startOfDay();
 
-    // Always initialize as arrays
-    $eventGroupIds = [];
-    $eventCategoryIds = [];
-
-    // Create events map
-    $eventsMap = [];
-    foreach ($events as $event) {
-        $checkDate = $startOfMonth->copy();
-        // Collect group_id and category
-        if (isset($event->group_id)) {
-            $eventGroupIds[] = $event->group_id;
-        }
-        if (isset($event->category_id)) {
-            $eventCategoryIds[] = $event->category_id;
-        }
-        while ($checkDate->lte($endOfMonth)) {
-            if ($event->matchesDate($checkDate)) {
-                $dateStr = $checkDate->format('Y-m-d');
-                if (!isset($eventsMap[$dateStr])) {
-                    $eventsMap[$dateStr] = [];
-                }
-                $eventsMap[$dateStr][] = $event;
-            }
-            $checkDate->addDay();
-        }
-    }
-    
-    if (count($eventsMap) > 0) {
-        $sampleDate = array_keys($eventsMap)[0];
-    }
-    $uniqueGroupIds = array_unique($eventGroupIds);
-    $uniqueCategoryIds = array_unique($eventCategoryIds);
-    $hasOnlineEvents = collect($events)->contains(fn($event) => !empty($event->event_url));
-
-    // Helper to transform event to Vue array
     $role = $role ?? null;
     $subdomain = $subdomain ?? null;
-    $eventToVueArray = function($event) use ($role, $subdomain) {
-        $groupId = isset($role) ? $event->getGroupIdForSubdomain($role->subdomain) : null;
-        return [
-            'id' => \App\Utils\UrlUtils::encodeId($event->id),
-            'group_id' => $groupId ? \App\Utils\UrlUtils::encodeId($groupId) : null,
-            'category_id' => $event->category_id,
-            'name' => $event->translatedName(),
-            'venue_name' => $event->getVenueDisplayName(),
-            'starts_at' => $event->starts_at,
-            'days_of_week' => $event->days_of_week,
-            'local_starts_at' => $event->localStartsAt(),
-            'local_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
-            'utc_date' => $event->starts_at ? $event->getStartDateTime(null, false)->format('Y-m-d') : null,
-            'guest_url' => $event->getGuestUrl(isset($subdomain) ? $subdomain : '', ''),
-            'image_url' => $event->getImageUrl(),
-            'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
-            'edit_url' => auth()->user() && auth()->user()->canEditEvent($event)
-                ? (isset($role) ? config('app.url') . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false) : config('app.url') . route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($event->id)], false))
-                : null,
-            'recurring_end_type' => $event->recurring_end_type ?? 'never',
-            'recurring_end_value' => $event->recurring_end_value,
-            'start_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
-            'is_online' => !empty($event->event_url),
-            'description_excerpt' => Str::words(strip_tags($event->translatedDescription()), 25, '...'),
-            'duration' => $event->duration,
-            'parts' => $event->parts->map(fn($part) => [
-                'id' => \App\Utils\UrlUtils::encodeId($part->id),
-                'name' => $part->translatedName(),
-                'start_time' => $part->start_time,
-                'end_time' => $part->end_time,
-            ])->values()->toArray(),
-            'video_count' => $event->approved_videos_count ?? 0,
-            'comment_count' => $event->approved_comments_count ?? 0,
-            'venue_profile_image' => $event->venue?->profile_image_url ?: null,
-            'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && $event->venue->getAttributes()['header_image'] !== 'none') ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
-            'venue_guest_url' => ($event->venue && isset($role) && $event->venue->subdomain === $role->subdomain) ? null : ($event->venue?->getGuestUrl() ?: null),
-            'talent' => $event->roles->filter(fn($r) => $r->type === 'talent')->map(fn($r) => [
-                'name' => $r->name,
-                'profile_image' => $r->profile_image_url ?: null,
-                'header_image' => ($r->getAttributes()['header_image'] && $r->getAttributes()['header_image'] !== 'none') ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
-                'guest_url' => (isset($role) && $r->subdomain === $role->subdomain) ? null : ($r->getGuestUrl() ?: null),
-            ])->values()->toArray(),
-            'videos' => $event->relationLoaded('approvedVideos') ? $event->approvedVideos->take(3)->map(fn($v) => [
-                'youtube_url' => $v->youtube_url,
-                'thumbnail_url' => \App\Utils\UrlUtils::getYouTubeThumbnail($v->youtube_url),
-            ])->values()->toArray() : [],
-            'recent_comments' => $event->relationLoaded('approvedComments') ? $event->approvedComments->take(2)->map(fn($c) => [
-                'author' => $c->user ? ($c->user->first_name ?: 'User') : 'User',
-                'text' => Str::limit($c->comment, 80),
-            ])->values()->toArray() : [],
-            'occurrenceDate' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
-            'uniqueKey' => \App\Utils\UrlUtils::encodeId($event->id),
-            'submit_video_url' => isset($role) ? route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : null,
-            'submit_comment_url' => isset($role) ? route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : null,
-        ];
-    };
 
-    // Prepare data for Vue
-    $eventsForVue = [];
-    foreach ($events as $event) {
-        $eventsForVue[] = $eventToVueArray($event);
-    }
+    if (request()->graphic) {
+        // Keep event processing for graphic mode (calendar-graphic.blade.php uses $events directly)
+        $eventGroupIds = [];
+        $eventCategoryIds = [];
 
-    // Prepare past events for Vue (list view)
-    $pastEventsForVue = [];
-    foreach (($pastEvents ?? collect()) as $event) {
-        $pastEventsForVue[] = $eventToVueArray($event);
-    }
+        $eventsMap = [];
+        foreach ($events as $event) {
+            $checkDate = $startOfMonth->copy();
+            if (isset($event->group_id)) {
+                $eventGroupIds[] = $event->group_id;
+            }
+            if (isset($event->category_id)) {
+                $eventCategoryIds[] = $event->category_id;
+            }
+            while ($checkDate->lte($endOfMonth)) {
+                if ($event->matchesDate($checkDate)) {
+                    $dateStr = $checkDate->format('Y-m-d');
+                    if (!isset($eventsMap[$dateStr])) {
+                        $eventsMap[$dateStr] = [];
+                    }
+                    $eventsMap[$dateStr][] = $event;
+                }
+                $checkDate->addDay();
+            }
+        }
 
-    // Also pass the pre-calculated events map to Vue
-    $eventsMapForVue = [];
-    foreach ($eventsMap as $date => $eventsForDate) {
-        $eventsMapForVue[$date] = array_map(function($event) {
-            return \App\Utils\UrlUtils::encodeId($event->id);
-        }, $eventsForDate);
+        $uniqueCategoryIds = array_unique($eventCategoryIds);
+        $hasOnlineEvents = collect($events)->contains(fn($event) => !empty($event->event_url));
+
+        $eventToVueArray = function($event) use ($role, $subdomain) {
+            $groupId = isset($role) ? $event->getGroupIdForSubdomain($role->subdomain) : null;
+            return [
+                'id' => \App\Utils\UrlUtils::encodeId($event->id),
+                'group_id' => $groupId ? \App\Utils\UrlUtils::encodeId($groupId) : null,
+                'category_id' => $event->category_id,
+                'name' => $event->translatedName(),
+                'venue_name' => $event->getVenueDisplayName(),
+                'starts_at' => $event->starts_at,
+                'days_of_week' => $event->days_of_week,
+                'local_starts_at' => $event->localStartsAt(),
+                'local_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
+                'utc_date' => $event->starts_at ? $event->getStartDateTime(null, false)->format('Y-m-d') : null,
+                'guest_url' => $event->getGuestUrl(isset($subdomain) ? $subdomain : '', ''),
+                'image_url' => $event->getImageUrl(),
+                'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
+                'edit_url' => auth()->user() && auth()->user()->canEditEvent($event)
+                    ? (isset($role) ? config('app.url') . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false) : config('app.url') . route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($event->id)], false))
+                    : null,
+                'recurring_end_type' => $event->recurring_end_type ?? 'never',
+                'recurring_end_value' => $event->recurring_end_value,
+                'start_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
+                'is_online' => !empty($event->event_url),
+                'description_excerpt' => Str::words(strip_tags($event->translatedDescription()), 25, '...'),
+                'duration' => $event->duration,
+                'parts' => $event->parts->map(fn($part) => [
+                    'id' => \App\Utils\UrlUtils::encodeId($part->id),
+                    'name' => $part->translatedName(),
+                    'start_time' => $part->start_time,
+                    'end_time' => $part->end_time,
+                ])->values()->toArray(),
+                'video_count' => $event->approved_videos_count ?? 0,
+                'comment_count' => $event->approved_comments_count ?? 0,
+                'venue_profile_image' => $event->venue?->profile_image_url ?: null,
+                'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && $event->venue->getAttributes()['header_image'] !== 'none') ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
+                'venue_guest_url' => ($event->venue && isset($role) && $event->venue->subdomain === $role->subdomain) ? null : ($event->venue?->getGuestUrl() ?: null),
+                'talent' => $event->roles->filter(fn($r) => $r->type === 'talent')->map(fn($r) => [
+                    'name' => $r->name,
+                    'profile_image' => $r->profile_image_url ?: null,
+                    'header_image' => ($r->getAttributes()['header_image'] && $r->getAttributes()['header_image'] !== 'none') ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
+                    'guest_url' => (isset($role) && $r->subdomain === $role->subdomain) ? null : ($r->getGuestUrl() ?: null),
+                ])->values()->toArray(),
+                'videos' => $event->relationLoaded('approvedVideos') ? $event->approvedVideos->take(3)->map(fn($v) => [
+                    'youtube_url' => $v->youtube_url,
+                    'thumbnail_url' => \App\Utils\UrlUtils::getYouTubeThumbnail($v->youtube_url),
+                ])->values()->toArray() : [],
+                'recent_comments' => $event->relationLoaded('approvedComments') ? $event->approvedComments->take(2)->map(fn($c) => [
+                    'author' => $c->user ? ($c->user->first_name ?: 'User') : 'User',
+                    'text' => Str::limit($c->comment, 80),
+                ])->values()->toArray() : [],
+                'occurrenceDate' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
+                'uniqueKey' => \App\Utils\UrlUtils::encodeId($event->id),
+                'submit_video_url' => isset($role) ? route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : null,
+                'submit_comment_url' => isset($role) ? route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : null,
+            ];
+        };
+
+        $eventsForVue = [];
+        foreach ($events as $event) {
+            $eventsForVue[] = $eventToVueArray($event);
+        }
+
+        $pastEventsForVue = [];
+        foreach (($pastEvents ?? collect()) as $event) {
+            $pastEventsForVue[] = $eventToVueArray($event);
+        }
+
+        $eventsMapForVue = [];
+        foreach ($eventsMap as $date => $eventsForDate) {
+            $eventsMapForVue[$date] = array_map(function($event) {
+                return \App\Utils\UrlUtils::encodeId($event->id);
+            }, $eventsForDate);
+        }
+    } else {
+        // Ajax mode - event data will be loaded via fetch
+        $eventsForVue = [];
+        $eventsMapForVue = [];
+        $pastEventsForVue = [];
+        $uniqueCategoryIds = [];
+        $hasOnlineEvents = false;
     }
 
     // Prepare groups data for Vue
@@ -139,16 +139,6 @@
         }
     }
 
-    // Calculate filter count for mobile display logic
-    $filterCount = 0;
-    if (isset($role) && $role->groups && $role->groups->count() > 1) $filterCount++;
-    if (count($uniqueCategoryIds ?? []) > 1) $filterCount++;
-    if ($hasOnlineEvents) $filterCount++;
-
-    $hasDesktopFilters = (isset($role) && $role->groups && $role->groups->count() > 1)
-        || count($uniqueCategoryIds ?? []) > 1
-        || $hasOnlineEvents;
-
     $accentColor = isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA';
     $contrastColor = accent_contrast_color($accentColor);
 @endphp
@@ -157,7 +147,7 @@
 <div>
 
 @if (! request()->graphic)
-<header class="{{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}" :class="currentView === 'list' ? '{{ $hasDesktopFilters ? 'pt-2 pb-4' : 'pt-0 pb-0' }}' : 'pt-2 pb-4'">
+<header class="{{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}" :class="currentView === 'list' ? (hasDesktopFilters ? 'pt-2 pb-4' : 'pt-0 pb-0') : 'pt-2 pb-4'">
     {{-- Main container: Stacks content on mobile, aligns in a row on desktop. --}}
     <div class="flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-4">
 
@@ -170,82 +160,26 @@
         {{-- All Controls Wrapper: Groups all interactive elements. Stacks on mobile, row on desktop. --}}
         <div class="flex flex-col md:flex-row md:items-center md:ms-auto gap-3">
 
-            {{-- Schedule and Category Selects Container (desktop only, or always when in list view) --}}
-            <div :class="currentView === 'list' ? 'md:!flex' : ''" class="hidden md:flex flex-row gap-2 w-full md:w-auto">
-                {{-- Schedule Select --}}
-                @if(isset($role) && $role->groups && $role->groups->count() > 1)
-                    <select v-model="selectedGroup" style="font-family: sans-serif" class="py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 min-w-[180px] hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                        <option value="">{{ __('messages.all_schedules') }}</option>
-                        @foreach($role->groups as $group)
-                            <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
-                        @endforeach
-                    </select>
-                @endif
-
-                {{-- Category Select --}}
-                @if(count($uniqueCategoryIds ?? []) > 1)
-                    <select v-model="selectedCategory" style="font-family: sans-serif" class="py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 min-w-[180px] hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                        <option value="">{{ __('messages.all_categories') }}</option>
-                        <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
-                    </select>
-                @endif
-
-                {{-- Online Events Checkbox --}}
-                @if($hasOnlineEvents)
-                    <label class="inline-flex items-center gap-2 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
-                        <span class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.online') }}</span>
-                    </label>
-                @endif
+            {{-- Month Navigation Controls --}}
+            <div v-show="currentView === 'calendar'" class="flex items-center bg-white/95 dark:bg-gray-900/95 rounded-md shadow-sm hidden md:flex">
+                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-s-md border-s border-y border-gray-300 dark:border-gray-600 pe-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:pe-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
+                    <span class="sr-only">{{ __('messages.previous_month') }}</span>
+                    <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+                <a href="{{ $route == 'home' ? route('home') : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => now()->year, 'month' => now()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => now()->year, 'month' => now()->month]) }}" class="flex h-11 items-center justify-center border-y border-gray-300 dark:border-gray-600 px-4 text-base font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 focus:relative">
+                    <span class="h-6 flex items-center">{{ __('messages.this_month') }}</span>
+                </a>
+                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-e-md border-e border-y border-gray-300 dark:border-gray-600 ps-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:ps-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
+                    <span class="sr-only">{{ __('messages.next_month') }}</span>
+                    <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" clip-rule="evenodd" />
+                    </svg>
+                </a>
             </div>
 
-            {{-- Mobile Filters (mobile only, hidden in list view since desktop filters are shown) --}}
-            @if($filterCount > 0)
-            <div class="md:hidden flex flex-col gap-2 w-full">
-                @if($filterCount == 1)
-                    {{-- Single filter: show directly without button --}}
-                    @if($hasOnlineEvents && !(isset($role) && $role->groups && $role->groups->count() > 1) && count($uniqueCategoryIds ?? []) <= 1)
-                        {{-- Only online filter --}}
-                        <label class="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
-                            <span class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.online') }}</span>
-                        </label>
-                    @elseif(isset($role) && $role->groups && $role->groups->count() > 1 && !$hasOnlineEvents && count($uniqueCategoryIds ?? []) <= 1)
-                        {{-- Only schedule filter --}}
-                        <select v-model="selectedGroup" style="font-family: sans-serif" class="w-full py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                            <option value="">{{ __('messages.all_schedules') }}</option>
-                            @foreach($role->groups as $group)
-                                <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
-                            @endforeach
-                        </select>
-                    @elseif(count($uniqueCategoryIds ?? []) > 1 && !$hasOnlineEvents && !(isset($role) && $role->groups && $role->groups->count() > 1))
-                        {{-- Only category filter --}}
-                        <select v-model="selectedCategory" style="font-family: sans-serif" class="w-full py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                            <option value="">{{ __('messages.all_categories') }}</option>
-                            <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
-                        </select>
-                    @endif
-                @else
-                    {{-- Multiple filters: show Filters button --}}
-                    <button @click="showFiltersDrawer = true"
-                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5
-                                   border border-gray-300 dark:border-gray-600 rounded-md
-                                   bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                                   text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3H19C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z"/>
-                        </svg>
-                        {{ __('messages.filters') }}
-                        <span v-if="activeFilterCount > 0"
-                              class="ms-1 px-1.5 py-0.5 text-xs bg-[#4E81FA] text-white rounded-full">
-                            @{{ activeFilterCount }}
-                        </span>
-                    </button>
-                @endif
-            </div>
-            @endif
-
-                        {{-- Save Button --}}
+            {{-- Save Button --}}
             @if ($route == 'admin' && $role->email_verified_at)
                 @if ($tab == 'availability')
                     <x-brand-button id="saveButton" :disabled="true" class="w-full md:w-auto">
@@ -297,25 +231,45 @@
                 </div>
             @endif
 
-            {{-- Month Navigation Controls --}}
-            <div v-show="currentView === 'calendar'" class="flex items-center bg-white/95 dark:bg-gray-900/95 rounded-md shadow-sm hidden md:flex">
-                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-s-md border-s border-y border-gray-300 dark:border-gray-600 pe-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:pe-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
-                    <span class="sr-only">{{ __('messages.previous_month') }}</span>
-                    <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
-                        <path fill-rule="evenodd" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" clip-rule="evenodd" />
-                    </svg>
-                </a>
-                <a href="{{ $route == 'home' ? route('home') : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => now()->year, 'month' => now()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => now()->year, 'month' => now()->month]) }}" class="flex h-11 items-center justify-center border-y border-gray-300 dark:border-gray-600 px-4 text-base font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 focus:relative">
-                    <span class="h-6 flex items-center">{{ __('messages.this_month') }}</span>
-                </a>
-                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-e-md border-e border-y border-gray-300 dark:border-gray-600 ps-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:ps-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
-                    <span class="sr-only">{{ __('messages.next_month') }}</span>
-                    <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
-                        <path fill-rule="evenodd" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" clip-rule="evenodd" />
-                    </svg>
-                </a>
+            {{-- Mobile Filters (mobile only, hidden in list view since desktop filters are shown) --}}
+            <div v-if="dynamicFilterCount > 0" class="md:hidden flex flex-col gap-2 w-full">
+                <template v-if="dynamicFilterCount === 1">
+                    {{-- Single filter: show directly without button --}}
+                    <label v-if="hasOnlineEvents && groups.length <= 1 && uniqueCategoryIds.length <= 1" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
+                        <span class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.online') }}</span>
+                    </label>
+                    @if(isset($role) && $role->groups && $role->groups->count() > 1)
+                    <select v-if="groups.length > 1 && !hasOnlineEvents && uniqueCategoryIds.length <= 1" v-model="selectedGroup" style="font-family: sans-serif" class="w-full py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                        <option value="">{{ __('messages.all_schedules') }}</option>
+                        @foreach($role->groups as $group)
+                            <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
+                        @endforeach
+                    </select>
+                    @endif
+                    <select v-if="uniqueCategoryIds.length > 1 && !hasOnlineEvents && groups.length <= 1" v-model="selectedCategory" style="font-family: sans-serif" class="w-full py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                        <option value="">{{ __('messages.all_categories') }}</option>
+                        <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
+                    </select>
+                </template>
+                <template v-else>
+                    {{-- Multiple filters: show Filters button --}}
+                    <button @click="showFiltersDrawer = true"
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5
+                                   border border-gray-300 dark:border-gray-600 rounded-md
+                                   bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                                   text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3H19C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z"/>
+                        </svg>
+                        {{ __('messages.filters') }}
+                        <span v-if="activeFilterCount > 0"
+                              class="ms-1 px-1.5 py-0.5 text-xs bg-[#4E81FA] text-white rounded-full">
+                            @{{ activeFilterCount }}
+                        </span>
+                    </button>
+                </template>
             </div>
-
 
             {{-- Add Event Button --}}
             @if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule')
@@ -326,6 +280,31 @@
                     {{ __('messages.add_event') }}
                 </x-brand-link>
             @endif
+
+            {{-- Schedule and Category Selects Container (desktop only, or always when in list view) --}}
+            <div :class="currentView === 'list' ? 'md:!flex' : ''" class="hidden md:flex flex-row gap-2 w-full md:w-auto">
+                {{-- Schedule Select --}}
+                @if(isset($role) && $role->groups && $role->groups->count() > 1)
+                    <select v-model="selectedGroup" style="font-family: sans-serif" class="py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 min-w-[180px] hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                        <option value="">{{ __('messages.all_schedules') }}</option>
+                        @foreach($role->groups as $group)
+                            <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
+                        @endforeach
+                    </select>
+                @endif
+
+                {{-- Category Select --}}
+                    <select v-if="uniqueCategoryIds.length > 1" v-model="selectedCategory" style="font-family: sans-serif" class="py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 min-w-[180px] hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                        <option value="">{{ __('messages.all_categories') }}</option>
+                        <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
+                    </select>
+
+                {{-- Online Events Checkbox --}}
+                    <label v-if="hasOnlineEvents" class="inline-flex items-center gap-2 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
+                        <span class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.online') }}</span>
+                    </label>
+            </div>
         </div>
     </div>
 </header>
@@ -336,7 +315,13 @@
         @if (request()->graphic)
             @include('role.partials.calendar-graphic')
         @else
-        <div class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
+        <div v-if="isLoadingEvents" class="flex justify-center items-center py-20">
+            <svg class="animate-spin h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+        <div v-show="!isLoadingEvents" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
             <div
                 class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-center text-xs font-semibold leading-6 text-gray-700 dark:text-gray-300">
                 @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $day)
@@ -438,7 +423,7 @@
         @endif
 
 
-        <div v-show="currentView === 'calendar'" class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
+        <div v-show="currentView === 'calendar' && !isLoadingEvents" class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
             <div v-if="mobileEventsList.length">
                 <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden mb-4 w-full text-center">
                     {{ __('messages.show_past_events') }}
@@ -504,7 +489,7 @@
                     </template>
                 </div>
             </div>
-            <div v-else-if="{{ $tab != 'availability' ? 'true' : 'false' }}" class="py-10 text-center">
+            <div v-else-if="!isLoadingEvents && {{ $tab != 'availability' ? 'true' : 'false' }}" class="py-10 text-center">
                 <div class="text-xl text-gray-500 dark:text-gray-400">
                     {{ __('messages.no_scheduled_events') }}
                 </div>
@@ -514,7 +499,7 @@
 
 
 {{-- List View (Desktop) --}}
-        <div v-show="currentView === 'list'" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+        <div v-show="currentView === 'list' && !isLoadingEvents" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Upcoming Events --}}
             <div v-if="allListEvents.length" class="space-y-4">
                 <template v-for="(event, eventIndex) in allListEvents" :key="'list-' + event.uniqueKey">
@@ -676,15 +661,15 @@
                                               method="POST" :action="event.submit_video_url">
                                             <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                             <input v-if="event.days_of_week" type="hidden" name="event_date" :value="event.occurrenceDate">
-                                            <div class="flex items-stretch gap-2">
+                                            <div class="flex flex-col gap-2">
                                                 <select v-if="event.parts.length > 0" name="event_part_id"
-                                                        class="min-w-[10rem] text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
+                                                        class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
                                                     <option value="">{{ __('messages.general') }}</option>
                                                     <option v-for="part in event.parts" :key="part.id" :value="part.id" v-text="part.name"></option>
                                                 </select>
                                                 <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}"
-                                                       class="flex-1 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
-                                                <button type="submit" class="px-4 py-2 border border-transparent text-sm rounded-lg"
+                                                       class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
+                                                <button type="submit" class="self-start px-4 py-2 border border-transparent text-sm rounded-lg"
                                                         style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}">{{ __('messages.submit') }}</button>
                                             </div>
                                         </form>
@@ -694,15 +679,15 @@
                                               method="POST" :action="event.submit_comment_url">
                                             <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                             <input v-if="event.days_of_week" type="hidden" name="event_date" :value="event.occurrenceDate">
-                                            <div class="flex items-start gap-2">
+                                            <div class="flex flex-col gap-2">
                                                 <select v-if="event.parts.length > 0" name="event_part_id"
-                                                        class="min-w-[10rem] text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
+                                                        class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
                                                     <option value="">{{ __('messages.general') }}</option>
                                                     <option v-for="part in event.parts" :key="part.id" :value="part.id" v-text="part.name"></option>
                                                 </select>
                                                 <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000"
-                                                          class="flex-1 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
-                                                <button type="submit" class="px-4 py-2 border border-transparent text-sm rounded-lg self-start"
+                                                          class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
+                                                <button type="submit" class="self-start px-4 py-2 border border-transparent text-sm rounded-lg"
                                                         style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}">{{ __('messages.submit') }}</button>
                                             </div>
                                         </form>
@@ -867,15 +852,15 @@
                                           method="POST" :action="event.submit_video_url">
                                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                         <input v-if="event.days_of_week" type="hidden" name="event_date" :value="event.occurrenceDate">
-                                        <div class="flex items-center gap-2">
+                                        <div class="flex flex-col gap-2">
                                             <select v-if="event.parts.length > 0" name="event_part_id"
-                                                    class="min-w-[10rem] text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
+                                                    class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
                                                 <option value="">{{ __('messages.general') }}</option>
                                                 <option v-for="part in event.parts" :key="part.id" :value="part.id" v-text="part.name"></option>
                                             </select>
                                             <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}"
-                                                   class="flex-1 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
-                                            <button type="submit" class="px-4 py-2 border border-transparent text-sm rounded-lg"
+                                                   class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
+                                            <button type="submit" class="self-start px-4 py-2 border border-transparent text-sm rounded-lg"
                                                     style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}">{{ __('messages.submit') }}</button>
                                         </div>
                                     </form>
@@ -885,15 +870,15 @@
                                           method="POST" :action="event.submit_comment_url">
                                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                         <input v-if="event.days_of_week" type="hidden" name="event_date" :value="event.occurrenceDate">
-                                        <div class="flex items-start gap-2">
+                                        <div class="flex flex-col gap-2">
                                             <select v-if="event.parts.length > 0" name="event_part_id"
-                                                    class="min-w-[10rem] text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
+                                                    class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
                                                 <option value="">{{ __('messages.general') }}</option>
                                                 <option v-for="part in event.parts" :key="part.id" :value="part.id" v-text="part.name"></option>
                                             </select>
                                             <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000"
-                                                      class="flex-1 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
-                                            <button type="submit" class="px-4 py-2 border border-transparent text-sm rounded-lg self-start"
+                                                      class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
+                                            <button type="submit" class="self-start px-4 py-2 border border-transparent text-sm rounded-lg"
                                                     style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}">{{ __('messages.submit') }}</button>
                                         </div>
                                     </form>
@@ -922,7 +907,7 @@
 
 
             {{-- Empty State --}}
-            <div v-if="flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="py-10 text-center">
+            <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="py-10 text-center">
                 <div class="text-xl text-gray-500 dark:text-gray-400">
                     {{ __('messages.no_scheduled_events') }}
                 </div>
@@ -930,7 +915,7 @@
         </div>
 
         {{-- List View (Mobile) --}}
-        <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+        <div v-show="!isLoadingEvents" class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- All events grouped by date --}}
             <div v-if="allMobileListGroups.length > 0" class="space-y-6">
                 <template v-for="(group, groupIndex) in allMobileListGroups" :key="'list-m-' + group.date">
@@ -1014,7 +999,7 @@
             </div>
 
             {{-- Empty State --}}
-            <div v-if="flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="py-10 text-center">
+            <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="py-10 text-center">
                 <div class="text-xl text-gray-500 dark:text-gray-400">
                     {{ __('messages.no_scheduled_events') }}
                 </div>
@@ -1023,8 +1008,7 @@
     </div>
 
 {{-- Mobile Filters Bottom Sheet Drawer --}}
-@if($filterCount >= 2)
-<div v-if="showFiltersDrawer" class="md:hidden fixed inset-0 z-50">
+<div v-if="dynamicFilterCount >= 2 && showFiltersDrawer" class="md:hidden fixed inset-0 z-50">
     {{-- Backdrop --}}
     <div @click="showFiltersDrawer = false"
          class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity"></div>
@@ -1062,18 +1046,15 @@
         @endif
 
         {{-- Online Filter --}}
-        @if($hasOnlineEvents)
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+        <div v-if="hasOnlineEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <label class="flex items-center justify-between cursor-pointer">
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.online') }}</span>
                 <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
             </label>
         </div>
-        @endif
 
         {{-- Category Filter --}}
-        @if(count($uniqueCategoryIds ?? []) > 1)
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+        <div v-if="uniqueCategoryIds.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.category') }}</label>
             <select v-model="selectedCategory" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
@@ -1084,7 +1065,6 @@
                 </option>
             </select>
         </div>
-        @endif
 
         {{-- Done button --}}
         <div class="px-6 py-4">
@@ -1094,7 +1074,6 @@
         </div>
     </div>
 </div>
-@endif
 
 <!-- Event Popup Component -->
 <div id="event-popup" class="event-popup">
@@ -1155,10 +1134,23 @@ const calendarApp = createApp({
             showPastEvents: false,
             isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
             openVideoForm: {},
-            openCommentForm: {}
+            openCommentForm: {},
+            isLoadingEvents: {{ request()->graphic ? 'false' : 'true' }},
+            uniqueCategoryIds: @json($uniqueCategoryIds ?? []),
+            hasOnlineEvents: {{ ($hasOnlineEvents ?? false) ? 'true' : 'false' }}
         }
     },
     computed: {
+        hasDesktopFilters() {
+            return this.groups.length > 1 || this.uniqueCategoryIds.length > 1 || this.hasOnlineEvents;
+        },
+        dynamicFilterCount() {
+            let count = 0;
+            if (this.groups.length > 1) count++;
+            if (this.uniqueCategoryIds.length > 1) count++;
+            if (this.hasOnlineEvents) count++;
+            return count;
+        },
         activeFilterCount() {
             let count = 0;
             if (this.selectedGroup) count++;
@@ -1582,6 +1574,7 @@ const calendarApp = createApp({
             const accentColor = (listBtn && listBtn.dataset.accent) || (calBtn && calBtn.dataset.accent) || '{{ $accentColor ?? "#4E81FA" }}';
             const contrastColor = (listBtn && listBtn.dataset.contrast) || (calBtn && calBtn.dataset.contrast) || '{{ $contrastColor ?? "#FFFFFF" }}';
             if (listBtn) {
+                listBtn.style.borderColor = accentColor;
                 if (view === 'list') {
                     listBtn.style.backgroundColor = accentColor;
                     listBtn.style.color = contrastColor;
@@ -1596,6 +1589,7 @@ const calendarApp = createApp({
                 }
             }
             if (calBtn) {
+                calBtn.style.borderColor = accentColor;
                 if (view === 'calendar') {
                     calBtn.style.backgroundColor = accentColor;
                     calBtn.style.color = contrastColor;
@@ -2031,6 +2025,50 @@ const calendarApp = createApp({
                 this.loadingPastEvents = false;
             }
         },
+        async fetchCalendarEvents() {
+            this.isLoadingEvents = true;
+            try {
+                let url;
+                if (this.route === 'home') {
+                    url = '{{ route("home.calendar_events", [], false) }}';
+                } else if (this.route === 'admin') {
+                    url = '{{ isset($subdomain) ? route("role.admin_calendar_events", ["subdomain" => $subdomain], false) : "" }}';
+                } else {
+                    url = '{{ isset($subdomain) ? route("role.calendar_events", ["subdomain" => $subdomain], false) : "" }}';
+                }
+                const separator = url.includes('?') ? '&' : '?';
+                url += separator + 'month={{ $month }}&year={{ $year }}';
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                this.allEvents = data.events;
+                this.eventsMap = data.eventsMap;
+                this.pastEvents = data.pastEvents || [];
+                this.hasMorePastEvents = data.hasMorePastEvents || false;
+                this.uniqueCategoryIds = data.filterMeta.uniqueCategoryIds;
+                this.hasOnlineEvents = data.filterMeta.hasOnlineEvents;
+            } catch (e) {
+                console.error('Failed to load calendar events:', e);
+            } finally {
+                this.isLoadingEvents = false;
+                this.$nextTick(() => {
+                    this.initPopups();
+                    // Re-trigger past events button logic
+                    const showPastEventsBtn = document.getElementById('showPastEventsBtn');
+                    const pastEventEls = document.querySelectorAll('.past-event');
+                    if (pastEventEls.length > 0 && showPastEventsBtn) {
+                        showPastEventsBtn.classList.remove('hidden');
+                        showPastEventsBtn.addEventListener('click', function() {
+                            pastEventEls.forEach(event => {
+                                event.classList.remove('hidden');
+                            });
+                            showPastEventsBtn.classList.add('hidden');
+                        });
+                    }
+                });
+            }
+        },
         updateUrlWithGroup(newGroupSlug) {
             if (!newGroupSlug) {
                 // If no group selected, redirect to base guest URL
@@ -2079,29 +2117,33 @@ const calendarApp = createApp({
         // Update panel wrapper for initial view
         this.updatePanelWrapper(this.currentView);
 
-        // Initialize popup functionality
-        this.initPopups();
-        
+        if (this.isLoadingEvents) {
+            // Ajax mode: fetch events, then init popups after data loads
+            this.fetchCalendarEvents();
+        } else {
+            // Graphic mode: data already server-rendered, init popups immediately
+            this.initPopups();
+
+            this.$nextTick(() => {
+                const showPastEventsBtn = document.getElementById('showPastEventsBtn');
+                const pastEvents = document.querySelectorAll('.past-event');
+
+                if (pastEvents.length > 0) {
+                    showPastEventsBtn?.classList.remove('hidden');
+
+                    showPastEventsBtn?.addEventListener('click', function() {
+                        pastEvents.forEach(event => {
+                            event.classList.remove('hidden');
+                        });
+                        showPastEventsBtn.classList.add('hidden');
+                    });
+                }
+            });
+        }
+
         // Reinitialize popups when events change
         this.$watch('filteredEvents', () => {
             this.initPopups();
-        });
-        
-        // Handle past events button
-        this.$nextTick(() => {
-            const showPastEventsBtn = document.getElementById('showPastEventsBtn');
-            const pastEvents = document.querySelectorAll('.past-event');
-
-            if (pastEvents.length > 0) {
-                showPastEventsBtn?.classList.remove('hidden');
-
-                showPastEventsBtn?.addEventListener('click', function() {
-                    pastEvents.forEach(event => {
-                        event.classList.remove('hidden');
-                    });
-                    showPastEventsBtn.classList.add('hidden');
-                });
-            }
         });
 
     }

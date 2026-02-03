@@ -35,6 +35,8 @@ use Illuminate\Support\Str;
 
 class RoleController extends Controller
 {
+    use Traits\CalendarDataTrait;
+
     protected $eventRepo;
 
     public function __construct(EventRepo $eventRepo)
@@ -493,9 +495,15 @@ class RoleController extends Controller
                 ->get();
         }
 
-        $hasMorePastEvents = $pastEvents->count() > 50;
-        if ($hasMorePastEvents) {
-            $pastEvents = $pastEvents->take(50);
+        $hasMorePastEvents = false;
+        if (request()->graphic) {
+            $hasMorePastEvents = $pastEvents->count() > 50;
+            if ($hasMorePastEvents) {
+                $pastEvents = $pastEvents->take(50);
+            }
+        } else {
+            // Past events will be loaded via Ajax in the calendar partial
+            $pastEvents = collect();
         }
 
         // Track view for analytics (non-member visits only, skip embeds)
@@ -687,6 +695,140 @@ class RoleController extends Controller
         ];
     }
 
+    public function calendarEvents(Request $request, $subdomain): JsonResponse
+    {
+        $role = Role::subdomain($subdomain)->with('groups')->first();
+
+        if (! $role || ! $role->isClaimed()) {
+            return response()->json(['events' => [], 'eventsMap' => (object) [], 'pastEvents' => [], 'hasMorePastEvents' => false, 'filterMeta' => ['uniqueCategoryIds' => [], 'hasOnlineEvents' => false]]);
+        }
+
+        $month = $request->month ?: now()->month;
+        $year = $request->year ?: now()->year;
+
+        $user = auth()->user();
+        $timezone = ($user ? $user->timezone : null) ?? $role->timezone ?? 'UTC';
+
+        $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
+        $endOfMonth = $startOfMonth->copy()->addMonths(3)->endOfMonth()->endOfDay();
+
+        $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+        $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
+
+        if ($role->isCurator()) {
+            $events = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
+                ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
+                    $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                        ->orWhereNotNull('days_of_week');
+                })
+                ->whereIn('id', function ($query) use ($role) {
+                    $query->select('event_id')
+                        ->from('event_role')
+                        ->where('role_id', $role->id)
+                        ->where('is_accepted', true);
+                })
+                ->orderBy('starts_at')
+                ->get();
+        } else {
+            $events = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
+                ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
+                    $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                        ->orWhereNotNull('days_of_week');
+                })
+                ->where(function ($query) use ($role) {
+                    $query->whereHas('roles', function ($query) use ($role) {
+                        $query->where('role_id', $role->id)
+                            ->where('is_accepted', true);
+                    });
+                })
+                ->orderBy('starts_at')
+                ->get();
+        }
+
+        if ($role->isCurator()) {
+            $pastEvents = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
+                ->where('starts_at', '<', Carbon::now('UTC'))
+                ->whereNull('days_of_week')
+                ->whereIn('id', function ($query) use ($role) {
+                    $query->select('event_id')
+                        ->from('event_role')
+                        ->where('role_id', $role->id)
+                        ->where('is_accepted', true);
+                })
+                ->orderByDesc('starts_at')
+                ->limit(51)
+                ->get();
+        } else {
+            $pastEvents = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
+                ->where('starts_at', '<', Carbon::now('UTC'))
+                ->whereNull('days_of_week')
+                ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
+                ->orderByDesc('starts_at')
+                ->limit(51)
+                ->get();
+        }
+
+        $hasMorePastEvents = $pastEvents->count() > 50;
+        if ($hasMorePastEvents) {
+            $pastEvents = $pastEvents->take(50);
+        }
+
+        return $this->buildCalendarResponse($events, $pastEvents, $hasMorePastEvents, $role, $subdomain, (int) $month, (int) $year, $timezone);
+    }
+
+    public function adminCalendarEvents(Request $request, $subdomain): JsonResponse
+    {
+        if (! auth()->user()->isMember($subdomain)) {
+            return response()->json(['error' => 'Not authorized'], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $month = $request->month ?: now()->month;
+        $year = $request->year ?: now()->year;
+
+        $user = $request->user();
+        $timezone = $user->timezone ?? $role->timezone ?? 'UTC';
+
+        $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
+        $endOfMonth = $startOfMonth->copy()->addMonths(4)->endOfMonth()->endOfDay();
+
+        $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+        $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
+
+        if ($role->isCurator()) {
+            $events = Event::with('roles', 'parts')
+                ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
+                    $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                        ->orWhereNotNull('days_of_week');
+                })
+                ->whereIn('id', function ($query) use ($role) {
+                    $query->select('event_id')
+                        ->from('event_role')
+                        ->where('role_id', $role->id)
+                        ->where('is_accepted', true);
+                })
+                ->orderBy('starts_at')
+                ->get();
+        } else {
+            $events = Event::with('roles', 'parts')
+                ->where(function ($query) use ($role) {
+                    $query->whereHas('roles', function ($query) use ($role) {
+                        $query->where('role_id', $role->id)
+                            ->where('is_accepted', true);
+                    });
+                })
+                ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
+                    $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                        ->orWhereNotNull('days_of_week');
+                })
+                ->orderBy('starts_at')
+                ->get();
+        }
+
+        return $this->buildCalendarResponse($events, collect(), false, $role, $subdomain, (int) $month, (int) $year, $timezone);
+    }
+
     public function viewAdmin(Request $request, $subdomain, $tab = 'schedule')
     {
         if (! auth()->user()->isMember($subdomain)) {
@@ -792,6 +934,11 @@ class RoleController extends Controller
                             $datesUnavailable[e($member->name)] = json_decode($member->pivot->dates_unavailable);
                         }
                     }
+                }
+
+                // Events will be loaded via Ajax in the calendar partial
+                if (! request()->graphic) {
+                    $events = collect();
                 }
             } elseif ($tab == 'availability') {
                 $user = $request->user();
