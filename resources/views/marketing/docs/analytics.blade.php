@@ -70,7 +70,7 @@
                             </ul>
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Note</div>
-                                <p>Basic analytics are available on the Free plan. Advanced analytics including revenue tracking, conversion rates, and detailed referrer data require the Pro plan.</p>
+                                <p>Basic analytics including traffic sources and referrer data are available on the Free plan. Revenue tracking, conversion rates, and revenue-per-view metrics require ticket sales, which are available on the Pro plan.</p>
                             </div>
                         </section>
 
@@ -92,7 +92,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Period Toggle</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Switch between <strong>Daily</strong> and <strong>Monthly</strong> grouping to view trends at different granularities. Daily is best for short ranges; monthly is better for spotting long-term patterns.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Switch between <strong>Daily</strong>, <strong>Weekly</strong>, and <strong>Monthly</strong> grouping to view trends at different granularities. Daily is best for short ranges; monthly is better for spotting long-term patterns.</p>
                                 </div>
                             </div>
                         </section>
@@ -123,11 +123,11 @@
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Comparison %</span></td>
-                                            <td>Percentage change compared to the previous period of equal length, shown as an increase or decrease</td>
+                                            <td>Percentage change compared to the previous period of equal length, shown as an increase or decrease (shown when a date range is selected)</td>
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Appearance Views</span></td>
-                                            <td>Views on schedules where your events appear as a guest (curator or talent appearances)</td>
+                                            <td>Views on schedules where your events appear as a guest (shown for talent and venue schedules)</td>
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Revenue</span></td>
@@ -177,19 +177,23 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Views by Schedule</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">If you manage multiple schedules, this chart breaks down views per schedule so you can compare performance.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Breaks down views per schedule so you can compare performance (shown if you have multiple schedules).</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Top Referrers</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">A list of the specific websites and pages that send the most traffic to your schedule.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Top Appearances</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Shows which external schedules drive the most views for your events when you appear as a guest performer or vendor.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Top Talents/Venues</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Shows which talents or venues appearing on your schedule drive the most views (shown for schedules with guest appearances).</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Top Schedules Appeared On</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Shows which external schedules generate the most views for your events when you appear as a guest (shown for talent and venue schedules).</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Top Events by Revenue</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Ranks your events by total ticket revenue, helping you identify your highest-earning events (Pro plan).</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Ranks your events by total ticket revenue, helping you identify your highest-earning events (shown when revenue data is available).</p>
                                 </div>
                             </div>
                         </section>
@@ -198,7 +202,7 @@
                         <section id="no-data" class="doc-section">
                             <h2 class="doc-heading">No Data State</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                If you see a "No analytics data" message, it means no views have been recorded for the selected date range or schedule. This can happen when:
+                                If no data appears on the dashboard, it means no views have been recorded for the selected date range or schedule. This can happen when:
                             </p>
                             <ul class="doc-list mb-6">
                                 <li>Your schedule is newly created and has not received any visits yet</li>

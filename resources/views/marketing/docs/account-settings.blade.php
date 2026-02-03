@@ -45,6 +45,7 @@
                         <a href="#payments" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Payment Methods</a>
                         <a href="#api" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">API Settings</a>
                         <a href="#google" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Google Settings</a>
+                        <a href="#app-update" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">App Update</a>
                         <a href="#password" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Update Password</a>
                         <a href="#delete-account" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Delete Account</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
@@ -84,7 +85,7 @@
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Language</span></td>
-                                            <td>Sets the interface language. Nine languages are supported: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, and Arabic.</td>
+                                            <td>Sets the interface language. Ten languages are supported: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, and Estonian.</td>
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">24-Hour Time</span></td>
@@ -109,7 +110,7 @@
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Stripe</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect your Stripe account using Stripe Connect. Payments go directly to your Stripe account with standard processing fees (2.9% + $0.30). Click "Link Stripe Account" to begin the connection process.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect your Stripe account using Stripe Connect. Payments go directly to your Stripe account with standard processing fees (2.9% + $0.30). Click "Link Stripe Account" to begin the connection process. Selfhosted users configure Stripe at the server level via environment variables rather than through account settings.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Invoice Ninja</h4>
@@ -147,7 +148,7 @@
 
                             <div class="doc-callout doc-callout-warning">
                                 <div class="doc-callout-title">Important</div>
-                                <p>Your API key grants full access to your account. If you suspect it has been compromised, disable and re-enable the API to generate a new key.</p>
+                                <p>Your API key grants full access to your account. If you suspect it has been compromised, disable and re-enable the API to generate a new key. Note that disabling API access immediately invalidates the existing key.</p>
                             </div>
                         </section>
 
@@ -161,17 +162,29 @@
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Google Account</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Link your Google account to enable login with Google and calendar sync features. Click "Connect Google Account" to authorize access.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Link your Google account to enable login with Google. This is independent from Google Calendar sync and can be connected or disconnected separately. To disconnect your Google account, you must first have a password set on your account.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Google Calendar</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Once your Google account is connected, you can enable two-way sync between Event Schedule and Google Calendar. Events created in either platform are automatically synced to the other.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect Google Calendar to enable two-way sync between Event Schedule and Google Calendar. This is a separate integration from the Google Account login above and can be connected or disconnected independently. Events created in either platform are automatically synced to the other.</p>
                                 </div>
                             </div>
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
                                 <p>Google Calendar sync is configured per schedule in the schedule settings. Connect your Google account here first, then enable sync on each schedule you want to keep in sync.</p>
+                            </div>
+                        </section>
+
+                        <!-- App Update (Selfhosted) -->
+                        <section id="app-update" class="doc-section">
+                            <h2 class="doc-heading">App Update</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                For selfhosted installations, the App Update section displays your currently installed version alongside the latest available version. If an update is available, you can apply it with a single click.
+                            </p>
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Note</div>
+                                <p>This section is only visible on selfhosted installations. Users on the hosted platform (eventschedule.com) are always on the latest version automatically.</p>
                             </div>
                         </section>
 
@@ -202,6 +215,11 @@
                             <div class="doc-callout doc-callout-warning">
                                 <div class="doc-callout-title">Warning</div>
                                 <p>Account deletion is permanent and cannot be undone. You will be asked to enter your password to confirm the deletion.</p>
+                            </div>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Note</div>
+                                <p>The Delete Account option is only available on the hosted platform (eventschedule.com). Selfhosted administrators manage accounts directly at the server level.</p>
                             </div>
                         </section>
 

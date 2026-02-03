@@ -17,17 +17,17 @@
 
   {{-- Status alerts (full width, above grid) --}}
   @if ($eventIsAccepted === null)
-  <div class="w-full bg-amber-50 border-b border-amber-200 py-6">
+  <div class="w-full bg-amber-50 dark:bg-amber-950 border-b border-amber-200 dark:border-amber-800 py-6">
     <div class="container mx-auto px-5">
-      <div class="flex items-center justify-center text-amber-800">
+      <div class="flex items-center justify-center text-amber-800 dark:text-amber-200">
         <span class="text-xl font-medium">{{ __('messages.event_pending_review') }}</span>
       </div>
     </div>
   </div>
   @elseif (! $eventIsAccepted)
-  <div class="w-full bg-red-50 border-b border-red-200 py-6">
+  <div class="w-full bg-red-50 dark:bg-red-950 border-b border-red-200 dark:border-red-800 py-6">
     <div class="container mx-auto px-5">
-      <div class="flex items-center justify-center text-red-800">
+      <div class="flex items-center justify-center text-red-800 dark:text-red-200">
         <span class="text-xl font-medium">{{ __('messages.event_rejected') }}</span>
       </div>
     </div>
@@ -653,7 +653,7 @@
 
         {{-- Ticket section OR Description/Content --}}
         @if (request()->get('tickets') === 'true' && $event->isPro())
-        <div class="flex flex-col xl:flex-row gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-100 dark:border-gray-800 px-5 py-6 sm:p-8">
+        <div class="flex flex-col xl:flex-row gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
           <div class="flex-1">
             <div class="flex flex-col gap-4">
               <h2 class="text-[28px] leading-snug text-gray-900 dark:text-gray-100">
@@ -675,7 +675,7 @@
         {{-- Description --}}
         @if ($translation ? $translation->description_translated : $event->translatedDescription())
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8">
-          <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-4">
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
             {{ __('messages.about') }}
           </h2>
           <div class="{{ $role->isRtl() || ($translation && $translation->role->isRtl()) ? 'rtl' : '' }}">
@@ -699,7 +699,7 @@
               @foreach ($event->parts as $part)
               <div class="relative mb-6 last:mb-0">
                 <div class="absolute {{ $role->isRtl() ? '-right-8' : '-left-8' }} top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-900" style="background-color: {{ $accentColor }}; box-shadow: 0 0 0 2px {{ $accentColor }}33;"></div>
-                <div class="flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-4">
+                <div class="flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                   @if ($part->start_time)
                   <span class="text-xs font-medium mb-1 inline-flex {{ $role->isRtl() ? 'self-end' : 'self-start' }} rounded-full px-2.5 py-0.5" style="color: {{ $accentColor }}; background-color: {{ $accentColor }}10;">
                     {{ $part->start_time }}@if ($part->end_time) - {{ $part->end_time }}@endif
@@ -721,7 +721,7 @@
                   @if ($partVideos->count() > 0)
                   <div class="mt-2 space-y-2">
                     @foreach ($partVideos as $video)
-                    <div class="rounded overflow-hidden">
+                    <div class="rounded-lg overflow-hidden">
                       <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                     </div>
                     @endforeach
@@ -747,7 +747,7 @@
                   @if ($myPartPendingVideos->count() > 0)
                   <div class="mt-2 space-y-2 opacity-60">
                     @foreach ($myPartPendingVideos as $video)
-                    <div class="rounded overflow-hidden relative">
+                    <div class="rounded-lg overflow-hidden relative">
                       <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
                     </div>
@@ -805,7 +805,7 @@
             {{-- Untimed setlist: numbered list --}}
             <div class="space-y-3">
               @foreach ($event->parts as $index => $part)
-              <div class="flex items-start gap-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-4 {{ $role->isRtl() ? 'rtl' : '' }}">
+              <div class="flex items-start gap-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 {{ $role->isRtl() ? 'rtl' : '' }}">
                 <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background-color: {{ $accentColor }};">{{ $index + 1 }}</span>
                 <div class="flex-1">
                   <span class="text-gray-900 dark:text-gray-100 font-medium">{{ $part->translatedName() }}</span>
@@ -824,7 +824,7 @@
                   @if ($partVideos->count() > 0)
                   <div class="mt-2 space-y-2">
                     @foreach ($partVideos as $video)
-                    <div class="rounded overflow-hidden">
+                    <div class="rounded-lg overflow-hidden">
                       <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                     </div>
                     @endforeach
@@ -850,7 +850,7 @@
                   @if ($myPartPendingVideos->count() > 0)
                   <div class="mt-2 space-y-2 opacity-60">
                     @foreach ($myPartPendingVideos as $video)
-                    <div class="rounded overflow-hidden relative">
+                    <div class="rounded-lg overflow-hidden relative">
                       <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
                     </div>
@@ -923,13 +923,13 @@
         @endphp
         @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $event->parts->count() == 0))
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
-          <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-4">
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
             {{ __('messages.fan_content') }}
           </h2>
           @if ($eventLevelVideos->count() > 0)
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             @foreach ($eventLevelVideos as $video)
-            <div class="rounded overflow-hidden">
+            <div class="rounded-lg overflow-hidden">
               <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
             </div>
             @endforeach
@@ -947,7 +947,7 @@
           @if ($myEventLevelPendingVideos->count() > 0)
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 opacity-60">
             @foreach ($myEventLevelPendingVideos as $video)
-            <div class="rounded overflow-hidden relative">
+            <div class="rounded-lg overflow-hidden relative">
               <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
               <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
             </div>

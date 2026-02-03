@@ -418,7 +418,7 @@
                                               class="hover:underline truncate" dir="auto" v-text="getEventDisplayName(event)">
                                         </span>
                                         <span v-if="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1" 
-                                              class="text-gray-400 dark:text-gray-500 truncate" v-text="getEventTime(event)">
+                                              class="text-gray-500 dark:text-gray-400 truncate" v-text="getEventTime(event)">
                                         </span>
                                     </p>
                                 </a>
@@ -460,7 +460,7 @@
                                 <div v-if="isEventVisible(event)"
                                      @click="navigateToEvent(event, $event)"
                                      class="block cursor-pointer">
-                                    <div class="event-item bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50/95 dark:hover:bg-gray-800/95"
+                                    <div class="event-item bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50/95 dark:hover:bg-gray-800/95"
                                         :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
                                         <div class="flex" :class="isRtl ? 'flex-row-reverse' : ''">
                                             {{-- Content Section --}}
@@ -627,10 +627,10 @@
                                                         <div class="absolute top-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 -start-[3px]" :style="'background-color: {{ $accentColor }}'"></div>
                                                         <div class="ps-3">
                                                             <span class="text-sm text-gray-700 dark:text-gray-300" v-text="part.name"></span>
-                                                            <span v-if="part.start_time" class="text-xs ms-1 text-gray-400 dark:text-gray-500" v-text="part.start_time"></span>
+                                                            <span v-if="part.start_time" class="text-xs ms-1 text-gray-500 dark:text-gray-400" v-text="part.start_time"></span>
                                                         </div>
                                                     </div>
-                                                    <div v-if="event.parts.length > 4" class="text-xs text-gray-400 dark:text-gray-500 ps-3">
+                                                    <div v-if="event.parts.length > 4" class="text-xs text-gray-500 dark:text-gray-400 ps-3">
                                                         +<span v-text="event.parts.length - 4"></span> {{ __('messages.more') }}
                                                     </div>
                                                 </div>
@@ -818,10 +818,10 @@
                                                     <div class="absolute top-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 -start-[3px]" :style="'background-color: {{ $accentColor }}'"></div>
                                                     <div class="ps-3">
                                                         <span class="text-sm text-gray-700 dark:text-gray-300" v-text="part.name"></span>
-                                                        <span v-if="part.start_time" class="text-xs ms-1 text-gray-400 dark:text-gray-500" v-text="part.start_time"></span>
+                                                        <span v-if="part.start_time" class="text-xs ms-1 text-gray-500 dark:text-gray-400" v-text="part.start_time"></span>
                                                     </div>
                                                 </div>
-                                                <div v-if="event.parts.length > 4" class="text-xs text-gray-400 dark:text-gray-500 ps-3">
+                                                <div v-if="event.parts.length > 4" class="text-xs text-gray-500 dark:text-gray-400 ps-3">
                                                     +<span v-text="event.parts.length - 4"></span> {{ __('messages.more') }}
                                                 </div>
                                             </div>
@@ -955,7 +955,7 @@
                     <div class="space-y-3">
                         <template v-for="event in group.events" :key="'list-mob-' + event.uniqueKey">
                             <div v-if="isEventVisible(event)" @click="navigateToEvent(event, $event)" class="block cursor-pointer">
-                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <div class="flex">
                                         <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
                                             <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>

@@ -77,7 +77,7 @@
 
                             <ul class="doc-list doc-list-numbered mb-6">
                                 <li>Go to your schedule's admin panel and click the <strong>Availability</strong> tab</li>
-                                <li>Click on any date in the calendar to toggle it as unavailable. Unavailable dates are highlighted with a visual indicator.</li>
+                                <li>Click on any date in the calendar to toggle it as unavailable. Your unavailable dates appear with a red overlay and an "Unavailable" label.</li>
                                 <li>Click <strong>Save</strong> to confirm your changes</li>
                             </ul>
 
@@ -95,13 +95,13 @@
                         <section id="team-view" class="doc-section">
                             <h2 class="doc-heading">How Team Members See It</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                When multiple team members use the availability calendar, each person's unavailable dates are visible to the rest of the team:
+                                When multiple team members use the availability calendar, other team members' unavailable dates are visible on the <strong>Schedule tab</strong> (not the Availability tab):
                             </p>
 
                             <ul class="doc-list mb-6">
-                                <li>Dates where team members are unavailable are highlighted in <strong>orange</strong> on the calendar</li>
-                                <li>Hovering over an orange date shows a <strong>tooltip</strong> listing the names of team members who are unavailable on that date</li>
-                                <li>Each team member can only edit their own availability; they cannot change another member's dates</li>
+                                <li>Dates where team members are unavailable are highlighted in <strong>orange</strong> on the Schedule tab calendar</li>
+                                <li>Hovering over the info icon in the corner of an orange date shows a <strong>tooltip</strong> listing the names of team members who are unavailable on that date</li>
+                                <li>Each team member can only edit their own availability on the Availability tab; they cannot change another member's dates</li>
                             </ul>
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">

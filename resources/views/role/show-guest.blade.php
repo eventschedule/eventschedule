@@ -433,7 +433,7 @@
             <div id="events-carousel" class="flex overflow-x-auto scrollbar-hide gap-6 pb-4 pt-4 {{ $isRtl ? 'rtl' : '' }}">
               @foreach($upcomingEventsWithVideos as $eventData)
                 @foreach($eventData['video_roles'] as $videoRole)
-                  <div class="carousel-item flex-shrink-0 w-full sm:w-80 bg-white rounded-xl shadow-md overflow-hidden group/card">
+                  <div class="carousel-item flex-shrink-0 w-full sm:w-80 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden group/card">
                     <!-- Video iframe -->
                     <iframe
                       class="w-full h-48 object-cover"
@@ -449,13 +449,13 @@
                     <!-- Event details below video -->
                     <div class="p-4">
                       <a href="{{ $eventData['event']->getGuestUrl($role->subdomain) }}" class="block">
-                        <h3 class="text-gray-900 font-semibold text-lg mb-2 line-clamp-1 group-hover/card:text-blue-600 transition-colors duration-200">
+                        <h3 class="text-gray-900 dark:text-gray-100 font-semibold text-lg mb-2 line-clamp-1 group-hover/card:text-blue-600 transition-colors duration-200">
                           {{ $eventData['event']->translatedName() }}
                         </h3>
-                        <p class="text-gray-600 text-sm mb-1 group-hover/card:text-gray-700 transition-colors duration-200">
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-1 group-hover/card:text-gray-700 dark:group-hover/card:text-gray-300 transition-colors duration-200">
                           {{ $eventData['event']->getVenueDisplayName() }}
                         </p>
-                        <p class="text-gray-500 text-xs group-hover/card:text-gray-600 transition-colors duration-200">
+                        <p class="text-gray-500 dark:text-gray-400 text-xs group-hover/card:text-gray-600 dark:group-hover/card:text-gray-300 transition-colors duration-200">
                           {{ $eventData['event']->localStartsAt(true, request()->date) }}
                         </p>
                       </a>
@@ -466,13 +466,13 @@
             </div>
             
             <!-- Navigation arrows -->
-            <button id="carousel-prev" aria-label="Previous" class="absolute {{ $isRtl ? 'right-2' : 'left-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-20">
-              <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button id="carousel-prev" aria-label="Previous" class="absolute {{ $isRtl ? 'right-2' : 'left-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-20">
+              <svg class="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $isRtl ? 'M9 5l7 7-7 7' : 'M15 19l-7-7 7-7' }}"></path>
               </svg>
             </button>
-            <button id="carousel-next" aria-label="Next" class="absolute {{ $isRtl ? 'left-2' : 'right-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-20">
-              <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button id="carousel-next" aria-label="Next" class="absolute {{ $isRtl ? 'left-2' : 'right-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-20">
+              <svg class="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $isRtl ? 'M15 19l-7-7 7-7' : 'M9 5l7 7-7 7' }}"></path>
               </svg>
             </button>
@@ -546,7 +546,7 @@
               <div class="grid grid-cols-1 md:grid-cols-{{ $gridCols }} gap-8">
               @foreach ($videoLinks as $link)
               @if ($link)
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
                   <iframe class="w-full" style="height:{{ $role->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" title="{{ $role->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                 </div>
               @endif
@@ -610,6 +610,10 @@
 #carousel-prev:hover,
 #carousel-next:hover {
   background-color: white !important;
+}
+.dark #carousel-prev:hover,
+.dark #carousel-next:hover {
+  background-color: rgb(31 41 55) !important;
 }
 
 /* Disabled state for navigation buttons */
