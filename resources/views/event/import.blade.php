@@ -97,7 +97,7 @@
                                     <button 
                                         @click="removeDetailsImage"
                                         type="button"
-                                        :class="['absolute -top-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors', 
+                                        :class="['absolute -top-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-all duration-200 hover:scale-105',
                                             {{ is_rtl() ? "'-left-1'" : "'-right-1'" }}]"
                                         title="{{ __('messages.remove_image') }}">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -199,7 +199,7 @@
 
                 <!-- Action buttons - now includes Save All -->
                 <div class="flex gap-2 self-end sm:self-auto">
-                    <button @click="handleSaveAll" v-if="({{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1) && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                    <button @click="handleSaveAll" v-if="({{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1) && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
                         {{ __('messages.save_all') }}
                     </button>
                 </div>
@@ -266,9 +266,9 @@
                                 </div>
                                 <div class="flex gap-2">
                                     <!-- View button -->
-                                    <a :href="preview.parsed[idx].event_url" 
-                                        target="_blank" 
-                                        class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                    <a :href="preview.parsed[idx].event_url"
+                                        target="_blank"
+                                        class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
                                         {{ __('messages.view') }}
                                     </a>
                                     <!-- Show Select button if event hasn't been added to curator schedule -->
@@ -276,10 +276,10 @@
                                             @click="handleSelect(idx)" 
                                             type="button" 
                                             :disabled="savingEvents[idx]"
-                                            :class="['px-4 py-2 rounded-md transition-colors', 
+                                            :class="['px-4 py-2 rounded-md transition-all duration-200',
                                                 savingEvents[idx]
-                                                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                                                    : 'bg-green-500 text-white hover:bg-green-600']">
+                                                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                                    : 'bg-green-500 text-white hover:bg-green-600 hover:scale-105']">
                                         <span v-if="savingEvents[idx]" class="inline-flex items-center">
                                             <svg class="animate-spin -ml-1 mr-1 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -559,30 +559,30 @@
                         <!-- Add buttons at the bottom of the left column -->
                         <div class="mt-12 flex justify-end gap-2">
                             <template v-if="savedEvents[idx]">
-                                <button v-if="!savedEventData[idx]?.is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" @click="handleEdit(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                <button v-if="!savedEventData[idx]?.is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" @click="handleEdit(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.edit') }}
                                 </button>
-                                <button v-if="{{ auth()->check() ? 'true' : 'false' }}" @click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+                                <button v-if="{{ auth()->check() ? 'true' : 'false' }}" @click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.view') }}
                                 </button>
-                                <button @click="handleClearForNext" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                <button @click="handleClearForNext" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.clear') }}
                                 </button>
                             </template>
                             <template v-else>
-                                <button @click="handleRemoveEvent(idx)" v-if="preview.parsed.length > 1" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                <button @click="handleRemoveEvent(idx)" v-if="preview.parsed.length > 1" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.remove') }}
                                 </button>
-                                <button @click="handleClear" type="button" v-if="preview.parsed.length == 1" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                <button @click="handleClear" type="button" v-if="preview.parsed.length == 1" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.clear') }}
                                 </button>
                                 <button @click="handleSave(idx)" 
                                         type="button" 
                                         :disabled="savingEvents[idx] || !canCreateAccount"
-                                        :class="['px-4 py-2 rounded-md transition-colors', 
+                                        :class="['px-4 py-2 rounded-md transition-all duration-200',
                                             (savingEvents[idx] || !canCreateAccount)
-                                                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                                                : 'bg-blue-500 text-white hover:bg-blue-600']">
+                                                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                                : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105']">
                                     <span v-if="savingEvents[idx]" class="inline-flex items-center">
                                         <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -628,7 +628,7 @@
                                         @click="removeImage(idx)" 
                                         type="button"
                                         v-bind:disabled="savedEvents[idx]"
-                                        class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+                                        class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>

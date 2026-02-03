@@ -905,7 +905,7 @@
             </div>
 
             {{-- Load More Button --}}
-            <div v-if="hasMorePastEvents && (flatUpcomingEvents.length + flatPastEvents.length) < 50" class="mt-6 text-center">
+            <div v-if="!hidePastEvents && hasMorePastEvents && (flatUpcomingEvents.length + flatPastEvents.length) < 50" class="mt-6 text-center">
                 <button @click.stop="loadMorePastEvents()"
                         :disabled="loadingPastEvents"
                         class="inline-flex items-center px-6 py-2.5 text-sm font-semibold rounded-xl border-2 transition-colors duration-200"
@@ -998,7 +998,7 @@
             </div>
 
             {{-- Load More Button --}}
-            <div v-if="hasMorePastEvents && (flatUpcomingEvents.length + flatPastEvents.length) < 50" class="mt-6 text-center">
+            <div v-if="!hidePastEvents && hasMorePastEvents && (flatUpcomingEvents.length + flatPastEvents.length) < 50" class="mt-6 text-center">
                 <button @click.stop="loadMorePastEvents()"
                         :disabled="loadingPastEvents"
                         class="inline-flex items-center px-6 py-2.5 text-sm font-semibold rounded-xl border-2 transition-colors duration-200"
@@ -1137,6 +1137,7 @@ const calendarApp = createApp({
             startOfMonth: '{{ $startOfMonth->format('Y-m-d') }}',
             endOfMonth: '{{ $endOfMonth->format('Y-m-d') }}',
             use24Hour: {{ get_use_24_hour_time($role ?? null) ? 'true' : 'false' }},
+            hidePastEvents: {{ (isset($hide_past_events) && $hide_past_events) ? 'true' : 'false' }},
             maxEvents: {{ isset($max_events) ? $max_events : 0 }},
             subdomain: '{{ isset($subdomain) ? $subdomain : '' }}',
             route: '{{ $route }}',
@@ -1478,6 +1479,7 @@ const calendarApp = createApp({
         },
         allListEvents() {
             const upcoming = this.flatUpcomingEvents.map(e => ({...e, _isPast: false}));
+            if (this.hidePastEvents) return upcoming;
             const past = this.flatPastEvents.map(e => ({...e, _isPast: true}));
             return upcoming.concat(past);
         },
@@ -1488,12 +1490,14 @@ const calendarApp = createApp({
                 if (!groups[date]) groups[date] = {date, events: [], hasPast: false};
                 groups[date].events.push({...event, _isPast: false});
             });
-            this.flatPastEvents.forEach(event => {
-                const date = event.occurrenceDate || 'no-date';
-                if (!groups[date]) groups[date] = {date, events: [], hasPast: true};
-                groups[date].events.push({...event, _isPast: true});
-                groups[date].hasPast = true;
-            });
+            if (!this.hidePastEvents) {
+                this.flatPastEvents.forEach(event => {
+                    const date = event.occurrenceDate || 'no-date';
+                    if (!groups[date]) groups[date] = {date, events: [], hasPast: true};
+                    groups[date].events.push({...event, _isPast: true});
+                    groups[date].hasPast = true;
+                });
+            }
             return Object.values(groups).sort((a, b) => {
                 // upcoming dates first (ascending), then past dates (descending)
                 const aIsPast = a.events.every(e => e._isPast);

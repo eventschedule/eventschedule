@@ -210,7 +210,7 @@
                         class="inline-flex items-center justify-center">
                         <button type="button" name="follow"
                           style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                          class="inline-flex items-center rounded-md px-4 py-2 hover:opacity-90 text-xs font-semibold shadow-sm">
+                          class="inline-flex items-center rounded-md px-4 py-2 transition-all duration-200 hover:scale-105 hover:shadow-md text-xs font-semibold shadow-sm">
                           {{ __('messages.follow') }}
                         </button>
                       </a>
@@ -405,7 +405,7 @@
             <button
               type="button"
               name="login"
-              class="inline-flex items-center justify-center rounded-xl text-base duration-300 bg-transparent border-[1px] py-4 px-8 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-90"
+              class="inline-flex items-center justify-center rounded-xl text-base duration-300 bg-transparent border-[1px] py-4 px-8 hover:scale-105 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-90"
               style="border-color: {{ $accentColor }}; color: {{ $accentColor }};"
               onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';"
               onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';"
@@ -417,11 +417,13 @@
         @endif
 
         {{-- Calendar widget --}}
+        @if(count($events) > 0)
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5 flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
           <div class="w-full">
-            @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'force_mobile' => true, 'max_events' => 20])
+            @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'force_mobile' => true, 'max_events' => 20, 'hide_past_events' => true])
           </div>
         </div>
+        @endif
 
         </div>
       </div>
@@ -573,7 +575,7 @@
               @endif
             >
                 <button type="button"
-                      class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm hover:opacity-90"
+                      class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                       style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
                   {{ $event->registration_url ? __('messages.view_event') : ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets')) }}
               </button>
@@ -582,7 +584,7 @@
         @else
               <button type="button"
                   onclick="event.stopPropagation(); var m = document.getElementById('calendar-pop-up-menu'); m.classList.toggle('hidden')"
-                  class="inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm hover:opacity-90"
+                  class="inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
                   id="menu-button" aria-expanded="true" aria-haspopup="true">
               {{ __('messages.add_to_calendar') }}
@@ -778,11 +780,11 @@
                   </div>
                   @endif
                   <div class="mt-2 flex gap-3" x-data="{ showVideo: false, showComment: false }">
-                    <button @click="showVideo = !showVideo; showComment = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-colors" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};">
+                    <button @click="showVideo = !showVideo; showComment = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                       {{ __('messages.add_video') }}
                     </button>
-                    <button @click="showComment = !showComment; showVideo = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-colors" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};">
+                    <button @click="showComment = !showComment; showVideo = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                       {{ __('messages.add_comment') }}
                     </button>
@@ -794,7 +796,7 @@
                         <input type="hidden" name="event_date" value="{{ $date }}">
                         @endif
                         <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
-                        <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                        <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
                     <div x-show="showComment" x-cloak class="mt-2 w-full">
@@ -805,7 +807,7 @@
                         <input type="hidden" name="event_date" value="{{ $date }}">
                         @endif
                         <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
-                        <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                        <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
                   </div>
@@ -881,11 +883,11 @@
                   </div>
                   @endif
                   <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false }">
-                    <button @click="showVideo = !showVideo; showComment = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-colors" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};">
+                    <button @click="showVideo = !showVideo; showComment = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                       {{ __('messages.add_video') }}
                     </button>
-                    <button @click="showComment = !showComment; showVideo = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-colors" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};">
+                    <button @click="showComment = !showComment; showVideo = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                       {{ __('messages.add_comment') }}
                     </button>
@@ -897,7 +899,7 @@
                         <input type="hidden" name="event_date" value="{{ $date }}">
                         @endif
                         <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
-                        <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                        <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
                     <div x-show="showComment" x-cloak class="w-full">
@@ -908,7 +910,7 @@
                         <input type="hidden" name="event_date" value="{{ $date }}">
                         @endif
                         <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
-                        <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                        <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
                   </div>
@@ -979,11 +981,11 @@
           @endif
           @if ($event->parts->count() == 0)
           <div class="flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false }">
-            <button @click="showVideo = !showVideo; showComment = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-colors" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};">
+            <button @click="showVideo = !showVideo; showComment = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
               {{ __('messages.add_video') }}
             </button>
-            <button @click="showComment = !showComment; showVideo = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-colors" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};">
+            <button @click="showComment = !showComment; showVideo = false" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
               {{ __('messages.add_comment') }}
             </button>
@@ -994,7 +996,7 @@
                 <input type="hidden" name="event_date" value="{{ $date }}">
                 @endif
                 <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
-                <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
               </form>
             </div>
             <div x-show="showComment" x-cloak class="w-full mt-2">
@@ -1004,7 +1006,7 @@
                 <input type="hidden" name="event_date" value="{{ $date }}">
                 @endif
                 <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
-                <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
               </form>
             </div>
           </div>
@@ -1032,7 +1034,7 @@
           @endif
         >
           <button type="button"
-                class="w-full justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm hover:opacity-90"
+                class="w-full justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                 style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
             {{ $event->registration_url ? __('messages.view_event') : ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets')) }}
           </button>
@@ -1041,7 +1043,7 @@
     @else
       <button type="button"
           onclick="document.getElementById('calendar-mobile-sheet').classList.remove('hidden')"
-          class="w-full justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm hover:opacity-90"
+          class="w-full justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
           style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
         {{ __('messages.add_to_calendar') }}
       </button>
