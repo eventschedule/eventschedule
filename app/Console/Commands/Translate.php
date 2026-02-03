@@ -343,6 +343,8 @@ class Translate extends Command
                     $this->info("Skipping translation for English event ID: {$event->id}");
                 }
 
+                $bar->advance();
+
                 continue;
             }
 
@@ -537,6 +539,8 @@ class Translate extends Command
                 if ($debug) {
                     $this->info("Skipping translation for English event part ID: {$part->id}");
                 }
+
+                $bar->advance();
 
                 continue;
             }

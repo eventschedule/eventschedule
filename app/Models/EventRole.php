@@ -22,6 +22,10 @@ class EventRole extends Pivot
         'last_translated_at',
     ];
 
+    protected $casts = [
+        'last_translated_at' => 'datetime',
+    ];
+
     public function role()
     {
         return $this->belongsTo(Role::class);
