@@ -2010,9 +2010,8 @@ const calendarApp = createApp({
             try {
                 const oldestEvent = this.pastEvents[this.pastEvents.length - 1];
                 if (!oldestEvent || !oldestEvent.starts_at) return;
-                const isHosted = {{ config('app.hosted') ? 'true' : 'false' }};
-                const baseUrl = isHosted ? window.location.origin : (window.location.origin + '/' + this.subdomain);
-                const url = baseUrl + '/api/past-events?before=' + encodeURIComponent(oldestEvent.starts_at);
+                const baseUrl = '{{ isset($subdomain) ? route("role.list_past_events", ["subdomain" => $subdomain], false) : "" }}';
+                const url = baseUrl + '?before=' + encodeURIComponent(oldestEvent.starts_at);
                 const response = await fetch(url);
                 const data = await response.json();
                 if (data.events && data.events.length > 0) {
