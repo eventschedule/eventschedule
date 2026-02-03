@@ -786,7 +786,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         ->where(['id' => '[A-Za-z0-9+/=]+']);
 
     // Existing catch-all remains last
-    Route::get('/{subdomain}/{slug}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
+    Route::get('/{subdomain}/{slug}', [RoleController::class, 'viewGuest'])->name('event.view_guest')->where('subdomain', '^(?!docs$).*');
 }
 
 Route::get('/{slug?}', [HomeController::class, 'landing'])->name('landing');
