@@ -13,6 +13,8 @@ class SyncEventToCalDAV implements ShouldQueue
 {
     use Queueable;
 
+    public $deleteWhenMissingModels = true;
+
     protected $event;
 
     protected $role;
