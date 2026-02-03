@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Mail\GraphicEmail;
 use App\Models\Event;
 use App\Models\Role;
-use App\Services\EventGraphicGenerator;
 use App\Utils\EventTextGenerator;
 use App\Utils\GeminiUtils;
 use Illuminate\Support\Facades\Config;
@@ -125,6 +124,8 @@ class GraphicEmailService
                 // For selfhost users, use system email settings
                 Mail::to(array_values($emailList))->send(new GraphicEmail($role, $imageData, $eventText));
             }
+
+            UsageTrackingService::track(UsageTrackingService::EMAIL_GRAPHIC, $role->id);
 
             return true;
         } catch (\Exception $e) {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Role;
+use App\Services\UsageTrackingService;
 use Illuminate\Http\Request;
 use Laravel\Cashier\Exceptions\IncompletePayment;
 
@@ -77,6 +78,8 @@ class SubscriptionController extends Controller
             $role->plan_type = 'pro';
             $role->plan_term = $request->plan;
             $role->save();
+
+            UsageTrackingService::track(UsageTrackingService::STRIPE_SUBSCRIPTION, $role->id);
 
             return redirect()
                 ->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])

@@ -133,6 +133,8 @@ class EmailService
                 Mail::raw(__('messages.test_email_body'), $testEmailCallback);
             }
 
+            UsageTrackingService::track(UsageTrackingService::EMAIL_TEST, $role->id);
+
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to send test email: '.$e->getMessage(), [

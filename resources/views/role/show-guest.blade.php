@@ -36,8 +36,7 @@
             <div class="absolute -top-40 bottom-0 left-1/2 -translate-x-1/2 w-screen bg-cover bg-no-repeat bg-top md:hidden -z-10"
                  style="background-image: url('{{ $mobileBannerUrl }}');"></div>
         @endif
-        <div class="bg-white dark:bg-gray-800 rounded-xl mb-3 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} transition-[max-width] duration-300 ease-in-out"
-          :class="listView ? 'mx-auto' : ''"
+        <div class="bg-white dark:bg-gray-800 rounded-xl mb-3 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} transition-[max-width] duration-300 ease-in-out mx-auto"
           :style="{ maxWidth: listView ? '56rem' : '200rem' }"
         >
           <div
@@ -523,9 +522,8 @@
       </style>
 
       <div
-        class="calendar-panel-border mb-6 px-0 md:px-6 lg:px-16 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out"
+        class="calendar-panel-border mb-6 px-0 md:px-6 lg:px-16 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
         id="calendar-panel-wrapper"
-        :class="listView ? 'mx-auto' : ''"
         :style="{ maxWidth: listView ? '56rem' : '200rem' }"
       >
         @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'eventLayout' => $role->event_layout ?? 'calendar', 'pastEvents' => $pastEvents ?? collect()])

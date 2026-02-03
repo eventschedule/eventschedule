@@ -15,6 +15,12 @@ class EventPart extends Model
         'start_time',
         'end_time',
         'sort_order',
+        'translation_attempts',
+        'last_translated_at',
+    ];
+
+    protected $casts = [
+        'last_translated_at' => 'datetime',
     ];
 
     protected static function boot()
@@ -24,10 +30,12 @@ class EventPart extends Model
         static::saving(function ($model) {
             if ($model->isDirty('name') && $model->exists) {
                 $model->name_en = null;
+                $model->translation_attempts = 0;
             }
 
             if ($model->isDirty('description') && $model->exists) {
                 $model->description_en = null;
+                $model->translation_attempts = 0;
             }
         });
     }

@@ -4,6 +4,7 @@ namespace App\Utils;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Services\UsageTrackingService;
 use Carbon\Carbon;
 
 class GeminiUtils
@@ -322,6 +323,8 @@ class GeminiUtils
         if ($data === null || empty($data)) {
             return [];
         }
+
+        UsageTrackingService::track(UsageTrackingService::GEMINI_PARSE_EVENT, $role->id ?? 0);
 
         foreach ($data as $key => $item) {
 
@@ -711,6 +714,8 @@ class GeminiUtils
             return [];
         }
 
+        UsageTrackingService::track(UsageTrackingService::GEMINI_PARSE_PARTS);
+
         // Normalize: sendRequest wraps single objects in an array
         $parts = [];
         if (isset($data[0]) && is_array($data[0])) {
@@ -805,6 +810,8 @@ class GeminiUtils
                 return [];
             }
 
+            UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE_GROUPS);
+
             // sendRequest returns an array, get the first item
             if (! empty($response) && is_array($response)) {
                 $translations = $response[0];
@@ -841,6 +848,8 @@ class GeminiUtils
             if ($response === null || empty($response)) {
                 return [];
             }
+
+            UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE_FIELDS);
 
             // sendRequest returns an array, get the first item
             if (! empty($response) && is_array($response)) {
@@ -907,6 +916,8 @@ class GeminiUtils
 
             return [];
         }
+
+        UsageTrackingService::track(UsageTrackingService::YOUTUBE_SEARCH);
 
         $data = json_decode($response, true);
 
@@ -1069,6 +1080,8 @@ class GeminiUtils
                 throw new \Exception('Gemini API quota exceeded or unavailable');
             }
 
+            UsageTrackingService::track(UsageTrackingService::GEMINI_BLOG);
+
             if (isset($data[0])) {
                 $result = $data[0];
 
@@ -1127,6 +1140,8 @@ Return a JSON object with just one field:
             if ($data === null || empty($data)) {
                 return null;
             }
+
+            UsageTrackingService::track(UsageTrackingService::GEMINI_BLOG_TOPIC);
 
             if (isset($data[0]['topic'])) {
                 return $data[0]['topic'];

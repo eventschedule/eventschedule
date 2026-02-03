@@ -250,6 +250,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
         Route::get('/admin/revenue', [AdminController::class, 'revenue'])->name('admin.revenue');
         Route::get('/admin/analytics', [AdminController::class, 'analytics'])->name('admin.analytics');
+        Route::get('/admin/usage', [AdminController::class, 'usage'])->name('admin.usage');
         Route::get('/admin/plans', [AdminController::class, 'plans'])->name('admin.plans');
         Route::get('/admin/plans/{role}/edit', [AdminController::class, 'editPlan'])->name('admin.plans.edit');
         Route::put('/admin/plans/{role}', [AdminController::class, 'updatePlan'])->name('admin.plans.update');
