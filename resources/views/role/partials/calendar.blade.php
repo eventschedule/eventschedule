@@ -515,7 +515,7 @@
             <div v-if="allListEvents.length" class="space-y-4">
                 <template v-for="event in allListEvents" :key="'list-' + event.uniqueKey">
                     <div @click="navigateToEvent(event, $event)" class="block cursor-pointer">
-                        <div class="rounded-2xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white dark:bg-gray-800">
+                        <div class="rounded-2xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white dark:bg-gray-800">
                             {{-- Side-by-side layout when flyer image exists --}}
                             <template v-if="event.image_url">
                                 <div class="flex flex-col md:flex-row" :class="isRtl ? 'md:flex-row-reverse' : ''">
