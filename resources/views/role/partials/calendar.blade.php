@@ -1939,6 +1939,11 @@ const calendarApp = createApp({
                 }
             }
 
+            // Move popup to body to avoid backdrop-filter containing block issues
+            if (popup.parentElement !== document.body) {
+                document.body.appendChild(popup);
+            }
+
             // Show popup
             this.popupElement = element;
             popup.classList.add('show');
