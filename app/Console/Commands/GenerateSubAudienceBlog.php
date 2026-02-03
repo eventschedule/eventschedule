@@ -47,6 +47,22 @@ class GenerateSubAudienceBlog extends Command
         $targetAudience = $this->option('audience');
         $targetSubAudience = $this->option('sub-audience');
 
+        // Skip if we already generated a sub-audience post today (unless --all flag)
+        if (! $generateAll) {
+            $subAudienceSlugs = collect($config)->flatMap(fn ($a) => collect($a['sub_audiences'])->pluck('slug')
+            )->toArray();
+
+            $createdToday = BlogPost::where('created_at', '>=', now()->startOfDay())
+                ->whereIn('slug', $subAudienceSlugs)
+                ->exists();
+
+            if ($createdToday) {
+                $this->info('Already generated a sub-audience post today. Skipping.');
+
+                return 0;
+            }
+        }
+
         $missing = [];
         $generated = 0;
 
