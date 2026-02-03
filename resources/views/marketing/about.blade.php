@@ -6,7 +6,7 @@
     <x-slot name="breadcrumbTitle">About</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "Organization",

@@ -226,6 +226,7 @@ return [
     'register_curator' => 'Registrar Curador',
     'updated_curator' => 'Curador actualizado con éxito',
     'deleted_curator' => 'Curador eliminado con éxito',
+    'flyer' => 'Flyer',
     'flyer_image' => 'Imagen del Flyer',
     'events_graphic' => 'Gráfico de Eventos',
     'graphic' => 'Gráfico',

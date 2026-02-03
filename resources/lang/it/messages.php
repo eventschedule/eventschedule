@@ -469,6 +469,7 @@ return [
     'curators' => 'Curatori',
     'curator' => 'Curatore',
     'register_curator' => 'Registra curatore',
+    'flyer' => 'Volantino',
     'flyer_image' => 'Immagine volantino',
     'event_added' => 'Evento aggiunto con successo',
     'please_select' => 'Seleziona',

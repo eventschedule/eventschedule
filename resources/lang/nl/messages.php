@@ -462,6 +462,7 @@ return [
     'curator' => 'Curator',
     'register_curator' => 'Curator registreren',
     'deleted_curator' => 'Curator succesvol verwijderd',
+    'flyer' => 'Flyer',
     'flyer_image' => 'Flyer afbeelding',
     'event_added' => 'Evenement succesvol toegevoegd',
     'please_select' => 'Selecteer',
