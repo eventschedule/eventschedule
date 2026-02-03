@@ -153,7 +153,7 @@
 <div>
 
 @if (! request()->graphic)
-<header class="pt-2 pb-4 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+<header class="{{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}" :class="currentView === 'list' ? 'pt-0 pb-0' : 'pt-2 pb-4'">
     {{-- Main container: Stacks content on mobile, aligns in a row on desktop. --}}
     <div class="flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-4">
 
@@ -514,7 +514,7 @@
             {{-- Upcoming Events --}}
             <div v-if="allListEvents.length" class="space-y-4">
                 <template v-for="event in allListEvents" :key="'list-' + event.uniqueKey">
-                    <div @click="navigateToEvent(event, $event)" class="block cursor-pointer" :class="event._isPast ? 'opacity-80' : ''">
+                    <div @click="navigateToEvent(event, $event)" class="block cursor-pointer">
                         <div class="rounded-2xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white dark:bg-gray-800">
                             {{-- Side-by-side layout when flyer image exists --}}
                             <template v-if="event.image_url">
@@ -697,7 +697,7 @@
                                     </div>
                                     {{-- Flyer Image Column --}}
                                     <div class="md:w-[35%] md:flex-shrink-0">
-                                        <img :src="event.image_url" class="w-full h-full object-cover" :alt="event.name">
+                                        <img :src="event.image_url" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name">
                                     </div>
                                 </div>
                             </template>
@@ -706,7 +706,7 @@
                             <template v-else>
                                 {{-- Hero Banner (only when no flyer) --}}
                                 <div v-if="getHeaderImage(event)" class="h-40 relative overflow-hidden">
-                                    <img :src="getHeaderImage(event)" class="w-full h-full object-cover" :alt="event.name">
+                                    <img :src="getHeaderImage(event)" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name">
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                                 </div>
 
@@ -933,7 +933,7 @@
                     {{-- Compact cards --}}
                     <div class="space-y-3">
                         <template v-for="event in group.events" :key="'list-mob-' + event.uniqueKey">
-                            <div v-if="isEventVisible(event)" @click="navigateToEvent(event, $event)" class="block cursor-pointer" :class="event._isPast ? 'opacity-80' : ''">
+                            <div v-if="isEventVisible(event)" @click="navigateToEvent(event, $event)" class="block cursor-pointer">
                                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <div class="flex">
                                         <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
@@ -966,7 +966,7 @@
                                             </div>
                                         </div>
                                         <div v-if="event.image_url" class="flex-shrink-0 w-24 self-stretch">
-                                            <img :src="event.image_url" class="w-full h-full object-cover" :alt="event.name">
+                                            <img :src="event.image_url" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name">
                                         </div>
                                     </div>
                                 </div>
