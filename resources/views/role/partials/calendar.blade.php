@@ -389,20 +389,21 @@
                             </div>
                         @endif
                         </div>
+                        @if (($tab ?? '') != 'availability')
                         <ol class="mt-4 divide-y divide-gray-100 dark:divide-gray-700 text-sm leading-6 md:col-span-7 xl:col-span-8">
-                            <li v-for="event in getEventsForDate('{{ $currentDate->format('Y-m-d') }}')" :key="event.id" 
-                                class="relative group" 
+                            <li v-for="event in getEventsForDate('{{ $currentDate->format('Y-m-d') }}')" :key="event.id"
+                                class="relative group"
                                 :class="event.can_edit ? 'hover:pe-8' : ''"
                                 v-show="isEventVisible(event)">
                                 <a :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')"
-                                    class="flex event-link-popup" 
+                                    class="flex event-link-popup"
                                     :data-event-id="event.id"
                                     @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
                                     <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }} truncate">
-                                        <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'" 
+                                        <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'"
                                               class="hover:underline truncate" dir="auto" v-text="getEventDisplayName(event)">
                                         </span>
-                                        <span v-if="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1" 
+                                        <span v-if="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1"
                                               class="text-gray-500 dark:text-gray-400 truncate" v-text="getEventTime(event)">
                                         </span>
                                     </p>
@@ -414,6 +415,7 @@
                                 </a>
                             </li>
                         </ol>
+                        @endif
                     </div>
                     @php $currentDate->addDay(); @endphp
                     @endwhile
@@ -423,6 +425,7 @@
         @endif
 
 
+        @if (($tab ?? '') != 'availability')
         <div v-show="currentView === 'calendar' && !isLoadingEvents" class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
             <div v-if="mobileEventsList.length">
                 <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden mb-4 w-full text-center">
@@ -495,6 +498,7 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 
 
@@ -637,7 +641,7 @@
                                                 {{ __('messages.edit') }}
                                             </a>
                                             <template v-if="isAuthenticated">
-                                                <button @click.stop="toggleVideoForm(event)"
+                                                <button @click.stop="toggleVideoForm(event, $event)"
                                                         class="inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium rounded-md transition-colors duration-200 border"
                                                         style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
                                                         @mouseenter="$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'"
@@ -645,7 +649,7 @@
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                                                     {{ __('messages.add_video') }}
                                                 </button>
-                                                <button @click.stop="toggleCommentForm(event)"
+                                                <button @click.stop="toggleCommentForm(event, $event)"
                                                         class="inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium rounded-md transition-colors duration-200 border"
                                                         style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
                                                         @mouseenter="$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'"
@@ -669,7 +673,7 @@
                                                 </select>
                                                 <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}"
                                                        class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
-                                                <button type="submit" class="self-start px-4 py-2 border border-transparent text-sm rounded-lg"
+                                                <button type="submit" class="self-start px-4 py-2 border border-transparent text-sm rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
                                                         style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}">{{ __('messages.submit') }}</button>
                                             </div>
                                         </form>
@@ -687,7 +691,7 @@
                                                 </select>
                                                 <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000"
                                                           class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
-                                                <button type="submit" class="self-start px-4 py-2 border border-transparent text-sm rounded-lg"
+                                                <button type="submit" class="self-start px-4 py-2 border border-transparent text-sm rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
                                                         style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}">{{ __('messages.submit') }}</button>
                                             </div>
                                         </form>
@@ -828,7 +832,7 @@
                                             {{ __('messages.edit') }}
                                         </a>
                                         <template v-if="isAuthenticated">
-                                            <button @click.stop="toggleVideoForm(event)"
+                                            <button @click.stop="toggleVideoForm(event, $event)"
                                                     class="inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium rounded-md transition-colors duration-200 border"
                                                     style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
                                                     @mouseenter="$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'"
@@ -836,7 +840,7 @@
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                                                 {{ __('messages.add_video') }}
                                             </button>
-                                            <button @click.stop="toggleCommentForm(event)"
+                                            <button @click.stop="toggleCommentForm(event, $event)"
                                                     class="inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium rounded-md transition-colors duration-200 border"
                                                     style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
                                                     @mouseenter="$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'"
@@ -860,7 +864,7 @@
                                             </select>
                                             <input type="text" name="youtube_url" placeholder="{{ __('messages.paste_youtube_url') }}"
                                                    class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
-                                            <button type="submit" class="self-start px-4 py-2 border border-transparent text-sm rounded-lg"
+                                            <button type="submit" class="self-start px-4 py-2 border border-transparent text-sm rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
                                                     style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}">{{ __('messages.submit') }}</button>
                                         </div>
                                     </form>
@@ -878,7 +882,7 @@
                                             </select>
                                             <textarea name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000"
                                                       class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
-                                            <button type="submit" class="self-start px-4 py-2 border border-transparent text-sm rounded-lg"
+                                            <button type="submit" class="self-start px-4 py-2 border border-transparent text-sm rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
                                                     style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}">{{ __('messages.submit') }}</button>
                                         </div>
                                     </form>
@@ -1120,6 +1124,7 @@ const calendarApp = createApp({
             maxEvents: {{ isset($max_events) ? $max_events : 0 }},
             subdomain: '{{ isset($subdomain) ? $subdomain : '' }}',
             route: '{{ $route }}',
+            tab: '{{ $tab ?? '' }}',
             embed: {{ isset($embed) && $embed ? 'true' : 'false' }},
             isRtl: {{ isset($role) && $role->isRtl() ? 'true' : 'false' }},
             languageCode: '{{ $isAdminRoute && auth()->check() ? app()->getLocale() : (session()->has('translate') ? 'en' : (isset($role) && $role->language_code ? $role->language_code : 'en')) }}',
@@ -1687,18 +1692,28 @@ const calendarApp = createApp({
 
             return url;
         },
-        toggleVideoForm(event) {
+        toggleVideoForm(event, $event) {
             const key = event.uniqueKey;
+            const btn = $event.target.closest('button');
             this.openVideoForm = { ...this.openVideoForm, [key]: !this.openVideoForm[key] };
             if (this.openVideoForm[key]) {
                 this.openCommentForm = { ...this.openCommentForm, [key]: false };
+                this.$nextTick(() => {
+                    const form = btn.closest('div').parentElement.querySelector('form input[name="youtube_url"]');
+                    if (form) form.focus();
+                });
             }
         },
-        toggleCommentForm(event) {
+        toggleCommentForm(event, $event) {
             const key = event.uniqueKey;
+            const btn = $event.target.closest('button');
             this.openCommentForm = { ...this.openCommentForm, [key]: !this.openCommentForm[key] };
             if (this.openCommentForm[key]) {
                 this.openVideoForm = { ...this.openVideoForm, [key]: false };
+                this.$nextTick(() => {
+                    const form = btn.closest('div').parentElement.querySelector('form textarea[name="comment"]');
+                    if (form) form.focus();
+                });
             }
         },
         navigateToEvent(event, e) {
@@ -2025,6 +2040,10 @@ const calendarApp = createApp({
             }
         },
         async fetchCalendarEvents() {
+            if (this.tab === 'availability') {
+                this.isLoadingEvents = false;
+                return;
+            }
             this.isLoadingEvents = true;
             try {
                 let url;

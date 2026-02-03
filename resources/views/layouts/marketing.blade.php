@@ -31,7 +31,10 @@
     <meta name="theme-color" content="#0a0a0f" media="(prefers-color-scheme: dark)">
 
     <!-- SEO Meta Tags -->
-    @php $canonicalPath = config('app.url') . '/' . ltrim(rtrim(request()->path(), '/'), '/'); @endphp
+    @php
+        $path = request()->path();
+        $canonicalPath = $path === '/' ? config('app.url') : config('app.url') . '/' . ltrim(rtrim($path, '/'), '/');
+    @endphp
     <link rel="canonical" href="{{ $canonicalPath }}">
     <!-- Hreflang tags for all supported languages -->
     <link rel="alternate" hreflang="x-default" href="{{ $canonicalPath }}">

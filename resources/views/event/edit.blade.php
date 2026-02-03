@@ -1872,15 +1872,8 @@
                                 </p>
                             </div>
                             <div class="flex gap-2 shrink-0">
-                                <form method="POST" action="{{ route('event.approve_video', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($video->id)]) }}">
-                                    @csrf
-                                    <button type="submit" class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">{{ __('messages.approve') }}</button>
-                                </form>
-                                <form method="POST" action="{{ route('event.reject_video', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($video->id)]) }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
-                                </form>
+                                <button type="submit" form="form-approve-video-{{ $video->id }}" class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">{{ __('messages.approve') }}</button>
+                                <button type="submit" form="form-reject-video-{{ $video->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
                             </div>
                         </div>
                         @endforeach
@@ -1898,15 +1891,8 @@
                                 </p>
                             </div>
                             <div class="flex gap-2 shrink-0">
-                                <form method="POST" action="{{ route('event.approve_comment', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($comment->id)]) }}">
-                                    @csrf
-                                    <button type="submit" class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">{{ __('messages.approve') }}</button>
-                                </form>
-                                <form method="POST" action="{{ route('event.reject_comment', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($comment->id)]) }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
-                                </form>
+                                <button type="submit" form="form-approve-comment-{{ $comment->id }}" class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">{{ __('messages.approve') }}</button>
+                                <button type="submit" form="form-reject-comment-{{ $comment->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
                             </div>
                         </div>
                         @endforeach
@@ -1934,11 +1920,7 @@
                                 </p>
                             </div>
                             <div class="shrink-0">
-                                <form method="POST" action="{{ route('event.reject_video', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($video->id)]) }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
-                                </form>
+                                <button type="submit" form="form-reject-video-{{ $video->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
                             </div>
                         </div>
                         @endforeach
@@ -1956,11 +1938,7 @@
                                 </p>
                             </div>
                             <div class="shrink-0">
-                                <form method="POST" action="{{ route('event.reject_comment', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($comment->id)]) }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
-                                </form>
+                                <button type="submit" form="form-reject-comment-{{ $comment->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
                             </div>
                         </div>
                         @endforeach
@@ -1998,6 +1976,25 @@
         </div>
 
     </form>
+
+    {{-- External forms for fan content approve/reject buttons (outside main form to avoid nesting) --}}
+    @if ($event->exists)
+        @foreach ($pendingVideos as $video)
+        <form id="form-approve-video-{{ $video->id }}" method="POST" action="{{ route('event.approve_video', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($video->id)]) }}" class="hidden">@csrf</form>
+        <form id="form-reject-video-{{ $video->id }}" method="POST" action="{{ route('event.reject_video', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($video->id)]) }}" class="hidden">@csrf @method('DELETE')</form>
+        @endforeach
+        @foreach ($pendingComments as $comment)
+        <form id="form-approve-comment-{{ $comment->id }}" method="POST" action="{{ route('event.approve_comment', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($comment->id)]) }}" class="hidden">@csrf</form>
+        <form id="form-reject-comment-{{ $comment->id }}" method="POST" action="{{ route('event.reject_comment', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($comment->id)]) }}" class="hidden">@csrf @method('DELETE')</form>
+        @endforeach
+        @foreach ($approvedVideos as $video)
+        <form id="form-reject-video-{{ $video->id }}" method="POST" action="{{ route('event.reject_video', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($video->id)]) }}" class="hidden">@csrf @method('DELETE')</form>
+        @endforeach
+        @foreach ($approvedComments as $comment)
+        <form id="form-reject-comment-{{ $comment->id }}" method="POST" action="{{ route('event.reject_comment', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($comment->id)]) }}" class="hidden">@csrf @method('DELETE')</form>
+        @endforeach
+    @endif
+
 </div>
 
 <script {!! nonce_attr() !!}>
@@ -2876,6 +2873,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
     
+    // Save the initial hash before anti-scroll logic strips it
+    const initialHash = window.location.hash ? window.location.hash.replace('#', '') : '';
+
     // Prevent browser from scrolling to hash on page load
     if (window.location.hash) {
         // Temporarily remove hash to prevent auto-scroll
@@ -2965,10 +2965,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize: show section based on hash or first section
     function initializeSections() {
-        // Check URL hash first
-        const hash = window.location.hash.replace('#', '');
-        if (hash && document.getElementById(hash)) {
-            showSection(hash, true); // Prevent scroll on initial load
+        // Use saved initialHash since anti-scroll logic may have stripped it
+        if (initialHash && document.getElementById(initialHash)) {
+            showSection(initialHash, true); // Prevent scroll on initial load
         } else {
             // Show first section
             const firstSection = sections[0];
