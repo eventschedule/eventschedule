@@ -7,6 +7,7 @@ use App\Utils\GeminiUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class BlogController extends Controller
@@ -221,6 +222,7 @@ class BlogController extends Controller
 
         $blogPost = BlogPost::findOrFail(UrlUtils::decodeId($blogPostId));
         $blogPost->delete();
+        Cache::forget('sub_audience_blog_'.$blogPost->slug);
 
         return redirect()->route('blog.admin.index')->with('message', 'Blog post deleted successfully.');
     }
@@ -231,7 +233,9 @@ class BlogController extends Controller
     public function destroySigned(BlogPost $blogPost)
     {
         $title = $blogPost->title;
+        $slug = $blogPost->slug;
         $blogPost->delete();
+        Cache::forget('sub_audience_blog_'.$slug);
 
         return view('blog.deleted-confirmation', compact('title'));
     }

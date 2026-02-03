@@ -255,6 +255,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/plans/{role}/edit', [AdminController::class, 'editPlan'])->name('admin.plans.edit');
         Route::put('/admin/plans/{role}', [AdminController::class, 'updatePlan'])->name('admin.plans.update');
 
+        // Admin queue routes
+        Route::get('/admin/queue', [AdminController::class, 'queue'])->name('admin.queue');
+        Route::post('/admin/queue/retry/{id}', [AdminController::class, 'queueRetry'])->name('admin.queue.retry');
+        Route::post('/admin/queue/delete/{id}', [AdminController::class, 'queueDelete'])->name('admin.queue.delete');
+        Route::post('/admin/queue/retry-all', [AdminController::class, 'queueRetryAll'])->name('admin.queue.retry-all');
+        Route::post('/admin/queue/clear-failed', [AdminController::class, 'queueClearFailed'])->name('admin.queue.clear-failed');
+        Route::post('/admin/queue/flush-pending', [AdminController::class, 'queueFlushPending'])->name('admin.queue.flush-pending');
+
         // Admin blog routes
         Route::get('/admin/blog', [BlogController::class, 'adminIndex'])->name('blog.admin.index');
         Route::get('/admin/blog/create', [BlogController::class, 'create'])->name('blog.create');
@@ -387,6 +395,9 @@ if (config('app.is_nexus')) {
         Route::get('/docs/tickets', [MarketingController::class, 'docsTickets'])->name('marketing.docs.tickets');
         Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
         Route::get('/docs/newsletters', [MarketingController::class, 'docsNewsletters'])->name('marketing.docs.newsletters');
+        Route::get('/docs/analytics', [MarketingController::class, 'docsAnalytics'])->name('marketing.docs.analytics');
+        Route::get('/docs/account-settings', [MarketingController::class, 'docsAccountSettings'])->name('marketing.docs.account_settings');
+        Route::get('/docs/availability', [MarketingController::class, 'docsAvailability'])->name('marketing.docs.availability');
         // Selfhost section
         Route::get('/docs/selfhost', [MarketingController::class, 'docsSelfhostIndex'])->name('marketing.docs.selfhost');
         Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
@@ -496,6 +507,9 @@ if (config('app.is_nexus')) {
             Route::get('/docs/tickets', [MarketingController::class, 'docsTickets'])->name('marketing.docs.tickets');
             Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
             Route::get('/docs/newsletters', [MarketingController::class, 'docsNewsletters'])->name('marketing.docs.newsletters');
+            Route::get('/docs/analytics', [MarketingController::class, 'docsAnalytics'])->name('marketing.docs.analytics');
+            Route::get('/docs/account-settings', [MarketingController::class, 'docsAccountSettings'])->name('marketing.docs.account_settings');
+            Route::get('/docs/availability', [MarketingController::class, 'docsAvailability'])->name('marketing.docs.availability');
             // Selfhost section
             Route::get('/docs/selfhost', [MarketingController::class, 'docsSelfhostIndex'])->name('marketing.docs.selfhost');
             Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
@@ -602,6 +616,9 @@ if (config('app.is_nexus')) {
             Route::get('/docs/tickets', fn () => redirect('https://eventschedule.com/docs/tickets', 301));
             Route::get('/docs/event-graphics', fn () => redirect('https://eventschedule.com/docs/event-graphics', 301));
             Route::get('/docs/newsletters', fn () => redirect('https://eventschedule.com/docs/newsletters', 301));
+            Route::get('/docs/analytics', fn () => redirect('https://eventschedule.com/docs/analytics', 301));
+            Route::get('/docs/account-settings', fn () => redirect('https://eventschedule.com/docs/account-settings', 301));
+            Route::get('/docs/availability', fn () => redirect('https://eventschedule.com/docs/availability', 301));
             // Selfhost section
             Route::get('/docs/selfhost', fn () => redirect('https://eventschedule.com/docs/selfhost', 301));
             Route::get('/docs/selfhost/installation', fn () => redirect('https://eventschedule.com/docs/selfhost/installation', 301));
@@ -703,6 +720,9 @@ if (config('app.is_nexus')) {
     Route::get('/docs/tickets', fn () => redirect()->route('home'));
     Route::get('/docs/event-graphics', fn () => redirect()->route('home'));
     Route::get('/docs/newsletters', fn () => redirect()->route('home'));
+    Route::get('/docs/analytics', fn () => redirect()->route('home'));
+    Route::get('/docs/account-settings', fn () => redirect()->route('home'));
+    Route::get('/docs/availability', fn () => redirect()->route('home'));
     // Selfhost section
     Route::get('/docs/selfhost', fn () => redirect()->route('home'));
     Route::get('/docs/selfhost/installation', fn () => redirect()->route('home'));

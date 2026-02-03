@@ -467,6 +467,7 @@ return [
     'curators' => 'Curadores',
     'curator' => 'Curador',
     'register_curator' => 'Registrar curador',
+    'flyer' => 'Flyer',
     'flyer_image' => 'Imagem do flyer',
     'event_added' => 'Evento adicionado com sucesso',
     'please_select' => 'Por favor selecione',
@@ -1456,4 +1457,7 @@ return [
     'camera_error' => 'Could not access camera. Please check your permissions.',
     'start_camera' => 'Start Camera',
     'select_camera' => 'Select Camera',
+    'footer_text' => 'Footer Text',
+    'edit_prompt' => 'Edit Prompt',
+    'change_camera' => 'Change Camera',
 ];

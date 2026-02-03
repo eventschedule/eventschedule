@@ -71,7 +71,7 @@
     <meta name="twitter:site" content="@ScheduleEvent">
 
     <!-- Structured Data -->
-    <script type="application/ld+json">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
@@ -80,7 +80,7 @@
         "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}"
     }
     </script>
-    <script type="application/ld+json">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "Organization",
@@ -102,7 +102,7 @@
         }
     }
     </script>
-    <script type="application/ld+json">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
@@ -145,7 +145,7 @@
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
         }
     @endphp
-    <script type="application/ld+json">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",

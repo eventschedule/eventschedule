@@ -183,6 +183,43 @@
                         <p class="text-gray-500 dark:text-gray-400 text-sm">Generate shareable images for social media.</p>
                     </div>
                 </a>
+
+                <a href="{{ route('marketing.docs.analytics') }}" class="doc-card block">
+                    <div class="rounded-xl border border-emerald-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900 dark:to-teal-900 hover:border-emerald-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-3">
+                            <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Analytics</h3>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Track views, devices, traffic sources, and conversions.</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('marketing.docs.account_settings') }}" class="doc-card block">
+                    <div class="rounded-xl border border-blue-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-900 dark:to-sky-900 hover:border-blue-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-3">
+                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Account Settings</h3>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Manage your profile, payments, and API access.</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('marketing.docs.availability') }}" class="doc-card block">
+                    <div class="rounded-xl border border-amber-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900 dark:to-orange-900 hover:border-amber-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-3">
+                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Availability Calendar</h3>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Mark your available and unavailable dates.</p>
+                    </div>
+                </a>
             </div>
         </div>
     </section>

@@ -19,6 +19,8 @@ class SyncEventToGoogleCalendar implements ShouldQueue
 
     protected $action; // 'create', 'update', 'delete'
 
+    public $deleteWhenMissingModels = true;
+
     /**
      * Create a new job instance.
      */
@@ -94,7 +96,7 @@ class SyncEventToGoogleCalendar implements ShouldQueue
         } catch (\Exception $e) {
             Log::error('Failed to sync event to Google Calendar', [
                 'event_id' => $this->event->id,
-                'user_id' => $user->id,
+                'user_id' => $this->role->user->id ?? null,
                 'action' => $this->action,
                 'error' => $e->getMessage(),
             ]);

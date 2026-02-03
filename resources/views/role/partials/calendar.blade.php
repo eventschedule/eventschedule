@@ -142,8 +142,12 @@
     // Calculate filter count for mobile display logic
     $filterCount = 0;
     if (isset($role) && $role->groups && $role->groups->count() > 1) $filterCount++;
-    if (count($uniqueCategoryIds ?? []) > 0) $filterCount++;
+    if (count($uniqueCategoryIds ?? []) > 1) $filterCount++;
     if ($hasOnlineEvents) $filterCount++;
+
+    $hasDesktopFilters = (isset($role) && $role->groups && $role->groups->count() > 1)
+        || count($uniqueCategoryIds ?? []) > 1
+        || $hasOnlineEvents;
 
     $accentColor = isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA';
     $contrastColor = accent_contrast_color($accentColor);
@@ -153,7 +157,7 @@
 <div>
 
 @if (! request()->graphic)
-<header class="{{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}" :class="currentView === 'list' ? 'pt-0 pb-0' : 'pt-2 pb-4'">
+<header class="{{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}" :class="currentView === 'list' ? '{{ $hasDesktopFilters ? 'pt-2 pb-4' : 'pt-0 pb-0' }}' : 'pt-2 pb-4'">
     {{-- Main container: Stacks content on mobile, aligns in a row on desktop. --}}
     <div class="flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-4">
 
@@ -179,7 +183,7 @@
                 @endif
 
                 {{-- Category Select --}}
-                @if(count($uniqueCategoryIds ?? []) > 0)
+                @if(count($uniqueCategoryIds ?? []) > 1)
                     <select v-model="selectedCategory" style="font-family: sans-serif" class="py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 min-w-[180px] hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
                         <option value="">{{ __('messages.all_categories') }}</option>
                         <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
@@ -200,13 +204,13 @@
             <div class="md:hidden flex flex-col gap-2 w-full">
                 @if($filterCount == 1)
                     {{-- Single filter: show directly without button --}}
-                    @if($hasOnlineEvents && !(isset($role) && $role->groups && $role->groups->count() > 1) && count($uniqueCategoryIds ?? []) == 0)
+                    @if($hasOnlineEvents && !(isset($role) && $role->groups && $role->groups->count() > 1) && count($uniqueCategoryIds ?? []) <= 1)
                         {{-- Only online filter --}}
                         <label class="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
                             <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
                             <span class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.online') }}</span>
                         </label>
-                    @elseif(isset($role) && $role->groups && $role->groups->count() > 1 && !$hasOnlineEvents && count($uniqueCategoryIds ?? []) == 0)
+                    @elseif(isset($role) && $role->groups && $role->groups->count() > 1 && !$hasOnlineEvents && count($uniqueCategoryIds ?? []) <= 1)
                         {{-- Only schedule filter --}}
                         <select v-model="selectedGroup" style="font-family: sans-serif" class="w-full py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
                             <option value="">{{ __('messages.all_schedules') }}</option>
@@ -214,7 +218,7 @@
                                 <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
                             @endforeach
                         </select>
-                    @elseif(count($uniqueCategoryIds ?? []) > 0 && !$hasOnlineEvents && !(isset($role) && $role->groups && $role->groups->count() > 1))
+                    @elseif(count($uniqueCategoryIds ?? []) > 1 && !$hasOnlineEvents && !(isset($role) && $role->groups && $role->groups->count() > 1))
                         {{-- Only category filter --}}
                         <select v-model="selectedCategory" style="font-family: sans-serif" class="w-full py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
                             <option value="">{{ __('messages.all_categories') }}</option>
@@ -294,7 +298,7 @@
             @endif
 
             {{-- Month Navigation Controls --}}
-            <div v-show="currentView === 'calendar'" class="flex items-center bg-white dark:bg-gray-800 rounded-md shadow-sm hidden md:flex">
+            <div v-show="currentView === 'calendar'" class="flex items-center bg-white/95 dark:bg-gray-900/95 rounded-md shadow-sm hidden md:flex">
                 <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-s-md border-s border-y border-gray-300 dark:border-gray-600 pe-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:pe-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
                     <span class="sr-only">{{ __('messages.previous_month') }}</span>
                     <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
@@ -336,7 +340,7 @@
             <div
                 class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-center text-xs font-semibold leading-6 text-gray-700 dark:text-gray-300">
                 @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $day)
-                <div class="flex justify-center bg-white dark:bg-gray-800 py-2">
+                <div class="flex justify-center bg-white dark:bg-gray-900 py-2">
                     {{ __('messages.' . $day) }}
                 </div>
                 @endforeach
@@ -360,24 +364,24 @@
                     }
                 }
                 @endphp
-                <div class="cursor-pointer relative {{ count($unavailable) ? ($currentDate->month == $month ? 'bg-orange-50 dark:bg-orange-900/30 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-orange-50 dark:bg-orange-900/30 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-500 dark:text-gray-400') : ($currentDate->month == $month ? 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600') }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
+                <div class="cursor-pointer relative {{ count($unavailable) ? ($currentDate->month == $month ? 'bg-orange-50 dark:bg-orange-900/30 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-orange-50 dark:bg-orange-900/30 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-500 dark:text-gray-400') : ($currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600') }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
                     onclick="window.location = '{{ route('event.create', ['subdomain' => $role->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}';">
                     @elseif ($route == 'admin' && $tab == 'availability' && $role->email_verified_at)
-                        <div class="{{ $tab == 'availability' && $currentDate->month != $month ? 'hidden md:block' : '' }} cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600 day-element" data-date="{{ $currentDate->format('Y-m-d') }}">
+                        <div class="{{ $tab == 'availability' && $currentDate->month != $month ? 'hidden md:block' : '' }} cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600 day-element" data-date="{{ $currentDate->format('Y-m-d') }}">
                         @if (is_array($datesUnavailable) && in_array($currentDate->format('Y-m-d'), $datesUnavailable))
                             <div class="day-x"></div>
                         @endif
                     @elseif ($route == 'home' && auth()->check())
                         @if ($firstRole)
-                        <div class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
+                        <div class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
                             onclick="window.location = '{{ route('event.create', ['subdomain' => $firstRole->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}';">
                         @else
                         <div
-                            class="relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
+                            class="relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
                         @endif
                     @else
                     <div
-                        class="relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
+                        class="relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
                         @endif
                         <div class="flex justify-between">
                         @if ($route == 'admin')
@@ -414,7 +418,7 @@
                                               class="hover:underline truncate" dir="auto" v-text="getEventDisplayName(event)">
                                         </span>
                                         <span v-if="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1" 
-                                              class="text-gray-400 dark:text-gray-500 truncate" v-text="getEventTime(event)">
+                                              class="text-gray-500 dark:text-gray-400 truncate" v-text="getEventTime(event)">
                                         </span>
                                     </p>
                                 </a>
@@ -442,7 +446,7 @@
                 <div id="mobileEventsList" class="space-y-6">
                     <template v-for="(group, groupIndex) in eventsGroupedByDate" :key="'date-' + group.date">
                         {{-- Date Header --}}
-                        <div class="sticky top-0 z-10 -mx-4 px-4 {{ (isset($force_mobile) && $force_mobile) ? 'bg-[#F5F9FE] dark:bg-gray-800' : 'bg-white dark:bg-gray-800' }}"
+                        <div class="sticky top-0 z-10 -mx-4 px-4 {{ (isset($force_mobile) && $force_mobile) ? 'bg-[#F5F9FE] dark:bg-gray-800' : 'bg-white dark:bg-gray-900' }}"
                             :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
                             <div class="px-4 pb-5 pt-3 flex items-center gap-4">
                                 <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
@@ -456,21 +460,21 @@
                                 <div v-if="isEventVisible(event)"
                                      @click="navigateToEvent(event, $event)"
                                      class="block cursor-pointer">
-                                    <div class="event-item bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-600"
+                                    <div class="event-item bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50/95 dark:hover:bg-gray-800/95"
                                         :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
                                         <div class="flex" :class="isRtl ? 'flex-row-reverse' : ''">
                                             {{-- Content Section --}}
                                             <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
                                                 <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
                                                 <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 hover:opacity-80 transition-opacity">
-                                                    <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                                                    <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
                                                     </svg>
                                                     <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
                                                 </a>
                                                 <div v-else-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                                    <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                                                    <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
                                                     </svg>
                                                     <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
                                                 </div>
@@ -513,9 +517,17 @@
         <div v-show="currentView === 'list'" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Upcoming Events --}}
             <div v-if="allListEvents.length" class="space-y-4">
-                <template v-for="event in allListEvents" :key="'list-' + event.uniqueKey">
+                <template v-for="(event, eventIndex) in allListEvents" :key="'list-' + event.uniqueKey">
+                    <div v-if="event._isPast && (eventIndex === 0 || !allListEvents[eventIndex - 1]._isPast)"
+                         class="py-4 flex items-center gap-4">
+                        <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-full px-4 py-1 bg-white dark:bg-gray-900">
+                            {{ __('messages.past_events') }}
+                        </span>
+                        <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                    </div>
                     <div @click="navigateToEvent(event, $event)" class="block cursor-pointer">
-                        <div class="rounded-2xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white dark:bg-gray-800">
+                        <div class="rounded-2xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
                             {{-- Side-by-side layout when flyer image exists --}}
                             <template v-if="event.image_url">
                                 <div class="flex flex-col md:flex-row" :class="isRtl ? 'md:flex-row-reverse' : ''">
@@ -526,7 +538,7 @@
 
                                         {{-- Date Badge --}}
                                         <div v-if="event.occurrenceDate" class="flex items-center gap-4">
-                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col items-center justify-center shadow-sm">
+                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
                                                 <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1" style="color: {{ $accentColor }}" v-text="getMonthAbbr(event.occurrenceDate)"></span>
                                                 <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none" v-text="getDayNum(event.occurrenceDate)"></span>
                                             </div>
@@ -541,9 +553,9 @@
 
                                         {{-- Venue Badge --}}
                                         <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="flex items-center gap-4 hover:opacity-80 transition-opacity">
-                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                                 <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
-                                                <svg v-else width="28" height="28" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
+                                                <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
                                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
                                                 </svg>
                                             </div>
@@ -553,9 +565,9 @@
                                             </svg>
                                         </a>
                                         <div v-else-if="event.venue_name" class="flex items-center gap-4">
-                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                                 <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
-                                                <svg v-else width="28" height="28" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
+                                                <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
                                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
                                                 </svg>
                                             </div>
@@ -615,10 +627,10 @@
                                                         <div class="absolute top-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 -start-[3px]" :style="'background-color: {{ $accentColor }}'"></div>
                                                         <div class="ps-3">
                                                             <span class="text-sm text-gray-700 dark:text-gray-300" v-text="part.name"></span>
-                                                            <span v-if="part.start_time" class="text-xs ms-1 text-gray-400 dark:text-gray-500" v-text="part.start_time"></span>
+                                                            <span v-if="part.start_time" class="text-xs ms-1 text-gray-500 dark:text-gray-400" v-text="part.start_time"></span>
                                                         </div>
                                                     </div>
-                                                    <div v-if="event.parts.length > 4" class="text-xs text-gray-400 dark:text-gray-500 ps-3">
+                                                    <div v-if="event.parts.length > 4" class="text-xs text-gray-500 dark:text-gray-400 ps-3">
                                                         +<span v-text="event.parts.length - 4"></span> {{ __('messages.more') }}
                                                     </div>
                                                 </div>
@@ -696,7 +708,7 @@
                                         </form>
                                     </div>
                                     {{-- Flyer Image Column --}}
-                                    <div class="md:w-[38%] md:flex-shrink-0">
+                                    <div class="md:w-[35%] md:flex-shrink-0">
                                         <img :src="event.image_url" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name">
                                     </div>
                                 </div>
@@ -717,7 +729,7 @@
 
                                     {{-- Date Badge --}}
                                     <div v-if="event.occurrenceDate" class="flex items-center gap-4">
-                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col items-center justify-center shadow-sm">
+                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
                                             <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1" style="color: {{ $accentColor }}" v-text="getMonthAbbr(event.occurrenceDate)"></span>
                                             <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none" v-text="getDayNum(event.occurrenceDate)"></span>
                                         </div>
@@ -732,9 +744,9 @@
 
                                     {{-- Venue Badge --}}
                                     <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="flex items-center gap-4 hover:opacity-80 transition-opacity">
-                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                             <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
-                                            <svg v-else width="28" height="28" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
+                                            <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
                                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
                                             </svg>
                                         </div>
@@ -744,9 +756,9 @@
                                         </svg>
                                     </a>
                                     <div v-else-if="event.venue_name" class="flex items-center gap-4">
-                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                             <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
-                                            <svg v-else width="28" height="28" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
+                                            <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
                                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
                                             </svg>
                                         </div>
@@ -806,10 +818,10 @@
                                                     <div class="absolute top-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 -start-[3px]" :style="'background-color: {{ $accentColor }}'"></div>
                                                     <div class="ps-3">
                                                         <span class="text-sm text-gray-700 dark:text-gray-300" v-text="part.name"></span>
-                                                        <span v-if="part.start_time" class="text-xs ms-1 text-gray-400 dark:text-gray-500" v-text="part.start_time"></span>
+                                                        <span v-if="part.start_time" class="text-xs ms-1 text-gray-500 dark:text-gray-400" v-text="part.start_time"></span>
                                                     </div>
                                                 </div>
-                                                <div v-if="event.parts.length > 4" class="text-xs text-gray-400 dark:text-gray-500 ps-3">
+                                                <div v-if="event.parts.length > 4" class="text-xs text-gray-500 dark:text-gray-400 ps-3">
                                                     +<span v-text="event.parts.length - 4"></span> {{ __('messages.more') }}
                                                 </div>
                                             </div>
@@ -922,6 +934,15 @@
             {{-- All events grouped by date --}}
             <div v-if="allMobileListGroups.length > 0" class="space-y-6">
                 <template v-for="(group, groupIndex) in allMobileListGroups" :key="'list-m-' + group.date">
+                    {{-- Past Events Divider --}}
+                    <div v-if="group.events.every(e => e._isPast) && (groupIndex === 0 || !allMobileListGroups[groupIndex - 1].events.every(e => e._isPast))"
+                         class="py-1 flex items-center gap-4">
+                        <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-full px-4 py-1 bg-white dark:bg-gray-900">
+                            {{ __('messages.past_events') }}
+                        </span>
+                        <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                    </div>
                     {{-- Date Header --}}
                     <div class="sticky top-0 z-10 -mx-4 px-4 bg-white dark:bg-gray-800">
                         <div class="px-4 pb-5 pt-3 flex items-center gap-4">
@@ -934,19 +955,19 @@
                     <div class="space-y-3">
                         <template v-for="event in group.events" :key="'list-mob-' + event.uniqueKey">
                             <div v-if="isEventVisible(event)" @click="navigateToEvent(event, $event)" class="block cursor-pointer">
-                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <div class="flex">
                                         <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
                                             <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
                                             <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 hover:opacity-80 transition-opacity">
-                                                <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                                                <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
                                                 </svg>
                                                 <span class="truncate hover:underline" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
                                             </a>
                                             <div v-else-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                                <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                                                <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
                                                 </svg>
                                                 <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
                                             </div>
@@ -1051,7 +1072,7 @@
         @endif
 
         {{-- Category Filter --}}
-        @if(count($uniqueCategoryIds ?? []) > 0)
+        @if(count($uniqueCategoryIds ?? []) > 1)
         <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.category') }}</label>
             <select v-model="selectedCategory" style="font-family: sans-serif"
@@ -1083,8 +1104,8 @@
             <h3 id="event-popup-title" class="event-popup-title"></h3>
             <div class="event-popup-details">
                 <div id="event-popup-venue" class="event-popup-detail" style="display: none;">
-                    <svg class="event-popup-icon" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                    <svg class="event-popup-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
                     </svg>
                     <span id="event-popup-venue-text"></span>
                 </div>
@@ -1498,7 +1519,7 @@ const calendarApp = createApp({
         toggleView(view) {
             this.currentView = view;
             this.updatePanelWrapper(view);
-            window.dispatchEvent(new CustomEvent('calendar-view-changed', {detail: view}));
+            this.updateOuterContainers(view);
             if (this.subdomain) {
                 try {
                     localStorage.setItem('es_view_' + this.subdomain, view);
@@ -1522,6 +1543,42 @@ const calendarApp = createApp({
                     wrapper.style.paddingLeft = '';
                     wrapper.style.paddingRight = '';
                     wrapper.style.paddingBottom = '';
+                }
+            }
+        },
+        updateOuterContainers(view) {
+            const maxWidth = view === 'list' ? '56rem' : '200rem';
+            document.querySelectorAll('[data-view-width]').forEach(el => {
+                el.style.maxWidth = maxWidth;
+            });
+            const listBtn = document.getElementById('toggle-list-btn');
+            const calBtn = document.getElementById('toggle-calendar-btn');
+            const accentColor = (listBtn && listBtn.dataset.accent) || (calBtn && calBtn.dataset.accent) || '{{ $accentColor ?? "#4E81FA" }}';
+            const contrastColor = (listBtn && listBtn.dataset.contrast) || (calBtn && calBtn.dataset.contrast) || '{{ $contrastColor ?? "#FFFFFF" }}';
+            if (listBtn) {
+                if (view === 'list') {
+                    listBtn.style.backgroundColor = accentColor;
+                    listBtn.style.color = contrastColor;
+                    listBtn.className = listBtn.className.replace(/\btext-gray-700\b/g, '').replace(/\bdark:text-gray-300\b/g, '').replace(/\bhover:bg-gray-50\b/g, '').replace(/\bdark:hover:bg-gray-700\b/g, '');
+                } else {
+                    listBtn.style.backgroundColor = '';
+                    listBtn.style.color = '';
+                    if (!listBtn.className.includes('text-gray-700')) {
+                        listBtn.className += ' text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700';
+                    }
+                }
+            }
+            if (calBtn) {
+                if (view === 'calendar') {
+                    calBtn.style.backgroundColor = accentColor;
+                    calBtn.style.color = contrastColor;
+                    calBtn.className = calBtn.className.replace(/\btext-gray-700\b/g, '').replace(/\bdark:text-gray-300\b/g, '').replace(/\bhover:bg-gray-50\b/g, '').replace(/\bdark:hover:bg-gray-700\b/g, '');
+                } else {
+                    calBtn.style.backgroundColor = '';
+                    calBtn.style.color = '';
+                    if (!calBtn.className.includes('text-gray-700')) {
+                        calBtn.className += ' text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700';
+                    }
                 }
             }
         },
@@ -2001,6 +2058,7 @@ const calendarApp = createApp({
                 const saved = localStorage.getItem('es_view_' + this.subdomain);
                 if (saved && ['calendar', 'list'].includes(saved)) {
                     this.currentView = saved;
+                    this.updateOuterContainers(saved);
                 }
             } catch (e) {
                 // localStorage not available
