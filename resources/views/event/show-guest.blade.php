@@ -90,7 +90,7 @@
               {{-- Profile image overlapping header --}}
               @if ($each->profile_image_url)
                 <div class="rounded-xl w-[100px] h-[100px] -mt-[60px] bg-white dark:bg-gray-900 p-[5px] mb-3">
-                  @if ($each->isClaimed())
+                  @if ($each->isClaimed() && $each->subdomain !== $role->subdomain)
                     @php
                       $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
                       $tQueryParams = [];
@@ -125,7 +125,7 @@
             <div class="p-5">
               {{-- Profile image (no header) --}}
               @if ($each->profile_image_url)
-                @if ($each->isClaimed())
+                @if ($each->isClaimed() && $each->subdomain !== $role->subdomain)
                   @php
                     $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
                     $tQueryParams = [];
@@ -158,7 +158,7 @@
               <div class="flex flex-col gap-4">
                 {{-- Name + follow/manage button --}}
                 <div class="flex items-center justify-between">
-                  @if ($each->isClaimed())
+                  @if ($each->isClaimed() && $each->subdomain !== $role->subdomain)
                     @if (!isset($talentUrl))
                       @php
                         $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
@@ -283,7 +283,7 @@
               <img class="w-full aspect-square object-cover rounded-xl mb-3" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
             @endif
             <div class="flex flex-col gap-2">
-              @if ($event->venue->isClaimed())
+              @if ($event->venue->isClaimed() && $event->venue->subdomain !== $role->subdomain)
                 @php
                   $venuePanelUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
                 @endphp
@@ -511,7 +511,7 @@
           <div class="flex flex-col">
             <span>
               @if ($event->venue && $event->venue->translatedName())
-                @if ($event->venue->isClaimed())
+                @if ($event->venue->isClaimed() && $event->venue->subdomain !== $role->subdomain)
                   @php
                     $venueUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
                     $queryParams = [];
