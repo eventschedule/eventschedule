@@ -1588,9 +1588,10 @@ const calendarApp = createApp({
                     listBtn.className = listBtn.className.replace(/\btext-gray-700\b/g, '').replace(/\bdark:text-gray-300\b/g, '').replace(/\bhover:bg-gray-50\b/g, '').replace(/\bdark:hover:bg-gray-700\b/g, '');
                 } else {
                     listBtn.style.backgroundColor = '';
-                    listBtn.style.color = '';
-                    if (!listBtn.className.includes('text-gray-700')) {
-                        listBtn.className += ' text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700';
+                    listBtn.style.color = accentColor;
+                    listBtn.className = listBtn.className.replace(/\btext-gray-700\b/g, '').replace(/\bdark:text-gray-300\b/g, '');
+                    if (!listBtn.className.includes('hover:bg-gray-50')) {
+                        listBtn.className += ' hover:bg-gray-50 dark:hover:bg-gray-700';
                     }
                 }
             }
@@ -1601,9 +1602,10 @@ const calendarApp = createApp({
                     calBtn.className = calBtn.className.replace(/\btext-gray-700\b/g, '').replace(/\bdark:text-gray-300\b/g, '').replace(/\bhover:bg-gray-50\b/g, '').replace(/\bdark:hover:bg-gray-700\b/g, '');
                 } else {
                     calBtn.style.backgroundColor = '';
-                    calBtn.style.color = '';
-                    if (!calBtn.className.includes('text-gray-700')) {
-                        calBtn.className += ' text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700';
+                    calBtn.style.color = accentColor;
+                    calBtn.className = calBtn.className.replace(/\btext-gray-700\b/g, '').replace(/\bdark:text-gray-300\b/g, '');
+                    if (!calBtn.className.includes('hover:bg-gray-50')) {
+                        calBtn.className += ' hover:bg-gray-50 dark:hover:bg-gray-700';
                     }
                 }
             }
