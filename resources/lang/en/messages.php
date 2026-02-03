@@ -164,6 +164,7 @@ return [
     'italian' => 'Italian',
     'portuguese' => 'Portuguese',
     'spanish' => 'Spanish',
+    'estonian' => 'Estonian',
     'sun' => 'Sun',
     'mon' => 'Mon',
     'tue' => 'Tue',

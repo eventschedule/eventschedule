@@ -172,6 +172,7 @@ return [
         'it', // Italian
         'nl', // Dutch
         'pt', // Portuguese
+        'et', // Estonian
     ],
 
 ];
