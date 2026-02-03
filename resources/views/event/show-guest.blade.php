@@ -90,7 +90,7 @@
               {{-- Profile image overlapping header --}}
               @if ($each->profile_image_url)
                 <div class="rounded-xl w-[100px] h-[100px] -mt-[60px] bg-white dark:bg-gray-900 p-[5px] mb-3">
-                  @if ($each->isClaimed() && $each->subdomain !== $role->subdomain)
+                  @if ($each->isClaimed())
                     @php
                       $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
                       $tQueryParams = [];
@@ -125,7 +125,7 @@
             <div class="p-5">
               {{-- Profile image (no header) --}}
               @if ($each->profile_image_url)
-                @if ($each->isClaimed() && $each->subdomain !== $role->subdomain)
+                @if ($each->isClaimed())
                   @php
                     $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
                     $tQueryParams = [];
@@ -158,7 +158,7 @@
               <div class="flex flex-col gap-4">
                 {{-- Name + follow/manage button --}}
                 <div class="flex items-center justify-between">
-                  @if ($each->isClaimed() && $each->subdomain !== $role->subdomain)
+                  @if ($each->isClaimed())
                     @if (!isset($talentUrl))
                       @php
                         $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
@@ -226,14 +226,14 @@
 
                 {{-- Description with expand/collapse --}}
                 @if ($each->description_html)
-                  <div x-data="{ expanded: false }">
-                    <div x-show="!expanded" class="text-sm text-gray-700 dark:text-gray-300 line-clamp-3 custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
+                  <div x-data="{ expanded: false, needsExpand: false }" x-init="$nextTick(() => { let el = $refs.collapsed; needsExpand = el.scrollHeight > el.clientHeight })">
+                    <div x-show="!expanded" x-ref="collapsed" class="text-sm text-gray-700 dark:text-gray-300 line-clamp-3 custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
                       {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
                     </div>
                     <div x-show="expanded" x-cloak class="text-sm text-gray-700 dark:text-gray-300 custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
                       {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
                     </div>
-                    <button x-show="!expanded" :aria-expanded="expanded" @click="expanded = true" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
+                    <button x-show="!expanded && needsExpand" :aria-expanded="expanded" @click="expanded = true" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
                       {{ __('messages.read_more') }}
                     </button>
                     <button x-show="expanded" x-cloak :aria-expanded="expanded" @click="expanded = false" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
@@ -283,7 +283,7 @@
               <img class="w-full aspect-square object-cover rounded-xl mb-3" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
             @endif
             <div class="flex flex-col gap-2">
-              @if ($event->venue->isClaimed() && $event->venue->subdomain !== $role->subdomain)
+              @if ($event->venue->isClaimed())
                 @php
                   $venuePanelUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
                 @endphp
@@ -301,14 +301,14 @@
                 </h2>
               @endif
               @if ($event->venue->translatedDescription())
-                <div x-data="{ expanded: false }">
-                  <div x-show="!expanded" class="text-sm text-gray-700 dark:text-gray-300 line-clamp-3 custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
+                <div x-data="{ expanded: false, needsExpand: false }" x-init="$nextTick(() => { let el = $refs.collapsed; needsExpand = el.scrollHeight > el.clientHeight })">
+                  <div x-show="!expanded" x-ref="collapsed" class="text-sm text-gray-700 dark:text-gray-300 line-clamp-3 custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
                     {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->venue->translatedDescription()) !!}
                   </div>
                   <div x-show="expanded" x-cloak class="text-sm text-gray-700 dark:text-gray-300 custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
                     {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->venue->translatedDescription()) !!}
                   </div>
-                  <button x-show="!expanded" :aria-expanded="expanded" @click="expanded = true" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
+                  <button x-show="!expanded && needsExpand" :aria-expanded="expanded" @click="expanded = true" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
                     {{ __('messages.read_more') }}
                   </button>
                   <button x-show="expanded" x-cloak :aria-expanded="expanded" @click="expanded = false" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
@@ -375,18 +375,21 @@
                 <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
               </svg>
               Google Calendar
+              <svg class="ml-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
             </a>
             <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 py-3 text-sm text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100">
               <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
               </svg>
               Apple Calendar
+              <svg class="ml-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
             </a>
             <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 py-3 text-sm text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100">
               <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
               </svg>
               Microsoft Outlook
+              <svg class="ml-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
             </a>
           </div>
         </div>
@@ -511,7 +514,7 @@
           <div class="flex flex-col">
             <span>
               @if ($event->venue && $event->venue->translatedName())
-                @if ($event->venue->isClaimed() && $event->venue->subdomain !== $role->subdomain)
+                @if ($event->venue->isClaimed())
                   @php
                     $venueUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
                     $queryParams = [];
@@ -547,7 +550,7 @@
             </span>
             @if ($event->venue && $event->venue->shortAddress())
             <span class="text-sm text-gray-500 dark:text-gray-400">
-              <x-link href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank" hideIcon>
+              <x-link href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank">
                 {{ $event->venue->shortAddress() }}
               </x-link>
             </span>
@@ -592,18 +595,21 @@
                         <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
                         </svg>
                         Google Calendar
+                        <svg class="ml-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                     </a>
                     <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-1">
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
                         </svg>
                         Apple Calendar
+                        <svg class="ml-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                     </a>
                     <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-2">
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
                         </svg>
                         Microsoft Outlook
+                        <svg class="ml-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                     </a>
                 </div>
             </div>
@@ -626,18 +632,21 @@
                   <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
                 </svg>
                 Google Calendar
+                <svg class="ml-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
               </a>
               <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
                 <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
                 </svg>
                 Apple Calendar
+                <svg class="ml-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
               </a>
               <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
                 <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
                 </svg>
                 Microsoft Outlook
+                <svg class="ml-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
               </a>
             </div>
           </div>

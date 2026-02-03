@@ -86,6 +86,7 @@
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z"/>
                   </svg>
                   {{ $role->shortAddress() }}
+                  <svg class="ml-1 h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                 </a>
                 @endif
               </div>
@@ -184,6 +185,7 @@
               {{-- Description below --}}
               @if($role->translatedDescription())
               <div class="text-start w-full mt-2">
+                @if(str_word_count(strip_tags($role->translatedDescription())) > 5)
                 <div x-data="{ expanded: false }" class="text-sm text-[#33383C] dark:text-gray-300">
                   <span x-show="!expanded" class="description-collapsed">
                     {{ Str::words(strip_tags($role->translatedDescription()), 5, '') }}...
@@ -200,6 +202,11 @@
                     </button>
                   </div>
                 </div>
+                @else
+                <div class="text-sm text-[#33383C] dark:text-gray-300 custom-content [&>*:first-child]:mt-0">
+                  {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
+                </div>
+                @endif
               </div>
               @endif
             </div>
@@ -221,6 +228,7 @@
                       <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z"/>
                     </svg>
                     {{ $role->shortAddress() }}
+                    <svg class="ml-1 h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                   </a>
                   @endif
                 </div>
@@ -343,6 +351,7 @@
 
               {{-- Description below (full width) --}}
               @if($role->translatedDescription())
+              @if(str_word_count(strip_tags($role->translatedDescription())) > 5)
               <div x-data="{ expanded: false }" class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
                 <span x-show="!expanded" class="description-collapsed">
                   {{ Str::words(strip_tags($role->translatedDescription()), 5, '') }}...
@@ -359,6 +368,11 @@
                   </button>
                 </div>
               </div>
+              @else
+              <div class="mt-2 text-sm text-[#33383C] dark:text-gray-300 custom-content [&>*:first-child]:mt-0">
+                {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
+              </div>
+              @endif
               @endif
             </div>
             <!--
