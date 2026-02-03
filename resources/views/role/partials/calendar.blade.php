@@ -1550,10 +1550,32 @@ const calendarApp = createApp({
                 }
             }
         },
-        updateOuterContainers(view) {
+        updateOuterContainers(view, animate = true) {
             const maxWidth = view === 'list' ? '56rem' : '200rem';
             document.querySelectorAll('[data-view-width]').forEach(el => {
+                const prevMaxWidth = el.style.maxWidth;
                 el.style.maxWidth = maxWidth;
+                if (animate) {
+                    const anim = view === 'calendar' ? 'view-toggle-bounce-expand' : 'view-toggle-bounce-shrink';
+                    const playBounce = () => {
+                        el.style.animation = 'none';
+                        el.offsetHeight;
+                        el.style.animation = anim + ' 0.4s ease-out';
+                        el.addEventListener('animationend', function handler() {
+                            el.style.animation = '';
+                            el.removeEventListener('animationend', handler);
+                        });
+                    };
+                    if (view === 'calendar' || prevMaxWidth === maxWidth) {
+                        playBounce();
+                    } else {
+                        el.addEventListener('transitionend', function handler(e) {
+                            if (e.propertyName !== 'max-width') return;
+                            el.removeEventListener('transitionend', handler);
+                            playBounce();
+                        });
+                    }
+                }
             });
             const listBtn = document.getElementById('toggle-list-btn');
             const calBtn = document.getElementById('toggle-calendar-btn');
@@ -2062,7 +2084,7 @@ const calendarApp = createApp({
                 const saved = localStorage.getItem('es_view_' + this.subdomain);
                 if (saved && ['calendar', 'list'].includes(saved)) {
                     this.currentView = saved;
-                    this.updateOuterContainers(saved);
+                    this.updateOuterContainers(saved, false);
                 }
             } catch (e) {
                 // localStorage not available
