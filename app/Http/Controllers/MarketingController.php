@@ -672,6 +672,30 @@ class MarketingController extends Controller
         ], $this->getDocNavigation('marketing.docs.event_graphics')));
     }
 
+    /**
+     * Analytics documentation page
+     */
+    public function docsAnalytics()
+    {
+        return view('marketing.docs.analytics', $this->getDocNavigation('marketing.docs.analytics'));
+    }
+
+    /**
+     * Account Settings documentation page
+     */
+    public function docsAccountSettings()
+    {
+        return view('marketing.docs.account-settings', $this->getDocNavigation('marketing.docs.account_settings'));
+    }
+
+    /**
+     * Availability Calendar documentation page
+     */
+    public function docsAvailability()
+    {
+        return view('marketing.docs.availability', $this->getDocNavigation('marketing.docs.availability'));
+    }
+
     // ==========================================
     // Selfhost Section
     // ==========================================
@@ -1251,6 +1275,9 @@ class MarketingController extends Controller
             ['route' => 'marketing.docs.newsletters', 'title' => 'Newsletters'],
             ['route' => 'marketing.docs.tickets', 'title' => 'Selling Tickets'],
             ['route' => 'marketing.docs.event_graphics', 'title' => 'Event Graphics'],
+            ['route' => 'marketing.docs.analytics', 'title' => 'Analytics'],
+            ['route' => 'marketing.docs.account_settings', 'title' => 'Account Settings'],
+            ['route' => 'marketing.docs.availability', 'title' => 'Availability Calendar'],
         ];
 
         $currentIndex = null;
