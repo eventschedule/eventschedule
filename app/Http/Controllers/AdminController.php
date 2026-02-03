@@ -523,12 +523,22 @@ class AdminController extends Controller
             ->where('subdomain', 'not like', 'demo-%');
 
         $googleCalendarEnabled = (clone $baseRoleQuery)->whereNotNull('google_calendar_id')->count();
-        $stripeEnabled = (clone $baseRoleQuery)->whereNotNull('stripe_id')->count();
+        $stripeConnected = (clone $baseRoleQuery)->whereHas('user', function ($q) {
+            $q->whereNotNull('stripe_account_id');
+        })->count();
+        $stripeOnboarded = (clone $baseRoleQuery)->whereHas('user', function ($q) {
+            $q->whereNotNull('stripe_completed_at');
+        })->count();
+        $stripeEvents = (clone $baseRoleQuery)->whereHas('events', function ($q) {
+            $q->where('payment_method', 'stripe');
+        })->count();
         $customDomainEnabled = (clone $baseRoleQuery)->whereNotNull('custom_domain')->count();
         $customCssEnabled = (clone $baseRoleQuery)->whereNotNull('custom_css')->where('custom_css', '!=', '')->count();
 
         $googleCalendarPercent = $totalSchedules > 0 ? round(($googleCalendarEnabled / $totalSchedules) * 100, 1) : 0;
-        $stripePercent = $totalSchedules > 0 ? round(($stripeEnabled / $totalSchedules) * 100, 1) : 0;
+        $stripeConnectedPercent = $totalSchedules > 0 ? round(($stripeConnected / $totalSchedules) * 100, 1) : 0;
+        $stripeOnboardedPercent = $totalSchedules > 0 ? round(($stripeOnboarded / $totalSchedules) * 100, 1) : 0;
+        $stripeEventsPercent = $totalSchedules > 0 ? round(($stripeEvents / $totalSchedules) * 100, 1) : 0;
         $customDomainPercent = $totalSchedules > 0 ? round(($customDomainEnabled / $totalSchedules) * 100, 1) : 0;
         $customCssPercent = $totalSchedules > 0 ? round(($customCssEnabled / $totalSchedules) * 100, 1) : 0;
 
@@ -551,11 +561,15 @@ class AdminController extends Controller
             'emailViews',
             'otherViews',
             'googleCalendarEnabled',
-            'stripeEnabled',
+            'stripeConnected',
+            'stripeOnboarded',
+            'stripeEvents',
             'customDomainEnabled',
             'customCssEnabled',
             'googleCalendarPercent',
-            'stripePercent',
+            'stripeConnectedPercent',
+            'stripeOnboardedPercent',
+            'stripeEventsPercent',
             'customDomainPercent',
             'customCssPercent',
             'topSchedulesByEvents',

@@ -107,10 +107,10 @@
                 <div>
                     <div class="flex items-center justify-between mb-1">
                         <span class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.stripe_payments')</span>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $stripePercent }}% ({{ number_format($stripeEnabled) }} @lang('messages.schedules'))</span>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $stripeEventsPercent }}% ({{ number_format($stripeEvents) }} @lang('messages.schedules'))</span>
                     </div>
                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                        <div class="bg-green-600 h-2.5 rounded-full" style="width: {{ min($stripePercent, 100) }}%"></div>
+                        <div class="bg-green-600 h-2.5 rounded-full" style="width: {{ min($stripeEventsPercent, 100) }}%"></div>
                     </div>
                 </div>
                 <div>
@@ -135,6 +135,21 @@
             <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">
                 @lang('messages.based_on_total_schedules', ['count' => number_format($totalSchedules)])
             </p>
+        </div>
+
+        {{-- Stripe Funnel --}}
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.stripe_funnel')</h3>
+            <div class="h-48">
+                <canvas id="stripeFunnelChart"></canvas>
+            </div>
+            <div class="mt-4 flex items-center justify-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                <span>{{ number_format($stripeConnected) }}</span>
+                <span>&rarr; {{ $stripeConnected > 0 ? round(($stripeOnboarded / $stripeConnected) * 100) : 0 }}%</span>
+                <span>{{ number_format($stripeOnboarded) }}</span>
+                <span>&rarr; {{ $stripeOnboarded > 0 ? round(($stripeEvents / $stripeOnboarded) * 100) : 0 }}%</span>
+                <span>{{ number_format($stripeEvents) }}</span>
+            </div>
         </div>
 
         {{-- Top Schedules by Events --}}
@@ -225,6 +240,50 @@
                             ticks: {
                                 color: textColor,
                                 precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Stripe Funnel Chart
+            const stripeFunnelCtx = document.getElementById('stripeFunnelChart').getContext('2d');
+            new Chart(stripeFunnelCtx, {
+                type: 'bar',
+                data: {
+                    labels: [@json(__('messages.stripe_connected')), @json(__('messages.stripe_onboarded')), @json(__('messages.stripe_events'))],
+                    datasets: [{
+                        label: @json(__('messages.schedules')),
+                        data: [{{ $stripeConnected }}, {{ $stripeOnboarded }}, {{ $stripeEvents }}],
+                        backgroundColor: ['#16A34A', '#22C55E', '#86EFAC']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: {
+                                color: gridColor
+                            },
+                            ticks: {
+                                color: textColor,
+                                precision: 0
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: gridColor
+                            },
+                            ticks: {
+                                color: textColor
                             }
                         }
                     }

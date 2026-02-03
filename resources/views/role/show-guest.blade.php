@@ -215,7 +215,7 @@
 
             {{-- Desktop layout (>= sm): horizontal with spacer --}}
             <div class="hidden sm:flex flex-col gap-3 mb-5">
-              {{-- Top row: Name/Location left, Buttons right --}}
+              {{-- Name/Location left, Social icons + Action buttons right --}}
               <div class="flex flex-wrap items-center gap-3">
                 {{-- Name/Location --}}
                 <div class="min-w-0">
@@ -235,32 +235,8 @@
                   @endif
                 </div>
 
-                {{-- Spacer to push buttons right --}}
+                {{-- Spacer --}}
                 <div class="flex-grow"></div>
-
-                {{-- Calendar/List View Toggle (desktop only, not on single event pages) --}}
-                @if(!$event)
-                <div class="hidden md:flex items-center rounded-md shadow-sm">
-                    <button id="toggle-list-btn"
-                            onclick="if(window.calendarVueApp) window.calendarVueApp.toggleView('list')"
-                            data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
-                            class="w-10 h-10 flex items-center justify-center rounded-s-md border border-gray-300 dark:border-gray-600 transition-colors {{ ($role->event_layout ?? 'calendar') === 'list' ? '' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}"
-                            style="{{ ($role->event_layout ?? 'calendar') === 'list' ? 'background-color: ' . $accentColor . '; color: ' . $contrastColor : '' }}">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M3,4H7V8H3V4M9,5V7H21V5H9M3,10H7V14H3V10M9,11V13H21V11H9M3,16H7V20H3V16M9,17V19H21V17H9"/>
-                        </svg>
-                    </button>
-                    <button id="toggle-calendar-btn"
-                            onclick="if(window.calendarVueApp) window.calendarVueApp.toggleView('calendar')"
-                            data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
-                            class="w-10 h-10 flex items-center justify-center rounded-e-md border border-s-0 border-gray-300 dark:border-gray-600 transition-colors {{ ($role->event_layout ?? 'calendar') === 'calendar' ? '' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}"
-                            style="{{ ($role->event_layout ?? 'calendar') === 'calendar' ? 'background-color: ' . $accentColor . '; color: ' . $contrastColor : '' }}">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
-                        </svg>
-                    </button>
-                </div>
-                @endif
 
                 {{-- Social icons --}}
                 @if($hasEmail || $hasWebsite || $hasSocial)
@@ -349,6 +325,30 @@
                     </button>
                   </a>
                   @endif
+                </div>
+                @endif
+
+                {{-- Calendar/List View Toggle (desktop only) --}}
+                @if(!$event)
+                <div class="hidden md:flex items-center rounded-md shadow-sm flex-shrink-0">
+                    <button id="toggle-list-btn"
+                            onclick="if(window.calendarVueApp) window.calendarVueApp.toggleView('list')"
+                            data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
+                            class="w-10 h-10 flex items-center justify-center rounded-s-md border border-gray-300 dark:border-gray-600 transition-colors {{ ($role->event_layout ?? 'calendar') === 'list' ? '' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}"
+                            style="{{ ($role->event_layout ?? 'calendar') === 'list' ? 'background-color: ' . $accentColor . '; color: ' . $contrastColor : '' }}">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3,4H7V8H3V4M9,5V7H21V5H9M3,10H7V14H3V10M9,11V13H21V11H9M3,16H7V20H3V16M9,17V19H21V17H9"/>
+                        </svg>
+                    </button>
+                    <button id="toggle-calendar-btn"
+                            onclick="if(window.calendarVueApp) window.calendarVueApp.toggleView('calendar')"
+                            data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
+                            class="w-10 h-10 flex items-center justify-center rounded-e-md border border-s-0 border-gray-300 dark:border-gray-600 transition-colors {{ ($role->event_layout ?? 'calendar') === 'calendar' ? '' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}"
+                            style="{{ ($role->event_layout ?? 'calendar') === 'calendar' ? 'background-color: ' . $accentColor . '; color: ' . $contrastColor : '' }}">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
+                        </svg>
+                    </button>
                 </div>
                 @endif
               </div>
