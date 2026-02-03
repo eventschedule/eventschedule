@@ -96,7 +96,7 @@
     </div>
 </div>
 
-<script>
+<script {!! nonce_attr() !!}>
 function openEmbedModal() {
     document.getElementById('embed-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';

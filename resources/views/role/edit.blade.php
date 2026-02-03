@@ -158,7 +158,6 @@
                 const warningElement = document.getElementById(previewId.split('_')[0] + '_image_size_warning');
 
                 if (!input || !input.files || !input.files[0]) {
-                    console.log('no file')
                     if (preview) {
                         preview.src = '';
                         preview.style.display = 'none';

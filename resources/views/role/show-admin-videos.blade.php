@@ -33,7 +33,7 @@
                     <div class="mt-4">
                         <div v-if="role.searching" class="flex items-center gap-x-2">
                             <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                            <span class="text-sm text-gray-500">{{ __('messages.searching_youtube') }}</span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.searching_youtube') }}</span>
                         </div>
                         
                         <div v-else-if="role.videos && role.videos.length > 0" class="space-y-3">
