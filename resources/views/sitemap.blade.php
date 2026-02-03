@@ -164,6 +164,12 @@
         <priority>0.8</priority>
     </url>
     <url>
+        <loc>{{ url('/features/fan-videos') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
         <loc>{{ url('/saas') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>

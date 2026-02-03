@@ -33,7 +33,7 @@
             <div class="absolute -top-40 bottom-0 left-1/2 -translate-x-1/2 w-screen bg-cover bg-no-repeat bg-top md:hidden -z-10"
                  style="background-image: url('{{ $mobileBannerUrl }}');"></div>
         @endif
-        <div class="bg-white dark:bg-gray-800 rounded-xl mb-6 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }}">
+        <div class="bg-white dark:bg-gray-800 rounded-xl mb-3 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }}">
           <div
             class="relative overflow-hidden rounded-t-xl before:block before:absolute before:bg-[#00000033] before:-inset-0 before:rounded-t-xl"
           >
@@ -223,6 +223,30 @@
 
                 {{-- Spacer to push buttons right --}}
                 <div class="flex-grow"></div>
+
+                {{-- Calendar/List View Toggle (desktop only, not on single event pages) --}}
+                @if(!$event)
+                <div x-data="{ heroView: '{{ $role->event_layout ?? 'calendar' }}' }"
+                     x-init="window.addEventListener('calendar-view-changed', e => heroView = e.detail)"
+                     class="hidden md:flex items-center rounded-md shadow-sm">
+                    <button @click="heroView = 'calendar'; if(window.calendarVueApp) window.calendarVueApp.toggleView('calendar')"
+                            :class="heroView === 'calendar' ? '' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                            :style="heroView === 'calendar' ? 'background-color: {{ $accentColor }}; color: {{ $contrastColor }}' : ''"
+                            class="w-10 h-10 flex items-center justify-center rounded-s-md border border-gray-300 dark:border-gray-600 transition-colors">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
+                        </svg>
+                    </button>
+                    <button @click="heroView = 'list'; if(window.calendarVueApp) window.calendarVueApp.toggleView('list')"
+                            :class="heroView === 'list' ? '' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                            :style="heroView === 'list' ? 'background-color: {{ $accentColor }}; color: {{ $contrastColor }}' : ''"
+                            class="w-10 h-10 flex items-center justify-center rounded-e-md border border-s-0 border-gray-300 dark:border-gray-600 transition-colors">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3,4H7V8H3V4M9,5V7H21V5H9M3,10H7V14H3V10M9,11V13H21V11H9M3,16H7V20H3V16M9,17V19H21V17H9"/>
+                        </svg>
+                    </button>
+                </div>
+                @endif
 
                 {{-- Social icons --}}
                 @if($hasEmail || $hasWebsite || $hasSocial)

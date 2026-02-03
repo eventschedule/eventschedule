@@ -317,6 +317,7 @@ if (config('app.is_nexus')) {
         Route::get('/features/newsletters', [MarketingController::class, 'newsletters'])->name('marketing.newsletters');
         Route::get('/features/recurring-events', [MarketingController::class, 'recurringEvents'])->name('marketing.recurring_events');
         Route::get('/features/embed-calendar', [MarketingController::class, 'embedCalendar'])->name('marketing.embed_calendar');
+        Route::get('/features/fan-videos', [MarketingController::class, 'fanVideos'])->name('marketing.fan_videos');
         // Redirects from old feature URLs
         Route::get('/wp/analytics', fn () => redirect()->route('marketing.analytics', [], 301));
         Route::get('/wp/newsletters', fn () => redirect()->route('marketing.newsletters', [], 301));
@@ -425,6 +426,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/newsletters', [MarketingController::class, 'newsletters'])->name('marketing.newsletters');
             Route::get('/features/recurring-events', [MarketingController::class, 'recurringEvents'])->name('marketing.recurring_events');
             Route::get('/features/embed-calendar', [MarketingController::class, 'embedCalendar'])->name('marketing.embed_calendar');
+            Route::get('/features/fan-videos', [MarketingController::class, 'fanVideos'])->name('marketing.fan_videos');
             // Redirects from old feature URLs
             Route::get('/ticketing', fn () => redirect()->route('marketing.ticketing', [], 301));
             Route::get('/ai', fn () => redirect()->route('marketing.ai', [], 301));
@@ -546,6 +548,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/newsletters', fn () => redirect('https://eventschedule.com/features/newsletters', 301));
             Route::get('/features/recurring-events', fn () => redirect('https://eventschedule.com/features/recurring-events', 301));
             Route::get('/features/embed-calendar', fn () => redirect('https://eventschedule.com/features/embed-calendar', 301));
+            Route::get('/features/fan-videos', fn () => redirect('https://eventschedule.com/features/fan-videos', 301));
             Route::get('/for-talent', fn () => redirect('https://eventschedule.com/for-talent', 301));
             Route::get('/for-venues', fn () => redirect('https://eventschedule.com/for-venues', 301));
             Route::get('/for-curators', fn () => redirect('https://eventschedule.com/for-curators', 301));
@@ -637,6 +640,7 @@ if (config('app.is_nexus')) {
     Route::get('/features/newsletters', fn () => redirect()->route('home'));
     Route::get('/features/recurring-events', fn () => redirect()->route('home'));
     Route::get('/features/embed-calendar', fn () => redirect()->route('home'));
+    Route::get('/features/fan-videos', fn () => redirect()->route('home'));
     Route::get('/features/analytics', fn () => redirect()->route('home'));
     // Old URLs still redirect to home
     Route::get('/ticketing', fn () => redirect()->route('home'));

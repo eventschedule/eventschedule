@@ -56,7 +56,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-                One simple tool for calendars, tickets, and check-ins.
+                Everything you need to run events, from calendars and ticketing to newsletters and analytics.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
@@ -858,7 +858,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="feature-banner block">
+                <a href="{{ marketing_url('/features/fan-videos') }}" class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -909,7 +909,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
         </section>
 
@@ -933,9 +933,9 @@
                                 Open Source
                             </div>
                             <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-gray-500 dark:group-hover:text-gray-300 transition-colors">Free and open source</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">100% open source under the AAL license. Self-host on your own server or integrate with our REST API.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">100% open source under the Attribution Assurance License (AAL). Selfhost on your own server or integrate with our REST API.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Self-host</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Selfhost</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">REST API</span>
                             </div>
                             <span class="inline-flex items-center text-gray-500 dark:text-gray-400 font-medium group-hover:gap-3 gap-2 transition-all">

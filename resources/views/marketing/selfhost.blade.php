@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Selfhost Event Schedule - Run on Your Own Server</x-slot>
-    <x-slot name="description">Self-host Event Schedule on your own server. 100% open source with one-click Docker installation, automatic updates, and exclusive AI-powered features.</x-slot>
+    <x-slot name="description">Selfhost Event Schedule on your own server. 100% open source with one-click Docker installation, automatic updates, and exclusive AI-powered features.</x-slot>
     <x-slot name="keywords">selfhosted event management, open source calendar, selfhost events, docker event schedule, softaculous calendar, auto import events, AI blog SEO</x-slot>
     <x-slot name="socialImage">social/selfhost.png</x-slot>
     <x-slot name="breadcrumbTitle">Selfhost</x-slot>
@@ -460,7 +460,7 @@
                     100% Open Source
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-                    Event Schedule is fully open source under the AAL license. Inspect the code, contribute improvements, or fork it for your own needs.
+                    Event Schedule is fully open source under the Attribution Assurance License (AAL). Inspect the code, contribute improvements, or fork it for your own needs.
                 </p>
 
                 <div class="grid sm:grid-cols-3 gap-6 mb-10">
@@ -474,7 +474,7 @@
                     </div>
                     <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-xl p-6 border border-emerald-200 dark:border-emerald-500/20">
                         <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">AAL</div>
-                        <div class="text-gray-500 dark:text-gray-400 text-sm">Licensed</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-sm">Open Source License</div>
                     </div>
                 </div>
 

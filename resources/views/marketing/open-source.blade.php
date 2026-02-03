@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Open Source Event Calendar | Self-Host & REST API - Event Schedule</x-slot>
-    <x-slot name="description">Event Schedule is 100% open source under the AAL license. Self-host on your own server or integrate with our REST API. Full control, no vendor lock-in.</x-slot>
+    <x-slot name="title">Open Source Event Calendar | Selfhost & REST API - Event Schedule</x-slot>
+    <x-slot name="description">Event Schedule is 100% open source under the Attribution Assurance License (AAL). Selfhost on your own server or integrate with our REST API. Full control, no vendor lock-in.</x-slot>
     <x-slot name="keywords">open source event calendar, self hosted events, event API, REST API events, AAL license, selfhost calendar, event schedule API, developer API</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Open Source</x-slot>
@@ -49,7 +49,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-                Self-host on your own server or integrate with our REST API. Full control, no vendor lock-in.
+                Selfhost on your own server or integrate with our REST API. Full control, no vendor lock-in.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
@@ -85,9 +85,9 @@
                                 Open Source
                             </div>
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Fully transparent code</h3>
-                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Every line of code is available on GitHub under the AAL license. Inspect, modify, or contribute. No hidden functionality, no surprises.</p>
+                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Every line of code is available on GitHub under the Attribution Assurance License (AAL). Inspect, modify, or contribute. No hidden functionality, no surprises.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">AAL Licensed</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Open Source (AAL)</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Laravel + Vue.js</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">MIT-friendly</span>
                             </div>

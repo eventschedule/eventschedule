@@ -144,7 +144,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-600 dark:text-gray-300">Beautiful event calendars</span>
+                            <span class="text-gray-600 dark:text-gray-300">Unlimited events and schedules</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -152,7 +152,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-600 dark:text-gray-300">Mobile-optimized design</span>
+                            <span class="text-gray-600 dark:text-gray-300">Beautiful, mobile-optimized design</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -222,7 +222,7 @@
                             <span class="text-6xl font-bold text-gray-900 dark:text-white">$5</span>
                             <span class="text-gray-500 dark:text-gray-400">/month</span>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400">or $50/year — after your free year</p>
+                        <p class="text-gray-500 dark:text-gray-400">$50/year (billed annually) after your free year</p>
                     </div>
 
                     <ul class="space-y-4 mb-10">
@@ -264,7 +264,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-600 dark:text-gray-300">Multiple account users</span>
+                            <span class="text-gray-600 dark:text-gray-300">Multiple team members per account</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">

@@ -136,7 +136,7 @@
 
                     <!-- Subheadline -->
                     <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-xl mb-12 animate-reveal delay-200">
-                        Event calendars, ticketing, newsletters, and check-ins for venues, performers, and communities.
+                        The simplest way for venues, performers, and communities to share events, sell tickets, and grow their audience.
                     </p>
 
                     <!-- CTA Buttons -->
@@ -149,6 +149,13 @@
                                 </svg>
                             </span>
                             <div class="absolute inset-0 animate-shimmer"></div>
+                        </a>
+                        <a href="{{ demo_url() }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-900 dark:text-white glass border border-gray-200 dark:border-white/10 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all">
+                            <svg class="mr-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            See a demo
                         </a>
                     </div>
                 </div>
@@ -392,7 +399,7 @@
                 </a>
 
                 <!-- Fan Videos & Comments -->
-                <a href="{{ marketing_url('/features') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-rose-200 dark:hover:border-rose-500/30 transition-all" aria-label="Learn more about fan videos and comments">
+                <a href="{{ marketing_url('/features/fan-videos') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-rose-200 dark:hover:border-rose-500/30 transition-all" aria-label="Learn more about fan videos and comments">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-500/20 mb-4">
                         <svg class="w-6 h-6 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -414,7 +421,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Open Source & API</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Self-host on your own server. Full REST API for custom integrations. AAL licensed.</p>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Selfhost on your own server. Full REST API for custom integrations. Open source.</p>
                     <span class="inline-flex items-center mt-3 text-sm font-medium text-gray-600 dark:text-gray-300 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -548,7 +555,7 @@
                         </svg>
                     </div>
                     <div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Open source</div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Self-host on your own server. AAL licensed.</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Selfhost on your own server. Open source.</p>
                 </div>
             </div>
         </div>

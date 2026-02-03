@@ -134,6 +134,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Fan Videos page
+     */
+    public function fanVideos()
+    {
+        return view('marketing.fan-videos');
+    }
+
+    /**
      * Embed Calendar page
      */
     public function embedCalendar()
