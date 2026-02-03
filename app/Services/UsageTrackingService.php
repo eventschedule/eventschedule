@@ -69,7 +69,7 @@ class UsageTrackingService
         }
 
         try {
-            UsageDaily::increment($operation, $roleId);
+            UsageDaily::record($operation, $roleId);
         } catch (\Exception $e) {
             // Tracking failures should never disrupt actual operations
         }

@@ -25,7 +25,7 @@ class UsageDaily extends Model
     /**
      * Increment count for a date/operation/role combination using upsert
      */
-    public static function increment(string $operation, int $roleId = 0): void
+    public static function record(string $operation, int $roleId = 0): void
     {
         $date = now()->toDateString();
 
