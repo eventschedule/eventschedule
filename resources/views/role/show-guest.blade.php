@@ -493,13 +493,10 @@
           background: rgba(255,255,255,0.95) !important;
           backdrop-filter: blur(4px) !important;
           border-radius: 1rem !important;
-          box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05) !important;
-          border: 1px solid #d1d5db !important;
           margin-top: 1rem;
         }
         .dark .calendar-panel-border {
-          background: rgba(17,24,39,0.95) !important;
-          border-color: #2d2d30 !important;
+          background: rgba(30,30,30,0.95) !important;
         }
         .calendar-panel-border-transparent {
           background: transparent !important;
@@ -522,7 +519,7 @@
       </style>
 
       <div
-        class="calendar-panel-border mb-6 px-0 md:px-6 lg:px-16 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
+        class="calendar-panel-border mb-6 px-0 md:px-6 lg:px-16 pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
         id="calendar-panel-wrapper"
         data-view-width
         style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
