@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AnalyticsEventsDaily;
 use App\Models\Sale;
+use App\Services\UsageTrackingService;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Stripe\Account;
@@ -28,6 +29,8 @@ class StripeController extends Controller
             $user->save();
 
             $accountId = $account->id;
+
+            UsageTrackingService::track(UsageTrackingService::STRIPE_ACCOUNT);
         }
 
         $link = AccountLink::create([
@@ -135,6 +138,8 @@ class StripeController extends Controller
                     $sale->payment_amount = $webhookAmount;
                     $sale->status = 'paid';
                     $sale->save();
+
+                    UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
                 }
                 break;
 
@@ -166,6 +171,8 @@ class StripeController extends Controller
                         $sale->status = 'paid';
                         $sale->transaction_reference = $session->payment_intent;
                         $sale->save();
+
+                        UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
 
                         // Record sale in analytics
                         AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);

@@ -547,9 +547,9 @@
                                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
                                                 </svg>
                                             </div>
-                                            <span class="text-lg font-semibold text-gray-900 dark:text-white truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
-                                            <svg class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" :class="isRtl ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                                            <span class="text-lg font-semibold text-gray-900 dark:text-white truncate hover:underline" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                            <svg class="w-5 h-5 flex-shrink-0 fill-gray-900 dark:fill-gray-100 opacity-70" :class="isRtl ? 'scale-x-[-1]' : ''" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                                             </svg>
                                         </a>
                                         <div v-else-if="event.venue_name" class="flex items-center gap-4">
@@ -574,11 +574,11 @@
                                             </div>
                                             <template v-for="(t, tIndex) in event.talent" :key="'tn-' + tIndex">
                                                 <span v-if="tIndex > 0" class="text-base text-gray-600 dark:text-gray-300">, </span>
-                                                <a v-if="t.guest_url" :href="t.guest_url" class="text-base text-gray-600 dark:text-gray-300 hover:opacity-80 transition-opacity truncate" v-text="t.name"></a>
+                                                <a v-if="t.guest_url" :href="t.guest_url" class="text-base text-gray-600 dark:text-gray-300 hover:opacity-80 hover:underline transition-opacity truncate" v-text="t.name"></a>
                                                 <span v-else class="text-base text-gray-600 dark:text-gray-300 truncate" v-text="t.name"></span>
                                             </template>
-                                            <svg class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" :class="isRtl ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                                            <svg class="w-5 h-5 flex-shrink-0 fill-gray-900 dark:fill-gray-100 opacity-70" :class="isRtl ? 'scale-x-[-1]' : ''" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                                             </svg>
                                         </div>
 
@@ -696,7 +696,7 @@
                                         </form>
                                     </div>
                                     {{-- Flyer Image Column --}}
-                                    <div class="md:w-[35%] md:flex-shrink-0">
+                                    <div class="md:w-[38%] md:flex-shrink-0">
                                         <img :src="event.image_url" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name">
                                     </div>
                                 </div>
@@ -738,9 +738,9 @@
                                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
                                             </svg>
                                         </div>
-                                        <span class="text-lg font-semibold text-gray-900 dark:text-white truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
-                                        <svg class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" :class="isRtl ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                                        <span class="text-lg font-semibold text-gray-900 dark:text-white truncate hover:underline" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                        <svg class="w-5 h-5 flex-shrink-0 fill-gray-900 dark:fill-gray-100 opacity-70" :class="isRtl ? 'scale-x-[-1]' : ''" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                                         </svg>
                                     </a>
                                     <div v-else-if="event.venue_name" class="flex items-center gap-4">
@@ -765,11 +765,11 @@
                                         </div>
                                         <template v-for="(t, tIndex) in event.talent" :key="'tn2-' + tIndex">
                                             <span v-if="tIndex > 0" class="text-base text-gray-600 dark:text-gray-300">, </span>
-                                            <a v-if="t.guest_url" :href="t.guest_url" class="text-base text-gray-600 dark:text-gray-300 hover:opacity-80 transition-opacity truncate" v-text="t.name"></a>
+                                            <a v-if="t.guest_url" :href="t.guest_url" class="text-base text-gray-600 dark:text-gray-300 hover:opacity-80 hover:underline transition-opacity truncate" v-text="t.name"></a>
                                             <span v-else class="text-base text-gray-600 dark:text-gray-300 truncate" v-text="t.name"></span>
                                         </template>
-                                        <svg class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" :class="isRtl ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                                        <svg class="w-5 h-5 flex-shrink-0 fill-gray-900 dark:fill-gray-100 opacity-70" :class="isRtl ? 'scale-x-[-1]' : ''" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                                         </svg>
                                     </div>
 
@@ -942,7 +942,7 @@
                                                 <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
                                                     <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
                                                 </svg>
-                                                <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                                <span class="truncate hover:underline" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
                                             </a>
                                             <div v-else-if="event.venue_name" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400">
                                                 <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">

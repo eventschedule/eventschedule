@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Role;
+use App\Services\UsageTrackingService;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -55,12 +56,14 @@ class SendQueuedEmail implements ShouldQueue
                     $this->configureRoleMailer($role);
                     $mailerName = 'role_'.$role->id;
                     Mail::mailer($mailerName)->to($this->recipient)->send($this->mailable);
+                    UsageTrackingService::track(UsageTrackingService::EMAIL_TICKET, $role->id);
 
                     return;
                 }
             }
 
             Mail::to($this->recipient)->send($this->mailable);
+            UsageTrackingService::track(UsageTrackingService::EMAIL_TICKET, $this->roleId ?? 0);
         } finally {
             app()->setLocale($originalLocale);
         }

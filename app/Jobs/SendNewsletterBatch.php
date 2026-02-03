@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Newsletter;
 use App\Models\NewsletterRecipient;
 use App\Services\NewsletterService;
+use App\Services\UsageTrackingService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -52,6 +53,7 @@ class SendNewsletterBatch implements ShouldQueue
             foreach ($recipients as $recipient) {
                 try {
                     $service->sendToRecipient($newsletter, $recipient);
+                    UsageTrackingService::track(UsageTrackingService::EMAIL_NEWSLETTER, $newsletter->role_id ?? 0);
                 } catch (\Exception $e) {
                     Log::error('Newsletter batch send error: '.$e->getMessage(), [
                         'newsletter_id' => $this->newsletterId,

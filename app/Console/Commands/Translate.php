@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\EventPart;
 use App\Models\EventRole;
 use App\Models\Role;
+use App\Services\UsageTrackingService;
 use App\Utils\GeminiUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Console\Command;
@@ -145,6 +146,15 @@ class Translate extends Command
         $bar->start();
 
         foreach ($roles as $role) {
+            if ($role->translation_attempts >= config('usage.stuck_translation_attempts', 3)) {
+                if ($debug) {
+                    $this->warn("Skipping stuck role ID: {$role->id} (attempts: {$role->translation_attempts})");
+                }
+                $bar->advance();
+
+                continue;
+            }
+
             if ($debug) {
                 $this->info("\nProcessing role ID: {$role->id}, Name: {$role->name}, Language: {$role->language_code}");
             }
@@ -215,6 +225,10 @@ class Translate extends Command
                     $this->info("Translated request terms from {$role->language_code} to en: '{$role->request_terms}' → '{$role->request_terms_en}'");
                 }
             }
+
+            $role->translation_attempts++;
+            $role->last_translated_at = now();
+            UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE, $role->id);
 
             // Translate event custom field names
             if ($role->event_custom_fields) {
@@ -305,6 +319,15 @@ class Translate extends Command
         $bar->start();
 
         foreach ($events as $event) {
+            if ($event->translation_attempts >= config('usage.stuck_translation_attempts', 3)) {
+                if ($debug) {
+                    $this->warn("Skipping stuck event ID: {$event->id} (attempts: {$event->translation_attempts})");
+                }
+                $bar->advance();
+
+                continue;
+            }
+
             if ($debug) {
                 $this->info("\nProcessing event ID: {$event->id}, Name: {$event->name}, Language: {$event->getLanguageCode()}");
             } else {
@@ -336,6 +359,10 @@ class Translate extends Command
                     $this->info("Translated description from {$event->getLanguageCode()} to en: '{$event->description}' → '{$event->description_en}'");
                 }
             }
+
+            $event->translation_attempts++;
+            $event->last_translated_at = now();
+            UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE, $event->creator_role_id ?? 0);
 
             $event->save();
             $bar->advance();
@@ -385,6 +412,15 @@ class Translate extends Command
         $bar->start();
 
         foreach ($eventRoles as $eventRole) {
+            if ($eventRole->translation_attempts >= config('usage.stuck_translation_attempts', 3)) {
+                if ($debug) {
+                    $this->warn("Skipping stuck event role ID: {$eventRole->id} (attempts: {$eventRole->translation_attempts})");
+                }
+                $bar->advance();
+
+                continue;
+            }
+
             if ($debug) {
                 $this->info("\nProcessing event role ID: {$eventRole->id}, Event ID: {$eventRole->event_id}, Role ID: {$eventRole->role_id}");
                 $this->info("Event language: {$eventRole->event->getLanguageCode()}, Role language: {$eventRole->role->language_code}");
@@ -419,6 +455,10 @@ class Translate extends Command
                     $this->info("Translated event description from {$fromLang} to {$toLang}: '{$eventRole->event->description}' → '{$eventRole->description_translated}'");
                 }
             }
+
+            $eventRole->translation_attempts++;
+            $eventRole->last_translated_at = now();
+            UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE, $eventRole->role_id);
 
             $eventRole->save();
             $bar->advance();
@@ -474,6 +514,15 @@ class Translate extends Command
         $bar->start();
 
         foreach ($parts as $part) {
+            if ($part->translation_attempts >= config('usage.stuck_translation_attempts', 3)) {
+                if ($debug) {
+                    $this->warn("Skipping stuck event part ID: {$part->id} (attempts: {$part->translation_attempts})");
+                }
+                $bar->advance();
+
+                continue;
+            }
+
             $languageCode = $part->event->getLanguageCode();
 
             if ($debug) {
@@ -505,6 +554,10 @@ class Translate extends Command
                     $this->info("Translated description from {$languageCode} to en: '{$part->description}' → '{$part->description_en}'");
                 }
             }
+
+            $part->translation_attempts++;
+            $part->last_translated_at = now();
+            UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE, $part->event->creator_role_id ?? 0);
 
             $part->save();
             $bar->advance();

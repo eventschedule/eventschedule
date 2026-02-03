@@ -151,6 +151,8 @@ class CalDAVService
                     'uid' => $uid,
                 ]);
 
+                UsageTrackingService::track(UsageTrackingService::CALDAV_SYNC, $role->id);
+
                 return $uid;
             }
 
@@ -211,6 +213,8 @@ class CalDAVService
                     'event_id' => $event->id,
                     'uid' => $uid,
                 ]);
+
+                UsageTrackingService::track(UsageTrackingService::CALDAV_SYNC, $role->id);
 
                 return true;
             }
@@ -311,6 +315,7 @@ class CalDAVService
                     if ($newUid) {
                         $event->setCalDAVEventUidForRole($role->id, $newUid);
                         $results['created']++;
+                        UsageTrackingService::track(UsageTrackingService::CALDAV_SYNC, $role->id);
                     } else {
                         $results['errors']++;
                     }
@@ -414,6 +419,7 @@ class CalDAVService
                     // Create new event
                     $this->createEventFromCalDAV($eventData, $role);
                     $results['created']++;
+                    UsageTrackingService::track(UsageTrackingService::CALDAV_SYNC, $role->id);
 
                     // Add to existing set to prevent duplicates within the same sync batch
                     $existingUidsSet[$eventData['uid']] = true;

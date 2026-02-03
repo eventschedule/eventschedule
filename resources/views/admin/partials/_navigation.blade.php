@@ -20,6 +20,12 @@
                 class="whitespace-nowrap border-b-2 {{ $active === 'analytics' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }} px-1 pb-4 text-base font-medium">
                 @lang('messages.analytics')
             </a>
+            @if (config('app.hosted'))
+            <a href="{{ route('admin.usage') }}"
+                class="whitespace-nowrap border-b-2 {{ $active === 'usage' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }} px-1 pb-4 text-base font-medium">
+                Usage
+            </a>
+            @endif
             @if (config('app.hosted') || config('app.is_nexus'))
             <a href="{{ route('admin.plans') }}"
                 class="whitespace-nowrap border-b-2 {{ $active === 'plans' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }} px-1 pb-4 text-base font-medium">

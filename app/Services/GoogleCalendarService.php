@@ -217,6 +217,8 @@ class GoogleCalendarService
             // Create the event
             $createdEvent = $this->calendarService->events->insert($calendarId, $googleEvent);
 
+            UsageTrackingService::track(UsageTrackingService::GCAL_CREATE, $role->id);
+
             return $createdEvent;
 
         } catch (\Exception $e) {
@@ -280,6 +282,8 @@ class GoogleCalendarService
             // Update the event
             $updatedEvent = $this->calendarService->events->update($calendarId, $googleEventId, $googleEvent);
 
+            UsageTrackingService::track(UsageTrackingService::GCAL_UPDATE, $role->id);
+
             return $updatedEvent;
 
         } catch (\Exception $e) {
@@ -304,6 +308,8 @@ class GoogleCalendarService
             }
 
             $this->calendarService->events->delete($calendarId, $googleEventId);
+
+            UsageTrackingService::track(UsageTrackingService::GCAL_DELETE);
 
             return true;
 
@@ -585,6 +591,7 @@ class GoogleCalendarService
                         // Create new event
                         $this->createEventFromGoogle($googleEvent, $role, $calendarId);
                         $results['created']++;
+                        UsageTrackingService::track(UsageTrackingService::GCAL_SYNC, $role->id);
                     }
                 } catch (\Exception $e) {
                     Log::error('Failed to sync individual Google Calendar event', [
@@ -719,6 +726,8 @@ class GoogleCalendarService
             $webhook->setToken(config('services.google.webhook_secret'));
 
             $result = $this->calendarService->events->watch($calendarId, $webhook);
+
+            UsageTrackingService::track(UsageTrackingService::GCAL_WEBHOOK);
 
             return [
                 'id' => $result->getId(),

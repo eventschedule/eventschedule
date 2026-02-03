@@ -80,6 +80,8 @@ class Role extends Model implements MustVerifyEmail
         'caldav_last_sync_at',
         'agenda_ai_prompt',
         'slug_pattern',
+        'translation_attempts',
+        'last_translated_at',
     ];
 
     /**
@@ -92,6 +94,7 @@ class Role extends Model implements MustVerifyEmail
         'trial_ends_at' => 'datetime',
         'caldav_last_sync_at' => 'datetime',
         'event_custom_fields' => 'array',
+        'last_translated_at' => 'datetime',
     ];
 
     /**
@@ -158,6 +161,10 @@ class Role extends Model implements MustVerifyEmail
             if ($model->isDirty('email') && config('app.hosted')) {
                 $model->email_verified_at = null;
                 $model->sendEmailVerificationNotification();
+            }
+
+            if ($model->isDirty(['name', 'description', 'address1', 'address2', 'city', 'state', 'request_terms'])) {
+                $model->translation_attempts = 0;
             }
 
             if ($model->isDirty('name')) {

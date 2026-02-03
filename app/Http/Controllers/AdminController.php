@@ -6,8 +6,11 @@ use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\AnalyticsReferrersDaily;
 use App\Models\Event;
+use App\Models\EventPart;
+use App\Models\EventRole;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Models\UsageDaily;
 use App\Models\User;
 use App\Services\DemoService;
 use App\Utils\UrlUtils;
@@ -556,6 +559,206 @@ class AdminController extends Controller
             'topSchedulesByEvents',
             'totalSchedules',
             'range'
+        ));
+    }
+
+    /**
+     * Display the admin usage page.
+     */
+    public function usage(Request $request)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // Get date range
+        $range = $request->input('range', 'last_30_days');
+        $dates = $this->getDateRange($range);
+        $startDate = $dates['start'];
+        $endDate = $dates['end'];
+
+        $today = now()->toDateString();
+        $daysInRange = max(1, $startDate->diffInDays($endDate));
+
+        // Category prefixes for grouping
+        $categories = [
+            'email' => ['prefix' => 'email_', 'label' => 'Emails', 'limit_key' => 'email_daily_limit'],
+            'gemini' => ['prefix' => 'gemini_', 'label' => 'AI / Gemini', 'limit_key' => 'ai_daily_limit'],
+            'gcal' => ['prefix' => 'gcal_', 'label' => 'Google Calendar', 'limit_key' => 'gcal_daily_limit'],
+            'stripe' => ['prefix' => 'stripe_', 'label' => 'Stripe', 'limit_key' => 'stripe_daily_limit'],
+            'invoiceninja' => ['prefix' => 'invoiceninja_', 'label' => 'Invoice Ninja', 'limit_key' => 'invoice_ninja_daily_limit'],
+            'caldav' => ['prefix' => 'caldav_', 'label' => 'CalDAV', 'limit_key' => 'caldav_daily_limit'],
+            'youtube' => ['prefix' => 'youtube_', 'label' => 'YouTube', 'limit_key' => null],
+        ];
+
+        // Summary totals per category for selected period
+        $allUsage = UsageDaily::inDateRange($startDate, $endDate)
+            ->select('operation', DB::raw('SUM(`count`) as total'))
+            ->groupBy('operation')
+            ->pluck('total', 'operation')
+            ->toArray();
+
+        // Today's totals per operation
+        $todayUsage = UsageDaily::where('date', $today)
+            ->select('operation', DB::raw('SUM(`count`) as total'))
+            ->groupBy('operation')
+            ->pluck('total', 'operation')
+            ->toArray();
+
+        // Build category summaries
+        $categorySummaries = [];
+        foreach ($categories as $key => $cat) {
+            $periodTotal = 0;
+            $todayTotal = 0;
+            foreach ($allUsage as $op => $total) {
+                if (str_starts_with($op, $cat['prefix'])) {
+                    $periodTotal += $total;
+                }
+            }
+            foreach ($todayUsage as $op => $total) {
+                if (str_starts_with($op, $cat['prefix'])) {
+                    $todayTotal += $total;
+                }
+            }
+            $categorySummaries[$key] = [
+                'label' => $cat['label'],
+                'period_total' => $periodTotal,
+                'today_total' => $todayTotal,
+                'daily_avg' => round($periodTotal / $daysInRange, 1),
+                'limit' => $cat['limit_key'] ? config('usage.'.$cat['limit_key'], 0) : null,
+            ];
+        }
+
+        // Operation breakdown table
+        $operationBreakdown = [];
+        $allOperations = array_unique(array_merge(array_keys($allUsage), array_keys($todayUsage)));
+        sort($allOperations);
+        foreach ($allOperations as $op) {
+            $operationBreakdown[] = [
+                'operation' => $op,
+                'today' => $todayUsage[$op] ?? 0,
+                'period_total' => $allUsage[$op] ?? 0,
+                'daily_avg' => round(($allUsage[$op] ?? 0) / $daysInRange, 1),
+            ];
+        }
+
+        // Top roles by usage
+        $topRoles = UsageDaily::inDateRange($startDate, $endDate)
+            ->where('role_id', '>', 0)
+            ->select('role_id', DB::raw('SUM(`count`) as total'))
+            ->groupBy('role_id')
+            ->orderByDesc('total')
+            ->limit(20)
+            ->get();
+
+        // Load role details and per-category breakdown
+        $roleIds = $topRoles->pluck('role_id')->toArray();
+        $roleMap = Role::whereIn('id', $roleIds)->pluck('subdomain', 'id')->toArray();
+
+        $roleBreakdowns = [];
+        if (! empty($roleIds)) {
+            $roleUsageRows = UsageDaily::inDateRange($startDate, $endDate)
+                ->whereIn('role_id', $roleIds)
+                ->select('role_id', 'operation', DB::raw('SUM(`count`) as total'))
+                ->groupBy('role_id', 'operation')
+                ->get();
+
+            foreach ($roleUsageRows as $row) {
+                if (! isset($roleBreakdowns[$row->role_id])) {
+                    $roleBreakdowns[$row->role_id] = [];
+                }
+                $roleBreakdowns[$row->role_id][$row->operation] = $row->total;
+            }
+        }
+
+        $topRolesData = $topRoles->map(function ($row) use ($roleMap, $roleBreakdowns, $categories) {
+            $breakdown = $roleBreakdowns[$row->role_id] ?? [];
+            $catTotals = [];
+            foreach ($categories as $key => $cat) {
+                $catTotal = 0;
+                foreach ($breakdown as $op => $total) {
+                    if (str_starts_with($op, $cat['prefix'])) {
+                        $catTotal += $total;
+                    }
+                }
+                $catTotals[$key] = $catTotal;
+            }
+
+            return [
+                'role_id' => $row->role_id,
+                'subdomain' => $roleMap[$row->role_id] ?? 'unknown',
+                'total' => $row->total,
+                'categories' => $catTotals,
+            ];
+        });
+
+        // Today's anomalies
+        $anomalies = [];
+        foreach ($categorySummaries as $key => $cat) {
+            if ($cat['limit'] && $cat['today_total'] > $cat['limit']) {
+                $anomalies[] = [
+                    'category' => $cat['label'],
+                    'today' => $cat['today_total'],
+                    'limit' => $cat['limit'],
+                ];
+            }
+        }
+
+        // Stuck translation records
+        $stuckThreshold = config('usage.stuck_translation_attempts', 3);
+
+        $stuckRoles = Role::where('translation_attempts', '>=', $stuckThreshold)
+            ->where(function ($q) {
+                $q->whereNull('name_en')
+                    ->orWhereNull('description_en')
+                    ->orWhereNull('address1_en')
+                    ->orWhereNull('city_en')
+                    ->orWhereNull('state_en')
+                    ->orWhereNull('request_terms_en');
+            })
+            ->orderByDesc('translation_attempts')
+            ->limit(20)
+            ->get(['id', 'name', 'subdomain', 'translation_attempts', 'last_translated_at']);
+
+        $stuckEvents = Event::where('translation_attempts', '>=', $stuckThreshold)
+            ->where(function ($q) {
+                $q->whereNull('name_en')
+                    ->orWhereNull('description_en');
+            })
+            ->orderByDesc('translation_attempts')
+            ->limit(20)
+            ->get(['id', 'name', 'translation_attempts', 'last_translated_at']);
+
+        $stuckEventParts = EventPart::where('translation_attempts', '>=', $stuckThreshold)
+            ->where(function ($q) {
+                $q->whereNull('name_en')
+                    ->orWhereNull('description_en');
+            })
+            ->orderByDesc('translation_attempts')
+            ->limit(20)
+            ->get(['id', 'name', 'event_id', 'translation_attempts', 'last_translated_at']);
+
+        $stuckEventRoles = EventRole::where('translation_attempts', '>=', $stuckThreshold)
+            ->where(function ($q) {
+                $q->whereNull('name_translated')
+                    ->orWhereNull('description_translated');
+            })
+            ->orderByDesc('translation_attempts')
+            ->limit(20)
+            ->get(['id', 'event_id', 'role_id', 'translation_attempts', 'last_translated_at']);
+
+        return view('admin.usage', compact(
+            'categorySummaries',
+            'operationBreakdown',
+            'topRolesData',
+            'anomalies',
+            'stuckRoles',
+            'stuckEvents',
+            'stuckEventParts',
+            'stuckEventRoles',
+            'stuckThreshold',
+            'range',
+            'categories'
         ));
     }
 

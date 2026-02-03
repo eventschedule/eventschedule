@@ -38,12 +38,15 @@ class Event extends Model
         'custom_fields',
         'custom_field_values',
         'agenda_ai_prompt',
+        'translation_attempts',
+        'last_translated_at',
     ];
 
     protected $casts = [
         'duration' => 'float',
         'custom_fields' => 'array',
         'custom_field_values' => 'array',
+        'last_translated_at' => 'datetime',
     ];
 
     /**
@@ -93,10 +96,12 @@ class Event extends Model
 
             if ($model->isDirty('name') && $model->exists) {
                 $model->name_en = null;
+                $model->translation_attempts = 0;
 
                 $eventRoles = EventRole::where('event_id', $model->id)->get();
                 foreach ($eventRoles as $eventRole) {
                     $eventRole->name_translated = null;
+                    $eventRole->translation_attempts = 0;
                     $eventRole->save();
                 }
             }
@@ -104,11 +109,13 @@ class Event extends Model
             if ($model->isDirty('description') && $model->exists) {
                 $model->description_en = null;
                 $model->description_html_en = null;
+                $model->translation_attempts = 0;
 
                 $eventRoles = EventRole::where('event_id', $model->id)->get();
                 foreach ($eventRoles as $eventRole) {
                     $eventRole->description_translated = null;
                     $eventRole->description_html_translated = null;
+                    $eventRole->translation_attempts = 0;
                     $eventRole->save();
                 }
             }

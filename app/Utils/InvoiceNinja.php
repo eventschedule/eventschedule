@@ -2,6 +2,8 @@
 
 namespace App\Utils;
 
+use App\Services\UsageTrackingService;
+
 class InvoiceNinja
 {
     public function __construct($apiKey, $apiUrl)
@@ -54,6 +56,8 @@ class InvoiceNinja
             ],
         ]);
 
+        UsageTrackingService::track(UsageTrackingService::INVOICENINJA_CLIENT);
+
         return $client;
     }
 
@@ -87,6 +91,8 @@ class InvoiceNinja
             'public_notes' => __('messages.qr_code_is_your_ticket').'<br><br><img src="'.$qrCodeUrl.'" />',
             'line_items' => $lineItems,
         ]);
+
+        UsageTrackingService::track(UsageTrackingService::INVOICENINJA_INVOICE);
 
         return $invoice;
     }
