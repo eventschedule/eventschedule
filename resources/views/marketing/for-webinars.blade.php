@@ -715,5 +715,12 @@
             background-clip: text;
             text-shadow: 0 0 40px rgba(13, 148, 136, 0.3);
         }
+        .dark .webinar-glow-text {
+            background: linear-gradient(135deg, #2dd4bf, #22d3ee, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(45, 212, 191, 0.3);
+        }
     </style>
 </x-marketing-layout>

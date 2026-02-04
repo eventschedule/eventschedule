@@ -685,6 +685,13 @@
             background-clip: text;
             text-shadow: 0 0 40px rgba(16, 185, 129, 0.3);
         }
+        .dark .fitness-glow-text {
+            background: linear-gradient(135deg, #34d399, #2dd4bf, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(52, 211, 153, 0.3);
+        }
 
         @keyframes breathe {
             0%, 100% { transform: scale(0.95); opacity: 0.5; }

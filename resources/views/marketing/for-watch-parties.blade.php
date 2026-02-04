@@ -746,5 +746,12 @@
             background-clip: text;
             text-shadow: 0 0 40px rgba(79, 70, 229, 0.3);
         }
+        .dark .watchparty-glow-text {
+            background: linear-gradient(135deg, #818cf8, #22d3ee, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(129, 140, 248, 0.3);
+        }
     </style>
 </x-marketing-layout>

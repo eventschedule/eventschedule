@@ -62,7 +62,7 @@
                         </p>
                     </div>
                     
-                    <div v-if="eventDetails && !errorMessage" class="mt-4 text-left">
+                    <div v-if="eventDetails && !errorMessage" class="mt-4 text-start">
                         <h3 class="text-xl font-semibold text-gray-800">@{{ eventDetails.event }}</h3>
                         <p class="text-gray-600 mt-1">@{{ eventDetails.date }}</p>
                         

@@ -12,7 +12,7 @@
             </button>
         </div>
 
-        <div class="flex items-center text-right">
+        <div class="flex items-center text-end">
             @if ($role->profile_image_url)
                 <div class="pe-4">
                     <img src="{{ $role->profile_image_url }}" class="rounded-lg h-14 w-14 flex-none">
@@ -421,7 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <!-- Event selector -->
         <div class="mb-4 relative" id="event-dropdown">
             <button @click="toggleDropdown" type="button" tabindex="0"
-                class="w-full flex items-center gap-3 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 shadow-sm focus:border-[#4E81FA] focus:ring-2 focus:ring-[#4E81FA] focus:outline-none text-left">
+                class="w-full flex items-center gap-3 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 shadow-sm focus:border-[#4E81FA] focus:ring-2 focus:ring-[#4E81FA] focus:outline-none text-start">
                 <template v-if="selectedEvent">
                     <img v-if="selectedEvent.image_url" :src="selectedEvent.image_url" class="w-10 h-10 rounded object-cover flex-shrink-0">
                     <span v-else class="w-10 h-10 rounded bg-gray-100 dark:bg-gray-600 flex items-center justify-center flex-shrink-0">
@@ -439,7 +439,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </button>
             <div v-if="dropdownOpen" class="absolute z-50 mt-1 w-full rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-lg max-h-72 overflow-y-auto">
                 <button v-for="event in events" :key="event.id" @click="onEventChange(event.id)" type="button"
-                    class="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                    class="w-full flex items-center gap-3 px-3 py-2 text-start hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                     :class="event.id === selectedEventId ? 'bg-gray-50 dark:bg-gray-600/50' : ''">
                     <img v-if="event.image_url" :src="event.image_url" class="w-10 h-10 rounded object-cover flex-shrink-0">
                     <span v-else class="w-10 h-10 rounded bg-gray-100 dark:bg-gray-600 flex items-center justify-center flex-shrink-0">
@@ -488,7 +488,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <div class="px-3 pb-4">
                             <button v-for="cam in cameras" :key="cam.deviceId" @click="selectCameraFromModal(cam.deviceId)"
-                                class="w-full flex items-center gap-3 px-3 py-3 text-left rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                class="w-full flex items-center gap-3 px-3 py-3 text-start rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                 <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -517,7 +517,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <div class="px-3 pb-4">
                             <button v-for="cam in cameras" :key="cam.deviceId" @click="selectCameraFromModal(cam.deviceId)"
-                                class="w-full flex items-center gap-3 px-3 py-3 text-left rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                class="w-full flex items-center gap-3 px-3 py-3 text-start rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                                 :class="cam.deviceId === selectedCameraId ? 'bg-gray-50 dark:bg-gray-700/50' : ''">
                                 <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />

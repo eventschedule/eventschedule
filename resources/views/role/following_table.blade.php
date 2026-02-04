@@ -6,12 +6,12 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-800">
                         <tr>
-                            <th scope="col" class="py-3.5 pl-4 pr-3 sm:pl-6 w-10">
+                            <th scope="col" class="py-3.5 ps-4 pe-3 sm:ps-6 w-10">
                                 <input type="checkbox" id="select-all"
                                     class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[#4E81FA] focus:ring-[#4E81FA]">
                             </th>
                             <th scope="col"
-                                class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                                class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                                 data-sort="name">
                                 <div class="flex items-center gap-1">
                                     {{ __('messages.name') }}
@@ -29,7 +29,7 @@
                                 </div>
                             </th>
                             <th scope="col"
-                                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                                class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                                 data-sort="type">
                                 <div class="flex items-center gap-1">
                                     {{ __('messages.type') }}
@@ -47,7 +47,7 @@
                                 </div>
                             </th>
                             <th scope="col"
-                                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                                class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                                 data-sort="email">
                                 <div class="flex items-center gap-1">
                                     {{ __('messages.email') }}
@@ -65,7 +65,7 @@
                                 </div>
                             </th>
                             <th scope="col"
-                                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                                class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                                 data-sort="phone">
                                 <div class="flex items-center gap-1">
                                     {{ __('messages.phone') }}
@@ -83,7 +83,7 @@
                                 </div>
                             </th>
                             <th scope="col"
-                                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                                class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                                 data-sort="website">
                                 <div class="flex items-center gap-1">
                                     {{ __('messages.website') }}
@@ -100,7 +100,7 @@
                                     @endif
                                 </div>
                             </th>
-                            <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                            <th scope="col" class="relative py-3.5 ps-3 pe-4 sm:pe-6">
                                 <span class="sr-only">{{ __('messages.actions') }}</span>
                             </th>
                         </tr>
@@ -108,12 +108,12 @@
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                         @foreach ($roles as $role)
                         <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                            <td class="py-4 pl-4 pr-3 sm:pl-6 w-10">
+                            <td class="py-4 ps-4 pe-3 sm:ps-6 w-10">
                                 <input type="checkbox" class="row-checkbox h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[#4E81FA] focus:ring-[#4E81FA]"
                                     value="{{ $role->subdomain }}"
                                     data-has-email="{{ $role->email ? 'true' : 'false' }}">
                             </td>
-                            <td class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-gray-100 max-w-xs">
+                            <td class="py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 max-w-xs">
                                 @if ($role->isClaimed())
                                 <a href="{{ $role->getGuestUrl() }}"
                                     target="_blank" class="hover:underline break-words">{{ $role->getDisplayName(false) }}
@@ -139,7 +139,7 @@
                                 <a href="{{ $role->website }}"
                                     target="_blank" class="hover:underline">{{ App\Utils\UrlUtils::clean($role->website) }}</a>
                             </td>
-                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                            <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
                                 <button type="button"
                                     onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.unfollow', ['subdomain' => $role->subdomain]) }}'; } return false;"
                                     class="inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">

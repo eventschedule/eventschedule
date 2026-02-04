@@ -13,6 +13,12 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+        .dark .text-gradient {
+            background: linear-gradient(135deg, #34d399 0%, #2dd4bf 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
         @media (prefers-reduced-motion: reduce) {
             .animate-pulse-slow,

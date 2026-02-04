@@ -708,6 +708,13 @@
             background-clip: text;
         }
 
+        .dark .text-gradient-sky {
+            background: linear-gradient(135deg, #38bdf8, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         .library-card-badge {
             background: rgba(255, 251, 235, 0.8);
             border: 1px solid rgba(14, 165, 233, 0.2);

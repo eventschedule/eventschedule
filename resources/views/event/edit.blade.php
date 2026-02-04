@@ -463,13 +463,13 @@
                         <x-input-label for="event_slug" :value="__('messages.url')" />
                             <div class="mt-1 flex">
                                 <x-text-input type="text" 
-                                    class="block w-1/2 rounded-r-none bg-gray-100 dark:bg-gray-800" 
+                                    class="block w-1/2 rounded-e-none bg-gray-100 dark:bg-gray-800" 
                                     :value="''"
                                     readonly />
                                 <x-text-input id="event_slug" 
                                     name="slug" 
                                     type="text" 
-                                    class="block w-1/2 rounded-l-none border-l-0"
+                                    class="block w-1/2 rounded-s-none border-s-0"
                                     :value="old('slug', $event->slug)"
                                     placeholder="{{ __('messages.auto_generated') }}"                                    autocomplete="off" />
                             </div>
@@ -586,15 +586,15 @@
                                         <input id="in_person" name="event_type" type="checkbox" v-model="isInPerson"
                                             class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
                                             @change="onChangeVenueType('in_person')">
-                                        <label for="in_person" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                        <label for="in_person" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.in_person') }}
                                         </label>
                                     </div>
-                                    <div class="flex items-center pl-3">
+                                    <div class="flex items-center ps-3">
                                         <input id="online" name="event_type" type="checkbox" v-model="isOnline"
                                             class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
                                             @change="onChangeVenueType('online')">
-                                        <label for="online" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                        <label for="online" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.online') }}
                                         </label>
                                     </div>
@@ -613,13 +613,13 @@
                                                 <input id="use_existing_venue" name="venue_type" type="radio" value="use_existing" v-model="venueType"
                                                     class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                                 <label for="use_existing_venue"
-                                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
+                                                    class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
                                             </div>
                                             <div class="flex items-center">
                                                 <input id="create_new_venue" name="venue_type" type="radio" value="create_new" v-model="venueType"
                                                     class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                                 <label for="create_new_venue"
-                                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.create_new') }}</label>
+                                                    class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.create_new') }}</label>
                                             </div>
                                         </div>
                                     </fieldset>
@@ -656,7 +656,7 @@
                                             <div class="flex items-center">
                                                 <input id="send_email_to_venue" name="send_email_to_venue" type="checkbox" v-model="sendEmailToVenue"
                                                     class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                                <label for="send_email_to_venue" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                                <label for="send_email_to_venue" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                                     {{ __('messages.send_email_to_notify_them') }}
                                                 </label>
                                             </div>
@@ -757,7 +757,7 @@
                                         </span>
                                     </div>
                                     <div>
-                                        <x-secondary-button v-if="!selectedVenue.user_id" @click="editSelectedVenue" type="button" class="mr-2">
+                                        <x-secondary-button v-if="!selectedVenue.user_id" @click="editSelectedVenue" type="button" class="me-2">
                                             {{ __('messages.edit') }}
                                         </x-secondary-button>
                                         <x-secondary-button @click="clearSelectedVenue" type="button">
@@ -811,7 +811,7 @@
                                             <x-input-label :value="__('messages.name') . ' *'" />
                                             <div class="flex mt-1">
                                                 <x-text-input v-bind:id="'edit_member_name_' + member.id"
-                                                    v-bind:name="'members[' + member.id + '][name]'" type="text" class="mr-2 block w-full"
+                                                    v-bind:name="'members[' + member.id + '][name]'" type="text" class="me-2 block w-full"
                                                     v-model="selectedMembers.find(m => m.id === member.id).name" v-bind:required="editMemberId === member.id"
                                                     @keydown.enter.prevent="editMember()" autocomplete="off" />
                                                 <x-primary-button @click="editMember()" type="button">
@@ -824,7 +824,7 @@
                                         <div class="mb-6">  
                                             <x-input-label for="edit_member_email" :value="__('messages.email')" />
                                             <x-text-input v-bind:id="'edit_member_email_' + member.id" 
-                                                v-bind:name="'members[' + member.id + '][email]'" type="email" class="mr-2 block w-full" 
+                                                v-bind:name="'members[' + member.id + '][email]'" type="email" class="me-2 block w-full" 
                                                 v-model="selectedMembers.find(m => m.id === member.id).email" @keydown.enter.prevent="editMember()" autocomplete="off" />
                                             @if (config('app.hosted'))
                                             <div v-if="selectedMembers.find(m => m.id === member.id).email && !member.user_id" class="mt-2">
@@ -834,7 +834,7 @@
                                                         :name="'send_email_to_members[' + selectedMembers.find(m => m.id === member.id).email + ']'" 
                                                         v-model="sendEmailToMembers[selectedMembers.find(m => m.id === member.id).email]"
                                                         class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                                    <label :for="'send_email_to_edit_member_' + member.id" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                                    <label :for="'send_email_to_edit_member_' + member.id" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                                         {{ __('messages.send_email_to_notify_them') }}
                                                     </label>
                                                 </div>
@@ -845,7 +845,7 @@
                                         <div class="mb-6">
                                             <x-input-label for="edit_member_youtube_url" :value="__('messages.youtube_video_url')" />
                                             <x-text-input v-bind:id="'edit_member_youtube_url_' + member.id" 
-                                                v-bind:name="'members[' + member.id + '][youtube_url]'" type="url" class="mr-2 block w-full" 
+                                                v-bind:name="'members[' + member.id + '][youtube_url]'" type="url" class="me-2 block w-full" 
                                                 v-model="selectedMembers.find(m => m.id === member.id).youtube_url" @keydown.enter.prevent="editMember()" autocomplete="off" />
                                         </div>
 
@@ -864,7 +864,7 @@
                                                         (<a :href="'mailto:' + member.email" class="hover:underline">@{{ member.email }}</a>)
                                                     </template>
                                                 </span>
-                                                <a v-if="member.youtube_url" :href="member.youtube_url" target="_blank" class="ml-2">
+                                                <a v-if="member.youtube_url" :href="member.youtube_url" target="_blank" class="ms-2">
                                                     <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                         <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                                                     </svg>
@@ -878,7 +878,7 @@
                                                         :name="'send_email_to_members[' + member.email + ']'" 
                                                         v-model="sendEmailToMembers[member.email]"
                                                         class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                                    <label :for="'send_email_to_member_' + member.id" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                                    <label :for="'send_email_to_member_' + member.id" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                                         {{ __('messages.send_email_to_notify_them') }}
                                                     </label>
                                                 </div>
@@ -886,7 +886,7 @@
                                             @endif
                                         </div>
                                         <div>
-                                            <x-secondary-button v-if="!member.user_id" @click="editMember(member)" type="button" class="mr-2">
+                                            <x-secondary-button v-if="!member.user_id" @click="editMember(member)" type="button" class="me-2">
                                                 {{ __('messages.edit') }}
                                             </x-secondary-button>
                                             <x-secondary-button @click="removeMember(member)" type="button">
@@ -904,19 +904,19 @@
                                             <input id="use_existing_members" name="member_type" type="radio" value="use_existing" v-model="memberType"
                                                 class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                             <label for="use_existing_members"
-                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
+                                                class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
                                         </div>
                                         <div v-if="Object.keys(members).length == 0" class="flex items-center">
                                             <input id="use_existing_members" name="member_type" type="radio" value="use_existing" v-model="memberType"
                                                 class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                             <label for="use_existing_members"
-                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.none') }}</label>
+                                                class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.none') }}</label>
                                         </div>
                                         <div class="flex items-center">
                                             <input id="create_new_members" name="member_type" type="radio" value="create_new" v-model="memberType"
                                                 class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                             <label for="create_new_members"
-                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.create_new') }}</label>
+                                                class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.create_new') }}</label>
                                         </div>
                                     </div>
                                 </fieldset>
@@ -936,7 +936,7 @@
                                         <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
                                         <div class="flex mt-1">
                                             <x-text-input id="member_name" @keydown.enter.prevent="addMember"
-                                                v-model="memberName" type="text" class="mr-2 block w-full" required autocomplete="off" />
+                                                v-model="memberName" type="text" class="me-2 block w-full" required autocomplete="off" />
                                             <x-primary-button @click="addMember" type="button">
                                                 {{ __('messages.add') }}
                                             </x-primary-button>
@@ -946,7 +946,7 @@
                                     <div class="mb-6">
                                         <x-input-label for="member_email" :value="__('messages.email')" />
                                         <div class="flex mt-1">
-                                            <x-text-input id="member_email" name="member_email" type="email" class="mr-2 block w-full"
+                                            <x-text-input id="member_email" name="member_email" type="email" class="me-2 block w-full"
                                             @keydown.enter.prevent="addMember" @blur="searchMembers" v-model="memberEmail" autocomplete="off" />
                                         </div>
                                         <x-input-error class="mt-2" :messages="$errors->get('member_email')" />
@@ -957,7 +957,7 @@
                                                     type="checkbox" 
                                                     v-model="sendEmailToNewMember"
                                                     class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                                <label for="send_email_to_new_member" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                                <label for="send_email_to_new_member" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                                     {{ __('messages.send_email_to_notify_them') }}
                                                 </label>
                                             </div>
@@ -975,7 +975,7 @@
                                                             (<a :href="'mailto:' + member.email" class="hover:underline">@{{ member.email }}</a>)
                                                         </template>
                                                     </span>
-                                                    <a v-if="member.youtube_url" :href="member.youtube_url" target="_blank" class="ml-2">
+                                                    <a v-if="member.youtube_url" :href="member.youtube_url" target="_blank" class="ms-2">
                                                         <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                             <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                                                         </svg>
@@ -991,7 +991,7 @@
                                     <div class="mb-6">
                                         <x-input-label for="member_youtube_url" :value="__('messages.youtube_video_url')" />
                                         <x-text-input id="member_youtube_url" @keydown.enter.prevent="addMember"
-                                            v-model="memberYoutubeUrl" type="url" class="mr-2 block w-full" autocomplete="off" />
+                                            v-model="memberYoutubeUrl" type="url" class="me-2 block w-full" autocomplete="off" />
                                     </div>
                                 
                                 </div>
@@ -1033,20 +1033,20 @@
                                 <input id="one_time" name="schedule_type" type="radio" value="one_time" onchange="onChangeDateType()" {{ $event->days_of_week ? '' : 'CHECKED' }}
                                     class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                 <label for="one_time"
-                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.one_time') }}</label>
+                                    class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.one_time') }}</label>
                             </div>
                             <div class="flex items-center">
                                 <input id="recurring" name="schedule_type" type="radio" value="recurring" onchange="onChangeDateType()"  {{ $event->days_of_week ? 'CHECKED' : '' }}
                                     class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                 <label for="recurring"
-                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.recurring') }}</label>
+                                    class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.recurring') }}</label>
                             </div>
                         </div>
 
                         <div id="days_of_week_div" class="mb-6 {{ ! $event || ! $event->days_of_week ? 'hidden' : '' }}">
                             <x-input-label :value="__('messages.days_of_week')" />
                             @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $index => $day)
-                            <label for="days_of_week_{{ $index }}" class="mr-3 text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">
+                            <label for="days_of_week_{{ $index }}" class="me-3 text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">
                                 <input type="checkbox" id="days_of_week_{{ $index }}" name="days_of_week_{{ $index }}" class="h-4 w-4 rounded border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]"
                                     {{ $event && $event->days_of_week && $event->days_of_week[$index] == '1' ? 'checked' : '' }}/> &nbsp;
                                 {{ __('messages.' . $day) }}
@@ -1061,15 +1061,15 @@
                                     <input id="recurring_end_never" name="recurring_end_type" type="radio" value="never" v-model="event.recurring_end_type"
                                         class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                     <label for="recurring_end_never"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.never') }}</label>
+                                        class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.never') }}</label>
                                 </div>
                                 <div class="flex items-center">
                                     <input id="recurring_end_on_date" name="recurring_end_type" type="radio" value="on_date" v-model="event.recurring_end_type"
                                         class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                     <label for="recurring_end_on_date"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.on_date') }}</label>
+                                        class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.on_date') }}</label>
                                 </div>
-                                <div v-if="event.recurring_end_type === 'on_date'" class="ml-7">
+                                <div v-if="event.recurring_end_type === 'on_date'" class="ms-7">
                                     <x-text-input type="text" id="recurring_end_date" name="recurring_end_value" class="datepicker-end-date mt-1 block w-full"
                                         value="{{ old('recurring_end_value', $event->recurring_end_value) }}"
                                         autocomplete="off" />
@@ -1079,9 +1079,9 @@
                                     <input id="recurring_end_after_events" name="recurring_end_type" type="radio" value="after_events" v-model="event.recurring_end_type"
                                         class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                     <label for="recurring_end_after_events"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.after_events') }}</label>
+                                        class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.after_events') }}</label>
                                 </div>
-                                <div v-if="event.recurring_end_type === 'after_events'" class="ml-7">
+                                <div v-if="event.recurring_end_type === 'after_events'" class="ms-7">
                                     <x-text-input type="number" id="recurring_end_count" name="recurring_end_value" class="mt-1 block w-full"
                                         :value="old('recurring_end_value', $event->recurring_end_value)"
                                         v-model="event.recurring_end_value"
@@ -1275,10 +1275,10 @@
                                            {{ $isCuratorChecked ? 'checked' : '' }}
                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
                                            @change="toggleCuratorGroupSelection('{{ $curator->encodeId() }}')">
-                                    <label for="curator_{{ $curator->encodeId() }}" class="ml-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    <label for="curator_{{ $curator->encodeId() }}" class="ms-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
                                         {{ $curator->name }}
                                     </label>
-                                    <div class="ml-2 flex-shrink-0">
+                                    <div class="ms-2 flex-shrink-0">
                                         @if($curator->accept_requests && $curator->request_terms)
                                         <div class="relative group">
                                             <button type="button" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none">
@@ -1286,11 +1286,11 @@
                                                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                                                 </svg>
                                             </button>
-                                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 w-[28rem] max-w-lg z-10">
+                                            <div class="absolute bottom-full start-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 w-[28rem] max-w-lg z-10">
                                                 <div class="leading-relaxed" 
                                                      dir="{{ is_rtl() ? 'rtl' : 'ltr' }}"
                                                      style="{{ is_rtl() ? 'text-align: right;' : 'text-align: left;' }}">{!! nl2br(e($curator->translatedRequestTerms())) !!}</div>
-                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
+                                                <div class="absolute top-full start-1/2 transform -translate-x-1/2 w-0 h-0 border-s-4 border-e-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
                                             </div>
                                         </div>
                                         @else
@@ -1300,7 +1300,7 @@
                                 </div>
                                 
                                 @if($curator->groups && count($curator->groups) > 0)
-                                <div id="curator_group_{{ $curator->encodeId() }}" class="ml-6 mb-2" style="display: {{ $isCuratorChecked ? 'block' : 'none' }};">
+                                <div id="curator_group_{{ $curator->encodeId() }}" class="ms-6 mb-2" style="display: {{ $isCuratorChecked ? 'block' : 'none' }};">
                                     <select id="curator_group_{{ $curator->encodeId() }}" 
                                             name="curator_groups[{{ $curator->encodeId() }}]" 
                                             class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
@@ -1356,7 +1356,7 @@
                                         class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
                                         {{ ! $role->isPro() ? 'disabled' : '' }}>
                                     <input type="hidden" name="tickets_enabled" :value="event.tickets_enabled ? 1 : 0" >
-                                    <label for="tickets_enabled" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                    <label for="tickets_enabled" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                         {{ __('messages.enable_tickets') }}
                                         @if (! $role->isPro())
                                         <div class="text-xs pt-1">
@@ -1373,7 +1373,7 @@
                             <div class="flex items-center mt-3" v-show="event.tickets_enabled">
                                 <input id="save_default_tickets" name="save_default_tickets" type="checkbox"
                                     class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                <label for="save_default_tickets" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                <label for="save_default_tickets" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                     {{ __('messages.save_as_default') }}
                                 </label>
                             </div>
@@ -1395,17 +1395,17 @@
                                     <nav class="-mb-px flex space-x-2 sm:space-x-6">
                                         <button type="button" @click="activeTicketTab = 'tickets'"
                                             :class="activeTicketTab === 'tickets' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="flex-1 sm:flex-initial text-center sm:text-start whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
                                             {{ __('messages.general') }}
                                         </button>
                                         <button type="button" @click="activeTicketTab = 'payment'"
                                             :class="activeTicketTab === 'payment' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="flex-1 sm:flex-initial text-center sm:text-start whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
                                             {{ __('messages.payment') }}
                                         </button>
                                         <button type="button" @click="activeTicketTab = 'options'"
                                             :class="activeTicketTab === 'options' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="flex-1 sm:flex-initial text-center sm:text-left whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="flex-1 sm:flex-initial text-center sm:text-start whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
                                             {{ __('messages.options') }}
                                         </button>
                                     </nav>
@@ -1506,7 +1506,7 @@
                                             <div class="mt-2 flex items-center justify-between">
                                                 <div class="flex items-center">
                                                     <input type="checkbox" v-model="field.required" :id="`event_field_required_${fieldKey}`" class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                                    <label :for="`event_field_required_${fieldKey}`" class="ml-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
+                                                    <label :for="`event_field_required_${fieldKey}`" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
                                                 </div>
                                                 <x-secondary-button @click="removeEventCustomField(fieldKey)" type="button" class="text-xs py-1 px-2">
                                                     {{ __('messages.remove') }}
@@ -1593,7 +1593,7 @@
                                                 <div class="mt-2 flex items-center justify-between">
                                                     <div class="flex items-center">
                                                         <input type="checkbox" v-model="field.required" :id="`ticket_${index}_field_required_${fieldKey}`" class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                                        <label :for="`ticket_${index}_field_required_${fieldKey}`" class="ml-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
+                                                        <label :for="`ticket_${index}_field_required_${fieldKey}`" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
                                                     </div>
                                                     <x-secondary-button @click="removeTicketCustomField(index, fieldKey)" type="button" class="text-xs py-1 px-2">
                                                         {{ __('messages.remove') }}
@@ -1611,7 +1611,7 @@
                                                 <input id="total_tickets_individual" name="total_tickets_mode" type="radio"
                                                     value="individual" v-model="event.total_tickets_mode"
                                                     class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300">
-                                                <label for="total_tickets_individual" class="ml-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                <label for="total_tickets_individual" class="ms-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
                                                     {{ __('messages.individual_quantities') }} (@{{ getTotalTicketQuantity }} total)
                                                     <p class="text-xs text-gray-600 dark:text-gray-400">
                                                         {{ __('messages.individual_quantities_help') }}
@@ -1622,7 +1622,7 @@
                                                 <input id="total_tickets_combined" name="total_tickets_mode" type="radio"
                                                     value="combined" v-model="event.total_tickets_mode"
                                                     class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300">
-                                                <label for="total_tickets_combined" class="ml-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                <label for="total_tickets_combined" class="ms-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
                                                     {{ __('messages.combined_total') }} (@{{ getCombinedTotalQuantity }} total)
                                                     <p class="text-xs text-gray-600 dark:text-gray-400">
                                                         {{ __('messages.combined_total_help') }}
@@ -1665,7 +1665,7 @@
                                                 v-model="showExpireUnpaid"
                                                 class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
                                                 @change="toggleExpireUnpaid">
-                                            <label for="expire_unpaid_tickets_checkbox" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                            <label for="expire_unpaid_tickets_checkbox" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                                 {{ __('messages.expire_unpaid_tickets') }}
                                             </label>
                                         </div>
@@ -1808,7 +1808,7 @@
                     <div class="flex items-center space-x-4">
                         @if ($event->isSyncedToGoogleCalendarForSubdomain(request()->subdomain))
                             <div class="flex items-center text-green-600 dark:text-green-400">
-                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-4 h-4 me-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                 </svg>
                                 <span class="text-sm">{{ __('messages.synced_to_google_calendar') }}</span>
@@ -1818,7 +1818,7 @@
                             </x-secondary-button>
                         @else
                             <div class="flex items-center text-gray-500 dark:text-gray-400">
-                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-4 h-4 me-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm8 0a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V8zm0 4a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1v-2z" clip-rule="evenodd"></path>
                                 </svg>
                                 <span class="text-sm">{{ __('messages.not_synced_to_google_calendar') }}</span>
@@ -1831,7 +1831,7 @@
                 
                     <div id="sync-status-{{ $event->id }}" class="hidden mt-3">
                         <div class="flex items-center text-blue-600 dark:text-blue-400">
-                            <svg class="animate-spin -ml-1 mr-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <svg class="animate-spin -ms-1 me-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>

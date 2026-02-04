@@ -743,5 +743,12 @@
             background-clip: text;
             text-shadow: 0 0 40px rgba(124, 58, 237, 0.3);
         }
+        .dark .qa-glow-text {
+            background: linear-gradient(135deg, #a78bfa, #c084fc, #e879f9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(167, 139, 250, 0.3);
+        }
     </style>
 </x-marketing-layout>

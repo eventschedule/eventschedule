@@ -6,8 +6,20 @@
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
+    .dark .text-gradient-blue {
+        background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #7dd3fc 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
     .text-gradient-emerald {
         background: linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #059669 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .dark .text-gradient-emerald {
+        background: linear-gradient(135deg, #34d399 0%, #2dd4bf 50%, #10b981 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
