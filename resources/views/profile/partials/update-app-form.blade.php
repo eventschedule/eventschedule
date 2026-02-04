@@ -11,14 +11,14 @@
 
     <div class="space-y-4 pt-6">
         <div class="flex items-center">
-            <span class="text-gray-600 dark:text-gray-400 w-[160px] pr-4">{{ __('messages.installed_version') }}:</span>
+            <span class="text-gray-600 dark:text-gray-400 w-[160px] pe-4">{{ __('messages.installed_version') }}:</span>
             <span class="font-medium text-gray-700 dark:text-gray-300">
                 {{ $version_installed }}
             </span>
         </div>
 
         <div class="flex items-center">
-            <span class="text-gray-600 dark:text-gray-400 w-[160px] pr-4">{{ __('messages.latest_version') }}:</span>
+            <span class="text-gray-600 dark:text-gray-400 w-[160px] pe-4">{{ __('messages.latest_version') }}:</span>
             <span class="font-medium text-gray-700 dark:text-gray-300">
                 {{ $version_available }}
             </span>

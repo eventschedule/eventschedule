@@ -720,5 +720,13 @@
             background-clip: text;
             text-shadow: 0 0 40px rgba(225, 29, 72, 0.3);
         }
+
+        .dark .concert-glow-text {
+            background: linear-gradient(135deg, #fb7185, #fbbf24, #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(251, 113, 133, 0.3);
+        }
     </style>
 </x-marketing-layout>

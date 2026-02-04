@@ -710,5 +710,11 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+        .dark .text-gradient-teal {
+            background: linear-gradient(135deg, #2dd4bf, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
     </style>
 </x-marketing-layout>

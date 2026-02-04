@@ -602,6 +602,13 @@
             background-clip: text;
         }
 
+        .dark .text-gradient-amber {
+            background: linear-gradient(135deg, #fbbf24, #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         /* Neon flicker animation for OPEN sign */
         @keyframes neon-flicker {
             0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {

@@ -9,7 +9,7 @@
                 </button>
             </div>
             
-            <div class="flex items-center text-right">
+            <div class="flex items-center text-end">
                 @if ($role->profile_image_url)
                     <div class="pe-4">
                         <img src="{{ $role->profile_image_url }}" class="rounded-lg h-14 w-14 flex-none">

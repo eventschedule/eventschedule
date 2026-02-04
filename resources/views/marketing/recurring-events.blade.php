@@ -12,6 +12,13 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+
+        .dark .text-gradient {
+            background: linear-gradient(135deg, #a3e635 0%, #4ade80 50%, #22c55e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
     </style>
 
     <!-- Hero Section -->

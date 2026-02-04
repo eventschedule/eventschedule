@@ -637,6 +637,13 @@
             background-clip: text;
         }
 
+        .dark .text-gradient-workshop {
+            background: linear-gradient(135deg, #7dd3fc, #38bdf8, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         .chalk-text {
             background: linear-gradient(135deg, #4E81FA, #0EA5E9, #3b82f6);
             -webkit-background-clip: text;

@@ -82,7 +82,7 @@
                                 <!-- Image preview overlay -->
                                 <div v-if="detailsImage" 
                                      :class="['absolute bottom-3 w-16 h-16 rounded-md overflow-hidden border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm', 
-                                         {{ is_rtl() ? "'right-3'" : "'left-3'" }}]">
+                                         'start-3']">
                                     <img v-if="detailsImageUrl" 
                                          :src="detailsImageUrl" 
                                          class="object-cover w-full h-full" 
@@ -98,7 +98,7 @@
                                         @click="removeDetailsImage"
                                         type="button"
                                         :class="['absolute -top-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-all duration-200 hover:scale-105',
-                                            {{ is_rtl() ? "'-left-1'" : "'-right-1'" }}]"
+                                            '-end-1']"
                                         title="{{ __('messages.remove_image') }}">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -112,7 +112,7 @@
                                     @click="openDetailsFileSelector"
                                     :disabled="isLoading || detailsImage"
                                     :class="['absolute p-2 rounded-md transition-all duration-200 shadow-md', 
-                                        {{ is_rtl() ? "'left-16'" : "'right-16'" }} + ' bottom-3',
+                                        'end-16 bottom-3',
                                         (isLoading || detailsImage)
                                             ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed border border-gray-400 dark:border-gray-500' 
                                             : 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl']"
@@ -128,7 +128,7 @@
                                     @click="handleSubmit"
                                     :disabled="!canSubmit || isLoading"
                                     :class="['absolute p-2 rounded-md transition-all duration-200 shadow-md', 
-                                        {{ is_rtl() ? "'left-5'" : "'right-5'" }} + ' bottom-3',
+                                        'end-5 bottom-3',
                                         canSubmit && !isLoading
                                             ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl' 
                                             : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed border border-gray-400 dark:border-gray-500']"
@@ -154,7 +154,7 @@
                                     <span class="animate-pulse">
                                         {{ __('messages.loading') }}
                                     </span>
-                                    <span class="ml-1 inline-flex animate-[ellipsis_1.5s_steps(4,end)_infinite]">...</span>
+                                    <span class="ms-1 inline-flex animate-[ellipsis_1.5s_steps(4,end)_infinite]">...</span>
                                 </div>
                             </div>
                         </div>
@@ -189,7 +189,7 @@
                             v-model="showAllFields" 
                             @change="saveShowAllFieldsPreference"
                             class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
-                    <label for="show_all_fields" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    <label for="show_all_fields" class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                         {{ __('messages.show_all_fields') }}
                     </label>
                 </div>
@@ -214,7 +214,7 @@
                     v-model="showAllFields" 
                     @change="saveShowAllFieldsPreference"
                     class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
-            <label for="show_all_fields" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+            <label for="show_all_fields" class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                 {{ __('messages.show_all_fields') }}
             </label>
         </div>
@@ -238,14 +238,14 @@
                 <div v-if="savedEvents[idx] || saveErrors[idx]" :class="['px-4 py-3 -m-4 sm:-m-8 mt-4 sm:mb-4 flex justify-between items-center rounded-t-lg', 
                                 savedEvents[idx] ? 'bg-green-50 dark:bg-green-900/30' : 'bg-red-50 dark:bg-red-900/30']">
                     <h3 class="font-medium text-lg">
-                        <span v-if="savedEvents[idx]" class="ml-2 text-sm text-green-600 dark:text-green-400">
-                            <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <span v-if="savedEvents[idx]" class="ms-2 text-sm text-green-600 dark:text-green-400">
+                            <svg class="inline-block w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
                             {{ __('messages.saved') }}
                         </span>
-                        <span v-else-if="saveErrors[idx]" class="ml-2 text-sm text-red-600 dark:text-red-400">
-                            <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <span v-else-if="saveErrors[idx]" class="ms-2 text-sm text-red-600 dark:text-red-400">
+                            <svg class="inline-block w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                             {{ __('messages.error') }}: @{{ saveErrors[idx] }}
@@ -281,7 +281,7 @@
                                                     ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                                     : 'bg-green-500 text-white hover:bg-green-600 hover:scale-105']">
                                         <span v-if="savingEvents[idx]" class="inline-flex items-center">
-                                            <svg class="animate-spin -ml-1 mr-1 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <svg class="animate-spin -ms-1 me-1 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                             </svg>
@@ -347,13 +347,13 @@
                                         <input :id="'use_existing_venue_' + idx" :name="'venue_type_' + idx" type="radio" value="use_existing" v-model="eventVenueTypes[idx]" @change="onVenueTypeChange(idx)"
                                             class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                         <label :for="'use_existing_venue_' + idx"
-                                            class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
+                                            class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
                                     </div>
                                     <div class="flex items-center">
                                         <input :id="'create_new_venue_' + idx" :name="'venue_type_' + idx" type="radio" value="create_new" v-model="eventVenueTypes[idx]" @change="onVenueTypeChange(idx)"
                                             class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                         <label :for="'create_new_venue_' + idx"
-                                            class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.create_new') }}</label>
+                                            class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.create_new') }}</label>
                                     </div>
                                 </div>
                             </fieldset>
@@ -505,10 +505,10 @@
                                     name="create_account_@{{ idx }}" 
                                     v-model="createAccount"
                                     class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
-                            <label for="create_account_@{{ idx }}" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <label for="create_account_@{{ idx }}" class="ms-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ __('messages.create_account') }}
                             </label>
-                            <div class="ml-2 pt-2 relative group">
+                            <div class="ms-2 pt-2 relative group">
                                 <button type="button" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none">
                                     <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
@@ -518,7 +518,7 @@
                                     <div class="leading-relaxed" 
                                             dir="{{ is_rtl() ? 'rtl' : 'ltr' }}"
                                             style="{{ is_rtl() ? 'text-align: right;' : 'text-align: left;' }}">{{ __('messages.create_account_benefits') }}</div>
-                                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
+                                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-s-4 border-e-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
                                 </div>
                             </div>
                         </div>
@@ -584,7 +584,7 @@
                                                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                                 : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105']">
                                     <span v-if="savingEvents[idx]" class="inline-flex items-center">
-                                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <svg class="animate-spin -ms-1 me-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
@@ -628,7 +628,7 @@
                                         @click="removeImage(idx)" 
                                         type="button"
                                         v-bind:disabled="savedEvents[idx]"
-                                        class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105">
+                                        class="absolute top-2 end-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
@@ -731,7 +731,7 @@
                                             <a :href="video.url" target="_blank" 
                                                 class="inline-flex items-center text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium transition-colors flex-shrink-0"
                                                 @click.stop>
-                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                                <svg class="w-3 h-3 me-1" fill="currentColor" viewBox="0 0 24 24">
                                                     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                                                 </svg>
                                                 Watch
@@ -739,7 +739,7 @@
                                         </div>
                                         
                                         <!-- Selection indicator -->
-                                        <div v-if="isVideoSelected(idx, performerIdx, video)" class="absolute top-2 right-2">
+                                        <div v-if="isVideoSelected(idx, performerIdx, video)" class="absolute top-2 end-2">
                                             <div class="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>

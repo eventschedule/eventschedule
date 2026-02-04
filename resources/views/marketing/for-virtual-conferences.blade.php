@@ -797,5 +797,12 @@
             background-clip: text;
             text-shadow: 0 0 40px rgba(2, 132, 199, 0.3);
         }
+        .dark .conference-glow-text {
+            background: linear-gradient(135deg, #38bdf8, #60a5fa, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(56, 189, 248, 0.3);
+        }
     </style>
 </x-marketing-layout>

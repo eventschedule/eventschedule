@@ -659,6 +659,12 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+        .dark .text-gradient-lime {
+            background: linear-gradient(135deg, #a3e635, #4ade80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
         .rustic-stamp {
             border: 3px solid currentColor;

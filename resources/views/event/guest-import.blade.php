@@ -30,7 +30,7 @@
           </div>
           <div class="px-4 sm:px-8 pb-4 relative z-10">
             @if ($role->profile_image_url)
-            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] -ml-1 mb-6 bg-white dark:bg-gray-800 flex items-center justify-center">
+            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] -ms-1 mb-6 bg-white dark:bg-gray-800 flex items-center justify-center">
               <img
                 class="rounded-lg w-[120px] h-[120px] object-cover"
                 src="{{ $role->profile_image_url }}"
@@ -50,7 +50,7 @@
                     </a>
                 </div>
 
-                <div class="w-full sm:w-auto text-right">
+                <div class="w-full sm:w-auto text-end">
                     <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
                         {{ __('messages.add_event') }}
                     </h2>

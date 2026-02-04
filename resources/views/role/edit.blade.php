@@ -1555,11 +1555,11 @@
                                                         <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"/></svg>
                                                         @endunless
                                                     </button>
-                                                    <div x-show="open" @click.outside="open = false" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2">
+                                                    <div x-show="open" @click.outside="open = false" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute start-0 mt-2 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2.5">
                                                         <div class="grid grid-cols-7 gap-1.5">
                                                             @foreach(['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'] as $swatch)
                                                             <button type="button"
-                                                                class="w-6 h-6 rounded-full border-2 transition-all duration-150 group-color-swatch {{ $currentColor === $swatch ? 'border-gray-900 dark:border-white ring-2 ring-offset-1 ring-gray-900 dark:ring-white' : 'border-transparent hover:border-gray-400' }}"
+                                                                class="w-3 h-3 rounded-full group-color-swatch transition-transform duration-150 hover:scale-110 {{ $currentColor === $swatch ? 'outline outline-2 outline-offset-1 outline-gray-800 dark:outline-white' : '' }}"
                                                                 style="background-color: {{ $swatch }}"
                                                                 onclick="selectGroupColor(this, '{{ $swatch }}')"
                                                                 title="{{ $swatch }}"></button>
@@ -2248,9 +2248,9 @@ function addGroupField() {
                 <button type="button" @click="open = !open" class="color-trigger w-7 h-7 rounded-full transition-all duration-150 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600">
                     <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"/></svg>
                 </button>
-                <div x-show="open" @click.outside="open = false" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2">
+                <div x-show="open" @click.outside="open = false" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute start-0 mt-2 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2.5">
                     <div class="grid grid-cols-7 gap-1.5">
-                        ${['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'].map(c => '<button type="button" class="w-6 h-6 rounded-full border-2 border-transparent hover:border-gray-400 transition-all duration-150 group-color-swatch" style="background-color: ' + c + '" onclick="selectGroupColor(this, \'' + c + '\')" title="' + c + '"></button>').join('')}
+                        ${['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'].map(c => '<button type="button" class="w-3 h-3 rounded-full group-color-swatch transition-transform duration-150 hover:scale-110" style="background-color: ' + c + '" onclick="selectGroupColor(this, \'' + c + '\')" title="' + c + '"></button>').join('')}
                     </div>
                     <button type="button" class="mt-1.5 w-full text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors duration-150 py-1" onclick="selectGroupColor(this, '')">{{ __('messages.clear') }}</button>
                 </div>
@@ -2315,13 +2315,11 @@ function selectGroupColor(element, color) {
     hiddenInput.value = color;
 
     container.querySelectorAll('.group-color-swatch').forEach(function(btn) {
-        btn.classList.remove('border-gray-900', 'dark:border-white', 'ring-2', 'ring-offset-1', 'ring-gray-900', 'dark:ring-white');
-        btn.classList.add('border-transparent', 'hover:border-gray-400');
+        btn.classList.remove('outline', 'outline-2', 'outline-offset-1', 'outline-gray-800', 'dark:outline-white');
     });
 
     if (color && element.classList.contains('group-color-swatch')) {
-        element.classList.remove('border-transparent', 'hover:border-gray-400');
-        element.classList.add('border-gray-900', 'dark:border-white', 'ring-2', 'ring-offset-1', 'ring-gray-900', 'dark:ring-white');
+        element.classList.add('outline', 'outline-2', 'outline-offset-1', 'outline-gray-800', 'dark:outline-white');
     }
 
     const trigger = container.querySelector('.color-trigger');

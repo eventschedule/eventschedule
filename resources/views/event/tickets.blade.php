@@ -170,7 +170,7 @@
                         <input id="create_account" name="create_account" type="checkbox"
                             v-model="createAccount" value="1"
                             class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                        <label for="create_account" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                        <label for="create_account" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                             {{ __('messages.create_account') }}
                         </label>
                     </div>
@@ -178,12 +178,12 @@
                     <div class="mt-6" v-if="createAccount">
                         <label for="password" class="text-gray-900 dark:text-gray-100">{{ __('messages.password') . ' *' }}</label>
                         <div class="relative mt-1" x-data="{ show: false }">
-                            <input :type="show ? 'text' : 'password'" name="password" id="password" class="block w-full pr-10 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+                            <input :type="show ? 'text' : 'password'" name="password" id="password" class="block w-full pe-10 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
                                 v-model="password" required autocomplete="new-password" />
                             <button
                                 type="button"
                                 @click="show = !show"
-                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                             >
                                 <svg x-show="!show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -254,7 +254,7 @@
             </div>
         </div>
 
-        <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-4 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-l-4 border-[#4E81FA]">
+        <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-4 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4 border-[#4E81FA]">
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ ticket.type }}</h3>
@@ -280,7 +280,7 @@
             </div>
 
             <!-- Ticket-level Custom Fields (shown when ticket is selected) -->
-            <div v-if="ticket.selectedQty > 0 && ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0" class="mt-4 pl-4 border-l-2 border-gray-200 dark:border-gray-600">
+            <div v-if="ticket.selectedQty > 0 && ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0" class="mt-4 ps-4 border-s-2 border-gray-200 dark:border-gray-600">
                 <div v-for="(field, fieldKey) in ticket.custom_fields" :key="fieldKey" class="mb-3">
                     <label :for="`ticket_custom_${ticket.id}_${fieldKey}`" class="text-sm text-gray-900 dark:text-gray-100">
                         @{{ field.name }}@{{ field.required ? ' *' : '' }}
