@@ -687,6 +687,8 @@ return [
     'no_videos_selected' => 'No videos selected',
     'new_requests_notification_subject' => ':count pending request(s) for :name',
     'new_requests_notification_line' => 'You have :count pending request(s) for :name. Click below to view and manage them.',
+    'new_fan_content_notification_subject' => ':count pending fan content item(s) for :name',
+    'pending_fan_content' => 'Pending Fan Content',
     'user_has_been_deleted' => 'Your account has been deleted',
     'user_has_been_deleted_details' => 'The account for :user has been deleted.',
     'feedback_placeholder' => 'Need any changes? Tell us the features you need and we\'ll be happy to add them for you.',

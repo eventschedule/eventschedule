@@ -90,6 +90,7 @@
                 'videos' => $event->relationLoaded('approvedVideos') ? $event->approvedVideos->take(3)->map(fn($v) => [
                     'youtube_url' => $v->youtube_url,
                     'thumbnail_url' => \App\Utils\UrlUtils::getYouTubeThumbnail($v->youtube_url),
+                    'embed_url' => \App\Utils\UrlUtils::getYouTubeEmbed($v->youtube_url),
                 ])->values()->toArray() : [],
                 'recent_comments' => $event->relationLoaded('approvedComments') ? $event->approvedComments->take(2)->map(fn($c) => [
                     'author' => $c->user ? ($c->user->first_name ?: 'User') : 'User',
@@ -584,14 +585,37 @@
                                         </div>
 
                                         {{-- Video Thumbnails --}}
-                                        <div v-if="event.videos && event.videos.length > 0" class="mt-3 flex gap-2 overflow-x-auto">
-                                            <div v-for="(vid, vidIdx) in event.videos" :key="'vid-' + vidIdx"
-                                                 class="relative flex-shrink-0 w-28 h-20 rounded-lg overflow-hidden shadow-sm group/vid">
-                                                <img :src="vid.thumbnail_url" class="w-full h-full object-cover" alt="">
-                                                <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                                    <svg class="w-8 h-8 text-white opacity-80 group-hover/vid:opacity-100" viewBox="0 0 24 24" fill="currentColor">
-                                                        <path d="M8 5v14l11-7z"/>
-                                                    </svg>
+                                        <div v-if="event.videos && event.videos.length > 0" class="mt-3 space-y-2">
+                                            {{-- Playing video iframe (full width, above thumbnails) --}}
+                                            <div v-if="event.videos.some((v, i) => playingVideo === event.uniqueKey + '-' + i)"
+                                                 class="w-full aspect-video rounded-lg overflow-hidden shadow-sm" @click.stop>
+                                                <template v-for="(vid, vidIdx) in event.videos" :key="'playing-' + vidIdx">
+                                                    <iframe v-if="playingVideo === event.uniqueKey + '-' + vidIdx"
+                                                            :src="vid.embed_url + '?autoplay=1'"
+                                                            class="w-full h-full" frameborder="0"
+                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                            allowfullscreen></iframe>
+                                                </template>
+                                            </div>
+                                            {{-- Thumbnail row --}}
+                                            <div class="flex gap-2 overflow-x-auto">
+                                                <div v-for="(vid, vidIdx) in event.videos" :key="'vid-' + vidIdx"
+                                                     @click.stop="playVideo(event.uniqueKey + '-' + vidIdx)"
+                                                     class="relative flex-shrink-0 w-28 h-20 rounded-lg overflow-hidden shadow-sm group/vid cursor-pointer"
+                                                     :class="playingVideo === event.uniqueKey + '-' + vidIdx ? 'ring-2 ring-blue-500' : ''">
+                                                    <img :src="vid.thumbnail_url" class="w-full h-full object-cover" alt="">
+                                                    <div class="absolute inset-0 flex items-center justify-center"
+                                                         :class="playingVideo === event.uniqueKey + '-' + vidIdx ? 'bg-black/50' : 'bg-black/30'">
+                                                        <svg v-if="playingVideo !== event.uniqueKey + '-' + vidIdx"
+                                                             class="w-8 h-8 text-white opacity-80 group-hover/vid:opacity-100"
+                                                             viewBox="0 0 24 24" fill="currentColor">
+                                                            <path d="M8 5v14l11-7z"/>
+                                                        </svg>
+                                                        <svg v-else class="w-6 h-6 text-white"
+                                                             viewBox="0 0 24 24" fill="currentColor">
+                                                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                                                        </svg>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -775,14 +799,37 @@
                                     </div>
 
                                     {{-- Video Thumbnails --}}
-                                    <div v-if="event.videos && event.videos.length > 0" class="mt-3 flex gap-2 overflow-x-auto">
-                                        <div v-for="(vid, vidIdx) in event.videos" :key="'vid-' + vidIdx"
-                                             class="relative flex-shrink-0 w-28 h-20 rounded-lg overflow-hidden shadow-sm group/vid">
-                                            <img :src="vid.thumbnail_url" class="w-full h-full object-cover" alt="">
-                                            <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                                <svg class="w-8 h-8 text-white opacity-80 group-hover/vid:opacity-100" viewBox="0 0 24 24" fill="currentColor">
-                                                    <path d="M8 5v14l11-7z"/>
-                                                </svg>
+                                    <div v-if="event.videos && event.videos.length > 0" class="mt-3 space-y-2">
+                                        {{-- Playing video iframe (full width, above thumbnails) --}}
+                                        <div v-if="event.videos.some((v, i) => playingVideo === event.uniqueKey + '-' + i)"
+                                             class="w-full aspect-video rounded-lg overflow-hidden shadow-sm" @click.stop>
+                                            <template v-for="(vid, vidIdx) in event.videos" :key="'playing-' + vidIdx">
+                                                <iframe v-if="playingVideo === event.uniqueKey + '-' + vidIdx"
+                                                        :src="vid.embed_url + '?autoplay=1'"
+                                                        class="w-full h-full" frameborder="0"
+                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                        allowfullscreen></iframe>
+                                            </template>
+                                        </div>
+                                        {{-- Thumbnail row --}}
+                                        <div class="flex gap-2 overflow-x-auto">
+                                            <div v-for="(vid, vidIdx) in event.videos" :key="'vid-' + vidIdx"
+                                                 @click.stop="playVideo(event.uniqueKey + '-' + vidIdx)"
+                                                 class="relative flex-shrink-0 w-28 h-20 rounded-lg overflow-hidden shadow-sm group/vid cursor-pointer"
+                                                 :class="playingVideo === event.uniqueKey + '-' + vidIdx ? 'ring-2 ring-blue-500' : ''">
+                                                <img :src="vid.thumbnail_url" class="w-full h-full object-cover" alt="">
+                                                <div class="absolute inset-0 flex items-center justify-center"
+                                                     :class="playingVideo === event.uniqueKey + '-' + vidIdx ? 'bg-black/50' : 'bg-black/30'">
+                                                    <svg v-if="playingVideo !== event.uniqueKey + '-' + vidIdx"
+                                                         class="w-8 h-8 text-white opacity-80 group-hover/vid:opacity-100"
+                                                         viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M8 5v14l11-7z"/>
+                                                    </svg>
+                                                    <svg v-else class="w-6 h-6 text-white"
+                                                         viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                                                    </svg>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1139,6 +1186,7 @@ const calendarApp = createApp({
             showPastEvents: false,
             isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
             openVideoForm: {},
+            playingVideo: null,
             openCommentForm: {},
             isLoadingEvents: {{ request()->graphic ? 'false' : 'true' }},
             uniqueCategoryIds: @json($uniqueCategoryIds ?? []),
@@ -1517,6 +1565,9 @@ const calendarApp = createApp({
         }
     },
     methods: {
+        playVideo(key) {
+            this.playingVideo = this.playingVideo === key ? null : key;
+        },
         toggleView(view) {
             this.currentView = view;
             this.updatePanelWrapper(view);
