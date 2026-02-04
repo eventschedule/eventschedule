@@ -35,6 +35,8 @@ class Event extends Model
         'creator_role_id',
         'recurring_end_type',
         'recurring_end_value',
+        'recurring_frequency',
+        'recurring_interval',
         'custom_fields',
         'custom_field_values',
         'agenda_ai_prompt',
@@ -408,10 +410,17 @@ class Event extends Model
         }
 
         if ($this->days_of_week) {
-            $afterStartDate = Carbon::parse($this->localStartsAt())->isSameDay($date) || Carbon::parse($this->localStartsAt())->lessThanOrEqualTo($date);
-            $dayOfWeek = $date->dayOfWeek;
+            $startDate = Carbon::parse($this->localStartsAt())->startOfDay();
+            $afterStartDate = $startDate->isSameDay($date) || $startDate->lessThanOrEqualTo($date);
 
-            if (! $afterStartDate || $this->days_of_week[$dayOfWeek] !== '1') {
+            if (! $afterStartDate) {
+                return false;
+            }
+
+            // Check if date matches the frequency pattern
+            $frequency = $this->recurring_frequency ?? 'weekly';
+
+            if (! $this->matchesFrequency($frequency, $date, $startDate)) {
                 return false;
             }
 
@@ -426,20 +435,9 @@ class Event extends Model
                 }
             } elseif ($recurringEndType === 'after_events' && $this->recurring_end_value) {
                 $maxOccurrences = (int) $this->recurring_end_value;
-                $startDate = Carbon::parse($this->localStartsAt())->startOfDay();
                 $checkDate = Carbon::parse($date)->startOfDay();
 
-                // Count occurrences from start date up to and including the check date
-                $occurrenceCount = 0;
-                $currentDate = $startDate->copy();
-
-                while ($currentDate->lte($checkDate)) {
-                    $dayOfWeek = $currentDate->dayOfWeek;
-                    if ($this->days_of_week[$dayOfWeek] === '1') {
-                        $occurrenceCount++;
-                    }
-                    $currentDate->addDay();
-                }
+                $occurrenceCount = $this->countOccurrences($frequency, $startDate, $checkDate);
 
                 if ($occurrenceCount > $maxOccurrences) {
                     return false;
@@ -449,6 +447,124 @@ class Event extends Model
             return true;
         } else {
             return Carbon::parse($this->localStartsAt())->isSameDay($date);
+        }
+    }
+
+    protected function matchesFrequency(string $frequency, Carbon $date, Carbon $startDate): bool
+    {
+        switch ($frequency) {
+            case 'daily':
+                return true;
+
+            case 'weekly':
+                return $this->days_of_week[$date->dayOfWeek] === '1';
+
+            case 'every_n_weeks':
+                if ($this->days_of_week[$date->dayOfWeek] !== '1') {
+                    return false;
+                }
+                $interval = $this->recurring_interval ?? 2;
+                $daysDiff = $startDate->copy()->startOfWeek(Carbon::SUNDAY)->diffInDays($date->copy()->startOfWeek(Carbon::SUNDAY));
+                $weeksDiff = (int) floor($daysDiff / 7);
+
+                return $weeksDiff % $interval === 0;
+
+            case 'monthly_date':
+                return $date->day === $startDate->day;
+
+            case 'monthly_weekday':
+                // Match nth weekday (e.g., 2nd Tuesday)
+                $nthWeekday = (int) ceil($startDate->day / 7);
+                $targetDayOfWeek = $startDate->dayOfWeek;
+                $dateNthWeekday = (int) ceil($date->day / 7);
+
+                return $date->dayOfWeek === $targetDayOfWeek && $dateNthWeekday === $nthWeekday;
+
+            case 'yearly':
+                return $date->month === $startDate->month && $date->day === $startDate->day;
+
+            default:
+                return $this->days_of_week[$date->dayOfWeek] === '1';
+        }
+    }
+
+    protected function countOccurrences(string $frequency, Carbon $startDate, Carbon $checkDate): int
+    {
+        switch ($frequency) {
+            case 'daily':
+                return $startDate->diffInDays($checkDate) + 1;
+
+            case 'monthly_date':
+                $count = 0;
+                $current = $startDate->copy();
+                while ($current->lte($checkDate)) {
+                    $count++;
+                    $current->addMonth();
+                }
+
+                return $count;
+
+            case 'monthly_weekday':
+                $count = 0;
+                $current = $startDate->copy();
+                $nthWeekday = (int) ceil($startDate->day / 7);
+                $targetDayOfWeek = $startDate->dayOfWeek;
+                while ($current->lte($checkDate)) {
+                    $count++;
+                    // Move to next month and find the nth weekday
+                    $current->addMonth()->startOfMonth();
+                    // Find the nth occurrence of the target day of week
+                    $found = 0;
+                    while ($found < $nthWeekday) {
+                        if ($current->dayOfWeek === $targetDayOfWeek) {
+                            $found++;
+                            if ($found === $nthWeekday) {
+                                break;
+                            }
+                        }
+                        $current->addDay();
+                    }
+                }
+
+                return $count;
+
+            case 'yearly':
+                $count = 0;
+                $current = $startDate->copy();
+                while ($current->lte($checkDate)) {
+                    $count++;
+                    $current->addYear();
+                }
+
+                return $count;
+
+            case 'every_n_weeks':
+                $interval = $this->recurring_interval ?? 2;
+                $count = 0;
+                $currentDate = $startDate->copy();
+                while ($currentDate->lte($checkDate)) {
+                    $daysDiff = $startDate->copy()->startOfWeek(Carbon::SUNDAY)->diffInDays($currentDate->copy()->startOfWeek(Carbon::SUNDAY));
+                    $weeksDiff = (int) floor($daysDiff / 7);
+                    if ($weeksDiff % $interval === 0 && $this->days_of_week[$currentDate->dayOfWeek] === '1') {
+                        $count++;
+                    }
+                    $currentDate->addDay();
+                }
+
+                return $count;
+
+            case 'weekly':
+            default:
+                $count = 0;
+                $currentDate = $startDate->copy();
+                while ($currentDate->lte($checkDate)) {
+                    if ($this->days_of_week[$currentDate->dayOfWeek] === '1') {
+                        $count++;
+                    }
+                    $currentDate->addDay();
+                }
+
+                return $count;
         }
     }
 

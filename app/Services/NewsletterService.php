@@ -58,8 +58,9 @@ class NewsletterService
         }
 
         $chunks = array_chunk($recipientIds, 50);
-        foreach ($chunks as $chunk) {
-            SendNewsletterBatch::dispatch($newsletter->id, $chunk);
+        foreach ($chunks as $index => $chunk) {
+            SendNewsletterBatch::dispatch($newsletter->id, $chunk)
+                ->delay(now()->addSeconds($index * 15));
         }
 
         return true;
@@ -246,7 +247,7 @@ class NewsletterService
         $html = $this->renderHtml($newsletter, null);
 
         $style = '<style>a { pointer-events: none !important; cursor: default !important; }</style>';
-        $html = str_replace('</head>', $style . '</head>', $html);
+        $html = str_replace('</head>', $style.'</head>', $html);
 
         return $html;
     }
@@ -385,8 +386,9 @@ class NewsletterService
         }
 
         $chunks = array_chunk($recipientIds, 50);
-        foreach ($chunks as $chunk) {
-            SendNewsletterBatch::dispatch($remainderNewsletter->id, $chunk);
+        foreach ($chunks as $index => $chunk) {
+            SendNewsletterBatch::dispatch($remainderNewsletter->id, $chunk)
+                ->delay(now()->addSeconds($index * 15));
         }
     }
 

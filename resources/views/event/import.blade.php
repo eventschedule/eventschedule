@@ -24,6 +24,24 @@
 
     @csrf
 
+        @php $use24hr = get_use_24_hour_time($role ?? null); @endphp
+        <datalist id="time-options-import">
+            @for ($m = 0; $m < 1440; $m += 15)
+                @php
+                    $h = intdiv($m, 60);
+                    $min = $m % 60;
+                    if ($use24hr) {
+                        $timeLabel = sprintf('%02d:%02d', $h, $min);
+                    } else {
+                        $period = $h < 12 ? 'AM' : 'PM';
+                        $h12 = $h % 12 ?: 12;
+                        $timeLabel = sprintf('%d:%02d %s', $h12, $min, $period);
+                    }
+                @endphp
+                <option value="{{ $timeLabel }}">
+            @endfor
+        </datalist>
+
         <div v-if="!preview || !preview.parsed || preview.parsed.length === 0">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg">
             <div class="max-w-3xl mx-auto">
@@ -305,17 +323,34 @@
                         </div>
 
                         <div>
-                            <label for="starts_at_@{{ idx }}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">
+                            <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">
                                 {{ __('messages.date_and_time') }}
                             </label>
-                            <input id="starts_at_@{{ idx }}"
-                                    name="starts_at_@{{ idx }}"
-                                    type="text"
-                                    :class="'mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm datepicker_' + idx"
+                            <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 mt-1">
+                                <input type="text"
+                                    :class="'datepicker_date_' + idx + ' flex-1 min-w-[140px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm'"
+                                    v-model="preview.parsed[idx].event_date"
                                     v-bind:readonly="savedEvents[idx]"
-                                    v-model="preview.parsed[idx].event_date_time"
-                                    required
-                                    autocomplete="off" />
+                                    autocomplete="off"
+                                    :aria-label="'{{ __('messages.date') }}'" />
+                                <input type="text" list="time-options-import"
+                                    class="w-28 sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                    v-model="preview.parsed[idx].event_start_time"
+                                    v-bind:readonly="savedEvents[idx]"
+                                    @blur="onStartTimeBlur(idx)"
+                                    placeholder="{{ __('messages.start_time') }}"
+                                    autocomplete="off"
+                                    :aria-label="'{{ __('messages.start_time') }}'" />
+                                <span class="text-gray-500 dark:text-gray-400 text-sm shrink-0">{{ __('messages.to') }}</span>
+                                <input type="text" list="time-options-import"
+                                    class="w-28 sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                    v-model="preview.parsed[idx].event_end_time"
+                                    v-bind:readonly="savedEvents[idx]"
+                                    @blur="onEndTimeBlur(idx)"
+                                    placeholder="{{ __('messages.end_time') }}"
+                                    autocomplete="off"
+                                    :aria-label="'{{ __('messages.end_time') }}'" />
+                            </div>
                         </div>
 
                         <!-- Venue display for saved events -->
@@ -771,26 +806,34 @@
         initializeFlatpickr();
     });
 
-    // Function to initialize flatpickr on datepicker elements
+    // Function to initialize flatpickr on date-only datepicker elements
     function initializeFlatpickr() {
         var fpLocale = window.flatpickrLocales ? window.flatpickrLocales[window.appLocale] : null;
         var localeConfig = fpLocale ? { locale: fpLocale } : {};
 
-        // Select all elements with datepicker_X class
-        document.querySelectorAll('[class*="datepicker_"]').forEach(element => {
+        // Select only date inputs (datepicker_date_X class)
+        document.querySelectorAll('[class*="datepicker_date_"]').forEach(element => {
             // Destroy existing flatpickr instance if it exists
             if (element._flatpickr) {
                 element._flatpickr.destroy();
             }
 
-            // Create new flatpickr instance with EXACT same configuration as edit.blade.php
+            // Extract index from class name for Vue model sync
+            var classMatch = element.className.match(/datepicker_date_(\d+)/);
+            var idx = classMatch ? parseInt(classMatch[1], 10) : null;
+
             var f = flatpickr(element, Object.assign({
                 allowInput: true,
-                enableTime: true,
+                enableTime: false,
                 altInput: true,
-                time_24hr: {{ get_use_24_hour_time($role ?? null) ? 'true' : 'false' }},
-                altFormat: "{{ get_use_24_hour_time($role ?? null) ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
-                dateFormat: "Y-m-d H:i:S",
+                altFormat: "M j, Y",
+                dateFormat: "Y-m-d",
+                onChange: function(selectedDates, dateStr) {
+                    // Sync flatpickr selection back to Vue model
+                    if (idx !== null && window.__importApp && window.__importApp.preview && window.__importApp.preview.parsed[idx]) {
+                        window.__importApp.preview.parsed[idx].event_date = dateStr;
+                    }
+                },
             }, localeConfig));
 
             // Prevent keyboard input as per edit view
@@ -802,9 +845,7 @@
 
     const { createApp } = Vue
 
-
-
-    createApp({
+    var app = createApp({
         data() {
             return {
                 eventDetails: '',
@@ -855,7 +896,7 @@
                 // Always check event fields regardless of createAccount status
                 const eventFieldsValid = this.preview?.parsed?.every(event => {
                     const hasName = event.event_name?.trim();
-                    const hasDate = event.event_date_time;
+                    const hasDate = event.event_date && event.event_start_time;
                     
                     // Any venue field (name, address, or city) is sufficient
                     const hasVenueInfo = event.venue_name?.trim() ||
@@ -916,6 +957,100 @@
         },
 
         methods: {
+            parseTimeToMinutes(timeStr) {
+                if (!timeStr) return null;
+                timeStr = timeStr.trim();
+                var use24hr = {{ $use24hr ? 'true' : 'false' }};
+
+                // Try 24hr format: HH:mm or H:mm
+                var match24 = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+                if (match24 && use24hr) {
+                    var h = parseInt(match24[1], 10);
+                    var m = parseInt(match24[2], 10);
+                    if (h >= 0 && h <= 23 && m >= 0 && m <= 59) return h * 60 + m;
+                }
+
+                // Try 12hr format: h:mm AM/PM or h:mmAM/PM
+                var match12 = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)$/i);
+                if (match12) {
+                    var h = parseInt(match12[1], 10);
+                    var m = parseInt(match12[2], 10);
+                    var period = match12[3].toUpperCase();
+                    if (h >= 1 && h <= 12 && m >= 0 && m <= 59) {
+                        if (period === 'AM' && h === 12) h = 0;
+                        else if (period === 'PM' && h !== 12) h += 12;
+                        return h * 60 + m;
+                    }
+                }
+
+                // Try shorthand: 2pm, 11am
+                var matchShort = timeStr.match(/^(\d{1,2})\s*(AM|PM|am|pm)$/i);
+                if (matchShort) {
+                    var h = parseInt(matchShort[1], 10);
+                    var period = matchShort[2].toUpperCase();
+                    if (h >= 1 && h <= 12) {
+                        if (period === 'AM' && h === 12) h = 0;
+                        else if (period === 'PM' && h !== 12) h += 12;
+                        return h * 60;
+                    }
+                }
+
+                // Try bare HH:mm in 12hr mode
+                if (!use24hr && match24) {
+                    var h = parseInt(match24[1], 10);
+                    var m = parseInt(match24[2], 10);
+                    if (h >= 0 && h <= 23 && m >= 0 && m <= 59) return h * 60 + m;
+                }
+
+                return null;
+            },
+
+            formatMinutesToTime(minutes) {
+                var use24hr = {{ $use24hr ? 'true' : 'false' }};
+                var h = Math.floor(minutes / 60) % 24;
+                var m = minutes % 60;
+                if (use24hr) {
+                    return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+                } else {
+                    var period = h < 12 ? 'AM' : 'PM';
+                    var h12 = h % 12 || 12;
+                    return h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + period;
+                }
+            },
+
+            onStartTimeBlur(idx) {
+                var event = this.preview.parsed[idx];
+                var startMin = this.parseTimeToMinutes(event.event_start_time);
+                if (startMin !== null) {
+                    event.event_start_time = this.formatMinutesToTime(startMin);
+                    // Auto-adjust end time to maintain duration
+                    var endMin = this.parseTimeToMinutes(event.event_end_time);
+                    var prevDuration = 60; // default 1 hour
+                    if (endMin !== null) {
+                        // Keep existing end time, recalculate nothing here
+                    } else if (event.event_duration) {
+                        prevDuration = Math.round(event.event_duration * 60);
+                        var newEnd = startMin + prevDuration;
+                        event.event_end_time = this.formatMinutesToTime(newEnd % 1440);
+                    } else {
+                        var newEnd = startMin + prevDuration;
+                        event.event_end_time = this.formatMinutesToTime(newEnd % 1440);
+                    }
+                } else if (event.event_start_time.trim() !== '') {
+                    event.event_start_time = '';
+                }
+            },
+
+            onEndTimeBlur(idx) {
+                var event = this.preview.parsed[idx];
+                var endMin = this.parseTimeToMinutes(event.event_end_time);
+                if (endMin !== null) {
+                    event.event_end_time = this.formatMinutesToTime(endMin);
+                } else if (event.event_end_time.trim() !== '') {
+                    event.event_end_time = '';
+                }
+            },
+
             handleKeydown(event) {
                 // Handle Enter key for form submission
                 if (event.key === 'Enter') {
@@ -1043,6 +1178,43 @@
                         // Initialize venue selection arrays
                         this.eventVenueTypes = [];
                         this.eventSelectedVenues = [];
+
+                        // Split event_date_time into separate date, start time, end time fields
+                        this.preview.parsed.forEach((event) => {
+                            if (event.event_date_time) {
+                                try {
+                                    var dt = new Date(event.event_date_time.replace(' ', 'T'));
+                                    if (!isNaN(dt.getTime())) {
+                                        var y = dt.getFullYear();
+                                        var mo = ('0' + (dt.getMonth() + 1)).slice(-2);
+                                        var d = ('0' + dt.getDate()).slice(-2);
+                                        event.event_date = y + '-' + mo + '-' + d;
+                                        var h = dt.getHours();
+                                        var m = dt.getMinutes();
+                                        event.event_start_time = this.formatMinutesToTime(h * 60 + m);
+                                        if (event.event_duration) {
+                                            var endMin = h * 60 + m + Math.round(event.event_duration * 60);
+                                            event.event_end_time = this.formatMinutesToTime(endMin % 1440);
+                                        } else {
+                                            event.event_end_time = '';
+                                        }
+                                    } else {
+                                        event.event_date = '';
+                                        event.event_start_time = '';
+                                        event.event_end_time = '';
+                                    }
+                                } catch(e) {
+                                    event.event_date = '';
+                                    event.event_start_time = '';
+                                    event.event_end_time = '';
+                                }
+                                delete event.event_date_time;
+                            } else {
+                                if (!event.event_date) event.event_date = '';
+                                if (!event.event_start_time) event.event_start_time = '';
+                                if (!event.event_end_time) event.event_end_time = '';
+                            }
+                        });
 
                         this.preview.parsed.forEach((event, idx) => {
                             let matchedUserVenue = null;
@@ -1213,17 +1385,23 @@
                     
                     const parsed = this.preview.parsed[idx];
                     
-                    let dateValue = null; // Declare dateValue variable here                        
-                    let dateElement = document.querySelector(`.datepicker_${idx}`);
-                    dateValue = dateElement.value;
-                    
-                    // Ensure the date has seconds
-                    if (dateValue && dateValue.length === 16) { // Format: "YYYY-MM-DD HH:MM"
-                        dateValue += ":00"; // Add seconds
+                    // Build starts_at from split date/time fields
+                    var eventDate = parsed.event_date;
+                    var startMinutes = this.parseTimeToMinutes(parsed.event_start_time);
+                    if (!eventDate || startMinutes === null) {
+                        throw new Error('Date and start time are required');
                     }
-                    
-                    if (!dateValue) {
-                        throw new Error('Date and time are required');
+                    var sh = Math.floor(startMinutes / 60);
+                    var sm = startMinutes % 60;
+                    var dateValue = eventDate + ' ' + (sh < 10 ? '0' : '') + sh + ':' + (sm < 10 ? '0' : '') + sm + ':00';
+
+                    // Compute duration from start/end times
+                    var endMinutes = this.parseTimeToMinutes(parsed.event_end_time);
+                    var computedDuration = parsed.event_duration || '';
+                    if (endMinutes !== null && startMinutes !== null) {
+                        var diff = endMinutes - startMinutes;
+                        if (diff < 0) diff += 1440;
+                        computedDuration = (diff / 60);
                     }
                     
                     // Prepare members data
@@ -1299,7 +1477,7 @@
                             name: eventName,
                             name_en: parsed.event_name_en,
                             starts_at: dateValue,
-                            duration: parsed.event_duration,
+                            duration: computedDuration,
                             description: this.eventDetails ? this.eventDetails : parsed.event_details,
                             social_image: parsed.social_image,
                             registration_url: parsed.registration_url,
@@ -2046,6 +2224,7 @@
                 }
             },
         }
-    }).mount('#event-import-app')
+    });
+    window.__importApp = app.mount('#event-import-app');
 </script>
 @endif

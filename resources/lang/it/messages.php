@@ -472,6 +472,7 @@ return [
     'register_curator' => 'Registra curatore',
     'flyer' => 'Volantino',
     'flyer_image' => 'Immagine volantino',
+    'choose_file' => 'Scegli file',
     'event_added' => 'Evento aggiunto con successo',
     'please_select' => 'Seleziona',
     'claim_email_line1' => 'Iscriviti per personalizzare la pagina dell\'evento o sentiti libero di ignorare questa email',
@@ -980,6 +981,10 @@ return [
     // Recurring events
     'recurring_events' => 'Eventi Ricorrenti',
     'exclude_recurring_events' => 'Escludi eventi ricorrenti',
+    'every_n_weeks' => 'Every N Weeks',
+    'monthly_same_date' => 'Monthly (same date)',
+    'monthly_same_weekday' => 'Monthly (same day of week)',
+    'repeat_every_n_weeks' => 'Repeat every N weeks',
 
     // Bot protection
     'turnstile_verification_failed' => 'Verifica non riuscita. Riprova.',

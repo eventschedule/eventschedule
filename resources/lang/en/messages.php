@@ -58,6 +58,7 @@ return [
     'type' => 'Type',
     'details' => 'Details',
     'date_and_time' => 'Date & Time',
+    'date_and_time_required' => 'Date and start time are required.',
     'duration_in_hours' => 'Duration in Hours',
     'private' => 'Private',
     'unlisted' => 'Unlisted',
@@ -251,6 +252,7 @@ return [
     'deleted_curator' => 'Successfully deleted curator',
     'flyer' => 'Flyer',
     'flyer_image' => 'Flyer Image',
+    'choose_file' => 'Choose File',
     'events_graphic' => 'Events Graphic',
     'graphic' => 'Graphic',
     'event_added' => 'Successfully added event',
@@ -1012,6 +1014,10 @@ return [
     // Recurring events
     'recurring_events' => 'Recurring Events',
     'exclude_recurring_events' => 'Exclude recurring events',
+    'every_n_weeks' => 'Every N Weeks',
+    'monthly_same_date' => 'Monthly (same date)',
+    'monthly_same_weekday' => 'Monthly (same day of week)',
+    'repeat_every_n_weeks' => 'Repeat every N weeks',
 
     // Bot protection
     'turnstile_verification_failed' => 'Verification failed. Please try again.',

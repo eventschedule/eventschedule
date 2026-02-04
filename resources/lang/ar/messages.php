@@ -228,6 +228,7 @@ return [
     'deleted_curator' => 'تم حذف المنظم بنجاح',
     'flyer' => 'نشرة إعلانية',
     'flyer_image' => 'صورة الإعلان',
+    'choose_file' => 'اختر ملف',
     'event_added' => 'تمت إضافة الحدث بنجاح',
     'please_select' => 'يرجى الاختيار',
     'claim_email_line1' => 'سجل لتخصيص صفحة الحدث أو تجاهل هذا البريد الإلكتروني',
@@ -980,6 +981,10 @@ return [
     // Recurring events
     'recurring_events' => 'أحداث متكررة',
     'exclude_recurring_events' => 'استبعاد الأحداث المتكررة',
+    'every_n_weeks' => 'Every N Weeks',
+    'monthly_same_date' => 'Monthly (same date)',
+    'monthly_same_weekday' => 'Monthly (same day of week)',
+    'repeat_every_n_weeks' => 'Repeat every N weeks',
 
     // Bot protection
     'turnstile_verification_failed' => 'فشل التحقق. يرجى المحاولة مرة أخرى.',

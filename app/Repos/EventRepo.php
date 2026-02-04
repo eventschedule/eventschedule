@@ -340,12 +340,34 @@ class EventRepo
             );
         }
 
-        $days_of_week = '';
-        $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-        foreach ($days as $index => $day) {
-            $days_of_week .= request()->has('days_of_week_'.$index) ? '1' : '0';
+        // Handle recurring frequency and days_of_week
+        if (request()->schedule_type == 'recurring') {
+            $frequency = $request->input('recurring_frequency', 'weekly');
+            $event->recurring_frequency = $frequency;
+
+            if ($frequency === 'every_n_weeks') {
+                $event->recurring_interval = max(2, (int) $request->input('recurring_interval', 2));
+            } else {
+                $event->recurring_interval = null;
+            }
+
+            if (in_array($frequency, ['weekly', 'every_n_weeks'])) {
+                // Build days_of_week from checkboxes
+                $days_of_week = '';
+                $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+                foreach ($days as $index => $day) {
+                    $days_of_week .= request()->has('days_of_week_'.$index) ? '1' : '0';
+                }
+                $event->days_of_week = $days_of_week;
+            } else {
+                // daily, monthly_date, monthly_weekday, yearly - set all days for query compatibility
+                $event->days_of_week = '1111111';
+            }
+        } else {
+            $event->days_of_week = null;
+            $event->recurring_frequency = null;
+            $event->recurring_interval = null;
         }
-        $event->days_of_week = request()->schedule_type == 'recurring' ? $days_of_week : null;
 
         // Handle recurring end configuration (only for recurring events)
         if (request()->schedule_type == 'recurring') {

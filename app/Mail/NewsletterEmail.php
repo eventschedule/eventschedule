@@ -48,6 +48,7 @@ class NewsletterEmail extends Mailable
         return new Envelope(
             subject: $this->newsletter->subject,
             from: new Address($fromAddress, $fromName),
+            replyTo: [new Address($fromAddress, $fromName)],
         );
     }
 
@@ -82,10 +83,25 @@ class NewsletterEmail extends Mailable
     {
         $unsubscribeUrl = url('/nl/u/'.$this->recipient->token);
 
+        $fromAddress = config('mail.from.address');
+        $role = $this->newsletter->role;
+        if ($role && $role->hasEmailSettings()) {
+            $emailSettings = $role->getEmailSettings();
+            if (! empty($emailSettings['from_address'])) {
+                $fromAddress = $emailSettings['from_address'];
+            }
+        }
+
+        $messageId = $this->recipient->id.'.'.$this->newsletter->id.'@'.parse_url(config('app.url'), PHP_URL_HOST);
+
         return new Headers(
+            messageId: $messageId,
             text: [
-                'List-Unsubscribe' => '<'.$unsubscribeUrl.'>',
+                'List-Unsubscribe' => '<mailto:'.$fromAddress.'?subject=unsubscribe>, <'.$unsubscribeUrl.'>',
                 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
+                'Precedence' => 'bulk',
+                'X-Entity-Ref-ID' => $this->recipient->id.'.'.uniqid(),
+                'Content-Language' => $role->language_code ?? 'en',
             ],
         );
     }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html dir="{{ !empty($isRtl) ? 'rtl' : 'ltr' }}">
+<html dir="{{ !empty($isRtl) ? 'rtl' : 'ltr' }}" lang="{{ $role->language_code ?? 'en' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +8,19 @@
     <title>{{ $newsletter->subject }}</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: {{ $style['fontFamily'] }}, sans-serif; background-color: {{ $style['backgroundColor'] }}; color: {{ $style['textColor'] }};">
+    @php
+        $preheaderText = '';
+        foreach ($blocks as $b) {
+            if (($b['type'] ?? '') === 'text' && !empty($b['data']['content'])) {
+                $preheaderText = Str::limit(strip_tags($b['data']['content']), 150, '');
+                break;
+            }
+        }
+        if (empty($preheaderText)) {
+            $preheaderText = $newsletter->subject;
+        }
+    @endphp
+    <div style="display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">{{ $preheaderText }}</div>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: {{ $style['backgroundColor'] }};">
         <tr>
             <td align="center" style="padding: 20px 10px;">

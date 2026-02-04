@@ -60,6 +60,7 @@ class SendNewsletterBatch implements ShouldQueue
                         'recipient_id' => $recipient->id,
                     ]);
                 }
+                usleep(200000); // 200ms throttle between sends
             }
         } finally {
             app()->setLocale($originalLocale);
