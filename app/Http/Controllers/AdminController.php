@@ -147,7 +147,7 @@ class AdminController extends Controller
             ->limit(10)
             ->get();
 
-        // Recent schedules (only claimed, excluding demo roles) - reduced to 5
+        // Recent schedules (only claimed, excluding demo roles)
         $recentSchedules = Role::whereNotNull('user_id')
             ->where(function ($query) {
                 $query->whereNotNull('email_verified_at')
@@ -156,17 +156,17 @@ class AdminController extends Controller
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
             ->where('subdomain', 'not like', 'demo-%')
             ->orderBy('created_at', 'desc')
-            ->limit(5)
+            ->limit(20)
             ->get();
 
-        // Recent events (excluding demo events) - reduced to 5
+        // Recent events (excluding demo events)
         $recentEvents = Event::with('roles')
             ->whereDoesntHave('roles', function ($query) {
                 $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
                     ->orWhere('subdomain', 'like', 'demo-%');
             })
             ->orderBy('created_at', 'desc')
-            ->limit(5)
+            ->limit(20)
             ->get();
 
         // Trends data - users, schedules, events over time

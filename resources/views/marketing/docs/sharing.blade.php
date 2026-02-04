@@ -82,6 +82,7 @@
                         <section id="embed" class="doc-section">
                             <h2 class="doc-heading">Embedding on Your Website</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Add your schedule directly to your website using an embed code. Your events will automatically update without any extra work.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">See our <a href="{{ marketing_url('/features/embed-calendar') }}" class="doc-link">embed calendar feature page</a> for a full overview and demo.</p>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Getting the Embed Code</h3>
                             <ol class="doc-list doc-list-numbered mb-6">

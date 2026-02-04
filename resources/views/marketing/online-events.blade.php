@@ -309,21 +309,21 @@
 
     <!-- Next Feature -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
-        <!-- Animated background blobs matching Open Source page's colors -->
+        <!-- Animated background blobs matching Sub-schedules page's colors -->
         <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-gray-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-slate-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-rose-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/open-source') }}" class="group block">
-                <div class="bg-gradient-to-br from-gray-100 to-slate-100 dark:from-gray-900 dark:to-slate-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+            <a href="{{ marketing_url('/features/sub-schedules') }}" class="group block">
+                <div class="bg-gradient-to-br from-rose-100 to-cyan-100 dark:from-rose-900 dark:to-cyan-900 rounded-3xl border border-rose-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <!-- Text content -->
                         <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-gray-300 transition-colors">Open Source & API</h3>
-                            <p class="text-gray-600 dark:text-white/80 text-lg mb-4">100% open source. Selfhost on your own server or integrate with our REST API.</p>
-                            <span class="inline-flex items-center text-gray-500 dark:text-white/80 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-rose-600 dark:group-hover:text-rose-300 transition-colors">Sub-schedules</h3>
+                            <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Organize events into categories. Perfect for venues with multiple rooms or event series.</p>
+                            <span class="inline-flex items-center text-rose-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -331,23 +331,27 @@
                             </span>
                         </div>
 
-                        <!-- Mini mockup: Terminal window with code -->
+                        <!-- Mini mockup: Nested list with colored dots -->
                         <div class="flex-shrink-0">
-                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-300 dark:border-white/20 overflow-hidden w-52">
-                                <!-- Terminal header -->
-                                <div class="flex items-center gap-1.5 px-3 py-2 bg-gray-200 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
-                                    <div class="w-2.5 h-2.5 rounded-full bg-red-500/70"></div>
-                                    <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/70"></div>
-                                    <div class="w-2.5 h-2.5 rounded-full bg-green-500/70"></div>
-                                </div>
-                                <!-- Terminal content -->
-                                <div class="p-3 font-mono text-[10px] space-y-1">
-                                    <div class="text-gray-500">$ git clone</div>
-                                    <div class="text-cyan-400 break-all leading-tight">github.com/eventschedule</div>
-                                    <div class="text-gray-500 pt-1">$ composer install</div>
-                                    <div class="text-green-400">Done!</div>
-                                    <div class="text-gray-500">$ php artisan serve</div>
-                                    <div class="text-gray-500 dark:text-gray-400">Server running...</div>
+                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
+                                <div class="text-[10px] text-gray-500 mb-3">Sub-schedules</div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-rose-500/20 border border-rose-500/30">
+                                        <div class="w-2 h-2 rounded-full bg-rose-400"></div>
+                                        <span class="text-gray-900 dark:text-white text-xs">Main Stage</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
+                                        <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+                                        <span class="text-gray-600 dark:text-gray-300 text-xs">Acoustic Room</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
+                                        <div class="w-2 h-2 rounded-full bg-sky-400"></div>
+                                        <span class="text-gray-600 dark:text-gray-300 text-xs">Outdoor Patio</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
+                                        <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                                        <span class="text-gray-600 dark:text-gray-300 text-xs">Jazz Lounge</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

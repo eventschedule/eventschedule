@@ -30,17 +30,30 @@
                 "billingIncrement": "MON",
                 "description": "Everything in Free plus remove branding, ticketing with QR check-ins, Stripe payments, multiple account users, event graphics, and REST API access.",
                 "availability": "https://schema.org/InStock",
-                "priceSpecification": {
-                    "@type": "UnitPriceSpecification",
-                    "price": "5.00",
-                    "priceCurrency": "USD",
-                    "unitText": "MONTH",
-                    "referenceQuantity": {
-                        "@type": "QuantitativeValue",
-                        "value": "1",
-                        "unitCode": "MON"
+                "priceSpecification": [
+                    {
+                        "@type": "UnitPriceSpecification",
+                        "price": "5.00",
+                        "priceCurrency": "USD",
+                        "unitText": "MONTH",
+                        "referenceQuantity": {
+                            "@type": "QuantitativeValue",
+                            "value": "1",
+                            "unitCode": "MON"
+                        }
+                    },
+                    {
+                        "@type": "UnitPriceSpecification",
+                        "price": "50.00",
+                        "priceCurrency": "USD",
+                        "unitText": "YEAR",
+                        "referenceQuantity": {
+                            "@type": "QuantitativeValue",
+                            "value": "1",
+                            "unitCode": "ANN"
+                        }
                     }
-                }
+                ]
             }
         ]
     }
@@ -63,7 +76,7 @@
                 "name": "What does \"first year free\" mean?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "When you sign up for Pro, your first year is completely free. After that, it's $5/month billed yearly. You can cancel anytime."
+                    "text": "When you sign up for Pro, your first year is completely free. After that, it's $5/month or $50/year. You can cancel anytime."
                 }
             },
             {
@@ -119,8 +132,18 @@
     </section>
 
     <!-- Pricing Cards -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24" x-data="{ annual: false }">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <!-- Monthly/Annual Toggle -->
+            <div class="relative flex items-center justify-center gap-3 mb-16">
+                <span class="text-sm font-semibold transition-colors" :class="annual ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white'">Monthly</span>
+                <button @click="annual = !annual" role="switch" :aria-checked="annual.toString()" aria-label="Toggle annual billing" class="relative w-14 h-8 rounded-full transition-colors cursor-pointer flex-shrink-0" :class="annual ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'">
+                    <span class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-200" :class="annual ? 'translate-x-6' : 'translate-x-0'"></span>
+                </button>
+                <span class="text-sm font-semibold transition-colors" :class="annual ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'">Annual</span>
+                <span class="absolute left-1/2 ml-[108px] px-2.5 py-1 text-xs font-semibold rounded-full transition-opacity duration-200" :class="annual ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 opacity-100' : 'opacity-0'">Save $10</span>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
                 <!-- Free Plan -->
@@ -132,7 +155,7 @@
                     <div class="mb-8">
                         <div class="flex items-baseline gap-2 mb-2">
                             <span class="text-6xl font-bold text-gray-900 dark:text-white">$0</span>
-                            <span class="text-gray-500 dark:text-gray-400">/month</span>
+                            <span class="text-gray-500 dark:text-gray-400" x-text="annual ? '/year' : '/month'">/year</span>
                         </div>
                         <p class="text-gray-500 dark:text-gray-400">Perfect for getting started</p>
                     </div>
@@ -218,11 +241,18 @@
                     </div>
 
                     <div class="mb-8">
-                        <div class="flex items-baseline gap-2 mb-2">
-                            <span class="text-6xl font-bold text-gray-900 dark:text-white">$5</span>
-                            <span class="text-gray-500 dark:text-gray-400">/month</span>
+                        <div class="mb-2 relative h-[68px]">
+                            <div x-show="annual" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform -translate-y-1" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform translate-y-1" class="absolute inset-0 flex items-baseline gap-2">
+                                <span class="text-6xl font-bold text-gray-900 dark:text-white">$50</span>
+                                <span class="text-gray-500 dark:text-gray-400">/year</span>
+                            </div>
+                            <div x-show="!annual" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform -translate-y-1" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform translate-y-1" class="absolute inset-0 flex items-baseline gap-2" x-cloak>
+                                <span class="text-6xl font-bold text-gray-900 dark:text-white">$5</span>
+                                <span class="text-gray-500 dark:text-gray-400">/month</span>
+                            </div>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400">$50/year (billed annually) after your free year</p>
+                        <p class="text-gray-500 dark:text-gray-400" x-show="annual">Just $4.17/month, billed annually after your free year</p>
+                        <p class="text-gray-500 dark:text-gray-400" x-show="!annual" x-cloak>Billed monthly after your free year</p>
                     </div>
 
                     <ul class="space-y-4 mb-10">
@@ -358,7 +388,7 @@
                     </button>
                     <div x-show="open === 2" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            When you sign up for Pro, your first year is completely free. After that, it's $5/month billed yearly. You can cancel anytime.
+                            When you sign up for Pro, your first year is completely free. After that, it's $5/month or $50/year. You can cancel anytime.
                         </p>
                     </div>
                 </div>

@@ -312,11 +312,11 @@
                 </a>
 
                 <!-- Next feature -->
-                <a href="{{ marketing_url('/features/calendar-sync') }}" class="group block">
-                    <div class="h-full bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-3xl border border-blue-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
-                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Calendar Sync</h3>
-                        <p class="text-gray-500 dark:text-white/80 text-lg mb-4">Two-way sync with Google Calendar. Changes flow in both directions automatically.</p>
-                        <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                <a href="{{ marketing_url('/features/custom-fields') }}" class="group block">
+                    <div class="h-full bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900 dark:to-yellow-900 rounded-3xl border border-amber-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">Custom Fields</h3>
+                        <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Collect additional info from ticket buyers with text, dropdown, date, and yes/no fields.</p>
+                        <span class="inline-flex items-center text-amber-500 dark:text-amber-400 font-medium group-hover:gap-3 gap-2 transition-all">
                             Learn more
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

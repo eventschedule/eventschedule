@@ -316,11 +316,39 @@
         @if (request()->graphic)
             @include('role.partials.calendar-graphic')
         @else
-        <div v-if="isLoadingEvents" class="flex justify-center items-center py-20">
-            <svg class="animate-spin h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
+        <div v-if="isLoadingEvents">
+            {{-- Desktop skeleton --}}
+            <div class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden animate-pulse">
+                <div class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700">
+                    @for ($i = 0; $i < 7; $i++)
+                    <div class="flex justify-center bg-white dark:bg-gray-900 py-2">
+                        <div class="h-4 w-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                    @endfor
+                </div>
+                <div class="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700">
+                    @for ($i = 0; $i < 35; $i++)
+                    <div class="bg-white dark:bg-gray-900 p-2 min-h-[100px]">
+                        <div class="h-4 w-6 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                        <div class="h-3 w-full bg-gray-200 dark:bg-gray-700 rounded mb-1"></div>
+                        <div class="h-3 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                    @endfor
+                </div>
+            </div>
+            {{-- Mobile skeleton --}}
+            <div class="md:hidden {{ (isset($force_mobile) && $force_mobile) ? '!block' : '' }} space-y-3 px-1 py-4 animate-pulse">
+                @for ($i = 0; $i < 5; $i++)
+                <div class="flex items-center bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3">
+                    <div class="flex-1 space-y-2">
+                        <div class="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div class="h-3 w-1/2 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div class="h-3 w-1/3 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                    <div class="w-24 h-16 bg-gray-200 dark:bg-gray-700 rounded ml-3"></div>
+                </div>
+                @endfor
+            </div>
         </div>
         <div v-show="!isLoadingEvents" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
             <div

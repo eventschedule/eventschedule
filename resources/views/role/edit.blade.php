@@ -3399,4 +3399,20 @@ function deleteRoleImage(url, token) {
         }
     });
 }
+
+// Unsaved changes warning
+document.addEventListener('DOMContentLoaded', function() {
+    var isDirty = false;
+    var form = document.querySelector('form[method="post"]');
+    if (form) {
+        form.addEventListener('input', function() { isDirty = true; });
+        form.addEventListener('change', function() { isDirty = true; });
+        form.addEventListener('submit', function(e) {
+            if (!e.defaultPrevented) { isDirty = false; }
+        });
+    }
+    window.addEventListener('beforeunload', function(e) {
+        if (isDirty) { e.preventDefault(); e.returnValue = ''; }
+    });
+});
 </script>

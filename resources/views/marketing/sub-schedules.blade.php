@@ -259,51 +259,23 @@
 
     <!-- Next Feature -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
-        <!-- Animated background blobs matching Online Events page's colors -->
+        <!-- Animated background blobs matching Fan Videos page's colors -->
         <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-sky-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-orange-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-amber-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/features/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
-                    <div class="flex flex-col lg:flex-row gap-8 items-center">
-                        <!-- Text content -->
-                        <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-300 transition-colors">Online Events</h3>
-                            <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Toggle any event to online and add your streaming URL. Works with Zoom, YouTube, or any platform.</p>
-                            <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
-                                Learn more
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                        </div>
-
-                        <!-- Mini mockup: Toggle switch with streaming URL field -->
-                        <div class="flex-shrink-0">
-                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
-                                <!-- Toggle switch -->
-                                <div class="flex items-center justify-between mb-4">
-                                    <span class="text-gray-600 dark:text-gray-300 text-xs">Online Event</span>
-                                    <div class="w-10 h-5 bg-sky-500 rounded-full relative">
-                                        <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow"></div>
-                                    </div>
-                                </div>
-                                <!-- URL field -->
-                                <div>
-                                    <div class="text-[10px] text-gray-500 mb-1">Streaming URL</div>
-                                    <div class="bg-sky-500/20 rounded-lg px-2 py-1.5 text-sky-300 text-xs border border-sky-400/30 flex items-center gap-1.5">
-                                        <svg class="w-3 h-3 text-sky-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
-                                        </svg>
-                                        <span class="truncate">zoom.us/j/123...</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <a href="{{ marketing_url('/features/fan-videos') }}" class="group block">
+                <div class="bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900 dark:to-amber-900 rounded-3xl border border-orange-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-orange-600 dark:group-hover:text-orange-300 transition-colors">Fan Videos & Comments</h3>
+                    <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Fans add YouTube videos and comments to your events. All submissions need your approval.</p>
+                    <span class="inline-flex items-center text-orange-500 dark:text-orange-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                        Learn more
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </span>
                 </div>
             </a>
         </div>

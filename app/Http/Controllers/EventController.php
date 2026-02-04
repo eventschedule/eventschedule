@@ -1297,6 +1297,10 @@ class EventController extends Controller
             'is_approved' => false,
         ]);
 
+        if (! $request->user()->isConnected($role->subdomain)) {
+            $request->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+        }
+
         return redirect()->to($event->getGuestUrl($subdomain))
             ->with('message', __('messages.video_submitted'))
             ->with('scroll_to', 'pending-video-' . $video->id);
@@ -1353,6 +1357,10 @@ class EventController extends Controller
             'comment' => $comment,
             'is_approved' => false,
         ]);
+
+        if (! $request->user()->isConnected($role->subdomain)) {
+            $request->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+        }
 
         return redirect()->to($event->getGuestUrl($subdomain))
             ->with('message', __('messages.comment_submitted'))
