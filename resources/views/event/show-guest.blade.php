@@ -89,7 +89,7 @@
             <div class="px-5 pb-5">
               {{-- Profile image overlapping header --}}
               @if ($each->profile_image_url)
-                <div class="rounded-xl w-[100px] h-[100px] -mt-[60px] bg-white dark:bg-gray-900 p-[5px] mb-3">
+                <div class="rounded-xl w-[100px] h-[100px] -mt-[60px] bg-white/95 dark:bg-gray-900/95 p-[5px] mb-3">
                   @if ($each->isClaimed())
                     @php
                       $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
@@ -268,18 +268,20 @@
         @php
           $hasVenueHeader = ($event->venue->header_image && $event->venue->header_image !== 'none') || $event->venue->header_image_url;
         @endphp
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl {{ $role->isRtl() ? 'rtl' : '' }}">
           @if ($hasVenueHeader)
-            @if ($event->venue->header_image && $event->venue->header_image !== 'none')
-              <img class="block max-h-40 w-full object-cover" src="{{ asset('images/headers') }}/{{ $event->venue->header_image }}.png" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
-            @elseif ($event->venue->header_image_url)
-              <img class="block max-h-40 w-full object-cover" src="{{ $event->venue->header_image_url }}" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
-            @endif
+            <div class="overflow-hidden rounded-t-2xl">
+              @if ($event->venue->header_image && $event->venue->header_image !== 'none')
+                <img class="block max-h-40 w-full object-cover" src="{{ asset('images/headers') }}/{{ $event->venue->header_image }}.png" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
+              @elseif ($event->venue->header_image_url)
+                <img class="block max-h-40 w-full object-cover" src="{{ $event->venue->header_image_url }}" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
+              @endif
+            </div>
           @endif
-          <div class="p-5">
+          <div class="p-5 relative z-10">
             @if ($event->venue->profile_image_url && $hasVenueHeader)
-              <div class="rounded-xl w-[100px] h-[100px] -mt-[60px] bg-white dark:bg-gray-900 p-[5px] mb-3">
-                <img class="rounded-lg w-full h-full object-cover" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
+              <div class="rounded-lg w-[100px] h-[100px] -mt-[60px] bg-white/95 dark:bg-gray-900/95 flex items-center justify-center mb-3">
+                <img class="rounded-md w-[90px] h-[90px] object-cover" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
               </div>
             @elseif ($event->venue->profile_image_url)
               <img class="w-full aspect-square object-cover rounded-xl mb-3" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
@@ -940,9 +942,6 @@
         @endphp
         @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $event->parts->count() == 0))
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
-          <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
-            {{ __('messages.fan_content') }}
-          </h2>
           @if ($eventLevelVideos->count() > 0)
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             @foreach ($eventLevelVideos as $video)

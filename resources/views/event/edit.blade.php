@@ -2056,6 +2056,7 @@
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
         activeTicketTab: 'tickets',
         formSubmitAttempted: false,
+        isDirty: false,
         soldLabel: "{{ __('messages.sold_reserved') }}",
         isRecurring: @json($event->days_of_week ? true : false),
         sendEmailToVenue: false,
@@ -2496,6 +2497,8 @@
             return;
           }
         }
+
+        this.isDirty = false;
       },
       addTicket() {
         this.tickets.push({
@@ -2780,6 +2783,18 @@
         if (((member.id && member.id.toString().startsWith('new_')) || !member.user_id) && member.email) {
           this.$set(this.sendEmailToMembers, member.email, false);
         }
+      });
+
+      // Unsaved changes warning
+      this.$nextTick(() => {
+          const form = this.$el.querySelector('form[enctype]');
+          if (form) {
+              form.addEventListener('input', () => { this.isDirty = true; });
+              form.addEventListener('change', () => { this.isDirty = true; });
+          }
+      });
+      window.addEventListener('beforeunload', (e) => {
+          if (this.isDirty) { e.preventDefault(); e.returnValue = ''; }
       });
     }
   }).mount('#app')

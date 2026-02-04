@@ -311,51 +311,23 @@
 
     <!-- Next Feature -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
-        <!-- Animated background blobs matching Embed Calendar page's colors -->
+        <!-- Animated background blobs matching Recurring Events page's colors -->
         <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-lime-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-green-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/features/embed-calendar') }}" class="group block">
-                <div class="bg-gradient-to-br from-blue-100 to-blue-100 dark:from-blue-900 dark:to-blue-900 rounded-3xl border border-blue-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
-                    <div class="flex flex-col lg:flex-row gap-8 items-center">
-                        <!-- Text content -->
-                        <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Embed Calendar</h3>
-                            <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Add your event calendar to any website with one line of code. Responsive and multilingual.</p>
-                            <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
-                                Learn more
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                        </div>
-
-                        <!-- Mini mockup: Browser with embed code -->
-                        <div class="flex-shrink-0">
-                            <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border border-gray-300 dark:border-white/20 overflow-hidden w-48">
-                                <div class="flex items-center gap-1.5 px-3 py-2 bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
-                                    <div class="w-2 h-2 rounded-full bg-red-500/70"></div>
-                                    <div class="w-2 h-2 rounded-full bg-yellow-500/70"></div>
-                                    <div class="w-2 h-2 rounded-full bg-green-500/70"></div>
-                                </div>
-                                <div class="p-3">
-                                    <div class="grid grid-cols-5 gap-0.5 mb-2">
-                                        <div class="h-3 bg-blue-200 dark:bg-blue-500/30 rounded"></div>
-                                        <div class="h-3 bg-gray-100 dark:bg-white/5 rounded"></div>
-                                        <div class="h-3 bg-blue-200 dark:bg-blue-500/30 rounded"></div>
-                                        <div class="h-3 bg-gray-100 dark:bg-white/5 rounded"></div>
-                                        <div class="h-3 bg-blue-200 dark:bg-blue-500/30 rounded"></div>
-                                    </div>
-                                    <div class="bg-gray-100 dark:bg-white/5 rounded p-1.5">
-                                        <code class="text-[8px] text-blue-500 dark:text-blue-300 font-mono">&lt;iframe&gt;</code>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <a href="{{ marketing_url('/features/recurring-events') }}" class="group block">
+                <div class="bg-gradient-to-br from-lime-100 to-green-100 dark:from-lime-900 dark:to-green-900 rounded-3xl border border-lime-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-lime-600 dark:group-hover:text-lime-300 transition-colors">Recurring Events</h3>
+                    <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Set events to repeat weekly on chosen days with flexible end conditions and per-occurrence tickets.</p>
+                    <span class="inline-flex items-center text-lime-500 dark:text-lime-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                        Learn more
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </span>
                 </div>
             </a>
         </div>
