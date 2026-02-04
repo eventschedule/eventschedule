@@ -3,6 +3,7 @@
     <x-slot name="description">Accept credit cards, Apple Pay, and Google Pay for ticket sales. Secure Stripe Checkout with direct payouts and no platform fees.</x-slot>
     <x-slot name="keywords">Stripe payments, event tickets, credit card payments, Apple Pay, Google Pay, Stripe Connect, ticket sales, payment processing</x-slot>
     <x-slot name="breadcrumbTitle">Stripe</x-slot>
+    <x-slot name="socialImage">social/integrations.png</x-slot>
 
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
@@ -355,7 +356,7 @@
 
     <!-- CTA Section -->
     <section class="relative bg-gradient-to-br from-blue-600 to-sky-700 py-24 overflow-hidden">
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+        <div class="absolute inset-0 grid-overlay"></div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">

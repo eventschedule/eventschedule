@@ -135,7 +135,8 @@
             $groupsForVue[] = [
                 'id' => \App\Utils\UrlUtils::encodeId($group->id),
                 'slug' => $group->slug,
-                'name' => $group->translatedName()
+                'name' => $group->translatedName(),
+                'color' => $group->color,
             ];
         }
     }
@@ -429,8 +430,11 @@
                                     :data-event-id="event.id"
                                     @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
                                     <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }} truncate">
-                                        <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'"
+                                        <span class="flex items-start gap-1.5">
+                                            <span v-if="getEventGroupColor(event)" class="inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
+                                            <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'"
                                               class="hover:underline truncate" dir="auto" v-text="getEventDisplayName(event)">
+                                            </span>
                                         </span>
                                         <span v-if="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1"
                                               class="text-gray-500 dark:text-gray-400 truncate" v-text="getEventTime(event)">
@@ -482,7 +486,10 @@
                                         <div class="flex" :class="isRtl ? 'flex-row-reverse' : ''">
                                             {{-- Content Section --}}
                                             <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
-                                                <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
+                                                <div class="flex items-start gap-1.5">
+                                                    <span v-if="getEventGroupColor(event)" class="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
+                                                    <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
+                                                </div>
                                                 <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 hover:opacity-80 transition-opacity">
                                                     <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 24 24" fill="currentColor">
                                                         <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
@@ -552,7 +559,10 @@
                                     {{-- Details Column --}}
                                     <div class="md:flex-1 md:min-w-0 px-5 py-6 md:px-8 lg:px-16 md:py-8 flex flex-col gap-5">
                                         {{-- Event Title --}}
-                                        <h3 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto" v-text="event.name"></h3>
+                                        <div class="flex items-start gap-2">
+                                            <span v-if="getEventGroupColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
+                                            <h3 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto" v-text="event.name"></h3>
+                                        </div>
 
                                         {{-- Date Badge --}}
                                         <div v-if="event.occurrenceDate" class="flex items-center gap-4">
@@ -750,7 +760,7 @@
                                     </div>
                                     {{-- Flyer Image Column --}}
                                     <div class="md:w-[35%] md:flex-shrink-0">
-                                        <img :src="event.image_url" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name">
+                                        <img :src="event.image_url" :class="event._isPast ? 'grayscale' : ''" class="w-full" :alt="event.name">
                                     </div>
                                 </div>
                             </template>
@@ -766,7 +776,10 @@
                                 {{-- Content --}}
                                 <div class="px-5 py-6 md:px-8 lg:px-16 md:py-8 flex flex-col gap-5">
                                     {{-- Event Title --}}
-                                    <h3 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto" v-text="event.name"></h3>
+                                    <div class="flex items-start gap-2">
+                                        <span v-if="getEventGroupColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
+                                        <h3 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto" v-text="event.name"></h3>
+                                    </div>
 
                                     {{-- Date Badge --}}
                                     <div v-if="event.occurrenceDate" class="flex items-center gap-4">
@@ -1022,7 +1035,10 @@
                                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <div class="flex">
                                         <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
-                                            <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
+                                            <div class="flex items-start gap-1.5">
+                                                <span v-if="getEventGroupColor(event)" class="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
+                                                <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
+                                            </div>
                                             <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 hover:opacity-80 transition-opacity">
                                                 <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 24 24" fill="currentColor">
                                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
@@ -1593,6 +1609,11 @@ const calendarApp = createApp({
         }
     },
     methods: {
+        getEventGroupColor(event) {
+            if (!event.group_id) return null;
+            const group = this.groups.find(g => g.id === event.group_id);
+            return group && group.color ? group.color : null;
+        },
         playVideo(key) {
             this.playingVideo = this.playingVideo === key ? null : key;
         },

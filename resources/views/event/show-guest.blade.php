@@ -38,7 +38,7 @@
     <div class="flex flex-col gap-4 lg:grid lg:grid-cols-[380px_minmax(0,1fr)] lg:gap-10">
 
       {{-- LEFT COLUMN --}}
-      <div class="order-2 lg:order-1">
+      <div class="order-2 lg:order-1 pb-4">
         <div class="flex flex-col gap-4">
 
         {{-- Talent/performer cards --}}

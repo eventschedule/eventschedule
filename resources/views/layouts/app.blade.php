@@ -194,6 +194,8 @@
         }
 
         .event-popup-content {
+            display: flex;
+            flex-direction: row;
             background: linear-gradient(135deg, rgba(249, 250, 251, 0.95) 0%, rgba(249, 250, 251, 0.9) 100%);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -201,8 +203,8 @@
             border-radius: 16px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
             overflow: hidden;
-            max-width: 320px;
-            min-width: 280px;
+            max-width: 480px;
+            min-width: 380px;
             pointer-events: auto;
         }
 
@@ -213,14 +215,17 @@
         }
 
         .event-popup-image {
-            width: 100%;
-            height: 180px;
+            width: 160px;
+            min-height: 100%;
             object-fit: cover;
+            flex-shrink: 0;
             display: block;
         }
 
         .event-popup-body {
             padding: 16px;
+            flex: 1;
+            min-width: 0;
         }
 
         .event-popup-title {

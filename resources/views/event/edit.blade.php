@@ -2177,7 +2177,7 @@
           this.selectedMembers.push(member);
           // Initialize sendEmailToMembers for selected member if they don't have user_id and have email
           if (!member.user_id && member.email) {
-            this.$set(this.sendEmailToMembers, member.email, false);
+            this.sendEmailToMembers[member.email] = false;
           }
         }        
         this.memberSearchResults = [];
@@ -2245,7 +2245,7 @@
         this.selectedMembers.push(newMember);
         // Initialize sendEmailToMembers for new member using the checkbox value
         if (newMember.email) {
-          this.$set(this.sendEmailToMembers, newMember.email, this.sendEmailToNewMember);
+          this.sendEmailToMembers[newMember.email] = this.sendEmailToNewMember;
         }
         this.memberEmail = "";
         this.memberName = "";
@@ -2258,7 +2258,7 @@
           this.selectedMembers.push(this.selectedMember);
           // Initialize sendEmailToMembers for selected member if they don't have user_id and have email
           if (!this.selectedMember.user_id && this.selectedMember.email) {
-            this.$set(this.sendEmailToMembers, this.selectedMember.email, false);
+            this.sendEmailToMembers[this.selectedMember.email] = false;
           }
           this.$nextTick(() => {
             this.selectedMember = "";
@@ -2295,7 +2295,7 @@
         this.selectedMembers.push(newMember);
         // Initialize sendEmailToMembers for new member using the checkbox value
         if (newMember.email) {
-          this.$set(this.sendEmailToMembers, newMember.email, this.sendEmailToNewMember);
+          this.sendEmailToMembers[newMember.email] = this.sendEmailToNewMember;
         }
         this.memberSearchResults = [];
         this.memberName = "";
@@ -2781,20 +2781,29 @@
       // Initialize sendEmailToMembers for existing selectedMembers
       this.selectedMembers.forEach(member => {
         if (((member.id && member.id.toString().startsWith('new_')) || !member.user_id) && member.email) {
-          this.$set(this.sendEmailToMembers, member.email, false);
+          this.sendEmailToMembers[member.email] = false;
         }
       });
 
       // Unsaved changes warning
-      this.$nextTick(() => {
-          const form = this.$el.querySelector('form[enctype]');
-          if (form) {
-              form.addEventListener('input', () => { this.isDirty = true; });
-              form.addEventListener('change', () => { this.isDirty = true; });
-          }
-      });
+      var dirtyForm = document.querySelector('form[enctype]');
+      if (dirtyForm) {
+          dirtyForm.addEventListener('input', () => { this.isDirty = true; });
+          dirtyForm.addEventListener('change', () => { this.isDirty = true; });
+      }
       window.addEventListener('beforeunload', (e) => {
           if (this.isDirty) { e.preventDefault(); e.returnValue = ''; }
+      });
+      document.addEventListener('click', (e) => {
+          if (!this.isDirty) return;
+          var link = e.target.closest('a[href]');
+          if (!link) return;
+          var href = link.getAttribute('href');
+          if (!href || href === '#' || href.startsWith('#') || href.startsWith('javascript:')) return;
+          if (link.closest('form[enctype]')) return;
+          if (!confirm('{{ __("messages.unsaved_changes") }}')) {
+              e.preventDefault();
+          }
       });
     }
   }).mount('#app')

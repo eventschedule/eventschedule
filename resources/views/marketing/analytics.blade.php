@@ -13,6 +13,12 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+        .dark .text-gradient {
+            background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #6ee7b7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
         /* Page-specific animations */
         @keyframes count-up {
             0% { opacity: 0; transform: translateY(10px); }
@@ -335,7 +341,7 @@
 
     <!-- CTA Section -->
     <section class="relative bg-gradient-to-br from-emerald-600 to-teal-700 py-24 overflow-hidden">
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+        <div class="absolute inset-0 grid-overlay"></div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">

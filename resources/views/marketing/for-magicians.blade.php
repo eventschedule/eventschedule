@@ -580,7 +580,7 @@
 
     <!-- CTA Section -->
     <section class="relative bg-gradient-to-br from-blue-600 to-blue-700 py-24 overflow-hidden">
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+        <div class="absolute inset-0 grid-overlay"></div>
 
         <!-- Magic sparkles in CTA -->
         <div class="absolute top-12 left-20 animate-sparkle">

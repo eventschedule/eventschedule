@@ -500,7 +500,7 @@
 
     <!-- CTA Section -->
     <section class="relative bg-gradient-to-br from-rose-600 via-red-600 to-rose-700 py-24 overflow-hidden">
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+        <div class="absolute inset-0 grid-overlay"></div>
 
         <div class="absolute top-0 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-[100px]"></div>
         <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-amber-500/20 rounded-full blur-[100px]"></div>

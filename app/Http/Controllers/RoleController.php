@@ -1650,6 +1650,7 @@ class RoleController extends Controller
                     $updateData = [
                         'name' => $groupData['name'],
                         'slug' => $groupData['slug'] ?? Str::slug($groupData['name']),
+                        'color' => $groupData['color'] ?? null,
                     ];
 
                     // Preserve manually entered English name or add automatic translation
@@ -1668,6 +1669,7 @@ class RoleController extends Controller
                     $createData = [
                         'name' => $groupData['name'],
                         'slug' => Str::slug($groupData['name']),
+                        'color' => $groupData['color'] ?? null,
                     ];
 
                     // Preserve manually entered English name or add automatic translation

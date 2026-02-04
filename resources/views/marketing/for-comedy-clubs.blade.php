@@ -24,7 +24,7 @@
         <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-amber-900/10 to-transparent"></div>
 
         <!-- Grid pattern -->
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
+        <div class="absolute inset-0 grid-overlay"></div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <!-- Neon sign style badge -->
@@ -654,7 +654,7 @@
     <section class="relative bg-gradient-to-br from-amber-600 to-yellow-700 py-24 overflow-hidden">
         <!-- Brick wall texture overlay -->
         <div class="absolute inset-0 opacity-[0.03]" style="background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"60\" height=\"30\"><rect width=\"60\" height=\"30\" fill=\"none\" stroke=\"%23fff\" stroke-width=\"0.5\"/><line x1=\"30\" y1=\"0\" x2=\"30\" y2=\"15\" stroke=\"%23fff\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"15\" x2=\"60\" y2=\"15\" stroke=\"%23fff\" stroke-width=\"0.5\"/><line x1=\"15\" y1=\"15\" x2=\"15\" y2=\"30\" stroke=\"%23fff\" stroke-width=\"0.5\"/><line x1=\"45\" y1=\"15\" x2=\"45\" y2=\"30\" stroke=\"%23fff\" stroke-width=\"0.5\"/></svg>');"></div>
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+        <div class="absolute inset-0 grid-overlay"></div>
 
         <!-- Glow effects -->
         <div class="absolute top-0 left-1/4 w-64 h-64 bg-yellow-500/20 rounded-full blur-[100px]"></div>
