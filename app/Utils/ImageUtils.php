@@ -266,6 +266,61 @@ class ImageUtils
     }
 
     /**
+     * Generate a WebP version of a source image
+     *
+     * @param  string  $sourcePath  Path to source image
+     * @param  string  $destPath  Path to save WebP file
+     * @param  int  $quality  WebP quality (0-100)
+     * @return bool True on success, false on failure
+     */
+    public static function generateWebP(string $sourcePath, string $destPath, int $quality = 80): bool
+    {
+        if (! file_exists($sourcePath)) {
+            return false;
+        }
+
+        $imageInfo = getimagesize($sourcePath);
+        if ($imageInfo === false) {
+            return false;
+        }
+
+        $mimeType = $imageInfo['mime'];
+
+        switch ($mimeType) {
+            case 'image/png':
+                $sourceImage = imagecreatefrompng($sourcePath);
+                break;
+            case 'image/jpeg':
+                $sourceImage = imagecreatefromjpeg($sourcePath);
+                break;
+            default:
+                return false;
+        }
+
+        if ($sourceImage === false) {
+            return false;
+        }
+
+        // Preserve alpha transparency for PNGs
+        if ($mimeType === 'image/png') {
+            imagealphablending($sourceImage, true);
+            imagesavealpha($sourceImage, true);
+        }
+
+        // Ensure destination directory exists
+        $destDir = dirname($destPath);
+        if (! is_dir($destDir)) {
+            mkdir($destDir, 0755, true);
+        }
+
+        $result = imagewebp($sourceImage, $destPath, $quality);
+
+        imagedestroy($sourceImage);
+
+        return $result;
+    }
+
+    /**
      * Clean up temporary file from an UploadedFile object
      *
      * @param  \Illuminate\Http\UploadedFile  $file  The uploaded file to clean up

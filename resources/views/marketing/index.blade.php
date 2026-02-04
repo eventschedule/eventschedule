@@ -174,7 +174,10 @@
                         @endphp
                         @foreach($screenshots as $index => $screenshot)
                         <div class="flex-shrink-0 w-full overflow-hidden">
-                            <img src="{{ url($screenshot[0]) }}" alt="{{ $screenshot[1] }}" width="1872" height="2560" class="block w-full h-auto scale-[1.05]" @if($index === 0) fetchpriority="high" @else loading="lazy" @endif />
+                            <picture>
+                                <source srcset="{{ url(webp_path($screenshot[0])) }}" type="image/webp">
+                                <img src="{{ url($screenshot[0]) }}" alt="{{ $screenshot[1] }}" width="1872" height="2560" class="block w-full h-auto scale-[1.05]" @if($index === 0) fetchpriority="high" @else loading="lazy" @endif />
+                            </picture>
                         </div>
                         @endforeach
                     </div>

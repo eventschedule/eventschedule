@@ -1,5 +1,16 @@
 <?php
 
+if (! function_exists('webp_path')) {
+    /**
+     * Convert an image path to its WebP equivalent
+     * e.g. 'images/headers/Arena.png' -> 'images/headers/Arena.webp'
+     */
+    function webp_path(string $path): string
+    {
+        return preg_replace('/\.(png|jpg|jpeg)$/i', '.webp', $path);
+    }
+}
+
 if (! function_exists('csp_nonce')) {
     /**
      * Get the CSP nonce for the current request

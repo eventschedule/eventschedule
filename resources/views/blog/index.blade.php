@@ -148,7 +148,10 @@
                                 <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-6 transition-all duration-300 hover:shadow-lg hover:shadow-violet-100/50 dark:hover:shadow-violet-900/20 hover:-translate-y-1 hover:border-violet-200 dark:hover:border-violet-700 cursor-pointer">
                                     @if($post->featured_image_url)
                                         <div class="mb-4 overflow-hidden rounded-xl">
-                                            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105">
+                                            <picture>
+                                                <source srcset="{{ webp_path($post->featured_image_url) }}" type="image/webp">
+                                                <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105">
+                                            </picture>
                                         </div>
                                     @endif
                                     <div class="flex flex-col sm:flex-row sm:items-center gap-x-4 text-xs mb-3">

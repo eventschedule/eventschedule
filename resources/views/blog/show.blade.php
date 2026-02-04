@@ -271,9 +271,12 @@
             <!-- Featured Image -->
             @if($post->featured_image_url)
                 <div class="mb-8">
-                    <img src="{{ $post->featured_image_url }}"
-                         alt="{{ $post->title }}"
-                         class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-2xl shadow-lg">
+                    <picture>
+                        <source srcset="{{ webp_path($post->featured_image_url) }}" type="image/webp">
+                        <img src="{{ $post->featured_image_url }}"
+                             alt="{{ $post->title }}"
+                             class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-2xl shadow-lg">
+                    </picture>
                 </div>
             @endif
 
@@ -306,9 +309,12 @@
                                 <article class="group">
                                     @if($relatedPost->featured_image_url)
                                         <div class="mb-4">
-                                            <img src="{{ $relatedPost->featured_image_url }}"
-                                                 alt="{{ $relatedPost->title }}"
-                                                 class="w-full h-32 object-cover rounded-xl">
+                                            <picture>
+                                                <source srcset="{{ webp_path($relatedPost->featured_image_url) }}" type="image/webp">
+                                                <img src="{{ $relatedPost->featured_image_url }}"
+                                                     alt="{{ $relatedPost->title }}"
+                                                     class="w-full h-32 object-cover rounded-xl">
+                                            </picture>
                                         </div>
                                     @endif
                                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors mb-2">

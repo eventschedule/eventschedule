@@ -139,7 +139,12 @@ class AppController extends Controller
             \Artisan::call('app:send-graphic-emails');
             \Artisan::call('google:refresh-webhooks');
 
-            \Artisan::call('app:notify-request-changes');
+            // Send pending notification emails (once per day at 12:00 PM UTC)
+            if (now()->hour >= 12 && ! Cache::has('notified_pending_today')) {
+                \Artisan::call('app:notify-request-changes');
+                \Artisan::call('app:notify-fan-content-changes');
+                Cache::put('notified_pending_today', true, now()->endOfDay());
+            }
 
             if (config('app.hosted')) {
                 \Artisan::call('app:generate-sub-audience-blog');
