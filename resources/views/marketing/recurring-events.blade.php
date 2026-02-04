@@ -1,7 +1,7 @@
 <x-marketing-layout>
-    <x-slot name="title">Recurring Events | Weekly Repeat Scheduling - Event Schedule</x-slot>
-    <x-slot name="description">Set events to repeat weekly on chosen days with flexible end conditions, per-occurrence tickets, and automatic Google Calendar sync.</x-slot>
-    <x-slot name="keywords">recurring events, weekly events, repeat scheduling, event recurrence, weekly calendar, per-occurrence tickets, Google Calendar sync, event series</x-slot>
+    <x-slot name="title">Recurring Events | Flexible Repeat Scheduling - Event Schedule</x-slot>
+    <x-slot name="description">Set events to repeat daily, weekly, biweekly, monthly, or yearly with flexible end conditions, per-occurrence tickets, and automatic Google Calendar sync.</x-slot>
+    <x-slot name="keywords">recurring events, daily events, weekly events, monthly events, yearly events, biweekly events, repeat scheduling, event recurrence, per-occurrence tickets, Google Calendar sync, event series</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Recurring Events</x-slot>
 
@@ -46,7 +46,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-                Schedule events to repeat weekly on your chosen days. Set end conditions and let Google Calendar sync handle the rest.
+                Schedule events to repeat daily, weekly, monthly, or yearly. Set end conditions and let Google Calendar sync handle the rest.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
@@ -66,7 +66,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-                <!-- Day Picker (spans 2 cols) -->
+                <!-- Frequency Options (spans 2 cols) -->
                 <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-lime-100 to-green-100 dark:from-lime-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
@@ -74,27 +74,38 @@
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                Weekly Schedule
+                                Flexible Recurrence
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Pick your days</h3>
-                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Select which days of the week your event repeats. Choose one day or several for a flexible weekly schedule.</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Choose your frequency</h3>
+                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Pick from six recurrence options to match any schedule. Daily, weekly, biweekly, monthly, or yearly.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any combination</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Weekly repeat</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Daily</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Weekly</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Monthly</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Yearly</span>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
                             <div class="animate-float">
                                 <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-6 border border-gray-200 dark:border-white/10 max-w-xs">
-                                    <div class="text-gray-500 dark:text-gray-400 text-xs mb-3">Repeat on</div>
-                                    <div class="flex gap-2">
-                                        <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-xs">S</div>
-                                        <div class="w-10 h-10 rounded-full bg-lime-500 text-white flex items-center justify-center text-xs font-semibold shadow-lg shadow-lime-500/25">M</div>
-                                        <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-xs">T</div>
-                                        <div class="w-10 h-10 rounded-full bg-lime-500 text-white flex items-center justify-center text-xs font-semibold shadow-lg shadow-lime-500/25">W</div>
-                                        <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-xs">T</div>
-                                        <div class="w-10 h-10 rounded-full bg-lime-500 text-white flex items-center justify-center text-xs font-semibold shadow-lg shadow-lime-500/25">F</div>
-                                        <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-xs">S</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-xs mb-3">Frequency</div>
+                                    <div class="space-y-1.5 mb-4">
+                                        <div class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-xs">Daily</div>
+                                        <div class="px-3 py-1.5 rounded-lg bg-lime-500 text-white text-xs font-semibold shadow-lg shadow-lime-500/25">Weekly</div>
+                                        <div class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-xs">Every N Weeks</div>
+                                        <div class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-xs">Monthly (same date)</div>
+                                        <div class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-xs">Monthly (same day)</div>
+                                        <div class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-xs">Yearly</div>
+                                    </div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-xs mb-2">Repeat on</div>
+                                    <div class="flex gap-1.5">
+                                        <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-[10px]">S</div>
+                                        <div class="w-8 h-8 rounded-full bg-lime-500 text-white flex items-center justify-center text-[10px] font-semibold shadow-lg shadow-lime-500/25">M</div>
+                                        <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-[10px]">T</div>
+                                        <div class="w-8 h-8 rounded-full bg-lime-500 text-white flex items-center justify-center text-[10px] font-semibold shadow-lg shadow-lime-500/25">W</div>
+                                        <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-[10px]">T</div>
+                                        <div class="w-8 h-8 rounded-full bg-lime-500 text-white flex items-center justify-center text-[10px] font-semibold shadow-lg shadow-lime-500/25">F</div>
+                                        <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-[10px]">S</div>
                                     </div>
                                 </div>
                             </div>
@@ -173,7 +184,7 @@
                                 Calendar View
                             </div>
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">See the series</h3>
-                            <p class="text-gray-600 dark:text-white/80 text-lg">All recurring dates appear on your schedule automatically. Guests see each occurrence individually with its own ticket availability.</p>
+                            <p class="text-gray-600 dark:text-white/80 text-lg">All recurring dates appear on your schedule automatically, regardless of frequency. Guests see each occurrence individually with its own ticket availability.</p>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10">
                             <div class="text-gray-500 dark:text-gray-400 text-xs mb-3 font-medium">February 2026</div>
@@ -273,15 +284,15 @@
                         Use Cases
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Built for regulars</h3>
-                    <p class="text-gray-600 dark:text-white/80 mb-6">Perfect for events that happen on a weekly schedule.</p>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">Perfect for events that repeat on any schedule.</p>
 
                     <div class="flex flex-wrap gap-2">
                         <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-700 dark:text-lime-300 text-sm">Yoga classes</span>
                         <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-700 dark:text-lime-300 text-sm">Trivia nights</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-700 dark:text-lime-300 text-sm">Daily standups</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-700 dark:text-lime-300 text-sm">Board meetings</span>
                         <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-700 dark:text-lime-300 text-sm">Open mic</span>
-                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-700 dark:text-lime-300 text-sm">Workshops</span>
-                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-700 dark:text-lime-300 text-sm">DJ nights</span>
-                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-700 dark:text-lime-300 text-sm">Jam sessions</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-700 dark:text-lime-300 text-sm">Annual galas</span>
                     </div>
                 </div>
 
@@ -365,7 +376,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Event Scheduling Software",
         "operatingSystem": "Web",
-        "description": "Set events to repeat weekly on chosen days with flexible end conditions, per-occurrence tickets, and automatic Google Calendar sync.",
+        "description": "Set events to repeat daily, weekly, biweekly, monthly, or yearly with flexible end conditions, per-occurrence tickets, and automatic Google Calendar sync.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -373,11 +384,15 @@
             "description": "Included free"
         },
         "featureList": [
+            "Daily recurrence",
             "Weekly day-of-week recurrence",
+            "Every N weeks recurrence",
+            "Monthly same-date recurrence",
+            "Monthly same-weekday recurrence",
+            "Yearly recurrence",
             "Three end conditions",
             "Per-occurrence tickets",
             "Google Calendar sync",
-            "Automatic series creation",
             "Individual ticket sales"
         ],
         "url": "{{ url()->current() }}",

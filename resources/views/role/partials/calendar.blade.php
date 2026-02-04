@@ -1661,19 +1661,26 @@ const calendarApp = createApp({
                     const nthWeekday = Math.ceil(startDate.getDate() / 7);
                     const targetDayOfWeek = startDate.getDay();
                     const current = new Date(startDate);
+                    current.setDate(1);
                     while (current <= checkDate) {
-                        count++;
-                        // Move to next month and find nth weekday
-                        current.setDate(1);
-                        current.setMonth(current.getMonth() + 1);
+                        const targetMonth = current.getMonth();
                         let found = 0;
-                        while (found < nthWeekday) {
-                            if (current.getDay() === targetDayOfWeek) {
+                        const candidate = new Date(current);
+                        while (candidate.getMonth() === targetMonth) {
+                            if (candidate.getDay() === targetDayOfWeek) {
                                 found++;
-                                if (found === nthWeekday) break;
+                                if (found === nthWeekday) {
+                                    if (candidate >= startDate && candidate <= checkDate) {
+                                        count++;
+                                    }
+                                    break;
+                                }
                             }
-                            current.setDate(current.getDate() + 1);
+                            candidate.setDate(candidate.getDate() + 1);
                         }
+                        // Move to next month
+                        current.setMonth(current.getMonth() + 1);
+                        current.setDate(1);
                     }
                     return count;
                 }

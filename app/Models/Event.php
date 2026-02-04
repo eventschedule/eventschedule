@@ -506,24 +506,28 @@ class Event extends Model
 
             case 'monthly_weekday':
                 $count = 0;
-                $current = $startDate->copy();
                 $nthWeekday = (int) ceil($startDate->day / 7);
                 $targetDayOfWeek = $startDate->dayOfWeek;
+                $current = $startDate->copy()->startOfMonth();
                 while ($current->lte($checkDate)) {
-                    $count++;
-                    // Move to next month and find the nth weekday
-                    $current->addMonth()->startOfMonth();
-                    // Find the nth occurrence of the target day of week
+                    // Find the nth target weekday in this month
+                    $targetMonth = $current->month;
                     $found = 0;
-                    while ($found < $nthWeekday) {
-                        if ($current->dayOfWeek === $targetDayOfWeek) {
+                    $candidate = $current->copy();
+                    while ($candidate->month === $targetMonth) {
+                        if ($candidate->dayOfWeek === $targetDayOfWeek) {
                             $found++;
                             if ($found === $nthWeekday) {
+                                if ($candidate->gte($startDate) && $candidate->lte($checkDate)) {
+                                    $count++;
+                                }
                                 break;
                             }
                         }
-                        $current->addDay();
+                        $candidate->addDay();
                     }
+                    // Move to next month
+                    $current->addMonth()->startOfMonth();
                 }
 
                 return $count;
