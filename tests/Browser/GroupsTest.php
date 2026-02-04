@@ -116,6 +116,7 @@ class GroupsTest extends DuskTestCase
             ->scrollIntoView('button[type="submit"]')
             ->press('SAVE')
             ->waitForLocation('/talent/schedule', 5)
+            ->pause(1000)
             ->assertSee('Main Show Event');
 
         // Create second event for "Workshops" sub-schedule
@@ -136,6 +137,7 @@ class GroupsTest extends DuskTestCase
             ->scrollIntoView('button[type="submit"]')
             ->press('SAVE')
             ->waitForLocation('/talent/schedule', 5)
+            ->pause(1000)
             ->assertSee('General Event');
     }
 
@@ -146,7 +148,8 @@ class GroupsTest extends DuskTestCase
     {
         // Visit guest view - should show all events initially
         $browser->visit('/talent')
-            ->waitForText('Talent', 5);
+            ->waitForText('Talent', 5)
+            ->pause(1000);
 
         // Check that all events are visible initially
         $browser->assertSee('Main Show Event')
@@ -155,6 +158,7 @@ class GroupsTest extends DuskTestCase
 
         // Test filtering by "Main Shows" sub-schedule by visiting the filtered URL
         $browser->visit('/talent/main-shows')
+            ->pause(1000)
             ->waitForText('Talent', 5)
             ->assertSee('Main Show Event')
             ->assertDontSee('Workshop Event')
@@ -162,6 +166,7 @@ class GroupsTest extends DuskTestCase
 
         // Test filtering by "Workshops" sub-schedule by visiting the filtered URL
         $browser->visit('/talent/workshops')
+            ->pause(1000)
             ->waitForText('Talent', 5)
             ->assertSee('Workshop Event')
             ->assertDontSee('Main Show Event')
@@ -169,6 +174,7 @@ class GroupsTest extends DuskTestCase
 
         // Test "All Schedules" filter by visiting the base URL again
         $browser->visit('/talent')
+            ->pause(1000)
             ->waitForText('Talent', 5)
             ->assertSee('Main Show Event')
             ->assertSee('Workshop Event')
