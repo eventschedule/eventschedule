@@ -229,6 +229,7 @@ return [
     'deleted_curator'                                                    =>'Organisateur supprimé avec succès',
     'flyer'                                                              =>'Flyer',
     'flyer_image'                                                        =>'Image du flyer',
+    'choose_file' => 'Choisir un fichier',
     'events_graphic'                                                     =>'Graphique des événements',
     'graphic'                                                            =>'Graphique',
     'event_added'                                                        =>'Événement ajouté avec succès',
@@ -979,6 +980,10 @@ return [
     // Recurring events
     'recurring_events'                                                   =>'Événements Récurrents',
     'exclude_recurring_events'                                           =>'Exclure les événements récurrents',
+    'every_n_weeks' => 'Every N Weeks',
+    'monthly_same_date' => 'Monthly (same date)',
+    'monthly_same_weekday' => 'Monthly (same day of week)',
+    'repeat_every_n_weeks' => 'Repeat every N weeks',
 
     // Bot protection
     'turnstile_verification_failed'                                      =>'La vérification a échoué. Veuillez réessayer.',

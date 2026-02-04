@@ -1012,6 +1012,10 @@ return [
     // Recurring events
     'recurring_events' => 'Korduvad sündmused',
     'exclude_recurring_events' => 'Välista korduvad sündmused',
+    'every_n_weeks' => 'Every N Weeks',
+    'monthly_same_date' => 'Monthly (same date)',
+    'monthly_same_weekday' => 'Monthly (same day of week)',
+    'repeat_every_n_weeks' => 'Repeat every N weeks',
 
     // Bot protection
     'turnstile_verification_failed' => 'Kinnitamine ebaõnnestus. Palun proovi uuesti.',

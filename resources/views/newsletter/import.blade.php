@@ -92,9 +92,14 @@
             {{-- CSV Tab --}}
             <div x-show="tab === 'csv'" x-cloak class="p-6">
                 <div class="mb-4">
-                    <input type="file" accept=".csv" @change="handleCsvFile($event)" class="block w-full text-sm text-gray-500 dark:text-gray-400
-                        file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold
-                        file:bg-[#4E81FA] file:text-white hover:file:bg-blue-600" />
+                    <input x-ref="csvFileInput" type="file" accept=".csv" @change="handleCsvFile($event); $refs.csvFilename.textContent = $event.target.files[0]?.name || ''" class="hidden" />
+                    <div class="flex items-center gap-3">
+                        <button type="button" @click="$refs.csvFileInput.click()"
+                            class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                            {{ __('messages.choose_file') }}
+                        </button>
+                        <span x-ref="csvFilename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                    </div>
                 </div>
 
                 {{-- CSV Preview --}}

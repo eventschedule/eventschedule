@@ -12,6 +12,24 @@
     </div>
 @endif
 
+@php
+  $use24hr = get_use_24_hour_time($role ?? null);
+  $oldStartsAt = old('starts_at', $event->localStartsAt());
+  $oldDuration = old('duration', $event->duration);
+  $eventDate = '';
+  $eventStartTime = '';
+  $eventEndTime = '';
+  if ($oldStartsAt) {
+      $localDt = \Carbon\Carbon::parse($oldStartsAt);
+      $eventDate = $localDt->format('Y-m-d');
+      $eventStartTime = $use24hr ? $localDt->format('H:i') : $localDt->format('g:i A');
+      if ($oldDuration) {
+          $endDt = $localDt->copy()->addMinutes(round($oldDuration * 60));
+          $eventEndTime = $use24hr ? $endDt->format('H:i') : $endDt->format('g:i A');
+      }
+  }
+@endphp
+
 <x-slot name="head">
   <style>
     form button {
@@ -60,6 +78,50 @@
     .dark .mobile-section-header.validation-error {
       border-color: #ef4444 !important;
     }
+
+    /* Custom time picker dropdown */
+    .time-dropdown {
+      display: none;
+      position: absolute;
+      z-index: 50;
+      width: 100%;
+      max-height: 200px;
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
+      margin-top: 2px;
+    }
+    .dark .time-dropdown {
+      background: #1e1e1e;
+      border-color: #2d2d30;
+    }
+    .time-dropdown.open {
+      display: block;
+    }
+    .time-dropdown-item {
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      color: #111827;
+    }
+    .dark .time-dropdown-item {
+      color: #d1d5db;
+    }
+    .time-dropdown-item:hover,
+    .time-dropdown-item.highlighted {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    .dark .time-dropdown-item:hover,
+    .dark .time-dropdown-item.highlighted {
+      background: #2d2d30;
+      color: #fff;
+    }
+    .time-dropdown-item.hidden {
+      display: none;
+    }
   </style>
   <script src="{{ asset('js/vue.global.prod.js') }}"></script>
   <script {!! nonce_attr() !!}>
@@ -67,16 +129,18 @@
         var fpLocale = window.flatpickrLocales ? window.flatpickrLocales[window.appLocale] : null;
         var localeConfig = fpLocale ? { locale: fpLocale } : {};
 
-        var f = flatpickr('.datepicker', Object.assign({
+        var f = flatpickr('.datepicker-date', Object.assign({
             allowInput: true,
-            enableTime: true,
+            enableTime: false,
             altInput: true,
-            time_24hr: {{ get_use_24_hour_time($role ?? null) ? 'true' : 'false' }},
-            altFormat: "{{ get_use_24_hour_time($role ?? null) ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
-            dateFormat: "Y-m-d H:i:S",
+            altFormat: "M j, Y",
+            dateFormat: "Y-m-d",
+            onChange: function() {
+                updateHiddenFields();
+            },
         }, localeConfig));
         // https://github.com/flatpickr/flatpickr/issues/892#issuecomment-604387030
-        f._input.onkeydown = () => false;
+        if (f._input) f._input.onkeydown = () => false;
 
         // Initialize recurring end date picker if it exists on page load
         var endDateInput = document.querySelector('.datepicker-end-date');
@@ -96,6 +160,301 @@
         $("#venue_country").countrySelect({
             defaultCountry: "{{ $selectedVenue && $selectedVenue->country ? $selectedVenue->country : ($role && $role->country_code ? $role->country_code : '') }}",
         });
+
+        // --- Time combobox logic ---
+        var use24hr = {{ $use24hr ? 'true' : 'false' }};
+
+        function parseTimeToMinutes(timeStr) {
+            if (!timeStr) return null;
+            timeStr = timeStr.trim();
+
+            // Try 24hr format: HH:mm or H:mm
+            var match24 = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+            if (match24 && use24hr) {
+                var h = parseInt(match24[1], 10);
+                var m = parseInt(match24[2], 10);
+                if (h >= 0 && h <= 23 && m >= 0 && m <= 59) return h * 60 + m;
+            }
+
+            // Try 12hr format: h:mm AM/PM or h:mmAM/PM
+            var match12 = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)$/i);
+            if (match12) {
+                var h = parseInt(match12[1], 10);
+                var m = parseInt(match12[2], 10);
+                var period = match12[3].toUpperCase();
+                if (h >= 1 && h <= 12 && m >= 0 && m <= 59) {
+                    if (period === 'AM' && h === 12) h = 0;
+                    else if (period === 'PM' && h !== 12) h += 12;
+                    return h * 60 + m;
+                }
+            }
+
+            // Try shorthand: 2pm, 11am
+            var matchShort = timeStr.match(/^(\d{1,2})\s*(AM|PM|am|pm)$/i);
+            if (matchShort) {
+                var h = parseInt(matchShort[1], 10);
+                var period = matchShort[2].toUpperCase();
+                if (h >= 1 && h <= 12) {
+                    if (period === 'AM' && h === 12) h = 0;
+                    else if (period === 'PM' && h !== 12) h += 12;
+                    return h * 60;
+                }
+            }
+
+            // Try bare HH:mm in 12hr mode (assume as-is if valid)
+            if (!use24hr && match24) {
+                var h = parseInt(match24[1], 10);
+                var m = parseInt(match24[2], 10);
+                if (h >= 0 && h <= 23 && m >= 0 && m <= 59) return h * 60 + m;
+            }
+
+            return null;
+        }
+
+        function formatMinutesToTime(minutes) {
+            var h = Math.floor(minutes / 60) % 24;
+            var m = minutes % 60;
+            if (use24hr) {
+                return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+            } else {
+                var period = h < 12 ? 'AM' : 'PM';
+                var h12 = h % 12 || 12;
+                return h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + period;
+            }
+        }
+
+        function normalizeTimeInput(inputEl) {
+            var val = inputEl.value;
+            var minutes = parseTimeToMinutes(val);
+            if (minutes !== null) {
+                inputEl.value = formatMinutesToTime(minutes);
+            } else if (val.trim() !== '') {
+                inputEl.value = '';
+            }
+        }
+
+        function updateHiddenFields() {
+            var dateEl = document.getElementById('event_date');
+            var startEl = document.getElementById('start_time');
+            var endEl = document.getElementById('end_time');
+            var hiddenStartsAt = document.getElementById('starts_at');
+            var hiddenDuration = document.getElementById('duration');
+
+            var dateVal = dateEl._flatpickr ? dateEl._flatpickr.selectedDates[0] : null;
+            var dateStr = dateVal ? dateEl._flatpickr.formatDate(dateVal, 'Y-m-d') : dateEl.value;
+            var startMinutes = parseTimeToMinutes(startEl.value);
+            var endMinutes = parseTimeToMinutes(endEl.value);
+
+            if (dateStr && startMinutes !== null) {
+                var hh = (Math.floor(startMinutes / 60) < 10 ? '0' : '') + Math.floor(startMinutes / 60);
+                var mm = (startMinutes % 60 < 10 ? '0' : '') + (startMinutes % 60);
+                hiddenStartsAt.value = dateStr + ' ' + hh + ':' + mm + ':00';
+            } else {
+                hiddenStartsAt.value = '';
+            }
+
+            if (endMinutes !== null && startMinutes !== null) {
+                var diff = endMinutes - startMinutes;
+                if (diff < 0) diff += 1440; // crosses midnight
+                hiddenDuration.value = (diff / 60).toFixed(2).replace(/\.?0+$/, '');
+            } else {
+                hiddenDuration.value = '';
+            }
+        }
+
+        // Track duration for auto-adjust
+        var lastDurationMinutes = 60;
+        var initStart = parseTimeToMinutes(document.getElementById('start_time').value);
+        var initEnd = parseTimeToMinutes(document.getElementById('end_time').value);
+        if (initStart !== null && initEnd !== null) {
+            var diff = initEnd - initStart;
+            if (diff < 0) diff += 1440;
+            lastDurationMinutes = diff;
+        }
+
+        var startTimeEl = document.getElementById('start_time');
+        var endTimeEl = document.getElementById('end_time');
+
+        startTimeEl.addEventListener('blur', function() {
+            normalizeTimeInput(startTimeEl);
+            updateHiddenFields();
+        });
+
+        endTimeEl.addEventListener('blur', function() {
+            normalizeTimeInput(endTimeEl);
+            var startMin = parseTimeToMinutes(startTimeEl.value);
+            var endMin = parseTimeToMinutes(endTimeEl.value);
+            if (startMin !== null && endMin !== null) {
+                var diff = endMin - startMin;
+                if (diff < 0) diff += 1440;
+                lastDurationMinutes = diff;
+            }
+            updateHiddenFields();
+        });
+
+        startTimeEl.addEventListener('input', function() { updateHiddenFields(); });
+        endTimeEl.addEventListener('input', function() { updateHiddenFields(); });
+
+        // Initialize hidden fields on page load
+        updateHiddenFields();
+
+        // Custom time picker dropdown
+        function initTimePicker(inputEl, dropdownEl, getDefaultMinutes) {
+            var timeOptions = [];
+            for (var m = 0; m < 1440; m += 30) {
+                timeOptions.push(formatMinutesToTime(m));
+            }
+
+            // Build dropdown items
+            timeOptions.forEach(function(label) {
+                var div = document.createElement('div');
+                div.className = 'time-dropdown-item';
+                div.textContent = label;
+                div.setAttribute('data-value', label);
+                div.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    inputEl.value = label;
+                    closeDropdown();
+                    normalizeTimeInput(inputEl);
+                    updateHiddenFields();
+                });
+                dropdownEl.appendChild(div);
+            });
+
+            var highlightedIndex = -1;
+
+            function getVisibleItems() {
+                return Array.from(dropdownEl.querySelectorAll('.time-dropdown-item:not(.hidden)'));
+            }
+
+            function setHighlight(idx) {
+                var items = getVisibleItems();
+                items.forEach(function(el, i) {
+                    el.classList.toggle('highlighted', i === idx);
+                });
+                highlightedIndex = idx;
+                if (idx >= 0 && idx < items.length) {
+                    items[idx].scrollIntoView({ block: 'nearest' });
+                }
+            }
+
+            function showAllItems() {
+                var items = dropdownEl.querySelectorAll('.time-dropdown-item');
+                items.forEach(function(el) {
+                    el.classList.remove('hidden');
+                });
+                highlightedIndex = -1;
+            }
+
+            function openDropdown() {
+                showAllItems();
+                dropdownEl.classList.add('open');
+                scrollToNearest();
+            }
+
+            function closeDropdown() {
+                dropdownEl.classList.remove('open');
+                highlightedIndex = -1;
+            }
+
+            function filterItems() {
+                var query = inputEl.value.trim().toLowerCase();
+                var items = dropdownEl.querySelectorAll('.time-dropdown-item');
+                items.forEach(function(el) {
+                    var val = el.getAttribute('data-value').toLowerCase();
+                    if (!query || val.indexOf(query) !== -1) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                });
+                highlightedIndex = -1;
+            }
+
+            function scrollToNearest() {
+                var minutes = parseTimeToMinutes(inputEl.value);
+                if (minutes === null) minutes = getDefaultMinutes();
+                // Find closest 30-min slot
+                var closest = Math.round(minutes / 30) * 30;
+                if (closest >= 1440) closest = 0;
+                var target = formatMinutesToTime(closest);
+                var items = getVisibleItems();
+                for (var i = 0; i < items.length; i++) {
+                    if (items[i].getAttribute('data-value') === target) {
+                        items[i].scrollIntoView({ block: 'center' });
+                        setHighlight(i);
+                        return;
+                    }
+                }
+            }
+
+            inputEl.addEventListener('focus', function() {
+                openDropdown();
+            });
+
+            inputEl.addEventListener('click', function() {
+                if (!dropdownEl.classList.contains('open')) {
+                    openDropdown();
+                }
+            });
+
+            inputEl.addEventListener('input', function() {
+                filterItems();
+                if (dropdownEl.classList.contains('open')) {
+                    var visible = getVisibleItems();
+                    if (visible.length > 0) {
+                        setHighlight(0);
+                    }
+                }
+                updateHiddenFields();
+            });
+
+            inputEl.addEventListener('blur', function() {
+                closeDropdown();
+                normalizeTimeInput(inputEl);
+                updateHiddenFields();
+            });
+
+            inputEl.addEventListener('keydown', function(e) {
+                if (!dropdownEl.classList.contains('open')) return;
+                var items = getVisibleItems();
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    var next = highlightedIndex + 1;
+                    if (next >= items.length) next = 0;
+                    setHighlight(next);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    var prev = highlightedIndex - 1;
+                    if (prev < 0) prev = items.length - 1;
+                    setHighlight(prev);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (highlightedIndex >= 0 && highlightedIndex < items.length) {
+                        inputEl.value = items[highlightedIndex].getAttribute('data-value');
+                        closeDropdown();
+                        normalizeTimeInput(inputEl);
+                        updateHiddenFields();
+                    }
+                } else if (e.key === 'Escape' || e.key === 'Tab') {
+                    closeDropdown();
+                }
+            });
+
+            // Close on click outside
+            document.addEventListener('mousedown', function(e) {
+                if (!inputEl.contains(e.target) && !dropdownEl.contains(e.target)) {
+                    closeDropdown();
+                }
+            });
+        }
+
+        initTimePicker(startTimeEl, document.getElementById('start_time_dropdown'), function() { return 540; });
+        initTimePicker(endTimeEl, document.getElementById('end_time_dropdown'), function() {
+            var startMinutes = parseTimeToMinutes(startTimeEl.value);
+            if (startMinutes === null) return 600;
+            return (startMinutes + 60) % 1440;
+        });
     });
 
     function onChangeCountry() {
@@ -107,11 +466,23 @@
     function onChangeDateType() {
         var value = $('input[name="schedule_type"]:checked').val();
         if (value == 'one_time') {
-            $('#days_of_week_div').hide();
             app.isRecurring = false;
         } else {
-            $('#days_of_week_div').show();
             app.isRecurring = true;
+            if (!app.event.recurring_frequency) {
+                app.event.recurring_frequency = 'weekly';
+            }
+        }
+        updateRecurringFieldVisibility();
+    }
+
+    function updateRecurringFieldVisibility() {
+        var freq = app.event.recurring_frequency || 'weekly';
+        var showDays = app.isRecurring && (freq === 'weekly' || freq === 'every_n_weeks');
+        if (showDays) {
+            $('#days_of_week_div').show();
+        } else {
+            $('#days_of_week_div').hide();
         }
     }
 
@@ -182,8 +553,12 @@
         var preview = document.getElementById('preview_img');
         var previewDiv = document.getElementById('image_preview');
         var warningElement = document.getElementById('image_size_warning');
-        
+        var filenameSpan = document.getElementById('flyer_image_filename');
+
         if (input.files && input.files[0]) {
+            if (filenameSpan) {
+                filenameSpan.textContent = input.files[0].name;
+            }
             var reader = new FileReader();
             
             reader.onload = function(e) {
@@ -296,6 +671,7 @@
         @if ($event->exists)
         @method('put')
         @endif
+
 
         <x-text-input name="venue_name" type="hidden" v-model="venueName" />
         <x-text-input name="venue_email" type="hidden" v-model="venueEmail" />                                                                
@@ -510,25 +886,44 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="starts_at"
-                                :value="__('messages.date_and_time') . '*'"/>
-                            <x-text-input type="text" id="starts_at" name="starts_at" class="datepicker"
-                                :value="old('starts_at', $event->localStartsAt())"
-                                required autocomplete="off" />
+                            <x-input-label for="event_date" :value="__('messages.date_and_time') . '*'" />
+                            <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 mt-1">
+                                <input type="text" id="event_date"
+                                    class="datepicker-date flex-1 min-w-[140px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl') }}"
+                                    value="{{ $eventDate }}" autocomplete="off" aria-label="{{ __('messages.date') }}" />
+                                <div class="relative w-28 sm:w-32">
+                                    <input type="text" id="start_time"
+                                        class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl') }}"
+                                        value="{{ $eventStartTime }}" placeholder="{{ __('messages.start_time') }}"
+                                        autocomplete="off" aria-label="{{ __('messages.start_time') }}" />
+                                    <div class="time-dropdown" id="start_time_dropdown"></div>
+                                </div>
+                                <span class="text-gray-500 dark:text-gray-400 text-sm shrink-0">{{ __('messages.to') }}</span>
+                                <div class="relative w-28 sm:w-32">
+                                    <input type="text" id="end_time"
+                                        class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl') }}"
+                                        value="{{ $eventEndTime }}" placeholder="{{ __('messages.end_time') }}"
+                                        autocomplete="off" aria-label="{{ __('messages.end_time') }}" />
+                                    <div class="time-dropdown" id="end_time_dropdown"></div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="starts_at" id="starts_at" value="{{ $oldStartsAt }}" />
+                            <input type="hidden" name="duration" id="duration" value="{{ $oldDuration }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('starts_at')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="duration" :value="__('messages.duration_in_hours')" />
-                            <x-text-input type="number" id="duration" name="duration" step="0.01"
-                                :value="old('duration', $event->duration)" autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('duration')" />
                         </div>
                         
                         <div class="mb-6">
-                        <x-input-label for="flyer_image" :value="__('messages.flyer_image')" />
-                        <input id="flyer_image" name="flyer_image" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
+                        <x-input-label :value="__('messages.flyer_image')" />
+                        <input id="flyer_image" name="flyer_image" type="file" class="hidden"
                                 accept="image/png, image/jpeg" onchange="previewImage(this);" />
+                            <div class="mt-1 flex items-center gap-3">
+                                <button type="button" onclick="document.getElementById('flyer_image').click()"
+                                    class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    {{ __('messages.choose_file') }}
+                                </button>
+                                <span id="flyer_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                            </div>
                             <x-input-error class="mt-2" :messages="$errors->get('flyer_image')" />
                             <p id="image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
                                 {{ __('messages.image_size_warning') }}
@@ -1043,7 +1438,25 @@
                             </div>
                         </div>
 
-                        <div id="days_of_week_div" class="mb-6 {{ ! $event || ! $event->days_of_week ? 'hidden' : '' }}">
+                        <div v-if="isRecurring" class="mb-6">
+                            <x-input-label :value="__('messages.frequency')" />
+                            <select name="recurring_frequency" v-model="event.recurring_frequency" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                <option value="daily">{{ __('messages.daily') }}</option>
+                                <option value="weekly">{{ __('messages.weekly') }}</option>
+                                <option value="every_n_weeks">{{ __('messages.every_n_weeks') }}</option>
+                                <option value="monthly_date">{{ __('messages.monthly_same_date') }}</option>
+                                <option value="monthly_weekday">{{ __('messages.monthly_same_weekday') }}</option>
+                                <option value="yearly">{{ __('messages.yearly') }}</option>
+                            </select>
+                        </div>
+
+                        <div v-if="isRecurring && event.recurring_frequency === 'every_n_weeks'" class="mb-6">
+                            <x-input-label :value="__('messages.repeat_every_n_weeks')" />
+                            <x-text-input type="number" name="recurring_interval" class="mt-1 block w-full" min="2" max="52"
+                                v-model="event.recurring_interval" />
+                        </div>
+
+                        <div id="days_of_week_div" class="mb-6 {{ ! $event || ! $event->days_of_week || !in_array($event->recurring_frequency, ['weekly', 'every_n_weeks', null]) ? 'hidden' : '' }}">
                             <x-input-label :value="__('messages.days_of_week')" />
                             @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $index => $day)
                             <label for="days_of_week_{{ $index }}" class="me-3 text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">
@@ -1391,21 +1804,21 @@
                             <div v-show="event.tickets_enabled">
 
                                 <!-- Ticket Section Tabs -->
-                                <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+                                <div class="mt-6 mb-6 border-b border-gray-200 dark:border-gray-700">
                                     <nav class="-mb-px flex space-x-2 sm:space-x-6">
                                         <button type="button" @click="activeTicketTab = 'tickets'"
                                             :class="activeTicketTab === 'tickets' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="flex-1 sm:flex-initial text-center sm:text-start whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
                                             {{ __('messages.general') }}
                                         </button>
                                         <button type="button" @click="activeTicketTab = 'payment'"
                                             :class="activeTicketTab === 'payment' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="flex-1 sm:flex-initial text-center sm:text-start whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
                                             {{ __('messages.payment') }}
                                         </button>
                                         <button type="button" @click="activeTicketTab = 'options'"
                                             :class="activeTicketTab === 'options' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="flex-1 sm:flex-initial text-center sm:text-start whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
                                             {{ __('messages.options') }}
                                         </button>
                                     </nav>
@@ -2009,6 +2422,8 @@
           total_tickets_mode: @json($event->total_tickets_mode ?? 'individual'),
           recurring_end_type: @json($event->recurring_end_type ?? 'never'),
           recurring_end_value: @json($event->recurring_end_value ?? null),
+          recurring_frequency: @json($event->recurring_frequency ?? 'weekly'),
+          recurring_interval: @json($event->recurring_interval ?? 2),
         },
         venues: @json($venues),
         members: @json($members ?? []),
@@ -2471,6 +2886,14 @@
       validateForm(event) {
         this.formSubmitAttempted = true;
 
+        var dateVal = document.getElementById('event_date').value;
+        var startVal = document.getElementById('start_time').value;
+        if (!dateVal || !startVal) {
+          event.preventDefault();
+          alert("{{ __('messages.date_and_time_required') }}");
+          return;
+        }
+
         if (! this.isFormValid) {
           event.preventDefault();
           alert("{{ __('messages.please_select_venue_or_participant') }}");
@@ -2727,6 +3150,9 @@
       'event.tickets_enabled'(newValue) {
         this.savePreferences();
       },
+      'event.recurring_frequency'() {
+        updateRecurringFieldVisibility();
+      },
       'event.recurring_end_type'(newValue, oldValue) {
         // Clear the value when switching between types
         if (oldValue && newValue !== oldValue) {
@@ -2740,6 +3166,7 @@
     },
     mounted() {
       this.showMemberTypeRadio = this.selectedMembers.length === 0;
+      updateRecurringFieldVisibility();
 
       const isCloned = @json($isCloned ?? false);
 
@@ -2803,6 +3230,8 @@
           if (link.closest('form[enctype]')) return;
           if (!confirm('{{ __("messages.unsaved_changes") }}')) {
               e.preventDefault();
+          } else {
+              this.isDirty = false;
           }
       });
     }

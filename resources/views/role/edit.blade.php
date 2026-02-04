@@ -980,9 +980,16 @@
                     <!-- Images Tab Content -->
                     <div id="style-content-images">
                             <div class="mb-6">
-                                <x-input-label for="profile_image" :value="__('messages.square_profile_image')" />
-                                <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100"
-                                    :value="old('profile_image')" accept="image/png, image/jpeg" />
+                                <x-input-label :value="__('messages.square_profile_image')" />
+                                <input id="profile_image" name="profile_image" type="file" class="hidden"
+                                    accept="image/png, image/jpeg" onchange="document.getElementById('profile_image_filename').textContent = this.files[0]?.name || ''; previewImage(this, 'profile_image_preview');" />
+                                <div class="mt-1 flex items-center gap-3">
+                                    <button type="button" onclick="document.getElementById('profile_image').click()"
+                                        class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        {{ __('messages.choose_file') }}
+                                    </button>
+                                    <span id="profile_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                                </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
                                 <p id="profile_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
                                     {{ __('messages.image_size_warning') }}
@@ -1035,10 +1042,15 @@
                                 </div>
 
                                 <div id="custom_header_input" style="display:none" class="mt-4">
-                                    <input id="header_image_url" name="header_image_url" type="file" 
-                                        class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
-                                        :value="old('header_image_url')" 
-                                        accept="image/png, image/jpeg" />
+                                    <input id="header_image_url" name="header_image_url" type="file" class="hidden"
+                                        accept="image/png, image/jpeg" onchange="document.getElementById('header_image_url_filename').textContent = this.files[0]?.name || '';" />
+                                    <div class="mt-1 flex items-center gap-3">
+                                        <button type="button" onclick="document.getElementById('header_image_url').click()"
+                                            class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                            {{ __('messages.choose_file') }}
+                                        </button>
+                                        <span id="header_image_url_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                                    </div>
                                     <x-input-error class="mt-2" :messages="$errors->get('header_image_url')" />
                                     <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
                                         {{ __('messages.image_size_warning') }}
@@ -1125,12 +1137,16 @@
                                     </button>
                                 </div>
 
-                                <div id="custom_image_input" style="display:none">
-                                    <input id="background_image_url" name="background_image_url" type="file" 
-                                        class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
-                                        :value="old('background_image_url')" 
-                                        oninput="updatePreview()" 
-                                        accept="image/png, image/jpeg" />
+                                <div id="custom_image_input" style="display:none" class="mt-4">
+                                    <input id="background_image_url" name="background_image_url" type="file" class="hidden"
+                                        accept="image/png, image/jpeg" onchange="document.getElementById('background_image_url_filename').textContent = this.files[0]?.name || ''; updatePreview();" />
+                                    <div class="mt-1 flex items-center gap-3">
+                                        <button type="button" onclick="document.getElementById('background_image_url').click()"
+                                            class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                            {{ __('messages.choose_file') }}
+                                        </button>
+                                        <span id="background_image_url_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                                    </div>
                                     <p id="background_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
                                         {{ __('messages.image_size_warning') }}
                                     </p>
@@ -2171,6 +2187,8 @@
                 if (link.closest('form[enctype]')) return;
                 if (!confirm('{{ __("messages.unsaved_changes") }}')) {
                     e.preventDefault();
+                } else {
+                    isDirty = false;
                 }
             });
         })();

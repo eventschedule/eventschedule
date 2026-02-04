@@ -34,6 +34,8 @@ trait CalendarDataTrait
                 : null,
             'recurring_end_type' => $event->recurring_end_type ?? 'never',
             'recurring_end_value' => $event->recurring_end_value,
+            'recurring_frequency' => $event->recurring_frequency,
+            'recurring_interval' => $event->recurring_interval,
             'start_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
             'is_online' => ! empty($event->event_url),
             'description_excerpt' => Str::words(strip_tags($event->translatedDescription()), 25, '...'),

@@ -366,6 +366,7 @@ return [
     'deleted_curator' => 'האוֹצֵר נמחק בהצלחה',
     'flyer' => 'פלייר',
     'flyer_image' => 'תמונת פלייר',
+    'choose_file' => 'בחר קובץ',
     'event_added' => 'האירוע נוסף בהצלחה',
     'please_select' => 'אנא בחר',
     'claim_email_line1' => 'הירשם כדי להתאים אישית את דף האירוע או אל תהסס להתעלם מדוא"ל זה',
@@ -972,6 +973,10 @@ return [
     // Recurring events
     'recurring_events' => 'אירועים חוזרים',
     'exclude_recurring_events' => 'לא לכלול אירועים חוזרים',
+    'every_n_weeks' => 'Every N Weeks',
+    'monthly_same_date' => 'Monthly (same date)',
+    'monthly_same_weekday' => 'Monthly (same day of week)',
+    'repeat_every_n_weeks' => 'Repeat every N weeks',
 
     // Bot protection
     'turnstile_verification_failed' => 'האימות נכשל. אנא נסה שוב.',

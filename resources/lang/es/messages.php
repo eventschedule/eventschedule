@@ -229,6 +229,7 @@ return [
     'deleted_curator' => 'Curador eliminado con éxito',
     'flyer' => 'Flyer',
     'flyer_image' => 'Imagen del Flyer',
+    'choose_file' => 'Elegir archivo',
     'events_graphic' => 'Gráfico de Eventos',
     'graphic' => 'Gráfico',
     'event_added' => 'Evento agregado exitosamente',
@@ -979,6 +980,10 @@ return [
     // Recurring events
     'recurring_events' => 'Eventos Recurrentes',
     'exclude_recurring_events' => 'Excluir eventos recurrentes',
+    'every_n_weeks' => 'Every N Weeks',
+    'monthly_same_date' => 'Monthly (same date)',
+    'monthly_same_weekday' => 'Monthly (same day of week)',
+    'repeat_every_n_weeks' => 'Repeat every N weeks',
 
     // Bot protection
     'turnstile_verification_failed' => 'La verificación falló. Por favor, inténtalo de nuevo.',

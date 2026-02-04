@@ -465,6 +465,7 @@ return [
     'deleted_curator' => 'Curator succesvol verwijderd',
     'flyer' => 'Flyer',
     'flyer_image' => 'Flyer afbeelding',
+    'choose_file' => 'Bestand kiezen',
     'event_added' => 'Evenement succesvol toegevoegd',
     'please_select' => 'Selecteer',
     'claim_email_line1' => 'Meld je aan om de evenementpagina aan te passen of negeer deze e-mail gerust',
@@ -977,6 +978,10 @@ return [
     // Recurring events
     'recurring_events' => 'Terugkerende Evenementen',
     'exclude_recurring_events' => 'Terugkerende evenementen uitsluiten',
+    'every_n_weeks' => 'Every N Weeks',
+    'monthly_same_date' => 'Monthly (same date)',
+    'monthly_same_weekday' => 'Monthly (same day of week)',
+    'repeat_every_n_weeks' => 'Repeat every N weeks',
 
     // Bot protection
     'turnstile_verification_failed' => 'Verificatie mislukt. Probeer het opnieuw.',

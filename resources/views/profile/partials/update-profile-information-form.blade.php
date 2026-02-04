@@ -96,9 +96,16 @@
         </div>
 
         <div>
-            <x-input-label for="profile_image" :value="__('messages.square_profile_image')" />
-            <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100"
-                :value="old('profile_image')" accept="image/png, image/jpeg" />
+            <x-input-label :value="__('messages.square_profile_image')" />
+            <input id="profile_image" name="profile_image" type="file" class="hidden"
+                accept="image/png, image/jpeg" onchange="document.getElementById('profile_image_filename').textContent = this.files[0]?.name || '';" />
+            <div class="mt-1 flex items-center gap-3">
+                <button type="button" onclick="document.getElementById('profile_image').click()"
+                    class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                    {{ __('messages.choose_file') }}
+                </button>
+                <span id="profile_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+            </div>
             <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
 
             @if ($user->profile_image_url)
