@@ -128,6 +128,7 @@ class GroupsTest extends DuskTestCase
             ->scrollIntoView('button[type="submit"]')
             ->press('SAVE')
             ->waitForLocation('/talent/schedule', 5)
+            ->pause(1000)
             ->assertSee('Workshop Event');
 
         // Create third event without sub-schedule
