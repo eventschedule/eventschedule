@@ -453,8 +453,7 @@
                 <a href="{{ marketing_url('/stripe') }}" class="group flex flex-col items-center gap-2">
                     <svg class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
                         <rect x="1" y="4" width="22" height="16" rx="3" class="fill-gray-400 group-hover:fill-[#635BFF] dark:fill-gray-500 dark:group-hover:fill-[#635BFF]"/>
-                        <path d="M11.5 10.5c0-.828.895-1.5 2-1.5s2 .672 2 1.5c0 1.5-2.5 1.5-2.5 3M13 15.5v.01" class="stroke-white dark:stroke-gray-300" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-                        <path d="M8.5 9.5c-.469 0-1 .266-1 .75 0 1.125 3.5.563 3.5 2.5 0 .844-.688 1.25-1.5 1.25M9.5 9.5V8.75M9.5 14v.75" class="stroke-white dark:stroke-gray-300" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+                        <path d="M11.2 10.3c0-.66.6-1.12 1.45-1.12.95 0 1.95.45 2.55 1.05l.8-1.85c-.7-.55-1.7-.95-3.05-.95-2.2 0-3.6 1.15-3.6 3.05 0 3 4.1 2.5 4.1 3.8 0 .55-.5.95-1.35.95-1.1 0-2.3-.55-3-1.15l-.85 1.85c.85.7 2.1 1.15 3.55 1.15 2.25 0 3.75-1.1 3.75-3.05 0-3.25-4.35-2.7-4.35-3.73z" class="fill-white dark:fill-gray-300"/>
                     </svg>
                     <span class="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Stripe</span>
                 </a>

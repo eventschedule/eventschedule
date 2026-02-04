@@ -40,6 +40,7 @@ class Event extends Model
         'agenda_ai_prompt',
         'translation_attempts',
         'last_translated_at',
+        'last_notified_fan_content_count',
     ];
 
     protected $casts = [

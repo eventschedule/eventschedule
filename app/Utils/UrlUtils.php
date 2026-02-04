@@ -60,7 +60,7 @@ class UrlUtils
         $videoId = self::extractYouTubeVideoId($url);
 
         if ($videoId) {
-            return 'https://img.youtube.com/vi/'.$videoId.'/mqdefault.jpg';
+            return 'https://i.ytimg.com/vi/'.$videoId.'/mqdefault.jpg';
         }
 
         return null;
