@@ -123,7 +123,11 @@
                     @media (min-width: 768px) {
                     @endif
                         @if ($otherRole->background_image)
-                            background-image: url("{{ asset('images/backgrounds/' . $otherRole->background_image . '.png') }}");
+                            background-image: url("{{ asset('images/backgrounds/' . $otherRole->background_image . '.webp') }}");
+                            background-image: image-set(
+                                url("{{ asset('images/backgrounds/' . $otherRole->background_image . '.webp') }}") type("image/webp"),
+                                url("{{ asset('images/backgrounds/' . $otherRole->background_image . '.png') }}") type("image/png")
+                            );
                         @else
                             background-image: url("{{ $otherRole->background_image_url }}");
                         @endif
@@ -149,7 +153,15 @@
                                 @if (request()->graphic)
                                     linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
                                 @endif
-                            url("{{ asset('images/backgrounds/' . $role->background_image . '.png') }}");
+                            url("{{ asset('images/backgrounds/' . $role->background_image . '.webp') }}");
+                            background-image:
+                                @if (request()->graphic)
+                                    linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
+                                @endif
+                            image-set(
+                                url("{{ asset('images/backgrounds/' . $role->background_image . '.webp') }}") type("image/webp"),
+                                url("{{ asset('images/backgrounds/' . $role->background_image . '.png') }}") type("image/png")
+                            );
                         @else
                             background-image:
                                 @if (request()->graphic)
@@ -364,12 +376,12 @@
             if ($event && $otherRole && $otherRole->isClaimed() && $otherRole->background == 'image') {
                 $showMobileBanner = true;
                 $mobileBannerUrl = $otherRole->background_image
-                    ? asset('images/backgrounds/' . $otherRole->background_image . '.png')
+                    ? asset('images/backgrounds/' . $otherRole->background_image . '.webp')
                     : $otherRole->background_image_url;
             } elseif ($role->background == 'image') {
                 $showMobileBanner = true;
                 $mobileBannerUrl = $role->background_image
-                    ? asset('images/backgrounds/' . $role->background_image . '.png')
+                    ? asset('images/backgrounds/' . $role->background_image . '.webp')
                     : $role->background_image_url;
             }
         @endphp

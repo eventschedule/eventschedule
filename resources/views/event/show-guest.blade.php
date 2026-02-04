@@ -82,7 +82,10 @@
           @if ($hasTalentHeader)
             {{-- Header banner --}}
             @if ($each->header_image && $each->header_image !== 'none')
-              <img class="block max-h-40 w-full object-cover" src="{{ asset('images/headers') }}/{{ $each->header_image }}.png" alt="{{ $each->translatedName() }}"/>
+              <picture>
+                <source srcset="{{ asset('images/headers') }}/{{ $each->header_image }}.webp" type="image/webp">
+                <img class="block max-h-40 w-full object-cover" src="{{ asset('images/headers') }}/{{ $each->header_image }}.png" alt="{{ $each->translatedName() }}"/>
+              </picture>
             @elseif ($each->header_image_url)
               <img class="block max-h-40 w-full object-cover" src="{{ $each->header_image_url }}" alt="{{ $each->translatedName() }}"/>
             @endif
@@ -272,7 +275,10 @@
           @if ($hasVenueHeader)
             <div class="overflow-hidden rounded-t-2xl">
               @if ($event->venue->header_image && $event->venue->header_image !== 'none')
-                <img class="block max-h-40 w-full object-cover" src="{{ asset('images/headers') }}/{{ $event->venue->header_image }}.png" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
+                <picture>
+                  <source srcset="{{ asset('images/headers') }}/{{ $event->venue->header_image }}.webp" type="image/webp">
+                  <img class="block max-h-40 w-full object-cover" src="{{ asset('images/headers') }}/{{ $event->venue->header_image }}.png" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
+                </picture>
               @elseif ($event->venue->header_image_url)
                 <img class="block max-h-40 w-full object-cover" src="{{ $event->venue->header_image_url }}" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
               @endif

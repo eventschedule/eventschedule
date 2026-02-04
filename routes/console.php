@@ -17,14 +17,6 @@ Schedule::call(function () {
 })->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
-    Artisan::call('app:notify-request-changes');
-})->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
-
-Schedule::call(function () {
-    Artisan::call('app:notify-fan-content-changes');
-})->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
-
-Schedule::call(function () {
     if (! config('app.hosted')) {
         Artisan::call('app:import-curator-events');
     }

@@ -25,7 +25,7 @@
             $mobileBannerUrl = null;
             if ($role->background == 'image' && !request()->embed) {
                 $mobileBannerUrl = $role->background_image
-                    ? asset('images/backgrounds/' . $role->background_image . '.png')
+                    ? asset('images/backgrounds/' . $role->background_image . '.webp')
                     : $role->background_image_url;
             }
         @endphp
@@ -43,10 +43,13 @@
           >
 
             @if ($role->header_image && $role->header_image !== 'none')
-            <img
-              class="block max-h-72 w-full object-cover"
-              src="{{ asset('images/headers') }}/{{ $role->header_image }}.png"
-            />
+            <picture>
+              <source srcset="{{ asset('images/headers') }}/{{ $role->header_image }}.webp" type="image/webp">
+              <img
+                class="block max-h-72 w-full object-cover"
+                src="{{ asset('images/headers') }}/{{ $role->header_image }}.png"
+              />
+            </picture>
             @elseif ($role->header_image_url)
             <img
               class="block max-h-72 w-full object-cover"

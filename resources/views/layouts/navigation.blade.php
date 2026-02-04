@@ -1,7 +1,9 @@
 <a href="{{ marketing_url() }}">
     <div class="flex h-16 pt-2 shrink-0 items-center">
-        <img class="h-10 w-auto" src="{{ url('images/light_logo.png') }}"
-            alt="Event Schedule">
+        <picture>
+            <source srcset="{{ url('images/light_logo.webp') }}" type="image/webp">
+            <img class="h-10 w-auto" src="{{ url('images/light_logo.png') }}" alt="Event Schedule">
+        </picture>
     </div>
 </a>
 <nav class="flex flex-1 flex-col mt-4">
