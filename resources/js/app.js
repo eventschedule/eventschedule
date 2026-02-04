@@ -113,5 +113,9 @@ document.addEventListener('DOMContentLoaded', () => {
             nativeSpellcheck: true,  
             status: false,
         });
+
+        easyMDE.codemirror.on('change', function() {
+            element.dispatchEvent(new Event('change', { bubbles: true }));
+        });
     });
 });

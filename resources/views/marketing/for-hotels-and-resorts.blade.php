@@ -652,7 +652,7 @@
 
     <!-- CTA Section -->
     <section class="relative bg-gradient-to-br from-slate-700 to-amber-600 py-24 overflow-hidden">
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+        <div class="absolute inset-0 grid-overlay"></div>
         <!-- Gold accent glow -->
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-yellow-500/10 rounded-full blur-[100px]"></div>
 
@@ -713,6 +713,12 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+        .dark .text-gradient-slate-gold {
+            background: linear-gradient(135deg, #94a3b8, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
         .hotel-brass-badge {
             border: 1.5px solid rgba(217, 119, 6, 0.35);
@@ -739,6 +745,9 @@
             height: 3px;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
             animation: shimmer 5s ease-in-out infinite;
+        }
+        .dark .hotel-shimmer-line::after {
+            background: linear-gradient(90deg, transparent, rgba(251,191,36,0.4), transparent);
         }
 
         @keyframes shimmer {

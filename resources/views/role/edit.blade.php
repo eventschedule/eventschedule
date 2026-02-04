@@ -1545,6 +1545,34 @@
                                                 <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name_en]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name_en : $group['name_en'] ?? ''" />
                                             </div>
                                             @endif
+                                            <div class="mb-4">
+                                                <x-input-label :value="__('messages.color')" />
+                                                <input type="hidden" name="groups[{{ is_object($group) ? $group->id : $i }}][color]" value="{{ is_object($group) ? $group->color : ($group['color'] ?? '') }}" />
+                                                <div class="mt-1 relative" x-data="{ open: false }">
+                                                    @php $currentColor = is_object($group) ? $group->color : ($group['color'] ?? ''); @endphp
+                                                    <button type="button" @click="open = !open" class="color-trigger w-7 h-7 rounded-full transition-all duration-150 flex items-center justify-center {{ $currentColor ? '' : 'border-2 border-dashed border-gray-300 dark:border-gray-600' }}" {!! $currentColor ? 'style="background-color: ' . $currentColor . '"' : '' !!}>
+                                                        @unless($currentColor)
+                                                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"/></svg>
+                                                        @endunless
+                                                    </button>
+                                                    <div x-show="open" @click.outside="open = false" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2">
+                                                        <div class="grid grid-cols-7 gap-1.5">
+                                                            @foreach(['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'] as $swatch)
+                                                            <button type="button"
+                                                                class="w-6 h-6 rounded-full border-2 transition-all duration-150 group-color-swatch {{ $currentColor === $swatch ? 'border-gray-900 dark:border-white ring-2 ring-offset-1 ring-gray-900 dark:ring-white' : 'border-transparent hover:border-gray-400' }}"
+                                                                style="background-color: {{ $swatch }}"
+                                                                onclick="selectGroupColor(this, '{{ $swatch }}')"
+                                                                title="{{ $swatch }}"></button>
+                                                            @endforeach
+                                                        </div>
+                                                        <button type="button"
+                                                            class="mt-1.5 w-full text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors duration-150 py-1"
+                                                            onclick="selectGroupColor(this, '')">
+                                                            {{ __('messages.clear') }}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
                                             <div class="mb-4" id="group-url-display-{{ is_object($group) ? $group->id : $i }}">
                                                 <p class="text-sm text-gray-500 flex items-center gap-2">
@@ -2119,6 +2147,34 @@
             </div>
         </div>
 
+        <script {!! nonce_attr() !!}>
+        (function() {
+            var isDirty = false;
+            var mainForm = document.currentScript.closest('form');
+
+            mainForm.addEventListener('input', function() { isDirty = true; });
+            mainForm.addEventListener('change', function() { isDirty = true; });
+            mainForm.addEventListener('submit', function(e) {
+                if (!e.defaultPrevented) { isDirty = false; }
+            });
+
+            window.addEventListener('beforeunload', function(e) {
+                if (isDirty) { e.preventDefault(); e.returnValue = ''; }
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!isDirty) return;
+                var link = e.target.closest('a[href]');
+                if (!link) return;
+                var href = link.getAttribute('href');
+                if (!href || href === '#' || href.startsWith('#') || href.startsWith('javascript:')) return;
+                if (link.closest('form[enctype]')) return;
+                if (!confirm('{{ __("messages.unsaved_changes") }}')) {
+                    e.preventDefault();
+                }
+            });
+        })();
+        </script>
     </form>
 
 </x-app-admin-layout>
@@ -2185,6 +2241,21 @@ function addGroupField() {
             <input name="groups[new_${idx}][name_en]" type="text" id="group_name_en_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
         </div>
         @endif
+        <div class="mb-4">
+            <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.color') }}</label>
+            <input type="hidden" name="groups[new_${idx}][color]" value="" />
+            <div class="mt-1 relative" x-data="{ open: false }">
+                <button type="button" @click="open = !open" class="color-trigger w-7 h-7 rounded-full transition-all duration-150 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600">
+                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"/></svg>
+                </button>
+                <div x-show="open" @click.outside="open = false" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2">
+                    <div class="grid grid-cols-7 gap-1.5">
+                        ${['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'].map(c => '<button type="button" class="w-6 h-6 rounded-full border-2 border-transparent hover:border-gray-400 transition-all duration-150 group-color-swatch" style="background-color: ' + c + '" onclick="selectGroupColor(this, \'' + c + '\')" title="' + c + '"></button>').join('')}
+                    </div>
+                    <button type="button" class="mt-1.5 w-full text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors duration-150 py-1" onclick="selectGroupColor(this, '')">{{ __('messages.clear') }}</button>
+                </div>
+            </div>
+        </div>
         <div class="flex gap-4 items-center justify-end">
             <button type="button" class="inline-flex items-center justify-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.parentElement.remove()">
                 {{ __('messages.remove') }}
@@ -2192,6 +2263,7 @@ function addGroupField() {
         </div>
     `;
     container.appendChild(div);
+    Alpine.initTree(div);
 }
 
 function copyRoleUrl(button) {
@@ -2235,6 +2307,40 @@ function copyGroupUrl(button, url) {
             button.innerHTML = originalHTML;
         }, 2000);
     });
+}
+
+function selectGroupColor(element, color) {
+    const container = element.closest('.mb-4');
+    const hiddenInput = container.querySelector('input[type="hidden"]');
+    hiddenInput.value = color;
+
+    container.querySelectorAll('.group-color-swatch').forEach(function(btn) {
+        btn.classList.remove('border-gray-900', 'dark:border-white', 'ring-2', 'ring-offset-1', 'ring-gray-900', 'dark:ring-white');
+        btn.classList.add('border-transparent', 'hover:border-gray-400');
+    });
+
+    if (color && element.classList.contains('group-color-swatch')) {
+        element.classList.remove('border-transparent', 'hover:border-gray-400');
+        element.classList.add('border-gray-900', 'dark:border-white', 'ring-2', 'ring-offset-1', 'ring-gray-900', 'dark:ring-white');
+    }
+
+    const trigger = container.querySelector('.color-trigger');
+    if (trigger) {
+        if (color) {
+            trigger.style.backgroundColor = color;
+            trigger.innerHTML = '';
+            trigger.classList.remove('border-2', 'border-dashed', 'border-gray-300', 'dark:border-gray-600');
+        } else {
+            trigger.style.backgroundColor = '';
+            trigger.innerHTML = '<svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"/></svg>';
+            trigger.classList.add('border-2', 'border-dashed', 'border-gray-300', 'dark:border-gray-600');
+        }
+    }
+
+    const alpineRoot = element.closest('[x-data]');
+    if (alpineRoot && alpineRoot._x_dataStack) {
+        alpineRoot._x_dataStack[0].open = false;
+    }
 }
 
 function toggleGroupSlugEdit(groupId) {
@@ -3400,19 +3506,4 @@ function deleteRoleImage(url, token) {
     });
 }
 
-// Unsaved changes warning
-document.addEventListener('DOMContentLoaded', function() {
-    var isDirty = false;
-    var form = document.querySelector('form[method="post"]');
-    if (form) {
-        form.addEventListener('input', function() { isDirty = true; });
-        form.addEventListener('change', function() { isDirty = true; });
-        form.addEventListener('submit', function(e) {
-            if (!e.defaultPrevented) { isDirty = false; }
-        });
-    }
-    window.addEventListener('beforeunload', function(e) {
-        if (isDirty) { e.preventDefault(); e.returnValue = ''; }
-    });
-});
 </script>

@@ -3,6 +3,7 @@
     <x-slot name="description">Sync with any CalDAV-compatible calendar server. Works with Nextcloud, Radicale, Fastmail, iCloud, and more. Open standard, selfhosted friendly.</x-slot>
     <x-slot name="keywords">CalDAV sync, calendar integration, Nextcloud calendar, Radicale, Fastmail calendar, iCloud sync, selfhosted calendar, open standard</x-slot>
     <x-slot name="breadcrumbTitle">CalDAV</x-slot>
+    <x-slot name="socialImage">social/integrations.png</x-slot>
 
     <style>
         /* Custom teal gradient for this page */
@@ -458,7 +459,7 @@
 
     <!-- CTA Section -->
     <section class="relative bg-gradient-to-br from-teal-600 to-cyan-700 py-24 overflow-hidden">
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+        <div class="absolute inset-0 grid-overlay"></div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">

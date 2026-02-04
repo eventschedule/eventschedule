@@ -11,6 +11,7 @@ class Group extends Model
         'name',
         'name_en',
         'slug',
+        'color',
     ];
 
     public function role()

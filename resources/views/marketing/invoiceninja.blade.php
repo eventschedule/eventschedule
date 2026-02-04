@@ -3,6 +3,7 @@
     <x-slot name="description">Generate professional invoices for ticket purchases. Automatic client management, QR code tickets, and seamless payment tracking with Invoice Ninja.</x-slot>
     <x-slot name="keywords">Invoice Ninja, event invoicing, professional invoices, ticket invoices, B2B ticketing, invoice automation, client management, selfhosted invoicing</x-slot>
     <x-slot name="breadcrumbTitle">Invoice Ninja</x-slot>
+    <x-slot name="socialImage">social/integrations.png</x-slot>
 
     <style>
         /* Custom emerald gradient for this page */
@@ -516,7 +517,7 @@
 
     <!-- CTA Section -->
     <section class="relative bg-gradient-to-br from-emerald-600 to-teal-700 py-24 overflow-hidden">
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+        <div class="absolute inset-0 grid-overlay"></div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">

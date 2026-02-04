@@ -49,6 +49,10 @@
             background-size: 200% 100%;
             animation: shimmer 2s infinite;
         }
+        .dark .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            background-size: 200% 100%;
+        }
 
         /* Delays */
         .delay-100 { animation-delay: 0.1s; }

@@ -1,7 +1,6 @@
 <x-app-admin-layout>
     <div class="max-w-7xl mx-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.newsletters') }}</h2>
+        <div class="flex justify-end items-center mb-6">
             @if ($roles->isNotEmpty() && $role)
             <div class="flex gap-3">
                 <x-secondary-link href="{{ route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
