@@ -48,6 +48,8 @@
                         <a href="#custom-prompts" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">Custom AI Prompts</a>
                         <a href="#calendar-sync" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Calendar Sync</a>
                         <a href="#recurring" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Recurring Events</a>
+                        <a href="#frequency-options" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">Frequency Options</a>
+                        <a href="#end-conditions" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">End Conditions</a>
                         <a href="#event-details" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Event Details</a>
                         <a href="#managing" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Managing Events</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
@@ -206,7 +208,7 @@
                         <!-- Recurring Events -->
                         <section id="recurring" class="doc-section">
                             <h2 class="doc-heading">Recurring Events</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">For events that happen regularly - weekly open mics, monthly meetups, daily happy hours - you can add multiple dates at once.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">For events that happen regularly - weekly open mics, monthly meetups, daily happy hours - you can set them to repeat automatically or add multiple dates manually.</p>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Adding Multiple Dates</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
@@ -215,20 +217,97 @@
                                 <li>All dates will share the same event details (name, description, venue)</li>
                                 <li>Each date becomes its own event, so you can edit them individually later if needed</li>
                             </ol>
+                        </section>
+
+                        <!-- Frequency Options -->
+                        <section id="frequency-options" class="doc-section">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recurrence Frequency</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Events can be set to repeat automatically on a schedule. Enable recurring on the event form, choose a frequency, and configure the options for that frequency.</p>
+
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Frequency</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Daily</span></td>
+                                            <td>Repeats every day</td>
+                                            <td>Daily happy hour</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Weekly</span></td>
+                                            <td>Repeats on selected days each week</td>
+                                            <td>Trivia every Tuesday and Thursday</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Every N Weeks</span></td>
+                                            <td>Repeats on selected days every N weeks (2 to 52)</td>
+                                            <td>Biweekly book club</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Monthly (same date)</span></td>
+                                            <td>Same date each month</td>
+                                            <td>Board meeting on the 15th</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Monthly (same day of week)</span></td>
+                                            <td>Same weekday position each month</td>
+                                            <td>First Friday art walk</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Yearly</span></td>
+                                            <td>Same date each year</td>
+                                            <td>Annual gala</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Day Picker</div>
+                                <p>The <strong>Weekly</strong> and <strong>Every N Weeks</strong> frequencies show a day-of-week picker so you can select which days the event repeats on. <strong>Every N Weeks</strong> also shows an interval selector (2 to 52 weeks).</p>
+                            </div>
+                        </section>
+
+                        <!-- End Conditions -->
+                        <section id="end-conditions" class="doc-section">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">End Conditions</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Choose when a recurring series should stop generating new occurrences:</p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Never</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">The event repeats indefinitely. New occurrences are created on an ongoing basis.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">On a specific date</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">The event stops repeating after a chosen date. No new occurrences are created past that date.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">After N occurrences</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">The event stops after a set number of occurrences. For example, a 6-week workshop series.</p>
+                                </div>
+                            </div>
 
                             <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
                                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Common Patterns</h4>
                                 <ul class="doc-list text-sm">
+                                    <li><strong class="text-gray-900 dark:text-white">Daily:</strong> Happy hours, daily standups</li>
                                     <li><strong class="text-gray-900 dark:text-white">Weekly:</strong> Open mic nights, trivia, live music residencies</li>
-                                    <li><strong class="text-gray-900 dark:text-white">Bi-weekly:</strong> Book clubs, game nights</li>
-                                    <li><strong class="text-gray-900 dark:text-white">Monthly:</strong> Networking events, first Friday art walks</li>
-                                    <li><strong class="text-gray-900 dark:text-white">Custom:</strong> Festival dates, workshop series</li>
+                                    <li><strong class="text-gray-900 dark:text-white">Every N Weeks:</strong> Biweekly book clubs, game nights</li>
+                                    <li><strong class="text-gray-900 dark:text-white">Monthly:</strong> Board meetings, first Friday art walks</li>
+                                    <li><strong class="text-gray-900 dark:text-white">Yearly:</strong> Annual galas, anniversary events</li>
                                 </ul>
                             </div>
 
                             <div class="doc-callout doc-callout-tip">
-                                <div class="doc-callout-title">Pro Tip: Use Google Calendar for True Recurrence</div>
-                                <p>For events with complex recurrence patterns (every Tuesday and Thursday, first Monday of the month, etc.), create a recurring event in <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-integrations" class="text-cyan-400 hover:text-cyan-300">Google Calendar</a> and sync it to Event Schedule. The calendar sync handles all the pattern logic automatically.</p>
+                                <div class="doc-callout-title">Pro Tip: Google Calendar Sync</div>
+                                <p>Recurring events sync to <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-integrations" class="text-cyan-400 hover:text-cyan-300">Google Calendar</a> as individual occurrences, so each date appears separately in both calendars.</p>
                             </div>
                         </section>
 
