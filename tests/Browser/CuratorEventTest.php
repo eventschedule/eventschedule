@@ -102,6 +102,7 @@ class CuratorEventTest extends DuskTestCase
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
                 ->waitForLocation('/curator1/schedule', 5)
+                ->pause(1000)
                 ->assertSee('Talent');
 
             // Assert that the number of records remains the same
@@ -140,6 +141,7 @@ class CuratorEventTest extends DuskTestCase
         $browser->scrollIntoView('button[type="submit"]')
             ->press('SAVE')
             ->waitForLocation('/talent/schedule', 5)
+            ->pause(1000)
             ->assertSee('Talent');
     }
 }
