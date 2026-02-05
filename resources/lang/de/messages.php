@@ -53,6 +53,7 @@ return [
     'type' => 'Typ',
     'details' => 'Details',
     'date_and_time' => 'Datum und Uhrzeit',
+    'date_and_time_required' => 'Datum und Startzeit sind erforderlich.',
     'duration_in_hours' => 'Dauer in Stunden',
     'private' => 'Privat',
     'unlisted' => 'Nicht gelistet',

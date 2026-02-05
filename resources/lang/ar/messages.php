@@ -53,6 +53,7 @@ return [
     'type' => 'نوع',
     'details' => 'التفاصيل',
     'date_and_time' => 'التاريخ والوقت',
+    'date_and_time_required' => 'التاريخ ووقت البدء مطلوبان.',
     'duration_in_hours' => 'المدة بالساعات',
     'private' => 'خاص',
     'unlisted' => 'غير مدرج',

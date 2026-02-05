@@ -54,6 +54,7 @@ return [
     'type' => 'סוג',
     'details' => 'פרטים',
     'date_and_time' => 'תאריך ושעה',
+    'date_and_time_required' => 'תאריך ושעת התחלה נדרשים.',
     'duration_in_hours' => 'משך (שעות)',
     'private' => 'פרטי',
     'unlisted' => 'לא רשום',

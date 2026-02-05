@@ -1209,7 +1209,7 @@
 
                         <div>
                             <div v-if="selectedMembers && selectedMembers.length > 0" class="mb-2">
-                                <div v-for="member in selectedMembers" :key="member.id" class="flex items-center justify-between mb-2">
+                                <div v-for="member in selectedMembers" :key="member.id" class="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
                                     <input type="hidden" v-bind:name="'members[' + member.id + '][email]'" v-bind:value="member.email" />
                                     <div v-show="editMemberId === member.id" class="w-full">
                                         <div class="mb-6">
@@ -3401,42 +3401,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to show a specific section and hide others
     function showSection(sectionId, preventScroll = false) {
-        // Check if we need to delay hiding for shake animation
-        const shouldDelayForShake = currentSectionId === 'section-participants' &&
+        // Block navigation if leaving participants with incomplete add member form
+        if (currentSectionId === 'section-participants' &&
             sectionId !== 'section-participants' &&
             window.vueApp &&
             window.vueApp.showMemberTypeRadio &&
-            window.vueApp.hasIncompleteParticipantData;
-
-        if (shouldDelayForShake) {
+            window.vueApp.hasIncompleteParticipantData) {
+            // Shake Done button as warning and block navigation
             const addBtn = document.getElementById('add-member-btn');
             if (addBtn) {
                 addBtn.classList.add('shake');
+                setTimeout(() => addBtn.classList.remove('shake'), 400);
             }
+            return; // Block navigation
         }
 
-        // Cancel add member form if leaving participants with form open
+        // Auto-cancel add member form if leaving participants with empty form
         if (currentSectionId === 'section-participants' &&
             sectionId !== 'section-participants' &&
             window.vueApp &&
             window.vueApp.showMemberTypeRadio) {
-            // Delay cancel if shaking so user sees the animation
-            if (shouldDelayForShake) {
-                setTimeout(() => window.vueApp.cancelAddMember(), 400);
-            } else {
-                window.vueApp.cancelAddMember();
-            }
+            window.vueApp.cancelAddMember();
         }
 
         // Track current section
         currentSectionId = sectionId;
 
-        // Show/hide sections (with optional delay for participants to show shake)
         sections.forEach(section => {
             if (section.id === sectionId) {
                 section.style.display = 'block';
-            } else if (section.id === 'section-participants' && shouldDelayForShake) {
-                setTimeout(() => { section.style.display = 'none'; }, 400);
             } else {
                 section.style.display = 'none';
             }
