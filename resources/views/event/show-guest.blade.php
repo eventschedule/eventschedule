@@ -498,7 +498,7 @@
 
       {{-- RIGHT COLUMN --}}
       <div class="order-1 lg:order-2 flex flex-col gap-4 lg:gap-6">
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 flex flex-col gap-6">
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 flex flex-col gap-6 z-10">
 
         {{-- Breadcrumb --}}
         @php
