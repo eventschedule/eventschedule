@@ -38,6 +38,25 @@
             background: rgba(156, 163, 175, 0.5);
             border-radius: 3px;
         }
+        /* Sticky first column (feature names) - works at all screen sizes */
+        .compare-table th:first-child,
+        .compare-table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            background: white;
+        }
+        .dark .compare-table th:first-child,
+        .dark .compare-table td:first-child {
+            background: #0f0f14;
+        }
+        /* Section header rows need correct background for sticky */
+        .compare-table .section-header td {
+            background: rgb(249 250 251);
+        }
+        .dark .compare-table .section-header td {
+            background: #17171c;
+        }
         @media (max-width: 768px) {
             /* Make wrapper handle both scrolls with fixed height */
             .compare-table-wrapper {
@@ -54,35 +73,23 @@
             .dark .compare-table thead th {
                 background: #0f0f14;
             }
-            /* Keep Event Schedule column highlight */
+            /* Keep Event Schedule column highlight - solid colors for scroll */
             .compare-table thead th:nth-child(2) {
-                background: rgb(239 246 255 / 0.5); /* bg-blue-50/50 */
+                background: #eff6ff; /* solid bg-blue-50 */
             }
             .dark .compare-table thead th:nth-child(2) {
-                background: rgb(59 130 246 / 0.05); /* dark:bg-blue-500/5 */
+                background: #12121a; /* solid dark blue tint */
             }
-            /* Sticky first column (feature names) when scrolling right */
-            .compare-table th:first-child,
-            .compare-table td:first-child {
-                position: sticky;
-                left: 0;
-                z-index: 10;
-                background: white;
+            /* Event Schedule data cells also need solid background */
+            .compare-table td:nth-child(2) {
+                background: #eff6ff; /* solid bg-blue-50 */
             }
-            .dark .compare-table th:first-child,
-            .dark .compare-table td:first-child {
-                background: #0f0f14;
+            .dark .compare-table td:nth-child(2) {
+                background: #12121a; /* solid dark blue tint */
             }
             /* Corner cell needs highest z-index */
             .compare-table thead th:first-child {
                 z-index: 30;
-            }
-            /* Section header rows need background for horizontal scroll */
-            .compare-table .section-header td {
-                background: rgb(249 250 251);
-            }
-            .dark .compare-table .section-header td {
-                background: rgba(255, 255, 255, 0.03);
             }
         }
     </style>
@@ -178,9 +185,14 @@
                         @endphp
                         @foreach ($sections as $sectionName => $rows)
                             <tr class="section-header">
-                                <td colspan="6" class="bg-gray-50 dark:bg-white/[0.03] px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <td class="bg-gray-50 dark:bg-white/[0.03] px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                     {{ $sectionName }}
                                 </td>
+                                <td class="bg-gray-50 dark:bg-white/[0.03]"></td>
+                                <td class="bg-gray-50 dark:bg-white/[0.03]"></td>
+                                <td class="bg-gray-50 dark:bg-white/[0.03]"></td>
+                                <td class="bg-gray-50 dark:bg-white/[0.03]"></td>
+                                <td class="bg-gray-50 dark:bg-white/[0.03]"></td>
                             </tr>
                             @foreach ($rows as $row)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">

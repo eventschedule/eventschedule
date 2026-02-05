@@ -1471,7 +1471,7 @@ class EventController extends Controller
             return [
                 'id' => UrlUtils::encodeId($e->id),
                 'name' => $e->name,
-                'starts_at' => $e->starts_at ? Carbon::parse($e->starts_at)->format('M j, Y') : null,
+                'starts_at' => $e->starts_at ? Carbon::parse($e->starts_at)->format('D, M j, Y') : null,
                 'image_url' => $e->getImageUrl(),
             ];
         });

@@ -429,8 +429,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </span>
-                    <span class="flex-1 truncate text-gray-900 dark:text-gray-100 text-sm">
-                        @{{ selectedEvent.name }}<span v-if="selectedEvent.starts_at"> - @{{ selectedEvent.starts_at }}</span>
+                    <span class="flex-1 min-w-0">
+                        <span class="block truncate text-gray-900 dark:text-gray-100 text-sm font-medium">@{{ selectedEvent.name }}</span>
+                        <span v-if="selectedEvent.starts_at" class="block truncate text-gray-500 dark:text-gray-400 text-xs">@{{ selectedEvent.starts_at }}</span>
                     </span>
                 </template>
                 <svg class="w-5 h-5 text-gray-400 flex-shrink-0 ms-auto" fill="none" viewBox="0 0 20 20">
@@ -447,8 +448,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </span>
-                    <span class="flex-1 truncate text-gray-900 dark:text-gray-100 text-sm">
-                        @{{ event.name }}<span v-if="event.starts_at"> - @{{ event.starts_at }}</span>
+                    <span class="flex-1 min-w-0">
+                        <span class="block truncate text-gray-900 dark:text-gray-100 text-sm font-medium">@{{ event.name }}</span>
+                        <span v-if="event.starts_at" class="block truncate text-gray-500 dark:text-gray-400 text-xs">@{{ event.starts_at }}</span>
                     </span>
                     <svg v-if="event.id === selectedEventId" class="w-5 h-5 text-[#4E81FA] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -548,7 +550,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div v-if="!editingPrompt">
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                         <span v-if="aiPrompt">@{{ aiPrompt }}</span>
-                        <span v-else class="italic">{{ __('messages.no_prompt_set') }}</span>
+                        <span v-else class="italic">No AI prompt set</span>
                     </p>
                 </div>
                 <div v-else>
@@ -559,7 +561,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <input type="checkbox" v-model="saveAsDefault" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] me-2">
                             {{ __('messages.save_as_default') }}
                         </label>
-                        <button @click="editingPrompt = false" class="text-sm font-medium text-[#4E81FA] hover:text-[#3a6de0] whitespace-nowrap border border-[#4E81FA] rounded-md px-3 py-1">{{ __('messages.done') }}</button>
+                        <button @click="editingPrompt = false" class="text-sm font-medium text-[#4E81FA] hover:text-[#3a6de0] whitespace-nowrap border border-[#4E81FA] rounded-md px-4 py-2">{{ __('messages.done') }}</button>
                     </div>
                 </div>
             </div>

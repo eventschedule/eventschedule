@@ -1208,7 +1208,7 @@
                         </h2>
 
                         <div>
-                            <div v-if="selectedMembers && selectedMembers.length > 0" class="mb-6">
+                            <div v-if="selectedMembers && selectedMembers.length > 0" class="mb-2">
                                 <div v-for="member in selectedMembers" :key="member.id" class="flex items-center justify-between mb-2">
                                     <input type="hidden" v-bind:name="'members[' + member.id + '][email]'" v-bind:value="member.email" />
                                     <div v-show="editMemberId === member.id" class="w-full">
@@ -1301,20 +1301,23 @@
                                 </div>
                             </div>
 
-                            <div>
-                                <fieldset>
+                            <div v-if="!showMemberTypeRadio">
+                                <button type="button" @click="showAddMemberForm" class="text-[#4E81FA] hover:text-blue-700 text-sm font-medium flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                    </svg>
+                                    {{ __('messages.add') }}
+                                </button>
+                            </div>
+
+                            <div v-if="showMemberTypeRadio">
+                                <fieldset v-if="filteredMembers.length > 0">
                                     <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
-                                        <div v-if="Object.keys(members).length > 0" class="flex items-center">
+                                        <div class="flex items-center">
                                             <input id="use_existing_members" name="member_type" type="radio" value="use_existing" v-model="memberType"
                                                 class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                             <label for="use_existing_members"
                                                 class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
-                                        </div>
-                                        <div v-if="Object.keys(members).length == 0" class="flex items-center">
-                                            <input id="use_existing_members" name="member_type" type="radio" value="use_existing" v-model="memberType"
-                                                class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                            <label for="use_existing_members"
-                                                class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.none') }}</label>
                                         </div>
                                         <div class="flex items-center">
                                             <input id="create_new_members" name="member_type" type="radio" value="create_new" v-model="memberType"
@@ -1335,7 +1338,7 @@
                                     </select>
                                 </div>
 
-                                <div v-if="memberType === 'create_new'">
+                                <div v-if="memberType === 'create_new' || filteredMembers.length === 0">
                                     <div class="mb-6">
                                         <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
                                         <x-text-input id="member_name" @keydown.enter.prevent="addMember"
@@ -1395,13 +1398,19 @@
 
                                     <div class="flex gap-2">
                                         <x-primary-button id="add-member-btn" type="button" @click="addMember">
-                                            {{ __('messages.add') }}
+                                            {{ __('messages.done') }}
                                         </x-primary-button>
-                                        <x-secondary-button v-if="hasIncompleteParticipantData" type="button" @click="clearNewParticipant">
-                                            {{ __('messages.clear') }}
+                                        <x-secondary-button type="button" @click="cancelAddMember">
+                                            {{ __('messages.cancel') }}
                                         </x-secondary-button>
                                     </div>
 
+                                </div>
+
+                                <div v-if="memberType === 'use_existing' && filteredMembers.length > 0" class="mt-4">
+                                    <x-secondary-button type="button" @click="cancelAddMember">
+                                        {{ __('messages.cancel') }}
+                                    </x-secondary-button>
                                 </div>
 
                             </div>
@@ -2451,7 +2460,7 @@
         memberEmail: "",
         memberName: "",
         memberYoutubeUrl: "",
-        showMemberTypeRadio: true,
+        showMemberTypeRadio: false,
         showVenueAddressFields: false,
         isInPerson: false,
         isOnline: false,
@@ -2740,15 +2749,19 @@
           }
         });
       },
-      clearNewParticipant() {
+      cancelAddMember() {
         this.memberName = "";
         this.memberEmail = "";
         this.memberYoutubeUrl = "";
         this.memberSearchResults = [];
+        this.showMemberTypeRadio = false;
       },
-      showAddMemberForm() {        
+      showAddMemberForm() {
         this.showMemberTypeRadio = true;
         this.editMemberId = "";
+        if (this.filteredMembers.length === 0) {
+          this.memberType = 'create_new';
+        }
         this.setFocusBasedOnMemberType();
       },
       clearEventUrl() {
@@ -3104,7 +3117,8 @@
         return this.tickets.reduce((total, ticket) => total + (ticket.quantity || 0), 0);
       },
       hasIncompleteParticipantData() {
-        return this.memberType === 'create_new' &&
+        return this.showMemberTypeRadio &&
+          this.memberType === 'create_new' &&
           (this.memberName.trim() || this.memberEmail.trim() || this.memberYoutubeUrl.trim());
       },
     },
@@ -3186,7 +3200,7 @@
       },
     },
     mounted() {
-      this.showMemberTypeRadio = this.selectedMembers.length === 0;
+      this.showMemberTypeRadio = false;
       this.$nextTick(() => updateRecurringFieldVisibility());
 
       const isCloned = @json($isCloned ?? false);
@@ -3387,26 +3401,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to show a specific section and hide others
     function showSection(sectionId, preventScroll = false) {
-        // Check if leaving participants section with incomplete data
-        if (currentSectionId === 'section-participants' &&
+        // Check if we need to delay hiding for shake animation
+        const shouldDelayForShake = currentSectionId === 'section-participants' &&
             sectionId !== 'section-participants' &&
             window.vueApp &&
-            window.vueApp.hasIncompleteParticipantData) {
-            // Shake the Add button
+            window.vueApp.showMemberTypeRadio &&
+            window.vueApp.hasIncompleteParticipantData;
+
+        if (shouldDelayForShake) {
             const addBtn = document.getElementById('add-member-btn');
             if (addBtn) {
                 addBtn.classList.add('shake');
-                setTimeout(() => addBtn.classList.remove('shake'), 400);
             }
-            return; // Don't allow navigation
+        }
+
+        // Cancel add member form if leaving participants with form open
+        if (currentSectionId === 'section-participants' &&
+            sectionId !== 'section-participants' &&
+            window.vueApp &&
+            window.vueApp.showMemberTypeRadio) {
+            // Delay cancel if shaking so user sees the animation
+            if (shouldDelayForShake) {
+                setTimeout(() => window.vueApp.cancelAddMember(), 400);
+            } else {
+                window.vueApp.cancelAddMember();
+            }
         }
 
         // Track current section
         currentSectionId = sectionId;
 
+        // Show/hide sections (with optional delay for participants to show shake)
         sections.forEach(section => {
             if (section.id === sectionId) {
                 section.style.display = 'block';
+            } else if (section.id === 'section-participants' && shouldDelayForShake) {
+                setTimeout(() => { section.style.display = 'none'; }, 400);
             } else {
                 section.style.display = 'none';
             }
