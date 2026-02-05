@@ -381,6 +381,7 @@ if (config('app.is_nexus')) {
         Route::get('/eventbrite-alternative', [MarketingController::class, 'compareEventbrite'])->name('marketing.compare_eventbrite');
         Route::get('/luma-alternative', [MarketingController::class, 'compareLuma'])->name('marketing.compare_luma');
         Route::get('/ticket-tailor-alternative', [MarketingController::class, 'compareTicketTailor'])->name('marketing.compare_ticket_tailor');
+        Route::get('/google-calendar-alternative', [MarketingController::class, 'compareGoogleCalendar'])->name('marketing.compare_google_calendar');
         Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
         Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
         Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
@@ -493,6 +494,7 @@ if (config('app.is_nexus')) {
             Route::get('/eventbrite-alternative', [MarketingController::class, 'compareEventbrite'])->name('marketing.compare_eventbrite');
             Route::get('/luma-alternative', [MarketingController::class, 'compareLuma'])->name('marketing.compare_luma');
             Route::get('/ticket-tailor-alternative', [MarketingController::class, 'compareTicketTailor'])->name('marketing.compare_ticket_tailor');
+            Route::get('/google-calendar-alternative', [MarketingController::class, 'compareGoogleCalendar'])->name('marketing.compare_google_calendar');
             Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
             Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
             Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');

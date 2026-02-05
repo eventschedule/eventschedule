@@ -122,7 +122,7 @@
                         Translation
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Instant translation</h3>
-                    <p class="text-gray-500 dark:text-white/80 mb-6">Translate your entire schedule automatically. Support for 9 languages including English, Spanish, French, German, and more.</p>
+                    <p class="text-gray-500 dark:text-white/80 mb-6">Translate your entire schedule automatically. Support for 10 languages including English, Spanish, French, German, and more.</p>
 
                     <div class="flex flex-wrap gap-2 justify-center">
                         <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-sm font-medium">EN</span>

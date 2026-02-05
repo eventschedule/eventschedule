@@ -1,8 +1,8 @@
 <x-marketing-layout>
     <x-slot name="title">Advanced Schedule Settings - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Advanced Schedule Settings</x-slot>
-    <x-slot name="description">Learn about advanced schedule features including subschedules, auto import, calendar integrations, and email settings.</x-slot>
-    <x-slot name="keywords">subschedules, categories, auto import, google calendar, caldav, email settings, schedule configuration</x-slot>
+    <x-slot name="description">Learn about advanced schedule features including sub-schedules, auto import, calendar integrations, and email settings.</x-slot>
+    <x-slot name="keywords">sub-schedules, categories, auto import, google calendar, caldav, email settings, schedule configuration</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
 
     @include('marketing.docs.partials.styles')
@@ -27,7 +27,7 @@
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Advanced Schedule Settings</h1>
             </div>
             <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
-                Automate your workflow and never manually add an event again. Configure subschedules, auto import, calendar integrations, and more.
+                Automate your workflow and never manually add an event again. Configure sub-schedules, auto import, calendar integrations, and more.
             </p>
         </div>
     </section>
@@ -41,7 +41,7 @@
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
                         <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Overview</a>
-                        <a href="#subschedules" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Subschedules</a>
+                        <a href="#subschedules" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Sub-schedules</a>
                         <a href="#auto-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Auto Import</a>
                         <a href="#calendar-integrations" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Calendar Integrations</a>
                         <a href="#email-settings" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Email Settings</a>
@@ -69,31 +69,31 @@
                             </div>
                         </section>
 
-                        <!-- Subschedules -->
+                        <!-- Sub-schedules -->
                         <section id="subschedules" class="doc-section">
-                            <h2 class="doc-heading">Subschedules</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Organize your events into subschedules (categories). This helps visitors filter and find events that interest them.</p>
+                            <h2 class="doc-heading">Sub-schedules</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Organize your events into sub-schedules (categories). This helps visitors filter and find events that interest them.</p>
 
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Creating Subschedules</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">To create a subschedule, go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and scroll to the Subschedules section.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Creating Sub-schedules</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">To create a sub-schedule, go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and scroll to the Sub-schedules section.</p>
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Use Cases</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Create subschedules like "Live Music", "DJ Nights", "Comedy Shows", or "Workshops". Each subschedule gets its own URL and can be filtered.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Create sub-schedules like "Live Music", "DJ Nights", "Comedy Shows", or "Workshops". Each sub-schedule gets its own URL and can be filtered.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Subschedule Name & English Name</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Like schedules, subschedules can have localized names with English translations for multilingual support.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sub-schedule Name & English Name</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Like schedules, sub-schedules can have localized names with English translations for multilingual support.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">URL Slugs</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Each subschedule gets a URL slug (e.g., <code class="doc-inline-code">/live-music</code>) so visitors can bookmark and share filtered views.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Each sub-schedule gets a URL slug (e.g., <code class="doc-inline-code">/live-music</code>) so visitors can bookmark and share filtered views.</p>
                                 </div>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Assigning Events to Subschedules</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">When creating or editing an event, select a subschedule from the dropdown. Events can belong to one subschedule at a time.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Assigning Events to Sub-schedules</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">When creating or editing an event, select a sub-schedule from the dropdown. Events can belong to one sub-schedule at a time.</p>
                         </section>
 
                         <!-- Auto Import -->
@@ -223,13 +223,13 @@
         "@context": "https://schema.org",
         "@type": "HowTo",
         "name": "How to Set Up Auto Import and Calendar Sync",
-        "description": "Configure subschedules, auto import from URLs, and connect Google Calendar or CalDAV for seamless event synchronization.",
+        "description": "Configure sub-schedules, auto import from URLs, and connect Google Calendar or CalDAV for seamless event synchronization.",
         "totalTime": "PT10M",
         "step": [
             {
                 "@type": "HowToStep",
-                "name": "Create Subschedules",
-                "text": "Go to Admin Panel, then Profile, then Edit and scroll to Subschedules. Create categories like Live Music, DJ Nights, or Comedy Shows.",
+                "name": "Create Sub-schedules",
+                "text": "Go to Admin Panel, then Profile, then Edit and scroll to Sub-schedules. Create categories like Live Music, DJ Nights, or Comedy Shows.",
                 "url": "{{ url(route('marketing.docs.creating_schedules')) }}#subschedules"
             },
             {

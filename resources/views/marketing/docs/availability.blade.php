@@ -143,4 +143,35 @@
     </section>
 
     @include('marketing.docs.partials.scripts')
+
+    <!-- HowTo Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Set Your Availability in Event Schedule",
+        "description": "Learn how to mark your available and unavailable dates using Event Schedule's availability calendar feature.",
+        "totalTime": "PT3M",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "name": "Open the Availability Tab",
+                "text": "Go to your schedule's admin panel and click the Availability tab to access the availability calendar.",
+                "url": "{{ url(route('marketing.docs.availability')) }}#setting-availability"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Mark Unavailable Dates",
+                "text": "Click on any date in the calendar to toggle it as unavailable. Unavailable dates appear with a red overlay.",
+                "url": "{{ url(route('marketing.docs.availability')) }}#setting-availability"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Save Your Changes",
+                "text": "Click Save to confirm your availability changes. You can click dates again to remove unavailable markers.",
+                "url": "{{ url(route('marketing.docs.availability')) }}#setting-availability"
+            }
+        ]
+    }
+    </script>
 </x-marketing-layout>

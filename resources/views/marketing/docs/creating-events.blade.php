@@ -350,8 +350,8 @@
                                             <td>A flyer or photo for the event</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Subschedule</span></td>
-                                            <td>Organize events by type (e.g., "Live Music", "Comedy"). See <a href="{{ route('marketing.docs.creating_schedules') }}#subschedules" class="text-cyan-400 hover:text-cyan-300">Subschedules</a></td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Sub-schedule</span></td>
+                                            <td>Organize events by type (e.g., "Live Music", "Comedy"). See <a href="{{ route('marketing.docs.creating_schedules') }}#subschedules" class="text-cyan-400 hover:text-cyan-300">Sub-schedules</a></td>
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Registration URL</span></td>
@@ -399,7 +399,7 @@
                                 <li><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Selling Tickets</a> - Add tickets to your events</li>
                                 <li><a href="{{ route('marketing.docs.event_graphics') }}" class="text-cyan-400 hover:text-cyan-300">Event Graphics</a> - Create promotional images</li>
                                 <li><a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">Sharing Your Schedule</a> - Share and embed your events</li>
-                                <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="text-cyan-400 hover:text-cyan-300">Advanced Schedule Settings</a> - Subschedules, auto-import, and calendar sync</li>
+                                <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="text-cyan-400 hover:text-cyan-300">Advanced Schedule Settings</a> - Sub-schedules, auto-import, and calendar sync</li>
                             </ul>
                         </section>
 

@@ -243,96 +243,96 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
                 <!-- Ticketing & Check-ins -->
-                <a href="{{ marketing_url('/features/ticketing') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-500/30 transition-all" aria-label="Learn more about ticketing and QR check-ins">
+                <a href="{{ marketing_url('/features/ticketing') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-500/30 transition-all flex flex-col" aria-label="Learn more about ticketing and QR check-ins">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 mb-4">
                         <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Ticketing & QR Check-ins</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Sell tickets online with multiple types (GA, VIP), set limits, and scan QR codes for fast check-ins.</p>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm flex-grow">Sell tickets online with multiple types (GA, VIP), set limits, and scan QR codes for fast check-ins.</p>
                     <div class="flex items-center gap-1.5 mt-2 text-xs text-gray-500 dark:text-gray-400">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                         <span>Secure payments by Stripe</span>
                     </div>
-                    <span class="inline-flex items-center mt-3 text-sm font-medium text-blue-600 group-hover:gap-2 gap-1 transition-all">
+                    <span class="inline-flex items-center mt-auto text-sm font-medium text-blue-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
                 </a>
 
                 <!-- AI Features -->
-                <a href="{{ marketing_url('/features/ai') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-sky-200 dark:hover:border-sky-500/30 transition-all" aria-label="Learn more about AI-powered features">
+                <a href="{{ marketing_url('/features/ai') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-sky-200 dark:hover:border-sky-500/30 transition-all flex flex-col" aria-label="Learn more about AI-powered features">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-sky-100 dark:bg-sky-500/20 mb-4">
                         <svg class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">AI-Powered</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Auto-extract event details from flyers, agendas, and setlists. Scan printed agendas to populate event parts. Translate instantly.</p>
-                    <span class="inline-flex items-center mt-3 text-sm font-medium text-sky-600 group-hover:gap-2 gap-1 transition-all">
+                    <p class="text-gray-600 dark:text-gray-400 text-sm flex-grow">Auto-extract event details from flyers, agendas, and setlists. Scan printed agendas to populate event parts. Translate instantly.</p>
+                    <span class="inline-flex items-center mt-auto text-sm font-medium text-sky-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
                 </a>
 
                 <!-- Newsletters -->
-                <a href="{{ route('marketing.newsletters') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-cyan-200 dark:hover:border-cyan-500/30 transition-all" aria-label="Learn more about newsletters">
+                <a href="{{ route('marketing.newsletters') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-cyan-200 dark:hover:border-cyan-500/30 transition-all flex flex-col" aria-label="Learn more about newsletters">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-100 dark:bg-cyan-500/20 mb-4">
                         <svg class="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">Newsletters</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Send beautiful emails to followers and ticket buyers with a drag-and-drop editor and A/B testing.</p>
-                    <span class="inline-flex items-center mt-3 text-sm font-medium text-cyan-600 group-hover:gap-2 gap-1 transition-all">
+                    <p class="text-gray-600 dark:text-gray-400 text-sm flex-grow">Send beautiful emails to followers and ticket buyers with a drag-and-drop editor and A/B testing.</p>
+                    <span class="inline-flex items-center mt-auto text-sm font-medium text-cyan-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
                 </a>
 
                 <!-- Calendar Sync -->
-                <a href="{{ marketing_url('/features/calendar-sync') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-sky-200 dark:hover:border-sky-500/30 transition-all" aria-label="Learn more about calendar sync">
+                <a href="{{ marketing_url('/features/calendar-sync') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-sky-200 dark:hover:border-sky-500/30 transition-all flex flex-col" aria-label="Learn more about calendar sync">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-sky-100 dark:bg-sky-500/20 mb-4">
                         <svg class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">Calendar Sync</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Two-way sync with Google Calendar. Let attendees add events to Apple, Google, or Outlook calendars.</p>
-                    <span class="inline-flex items-center mt-3 text-sm font-medium text-sky-600 group-hover:gap-2 gap-1 transition-all">
+                    <p class="text-gray-600 dark:text-gray-400 text-sm flex-grow">Two-way sync with Google Calendar. Let attendees add events to Apple, Google, or Outlook calendars.</p>
+                    <span class="inline-flex items-center mt-auto text-sm font-medium text-sky-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
                 </a>
 
                 <!-- Built-in Analytics -->
-                <a href="{{ route('marketing.analytics') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-500/30 transition-all" aria-label="Learn more about built-in analytics">
+                <a href="{{ route('marketing.analytics') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-500/30 transition-all flex flex-col" aria-label="Learn more about built-in analytics">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 mb-4">
                         <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Built-in Analytics</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Track page views, device breakdown, top events, and traffic sources. No external services required.</p>
-                    <span class="inline-flex items-center mt-3 text-sm font-medium text-emerald-600 group-hover:gap-2 gap-1 transition-all">
+                    <p class="text-gray-600 dark:text-gray-400 text-sm flex-grow">Track page views, device breakdown, top events, and traffic sources. No external services required.</p>
+                    <span class="inline-flex items-center mt-auto text-sm font-medium text-emerald-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
                 </a>
 
                 <!-- Recurring Events -->
-                <a href="{{ marketing_url('/features/recurring-events') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-lime-200 dark:hover:border-lime-500/30 transition-all" aria-label="Learn more about recurring events">
+                <a href="{{ marketing_url('/features/recurring-events') }}" class="feature-card group block bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:border-lime-200 dark:hover:border-lime-500/30 transition-all flex flex-col" aria-label="Learn more about recurring events">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-lime-100 dark:bg-lime-500/20 mb-4">
                         <svg class="w-6 h-6 text-lime-600 dark:text-lime-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-lime-600 dark:group-hover:text-lime-400 transition-colors">Recurring Events</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Set events to repeat weekly on chosen days with flexible end conditions and per-occurrence tickets.</p>
-                    <span class="inline-flex items-center mt-3 text-sm font-medium text-lime-600 group-hover:gap-2 gap-1 transition-all">
+                    <p class="text-gray-600 dark:text-gray-400 text-sm flex-grow">Set events to repeat weekly on chosen days with flexible end conditions and per-occurrence tickets.</p>
+                    <span class="inline-flex items-center mt-auto text-sm font-medium text-lime-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>

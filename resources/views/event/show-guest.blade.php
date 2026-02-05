@@ -15,9 +15,9 @@
     $contrastColor = accent_contrast_color($accentColor);
     @endphp
 
-  {{-- Status alerts (full width, above grid) --}}
+  {{-- Status alerts (full width, fixed at top) --}}
   @if ($eventIsAccepted === null)
-  <div class="w-full bg-amber-50 dark:bg-amber-950 border-b border-amber-200 dark:border-amber-800 py-6">
+  <div class="fixed top-0 left-0 w-full bg-amber-50 dark:bg-amber-950 border-b border-amber-200 dark:border-amber-800 py-6 z-[60]">
     <div class="container mx-auto px-5">
       <div class="flex items-center justify-center text-amber-800 dark:text-amber-200">
         <span class="text-xl font-medium">{{ __('messages.event_pending_review') }}</span>
@@ -25,13 +25,17 @@
     </div>
   </div>
   @elseif (! $eventIsAccepted)
-  <div class="w-full bg-red-50 dark:bg-red-950 border-b border-red-200 dark:border-red-800 py-6">
+  <div class="fixed top-0 left-0 w-full bg-red-50 dark:bg-red-950 border-b border-red-200 dark:border-red-800 py-6 z-[60]">
     <div class="container mx-auto px-5">
       <div class="flex items-center justify-center text-red-800 dark:text-red-200">
         <span class="text-xl font-medium">{{ __('messages.event_rejected') }}</span>
       </div>
     </div>
   </div>
+  @endif
+  {{-- Spacer for fixed banner --}}
+  @if ($eventIsAccepted === null || ! $eventIsAccepted)
+  <div class="h-[68px]"></div>
   @endif
 
   <div class="container mx-auto max-w-5xl px-0 sm:px-5 pt-4 pb-20 sm:pb-0">
@@ -271,7 +275,7 @@
         @php
           $hasVenueHeader = ($event->venue->header_image && $event->venue->header_image !== 'none') || $event->venue->header_image_url;
         @endphp
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl z-20 relative {{ $role->isRtl() ? 'rtl' : '' }}">
           @if ($hasVenueHeader)
             <div class="overflow-hidden rounded-t-2xl">
               @if ($event->venue->header_image && $event->venue->header_image !== 'none')
@@ -368,39 +372,93 @@
                 @endforeach
               </div>
               @endif
+
+              {{-- Calendar links dropdown (inside venue card) --}}
+              @if ($event->tickets_enabled && $event->isPro())
+              <div class="relative mt-4">
+                <button type="button"
+                    onclick="event.stopPropagation(); var m = document.getElementById('calendar-card-dropdown'); m.classList.toggle('hidden')"
+                    class="inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                    style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
+                    aria-expanded="true" aria-haspopup="true">
+                  {{ __('messages.add_to_calendar') }}
+                  <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+
+                {{-- Calendar dropdown menu --}}
+                <div id="calendar-card-dropdown" class="pop-up-menu hidden absolute top-full {{ $role->isRtl() ? 'end-0 origin-top-right' : 'start-0 origin-top-left' }} z-50 mt-2 w-56 divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" tabindex="-1">
+                  <div class="py-1" role="none" onclick="event.stopPropagation()">
+                    <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1">
+                      <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
+                      </svg>
+                      Google Calendar
+                      <svg class="ms-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                    </a>
+                    <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1">
+                      <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
+                      </svg>
+                      Apple Calendar
+                      <svg class="ms-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                    </a>
+                    <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1">
+                      <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
+                      </svg>
+                      Microsoft Outlook
+                      <svg class="ms-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                    </a>
+                  </div>
+                </div>
+              </div>
+              @endif
             </div>
           </div>
         </div>
         @endif
 
-        {{-- Calendar links card --}}
-        @if ($event->tickets_enabled && $event->isPro())
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5 flex flex-col gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
-          <h2 class="text-gray-900 dark:text-gray-100 text-base leading-snug font-semibold">
+        {{-- Calendar links dropdown (fallback when no venue) --}}
+        @if (!($event->venue && $event->venue->name) && $event->tickets_enabled && $event->isPro())
+        <div class="relative {{ $role->isRtl() ? 'rtl' : '' }}">
+          <button type="button"
+              onclick="event.stopPropagation(); var m = document.getElementById('calendar-card-dropdown'); m.classList.toggle('hidden')"
+              class="inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+              style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
+              aria-expanded="true" aria-haspopup="true">
             {{ __('messages.add_to_calendar') }}
-          </h2>
-          <div class="flex flex-col divide-y divide-gray-100 dark:divide-gray-700">
-            <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 py-3 text-sm text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100">
-              <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
-              </svg>
-              Google Calendar
-              <svg class="ml-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-            </a>
-            <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 py-3 text-sm text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100">
-              <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
-              </svg>
-              Apple Calendar
-              <svg class="ml-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-            </a>
-            <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 py-3 text-sm text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100">
-              <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
-              </svg>
-              Microsoft Outlook
-              <svg class="ml-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-            </a>
+            <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            </svg>
+          </button>
+
+          {{-- Calendar dropdown menu --}}
+          <div id="calendar-card-dropdown" class="pop-up-menu hidden absolute top-full {{ $role->isRtl() ? 'end-0 origin-top-right' : 'start-0 origin-top-left' }} z-50 mt-2 w-56 divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" tabindex="-1">
+            <div class="py-1" role="none" onclick="event.stopPropagation()">
+              <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1">
+                <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
+                </svg>
+                Google Calendar
+                <svg class="ms-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+              </a>
+              <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1">
+                <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
+                </svg>
+                Apple Calendar
+                <svg class="ms-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+              </a>
+              <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1">
+                <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
+                </svg>
+                Microsoft Outlook
+                <svg class="ms-auto h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+              </a>
+            </div>
           </div>
         </div>
         @endif
@@ -440,7 +498,7 @@
 
       {{-- RIGHT COLUMN --}}
       <div class="order-1 lg:order-2 flex flex-col gap-4 lg:gap-6">
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 flex flex-col gap-6 z-10">
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 flex flex-col gap-6">
 
         {{-- Breadcrumb --}}
         @php
@@ -604,7 +662,7 @@
               </button>
 
             {{-- Desktop calendar dropdown --}}
-            <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute top-full end-0 z-10 mt-2 w-56 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+            <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute top-full end-0 z-50 mt-2 w-56 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                 <div class="py-1" role="none" onclick="event.stopPropagation()">
                     <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-0">
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

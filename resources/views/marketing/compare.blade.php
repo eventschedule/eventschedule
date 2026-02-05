@@ -1,7 +1,7 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Schedule vs Eventbrite, Luma & Ticket Tailor | Comparison</x-slot>
-    <x-slot name="description">Compare Event Schedule with Eventbrite, Luma, and Ticket Tailor. See how our 0% platform fees, open source platform, and AI features stack up.</x-slot>
-    <x-slot name="keywords">event schedule comparison, eventbrite alternative, luma alternative, ticket tailor alternative, free event platform, no platform fees ticketing</x-slot>
+    <x-slot name="title">Event Schedule vs Eventbrite, Luma, Ticket Tailor & Google Calendar | Comparison</x-slot>
+    <x-slot name="description">Compare Event Schedule with Eventbrite, Luma, Ticket Tailor, and Google Calendar. See how our 0% platform fees, open source platform, and AI features stack up.</x-slot>
+    <x-slot name="keywords">event schedule comparison, eventbrite alternative, luma alternative, ticket tailor alternative, google calendar alternative, free event platform, no platform fees ticketing</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Compare</x-slot>
 
@@ -10,8 +10,8 @@
     {
         "@context": "https://schema.org",
         "@type": ["WebPage", "ItemPage"],
-        "name": "Event Schedule vs Eventbrite, Luma & Ticket Tailor",
-        "description": "Compare Event Schedule with Eventbrite, Luma, and Ticket Tailor. See how our 0% platform fees, open source platform, and AI features stack up.",
+        "name": "Event Schedule vs Eventbrite, Luma, Ticket Tailor & Google Calendar",
+        "description": "Compare Event Schedule with Eventbrite, Luma, Ticket Tailor, and Google Calendar. See how our 0% platform fees, open source platform, and AI features stack up.",
         "url": "{{ config('app.url') }}/compare",
         "mainEntity": {
             "@type": "SoftwareApplication",
@@ -39,14 +39,50 @@
             border-radius: 3px;
         }
         @media (max-width: 768px) {
+            /* Make wrapper handle both scrolls with fixed height */
+            .compare-table-wrapper {
+                max-height: 70vh;
+                overflow: auto;
+            }
+            /* Sticky header row (app names) when scrolling down */
+            .compare-table thead th {
+                position: sticky;
+                top: 0;
+                z-index: 20;
+                background: white;
+            }
+            .dark .compare-table thead th {
+                background: #0f0f14;
+            }
+            /* Keep Event Schedule column highlight */
+            .compare-table thead th:nth-child(2) {
+                background: rgb(239 246 255 / 0.5); /* bg-blue-50/50 */
+            }
+            .dark .compare-table thead th:nth-child(2) {
+                background: rgb(59 130 246 / 0.05); /* dark:bg-blue-500/5 */
+            }
+            /* Sticky first column (feature names) when scrolling right */
             .compare-table th:first-child,
             .compare-table td:first-child {
                 position: sticky;
                 left: 0;
                 z-index: 10;
+                background: white;
             }
-            .compare-table th:first-child {
-                z-index: 20;
+            .dark .compare-table th:first-child,
+            .dark .compare-table td:first-child {
+                background: #0f0f14;
+            }
+            /* Corner cell needs highest z-index */
+            .compare-table thead th:first-child {
+                z-index: 30;
+            }
+            /* Section header rows need background for horizontal scroll */
+            .compare-table .section-header td {
+                background: rgb(249 250 251);
+            }
+            .dark .compare-table .section-header td {
+                background: rgba(255, 255, 255, 0.03);
             }
         }
     </style>
@@ -76,7 +112,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto">
-                See how Event Schedule stacks up against Eventbrite, Luma, and Ticket Tailor.
+                See how Event Schedule stacks up against Eventbrite, Luma, Ticket Tailor, and Google Calendar.
             </p>
         </div>
     </section>
@@ -98,57 +134,58 @@
                             <th class="px-6 py-5 text-sm font-semibold text-gray-900 dark:text-white min-w-[160px]">Eventbrite</th>
                             <th class="px-6 py-5 text-sm font-semibold text-gray-900 dark:text-white min-w-[160px]">Luma</th>
                             <th class="px-6 py-5 text-sm font-semibold text-gray-900 dark:text-white min-w-[160px]">Ticket Tailor</th>
+                            <th class="px-6 py-5 text-sm font-semibold text-gray-900 dark:text-white min-w-[160px]">Google Calendar</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-white/5">
                         @php
                             $sections = [
                                 'Pricing & Fees' => [
-                                    ['Free plan', 'Yes (forever)', 'Free to publish events', 'Yes (forever)', 'Free events only'],
-                                    ['Paid plan price', '$5/mo (first year free)', 'Free (fees on tickets)', '$59/mo', 'From $0.28/ticket'],
-                                    ['Platform fees', '0%', '3.7% + $1.79/ticket', '5% (free plan), 0% (Plus)', '$0.28-$0.60/ticket'],
-                                    ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in (included above)', 'Built-in', 'Stripe/PayPal/Square'],
+                                    ['Free plan', 'Yes (forever)', 'Free to publish events', 'Yes (forever)', 'Free events only', 'Yes (forever)'],
+                                    ['Paid plan price', '$5/mo (first year free)', 'Free (fees on tickets)', '$59/mo', 'From $0.28/ticket', 'Free'],
+                                    ['Platform fees', '0%', '3.7% + $1.79/ticket', '5% (free plan), 0% (Plus)', '$0.28-$0.60/ticket', 'N/A (no ticketing)'],
+                                    ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in (included above)', 'Built-in', 'Stripe/PayPal/Square', 'No'],
                                 ],
                                 'Events & Ticketing' => [
-                                    ['Ticketing', 'Yes (Pro)', 'Yes', 'Yes', 'Yes'],
-                                    ['QR check-ins', 'Yes (Pro)', 'Yes', 'Yes', 'Yes'],
-                                    ['Online events', 'Yes (Free)', 'Yes', 'Yes', 'Yes'],
+                                    ['Ticketing', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
+                                    ['QR check-ins', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
+                                    ['Online events', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
                                 ],
                                 'Integrations' => [
-                                    ['Google Calendar sync', 'Yes (Free)', 'No native 2-way sync', 'Yes', 'No'],
-                                    ['CalDAV sync', 'Yes (Free)', 'No', 'No', 'No'],
-                                    ['Newsletters', 'Yes (Free)', 'Yes', 'Yes', 'No'],
+                                    ['Google Calendar sync', 'Yes (Free)', 'No native 2-way sync', 'Yes', 'No', 'N/A'],
+                                    ['CalDAV sync', 'Yes (Free)', 'No', 'No', 'No', 'No'],
+                                    ['Newsletters', 'Yes (Free)', 'Yes', 'Yes', 'No', 'No'],
                                 ],
                                 'Customization' => [
-                                    ['Custom domains', 'Yes (Pro)', 'No', 'Yes (Plus)', 'Yes (paid)'],
-                                    ['Remove branding', 'Yes (Pro)', 'No', 'Yes (Plus)', 'Yes (paid)'],
-                                    ['Custom fields', 'Yes (Free)', 'Yes', 'Yes', 'Yes'],
-                                    ['Built-in analytics', 'Yes (Free)', 'Yes', 'Yes', 'Yes'],
+                                    ['Custom domains', 'Yes (Pro)', 'No', 'Yes (Plus)', 'Yes (paid)', 'No'],
+                                    ['Remove branding', 'Yes (Pro)', 'No', 'Yes (Plus)', 'Yes (paid)', 'No'],
+                                    ['Custom fields', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
+                                    ['Built-in analytics', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
                                 ],
                                 'Unique Features' => [
-                                    ['AI event parsing (incl. agenda scanning)', 'Yes (Pro)', 'No', 'No', 'No'],
-                                    ['Event graphics gen', 'Yes (Pro)', 'No', 'No', 'No'],
-                                    ['Sub-schedules', 'Yes (Free)', 'No', 'No', 'No'],
-                                    ['Fan videos & comments', 'Yes (Free)', 'No', 'No', 'No'],
-                                    ['Team collaboration', 'Yes (Free)', 'Yes', '3 admins (free), 5 (Plus)', 'Yes'],
+                                    ['AI event parsing (incl. agenda scanning)', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
+                                    ['Event graphics gen', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
+                                    ['Sub-schedules', 'Yes (Free)', 'No', 'No', 'No', 'Multiple calendars'],
+                                    ['Fan videos & comments', 'Yes (Free)', 'No', 'No', 'No', 'No'],
+                                    ['Team collaboration', 'Yes (Free)', 'Yes', '3 admins (free), 5 (Plus)', 'Yes', 'Yes'],
                                 ],
                                 'Platform' => [
-                                    ['REST API', 'Yes (Pro)', 'Yes', 'Yes (Plus)', 'Yes'],
-                                    ['Open source', 'Yes', 'No', 'No', 'No'],
-                                    ['Selfhosting', 'Yes', 'No', 'No', 'No'],
+                                    ['REST API', 'Yes (Pro)', 'Yes', 'Yes (Plus)', 'Yes', 'Yes'],
+                                    ['Open source', 'Yes', 'No', 'No', 'No', 'No'],
+                                    ['Selfhosting', 'Yes', 'No', 'No', 'No', 'No'],
                                 ],
                             ];
                         @endphp
                         @foreach ($sections as $sectionName => $rows)
-                            <tr>
-                                <td colspan="5" class="bg-gray-50 dark:bg-white/[0.03] px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                            <tr class="section-header">
+                                <td colspan="6" class="bg-gray-50 dark:bg-white/[0.03] px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                     {{ $sectionName }}
                                 </td>
                             </tr>
                             @foreach ($rows as $row)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
                                     <td class="bg-white dark:bg-[#0f0f14] px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{{ $row[0] }}</td>
-                                    @for ($i = 1; $i <= 4; $i++)
+                                    @for ($i = 1; $i <= 5; $i++)
                                     <td class="px-6 py-4 text-sm {{ $i === 1 ? 'bg-blue-50/50 dark:bg-blue-500/5' : '' }}">
                                         @if (str_starts_with($row[$i], 'Yes'))
                                             <span class="inline-flex items-center gap-1.5 {{ $i === 1 ? 'font-medium' : '' }}">
@@ -194,12 +231,12 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <a href="{{ route('marketing.compare_eventbrite') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <a href="{{ route('marketing.compare_eventbrite') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
                     <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Eventbrite</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">0% platform fees vs 3.7% + $1.79/ticket. Plus custom domains, AI features, and open source.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">0% platform fees vs 3.7% + $1.79/ticket. Plus custom domains, AI features, and open source.</p>
+                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
                         Compare
                         <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -207,11 +244,11 @@
                     </span>
                 </a>
 
-                <a href="{{ route('marketing.compare_luma') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all">
+                <a href="{{ route('marketing.compare_luma') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
                     <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Luma</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">$5/mo vs $59/mo for comparable features. Zero platform fees and fully open source.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">$5/mo vs $59/mo for comparable features. Zero platform fees and fully open source.</p>
+                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
                         Compare
                         <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -219,11 +256,23 @@
                     </span>
                 </a>
 
-                <a href="{{ route('marketing.compare_ticket_tailor') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all">
+                <a href="{{ route('marketing.compare_ticket_tailor') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
                     <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Ticket Tailor</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Flat $5/mo vs per-ticket fees. Plus calendar sync, newsletters, and selfhosting.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Flat $5/mo vs per-ticket fees. Plus calendar sync, newsletters, and selfhosting.</p>
+                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
+                        Compare
+                        <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </span>
+                </a>
+
+                <a href="{{ route('marketing.compare_google_calendar') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Google Calendar</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Purpose-built event platform vs personal scheduling tool. Ticketing, public pages, and AI features.</p>
+                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
                         Compare
                         <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

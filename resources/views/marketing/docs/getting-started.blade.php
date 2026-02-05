@@ -150,8 +150,8 @@
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Choose your timezone, date format, and language preferences. See <a href="{{ route('marketing.docs.schedule_basics') }}#settings" class="text-cyan-400 hover:text-cyan-300">Schedule Basics</a> for all available settings.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Subschedules</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Create <a href="{{ route('marketing.docs.creating_schedules') }}#subschedules" class="text-cyan-400 hover:text-cyan-300">subschedules</a> to organize your events (e.g., "Live Music", "DJ Nights", "Comedy").</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sub-schedules</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Create <a href="{{ route('marketing.docs.creating_schedules') }}#subschedules" class="text-cyan-400 hover:text-cyan-300">sub-schedules</a> to organize your events (e.g., "Live Music", "DJ Nights", "Comedy").</p>
                                 </div>
                             </div>
 

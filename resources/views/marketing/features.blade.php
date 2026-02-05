@@ -542,11 +542,11 @@
                                 Embed Calendar
                             </div>
                             <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Add to any website</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Embed your event calendar on any site with one line of code. Responsive iframe with dark mode and 9 language support.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Embed your event calendar on any site with one line of code. Responsive iframe with dark mode and 10 language support.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">One-line embed</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Responsive</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">9 languages</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">10 languages</span>
                             </div>
                             <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
