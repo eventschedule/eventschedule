@@ -497,10 +497,17 @@ class TicketController extends Controller
     public function paymentUrlCancel($sale_id)
     {
         $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
+        $event = $sale->event;
+        $user = $event->user;
+
+        // Verify the secret from the URL (using constant-time comparison to prevent timing attacks)
+        $secret = request()->query('secret');
+        if (! $secret || ! $user->payment_secret || ! hash_equals($user->payment_secret, $secret)) {
+            abort(403, 'Invalid secret');
+        }
+
         $sale->status = 'cancelled';
         $sale->save();
-
-        $event = $sale->event;
 
         return redirect($event->getGuestUrl($sale->subdomain, $sale->event_date).'&tickets=true');
     }

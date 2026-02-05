@@ -63,7 +63,7 @@ class InvoiceNinja
 
     public function findClient($email, $currencyCode)
     {
-        $clients = $this->sendRequest('clients?is_deleted=false&email='.$email, 'GET');
+        $clients = $this->sendRequest('clients?is_deleted=false&email='.urlencode($email), 'GET');
 
         if (count($clients) > 0) {
             foreach ($clients as $client) {

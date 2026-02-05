@@ -28,6 +28,16 @@ class UrlUtils
         }
     }
 
+    public static function decodeIdOrFail($value)
+    {
+        $decoded = self::decodeId($value);
+        if ($decoded === null) {
+            abort(404);
+        }
+
+        return $decoded;
+    }
+
     public static function clean($url)
     {
         $pattern = '/^(https?:\/\/)?(www\.)?/';
