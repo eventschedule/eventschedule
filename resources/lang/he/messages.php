@@ -1468,6 +1468,8 @@ return [
 
     // Newsletter import enhancement
     'form_entry' => 'הזנת טופס',
+    'parse_emails' => 'ניתוח אימיילים',
+    'emails_to_import' => 'אימייל(ים) לייבוא',
     'add_row' => 'הוסף שורה',
     'name_required' => 'שם נדרש',
     'invalid_email' => 'פורמט אימייל לא חוקי',

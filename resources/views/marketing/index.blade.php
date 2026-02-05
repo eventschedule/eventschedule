@@ -781,8 +781,8 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Step 1 -->
                 <div class="relative group">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-400 to-blue-300 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
-                    <div class="relative bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl p-8 h-full shadow-sm">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-400 to-blue-300 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300 transform-gpu"></div>
+                    <div class="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-3xl p-8 h-full shadow-sm">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-400 flex items-center justify-center text-white font-bold text-xl">1</div>
                             <div class="h-px flex-1 bg-gradient-to-r from-blue-300 dark:from-blue-500/50 to-transparent"></div>
@@ -794,8 +794,8 @@
 
                 <!-- Step 2 -->
                 <div class="relative group">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-sky-400 to-cyan-400 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
-                    <div class="relative bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl p-8 h-full shadow-sm">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-sky-400 to-cyan-400 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300 transform-gpu"></div>
+                    <div class="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-3xl p-8 h-full shadow-sm">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xl">2</div>
                             <div class="h-px flex-1 bg-gradient-to-r from-sky-300 dark:from-sky-500/50 to-transparent"></div>
@@ -807,8 +807,8 @@
 
                 <!-- Step 3 -->
                 <div class="relative group">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
-                    <div class="relative bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl p-8 h-full shadow-sm">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300 transform-gpu"></div>
+                    <div class="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-3xl p-8 h-full shadow-sm">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold text-xl">3</div>
                             <div class="h-px flex-1 bg-gradient-to-r from-emerald-300 dark:from-emerald-500/50 to-transparent"></div>

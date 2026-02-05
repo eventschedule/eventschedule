@@ -1473,6 +1473,8 @@ return [
 
     // Newsletter import enhancement
     'form_entry' => 'Formulier invoer',
+    'parse_emails' => 'E-mails verwerken',
+    'emails_to_import' => 'e-mail(s) te importeren',
     'add_row' => 'Rij toevoegen',
     'name_required' => 'Naam is verplicht',
     'invalid_email' => 'Ongeldig e-mailformaat',

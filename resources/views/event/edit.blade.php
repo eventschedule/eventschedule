@@ -1151,13 +1151,13 @@
                                             </template>
                                         </span>
                                     </div>
-                                    <div>
-                                        <x-secondary-button v-if="!selectedVenue.user_id" @click="editSelectedVenue" type="button" class="me-2">
+                                    <div class="flex items-center gap-3">
+                                        <button v-if="!selectedVenue.user_id" @click="editSelectedVenue" type="button" class="text-sm text-[#4E81FA] hover:text-blue-700">
                                             {{ __('messages.edit') }}
-                                        </x-secondary-button>
-                                        <x-secondary-button @click="clearSelectedVenue" type="button">
+                                        </button>
+                                        <button @click="clearSelectedVenue" type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                             {{ __('messages.remove') }}
-                                        </x-secondary-button>
+                                        </button>
                                     </div>
                                 </div>
                             </div>                        
@@ -1280,20 +1280,20 @@
                                             </div>
                                             @endif
                                         </div>
-                                        <div>
-                                            <x-secondary-button v-if="!member.user_id" @click="editMember(member)" type="button" class="me-2">
+                                        <div class="flex items-center gap-3">
+                                            <button v-if="!member.user_id" @click="editMember(member)" type="button" class="text-sm text-[#4E81FA] hover:text-blue-700">
                                                 {{ __('messages.edit') }}
-                                            </x-secondary-button>
-                                            <x-secondary-button @click="removeMember(member)" type="button">
+                                            </button>
+                                            <button @click="removeMember(member)" type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                 {{ __('messages.remove') }}
-                                            </x-secondary-button>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div v-if="showMemberTypeRadio">
-                                <fieldset>                                
+                            <div>
+                                <fieldset>
                                     <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                         <div v-if="Object.keys(members).length > 0" class="flex items-center">
                                             <input id="use_existing_members" name="member_type" type="radio" value="use_existing" v-model="memberType"
@@ -1326,16 +1326,11 @@
                                     </select>
                                 </div>
 
-                                <div v-if="memberType === 'create_new'"> 
+                                <div v-if="memberType === 'create_new'">
                                     <div class="mb-6">
                                         <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
-                                        <div class="flex mt-1">
-                                            <x-text-input id="member_name" @keydown.enter.prevent="addMember"
-                                                v-model="memberName" type="text" class="me-2 block w-full" required autocomplete="off" />
-                                            <x-primary-button @click="addMember" type="button">
-                                                {{ __('messages.add') }}
-                                            </x-primary-button>
-                                        </div>
+                                        <x-text-input id="member_name" @keydown.enter.prevent="addMember"
+                                            v-model="memberName" type="text" class="mt-1 block w-full" required autocomplete="off" />
                                     </div>
 
                                     <div class="mb-6">
@@ -1348,8 +1343,8 @@
                                         @if (config('app.hosted'))
                                         <div v-if="memberEmail" class="mt-2">
                                             <div class="flex items-center">
-                                                <input id="send_email_to_new_member" 
-                                                    type="checkbox" 
+                                                <input id="send_email_to_new_member"
+                                                    type="checkbox"
                                                     v-model="sendEmailToNewMember"
                                                     class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
                                                 <label for="send_email_to_new_member" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
@@ -1388,15 +1383,13 @@
                                         <x-text-input id="member_youtube_url" @keydown.enter.prevent="addMember"
                                             v-model="memberYoutubeUrl" type="url" class="me-2 block w-full" autocomplete="off" />
                                     </div>
-                                
-                                </div>
-                                
-                            </div>
 
-                            <div v-if="!showMemberTypeRadio" class="mt-4 flex justify-end">
-                                <x-secondary-button @click="showAddMemberForm" type="button">
-                                    {{ __('messages.add') }}
-                                </x-secondary-button>
+                                    <button type="button" @click="addMember" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                        + {{ __('messages.add') }}
+                                    </button>
+
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -1547,10 +1540,7 @@
                                                 </svg>
                                                 {{ __('messages.down') }}
                                             </button>
-                                            <button type="button" @click="removePart(index)" class="inline-flex items-center justify-center gap-1 px-2 py-1 text-xs font-medium rounded-md border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 bg-white dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
+                                            <button type="button" @click="removePart(index)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                 {{ __('messages.remove') }}
                                             </button>
                                         </div>
@@ -1579,9 +1569,9 @@
                         </div>
 
                         <div class="mt-4 flex flex-wrap gap-2">
-                            <x-secondary-button type="button" @click="addPart">
-                                {{ __('messages.add_part') }}
-                            </x-secondary-button>
+                            <button type="button" @click="addPart" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                + {{ __('messages.add_part') }}
+                            </button>
 
                             @if (config('services.google.gemini_key'))
                             <x-secondary-button type="button" @click="$refs.partsImageInput.click()" v-bind:disabled="parsingParts">
@@ -1921,16 +1911,16 @@
                                                     <input type="checkbox" v-model="field.required" :id="`event_field_required_${fieldKey}`" class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
                                                     <label :for="`event_field_required_${fieldKey}`" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
                                                 </div>
-                                                <x-secondary-button @click="removeEventCustomField(fieldKey)" type="button" class="text-xs py-1 px-2">
+                                                <button type="button" @click="removeEventCustomField(fieldKey)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                     {{ __('messages.remove') }}
-                                                </x-secondary-button>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
                                     <input type="hidden" name="custom_fields" :value="JSON.stringify(eventCustomFields || {})">
-                                    <x-secondary-button @click="addEventCustomField" type="button" class="mt-2" v-if="getEventCustomFieldCount() < 8">
-                                        {{ __('messages.add_field') }}
-                                    </x-secondary-button>
+                                    <button type="button" @click="addEventCustomField" class="mt-2 text-sm text-[#4E81FA] hover:text-blue-700" v-if="getEventCustomFieldCount() < 8">
+                                        + {{ __('messages.add_field') }}
+                                    </button>
                                 </div>
                                 </div>
 
@@ -1957,13 +1947,13 @@
                                                     class="mt-1 block w-full" v-bind:required="event.tickets_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && tickets.length > 1 && !ticket.type }" />
                                                 <p v-if="formSubmitAttempted && tickets.length > 1 && !ticket.type" class="mt-1 text-xs text-red-600">{{ __('messages.ticket_type_required') }}</p>
                                             </div>
-                                            <div v-if="tickets.length > 1" class="flex items-end gap-2">
-                                                <x-secondary-button @click="addTicketCustomField(index)" type="button" class="mt-1" v-if="getTicketCustomFieldCount(index) < 8">
-                                                    {{ __('messages.add_field') }}
-                                                </x-secondary-button>
-                                                <x-secondary-button @click="removeTicket(index)" type="button" class="mt-1">
+                                            <div v-if="tickets.length > 1" class="flex items-end gap-3">
+                                                <button type="button" @click="addTicketCustomField(index)" class="mt-1 text-sm text-[#4E81FA] hover:text-blue-700" v-if="getTicketCustomFieldCount(index) < 8">
+                                                    + {{ __('messages.add_field') }}
+                                                </button>
+                                                <button type="button" @click="removeTicket(index)" class="mt-1 text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                     {{ __('messages.remove') }}
-                                                </x-secondary-button>
+                                                </button>
                                             </div>
                                         </div>
                                         <div class="mt-4">
@@ -2008,9 +1998,9 @@
                                                         <input type="checkbox" v-model="field.required" :id="`ticket_${index}_field_required_${fieldKey}`" class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
                                                         <label :for="`ticket_${index}_field_required_${fieldKey}`" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
                                                     </div>
-                                                    <x-secondary-button @click="removeTicketCustomField(index, fieldKey)" type="button" class="text-xs py-1 px-2">
+                                                    <button type="button" @click="removeTicketCustomField(index, fieldKey)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                         {{ __('messages.remove') }}
-                                                    </x-secondary-button>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -2046,9 +2036,9 @@
                                     </div>
 
                                     <div class="flex gap-2 mt-4">
-                                        <x-secondary-button @click="addTicket" type="button">
-                                            {{ __('messages.add_type') }}
-                                        </x-secondary-button>
+                                        <button type="button" @click="addTicket" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                            + {{ __('messages.add_type') }}
+                                        </button>
                                     </div>
                                 </div>
                                 </div>

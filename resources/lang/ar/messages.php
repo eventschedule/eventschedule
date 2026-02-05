@@ -1476,6 +1476,8 @@ return [
 
     // Newsletter import enhancement
     'form_entry' => 'إدخال النموذج',
+    'parse_emails' => 'تحليل البريد الإلكتروني',
+    'emails_to_import' => 'بريد إلكتروني للاستيراد',
     'add_row' => 'إضافة صف',
     'name_required' => 'الاسم مطلوب',
     'invalid_email' => 'تنسيق البريد الإلكتروني غير صالح',

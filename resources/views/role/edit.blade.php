@@ -1523,18 +1523,18 @@
                                             class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
                                         <label for="event_field_required_{{ $fieldKey }}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
                                     </div>
-                                    <x-secondary-button type="button" onclick="removeEventCustomField(this)" class="text-xs py-1 px-2">
+                                    <button type="button" onclick="removeEventCustomField(this)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                         {{ __('messages.remove') }}
-                                    </x-secondary-button>
+                                    </button>
                                 </div>
                             </div>
                             @php $fieldIndex++; @endphp
                             @endforeach
                         </div>
 
-                        <x-secondary-button type="button" onclick="addEventCustomField()" id="add-event-custom-field-btn" class="{{ count($eventCustomFields) >= 8 ? 'hidden' : '' }}">
-                            {{ __('messages.add_field') }}
-                        </x-secondary-button>
+                        <button type="button" onclick="addEventCustomField()" id="add-event-custom-field-btn" class="text-sm text-[#4E81FA] hover:text-blue-700 {{ count($eventCustomFields) >= 8 ? 'hidden' : '' }}">
+                            + {{ __('messages.add_field') }}
+                        </button>
 
                         <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
                             {{ __('messages.event_custom_fields_graphic_help') }}
@@ -1608,32 +1608,32 @@
                                             </div>
                                             <div class="flex gap-4 items-center justify-between">
                                                 <div class="flex gap-4 items-center">
-                                                    <x-secondary-button type="button" onclick="toggleGroupSlugEdit('{{ is_object($group) ? $group->id : $i }}')" id="edit-button-{{ is_object($group) ? $group->id : $i }}">
+                                                    <button type="button" onclick="toggleGroupSlugEdit('{{ is_object($group) ? $group->id : $i }}')" id="edit-button-{{ is_object($group) ? $group->id : $i }}" class="text-sm text-[#4E81FA] hover:text-blue-700">
                                                         {{ __('messages.edit') }}
-                                                    </x-secondary-button>
+                                                    </button>
                                                     @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
-                                                    <x-secondary-button type="button" onclick="toggleGroupSlugEdit('{{ is_object($group) ? $group->id : $i }}')" class="hidden" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
+                                                    <button type="button" onclick="toggleGroupSlugEdit('{{ is_object($group) ? $group->id : $i }}')" class="hidden text-sm text-[#4E81FA] hover:text-blue-700" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
                                                         {{ __('messages.cancel') }}
-                                                    </x-secondary-button>
+                                                    </button>
                                                     @endif
                                                 </div>
-                                                <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
+                                                <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                     {{ __('messages.remove') }}
-                                                </x-secondary-button>
+                                                </button>
                                             </div>
                                             @else
                                             <div class="flex gap-4 items-center justify-end">
-                                                <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
+                                                <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                     {{ __('messages.remove') }}
-                                                </x-secondary-button>
+                                                </button>
                                             </div>
                                             @endif
                                         </div>
                                     @endforeach
                                 </div>
-                                <x-secondary-button type="button" onclick="addGroupField()">
-                                    {{ __('messages.add_subschedule') }}
-                                </x-secondary-button>
+                                <button type="button" onclick="addGroupField()" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                    + {{ __('messages.add_subschedule') }}
+                                </button>
                             </div>
                             <x-input-error class="mt-2" :messages="$errors->get('groups')" />
                         </div>
@@ -1679,16 +1679,16 @@
                                                 <x-text-input name="import_urls[]" type="url" class="mt-1 block w-full" :value="$url" />
                                             </div>
                                             <div class="flex gap-4 items-center">
-                                                <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
+                                                <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                     {{ __('messages.remove') }}
-                                                </x-secondary-button>
+                                                </button>
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
-                                <x-secondary-button type="button" onclick="addImportUrlField()">
-                                    {{ __('messages.add') }}
-                                </x-secondary-button>
+                                <button type="button" onclick="addImportUrlField()" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                    + {{ __('messages.add') }}
+                                </button>
                             </div>
                             <x-input-error class="mt-2" :messages="$errors->get('import_urls')" />
                         </div>
@@ -1707,16 +1707,16 @@
                                                 <x-text-input name="import_cities[]" type="text" class="mt-1 block w-full" :value="$city" placeholder="{{ __('messages.placeholder_city') }}" />
                                             </div>
                                             <div class="flex gap-4 items-center">
-                                                <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
+                                                <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                     {{ __('messages.remove') }}
-                                                </x-secondary-button>
+                                                </button>
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
-                                <x-secondary-button type="button" onclick="addImportCityField()">
-                                    {{ __('messages.add') }}
-                                </x-secondary-button>
+                                <button type="button" onclick="addImportCityField()" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                    + {{ __('messages.add') }}
+                                </button>
                             </div>
                             <x-input-error class="mt-2" :messages="$errors->get('import_cities')" />
                         </div>
@@ -2275,7 +2275,7 @@ function addGroupField() {
             </div>
         </div>
         <div class="flex gap-4 items-center justify-end">
-            <button type="button" class="inline-flex items-center justify-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.parentElement.remove()">
+            <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm" onclick="this.parentElement.parentElement.remove()">
                 {{ __('messages.remove') }}
             </button>
         </div>
@@ -2508,7 +2508,7 @@ function addImportUrlField() {
             <input name="import_urls[new_${idx}]" type="url" id="import_url_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
         </div>
         <div class="flex gap-4 items-center">
-            <button type="button" class="inline-flex items-center justify-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.parentElement.remove()">
+            <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm" onclick="this.parentElement.parentElement.remove()">
                 {{ __('messages.remove') }}
             </button>
         </div>
@@ -2527,7 +2527,7 @@ function addImportCityField() {
             <input name="import_cities[new_${idx}]" type="text" id="import_city_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" placeholder="{{ __('messages.placeholder_city') }}" />
         </div>
         <div class="flex gap-4 items-center">
-            <button type="button" class="inline-flex items-center justify-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.parentElement.remove()">
+            <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm" onclick="this.parentElement.parentElement.remove()">
                 {{ __('messages.remove') }}
             </button>
         </div>
@@ -3458,7 +3458,7 @@ function addEventCustomField() {
                         class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
                     <label for="event_field_required_${fieldKey}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{!! __('messages.field_required') !!}</label>
                 </div>
-                <button type="button" onclick="removeEventCustomField(this)" class="inline-flex items-center justify-center px-2 py-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
+                <button type="button" onclick="removeEventCustomField(this)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                     {!! __('messages.remove') !!}
                 </button>
             </div>
