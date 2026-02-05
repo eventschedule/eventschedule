@@ -638,7 +638,7 @@ return [
     'sync_all_events' => 'Synchroniseer Alle Evenementen',
     'syncing_events' => 'Evenementen synchroniseren...',
     'connect_google_calendar' => 'Verbind Google Calendar',
-    'google_calendar_sync' => 'Google Calendar Synchronisatie',
+    'google_calendar_sync' => 'Google Agenda',
     'sync_this_event_description' => 'Synchroniseer dit evenement met je Google Calendar.',
     'synced_to_google_calendar' => 'Gesynchroniseerd met Google Calendar',
     'remove_from_google_calendar' => 'Verwijder uit Google Calendar',

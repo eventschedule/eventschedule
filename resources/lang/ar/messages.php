@@ -641,7 +641,7 @@ return [
     'sync_all_events' => 'مزامنة جميع الأحداث',
     'syncing_events' => 'جاري مزامنة الأحداث...',
     'connect_google_calendar' => 'اتصال بتقويم جوجل',
-    'google_calendar_sync' => 'مزامنة تقويم جوجل',
+    'google_calendar_sync' => 'تقويم جوجل',
     'sync_this_event_description' => 'مزامنة هذا الحدث مع تقويم جوجل الخاص بك.',
     'synced_to_google_calendar' => 'تمت المزامنة مع تقويم جوجل',
     'remove_from_google_calendar' => 'إزالة من تقويم جوجل',

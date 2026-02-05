@@ -663,7 +663,7 @@ return [
     'sync_all_events' => 'Sünkrooni kõik sündmused',
     'syncing_events' => 'Sündmuste sünkroonimine...',
     'connect_google_calendar' => 'Ühendage Google\'i kalender',
-    'google_calendar_sync' => 'Google\'i kalendri sünkroonimine',
+    'google_calendar_sync' => 'Google\'i kalender',
     'sync_this_event_description' => 'Sünkroonige see sündmus oma Google\'i kalendriga.',
     'synced_to_google_calendar' => 'Sünkroonitud Google\'i kalendriga',
     'remove_from_google_calendar' => 'Eemaldage Google\'i kalendrist',

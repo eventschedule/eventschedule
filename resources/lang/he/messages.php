@@ -633,7 +633,7 @@ return [
     'sync_all_events' => 'סנכרן את כל האירועים',
     'syncing_events' => 'מסנכרן אירועים...',
     'connect_google_calendar' => 'חבר Google Calendar',
-    'google_calendar_sync' => 'סנכרון Google Calendar',
+    'google_calendar_sync' => 'Google Calendar',
     'sync_this_event_description' => 'סנכרן את האירוע הזה עם Google Calendar שלך.',
     'synced_to_google_calendar' => 'מסונכרן עם Google Calendar',
     'remove_from_google_calendar' => 'הסר מ-Google Calendar',

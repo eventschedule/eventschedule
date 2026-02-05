@@ -640,7 +640,7 @@ return [
     'sync_all_events' => 'Synchroniser tous les événements',
     'syncing_events' => 'Synchronisation des événements...',
     'connect_google_calendar' => 'Connecter calendrier Google',
-    'google_calendar_sync' => 'Synchronisation calendrier Google',
+    'google_calendar_sync' => 'Calendrier Google',
     'sync_this_event_description' => 'Synchronisez cet événement avec votre calendrier Google.',
     'synced_to_google_calendar' => 'Synchronisé avec calendrier Google',
     'remove_from_google_calendar' => 'Supprimer de calendrier Google',
