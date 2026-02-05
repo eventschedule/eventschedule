@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::table('event_parts', function (Blueprint $table) {
             $table->text('description_html')->nullable()->after('description');
-            $table->text('description_html_en')->nullable()->after('description_en');
         });
     }
 
@@ -23,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('event_parts', function (Blueprint $table) {
-            $table->dropColumn(['description_html', 'description_html_en']);
+            $table->dropColumn('description_html');
         });
     }
 };
