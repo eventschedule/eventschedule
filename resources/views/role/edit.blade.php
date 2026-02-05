@@ -985,7 +985,10 @@
                                     accept="image/png, image/jpeg" onchange="document.getElementById('profile_image_filename').textContent = this.files[0]?.name || ''; previewImage(this, 'profile_image_preview');" />
                                 <div class="mt-1 flex items-center gap-3">
                                     <button type="button" onclick="document.getElementById('profile_image').click()"
-                                        class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
                                         {{ __('messages.choose_file') }}
                                     </button>
                                     <span id="profile_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
@@ -998,12 +1001,16 @@
                                 <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px; display:none;" class="pt-3" />
 
                                 @if ($role->profile_image_url)
-                                <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="pt-3" />
-                                <button type="button"
-                                    onclick="deleteRoleImage('{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}', '{{ csrf_token() }}')"
-                                    class="hover:underline text-gray-900 dark:text-gray-100">
-                                    {{ __('messages.delete_image') }}
-                                </button>
+                                <div class="relative inline-block pt-3">
+                                    <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                    <button type="button"
+                                        onclick="deleteRoleImage('{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}', '{{ csrf_token() }}', this.parentElement)"
+                                        class="absolute -top-1 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                                 @endif
                             </div>
 
@@ -1046,7 +1053,10 @@
                                         accept="image/png, image/jpeg" onchange="document.getElementById('header_image_url_filename').textContent = this.files[0]?.name || '';" />
                                     <div class="mt-1 flex items-center gap-3">
                                         <button type="button" onclick="document.getElementById('header_image_url').click()"
-                                            class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
                                             {{ __('messages.choose_file') }}
                                         </button>
                                         <span id="header_image_url_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
@@ -1064,12 +1074,16 @@
                                     class="pt-3" />
 
                                 @if ($role->header_image_url)
-                                <button type="button" id="delete_header_image_button"
-                                    style="display: {{ $role->header_image ? 'none' : 'block' }};"
-                                    onclick="deleteRoleImage('{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}', '{{ csrf_token() }}')"
-                                    class="hover:underline text-gray-900 dark:text-gray-100">
-                                    {{ __('messages.delete_image') }}
-                                </button>
+                                <div id="delete_header_image_button" class="relative inline-block pt-3" style="display: {{ $role->header_image ? 'none' : 'block' }};">
+                                    <img src="{{ $role->header_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                    <button type="button"
+                                        onclick="deleteRoleImage('{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}', '{{ csrf_token() }}', this.parentElement)"
+                                        class="absolute -top-1 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                                 @endif
 
                             </div>
@@ -1142,7 +1156,10 @@
                                         accept="image/png, image/jpeg" onchange="document.getElementById('background_image_url_filename').textContent = this.files[0]?.name || ''; updatePreview();" />
                                     <div class="mt-1 flex items-center gap-3">
                                         <button type="button" onclick="document.getElementById('background_image_url').click()"
-                                            class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
                                             {{ __('messages.choose_file') }}
                                         </button>
                                         <span id="background_image_url_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
@@ -1154,12 +1171,16 @@
                                     <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px; display:none;" class="pt-3" />
 
                                     @if ($role->background_image_url)
-                                    <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
-                                    <button type="button"
-                                        onclick="deleteRoleImage('{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}', '{{ csrf_token() }}')"
-                                        class="hover:underline text-gray-900 dark:text-gray-100">
-                                        {{ __('messages.delete_image') }}
-                                    </button>
+                                    <div class="relative inline-block pt-3">
+                                        <img src="{{ $role->background_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                        <button type="button"
+                                            onclick="deleteRoleImage('{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}', '{{ csrf_token() }}', this.parentElement)"
+                                            class="absolute -top-1 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
                                     @endif
                                 </div>
                             </div>
@@ -3502,7 +3523,7 @@ function updateEventCustomFieldButton() {
     }
 }
 
-function deleteRoleImage(url, token) {
+function deleteRoleImage(url, token, element) {
     if (!confirm({!! json_encode(__('messages.are_you_sure'), JSON_UNESCAPED_UNICODE) !!})) {
         return;
     }
@@ -3515,7 +3536,11 @@ function deleteRoleImage(url, token) {
         }
     }).then(response => {
         if (response.ok) {
-            location.reload();
+            if (element) {
+                element.remove();
+            } else {
+                location.reload();
+            }
         } else {
             alert('{{ __('messages.failed_to_delete_image') }}');
         }
