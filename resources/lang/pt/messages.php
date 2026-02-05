@@ -1474,6 +1474,8 @@ return [
 
     // Newsletter import enhancement
     'form_entry' => 'Entrada de formulário',
+    'parse_emails' => 'Analisar e-mails',
+    'emails_to_import' => 'e-mail(s) para importar',
     'add_row' => 'Adicionar linha',
     'name_required' => 'O nome é obrigatório',
     'invalid_email' => 'Formato de e-mail inválido',

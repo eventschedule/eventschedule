@@ -130,8 +130,11 @@
 
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">{{ __('messages.name_and_email_required') }}</p>
 
-                <div class="flex justify-end mt-4">
-                    <button @click="submitForm()" :disabled="submitting"
+                <div class="flex items-center justify-between mt-4">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        <span x-text="getValidEntryCount()"></span> {{ __('messages.emails_to_import') }}
+                    </p>
+                    <button @click="submitForm()" :disabled="submitting || getValidEntryCount() === 0"
                         class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
                         <span x-show="!submitting">{{ __('messages.confirm_import') }}</span>
                         <span x-show="submitting">{{ __('messages.loading') }}...</span>
@@ -141,28 +144,15 @@
 
             {{-- Paste Tab --}}
             <div x-show="tab === 'paste'" x-cloak class="p-6">
-                {{-- Error display for paste tab --}}
-                <template x-if="pasteErrors.length > 0">
-                    <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md">
-                        <p class="text-sm font-medium text-red-700 dark:text-red-300 mb-2">{{ __('messages.import_validation_failed') }}</p>
-                        <ul class="list-disc list-inside text-sm text-red-600 dark:text-red-400">
-                            <template x-for="error in pasteErrors" :key="error">
-                                <li x-text="error"></li>
-                            </template>
-                        </ul>
-                    </div>
-                </template>
-
                 <textarea x-model="pasteText" rows="10"
                     class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm"
                     placeholder="John Smith <john@example.com>&#10;Jane Doe <jane@example.com>&#10;bob@example.com, Bob Johnson&#10;carol@example.com, Carol Smith"></textarea>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.import_emails_help') }} {{ __('messages.name_and_email_required') }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.import_emails_help') }}</p>
 
                 <div class="flex justify-end mt-4">
-                    <button @click="submitPaste()" :disabled="submitting || !pasteText.trim()"
+                    <button @click="parsePaste()" :disabled="!pasteText.trim()"
                         class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <span x-show="!submitting">{{ __('messages.confirm_import') }}</span>
-                        <span x-show="submitting">{{ __('messages.loading') }}...</span>
+                        {{ __('messages.parse_emails') }}
                     </button>
                 </div>
             </div>
@@ -267,7 +257,6 @@
                 submitting: false,
                 formEntries: [{ name: '', email: '' }],
                 formErrors: [],
-                pasteErrors: [],
                 csvErrors: [],
 
                 handleCsvFile(event) {
@@ -402,81 +391,27 @@
                     this.doSubmit(entries);
                 },
 
-                parseEmailText(text) {
-                    const results = [];
-                    const seen = {};
-                    const lines = text.split(/\r?\n/);
-
-                    for (const line of lines) {
-                        const trimmed = line.trim();
-                        if (!trimmed) continue;
-
-                        // Try "Name <email>" format
-                        const angleMatch = trimmed.match(/^(.+?)\s*<([^>]+)>/);
-                        if (angleMatch) {
-                            const name = angleMatch[1].trim();
-                            const email = angleMatch[2].trim().toLowerCase();
-                            if (this.isValidEmail(email) && !seen[email]) {
-                                seen[email] = true;
-                                results.push({ email, name });
-                            }
-                            continue;
-                        }
-
-                        // Split by comma
-                        const parts = trimmed.split(',').map(p => p.trim());
-
-                        if (parts.length === 2 && this.isValidEmail(parts[0]) && !this.isValidEmail(parts[1])) {
-                            // "email, Name" format
-                            const email = parts[0].toLowerCase();
-                            if (!seen[email]) {
-                                seen[email] = true;
-                                results.push({ email, name: parts[1] });
-                            }
-                        } else {
-                            // Comma-separated emails or single email
-                            for (const part of parts) {
-                                const p = part.trim();
-                                const innerAngle = p.match(/^(.+?)\s*<([^>]+)>/);
-                                if (innerAngle) {
-                                    const name = innerAngle[1].trim();
-                                    const email = innerAngle[2].trim().toLowerCase();
-                                    if (this.isValidEmail(email) && !seen[email]) {
-                                        seen[email] = true;
-                                        results.push({ email, name });
-                                    }
-                                } else if (this.isValidEmail(p)) {
-                                    const email = p.toLowerCase();
-                                    if (!seen[email]) {
-                                        seen[email] = true;
-                                        results.push({ email, name: null });
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    return results;
-                },
-
                 isValidEmail(str) {
                     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
                 },
 
-                async submitPaste() {
-                    this.pasteErrors = [];
+                getValidEntryCount() {
+                    return this.formEntries.filter(e =>
+                        e.email && e.name && this.isValidEmail(e.email.trim())
+                    ).length;
+                },
+
+                parsePaste() {
                     const entries = [];
                     const seen = {};
                     const lines = this.pasteText.split(/\r?\n/);
-                    let lineNum = 0;
 
                     for (const line of lines) {
                         const trimmed = line.trim();
                         if (!trimmed) continue;
-                        lineNum++;
 
                         let email = null;
-                        let name = null;
+                        let name = '';
 
                         // Try "Name <email>" format
                         const angleMatch = trimmed.match(/^(.+?)\s*<([^>]+)>/);
@@ -489,39 +424,27 @@
                             if (parts.length === 2 && this.isValidEmail(parts[0]) && !this.isValidEmail(parts[1])) {
                                 email = parts[0].toLowerCase();
                                 name = parts[1];
-                            } else if (parts.length === 1 && this.isValidEmail(parts[0])) {
+                            } else if (this.isValidEmail(parts[0])) {
                                 email = parts[0].toLowerCase();
-                                name = null;
+                                name = '';
                             }
                         }
 
-                        if (email && !name) {
-                            this.pasteErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', lineNum).replace(':error', '{{ __('messages.name_required') }}'));
-                        }
-                        if (!email && name) {
-                            this.pasteErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', lineNum).replace(':error', '{{ __('messages.email_required') }}'));
-                        }
-                        if (email && !this.isValidEmail(email)) {
-                            this.pasteErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', lineNum).replace(':error', '{{ __('messages.invalid_email') }}'));
-                            email = null;
-                        }
-                        if (email && seen[email]) {
-                            this.pasteErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', lineNum).replace(':error', '{{ __('messages.duplicate_email') }}'));
-                            email = null;
-                        }
-
-                        if (email && name && this.isValidEmail(email) && !seen[email]) {
+                        if (email && !seen[email]) {
                             seen[email] = true;
                             entries.push({ email, name });
                         }
                     }
 
-                    if (this.pasteErrors.length > 0) return;
-                    if (!entries.length) {
+                    if (entries.length === 0) {
                         alert('{{ __('messages.no_valid_emails') }}');
                         return;
                     }
-                    await this.doSubmit(entries);
+
+                    // Populate Form tab and switch to it
+                    this.formEntries = entries;
+                    this.formErrors = [];
+                    this.tab = 'form';
                 },
 
                 async submitCsv() {

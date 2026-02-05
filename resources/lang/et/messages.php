@@ -1489,6 +1489,8 @@ return [
 
     // Newsletter import enhancement
     'form_entry' => 'Vormi sisestus',
+    'parse_emails' => 'Analüüsi e-kirju',
+    'emails_to_import' => 'e-kiri(e) importimiseks',
     'add_row' => 'Lisa rida',
     'name_required' => 'Nimi on kohustuslik',
     'invalid_email' => 'Vigane e-posti formaat',
