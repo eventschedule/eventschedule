@@ -220,7 +220,7 @@
                             <ul class="doc-list">
                                 <li><a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">Sharing Your Schedule</a> - Increase traffic to your schedule</li>
                                 <li><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Selling Tickets</a> - Set up ticketing to track conversions and revenue</li>
-                                <li><a href="{{ route('marketing.docs.newsletters') }}" class="text-cyan-400 hover:text-cyan-300">Newsletters</a> - Drive engagement with email campaigns</li>
+                                <li><a href="{{ route('marketing.docs.newsletters') }}#analytics" class="text-cyan-400 hover:text-cyan-300">Newsletter Analytics</a> - Track open rates, clicks, and engagement for email campaigns</li>
                                 <li><a href="{{ route('marketing.docs.event_graphics') }}" class="text-cyan-400 hover:text-cyan-300">Event Graphics</a> - Create shareable images to boost visibility</li>
                             </ul>
                         </section>
@@ -233,4 +233,41 @@
     </section>
 
     @include('marketing.docs.partials.scripts')
+
+    <!-- HowTo Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Use Event Schedule Analytics",
+        "description": "Learn how to track views, devices, traffic sources, and conversions with Event Schedule's built-in analytics dashboard.",
+        "totalTime": "PT5M",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "name": "Access the Analytics Dashboard",
+                "text": "Click Analytics in the main navigation to open the analytics dashboard and view your schedule performance.",
+                "url": "{{ url(route('marketing.docs.analytics')) }}#overview"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Apply Filters",
+                "text": "Use the schedule selector, date range picker, and period toggle to filter and customize the data displayed.",
+                "url": "{{ url(route('marketing.docs.analytics')) }}#filters"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Review Stats Cards",
+                "text": "Check the summary cards at the top for key metrics like total views, period views, comparison percentage, and revenue.",
+                "url": "{{ url(route('marketing.docs.analytics')) }}#stats-cards"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Analyze Charts",
+                "text": "Explore the interactive charts showing views over time, device breakdown, top events, traffic sources, and referrers.",
+                "url": "{{ url(route('marketing.docs.analytics')) }}#charts"
+            }
+        ]
+    }
+    </script>
 </x-marketing-layout>

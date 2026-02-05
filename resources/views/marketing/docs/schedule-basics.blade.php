@@ -196,7 +196,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Language</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose from 9 supported languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, and Arabic. This affects the interface language on your schedule page.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose from 10 supported languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, and Estonian. This affects the interface language on your schedule page.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Timezone</h4>
@@ -488,7 +488,7 @@
                             <h2 class="doc-heading">See Also</h2>
                             <ul class="doc-list">
                                 <li><a href="{{ route('marketing.docs.schedule_styling') }}" class="text-cyan-400 hover:text-cyan-300">Schedule Styling</a> - Customize colors, fonts, backgrounds, and visual appearance</li>
-                                <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="text-cyan-400 hover:text-cyan-300">Advanced Schedule Settings</a> - Subschedules, calendar integrations, and auto-import</li>
+                                <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="text-cyan-400 hover:text-cyan-300">Advanced Schedule Settings</a> - Sub-schedules, calendar integrations, and auto-import</li>
                                 <li><a href="{{ route('marketing.docs.creating_events') }}" class="text-cyan-400 hover:text-cyan-300">Creating Events</a> - Add events to your schedule</li>
                                 <li><a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">Sharing Your Schedule</a> - Embed and share your schedule</li>
                                 <li><a href="{{ route('marketing.docs.availability') }}" class="text-cyan-400 hover:text-cyan-300">Availability Calendar</a> - Mark available and unavailable dates (Talent and Venue schedules)</li>

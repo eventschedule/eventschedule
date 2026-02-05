@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Embed Calendar | Add Events to Any Website - Event Schedule</x-slot>
-    <x-slot name="description">Embed your event calendar on any website with one line of code. Responsive iframe with dark mode support and 9 languages.</x-slot>
+    <x-slot name="description">Embed your event calendar on any website with one line of code. Responsive iframe with dark mode support and 10 languages.</x-slot>
     <x-slot name="keywords">embed calendar, iframe calendar, website calendar widget, embed events, responsive calendar, calendar embed code, website integration, event widget</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Embed Calendar</x-slot>

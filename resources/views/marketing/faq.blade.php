@@ -199,7 +199,7 @@
                 "name": "What languages does Event Schedule support?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "The interface is available in 9 languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, and Arabic. You can also use AI-powered translation to automatically translate your event descriptions."
+                    "text": "The interface is available in 10 languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, and Estonian. You can also use AI-powered translation to automatically translate your event descriptions."
                 }
             }
         ]
@@ -610,7 +610,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">The interface is available in 9 languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, and Arabic. You can also use <a href="{{ marketing_url('/features/ai') }}" class="text-blue-600 hover:text-blue-700 underline">AI-powered translation</a> to automatically translate your event descriptions.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">The interface is available in 10 languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, and Estonian. You can also use <a href="{{ marketing_url('/features/ai') }}" class="text-blue-600 hover:text-blue-700 underline">AI-powered translation</a> to automatically translate your event descriptions.</p>
                         </div>
                     </div>
                 </div>

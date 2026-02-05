@@ -52,9 +52,9 @@
                 <!-- Musicians -->
                 <a href="{{ marketing_url('/for-musicians') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Musicians</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Share your gigs, sync calendars, and let fans follow your shows.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share your gigs, sync calendars, and let fans follow your shows.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Solo Artists</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Rock & Pop Bands</span>
@@ -69,9 +69,9 @@
                 <!-- DJs -->
                 <a href="{{ marketing_url('/for-djs') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">DJs</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Promote your sets, manage bookings, and grow your following.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Promote your sets, manage bookings, and grow your following.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Resident DJs</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Touring DJs</span>
@@ -86,9 +86,9 @@
                 <!-- Comedians -->
                 <a href="{{ marketing_url('/for-comedians') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-amber-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Comedians</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">List your shows, sell tickets, and build your comedy brand.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">List your shows, sell tickets, and build your comedy brand.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Stand-Up Comics</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Improv Performers</span>
@@ -103,9 +103,9 @@
                 <!-- Circus & Acrobatics -->
                 <a href="{{ marketing_url('/for-circus-acrobatics') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-cyan-100 dark:from-rose-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-rose-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Circus & Acrobatics</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Showcase performances and manage tour dates with ease.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Showcase performances and manage tour dates with ease.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Aerialists</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Circus Troupes</span>
@@ -120,9 +120,9 @@
                 <!-- Magicians -->
                 <a href="{{ marketing_url('/for-magicians') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Magicians</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Book more shows and let audiences find your next performance.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Book more shows and let audiences find your next performance.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Close-Up Magicians</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Stage Illusionists</span>
@@ -137,9 +137,9 @@
                 <!-- Spoken Word -->
                 <a href="{{ marketing_url('/for-spoken-word') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-teal-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Spoken Word</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Share your readings, slams, and open mic nights with your community.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share your readings, slams, and open mic nights with your community.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Slam Poets</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Spoken Word Artists</span>
@@ -154,9 +154,9 @@
                 <!-- Dance Groups -->
                 <a href="{{ marketing_url('/for-dance-groups') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-rose-100 dark:from-cyan-900 dark:to-rose-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-cyan-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Dance Groups</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Promote performances, classes, and recitals in one place.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Promote performances, classes, and recitals in one place.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Ballet Companies</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Hip-Hop Crews</span>
@@ -171,9 +171,9 @@
                 <!-- Theater Performers -->
                 <a href="{{ marketing_url('/for-theater-performers') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Theater Performers</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Share your productions and auditions with theater fans.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share your productions and auditions with theater fans.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Musical Theater</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Drama & Straight Plays</span>
@@ -188,9 +188,9 @@
                 <!-- Food Trucks & Vendors -->
                 <a href="{{ marketing_url('/for-food-trucks-and-vendors') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900 dark:to-red-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Food Trucks & Vendors</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Let customers know where to find you every day of the week.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Let customers know where to find you every day of the week.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Food Trucks</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Coffee & Beverage Carts</span>
@@ -205,9 +205,9 @@
                 <!-- Fitness & Yoga Instructors -->
                 <a href="{{ marketing_url('/for-fitness-and-yoga') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Fitness & Yoga Instructors</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Share your class schedule and let students follow your sessions.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share your class schedule and let students follow your sessions.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Yoga Teachers</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Personal Trainers</span>
@@ -222,9 +222,9 @@
                 <!-- Workshop Instructors -->
                 <a href="{{ marketing_url('/for-workshop-instructors') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Workshop Instructors</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">List your workshops and courses to fill every seat.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">List your workshops and courses to fill every seat.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Cooking Classes</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Pottery & Ceramics</span>
@@ -239,9 +239,9 @@
                 <!-- Visual Artists -->
                 <a href="{{ marketing_url('/for-visual-artists') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Visual Artists</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Announce exhibitions, open studios, and art fairs to collectors.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Announce exhibitions, open studios, and art fairs to collectors.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Painters & Illustrators</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Sculptors</span>
@@ -273,9 +273,9 @@
                 <!-- Bars & Pubs -->
                 <a href="{{ marketing_url('/for-bars') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900 dark:to-yellow-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-amber-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Bars & Pubs</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Keep your entertainment calendar fresh and bring in crowds.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Keep your entertainment calendar fresh and bring in crowds.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Craft Beer Bars</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Wine Bars</span>
@@ -290,9 +290,9 @@
                 <!-- Nightclubs -->
                 <a href="{{ marketing_url('/for-nightclubs') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Nightclubs</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Promote DJ lineups, themed nights, and special events.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Promote DJ lineups, themed nights, and special events.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Dance Clubs & EDM</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Hip-Hop & Urban</span>
@@ -307,9 +307,9 @@
                 <!-- Music Venues -->
                 <a href="{{ marketing_url('/for-music-venues') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Music Venues</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Manage concert schedules and sell tickets for every show.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Manage concert schedules and sell tickets for every show.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Concert Halls</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Live Music Bars</span>
@@ -324,9 +324,9 @@
                 <!-- Theaters -->
                 <a href="{{ marketing_url('/for-theaters') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-100 to-rose-100 dark:from-red-900 dark:to-rose-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-red-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Theaters</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Share your season schedule and sell tickets for every production.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share your season schedule and sell tickets for every production.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Community Theaters</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Regional Theaters</span>
@@ -341,9 +341,9 @@
                 <!-- Comedy Clubs -->
                 <a href="{{ marketing_url('/for-comedy-clubs') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900 dark:to-amber-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-yellow-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Comedy Clubs</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Fill seats with a lineup calendar your audience will love.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Fill seats with a lineup calendar your audience will love.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Stand-up Clubs</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Improv Theaters</span>
@@ -358,9 +358,9 @@
                 <!-- Restaurants -->
                 <a href="{{ marketing_url('/for-restaurants') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-green-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Restaurants</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Promote special dinners, live music nights, and tasting events.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Promote special dinners, live music nights, and tasting events.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Fine Dining</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Wine Bars & Tapas</span>
@@ -375,9 +375,9 @@
                 <!-- Breweries & Wineries -->
                 <a href="{{ marketing_url('/for-breweries-and-wineries') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-lime-100 to-green-100 dark:from-lime-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-lime-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Breweries & Wineries</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Share tastings, tap takeovers, live music, and seasonal events.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share tastings, tap takeovers, live music, and seasonal events.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Craft Breweries</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Brewpubs & Taprooms</span>
@@ -392,9 +392,9 @@
                 <!-- Art Galleries -->
                 <a href="{{ marketing_url('/for-art-galleries') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-cyan-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Art Galleries</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Promote exhibitions, openings, and artist talks to collectors and fans.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Promote exhibitions, openings, and artist talks to collectors and fans.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Contemporary Art</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Fine Art Studios</span>
@@ -409,9 +409,9 @@
                 <!-- Community Centers -->
                 <a href="{{ marketing_url('/for-community-centers') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Community Centers</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Keep your community informed about classes, meetings, and events.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Keep your community informed about classes, meetings, and events.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Recreation Centers</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Senior Centers</span>
@@ -426,9 +426,9 @@
                 <!-- Farmers Markets -->
                 <a href="{{ marketing_url('/for-farmers-markets') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-lime-100 to-green-100 dark:from-lime-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-lime-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Farmers Markets</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Share your market schedule and build a loyal shopper community.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share your market schedule and build a loyal shopper community.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Weekly Farmers Markets</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Artisan & Craft Markets</span>
@@ -443,9 +443,9 @@
                 <!-- Hotels & Resorts -->
                 <a href="{{ marketing_url('/for-hotels-and-resorts') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-100 to-amber-100 dark:from-slate-900 dark:to-amber-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-slate-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Hotels & Resorts</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Elevate the guest experience with activity calendars and events.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Elevate the guest experience with activity calendars and events.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Boutique Hotels</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Beach Resorts</span>
@@ -460,9 +460,9 @@
                 <!-- Libraries -->
                 <a href="{{ marketing_url('/for-libraries') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative">
+                    <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Libraries</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Share programs, author events, and community activities with patrons.</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share programs, author events, and community activities with patrons.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Public Libraries</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">University Libraries</span>

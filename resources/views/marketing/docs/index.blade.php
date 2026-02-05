@@ -88,25 +88,13 @@
                     </div>
                 </a>
 
-                <a href="{{ route('marketing.docs.creating_schedules') }}" class="doc-card block">
+                <a href="{{ route('marketing.docs.schedule_basics') }}" class="doc-card block">
                     <div class="rounded-xl border border-blue-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-900 dark:to-sky-900 hover:border-blue-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
                             <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <h3 class="font-semibold text-gray-900 dark:text-white">Advanced Schedule Settings</h3>
-                        </div>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Subschedules, auto import, calendar integrations, and email settings.</p>
-                    </div>
-                </a>
-
-                <a href="{{ route('marketing.docs.schedule_basics') }}" class="doc-card block">
-                    <div class="rounded-xl border border-sky-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900 dark:to-blue-900 hover:border-sky-500/30 transition-colors">
-                        <div class="flex items-center gap-3 mb-3">
-                            <svg class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                             </svg>
-                            <h3 class="font-semibold text-gray-900 dark:text-white">Schedule Setup</h3>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Schedule Basics</h3>
                         </div>
                         <p class="text-gray-500 dark:text-gray-400 text-sm">Configure name, type, location, styling, and settings.</p>
                     </div>
@@ -121,6 +109,18 @@
                             <h3 class="font-semibold text-gray-900 dark:text-white">Schedule Styling</h3>
                         </div>
                         <p class="text-gray-500 dark:text-gray-400 text-sm">Customize colors, fonts, and branding for your schedule.</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('marketing.docs.creating_schedules') }}" class="doc-card block">
+                    <div class="rounded-xl border border-sky-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-900 dark:to-cyan-900 hover:border-sky-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-3">
+                            <svg class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Advanced Schedule Settings</h3>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Sub-schedules, auto import, calendar integrations, and email settings.</p>
                     </div>
                 </a>
 
@@ -355,7 +355,7 @@
                     <p class="text-sm text-gray-500 dark:text-gray-400">A single occurrence with a date, time, location, and details. Events belong to a schedule.</p>
                 </div>
                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                    <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Subschedule</h3>
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Sub-schedule</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">A category to organize events within your schedule (e.g., "Live Music", "Comedy", "Workshops").</p>
                 </div>
                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">

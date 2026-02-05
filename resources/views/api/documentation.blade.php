@@ -326,7 +326,7 @@
                                             You can specify schedules and categories by ID or name:
                                         </p>
                                         <ul class="text-sm text-blue-800 dark:text-blue-200 mt-2 space-y-1">
-                                            <li><strong>schedule</strong>: Assigns event to a specific subschedule</li>
+                                            <li><strong>schedule</strong>: Assigns event to a specific sub-schedule</li>
                                             <li><strong>category</strong> or <strong>category_id</strong>: Sets event category</li>
                                         </ul>
                                         <p class="text-sm text-blue-800 dark:text-blue-200 mt-2">

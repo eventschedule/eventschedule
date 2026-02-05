@@ -268,7 +268,7 @@
                                 <div class="doc-callout-title">Schedule & Category Support</div>
                                 <p>You can specify schedules and categories by ID or name:</p>
                                 <ul class="doc-list mt-2">
-                                    <li><strong>schedule</strong> - Assigns event to a specific subschedule</li>
+                                    <li><strong>schedule</strong> - Assigns event to a specific sub-schedule</li>
                                     <li><strong>category</strong> or <strong>category_id</strong> - Sets event category</li>
                                 </ul>
                                 <p class="mt-2">When using names, the API will automatically find matching schedules by slug and categories by name.</p>

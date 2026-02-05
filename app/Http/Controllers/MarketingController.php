@@ -494,6 +494,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Compare vs Google Calendar page
+     */
+    public function compareGoogleCalendar()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('google-calendar'));
+    }
+
+    /**
      * Contact page
      */
     public function contact()
@@ -1035,6 +1043,7 @@ class MarketingController extends Controller
                 'cross_links' => [
                     ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
                     ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
+                    ['name' => 'Google Calendar', 'route' => 'marketing.compare_google_calendar'],
                 ],
             ],
             'luma' => [
@@ -1144,6 +1153,7 @@ class MarketingController extends Controller
                 'cross_links' => [
                     ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
                     ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
+                    ['name' => 'Google Calendar', 'route' => 'marketing.compare_google_calendar'],
                 ],
             ],
             'ticket-tailor' => [
@@ -1253,6 +1263,121 @@ class MarketingController extends Controller
                 'cross_links' => [
                     ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
                     ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
+                    ['name' => 'Google Calendar', 'route' => 'marketing.compare_google_calendar'],
+                ],
+            ],
+            'google-calendar' => [
+                'name' => 'Google Calendar',
+                'key' => 'google-calendar',
+                'slug' => 'google-calendar-alternative',
+                'tagline' => 'A purpose-built event platform vs a general scheduling tool.',
+                'description' => 'Compare Event Schedule with Google Calendar. Get public event pages, ticketing, AI features, and more - everything Google Calendar wasn\'t designed for.',
+                'keywords' => 'google calendar alternative, google calendar for events, event calendar platform, public event calendar, google calendar vs event platform',
+                'about' => 'Google Calendar is a popular personal scheduling tool used by billions worldwide. It excels at managing appointments, meetings, and personal reminders with deep Google ecosystem integration. The good news? You don\'t have to choose - Event Schedule syncs with Google Calendar, so you can use both together.',
+                'competitor_strengths' => [
+                    'Free and ubiquitous with billions of existing users',
+                    'Deep Google ecosystem integration (Gmail, Meet, Drive)',
+                    'Excellent mobile apps with push notifications',
+                ],
+                'sections' => [
+                    'Core Purpose' => [
+                        ['Public event pages', 'Yes (Free)', 'No', true],
+                        ['Event discovery & SEO', 'Yes (Free)', 'No', true],
+                        ['Personal scheduling', 'No', 'Yes', false],
+                        ['Meeting invites', 'No', 'Yes', false],
+                    ],
+                    'Ticketing & Payments' => [
+                        ['Ticket sales', 'Yes (Pro)', 'No', true],
+                        ['Payment processing', 'Stripe integration', 'No', true],
+                        ['QR code check-in', 'Yes (Pro)', 'No', true],
+                        ['Platform fees', '0%', 'N/A', true],
+                    ],
+                    'Event Features' => [
+                        ['AI event parsing', 'Yes (Pro)', 'No', true],
+                        ['Event graphics generation', 'Yes (Pro)', 'No', true],
+                        ['Rich descriptions (Markdown)', 'Yes (Free)', 'Plain text only', true],
+                        ['Custom fields', 'Yes (Free)', 'No', true],
+                        ['Fan videos & comments', 'Yes (Free)', 'No', true],
+                        ['Recurring events', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Sharing & Promotion' => [
+                        ['Shareable event pages', 'Yes (Free)', 'No', true],
+                        ['Social sharing images', 'Yes (Pro)', 'No', true],
+                        ['Newsletter integration', 'Yes (Free)', 'No', true],
+                        ['Embeddable calendars', 'Yes (customizable)', 'Yes (limited styling)', true],
+                    ],
+                    'Organization' => [
+                        ['Sub-schedules/categories', 'Yes (Free)', 'Multiple calendars', true],
+                        ['Team collaboration', 'Yes (Free)', 'Yes', false],
+                        ['Built-in analytics', 'Yes (Free)', 'No', true],
+                    ],
+                    'Platform' => [
+                        ['Custom domain', 'Yes (Pro)', 'No', true],
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                        ['Google Calendar sync', 'Yes (Free)', 'N/A', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => 'Built for Public Events',
+                        'description' => 'Google Calendar is for personal scheduling. Event Schedule is purpose-built for sharing events with the world - with SEO-optimized public pages.',
+                        'icon' => 'globe',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => 'Ticketing & Payments',
+                        'description' => 'Sell tickets directly with Stripe integration and QR code check-in. Google Calendar has no payment or ticketing capabilities whatsoever.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30',
+                        'border' => 'border-violet-200 dark:border-violet-500/20',
+                        'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20',
+                        'icon_color' => 'text-violet-600 dark:text-violet-400',
+                    ],
+                    [
+                        'title' => 'AI Event Parsing',
+                        'description' => 'Paste event details in any format and our AI extracts dates, times, and descriptions automatically. Google Calendar requires tedious manual entry.',
+                        'icon' => 'ai',
+                        'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30',
+                        'border' => 'border-sky-200 dark:border-sky-500/20',
+                        'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20',
+                        'icon_color' => 'text-sky-600 dark:text-sky-400',
+                    ],
+                    [
+                        'title' => 'Event Graphics',
+                        'description' => 'Generate beautiful, shareable event graphics automatically. Perfect for social media promotion - something Google Calendar simply cannot do.',
+                        'icon' => 'image',
+                        'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
+                        'border' => 'border-rose-200 dark:border-rose-500/20',
+                        'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20',
+                        'icon_color' => 'text-rose-600 dark:text-rose-400',
+                    ],
+                    [
+                        'title' => 'Beautiful Embeds',
+                        'description' => 'Embed fully customizable calendars on your website. Google Calendar embeds are rigid and difficult to style to match your brand.',
+                        'icon' => 'code',
+                        'gradient' => 'from-blue-50 to-blue-50 dark:from-blue-900/30 dark:to-blue-900/30',
+                        'border' => 'border-blue-200 dark:border-blue-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'Open Source',
+                        'description' => 'Fully open source with selfhosting option. Own your data completely, unlike Google\'s proprietary ecosystem.',
+                        'icon' => 'code',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
+                    ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
+                    ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
                 ],
             ],
         ];

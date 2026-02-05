@@ -1139,6 +1139,7 @@ class RoleController extends Controller
         $role->background_rotation = rand(0, 359);
         $role->timezone = auth()->user()->timezone;
         $role->language_code = auth()->user()->language_code;
+        $role->use_24_hour_time = auth()->user()->use_24_hour_time;
 
         if ($role->type == 'talent') {
             $role->name = auth()->user()->name;

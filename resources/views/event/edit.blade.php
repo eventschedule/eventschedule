@@ -1329,13 +1329,13 @@
                                     <div class="mb-6">
                                         <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
                                         <x-text-input id="member_name" @keydown.enter.prevent="addMember"
-                                            v-model="memberName" type="text" class="mt-1 block w-full" required autocomplete="off" />
+                                            v-model="memberName" type="text" class="mt-1 block w-full" :required="false" autocomplete="off" />
                                     </div>
 
                                     <div class="mb-6">
                                         <x-input-label for="member_email" :value="__('messages.email')" />
                                         <div class="flex mt-1">
-                                            <x-text-input id="member_email" name="member_email" type="email" class="me-2 block w-full"
+                                            <x-text-input id="member_email" type="email" class="me-2 block w-full"
                                             @keydown.enter.prevent="addMember" @blur="searchMembers" v-model="memberEmail" autocomplete="off" />
                                         </div>
                                         <x-input-error class="mt-2" :messages="$errors->get('member_email')" />
@@ -2671,7 +2671,14 @@
         }
       },
       addMember() {
-        const nameInput = document.getElementById('member_name');    
+        // Check if name is empty (since we can't use HTML required attribute)
+        if (!this.memberName.trim()) {
+          const nameInput = document.getElementById('member_name');
+          nameInput.focus();
+          return;
+        }
+
+        const nameInput = document.getElementById('member_name');
         if (!nameInput.checkValidity()) {
           nameInput.reportValidity();
           return;
@@ -2880,6 +2887,49 @@
         if (!dateVal || !startVal) {
           event.preventDefault();
           alert("{{ __('messages.date_and_time_required') }}");
+          return;
+        }
+
+        // Check for incomplete participant data (must be before isFormValid check)
+        if (this.memberType === 'create_new' && (this.memberName.trim() || this.memberEmail.trim() || this.memberYoutubeUrl.trim())) {
+          event.preventDefault();
+
+          // Highlight the participants section tab (desktop)
+          const sectionLink = document.querySelector('.section-nav-link[data-section="section-participants"]');
+          if (sectionLink) {
+            sectionLink.classList.add('validation-error');
+          }
+          // Highlight the accordion header (mobile)
+          const mobileHeader = document.querySelector('.mobile-section-header[data-section="section-participants"]');
+          if (mobileHeader) {
+            mobileHeader.classList.add('validation-error');
+          }
+
+          // Show the participants section
+          document.querySelectorAll('.section-content').forEach(section => {
+            section.style.display = section.id === 'section-participants' ? 'block' : 'none';
+          });
+
+          // Update active nav link styling
+          document.querySelectorAll('.section-nav-link').forEach(link => {
+            if (link.getAttribute('data-section') === 'section-participants') {
+              link.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[#4E81FA]');
+              link.classList.remove('text-gray-700', 'dark:text-gray-300', 'font-medium', 'border-transparent');
+            } else {
+              link.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[#4E81FA]');
+              link.classList.add('text-gray-700', 'dark:text-gray-300', 'font-medium', 'border-transparent');
+            }
+          });
+
+          // Focus the name field and scroll to it
+          this.$nextTick(() => {
+            const nameInput = document.getElementById('member_name');
+            if (nameInput) {
+              nameInput.focus();
+              nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          });
+
           return;
         }
 
