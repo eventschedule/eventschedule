@@ -1090,7 +1090,10 @@
                                 accept="image/png, image/jpeg" onchange="previewImage(this);" />
                             <div class="mt-1 flex items-center gap-3">
                                 <button type="button" onclick="document.getElementById('flyer_image').click()"
-                                    class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
                                     {{ __('messages.choose_file') }}
                                 </button>
                                 <span id="flyer_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
@@ -1105,12 +1108,16 @@
                             </div>
 
                             @if ($event->flyer_image_url)
-                            <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="pt-3" id="flyer_preview" />
-                            <button type="button"
-                                onclick="deleteFlyer('{{ route('event.delete_image', ['subdomain' => $subdomain]) }}', '{{ \App\Utils\UrlUtils::encodeId($event->id) }}', '{{ csrf_token() }}', this)"
-                                class="hover:underline text-gray-900 dark:text-gray-100">
-                                {{ __('messages.delete_image') }}
-                            </button>
+                            <div class="relative inline-block pt-3">
+                                <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" id="flyer_preview" />
+                                <button type="button"
+                                    onclick="deleteFlyer('{{ route('event.delete_image', ['subdomain' => $subdomain]) }}', '{{ \App\Utils\UrlUtils::encodeId($event->id) }}', '{{ csrf_token() }}', this.parentElement)"
+                                    class="absolute -top-1 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
                             @endif
                         </div>
 
@@ -1813,6 +1820,9 @@
                             @if (config('services.google.gemini_key'))
                             <div class="flex flex-wrap gap-2">
                                 <x-secondary-button type="button" @click="$refs.partsImageInput.click()" v-bind:disabled="parsingParts">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
                                     <span v-if="parsingParts">{{ __('messages.parsing_image') }}</span>
                                     <span v-else>{{ __('messages.import_from_image') }}</span>
                                 </x-secondary-button>
@@ -4010,7 +4020,7 @@ window.addEventListener('load', function() {
     }, 0);
 });
 
-function deleteFlyer(url, hash, token, button) {
+function deleteFlyer(url, hash, token, element) {
     if (!confirm('{{ __('messages.are_you_sure') }}')) {
         return;
     }
@@ -4023,8 +4033,7 @@ function deleteFlyer(url, hash, token, button) {
         }
     }).then(response => {
         if (response.ok) {
-            document.getElementById('flyer_preview').remove();
-            button.remove();
+            element.remove();
         } else {
             alert('Failed to delete image');
         }
