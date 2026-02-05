@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::table('event_parts', function (Blueprint $table) {
             $table->string('name_en')->nullable()->after('name');
             $table->text('description_en')->nullable()->after('description');
+            $table->text('description_html_en')->nullable()->after('description_en');
         });
     }
 
@@ -23,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('event_parts', function (Blueprint $table) {
-            $table->dropColumn(['name_en', 'description_en']);
+            $table->dropColumn(['name_en', 'description_en', 'description_html_en']);
         });
     }
 };
