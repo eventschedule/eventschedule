@@ -38,7 +38,7 @@
   <div class="h-[68px]"></div>
   @endif
 
-  <div class="container mx-auto max-w-5xl px-0 sm:px-5 pt-4 pb-20 sm:pb-0">
+  <div class="container mx-auto max-w-5xl px-0 sm:px-5 pt-4 pb-20 sm:pb-8">
     <div class="flex flex-col gap-4 lg:grid lg:grid-cols-[380px_minmax(0,1fr)] lg:gap-10">
 
       {{-- LEFT COLUMN --}}
