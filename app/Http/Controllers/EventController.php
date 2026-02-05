@@ -75,8 +75,8 @@ class EventController extends Controller
         $event = Event::findOrFail($event_id);
         $user = $request->user();
 
-        // Check if user is the creator of the event
-        if ($event->user_id !== $user->id) {
+        // Check if user can edit this event
+        if (! $user->canEditEvent($event)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 

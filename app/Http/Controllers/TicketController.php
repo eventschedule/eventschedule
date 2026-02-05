@@ -609,7 +609,7 @@ class TicketController extends Controller
         $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
         $user = auth()->user();
 
-        if ($user->id !== $sale->event->user_id) {
+        if (! $user->canEditEvent($sale->event)) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
@@ -722,7 +722,7 @@ class TicketController extends Controller
         $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
         $user = auth()->user();
 
-        if ($user->id !== $sale->event->user_id) {
+        if (! $user->canEditEvent($sale->event)) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
