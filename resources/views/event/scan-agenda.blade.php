@@ -61,11 +61,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const aiPrompt = ref(@json($aiPrompt));
             const saveAsDefault = ref(false);
             const editingPrompt = ref(false);
-            const showAllFields = ref(localStorage.getItem('scanAgendaShowAllFields') === '1');
+            const showTimes = ref({{ ($role->agenda_show_times ?? true) ? 'true' : 'false' }});
+            const showDescription = ref({{ ($role->agenda_show_description ?? true) ? 'true' : 'false' }});
             const parts = ref([]);
             const errorMessage = ref('');
 
             const cameraError = ref('');
+            const cameraErrorType = ref(''); // 'permission', 'not_found', 'in_use', 'unknown'
+            const isMobile = ref(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
             const videoEl = ref(null);
             const canvasEl = ref(null);
             const cameras = ref([]);
@@ -115,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                     .catch(err => {
                         console.error('Camera error:', err);
-                        cameraError.value = '{{ __("messages.camera_error") }}';
+                        handleCameraError(err);
                         localStorage.removeItem('scanAgendaCameraGranted');
                     });
             }
@@ -135,8 +138,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }).catch(err => {
                     console.error('Camera error:', err);
-                    cameraError.value = '{{ __("messages.camera_error") }}';
+                    handleCameraError(err);
                 });
+            }
+
+            function handleCameraError(err) {
+                const errorName = err.name || '';
+                if (errorName === 'NotAllowedError' || errorName === 'PermissionDeniedError') {
+                    cameraErrorType.value = 'permission';
+                    cameraError.value = '{{ __("messages.camera_need_access") }}';
+                } else if (errorName === 'NotFoundError' || errorName === 'DevicesNotFoundError') {
+                    cameraErrorType.value = 'not_found';
+                    cameraError.value = '{{ __("messages.camera_not_found") }}';
+                } else if (errorName === 'NotReadableError' || errorName === 'TrackStartError') {
+                    cameraErrorType.value = 'in_use';
+                    cameraError.value = '{{ __("messages.camera_in_use") }}';
+                } else {
+                    cameraErrorType.value = 'unknown';
+                    cameraError.value = '{{ __("messages.camera_something_wrong") }}';
+                }
+            }
+
+            function retryCameraAccess() {
+                cameraError.value = '';
+                cameraErrorType.value = '';
+                requestCameraAccess();
             }
 
             function switchCamera(deviceId) {
@@ -293,20 +319,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            function toggleShowAllFields() {
-                showAllFields.value = !showAllFields.value;
-                localStorage.setItem('scanAgendaShowAllFields', showAllFields.value ? '1' : '0');
-            }
-
             function saveParts() {
                 if (parts.value.length === 0) return;
 
                 state.value = 'loading';
                 errorMessage.value = '';
 
-                const partsToSend = showAllFields.value
-                    ? parts.value
-                    : parts.value.map(p => ({ name: p.name, description: '', start_time: '', end_time: '' }));
+                const partsToSend = parts.value.map(p => ({
+                    name: p.name,
+                    description: showDescription.value ? p.description : '',
+                    start_time: showTimes.value ? p.start_time : '',
+                    end_time: showTimes.value ? p.end_time : ''
+                }));
 
                 fetch('{{ route("event.save_parts", ["subdomain" => $subdomain]) }}', {
                     method: 'POST',
@@ -394,17 +418,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
             return {
                 state, events, selectedEventId, selectedEvent, aiPrompt, saveAsDefault,
-                editingPrompt, showAllFields,
-                parts, errorMessage, cameraError,
+                editingPrompt, showTimes, showDescription,
+                parts, errorMessage, cameraError, cameraErrorType, isMobile,
                 videoEl, canvasEl, selectedEventName, hasEvents,
                 cameras, selectedCameraId, cameraStarted, selectCameraLabel,
                 showCameraModal, selectedCameraLabel,
                 dragIndex, dropTargetIndex, onDragStart, onDragOver, onDrop, onDragEnd, onContainerDragOver,
                 dropdownOpen, toggleDropdown, closeDropdown,
-                requestCameraAccess, startCamera, switchCamera,
+                requestCameraAccess, startCamera, switchCamera, retryCameraAccess,
                 captureAndParse, addPart, removePart,
                 saveParts, cancelEditing, scanAnother, onEventChange,
-                toggleShowAllFields, selectCameraFromModal, changeCamera,
+                selectCameraFromModal, changeCamera,
             };
         },
         template: `
@@ -466,12 +490,85 @@ document.addEventListener('DOMContentLoaded', function() {
 
         <!-- Camera view -->
         <div v-if="state === 'camera'">
-            <div v-if="cameraError" class="text-center py-12">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <p class="mt-4 text-gray-500 dark:text-gray-400">@{{ cameraError }}</p>
+            <!-- Camera Error Card -->
+            <div v-if="cameraError" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm">
+                <div class="text-center">
+                    <!-- Camera icon with X overlay -->
+                    <div class="relative inline-block mb-4">
+                        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Heading -->
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">@{{ cameraError }}</h3>
+
+                    <!-- Help text based on error type -->
+                    <p v-if="cameraErrorType === 'permission'" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        {{ __('messages.camera_need_access_help') }}
+                    </p>
+                    <p v-else-if="cameraErrorType === 'not_found'" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        {{ __('messages.camera_not_found_help') }}
+                    </p>
+                    <p v-else-if="cameraErrorType === 'in_use'" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        {{ __('messages.camera_in_use_help') }}
+                    </p>
+                    <p v-else class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        {{ __('messages.camera_something_wrong_help') }}
+                    </p>
+                </div>
+
+                <!-- Fix steps (only for permission error) -->
+                <div v-if="cameraErrorType === 'permission'" class="mt-6 space-y-0">
+                    <!-- Desktop instructions -->
+                    <div v-if="!isMobile" class="divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                        <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
+                            <span class="flex-shrink-0 w-6 h-6 bg-[#4E81FA] text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step1') }}</span>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
+                            <span class="flex-shrink-0 w-6 h-6 bg-[#4E81FA] text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step2') }}</span>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
+                            <span class="flex-shrink-0 w-6 h-6 bg-[#4E81FA] text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step3') }}</span>
+                        </div>
+                    </div>
+                    <!-- Mobile instructions -->
+                    <div v-else class="divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                        <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
+                            <span class="flex-shrink-0 w-6 h-6 bg-[#4E81FA] text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step1_mobile') }}</span>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
+                            <span class="flex-shrink-0 w-6 h-6 bg-[#4E81FA] text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step2_mobile') }}</span>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
+                            <span class="flex-shrink-0 w-6 h-6 bg-[#4E81FA] text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step3_mobile') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Try Again button -->
+                <div class="mt-6 text-center">
+                    <button @click="retryCameraAccess" class="inline-flex items-center gap-2 px-6 py-3 bg-[#4E81FA] hover:bg-[#3a6de0] border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        {{ __('messages.camera_try_again') }}
+                    </button>
+                </div>
             </div>
             <div v-else-if="!cameraStarted" class="text-center py-12">
                 <button v-if="!showCameraModal" @click="requestCameraAccess" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-sm text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
@@ -580,40 +677,8 @@ document.addEventListener('DOMContentLoaded', function() {
         <div v-if="state === 'editing'">
             <div :class="showAllFields ? 'space-y-3' : 'space-y-1'" class="mb-24">
                 <!-- Compact layout (name only) -->
-                <div v-if="!showAllFields" @dragover.prevent="onContainerDragOver($event)" @drop="onDrop()" class="space-y-1">
-                    <div v-for="(part, index) in parts" :key="'compact-' + index"
-                        draggable="true"
-                        @dragstart="onDragStart(index)"
-                        @dragover="onDragOver(index, $event)"
-                        @drop="onDrop()"
-                        @dragend="onDragEnd"
-                        :class="{ 'opacity-50': dragIndex === index }"
-                        :style="{ marginTop: dropTargetIndex === index && dragIndex !== null && dragIndex !== index ? '3rem' : '', transition: 'margin 150ms ease' }"
-                        class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-2 shadow-sm">
-                        <div class="flex items-center gap-2">
-                            <div class="cursor-grab text-gray-400 dark:text-gray-500">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16">
-                                    <circle cx="5.5" cy="3.5" r="1.5"/>
-                                    <circle cx="10.5" cy="3.5" r="1.5"/>
-                                    <circle cx="5.5" cy="8" r="1.5"/>
-                                    <circle cx="10.5" cy="8" r="1.5"/>
-                                    <circle cx="5.5" cy="12.5" r="1.5"/>
-                                    <circle cx="10.5" cy="12.5" r="1.5"/>
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <input v-model="part.name" type="text" placeholder="{{ __('messages.name') }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm font-medium">
-                            </div>
-                            <button @click="removePart(index)" class="self-stretch rounded-md border border-red-300 dark:border-red-700 px-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="{{ __('messages.remove') }}">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Full layout (all fields) -->
-                <div v-else @dragover.prevent="onContainerDragOver($event)" @drop="onDrop()" class="space-y-3">
-                    <div v-for="(part, index) in parts" :key="'full-' + index"
+                <div @dragover.prevent="onContainerDragOver($event)" @drop="onDrop()" class="space-y-3">
+                    <div v-for="(part, index) in parts" :key="index"
                         draggable="true"
                         @dragstart="onDragStart(index)"
                         @dragover="onDragOver(index, $event)"
@@ -635,8 +700,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                             <div class="flex-1 space-y-2">
                                 <input v-model="part.name" type="text" placeholder="{{ __('messages.name') }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm font-medium">
-                                <textarea v-model="part.description" rows="2" placeholder="{{ __('messages.description') }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm"></textarea>
-                                <div class="flex gap-2">
+                                <textarea v-if="showDescription" v-model="part.description" rows="2" placeholder="{{ __('messages.description') }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm"></textarea>
+                                <div v-if="showTimes" class="flex gap-2">
                                     <input v-model="part.start_time" type="text" placeholder="{{ __('messages.start_time') }}" class="w-1/2 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm">
                                     <input v-model="part.end_time" type="text" placeholder="{{ __('messages.end_time') }}" class="w-1/2 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm">
                                 </div>
@@ -652,10 +717,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     + {{ __('messages.add') }}
                 </button>
 
-                <label class="flex items-center text-sm text-gray-600 dark:text-gray-400 pt-4 mt-3">
-                    <input type="checkbox" :checked="showAllFields" @change="toggleShowAllFields" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] me-2">
-                    {{ __('messages.show_all_fields') }}
-                </label>
             </div>
 
             <!-- Floating save/cancel bar -->

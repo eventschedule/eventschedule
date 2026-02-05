@@ -102,6 +102,17 @@
 
     <script {!! nonce_attr() !!}>
         window.appLocale = "{{ app()->getLocale() }}";
+        window.editorTranslations = {
+            bold: "{{ __('messages.editor_bold') }}",
+            italic: "{{ __('messages.editor_italic') }}",
+            heading: "{{ __('messages.editor_heading') }}",
+            link: "{{ __('messages.editor_link') }}",
+            quote: "{{ __('messages.editor_quote') }}",
+            unorderedList: "{{ __('messages.editor_unordered_list') }}",
+            orderedList: "{{ __('messages.editor_ordered_list') }}",
+            preview: "{{ __('messages.editor_preview') }}",
+            guide: "{{ __('messages.editor_guide') }}"
+        };
     </script>
 
     @vite([

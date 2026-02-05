@@ -36,29 +36,30 @@ import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
 
 document.addEventListener('DOMContentLoaded', () => {
+    const t = window.editorTranslations || {};
     document.querySelectorAll('.html-editor').forEach(element => {
-        const easyMDE = new EasyMDE({ 
+        const easyMDE = new EasyMDE({
             element: element,
             toolbar: [
                 {
                     name: "bold",
                     action: EasyMDE.toggleBold,
                     className: "editor-button-text",
-                    title: "Bold",
+                    title: t.bold || "Bold",
                     text: "B"
                 },
                 {
                     name: "italic",
                     action: EasyMDE.toggleItalic,
                     className: "editor-button-text",
-                    title: "Italic",
+                    title: t.italic || "Italic",
                     text: "I"
                 },
                 {
                     name: "heading",
                     action: EasyMDE.toggleHeadingSmaller,
                     className: "editor-button-text",
-                    title: "Heading",
+                    title: t.heading || "Heading",
                     text: "H"
                 },
                 "|",
@@ -68,28 +69,28 @@ document.addEventListener('DOMContentLoaded', () => {
                         EasyMDE.drawLink(editor);
                     },
                     className: "editor-button-text",
-                    title: "Link",
+                    title: t.link || "Link",
                     text: "🔗"
                 },
                 {
                     name: "quote",
                     action: EasyMDE.toggleBlockquote,
                     className: "editor-button-text",
-                    title: "Quote",
+                    title: t.quote || "Quote",
                     text: "\""
                 },
                 {
                     name: "unordered-list",
                     action: EasyMDE.toggleUnorderedList,
                     className: "editor-button-text",
-                    title: "Unordered List",
+                    title: t.unorderedList || "Unordered List",
                     text: "UL"
                 },
                 {
                     name: "ordered-list",
                     action: EasyMDE.toggleOrderedList,
                     className: "editor-button-text",
-                    title: "Ordered List",
+                    title: t.orderedList || "Ordered List",
                     text: "OL"
                 },
                 "|",
@@ -97,20 +98,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     name: "preview",
                     action: EasyMDE.togglePreview,
                     className: "editor-button-text no-disable",
-                    title: "Toggle Preview",
+                    title: t.preview || "Toggle Preview",
                     text: "👁"
                 },
                 {
                     name: "guide",
                     action: "https://www.markdownguide.org/basic-syntax/",
                     className: "editor-button-text",
-                    title: "Markdown Guide",
+                    title: t.guide || "Markdown Guide",
                     text: "?"
                 }
             ],
             minHeight: "200px",
             spellChecker: true,
-            nativeSpellcheck: true,  
+            nativeSpellcheck: true,
             status: false,
         });
 
@@ -119,3 +120,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+// Make EasyMDE available globally for Vue components (tiny version for agenda descriptions)
+window.initTinyMDE = function(element, onChange) {
+    const t = window.editorTranslations || {};
+    const easyMDE = new EasyMDE({
+        element: element,
+        toolbar: [
+            { name: "bold", action: EasyMDE.toggleBold, className: "editor-button-text", title: t.bold || "Bold", text: "B" },
+            { name: "italic", action: EasyMDE.toggleItalic, className: "editor-button-text", title: t.italic || "Italic", text: "I" },
+            { name: "link", action: (editor) => EasyMDE.drawLink(editor), className: "editor-button-text", title: t.link || "Link", text: "🔗" },
+            "|",
+            { name: "quote", action: EasyMDE.toggleBlockquote, className: "editor-button-text", title: t.quote || "Quote", text: "\"" },
+            { name: "unordered-list", action: EasyMDE.toggleUnorderedList, className: "editor-button-text", title: t.unorderedList || "Unordered List", text: "UL" },
+            { name: "ordered-list", action: EasyMDE.toggleOrderedList, className: "editor-button-text", title: t.orderedList || "Ordered List", text: "OL" },
+            "|",
+            { name: "preview", action: EasyMDE.togglePreview, className: "editor-button-text no-disable", title: t.preview || "Toggle Preview", text: "👁" },
+            { name: "guide", action: "https://www.markdownguide.org/basic-syntax/", className: "editor-button-text", title: t.guide || "Markdown Guide", text: "?" }
+        ],
+        minHeight: "80px",
+        spellChecker: false,
+        status: false,
+    });
+
+    if (onChange) {
+        easyMDE.codemirror.on('change', onChange);
+    }
+
+    return easyMDE;
+};
