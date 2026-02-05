@@ -1470,4 +1470,14 @@ return [
     'footer_text' => 'Footer Text',
     'edit_prompt' => 'Edit Prompt',
     'change_camera' => 'Change Camera',
+
+    // Newsletter import enhancement
+    'form_entry' => 'Formulier invoer',
+    'add_row' => 'Rij toevoegen',
+    'name_required' => 'Naam is verplicht',
+    'invalid_email' => 'Ongeldig e-mailformaat',
+    'duplicate_email' => 'Dubbel e-mailadres',
+    'row_error' => 'Rij :row: :error',
+    'import_validation_failed' => 'Corrigeer de volgende fouten:',
+    'name_and_email_required' => 'Elke rij moet zowel een naam als een e-mailadres bevatten.',
 ];

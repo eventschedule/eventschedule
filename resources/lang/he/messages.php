@@ -1465,4 +1465,14 @@ return [
     'footer_text' => 'Footer Text',
     'edit_prompt' => 'Edit Prompt',
     'change_camera' => 'Change Camera',
+
+    // Newsletter import enhancement
+    'form_entry' => 'הזנת טופס',
+    'add_row' => 'הוסף שורה',
+    'name_required' => 'שם נדרש',
+    'invalid_email' => 'פורמט אימייל לא חוקי',
+    'duplicate_email' => 'אימייל כפול',
+    'row_error' => 'שורה :row: :error',
+    'import_validation_failed' => 'אנא תקן את השגיאות הבאות:',
+    'name_and_email_required' => 'כל שורה חייבת לכלול שם וכתובת אימייל.',
 ];

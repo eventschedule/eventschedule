@@ -1489,4 +1489,14 @@ return [
     'select_camera' => 'Select Camera',
     'edit_prompt' => 'Edit Prompt',
     'change_camera' => 'Change Camera',
+
+    // Newsletter import enhancement
+    'form_entry' => 'Form Entry',
+    'add_row' => 'Add Row',
+    'name_required' => 'Name is required',
+    'invalid_email' => 'Invalid email format',
+    'duplicate_email' => 'Duplicate email',
+    'row_error' => 'Row :row: :error',
+    'import_validation_failed' => 'Please fix the following errors:',
+    'name_and_email_required' => 'Every row must have both a name and email address.',
 ];

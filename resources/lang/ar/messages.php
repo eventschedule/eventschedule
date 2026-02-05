@@ -1473,4 +1473,14 @@ return [
     'footer_text' => 'Footer Text',
     'edit_prompt' => 'Edit Prompt',
     'change_camera' => 'Change Camera',
+
+    // Newsletter import enhancement
+    'form_entry' => 'إدخال النموذج',
+    'add_row' => 'إضافة صف',
+    'name_required' => 'الاسم مطلوب',
+    'invalid_email' => 'تنسيق البريد الإلكتروني غير صالح',
+    'duplicate_email' => 'بريد إلكتروني مكرر',
+    'row_error' => 'الصف :row: :error',
+    'import_validation_failed' => 'يرجى إصلاح الأخطاء التالية:',
+    'name_and_email_required' => 'يجب أن يحتوي كل صف على اسم وعنوان بريد إلكتروني.',
 ];

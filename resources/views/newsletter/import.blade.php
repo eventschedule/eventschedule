@@ -64,6 +64,9 @@
         <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden">
             <div class="border-b border-gray-200 dark:border-gray-700">
                 <nav class="flex -mb-px">
+                    <button @click="tab = 'form'" :class="tab === 'form' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="px-6 py-3 border-b-2 font-medium text-sm transition-colors">
+                        {{ __('messages.form_entry') }}
+                    </button>
                     <button @click="tab = 'paste'" :class="tab === 'paste' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="px-6 py-3 border-b-2 font-medium text-sm transition-colors">
                         {{ __('messages.paste_emails') }}
                     </button>
@@ -73,12 +76,87 @@
                 </nav>
             </div>
 
+            {{-- Form Tab --}}
+            <div x-show="tab === 'form'" class="p-6">
+                {{-- Error display --}}
+                <template x-if="formErrors.length > 0">
+                    <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md">
+                        <p class="text-sm font-medium text-red-700 dark:text-red-300 mb-2">{{ __('messages.import_validation_failed') }}</p>
+                        <ul class="list-disc list-inside text-sm text-red-600 dark:text-red-400">
+                            <template x-for="error in formErrors" :key="error">
+                                <li x-text="error"></li>
+                            </template>
+                        </ul>
+                    </div>
+                </template>
+
+                {{-- Entry table --}}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                <th class="pb-2 pr-4">{{ __('messages.name') }}</th>
+                                <th class="pb-2 pr-4">{{ __('messages.email') }}</th>
+                                <th class="pb-2 w-20"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="(entry, index) in formEntries" :key="index">
+                                <tr>
+                                    <td class="py-1 pr-2">
+                                        <x-text-input x-model="entry.name" type="text" class="w-full" placeholder="{{ __('messages.name') }}" />
+                                    </td>
+                                    <td class="py-1 pr-2">
+                                        <x-text-input x-model="entry.email" type="email" class="w-full" placeholder="email@example.com" />
+                                    </td>
+                                    <td class="py-1">
+                                        <button type="button" @click="removeFormRow(index)" x-show="formEntries.length > 1"
+                                            class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                            {{ __('messages.remove') }}
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-3">
+                    <button type="button" @click="addFormRow()"
+                        class="text-sm text-[#4E81FA] hover:text-blue-700">
+                        + {{ __('messages.add_row') }}
+                    </button>
+                </div>
+
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">{{ __('messages.name_and_email_required') }}</p>
+
+                <div class="flex justify-end mt-4">
+                    <button @click="submitForm()" :disabled="submitting"
+                        class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span x-show="!submitting">{{ __('messages.confirm_import') }}</span>
+                        <span x-show="submitting">{{ __('messages.loading') }}...</span>
+                    </button>
+                </div>
+            </div>
+
             {{-- Paste Tab --}}
-            <div x-show="tab === 'paste'" class="p-6">
+            <div x-show="tab === 'paste'" x-cloak class="p-6">
+                {{-- Error display for paste tab --}}
+                <template x-if="pasteErrors.length > 0">
+                    <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md">
+                        <p class="text-sm font-medium text-red-700 dark:text-red-300 mb-2">{{ __('messages.import_validation_failed') }}</p>
+                        <ul class="list-disc list-inside text-sm text-red-600 dark:text-red-400">
+                            <template x-for="error in pasteErrors" :key="error">
+                                <li x-text="error"></li>
+                            </template>
+                        </ul>
+                    </div>
+                </template>
+
                 <textarea x-model="pasteText" rows="10"
                     class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm"
-                    placeholder="john@example.com&#10;Jane Doe <jane@example.com>&#10;bob@example.com, alice@example.com&#10;carol@example.com, Carol Smith"></textarea>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.import_emails_help') }}</p>
+                    placeholder="John Smith <john@example.com>&#10;Jane Doe <jane@example.com>&#10;bob@example.com, Bob Johnson&#10;carol@example.com, Carol Smith"></textarea>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.import_emails_help') }} {{ __('messages.name_and_email_required') }}</p>
 
                 <div class="flex justify-end mt-4">
                     <button @click="submitPaste()" :disabled="submitting || !pasteText.trim()"
@@ -91,6 +169,18 @@
 
             {{-- CSV Tab --}}
             <div x-show="tab === 'csv'" x-cloak class="p-6">
+                {{-- Error display for CSV tab --}}
+                <template x-if="csvErrors.length > 0">
+                    <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md">
+                        <p class="text-sm font-medium text-red-700 dark:text-red-300 mb-2">{{ __('messages.import_validation_failed') }}</p>
+                        <ul class="list-disc list-inside text-sm text-red-600 dark:text-red-400">
+                            <template x-for="error in csvErrors" :key="error">
+                                <li x-text="error"></li>
+                            </template>
+                        </ul>
+                    </div>
+                </template>
+
                 <div class="mb-4">
                     <input x-ref="csvFileInput" type="file" accept=".csv" @change="handleCsvFile($event); $refs.csvFilename.textContent = $event.target.files[0]?.name || ''" class="hidden" />
                     <div class="flex items-center gap-3">
@@ -164,7 +254,7 @@
     <script {!! nonce_attr() !!}>
         function importEmails() {
             return {
-                tab: 'paste',
+                tab: 'form',
                 segmentTarget: 'new',
                 segmentName: '',
                 segmentId: '',
@@ -175,6 +265,10 @@
                 csvTotalRows: 0,
                 columnMappings: [],
                 submitting: false,
+                formEntries: [{ name: '', email: '' }],
+                formErrors: [],
+                pasteErrors: [],
+                csvErrors: [],
 
                 handleCsvFile(event) {
                     const file = event.target.files[0];
@@ -257,6 +351,57 @@
                     return this.columnMappings.includes('email');
                 },
 
+                hasNameColumn() {
+                    return this.columnMappings.includes('name');
+                },
+
+                addFormRow() {
+                    this.formEntries.push({ name: '', email: '' });
+                },
+
+                removeFormRow(index) {
+                    this.formEntries.splice(index, 1);
+                },
+
+                submitForm() {
+                    this.formErrors = [];
+                    const entries = [];
+                    const seen = {};
+
+                    this.formEntries.forEach((entry, i) => {
+                        const email = (entry.email || '').trim().toLowerCase();
+                        const name = (entry.name || '').trim();
+
+                        // Skip completely empty rows
+                        if (!email && !name) return;
+
+                        const rowNum = i + 1;
+                        if (!name) {
+                            this.formErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', rowNum).replace(':error', '{{ __('messages.name_required') }}'));
+                        }
+                        if (!email) {
+                            this.formErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', rowNum).replace(':error', '{{ __('messages.email_required') }}'));
+                        } else if (!this.isValidEmail(email)) {
+                            this.formErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', rowNum).replace(':error', '{{ __('messages.invalid_email') }}'));
+                        } else if (seen[email]) {
+                            this.formErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', rowNum).replace(':error', '{{ __('messages.duplicate_email') }}'));
+                        }
+
+                        if (name && email && this.isValidEmail(email) && !seen[email]) {
+                            seen[email] = true;
+                            entries.push({ email, name });
+                        }
+                    });
+
+                    if (this.formErrors.length > 0) return;
+                    if (entries.length === 0) {
+                        alert('{{ __('messages.no_valid_emails') }}');
+                        return;
+                    }
+
+                    this.doSubmit(entries);
+                },
+
                 parseEmailText(text) {
                     const results = [];
                     const seen = {};
@@ -319,7 +464,59 @@
                 },
 
                 async submitPaste() {
-                    const entries = this.parseEmailText(this.pasteText);
+                    this.pasteErrors = [];
+                    const entries = [];
+                    const seen = {};
+                    const lines = this.pasteText.split(/\r?\n/);
+                    let lineNum = 0;
+
+                    for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (!trimmed) continue;
+                        lineNum++;
+
+                        let email = null;
+                        let name = null;
+
+                        // Try "Name <email>" format
+                        const angleMatch = trimmed.match(/^(.+?)\s*<([^>]+)>/);
+                        if (angleMatch) {
+                            name = angleMatch[1].trim();
+                            email = angleMatch[2].trim().toLowerCase();
+                        } else {
+                            // Split by comma - try "email, Name" format
+                            const parts = trimmed.split(',').map(p => p.trim());
+                            if (parts.length === 2 && this.isValidEmail(parts[0]) && !this.isValidEmail(parts[1])) {
+                                email = parts[0].toLowerCase();
+                                name = parts[1];
+                            } else if (parts.length === 1 && this.isValidEmail(parts[0])) {
+                                email = parts[0].toLowerCase();
+                                name = null;
+                            }
+                        }
+
+                        if (email && !name) {
+                            this.pasteErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', lineNum).replace(':error', '{{ __('messages.name_required') }}'));
+                        }
+                        if (!email && name) {
+                            this.pasteErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', lineNum).replace(':error', '{{ __('messages.email_required') }}'));
+                        }
+                        if (email && !this.isValidEmail(email)) {
+                            this.pasteErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', lineNum).replace(':error', '{{ __('messages.invalid_email') }}'));
+                            email = null;
+                        }
+                        if (email && seen[email]) {
+                            this.pasteErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', lineNum).replace(':error', '{{ __('messages.duplicate_email') }}'));
+                            email = null;
+                        }
+
+                        if (email && name && this.isValidEmail(email) && !seen[email]) {
+                            seen[email] = true;
+                            entries.push({ email, name });
+                        }
+                    }
+
+                    if (this.pasteErrors.length > 0) return;
                     if (!entries.length) {
                         alert('{{ __('messages.no_valid_emails') }}');
                         return;
@@ -328,7 +525,17 @@
                 },
 
                 async submitCsv() {
-                    if (!this.hasEmailColumn()) return;
+                    this.csvErrors = [];
+
+                    if (!this.hasEmailColumn()) {
+                        this.csvErrors.push('{{ __('messages.email_required') }}');
+                        return;
+                    }
+
+                    if (!this.hasNameColumn()) {
+                        this.csvErrors.push('{{ __('messages.name_required') }}');
+                        return;
+                    }
 
                     const emailIdx = this.columnMappings.indexOf('email');
                     const nameIndices = this.columnMappings.reduce((acc, val, idx) => {
@@ -339,15 +546,31 @@
                     const entries = [];
                     const seen = {};
 
-                    for (const row of this.csvAllRows) {
+                    this.csvAllRows.forEach((row, i) => {
+                        const rowNum = i + 1;
                         const email = (row[emailIdx] || '').trim().toLowerCase();
-                        if (!this.isValidEmail(email) || seen[email]) continue;
-                        seen[email] = true;
+                        const name = nameIndices.map(idx => (row[idx] || '').trim()).filter(Boolean).join(' ');
 
-                        let name = nameIndices.map(i => (row[i] || '').trim()).filter(Boolean).join(' ') || null;
-                        entries.push({ email, name });
-                    }
+                        if (!email && !name) return; // Skip empty rows
 
+                        if (!name) {
+                            this.csvErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', rowNum).replace(':error', '{{ __('messages.name_required') }}'));
+                        }
+                        if (!email) {
+                            this.csvErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', rowNum).replace(':error', '{{ __('messages.email_required') }}'));
+                        } else if (!this.isValidEmail(email)) {
+                            this.csvErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', rowNum).replace(':error', '{{ __('messages.invalid_email') }}'));
+                        } else if (seen[email]) {
+                            this.csvErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', rowNum).replace(':error', '{{ __('messages.duplicate_email') }}'));
+                        }
+
+                        if (email && name && this.isValidEmail(email) && !seen[email]) {
+                            seen[email] = true;
+                            entries.push({ email, name });
+                        }
+                    });
+
+                    if (this.csvErrors.length > 0) return;
                     if (!entries.length) {
                         alert('{{ __('messages.no_valid_emails') }}');
                         return;
@@ -388,9 +611,7 @@
 
                     entries.forEach((entry, i) => {
                         addField(`entries[${i}][email]`, entry.email);
-                        if (entry.name) {
-                            addField(`entries[${i}][name]`, entry.name);
-                        }
+                        addField(`entries[${i}][name]`, entry.name);
                     });
 
                     document.body.appendChild(form);

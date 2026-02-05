@@ -1229,7 +1229,7 @@ return [
     'error_testing_connection' => 'Viga ühenduse testimisel',
     'stripe' => 'Stripe',
     'database_already_initialized' => 'Sellel andmebaasil on juba installitud fail. Kasutage mõnda muud andmebaasi või logige sisse olemasolevasse installi.',
-    
+
     // UTM Attribution
     'utm_attribution' => 'UTM-i omistamine',
     'top_sources' => 'Peamised allikad',
@@ -1486,4 +1486,14 @@ return [
     'select_camera' => 'Valige Kaamera',
     'edit_prompt' => 'Redigeeri viipa',
     'change_camera' => 'Vaheta kaamerat',
+
+    // Newsletter import enhancement
+    'form_entry' => 'Vormi sisestus',
+    'add_row' => 'Lisa rida',
+    'name_required' => 'Nimi on kohustuslik',
+    'invalid_email' => 'Vigane e-posti formaat',
+    'duplicate_email' => 'Topelt e-post',
+    'row_error' => 'Rida :row: :error',
+    'import_validation_failed' => 'Palun parandage järgmised vead:',
+    'name_and_email_required' => 'Iga rida peab sisaldama nii nime kui ka e-posti aadressi.',
 ];
