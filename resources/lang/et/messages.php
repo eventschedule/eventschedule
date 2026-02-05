@@ -58,6 +58,7 @@ return [
     'type' => 'Tüüp',
     'details' => 'Üksikasjad',
     'date_and_time' => 'Kuupäev ja kellaaeg',
+    'date_and_time_required' => 'Kuupäev ja algusaeg on kohustuslikud.',
     'duration_in_hours' => 'Kestus tundides',
     'private' => 'Privaatne',
     'unlisted' => 'Registreerimata',
@@ -1498,4 +1499,5 @@ return [
     'row_error' => 'Rida :row: :error',
     'import_validation_failed' => 'Palun parandage järgmised vead:',
     'name_and_email_required' => 'Iga rida peab sisaldama nii nime kui ka e-posti aadressi.',
+    'choose_file' => 'Vali fail',
 ];

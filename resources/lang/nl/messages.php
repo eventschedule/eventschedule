@@ -53,6 +53,7 @@ return [
     'type' => 'Type',
     'details' => 'Details',
     'date_and_time' => 'Datum en Tijd',
+    'date_and_time_required' => 'Datum en starttijd zijn verplicht.',
     'duration_in_hours' => 'Duur in Uren',
     'private' => 'Privé',
     'unlisted' => 'Niet-gelijst',
