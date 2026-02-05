@@ -498,9 +498,9 @@ class NewsletterController extends Controller
             return back()->with('error', __('messages.email_required'));
         }
 
-        $rateLimitKey = 'test-newsletter-' . $role->id;
+        $rateLimitKey = 'test-newsletter-'.$role->id;
         if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
-            return back()->with('error', __('messages.please_wait') . '...');
+            return back()->with('error', __('messages.please_wait').'...');
         }
 
         $newsletter = Newsletter::where('role_id', $role->id)
@@ -842,7 +842,11 @@ class NewsletterController extends Controller
             'segment_id' => 'required_if:segment_target,existing|nullable|string',
             'entries' => 'required|array|min:1|max:10000',
             'entries.*.email' => 'required|email',
-            'entries.*.name' => 'nullable|string|max:255',
+            'entries.*.name' => 'required|string|max:255',
+        ], [
+            'entries.*.email.required' => __('messages.row_error', ['row' => ':index', 'error' => __('messages.email_required')]),
+            'entries.*.email.email' => __('messages.row_error', ['row' => ':index', 'error' => __('messages.invalid_email')]),
+            'entries.*.name.required' => __('messages.row_error', ['row' => ':index', 'error' => __('messages.name_required')]),
         ]);
 
         if ($validated['segment_target'] === 'new') {

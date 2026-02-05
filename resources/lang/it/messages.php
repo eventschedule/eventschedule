@@ -1472,4 +1472,14 @@ return [
     'footer_text' => 'Footer Text',
     'edit_prompt' => 'Edit Prompt',
     'change_camera' => 'Change Camera',
+
+    // Newsletter import enhancement
+    'form_entry' => 'Inserimento modulo',
+    'add_row' => 'Aggiungi riga',
+    'name_required' => 'Il nome è obbligatorio',
+    'invalid_email' => 'Formato email non valido',
+    'duplicate_email' => 'Email duplicata',
+    'row_error' => 'Riga :row: :error',
+    'import_validation_failed' => 'Si prega di correggere i seguenti errori:',
+    'name_and_email_required' => 'Ogni riga deve avere sia un nome che un indirizzo email.',
 ];

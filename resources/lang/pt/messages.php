@@ -1471,4 +1471,14 @@ return [
     'footer_text' => 'Footer Text',
     'edit_prompt' => 'Edit Prompt',
     'change_camera' => 'Change Camera',
+
+    // Newsletter import enhancement
+    'form_entry' => 'Entrada de formulário',
+    'add_row' => 'Adicionar linha',
+    'name_required' => 'O nome é obrigatório',
+    'invalid_email' => 'Formato de e-mail inválido',
+    'duplicate_email' => 'E-mail duplicado',
+    'row_error' => 'Linha :row: :error',
+    'import_validation_failed' => 'Por favor, corrija os seguintes erros:',
+    'name_and_email_required' => 'Cada linha deve ter um nome e um endereço de e-mail.',
 ];

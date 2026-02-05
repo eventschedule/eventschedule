@@ -1,7 +1,20 @@
 <x-app-admin-layout>
     <div class="max-w-7xl mx-auto">
-        <div class="flex justify-end items-center mb-6">
-            @if ($roles->isNotEmpty() && $role)
+        @if ($roles->isNotEmpty())
+        <div class="flex justify-between items-center mb-6">
+            {{-- Schedule Selector --}}
+            <div class="min-w-[200px] max-w-xs">
+                <select id="role-filter" onchange="filterByRole(this.value)"
+                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base">
+                    @foreach ($roles as $r)
+                        <option value="{{ \App\Utils\UrlUtils::encodeId($r->id) }}" {{ $selectedRoleId == $r->id ? 'selected' : '' }}>
+                            {{ $r->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            @if ($role)
             <div class="flex gap-3">
                 <x-secondary-link href="{{ route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
                     {{ __('messages.segments') }}
@@ -16,21 +29,6 @@
                 </x-brand-link>
             </div>
             @endif
-        </div>
-
-        @if ($roles->isNotEmpty())
-        {{-- Schedule Selector --}}
-        <div class="mb-6">
-            <div class="min-w-[200px] max-w-xs">
-                <select id="role-filter" onchange="filterByRole(this.value)"
-                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base">
-                    @foreach ($roles as $r)
-                        <option value="{{ \App\Utils\UrlUtils::encodeId($r->id) }}" {{ $selectedRoleId == $r->id ? 'selected' : '' }}>
-                            {{ $r->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
         </div>
 
         @if (session('status'))
