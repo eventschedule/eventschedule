@@ -122,6 +122,16 @@
     .time-dropdown-item.hidden {
       display: none;
     }
+
+    /* Shake animation for incomplete data warning */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+    .shake {
+      animation: shake 0.4s ease-in-out;
+    }
   </style>
   <script src="{{ asset('js/vue.global.prod.js') }}"></script>
   <script {!! nonce_attr() !!}>
@@ -1383,9 +1393,14 @@
                                             v-model="memberYoutubeUrl" type="url" class="me-2 block w-full" autocomplete="off" />
                                     </div>
 
-                                    <x-primary-button type="button" @click="addMember">
-                                        {{ __('messages.add') }}
-                                    </x-primary-button>
+                                    <div class="flex gap-2">
+                                        <x-primary-button id="add-member-btn" type="button" @click="addMember">
+                                            {{ __('messages.add') }}
+                                        </x-primary-button>
+                                        <x-secondary-button v-if="hasIncompleteParticipantData" type="button" @click="clearNewParticipant">
+                                            {{ __('messages.clear') }}
+                                        </x-secondary-button>
+                                    </div>
 
                                 </div>
 
@@ -2725,6 +2740,12 @@
           }
         });
       },
+      clearNewParticipant() {
+        this.memberName = "";
+        this.memberEmail = "";
+        this.memberYoutubeUrl = "";
+        this.memberSearchResults = [];
+      },
       showAddMemberForm() {        
         this.showMemberTypeRadio = true;
         this.editMemberId = "";
@@ -2887,49 +2908,6 @@
         if (!dateVal || !startVal) {
           event.preventDefault();
           alert("{{ __('messages.date_and_time_required') }}");
-          return;
-        }
-
-        // Check for incomplete participant data (must be before isFormValid check)
-        if (this.memberType === 'create_new' && (this.memberName.trim() || this.memberEmail.trim() || this.memberYoutubeUrl.trim())) {
-          event.preventDefault();
-
-          // Highlight the participants section tab (desktop)
-          const sectionLink = document.querySelector('.section-nav-link[data-section="section-participants"]');
-          if (sectionLink) {
-            sectionLink.classList.add('validation-error');
-          }
-          // Highlight the accordion header (mobile)
-          const mobileHeader = document.querySelector('.mobile-section-header[data-section="section-participants"]');
-          if (mobileHeader) {
-            mobileHeader.classList.add('validation-error');
-          }
-
-          // Show the participants section
-          document.querySelectorAll('.section-content').forEach(section => {
-            section.style.display = section.id === 'section-participants' ? 'block' : 'none';
-          });
-
-          // Update active nav link styling
-          document.querySelectorAll('.section-nav-link').forEach(link => {
-            if (link.getAttribute('data-section') === 'section-participants') {
-              link.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[#4E81FA]');
-              link.classList.remove('text-gray-700', 'dark:text-gray-300', 'font-medium', 'border-transparent');
-            } else {
-              link.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[#4E81FA]');
-              link.classList.add('text-gray-700', 'dark:text-gray-300', 'font-medium', 'border-transparent');
-            }
-          });
-
-          // Focus the name field and scroll to it
-          this.$nextTick(() => {
-            const nameInput = document.getElementById('member_name');
-            if (nameInput) {
-              nameInput.focus();
-              nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-          });
-
           return;
         }
 
@@ -3124,7 +3102,11 @@
           return this.getSameTicketQuantity;
         }
         return this.tickets.reduce((total, ticket) => total + (ticket.quantity || 0), 0);
-      }
+      },
+      hasIncompleteParticipantData() {
+        return this.memberType === 'create_new' &&
+          (this.memberName.trim() || this.memberEmail.trim() || this.memberYoutubeUrl.trim());
+      },
     },
     watch: {
       venueType() {
@@ -3274,7 +3256,11 @@
           }
       });
     }
-  }).mount('#app')
+  });
+  const vueInstance = app.mount('#app');
+
+  // Store reference for section navigation
+  window.vueApp = vueInstance;
 
   // Google Calendar sync functions
   function syncEvent(subdomain, eventId) {
@@ -3385,6 +3371,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const mobileHeaders = document.querySelectorAll('.mobile-section-header');
 
+    // Track current section for navigation blocking
+    let currentSectionId = null;
+
     // Function to sync mobile accordion headers
     function syncMobileHeaders(sectionId) {
         mobileHeaders.forEach(header => {
@@ -3398,6 +3387,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to show a specific section and hide others
     function showSection(sectionId, preventScroll = false) {
+        // Check if leaving participants section with incomplete data
+        if (currentSectionId === 'section-participants' &&
+            sectionId !== 'section-participants' &&
+            window.vueApp &&
+            window.vueApp.hasIncompleteParticipantData) {
+            // Shake the Add button
+            const addBtn = document.getElementById('add-member-btn');
+            if (addBtn) {
+                addBtn.classList.add('shake');
+                setTimeout(() => addBtn.classList.remove('shake'), 400);
+            }
+            return; // Don't allow navigation
+        }
+
+        // Track current section
+        currentSectionId = sectionId;
+
         sections.forEach(section => {
             if (section.id === sectionId) {
                 section.style.display = 'block';
