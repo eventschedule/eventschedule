@@ -36,7 +36,7 @@
             <div class="flex flex-wrap justify-center gap-4">
                 <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
                     {{ __('messages.why_create_account_cta') }}
-                    <svg class="ms-2 w-5 h-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="ms-2 w-5 h-5" @if(in_array(request()->get('lang'), ['he', 'ar'])) style="transform: rotate(180deg)" @endif fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -246,6 +246,18 @@
                     <p class="text-gray-600 dark:text-gray-400">{{ __('messages.why_create_account_connect_desc') }}</p>
                 </div>
 
+                <!-- Get Started Fast -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 border border-teal-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        {{ __('messages.fast') }}
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('messages.why_create_account_fast_title') }}</h3>
+                    <p class="text-gray-600 dark:text-gray-400">{{ __('messages.why_create_account_fast_desc') }}</p>
+                </div>
+
                 <!-- Access Free Features (spans 2 cols) -->
                 <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 border border-emerald-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
@@ -360,7 +372,7 @@
             </p>
             <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                 {{ __('messages.why_create_account_cta') }}
-                <svg class="ms-2 w-5 h-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="ms-2 w-5 h-5" @if(in_array(request()->get('lang'), ['he', 'ar'])) style="transform: rotate(180deg)" @endif fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
             </a>
