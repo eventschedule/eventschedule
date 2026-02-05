@@ -62,6 +62,12 @@
         <priority>0.8</priority>
     </url>
     <url>
+        <loc>{{ url('/why-create-account') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
         <loc>{{ url('/features/ticketing') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>

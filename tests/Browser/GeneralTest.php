@@ -79,6 +79,8 @@ class GeneralTest extends DuskTestCase
             $browser->visit('/venue/add-event?date='.date('Y-m-d'))
                 ->type('name', 'Venue Event')
                 ->click('a[data-section="section-participants"]')
+                ->pause(500)
+                ->click('#section-participants button[type="button"]')
                 ->waitFor('#selected_member', 5)
                 ->select('#selected_member')
                 ->scrollIntoView('button[type="submit"]')
