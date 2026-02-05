@@ -68,6 +68,8 @@ return [
     'saving' => 'Saving...',
     'submit' => 'Submit',
     'profile' => 'Profile',
+    'reputation' => 'Reputation',
+    'data' => 'Data',
     'there_was_a_problem' => 'There was a problem',
     'delete_account' => 'Delete Account',
     'once_your_account_is_deleted' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.',

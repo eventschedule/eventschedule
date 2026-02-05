@@ -312,6 +312,7 @@ if (config('app.is_nexus')) {
         Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
         Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
         Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
+        Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
         Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
         Route::get('/features/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
         Route::get('/features/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
@@ -425,6 +426,7 @@ if (config('app.is_nexus')) {
             Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
             Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
             Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
+            Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
             Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
             Route::get('/features/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
             Route::get('/features/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');

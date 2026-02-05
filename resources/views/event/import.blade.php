@@ -81,6 +81,7 @@
                         <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-md">
                             <p class="text-sm text-blue-800 dark:text-blue-200">
                                 {!! __('messages.create_account_link', ['link' => '<a href="' . route('sign_up') . '" class="font-medium underline hover:no-underline">' . __('messages.create_an_account') . '</a>']) !!}
+                                <a href="{{ marketing_url('/why-create-account') }}{{ request()->has('lang') ? '?lang=' . request()->get('lang') : '' }}" target="_blank" class="ms-1 text-blue-600 dark:text-blue-300 hover:underline">{{ __('messages.why_create_account_learn_more') }}</a>
                             </p>
                         </div>
                         @endif
@@ -605,21 +606,9 @@
                             <label for="create_account_@{{ idx }}" class="ms-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ __('messages.create_account') }}
                             </label>
-                            <div class="ms-2 pt-2 relative group">
-                                <button type="button" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none">
-                                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                                    </svg>
-                                </button>
-                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 w-[28rem] max-w-lg z-10">
-                                    <div class="leading-relaxed" 
-                                            dir="{{ is_rtl() ? 'rtl' : 'ltr' }}"
-                                            style="{{ is_rtl() ? 'text-align: right;' : 'text-align: left;' }}">{{ __('messages.create_account_benefits') }}</div>
-                                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-s-4 border-e-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
-                                </div>
-                            </div>
+                            <a href="{{ marketing_url('/why-create-account') }}{{ request()->has('lang') ? '?lang=' . request()->get('lang') : '' }}" target="_blank" class="ms-2 text-sm text-blue-600 dark:text-blue-300 hover:underline">{{ __('messages.why_create_account_learn_more') }}</a>
                         </div>
-                        
+
                         <div v-if="createAccount" class="space-y-4">
                             <div>
                                 <x-input-label for="name_@{{ idx }}" :value="__('messages.name')" />
@@ -1695,6 +1684,7 @@
                             social_image: parsed.social_image,
                             registration_url: parsed.registration_url,
                             custom_field_values: parsed.custom_field_values || {},
+                            category_id: parsed.category_id,
                             @if ($role->isCurator() && !isset($isGuest))
                                 curators: ['{{ \App\Utils\UrlUtils::encodeId($role->id) }}'],
                             @endif

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+
 class MarketingController extends Controller
 {
     /**
@@ -49,6 +51,18 @@ class MarketingController extends Controller
     public function faq()
     {
         return view('marketing.faq');
+    }
+
+    /**
+     * Why Create Account page
+     */
+    public function whyCreateAccount(Request $request)
+    {
+        if ($request->has('lang') && is_valid_language_code($request->lang)) {
+            app()->setLocale($request->lang);
+        }
+
+        return view('marketing.why-create-account');
     }
 
     /**
