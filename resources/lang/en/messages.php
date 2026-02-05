@@ -664,7 +664,7 @@ return [
     'sync_all_events' => 'Sync All Events',
     'syncing_events' => 'Syncing events...',
     'connect_google_calendar' => 'Connect Google Calendar',
-    'google_calendar_sync' => 'Google Calendar Sync',
+    'google_calendar_sync' => 'Google Calendar',
     'sync_this_event_description' => 'Sync this event with your Google Calendar.',
     'synced_to_google_calendar' => 'Synced to Google Calendar',
     'remove_from_google_calendar' => 'Remove from Google Calendar',
