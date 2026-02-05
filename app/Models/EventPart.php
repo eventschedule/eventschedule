@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Utils\MarkdownUtils;
 use Illuminate\Database\Eloquent\Model;
 
 class EventPart extends Model
@@ -12,6 +13,8 @@ class EventPart extends Model
         'name_en',
         'description',
         'description_en',
+        'description_html',
+        'description_html_en',
         'start_time',
         'end_time',
         'sort_order',
@@ -37,6 +40,10 @@ class EventPart extends Model
                 $model->description_en = null;
                 $model->translation_attempts = 0;
             }
+
+            // Convert markdown to HTML
+            $model->description_html = MarkdownUtils::convertToHtml($model->description);
+            $model->description_html_en = MarkdownUtils::convertToHtml($model->description_en);
         });
     }
 
@@ -55,10 +62,10 @@ class EventPart extends Model
 
     public function translatedDescription()
     {
-        $value = $this->description;
+        $value = $this->description_html;
 
-        if ($this->description_en && (session()->has('translate') || request()->lang == 'en')) {
-            $value = $this->description_en;
+        if ($this->description_html_en && (session()->has('translate') || request()->lang == 'en')) {
+            $value = $this->description_html_en;
         }
 
         return $value;

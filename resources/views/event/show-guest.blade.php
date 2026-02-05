@@ -789,8 +789,8 @@
                   </span>
                   @endif
                   <span class="text-gray-900 dark:text-gray-100 font-medium">{{ $part->translatedName() }}</span>
-                  @if ($part->description)
-                  <span class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ $part->translatedDescription() }}</span>
+                  @if ($part->translatedDescription())
+                  <div class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! $part->translatedDescription() !!}</div>
                   @endif
                   @if (!is_demo_role($role))
                   @php
@@ -892,8 +892,8 @@
                 <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background-color: {{ $accentColor }};">{{ $index + 1 }}</span>
                 <div class="flex-1">
                   <span class="text-gray-900 dark:text-gray-100 font-medium">{{ $part->translatedName() }}</span>
-                  @if ($part->description)
-                  <span class="text-sm text-gray-500 dark:text-gray-400 block mt-0.5">{{ $part->translatedDescription() }}</span>
+                  @if ($part->translatedDescription())
+                  <div class="text-sm text-gray-500 dark:text-gray-400 block mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! $part->translatedDescription() !!}</div>
                   @endif
                   @if (!is_demo_role($role))
                   @php

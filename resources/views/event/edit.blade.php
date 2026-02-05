@@ -135,6 +135,219 @@
   </style>
   <script src="{{ asset('js/vue.global.prod.js') }}"></script>
   <script {!! nonce_attr() !!}>
+    // --- Global time helper functions (used by main event and parts) ---
+    var use24hr = {{ $use24hr ? 'true' : 'false' }};
+
+    function parseTimeToMinutes(timeStr) {
+        if (!timeStr) return null;
+        timeStr = timeStr.trim();
+
+        // Try 24hr format: HH:mm or H:mm
+        var match24 = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+        if (match24 && use24hr) {
+            var h = parseInt(match24[1], 10);
+            var m = parseInt(match24[2], 10);
+            if (h >= 0 && h <= 23 && m >= 0 && m <= 59) return h * 60 + m;
+        }
+
+        // Try 12hr format: h:mm AM/PM or h:mmAM/PM
+        var match12 = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)$/i);
+        if (match12) {
+            var h = parseInt(match12[1], 10);
+            var m = parseInt(match12[2], 10);
+            var period = match12[3].toUpperCase();
+            if (h >= 1 && h <= 12 && m >= 0 && m <= 59) {
+                if (period === 'AM' && h === 12) h = 0;
+                else if (period === 'PM' && h !== 12) h += 12;
+                return h * 60 + m;
+            }
+        }
+
+        // Try shorthand: 2pm, 11am
+        var matchShort = timeStr.match(/^(\d{1,2})\s*(AM|PM|am|pm)$/i);
+        if (matchShort) {
+            var h = parseInt(matchShort[1], 10);
+            var period = matchShort[2].toUpperCase();
+            if (h >= 1 && h <= 12) {
+                if (period === 'AM' && h === 12) h = 0;
+                else if (period === 'PM' && h !== 12) h += 12;
+                return h * 60;
+            }
+        }
+
+        // Try bare HH:mm in 12hr mode (assume as-is if valid)
+        if (!use24hr && match24) {
+            var h = parseInt(match24[1], 10);
+            var m = parseInt(match24[2], 10);
+            if (h >= 0 && h <= 23 && m >= 0 && m <= 59) return h * 60 + m;
+        }
+
+        return null;
+    }
+
+    function formatMinutesToTime(minutes) {
+        var h = Math.floor(minutes / 60) % 24;
+        var m = minutes % 60;
+        if (use24hr) {
+            return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+        } else {
+            var period = h < 12 ? 'AM' : 'PM';
+            var h12 = h % 12 || 12;
+            return h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + period;
+        }
+    }
+
+    // Simplified time picker for event parts (lazy initialization)
+    function initPartTimePicker(inputEl, dropdownEl) {
+        if (inputEl._timepickerInit) return; // Already initialized
+        inputEl._timepickerInit = true;
+
+        var timeOptions = [];
+        for (var m = 0; m < 1440; m += 30) {
+            timeOptions.push(formatMinutesToTime(m));
+        }
+
+        // Build dropdown items
+        timeOptions.forEach(function(label) {
+            var div = document.createElement('div');
+            div.className = 'time-dropdown-item';
+            div.textContent = label;
+            div.setAttribute('data-value', label);
+            div.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                inputEl.value = label;
+                closeDropdown();
+                inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+            dropdownEl.appendChild(div);
+        });
+
+        var highlightedIndex = -1;
+
+        function getVisibleItems() {
+            return Array.from(dropdownEl.querySelectorAll('.time-dropdown-item:not(.hidden)'));
+        }
+
+        function setHighlight(idx) {
+            var items = getVisibleItems();
+            items.forEach(function(el, i) {
+                el.classList.toggle('highlighted', i === idx);
+            });
+            highlightedIndex = idx;
+            if (idx >= 0 && idx < items.length) {
+                items[idx].scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        function showAllItems() {
+            var items = dropdownEl.querySelectorAll('.time-dropdown-item');
+            items.forEach(function(el) {
+                el.classList.remove('hidden');
+            });
+            highlightedIndex = -1;
+        }
+
+        function openDropdown() {
+            showAllItems();
+            dropdownEl.classList.add('open');
+            scrollToNearest();
+        }
+
+        function closeDropdown() {
+            dropdownEl.classList.remove('open');
+            highlightedIndex = -1;
+        }
+
+        function filterItems() {
+            var query = inputEl.value.trim().toLowerCase();
+            var items = dropdownEl.querySelectorAll('.time-dropdown-item');
+            items.forEach(function(el) {
+                var val = el.getAttribute('data-value').toLowerCase();
+                if (!query || val.indexOf(query) !== -1) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+            highlightedIndex = -1;
+        }
+
+        function scrollToNearest() {
+            var minutes = parseTimeToMinutes(inputEl.value);
+            if (minutes === null) minutes = 540; // Default to 9am
+            var closest = Math.round(minutes / 30) * 30;
+            if (closest >= 1440) closest = 0;
+            var target = formatMinutesToTime(closest);
+            var items = getVisibleItems();
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].getAttribute('data-value') === target) {
+                    items[i].scrollIntoView({ block: 'center' });
+                    setHighlight(i);
+                    return;
+                }
+            }
+        }
+
+        inputEl.addEventListener('focus', function() {
+            openDropdown();
+        });
+
+        inputEl.addEventListener('click', function() {
+            if (!dropdownEl.classList.contains('open')) {
+                openDropdown();
+            }
+        });
+
+        inputEl.addEventListener('input', function() {
+            filterItems();
+            if (dropdownEl.classList.contains('open')) {
+                var visible = getVisibleItems();
+                if (visible.length > 0) {
+                    setHighlight(0);
+                }
+            }
+        });
+
+        inputEl.addEventListener('blur', function() {
+            closeDropdown();
+        });
+
+        inputEl.addEventListener('keydown', function(e) {
+            if (!dropdownEl.classList.contains('open')) return;
+            var items = getVisibleItems();
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                var next = highlightedIndex + 1;
+                if (next >= items.length) next = 0;
+                setHighlight(next);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                var prev = highlightedIndex - 1;
+                if (prev < 0) prev = items.length - 1;
+                setHighlight(prev);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (highlightedIndex >= 0 && highlightedIndex < items.length) {
+                    inputEl.value = items[highlightedIndex].getAttribute('data-value');
+                    closeDropdown();
+                    inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            } else if (e.key === 'Escape' || e.key === 'Tab') {
+                closeDropdown();
+            }
+        });
+
+        // Close on click outside
+        document.addEventListener('mousedown', function(e) {
+            if (!inputEl.contains(e.target) && !dropdownEl.contains(e.target)) {
+                closeDropdown();
+            }
+        });
+
+        // Open immediately since this is called on focus
+        openDropdown();
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         var fpLocale = window.flatpickrLocales ? window.flatpickrLocales[window.appLocale] : null;
         var localeConfig = fpLocale ? { locale: fpLocale } : {};
@@ -171,67 +384,7 @@
             defaultCountry: "{{ $selectedVenue && $selectedVenue->country ? $selectedVenue->country : ($role && $role->country_code ? $role->country_code : '') }}",
         });
 
-        // --- Time combobox logic ---
-        var use24hr = {{ $use24hr ? 'true' : 'false' }};
-
-        function parseTimeToMinutes(timeStr) {
-            if (!timeStr) return null;
-            timeStr = timeStr.trim();
-
-            // Try 24hr format: HH:mm or H:mm
-            var match24 = timeStr.match(/^(\d{1,2}):(\d{2})$/);
-            if (match24 && use24hr) {
-                var h = parseInt(match24[1], 10);
-                var m = parseInt(match24[2], 10);
-                if (h >= 0 && h <= 23 && m >= 0 && m <= 59) return h * 60 + m;
-            }
-
-            // Try 12hr format: h:mm AM/PM or h:mmAM/PM
-            var match12 = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)$/i);
-            if (match12) {
-                var h = parseInt(match12[1], 10);
-                var m = parseInt(match12[2], 10);
-                var period = match12[3].toUpperCase();
-                if (h >= 1 && h <= 12 && m >= 0 && m <= 59) {
-                    if (period === 'AM' && h === 12) h = 0;
-                    else if (period === 'PM' && h !== 12) h += 12;
-                    return h * 60 + m;
-                }
-            }
-
-            // Try shorthand: 2pm, 11am
-            var matchShort = timeStr.match(/^(\d{1,2})\s*(AM|PM|am|pm)$/i);
-            if (matchShort) {
-                var h = parseInt(matchShort[1], 10);
-                var period = matchShort[2].toUpperCase();
-                if (h >= 1 && h <= 12) {
-                    if (period === 'AM' && h === 12) h = 0;
-                    else if (period === 'PM' && h !== 12) h += 12;
-                    return h * 60;
-                }
-            }
-
-            // Try bare HH:mm in 12hr mode (assume as-is if valid)
-            if (!use24hr && match24) {
-                var h = parseInt(match24[1], 10);
-                var m = parseInt(match24[2], 10);
-                if (h >= 0 && h <= 23 && m >= 0 && m <= 59) return h * 60 + m;
-            }
-
-            return null;
-        }
-
-        function formatMinutesToTime(minutes) {
-            var h = Math.floor(minutes / 60) % 24;
-            var m = minutes % 60;
-            if (use24hr) {
-                return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
-            } else {
-                var period = h < 12 ? 'AM' : 'PM';
-                var h12 = h % 12 || 12;
-                return h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + period;
-            }
-        }
+        // --- Time combobox logic for main event ---
 
         function normalizeTimeInput(inputEl) {
             var val = inputEl.value;
@@ -474,21 +627,27 @@
     }
 
     function onChangeDateType() {
+        if (typeof window.vueApp === 'undefined' || !window.vueApp.event) {
+            return;
+        }
         var value = $('input[name="schedule_type"]:checked').val();
         if (value == 'one_time') {
-            app.isRecurring = false;
+            window.vueApp.isRecurring = false;
         } else {
-            app.isRecurring = true;
-            if (!app.event.recurring_frequency) {
-                app.event.recurring_frequency = 'weekly';
+            window.vueApp.isRecurring = true;
+            if (!window.vueApp.event.recurring_frequency) {
+                window.vueApp.event.recurring_frequency = 'weekly';
             }
         }
         updateRecurringFieldVisibility();
     }
 
     function updateRecurringFieldVisibility() {
-        var freq = app.event.recurring_frequency || 'weekly';
-        var showDays = app.isRecurring && (freq === 'weekly' || freq === 'every_n_weeks');
+        if (typeof window.vueApp === 'undefined' || !window.vueApp.event) {
+            return;
+        }
+        var freq = window.vueApp.event.recurring_frequency || 'weekly';
+        var showDays = window.vueApp.isRecurring && (freq === 'weekly' || freq === 'every_n_weeks');
         if (showDays) {
             $('#days_of_week_div').show();
         } else {
@@ -901,20 +1060,22 @@
                                 <input type="text" id="event_date"
                                     class="datepicker-date flex-1 min-w-[140px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl') }}"
                                     value="{{ $eventDate }}" autocomplete="off" aria-label="{{ __('messages.date') }}" />
-                                <div class="relative w-28 sm:w-32">
-                                    <input type="text" id="start_time"
-                                        class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl') }}"
-                                        value="{{ $eventStartTime }}" placeholder="{{ __('messages.start_time') }}"
-                                        autocomplete="off" aria-label="{{ __('messages.start_time') }}" />
-                                    <div class="time-dropdown" id="start_time_dropdown"></div>
-                                </div>
-                                <span class="text-gray-500 dark:text-gray-400 text-sm shrink-0">{{ __('messages.to') }}</span>
-                                <div class="relative w-28 sm:w-32">
-                                    <input type="text" id="end_time"
-                                        class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl') }}"
-                                        value="{{ $eventEndTime }}" placeholder="{{ __('messages.end_time') }}"
-                                        autocomplete="off" aria-label="{{ __('messages.end_time') }}" />
-                                    <div class="time-dropdown" id="end_time_dropdown"></div>
+                                <div class="flex items-center gap-2 sm:gap-3">
+                                    <div class="relative w-28 sm:w-32">
+                                        <input type="text" id="start_time"
+                                            class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl') }}"
+                                            value="{{ $eventStartTime }}" placeholder="{{ __('messages.start_time') }}"
+                                            autocomplete="off" aria-label="{{ __('messages.start_time') }}" />
+                                        <div class="time-dropdown" id="start_time_dropdown"></div>
+                                    </div>
+                                    <span class="text-gray-500 dark:text-gray-400 text-sm shrink-0">{{ __('messages.to') }}</span>
+                                    <div class="relative w-28 sm:w-32">
+                                        <input type="text" id="end_time"
+                                            class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl') }}"
+                                            value="{{ $eventEndTime }}" placeholder="{{ __('messages.end_time') }}"
+                                            autocomplete="off" aria-label="{{ __('messages.end_time') }}" />
+                                        <div class="time-dropdown" id="end_time_dropdown"></div>
+                                    </div>
                                 </div>
                             </div>
                             <input type="hidden" name="starts_at" id="starts_at" value="{{ $oldStartsAt }}" />
@@ -1545,8 +1706,46 @@
                             {{ __('messages.agenda') }}
                         </h2>
 
-                        <div class="space-y-4">
-                            <template v-for="(part, index) in eventParts" :key="index">
+                        <!-- Compact mode: drag-drop layout when times AND description are both hidden -->
+                        <div v-if="!agendaShowTimes && !agendaShowDescription" @dragover.prevent="onContainerPartDragOver($event)" @drop="onPartDrop()" class="space-y-2">
+                            <div v-for="(part, index) in eventParts" :key="part.uid"
+                                 draggable="true"
+                                 @dragstart="onPartDragStart(index)"
+                                 @dragover="onPartDragOver(index, $event)"
+                                 @drop="onPartDrop()"
+                                 @dragend="onPartDragEnd"
+                                 :class="{ 'opacity-50': partDragIndex === index }"
+                                 :style="{ marginTop: partDropTargetIndex === index && partDragIndex !== null && partDragIndex !== index ? '2.5rem' : '', transition: 'margin 150ms ease' }"
+                                 class="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                                <!-- Drag handle -->
+                                <div class="cursor-grab text-gray-400 dark:text-gray-500">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16">
+                                        <circle cx="5.5" cy="3.5" r="1.5"/>
+                                        <circle cx="10.5" cy="3.5" r="1.5"/>
+                                        <circle cx="5.5" cy="8" r="1.5"/>
+                                        <circle cx="10.5" cy="8" r="1.5"/>
+                                        <circle cx="5.5" cy="12.5" r="1.5"/>
+                                        <circle cx="10.5" cy="12.5" r="1.5"/>
+                                    </svg>
+                                </div>
+                                <!-- Name input -->
+                                <input type="text" v-model="part.name" :name="'event_parts[' + index + '][name]'" required
+                                       class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+                                <!-- Hidden fields -->
+                                <input type="hidden" :name="'event_parts[' + index + '][id]'" :value="part.id || ''" />
+                                <input type="hidden" :name="'event_parts[' + index + '][start_time]'" :value="part.start_time" />
+                                <input type="hidden" :name="'event_parts[' + index + '][end_time]'" :value="part.end_time" />
+                                <input type="hidden" :name="'event_parts[' + index + '][description]'" :value="part.description" />
+                                <!-- Remove button -->
+                                <button type="button" @click="removePart(index)" class="text-red-400 hover:text-red-600 p-1" title="{{ __('messages.remove') }}">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Full mode: card layout with Up/Down buttons when times OR description are shown -->
+                        <div v-else class="space-y-4">
+                            <template v-for="(part, index) in eventParts" :key="part.uid">
                                 <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                                     <div class="flex items-center justify-between mb-3">
                                         <span class="text-sm font-medium text-gray-500 dark:text-gray-400">#@{{ index + 1 }}</span>
@@ -1572,40 +1771,57 @@
                                         <x-input-label :value="__('messages.part_name') . ' *'" />
                                         <input type="text" v-model="part.name" :name="'event_parts[' + index + '][name]'" required class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
                                     </div>
-                                    <div class="grid grid-cols-2 gap-3 mb-3">
-                                        <div>
+                                    <div v-if="agendaShowTimes" class="grid grid-cols-2 gap-3 mb-3">
+                                        <div class="relative">
                                             <x-input-label :value="__('messages.start_time')" />
-                                            <input type="time" v-model="part.start_time" :name="'event_parts[' + index + '][start_time]'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+                                            <input type="text"
+                                                   :value="formatPartTime(part.start_time)"
+                                                   @focus="initPartTimePickerOnFocus($event, part.uid, 'start')"
+                                                   @change="onPartTimeChange(index, 'start_time', $event)"
+                                                   class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+                                            <input type="hidden" :name="'event_parts[' + index + '][start_time]'" :value="part.start_time" />
+                                            <div class="time-dropdown" :ref="'part_start_dropdown_' + part.uid"></div>
                                         </div>
-                                        <div>
+                                        <div class="relative">
                                             <x-input-label :value="__('messages.end_time')" />
-                                            <input type="time" v-model="part.end_time" :name="'event_parts[' + index + '][end_time]'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+                                            <input type="text"
+                                                   :value="formatPartTime(part.end_time)"
+                                                   @focus="initPartTimePickerOnFocus($event, part.uid, 'end')"
+                                                   @change="onPartTimeChange(index, 'end_time', $event)"
+                                                   class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+                                            <input type="hidden" :name="'event_parts[' + index + '][end_time]'" :value="part.end_time" />
+                                            <div class="time-dropdown" :ref="'part_end_dropdown_' + part.uid"></div>
                                         </div>
                                     </div>
-                                    <div>
+                                    <div v-if="agendaShowDescription">
                                         <x-input-label :value="__('messages.description')" />
-                                        <textarea v-model="part.description" :name="'event_parts[' + index + '][description]'" rows="2" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                                        <textarea :ref="'partDescription_' + part.uid"
+                                                  :name="'event_parts[' + index + '][description]'"
+                                                  rows="2"
+                                                  class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">@{{ part.description }}</textarea>
                                     </div>
                                     <input type="hidden" :name="'event_parts[' + index + '][id]'" :value="part.id || ''" />
                                 </div>
                             </template>
                         </div>
 
-                        <div class="mt-4 flex flex-wrap gap-2">
+                        <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
                             <button type="button" @click="addPart" class="text-sm text-[#4E81FA] hover:text-blue-700">
                                 + {{ __('messages.add_part') }}
                             </button>
 
                             @if (config('services.google.gemini_key'))
-                            <x-secondary-button type="button" @click="$refs.partsImageInput.click()" v-bind:disabled="parsingParts">
-                                <span v-if="parsingParts">{{ __('messages.parsing_image') }}</span>
-                                <span v-else>{{ __('messages.import_from_image') }}</span>
-                            </x-secondary-button>
-                            <input type="file" ref="partsImageInput" @change="parsePartsFromImage($event)" accept="image/*" class="hidden" />
+                            <div class="flex flex-wrap gap-2">
+                                <x-secondary-button type="button" @click="$refs.partsImageInput.click()" v-bind:disabled="parsingParts">
+                                    <span v-if="parsingParts">{{ __('messages.parsing_image') }}</span>
+                                    <span v-else>{{ __('messages.import_from_image') }}</span>
+                                </x-secondary-button>
+                                <input type="file" ref="partsImageInput" @change="parsePartsFromImage($event)" accept="image/*" class="hidden" />
 
-                            <x-secondary-button type="button" @click="showPartsTextInput = !showPartsTextInput">
-                                {{ __('messages.import_from_text') }}
-                            </x-secondary-button>
+                                <x-secondary-button type="button" @click="showPartsTextInput = !showPartsTextInput">
+                                    {{ __('messages.import_from_text') }}
+                                </x-secondary-button>
+                            </div>
                             @endif
                         </div>
 
@@ -1625,13 +1841,26 @@
                             <textarea v-model="partsAiPrompt" rows="3" maxlength="500" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" dir="auto"
                                 placeholder="{{ __('messages.ai_agenda_prompt_placeholder') }}"></textarea>
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ai_agenda_prompt_help') }}</p>
-                            <label class="flex items-center mt-2">
-                                <input type="checkbox" v-model="savePartsAiPromptDefault" class="rounded border-gray-300 dark:border-gray-700 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800" />
-                                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.save_as_default') }}</span>
-                            </label>
                             <input type="hidden" name="agenda_ai_prompt" :value="partsAiPrompt" />
                             <input type="hidden" name="save_ai_prompt_default" :value="savePartsAiPromptDefault ? '1' : '0'" />
                         </div>
+
+                        <div class="mt-6 space-y-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" v-model="agendaShowTimes" class="rounded border-gray-300 dark:border-gray-700 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800" />
+                                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.show_times') }}</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" v-model="agendaShowDescription" class="rounded border-gray-300 dark:border-gray-700 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800" />
+                                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.show_description') }}</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" v-model="savePartsAiPromptDefault" class="rounded border-gray-300 dark:border-gray-700 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800" />
+                                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.save_as_default') }}</span>
+                            </label>
+                        </div>
+                        <input type="hidden" name="agenda_show_times" :value="agendaShowTimes ? '1' : '0'" />
+                        <input type="hidden" name="agenda_show_description" :value="agendaShowDescription ? '1' : '0'" />
 
                         <!-- Preview Modal -->
                         <div v-if="showPartsPreview" class="mt-4 border border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
@@ -2490,13 +2719,15 @@
         sendEmailToVenue: false,
         sendEmailToMembers: {},
         sendEmailToNewMember: false,
-        eventParts: @json($event->exists ? $event->parts : ($clonedParts ?? [])).map(part => ({
+        eventParts: @json($event->exists ? $event->parts : ($clonedParts ?? [])).map((part, i) => ({
+          uid: i,
           id: part.id || '',
           name: part.name || '',
           description: part.description || '',
           start_time: part.start_time || '',
           end_time: part.end_time || '',
         })),
+        partUidCounter: @json(count($event->exists ? $event->parts : ($clonedParts ?? []))),
         parsingParts: false,
         parsedPartsPreview: [],
         showPartsPreview: false,
@@ -2504,6 +2735,11 @@
         partsText: '',
         partsAiPrompt: @json($event->agenda_ai_prompt ?? $role->agenda_ai_prompt ?? ''),
         savePartsAiPromptDefault: false,
+        agendaShowTimes: @json($role->agenda_show_times ?? true),
+        agendaShowDescription: @json($role->agenda_show_description ?? true),
+        partDragIndex: null,
+        partDropTargetIndex: null,
+        partEditors: {},
       }
     },
     methods: {
@@ -2768,10 +3004,42 @@
         this.event.event_url = "";
       },
       addPart() {
-        this.eventParts.push({ id: '', name: '', description: '', start_time: '', end_time: '' });
+        const newPart = { uid: this.partUidCounter++, id: '', name: '', description: '', start_time: '', end_time: '' };
+        this.eventParts.push(newPart);
+        this.initPartEditor(newPart);
       },
       removePart(index) {
+        const part = this.eventParts[index];
+        this.destroyPartEditor(part);
         this.eventParts.splice(index, 1);
+      },
+      formatPartTime(time) {
+        if (!time) return '';
+        var minutes = parseTimeToMinutes(time);
+        if (minutes === null) return time;
+        return formatMinutesToTime(minutes);
+      },
+      onPartTimeChange(index, field, event) {
+        var minutes = parseTimeToMinutes(event.target.value);
+        if (minutes !== null) {
+          var h = Math.floor(minutes / 60);
+          var m = minutes % 60;
+          this.eventParts[index][field] = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+          event.target.value = formatMinutesToTime(minutes);
+        } else {
+          this.eventParts[index][field] = '';
+        }
+      },
+      initPartTimePickerOnFocus(event, uid, type) {
+        var inputEl = event.target;
+        var dropdownRef = 'part_' + type + '_dropdown_' + uid;
+        var dropdownEl = this.$refs[dropdownRef];
+        if (Array.isArray(dropdownEl)) {
+          dropdownEl = dropdownEl[0];
+        }
+        if (dropdownEl && !inputEl._timepickerInit) {
+          initPartTimePicker(inputEl, dropdownEl);
+        }
       },
       movePartUp(index) {
         if (index > 0) {
@@ -2786,6 +3054,77 @@
           this.eventParts.splice(index, 1);
           this.eventParts.splice(index + 1, 0, temp);
         }
+      },
+      onPartDragStart(index) {
+        this.partDragIndex = index;
+      },
+      onPartDragOver(index, event) {
+        event.preventDefault();
+        if (this.partDragIndex === null) return;
+        const rect = event.currentTarget.getBoundingClientRect();
+        const midpoint = rect.top + rect.height / 2;
+        const target = event.clientY < midpoint ? index : index + 1;
+        if (target === this.partDragIndex || target === this.partDragIndex + 1) {
+          this.partDropTargetIndex = null;
+        } else {
+          this.partDropTargetIndex = target;
+        }
+      },
+      onPartDrop() {
+        if (this.partDragIndex === null || this.partDropTargetIndex === null) {
+          this.partDragIndex = null;
+          this.partDropTargetIndex = null;
+          return;
+        }
+        const item = this.eventParts.splice(this.partDragIndex, 1)[0];
+        const insertAt = this.partDropTargetIndex > this.partDragIndex ? this.partDropTargetIndex - 1 : this.partDropTargetIndex;
+        this.eventParts.splice(insertAt, 0, item);
+        this.partDragIndex = null;
+        this.partDropTargetIndex = null;
+      },
+      onPartDragEnd() {
+        this.partDragIndex = null;
+        this.partDropTargetIndex = null;
+      },
+      onContainerPartDragOver(event) {
+        if (this.partDragIndex === null || this.eventParts.length === 0) return;
+        const container = event.currentTarget;
+        const firstChild = container.children[0];
+        if (firstChild) {
+          const rect = firstChild.getBoundingClientRect();
+          if (event.clientY < rect.top + rect.height / 2) {
+            if (0 !== this.partDragIndex && 0 !== this.partDragIndex + 1) {
+              this.partDropTargetIndex = 0;
+            } else {
+              this.partDropTargetIndex = null;
+            }
+          }
+        }
+      },
+      initPartEditor(part) {
+        if (!this.agendaShowDescription) return;
+        this.$nextTick(() => {
+          const textarea = this.$refs['partDescription_' + part.uid];
+          if (textarea && textarea[0] && !this.partEditors[part.uid]) {
+            this.partEditors[part.uid] = window.initTinyMDE(textarea[0], () => {
+              part.description = this.partEditors[part.uid].value();
+            });
+          }
+        });
+      },
+      destroyPartEditor(part) {
+        if (this.partEditors[part.uid]) {
+          this.partEditors[part.uid].toTextArea();
+          delete this.partEditors[part.uid];
+        }
+      },
+      initAllPartEditors() {
+        if (this.agendaShowDescription) {
+          this.eventParts.forEach(part => this.initPartEditor(part));
+        }
+      },
+      destroyAllPartEditors() {
+        this.eventParts.forEach(part => this.destroyPartEditor(part));
       },
       parsePartsFromImage(event) {
         const file = event.target.files[0];
@@ -2855,6 +3194,7 @@
       acceptParsedParts() {
         this.parsedPartsPreview.forEach(part => {
           this.eventParts.push({
+            uid: this.partUidCounter++,
             id: '',
             name: part.name || '',
             description: part.description || '',
@@ -3193,9 +3533,16 @@
         if (oldValue && newValue !== oldValue) {
           this.event.recurring_end_value = null;
         }
-        
+
         if (newValue === 'on_date') {
           this.initializeRecurringEndDatePicker();
+        }
+      },
+      agendaShowDescription(newVal) {
+        if (newVal) {
+          this.initAllPartEditors();
+        } else {
+          this.destroyAllPartEditors();
         }
       },
     },
@@ -3234,7 +3581,12 @@
 
       // Initialize curator group selections
       this.initializeCuratorGroupSelections();
-      
+
+      // Initialize part description editors
+      this.$nextTick(() => {
+        this.initAllPartEditors();
+      });
+
       // Initialize recurring end date picker if needed
       if (this.event.recurring_end_type === 'on_date') {
         this.initializeRecurringEndDatePicker();

@@ -8,6 +8,50 @@
     #event-import-app.loaded {
         visibility: visible;
     }
+
+    /* Custom time picker dropdown */
+    .time-dropdown-import {
+        display: none;
+        position: absolute;
+        z-index: 50;
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+        background: #fff;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
+        margin-top: 2px;
+    }
+    .dark .time-dropdown-import {
+        background: #1e1e1e;
+        border-color: #374151;
+    }
+    .time-dropdown-import.open {
+        display: block;
+    }
+    .time-dropdown-item-import {
+        padding: 6px 12px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        color: #111827;
+    }
+    .dark .time-dropdown-item-import {
+        color: #d1d5db;
+    }
+    .time-dropdown-item-import:hover,
+    .time-dropdown-item-import.highlighted {
+        background: #e5e7eb;
+        color: #111827;
+    }
+    .dark .time-dropdown-item-import:hover,
+    .dark .time-dropdown-item-import.highlighted {
+        background: #374151;
+        color: #fff;
+    }
+    .time-input-wrapper {
+        position: relative;
+    }
 </style>
 
 @if (! config('services.google.gemini_key'))
@@ -25,22 +69,6 @@
     @csrf
 
         @php $use24hr = get_use_24_hour_time($role ?? null); @endphp
-        <datalist id="time-options-import">
-            @for ($m = 0; $m < 1440; $m += 15)
-                @php
-                    $h = intdiv($m, 60);
-                    $min = $m % 60;
-                    if ($use24hr) {
-                        $timeLabel = sprintf('%02d:%02d', $h, $min);
-                    } else {
-                        $period = $h < 12 ? 'AM' : 'PM';
-                        $h12 = $h % 12 ?: 12;
-                        $timeLabel = sprintf('%d:%02d %s', $h12, $min, $period);
-                    }
-                @endphp
-                <option value="{{ $timeLabel }}">
-            @endfor
-        </datalist>
 
         <div v-if="!preview || !preview.parsed || preview.parsed.length === 0">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg">
@@ -273,7 +301,7 @@
                 @endif
                 
                 <!-- Card body -->
-                <div class="grid md:grid-cols-2 gap-6">
+                <div class="grid lg:grid-cols-2 gap-6">
                     <!-- Left column: Form fields -->
                     <div class="space-y-4">
                         <!-- Show matching event if found for this specific event -->
@@ -326,30 +354,64 @@
                             <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">
                                 {{ __('messages.date_and_time') }}
                             </label>
-                            <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 mt-1">
+                            <div class="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
                                 <input type="text"
-                                    :class="'datepicker_date_' + idx + ' flex-1 min-w-[140px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm'"
+                                    :class="'datepicker_date_' + idx + ' flex-1 min-w-[140px] basis-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm'"
                                     v-model="preview.parsed[idx].event_date"
                                     v-bind:readonly="savedEvents[idx]"
                                     autocomplete="off"
                                     :aria-label="'{{ __('messages.date') }}'" />
-                                <input type="text" list="time-options-import"
-                                    class="w-28 sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
-                                    v-model="preview.parsed[idx].event_start_time"
-                                    v-bind:readonly="savedEvents[idx]"
-                                    @blur="onStartTimeBlur(idx)"
-                                    placeholder="{{ __('messages.start_time') }}"
-                                    autocomplete="off"
-                                    :aria-label="'{{ __('messages.start_time') }}'" />
-                                <span class="text-gray-500 dark:text-gray-400 text-sm shrink-0">{{ __('messages.to') }}</span>
-                                <input type="text" list="time-options-import"
-                                    class="w-28 sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
-                                    v-model="preview.parsed[idx].event_end_time"
-                                    v-bind:readonly="savedEvents[idx]"
-                                    @blur="onEndTimeBlur(idx)"
-                                    placeholder="{{ __('messages.end_time') }}"
-                                    autocomplete="off"
-                                    :aria-label="'{{ __('messages.end_time') }}'" />
+                                <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                                    <div class="time-input-wrapper">
+                                        <input type="text"
+                                            class="w-28 sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                            v-model="preview.parsed[idx].event_start_time"
+                                            v-bind:readonly="savedEvents[idx]"
+                                            @focus="openTimeDropdown(idx, 'start')"
+                                            @click="openTimeDropdown(idx, 'start')"
+                                            @blur="onStartTimeBlur(idx); closeTimeDropdown(idx, 'start')"
+                                            @input="filterTimeOptions(idx, 'start')"
+                                            @keydown="handleTimeKeydown($event, idx, 'start')"
+                                            placeholder="{{ __('messages.start_time') }}"
+                                            autocomplete="off"
+                                            :aria-label="'{{ __('messages.start_time') }}'" />
+                                        <div :class="['time-dropdown-import', { 'open': activeTimeDropdown === idx + '-start' }]"
+                                            :ref="'time_dropdown_' + idx + '_start'">
+                                            <div v-for="time in timeOptions" :key="time"
+                                                class="time-dropdown-item-import"
+                                                :class="{ 'highlighted': highlightedTimeIndex[idx + '-start'] === timeOptions.indexOf(time) }"
+                                                v-show="!timeFilter[idx + '-start'] || time.toLowerCase().includes(timeFilter[idx + '-start'].toLowerCase())"
+                                                @mousedown.prevent="selectTime(idx, 'start', time)">
+                                                @{{ time }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="text-gray-500 dark:text-gray-400 text-sm shrink-0">{{ __('messages.to') }}</span>
+                                    <div class="time-input-wrapper">
+                                        <input type="text"
+                                            class="w-28 sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                            v-model="preview.parsed[idx].event_end_time"
+                                            v-bind:readonly="savedEvents[idx]"
+                                            @focus="openTimeDropdown(idx, 'end')"
+                                            @click="openTimeDropdown(idx, 'end')"
+                                            @blur="onEndTimeBlur(idx); closeTimeDropdown(idx, 'end')"
+                                            @input="filterTimeOptions(idx, 'end')"
+                                            @keydown="handleTimeKeydown($event, idx, 'end')"
+                                            placeholder="{{ __('messages.end_time') }}"
+                                            autocomplete="off"
+                                            :aria-label="'{{ __('messages.end_time') }}'" />
+                                        <div :class="['time-dropdown-import', { 'open': activeTimeDropdown === idx + '-end' }]"
+                                            :ref="'time_dropdown_' + idx + '_end'">
+                                            <div v-for="time in timeOptions" :key="time"
+                                                class="time-dropdown-item-import"
+                                                :class="{ 'highlighted': highlightedTimeIndex[idx + '-end'] === timeOptions.indexOf(time) }"
+                                                v-show="!timeFilter[idx + '-end'] || time.toLowerCase().includes(timeFilter[idx + '-end'].toLowerCase())"
+                                                @mousedown.prevent="selectTime(idx, 'end', time)">
+                                                @{{ time }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -876,6 +938,11 @@
                 venues: @json($venues ?? []),
                 eventVenueTypes: [],      // 'use_existing' | 'create_new' per event
                 eventSelectedVenues: [],  // selected venue object per event
+                // Time picker dropdown
+                activeTimeDropdown: null,
+                highlightedTimeIndex: {},
+                timeFilter: {},
+                timeOptions: [],
             }
         },
 
@@ -927,7 +994,8 @@
 
                     created() {
                 this.loadShowAllFieldsPreference()
-                
+                this.timeOptions = this.generateTimeOptions()
+
                 // Add global drag event listeners
                 document.addEventListener('dragend', this.handleGlobalDragEnd)
                 document.addEventListener('dragstart', this.handleGlobalDragStart)
@@ -957,6 +1025,164 @@
         },
 
         methods: {
+            // Time picker dropdown methods
+            generateTimeOptions() {
+                var options = [];
+                var use24hr = {{ $use24hr ? 'true' : 'false' }};
+                for (var m = 0; m < 1440; m += 30) {
+                    var h = Math.floor(m / 60);
+                    var min = m % 60;
+                    var label;
+                    if (use24hr) {
+                        label = (h < 10 ? '0' : '') + h + ':' + (min < 10 ? '0' : '') + min;
+                    } else {
+                        var period = h < 12 ? 'AM' : 'PM';
+                        var h12 = h % 12 || 12;
+                        label = h12 + ':' + (min < 10 ? '0' : '') + min + ' ' + period;
+                    }
+                    options.push(label);
+                }
+                return options;
+            },
+
+            openTimeDropdown(idx, type) {
+                if (this.savedEvents[idx]) return;
+                var key = idx + '-' + type;
+                this.activeTimeDropdown = key;
+                this.timeFilter[key] = '';
+                var self = this;
+                this.$nextTick(() => {
+                    // Use setTimeout to ensure DOM is fully laid out after display:block
+                    setTimeout(() => {
+                        self.scrollToNearestTime(idx, type);
+                    }, 0);
+                });
+            },
+
+            closeTimeDropdown(idx, type) {
+                var key = idx + '-' + type;
+                // Small delay to allow mousedown to register before closing
+                setTimeout(() => {
+                    if (this.activeTimeDropdown === key) {
+                        this.activeTimeDropdown = null;
+                        this.highlightedTimeIndex[key] = -1;
+                    }
+                }, 150);
+            },
+
+            filterTimeOptions(idx, type) {
+                var key = idx + '-' + type;
+                var value = type === 'start'
+                    ? this.preview.parsed[idx].event_start_time
+                    : this.preview.parsed[idx].event_end_time;
+                this.timeFilter[key] = value || '';
+            },
+
+            selectTime(idx, type, time) {
+                if (type === 'start') {
+                    this.preview.parsed[idx].event_start_time = time;
+                } else {
+                    this.preview.parsed[idx].event_end_time = time;
+                }
+                this.activeTimeDropdown = null;
+                var key = idx + '-' + type;
+                this.timeFilter[key] = '';
+            },
+
+            scrollToNearestTime(idx, type) {
+                var key = idx + '-' + type;
+                var refKey = 'time_dropdown_' + idx + '_' + type;
+                var dropdownEl = this.$refs[refKey];
+                // Vue 3 dynamic refs inside v-for return arrays
+                if (Array.isArray(dropdownEl)) dropdownEl = dropdownEl[0];
+                if (!dropdownEl) return;
+
+                var value = type === 'start'
+                    ? this.preview.parsed[idx].event_start_time
+                    : this.preview.parsed[idx].event_end_time;
+
+                // Normalize the value to match timeOptions format
+                var minutes = this.parseTimeToMinutes(value);
+                if (minutes !== null) {
+                    var normalizedValue = this.formatMinutesToTime(minutes);
+                    var exactIndex = this.timeOptions.indexOf(normalizedValue);
+                    if (exactIndex !== -1) {
+                        var items = dropdownEl.querySelectorAll('.time-dropdown-item-import');
+                        if (items[exactIndex]) {
+                            items[exactIndex].scrollIntoView({ block: 'center' });
+                            this.highlightedTimeIndex[key] = exactIndex;
+                        }
+                        return;
+                    }
+                }
+
+                // Fall back to nearest 30-min slot
+                if (minutes === null) minutes = type === 'start' ? 540 : 600; // Default 9am or 10am
+
+                var closest = Math.round(minutes / 30) * 30;
+                if (closest >= 1440) closest = 0;
+                var targetTime = this.formatMinutesToTime(closest);
+                var targetIndex = this.timeOptions.indexOf(targetTime);
+
+                if (targetIndex !== -1) {
+                    var items = dropdownEl.querySelectorAll('.time-dropdown-item-import');
+                    if (items[targetIndex]) {
+                        items[targetIndex].scrollIntoView({ block: 'center' });
+                        this.highlightedTimeIndex[key] = targetIndex;
+                    }
+                }
+            },
+
+            handleTimeKeydown(e, idx, type) {
+                var key = idx + '-' + type;
+                if (this.activeTimeDropdown !== key) return;
+
+                var visibleOptions = this.getVisibleTimeOptions(key);
+                var currentHighlight = this.highlightedTimeIndex[key] || 0;
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    var nextIndex = currentHighlight + 1;
+                    if (nextIndex >= visibleOptions.length) nextIndex = 0;
+                    this.highlightedTimeIndex[key] = nextIndex;
+                    this.scrollHighlightedIntoView(idx, type);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    var prevIndex = currentHighlight - 1;
+                    if (prevIndex < 0) prevIndex = visibleOptions.length - 1;
+                    this.highlightedTimeIndex[key] = prevIndex;
+                    this.scrollHighlightedIntoView(idx, type);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (visibleOptions[currentHighlight]) {
+                        this.selectTime(idx, type, visibleOptions[currentHighlight]);
+                    }
+                } else if (e.key === 'Escape' || e.key === 'Tab') {
+                    this.activeTimeDropdown = null;
+                }
+            },
+
+            getVisibleTimeOptions(key) {
+                var filter = (this.timeFilter[key] || '').toLowerCase();
+                if (!filter) return this.timeOptions;
+                return this.timeOptions.filter(t => t.toLowerCase().includes(filter));
+            },
+
+            scrollHighlightedIntoView(idx, type) {
+                var refKey = 'time_dropdown_' + idx + '_' + type;
+                var dropdownEl = this.$refs[refKey];
+                // Vue 3 dynamic refs inside v-for return arrays
+                if (Array.isArray(dropdownEl)) dropdownEl = dropdownEl[0];
+                if (!dropdownEl) return;
+
+                var key = idx + '-' + type;
+                var highlightIdx = this.highlightedTimeIndex[key];
+                var items = dropdownEl.querySelectorAll('.time-dropdown-item-import:not([style*="display: none"])');
+                if (items[highlightIdx]) {
+                    items[highlightIdx].scrollIntoView({ block: 'nearest' });
+                }
+            },
+
             parseTimeToMinutes(timeStr) {
                 if (!timeStr) return null;
                 timeStr = timeStr.trim();
@@ -1023,19 +1249,6 @@
                 var startMin = this.parseTimeToMinutes(event.event_start_time);
                 if (startMin !== null) {
                     event.event_start_time = this.formatMinutesToTime(startMin);
-                    // Auto-adjust end time to maintain duration
-                    var endMin = this.parseTimeToMinutes(event.event_end_time);
-                    var prevDuration = 60; // default 1 hour
-                    if (endMin !== null) {
-                        // Keep existing end time, recalculate nothing here
-                    } else if (event.event_duration) {
-                        prevDuration = Math.round(event.event_duration * 60);
-                        var newEnd = startMin + prevDuration;
-                        event.event_end_time = this.formatMinutesToTime(newEnd % 1440);
-                    } else {
-                        var newEnd = startMin + prevDuration;
-                        event.event_end_time = this.formatMinutesToTime(newEnd % 1440);
-                    }
                 } else if (event.event_start_time.trim() !== '') {
                     event.event_start_time = '';
                 }

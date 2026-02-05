@@ -537,6 +537,8 @@ class EventController extends Controller
         }
         if ($request->input('save_ai_prompt_default')) {
             $role->agenda_ai_prompt = $request->input('agenda_ai_prompt');
+            $role->agenda_show_times = $request->boolean('agenda_show_times');
+            $role->agenda_show_description = $request->boolean('agenda_show_description');
             $role->save();
         }
 
@@ -725,6 +727,8 @@ class EventController extends Controller
         }
         if ($request->input('save_ai_prompt_default')) {
             $role->agenda_ai_prompt = $request->input('agenda_ai_prompt');
+            $role->agenda_show_times = $request->boolean('agenda_show_times');
+            $role->agenda_show_description = $request->boolean('agenda_show_description');
             $role->save();
         }
 
@@ -1303,7 +1307,7 @@ class EventController extends Controller
 
         return redirect()->to($event->getGuestUrl($subdomain))
             ->with('message', __('messages.video_submitted'))
-            ->with('scroll_to', 'pending-video-' . $video->id);
+            ->with('scroll_to', 'pending-video-'.$video->id);
     }
 
     public function submitComment(Request $request, $subdomain, $event_hash)
@@ -1364,7 +1368,7 @@ class EventController extends Controller
 
         return redirect()->to($event->getGuestUrl($subdomain))
             ->with('message', __('messages.comment_submitted'))
-            ->with('scroll_to', 'pending-comment-' . $eventComment->id);
+            ->with('scroll_to', 'pending-comment-'.$eventComment->id);
     }
 
     public function approveVideo(Request $request, $subdomain, $hash)
@@ -1373,13 +1377,13 @@ class EventController extends Controller
         $video = EventVideo::with('event')->findOrFail($id);
 
         if (! $request->user()->canEditEvent($video->event)) {
-            return redirect()->to(url()->previous() . '#section-fan-content')->with('error', __('messages.not_authorized'));
+            return redirect()->to(url()->previous().'#section-fan-content')->with('error', __('messages.not_authorized'));
         }
 
         $video->is_approved = true;
         $video->save();
 
-        return redirect()->to(url()->previous() . '#section-fan-content')->with('message', __('messages.video_approved'));
+        return redirect()->to(url()->previous().'#section-fan-content')->with('message', __('messages.video_approved'));
     }
 
     public function rejectVideo(Request $request, $subdomain, $hash)
@@ -1388,12 +1392,12 @@ class EventController extends Controller
         $video = EventVideo::with('event')->findOrFail($id);
 
         if (! $request->user()->canEditEvent($video->event)) {
-            return redirect()->to(url()->previous() . '#section-fan-content')->with('error', __('messages.not_authorized'));
+            return redirect()->to(url()->previous().'#section-fan-content')->with('error', __('messages.not_authorized'));
         }
 
         $video->delete();
 
-        return redirect()->to(url()->previous() . '#section-fan-content')->with('message', __('messages.video_rejected'));
+        return redirect()->to(url()->previous().'#section-fan-content')->with('message', __('messages.video_rejected'));
     }
 
     public function approveComment(Request $request, $subdomain, $hash)
@@ -1402,13 +1406,13 @@ class EventController extends Controller
         $comment = EventComment::with('event')->findOrFail($id);
 
         if (! $request->user()->canEditEvent($comment->event)) {
-            return redirect()->to(url()->previous() . '#section-fan-content')->with('error', __('messages.not_authorized'));
+            return redirect()->to(url()->previous().'#section-fan-content')->with('error', __('messages.not_authorized'));
         }
 
         $comment->is_approved = true;
         $comment->save();
 
-        return redirect()->to(url()->previous() . '#section-fan-content')->with('message', __('messages.comment_approved'));
+        return redirect()->to(url()->previous().'#section-fan-content')->with('message', __('messages.comment_approved'));
     }
 
     public function rejectComment(Request $request, $subdomain, $hash)
@@ -1417,12 +1421,12 @@ class EventController extends Controller
         $comment = EventComment::with('event')->findOrFail($id);
 
         if (! $request->user()->canEditEvent($comment->event)) {
-            return redirect()->to(url()->previous() . '#section-fan-content')->with('error', __('messages.not_authorized'));
+            return redirect()->to(url()->previous().'#section-fan-content')->with('error', __('messages.not_authorized'));
         }
 
         $comment->delete();
 
-        return redirect()->to(url()->previous() . '#section-fan-content')->with('message', __('messages.comment_rejected'));
+        return redirect()->to(url()->previous().'#section-fan-content')->with('message', __('messages.comment_rejected'));
     }
 
     public function scanAgenda(Request $request, $subdomain)

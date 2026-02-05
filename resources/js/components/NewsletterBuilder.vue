@@ -127,9 +127,9 @@
                                                 <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm"
                                                     :value="block.data.level"
                                                     @change="updateBlockData(block.id, 'level', $event.target.value)">
-                                                    <option value="h1">H1</option>
-                                                    <option value="h2">H2</option>
-                                                    <option value="h3">H3</option>
+                                                    <option value="h1">{{ t.heading_header }}</option>
+                                                    <option value="h2">{{ t.heading_subheader }}</option>
+                                                    <option value="h3">{{ t.heading_section }}</option>
                                                 </select>
                                             </div>
                                             <div>
@@ -693,20 +693,21 @@ function initEasyMDE(blockId) {
     const block = blocks.value.find(b => b.id === blockId);
     if (!block) return;
 
+    const t = window.editorTranslations || {};
     const instance = new EasyMDE({
         element: el,
         toolbar: [
-            { name: "bold", action: EasyMDE.toggleBold, className: "editor-button-text", title: "Bold", text: "B" },
-            { name: "italic", action: EasyMDE.toggleItalic, className: "editor-button-text", title: "Italic", text: "I" },
-            { name: "heading", action: EasyMDE.toggleHeadingSmaller, className: "editor-button-text", title: "Heading", text: "H" },
+            { name: "bold", action: EasyMDE.toggleBold, className: "editor-button-text", title: t.bold || "Bold", text: "B" },
+            { name: "italic", action: EasyMDE.toggleItalic, className: "editor-button-text", title: t.italic || "Italic", text: "I" },
+            { name: "heading", action: EasyMDE.toggleHeadingSmaller, className: "editor-button-text", title: t.heading || "Heading", text: "H" },
             "|",
-            { name: "link", action: function(editor) { EasyMDE.drawLink(editor); }, className: "editor-button-text", title: "Link", text: "\ud83d\udd17" },
-            { name: "quote", action: EasyMDE.toggleBlockquote, className: "editor-button-text", title: "Quote", text: "\"" },
-            { name: "unordered-list", action: EasyMDE.toggleUnorderedList, className: "editor-button-text", title: "Unordered List", text: "UL" },
-            { name: "ordered-list", action: EasyMDE.toggleOrderedList, className: "editor-button-text", title: "Ordered List", text: "OL" },
+            { name: "link", action: function(editor) { EasyMDE.drawLink(editor); }, className: "editor-button-text", title: t.link || "Link", text: "\ud83d\udd17" },
+            { name: "quote", action: EasyMDE.toggleBlockquote, className: "editor-button-text", title: t.quote || "Quote", text: "\"" },
+            { name: "unordered-list", action: EasyMDE.toggleUnorderedList, className: "editor-button-text", title: t.unorderedList || "Unordered List", text: "UL" },
+            { name: "ordered-list", action: EasyMDE.toggleOrderedList, className: "editor-button-text", title: t.orderedList || "Ordered List", text: "OL" },
             "|",
-            { name: "preview", action: EasyMDE.togglePreview, className: "editor-button-text no-disable", title: "Toggle Preview", text: "\ud83d\udc41" },
-            { name: "guide", action: "https://www.markdownguide.org/basic-syntax/", className: "editor-button-text", title: "Markdown Guide", text: "?" },
+            { name: "preview", action: EasyMDE.togglePreview, className: "editor-button-text no-disable", title: t.preview || "Toggle Preview", text: "\ud83d\udc41" },
+            { name: "guide", action: "https://www.markdownguide.org/basic-syntax/", className: "editor-button-text", title: t.guide || "Markdown Guide", text: "?" },
         ],
         initialValue: block.data.content || '',
         minHeight: "200px",
