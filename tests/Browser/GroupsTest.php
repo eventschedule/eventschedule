@@ -111,7 +111,6 @@ class GroupsTest extends DuskTestCase
         // Create first event for "Main Shows" sub-schedule
         $browser->visit('/talent/add-event?date='.date('Y-m-d'))
             ->type('name', 'Main Show Event')
-            ->type('duration', '2')
             ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($mainShows->id))
             ->scrollIntoView('button[type="submit"]')
             ->press('SAVE')
@@ -122,7 +121,6 @@ class GroupsTest extends DuskTestCase
         // Create second event for "Workshops" sub-schedule
         $browser->visit('/talent/add-event?date='.date('Y-m-d'))
             ->type('name', 'Workshop Event')
-            ->type('duration', '3')
             ->scrollIntoView('select[name="current_role_group_id"]')
             ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($workshops->id))
             ->scrollIntoView('button[type="submit"]')
@@ -134,7 +132,6 @@ class GroupsTest extends DuskTestCase
         // Create third event without sub-schedule
         $browser->visit('/talent/add-event?date='.date('Y-m-d'))
             ->type('name', 'General Event')
-            ->type('duration', '1')
             ->scrollIntoView('button[type="submit"]')
             ->press('SAVE')
             ->waitForLocation('/talent/schedule', 5)
