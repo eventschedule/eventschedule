@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -11,11 +9,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('event_parts', 'description_html_en')) {
-            Schema::table('event_parts', function (Blueprint $table) {
-                $table->text('description_html_en')->nullable()->after('description_en');
-            });
-        }
+        // No-op: translation columns (including description_html_en) are now
+        // added by 2026_07_01_000001_add_translation_columns_to_event_parts
     }
 
     /**
@@ -23,8 +18,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('event_parts', function (Blueprint $table) {
-            $table->dropColumn('description_html_en');
-        });
+        // No-op
     }
 };
