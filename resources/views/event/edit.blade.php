@@ -1204,29 +1204,24 @@
                                     <div v-show="editMemberId === member.id" class="w-full">
                                         <div class="mb-6">
                                             <x-input-label :value="__('messages.name') . ' *'" />
-                                            <div class="flex mt-1">
-                                                <x-text-input v-bind:id="'edit_member_name_' + member.id"
-                                                    v-bind:name="'members[' + member.id + '][name]'" type="text" class="me-2 block w-full"
-                                                    v-model="selectedMembers.find(m => m.id === member.id).name" v-bind:required="editMemberId === member.id"
-                                                    @keydown.enter.prevent="editMember()" autocomplete="off" />
-                                                <x-primary-button @click="editMember()" type="button">
-                                                    {{ __('messages.done') }}
-                                                </x-primary-button>
-                                            </div>
+                                            <x-text-input v-bind:id="'edit_member_name_' + member.id"
+                                                v-bind:name="'members[' + member.id + '][name]'" type="text" class="block w-full"
+                                                v-model="selectedMembers.find(m => m.id === member.id).name" v-bind:required="editMemberId === member.id"
+                                                @keydown.enter.prevent="editMember()" autocomplete="off" />
                                             <x-input-error class="mt-2" :messages="$errors->get('member_name')" />
                                         </div>
 
-                                        <div class="mb-6">  
+                                        <div class="mb-6">
                                             <x-input-label for="edit_member_email" :value="__('messages.email')" />
-                                            <x-text-input v-bind:id="'edit_member_email_' + member.id" 
-                                                v-bind:name="'members[' + member.id + '][email]'" type="email" class="me-2 block w-full" 
+                                            <x-text-input v-bind:id="'edit_member_email_' + member.id"
+                                                v-bind:name="'members[' + member.id + '][email]'" type="email" class="me-2 block w-full"
                                                 v-model="selectedMembers.find(m => m.id === member.id).email" @keydown.enter.prevent="editMember()" autocomplete="off" />
                                             @if (config('app.hosted'))
                                             <div v-if="selectedMembers.find(m => m.id === member.id).email && !member.user_id" class="mt-2">
                                                 <div class="flex items-center">
-                                                    <input type="checkbox" 
-                                                        :id="'send_email_to_edit_member_' + member.id" 
-                                                        :name="'send_email_to_members[' + selectedMembers.find(m => m.id === member.id).email + ']'" 
+                                                    <input type="checkbox"
+                                                        :id="'send_email_to_edit_member_' + member.id"
+                                                        :name="'send_email_to_members[' + selectedMembers.find(m => m.id === member.id).email + ']'"
                                                         v-model="sendEmailToMembers[selectedMembers.find(m => m.id === member.id).email]"
                                                         class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
                                                     <label :for="'send_email_to_edit_member_' + member.id" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
@@ -1239,10 +1234,14 @@
 
                                         <div class="mb-6">
                                             <x-input-label for="edit_member_youtube_url" :value="__('messages.youtube_video_url')" />
-                                            <x-text-input v-bind:id="'edit_member_youtube_url_' + member.id" 
-                                                v-bind:name="'members[' + member.id + '][youtube_url]'" type="url" class="me-2 block w-full" 
+                                            <x-text-input v-bind:id="'edit_member_youtube_url_' + member.id"
+                                                v-bind:name="'members[' + member.id + '][youtube_url]'" type="url" class="me-2 block w-full"
                                                 v-model="selectedMembers.find(m => m.id === member.id).youtube_url" @keydown.enter.prevent="editMember()" autocomplete="off" />
                                         </div>
+
+                                        <x-primary-button @click="editMember()" type="button">
+                                            {{ __('messages.done') }}
+                                        </x-primary-button>
 
                                     </div>
                                     <div v-show="editMemberId !== member.id" class="flex justify-between w-full">
@@ -1384,9 +1383,9 @@
                                             v-model="memberYoutubeUrl" type="url" class="me-2 block w-full" autocomplete="off" />
                                     </div>
 
-                                    <button type="button" @click="addMember" class="text-sm text-[#4E81FA] hover:text-blue-700">
-                                        + {{ __('messages.add') }}
-                                    </button>
+                                    <x-primary-button type="button" @click="addMember">
+                                        {{ __('messages.add') }}
+                                    </x-primary-button>
 
                                 </div>
 
