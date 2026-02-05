@@ -3166,7 +3166,7 @@
     },
     mounted() {
       this.showMemberTypeRadio = this.selectedMembers.length === 0;
-      updateRecurringFieldVisibility();
+      this.$nextTick(() => updateRecurringFieldVisibility());
 
       const isCloned = @json($isCloned ?? false);
 
