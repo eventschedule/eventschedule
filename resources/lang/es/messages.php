@@ -309,6 +309,7 @@ return [
     'schedule_style' => 'Estilo de horario',
     'event_venue' => 'Lugar del evento',
     'event_details' => 'Detalles del evento',
+    'short_description' => 'Descripción breve',
     'solid' => 'Sólido',
     'background_color' => 'Color de fondo',
     'custom' => 'Personalizado',

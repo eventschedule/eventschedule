@@ -98,7 +98,7 @@
         <div>
             <x-input-label :value="__('messages.square_profile_image')" />
             <input id="profile_image" name="profile_image" type="file" class="hidden"
-                accept="image/png, image/jpeg" onchange="document.getElementById('profile_image_filename').textContent = this.files[0]?.name || '';" />
+                accept="image/png, image/jpeg" onchange="document.getElementById('profile_image_filename').textContent = this.files[0]?.name || ''; document.getElementById('profile_image_clear').style.display = this.files[0] ? 'inline' : 'none';" />
             <div class="mt-1 flex items-center gap-3">
                 <button type="button" onclick="document.getElementById('profile_image').click()"
                     class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
@@ -108,6 +108,12 @@
                     {{ __('messages.choose_file') }}
                 </button>
                 <span id="profile_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                <button type="button" id="profile_image_clear" onclick="document.getElementById('profile_image').value = ''; document.getElementById('profile_image_filename').textContent = ''; this.style.display = 'none';"
+                    class="text-gray-400 hover:text-red-500 p-1" style="display: none;">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
             </div>
             <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
 

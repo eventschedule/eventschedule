@@ -62,6 +62,11 @@
                         </a>
                     </li>
                     @endif
+                    <li>
+                        <a href="{{ marketing_url('/demos') }}" class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                            Examples
+                        </a>
+                    </li>
                 </ul>
             </div>
 

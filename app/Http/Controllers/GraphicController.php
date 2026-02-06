@@ -9,6 +9,8 @@ use App\Services\GraphicEmailService;
 use App\Utils\EventTextGenerator;
 use App\Utils\GeminiUtils;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class GraphicController extends Controller
 {
@@ -89,7 +91,7 @@ class GraphicController extends Controller
         ]);
 
         // Merge with existing settings to preserve defaults
-        $currentSettings = $role->graphic_settings;
+        $currentSettings = $role->graphic_settings ?? [];
         $newSettings = array_merge($currentSettings, $validated);
 
         // Require recipient_emails when enabled is true
@@ -145,7 +147,7 @@ class GraphicController extends Controller
         }
 
         // Get recipient emails from graphic settings
-        $settings = $role->graphic_settings;
+        $settings = $role->graphic_settings ?? [];
         $recipientEmails = trim($settings['recipient_emails'] ?? '');
 
         if (empty($recipientEmails)) {
@@ -193,7 +195,7 @@ class GraphicController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
-        $graphicSettings = $role->graphic_settings;
+        $graphicSettings = $role->graphic_settings ?? [];
 
         // Use request parameters if provided, otherwise fall back to saved settings
         $layout = $request->get('layout', $graphicSettings['layout'] ?? 'grid');
@@ -298,6 +300,7 @@ class GraphicController extends Controller
                 'date_position' => $datePosition,
                 'max_per_row' => $maxPerRow,
                 'overlay_text' => $overlayText,
+                'header_image_url' => $graphicSettings['header_image_url'] ?? null,
             ];
 
             // Use the service to generate the graphic with the specified layout and options
@@ -353,7 +356,7 @@ class GraphicController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $graphicSettings = $role->graphic_settings;
+        $graphicSettings = $role->graphic_settings ?? [];
 
         $layout = $request->get('layout', $graphicSettings['layout'] ?? 'grid');
         $directRegistration = $request->boolean('direct');
@@ -455,6 +458,7 @@ class GraphicController extends Controller
                 'date_position' => $datePosition,
                 'max_per_row' => $maxPerRow,
                 'overlay_text' => $overlayText,
+                'header_image_url' => $graphicSettings['header_image_url'] ?? null,
             ];
 
             // Use the service to generate the graphic with the specified layout and options
@@ -491,5 +495,97 @@ class GraphicController extends Controller
 
             return null;
         }
+    }
+
+    public function uploadHeaderImage(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->user()->isMember($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (! $request->hasFile('header_image')) {
+            return response()->json(['error' => __('messages.no_file_uploaded')], 400);
+        }
+
+        $file = $request->file('header_image');
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        // Validate file extension
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        if (! in_array($extension, $allowedExtensions)) {
+            return response()->json(['error' => __('messages.invalid_file_type')], 400);
+        }
+
+        // Validate MIME type
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (! in_array($file->getMimeType(), $allowedMimeTypes)) {
+            return response()->json(['error' => __('messages.invalid_file_type')], 400);
+        }
+
+        // Get existing settings
+        $settings = $role->graphic_settings ?? [];
+
+        // Delete existing header image if present
+        if (! empty($settings['header_image_url'])) {
+            $path = $settings['header_image_url'];
+            if (config('filesystems.default') == 'local') {
+                $path = 'public/'.$path;
+            }
+            Storage::delete($path);
+        }
+
+        // Store new image
+        $filename = strtolower('graphic_header_'.Str::random(32).'.'.$extension);
+        $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+
+        // Update graphic settings
+        $settings['header_image_url'] = $filename;
+        $role->graphic_settings = $settings;
+        $role->save();
+
+        // Build URL for preview
+        if (config('filesystems.default') == 'local') {
+            $url = url('/storage/'.$filename);
+        } else {
+            $url = Storage::url($filename);
+        }
+
+        return response()->json([
+            'success' => true,
+            'url' => $url,
+            'filename' => $filename,
+        ]);
+    }
+
+    public function deleteHeaderImage(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->user()->isMember($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        // Get existing settings
+        $settings = $role->graphic_settings ?? [];
+
+        // Delete the header image if present
+        if (! empty($settings['header_image_url'])) {
+            $path = $settings['header_image_url'];
+            if (config('filesystems.default') == 'local') {
+                $path = 'public/'.$path;
+            }
+            Storage::delete($path);
+
+            // Clear from settings
+            unset($settings['header_image_url']);
+            $role->graphic_settings = $settings;
+            $role->save();
+        }
+
+        return response()->json([
+            'success' => true,
+        ]);
     }
 }

@@ -152,6 +152,7 @@ return [
     'schedule_style' => 'Rooster stijl',
     'event_venue' => 'Evenementlocatie',
     'event_details' => 'Evenementdetails',
+    'short_description' => 'Korte beschrijving',
     'solid' => 'Solide',
     'background_color' => 'Achtergrondkleur',
     'custom' => 'Aangepast',

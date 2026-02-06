@@ -93,6 +93,7 @@ class EventTextGenerator
 
             // Event variables
             '{event_name}' => $event->translatedName(),
+            '{short_description}' => $event->translatedShortDescription() ?? '',
             '{description}' => $event->translatedDescription() ?? '',
             '{url}' => $eventUrl,
 

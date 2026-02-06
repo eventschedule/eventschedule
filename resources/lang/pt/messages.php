@@ -153,6 +153,7 @@ return [
     'schedule_style' => 'Estilo do cronograma',
     'event_venue' => 'Local do evento',
     'event_details' => 'Detalhes do evento',
+    'short_description' => 'Descrição curta',
     'solid' => 'Sólido',
     'background_color' => 'Cor de fundo',
     'custom' => 'Personalizado',

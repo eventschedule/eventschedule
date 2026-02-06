@@ -350,6 +350,7 @@ return [
     'schedule_style' => 'Stiil',
     'event_venue' => 'Ürituse koht',
     'event_details' => 'Sündmuse üksikasjad',
+    'short_description' => 'Lühikirjeldus',
     'solid' => 'Tahke',
     'background_color' => 'Taustavärv',
     'custom' => 'Kohandatud',

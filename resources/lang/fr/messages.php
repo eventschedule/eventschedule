@@ -308,6 +308,7 @@ return [
     'schedule_style' => 'Style de planning',
     'event_venue' => 'Lieu de l\'événement',
     'event_details' => 'Détails de l\'événement',
+    'short_description' => 'Description courte',
     'solid' => 'Solide',
     'background_color' => 'Couleur de fond',
     'custom' => 'Personnalisé',

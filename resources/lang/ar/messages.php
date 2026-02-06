@@ -302,6 +302,7 @@ return [
     'schedule_style' => 'نمط الجدول',
     'event_venue' => 'مكان الفعالية',
     'event_details' => 'تفاصيل الفعالية',
+    'short_description' => 'وصف قصير',
     'solid' => 'صلب',
     'background_color' => 'لون الخلفية',
     'custom' => 'مخصص',

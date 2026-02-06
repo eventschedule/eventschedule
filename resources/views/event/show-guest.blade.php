@@ -540,6 +540,13 @@
           {{ $translation ? $translation->name_translated : $event->translatedName() }}
         </h1>
 
+        {{-- Short description --}}
+        @if ($event->short_description)
+        <p class="text-gray-600 dark:text-gray-400 text-lg mt-2 {{ $role->isRtl() ? 'rtl text-right' : '' }}">
+          {{ $translation && $translation->short_description_translated ? $translation->short_description_translated : $event->translatedShortDescription() }}
+        </p>
+        @endif
+
         {{-- Calendar date badge + time --}}
         <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
           <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700

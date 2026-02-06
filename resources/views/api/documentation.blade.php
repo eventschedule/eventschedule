@@ -284,6 +284,7 @@
             "id": "456",
             "url": "{{ config('app.url') }}/venue-name/event-slug",
             "name": "Event Name",
+            "short_description": "Brief event summary",
             "description": "Event description",
             "starts_at": "{{ now()->format('Y-m-d') }} 19:00:00",
             "duration": 3,
@@ -353,6 +354,7 @@
      -H "Content-Type: application/json" \
      -d '{
          "name": "Event Name",
+         "short_description": "Brief event summary",
          "description": "Event description",
          "starts_at": "{{ now()->format('Y-m-d') }} 19:00:00",
          "duration": 2,
@@ -389,6 +391,7 @@
     -H "X-Requested-With: XMLHttpRequest" \
     -F "flyer_image=@/path/to/your/flyer.jpg" \
     -F "name=Event Name" \
+    -F "short_description=Brief event summary" \
     -F "description=Event description" \
     -F "starts_at=2025-04-14 19:00:00" \
     -F "duration=2" \
@@ -410,8 +413,9 @@
                                         </div>
                                         <pre class="mt-2 overflow-x-auto"><code>{
     "data": {
-        "event_url": "https://example.com",        
+        "event_url": "https://example.com",
         "name": "Event Name",
+        "short_description": "Brief event summary",
         "description": "Event description",
         "starts_at": "{{ now()->format('Y-m-d') }} 19:00:00",
         "duration": 2,

@@ -263,6 +263,11 @@ https://example.com/event/summer-concert</code></pre>
                                             <td>Summer Concert</td>
                                         </tr>
                                         <tr>
+                                            <td><code class="doc-inline-code">{short_description}</code></td>
+                                            <td>Short event summary</td>
+                                            <td>Live jazz with local artists</td>
+                                        </tr>
+                                        <tr>
                                             <td><code class="doc-inline-code">{description}</code></td>
                                             <td>Event description</td>
                                             <td>Join us for a night of music...</td>

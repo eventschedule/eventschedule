@@ -141,11 +141,11 @@
                                     </div>
                                     
                                     <!-- Remove image button -->
-                                    <button 
+                                    <button
                                         @click="removeDetailsImage"
                                         type="button"
-                                        :class="['absolute -top-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-all duration-200 hover:scale-105',
-                                            '-end-1']"
+                                        style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
+                                        :class="['absolute -top-1 -end-1 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-all duration-200 hover:scale-105']"
                                         title="{{ __('messages.remove_image') }}">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -711,11 +711,12 @@
                                 
                                 <!-- Remove image button -->
                                 <button v-if="!isLoading"
-                                        @click="removeImage(idx)" 
+                                        @click="removeImage(idx)"
                                         type="button"
                                         v-bind:disabled="savedEvents[idx]"
-                                        class="absolute top-2 end-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
+                                        class="absolute top-2 end-2 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 flex items-center justify-center">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
@@ -1678,6 +1679,8 @@
                             members: members,
                             name: eventName,
                             name_en: parsed.event_name_en,
+                            short_description: parsed.short_description,
+                            short_description_en: parsed.short_description_en,
                             starts_at: dateValue,
                             duration: computedDuration,
                             description: this.eventDetails ? this.eventDetails : parsed.event_details,
