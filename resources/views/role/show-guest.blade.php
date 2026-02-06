@@ -101,9 +101,9 @@
                 <div class="flex flex-row gap-3 items-center">
                     @if($hasEmail)
                     <a href="mailto:{{ $role->email }}"
-                       class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
+                       class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
                        style="background-color: {{ $accentColor }}"
-                       title="{{ $role->email }}">
+                       data-tooltip="Email: {{ $role->email }}">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24">
                             <path fill="{{ $contrastColor }}" fill-rule="evenodd" clip-rule="evenodd" d="M3.17157 5.17157C2 6.34315 2 8.22876 2 12C2 15.7712 2 17.6569 3.17157 18.8284C4.34315 20 6.22876 20 10 20H14C17.7712 20 19.6569 20 20.8284 18.8284C22 17.6569 22 15.7712 22 12C22 8.22876 22 6.34315 20.8284 5.17157C19.6569 4 17.7712 4 14 4H10C6.22876 4 4.34315 4 3.17157 5.17157ZM18.5762 7.51986C18.8413 7.83807 18.7983 8.31099 18.4801 8.57617L16.2837 10.4066C15.3973 11.1452 14.6789 11.7439 14.0448 12.1517C13.3843 12.5765 12.7411 12.8449 12 12.8449C11.2589 12.8449 10.6157 12.5765 9.95518 12.1517C9.32112 11.7439 8.60271 11.1452 7.71636 10.4066L5.51986 8.57617C5.20165 8.31099 5.15866 7.83807 5.42383 7.51986C5.68901 7.20165 6.16193 7.15866 6.48014 7.42383L8.63903 9.22291C9.57199 10.0004 10.2197 10.5384 10.7666 10.8901C11.2959 11.2306 11.6549 11.3449 12 11.3449C12.3451 11.3449 12.7041 11.2306 13.2334 10.8901C13.7803 10.5384 14.428 10.0004 15.361 9.22291L17.5199 7.42383C17.8381 7.15866 18.311 7.20165 18.5762 7.51986Z"/>
                         </svg>
@@ -111,9 +111,9 @@
                     @endif
                     @if($hasWebsite)
                     <a href="{{ $role->website }}" target="_blank" rel="noopener noreferrer"
-                       class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
+                       class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
                        style="background-color: {{ $accentColor }}"
-                       title="{{ App\Utils\UrlUtils::clean($role->website) }}">
+                       data-tooltip="Website: {{ App\Utils\UrlUtils::clean($role->website) }}">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24">
                             <path fill="{{ $contrastColor }}" fill-rule="evenodd" clip-rule="evenodd" d="M12 2C17.52 2 22 6.48 22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2ZM11 19.93C7.05 19.44 4 16.08 4 12C4 11.38 4.08 10.79 4.21 10.21L9 15V16C9 17.1 9.9 18 11 18V19.93ZM17.9 17.39C17.64 16.58 16.9 16 16 16H15V13C15 12.45 14.55 12 14 12H8V10H10C10.55 10 11 9.55 11 9V7H13C14.1 7 15 6.1 15 5V4.59C17.93 5.78 20 8.65 20 12C20 14.08 19.2 15.97 17.9 17.39Z"/>
                         </svg>
@@ -123,9 +123,9 @@
                         @foreach (json_decode($role->social_links) as $link)
                         @if ($link)
                         <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer"
-                           class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
+                           class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
                            style="background-color: {{ $accentColor }}"
-                           title="{{ App\Utils\UrlUtils::clean($link->url) }}">
+                           data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
                             <x-url-icon class="w-5 h-5" :color="$contrastColor">
                                 {{ \App\Utils\UrlUtils::clean($link->url) }}
                             </x-url-icon>
@@ -236,50 +236,46 @@
                     <svg class="ml-1 h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                   </a>
                   @endif
+                  {{-- Social icons (desktop - simple monochrome style) --}}
+                  @if($hasEmail || $hasWebsite || $hasSocial)
+                  <div class="flex flex-row gap-4 items-center mt-3">
+                      @if($hasEmail)
+                      <a href="mailto:{{ $role->email }}"
+                         class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
+                         data-tooltip="Email: {{ $role->email }}">
+                          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                              <path fill-rule="evenodd" clip-rule="evenodd" d="M3.17157 5.17157C2 6.34315 2 8.22876 2 12C2 15.7712 2 17.6569 3.17157 18.8284C4.34315 20 6.22876 20 10 20H14C17.7712 20 19.6569 20 20.8284 18.8284C22 17.6569 22 15.7712 22 12C22 8.22876 22 6.34315 20.8284 5.17157C19.6569 4 17.7712 4 14 4H10C6.22876 4 4.34315 4 3.17157 5.17157ZM18.5762 7.51986C18.8413 7.83807 18.7983 8.31099 18.4801 8.57617L16.2837 10.4066C15.3973 11.1452 14.6789 11.7439 14.0448 12.1517C13.3843 12.5765 12.7411 12.8449 12 12.8449C11.2589 12.8449 10.6157 12.5765 9.95518 12.1517C9.32112 11.7439 8.60271 11.1452 7.71636 10.4066L5.51986 8.57617C5.20165 8.31099 5.15866 7.83807 5.42383 7.51986C5.68901 7.20165 6.16193 7.15866 6.48014 7.42383L8.63903 9.22291C9.57199 10.0004 10.2197 10.5384 10.7666 10.8901C11.2959 11.2306 11.6549 11.3449 12 11.3449C12.3451 11.3449 12.7041 11.2306 13.2334 10.8901C13.7803 10.5384 14.428 10.0004 15.361 9.22291L17.5199 7.42383C17.8381 7.15866 18.311 7.20165 18.5762 7.51986Z"/>
+                          </svg>
+                      </a>
+                      @endif
+                      @if($hasWebsite)
+                      <a href="{{ $role->website }}" target="_blank" rel="noopener noreferrer"
+                         class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
+                         data-tooltip="Website: {{ App\Utils\UrlUtils::clean($role->website) }}">
+                          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                              <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C17.52 2 22 6.48 22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2ZM11 19.93C7.05 19.44 4 16.08 4 12C4 11.38 4.08 10.79 4.21 10.21L9 15V16C9 17.1 9.9 18 11 18V19.93ZM17.9 17.39C17.64 16.58 16.9 16 16 16H15V13C15 12.45 14.55 12 14 12H8V10H10C10.55 10 11 9.55 11 9V7H13C14.1 7 15 6.1 15 5V4.59C17.93 5.78 20 8.65 20 12C20 14.08 19.2 15.97 17.9 17.39Z"/>
+                          </svg>
+                      </a>
+                      @endif
+                      @if($hasSocial)
+                          @foreach (json_decode($role->social_links) as $link)
+                          @if ($link)
+                          <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer"
+                             class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
+                             data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
+                              <x-url-icon class="w-5 h-5">
+                                  {{ \App\Utils\UrlUtils::clean($link->url) }}
+                              </x-url-icon>
+                          </a>
+                          @endif
+                          @endforeach
+                      @endif
+                  </div>
+                  @endif
                 </div>
 
                 {{-- Spacer --}}
                 <div class="flex-grow"></div>
-
-                {{-- Social icons --}}
-                @if($hasEmail || $hasWebsite || $hasSocial)
-                <div class="flex flex-row gap-3 items-center flex-shrink-0">
-                    @if($hasEmail)
-                    <a href="mailto:{{ $role->email }}"
-                       class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
-                       style="background-color: {{ $accentColor }}"
-                       title="{{ $role->email }}">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24">
-                            <path fill="{{ $contrastColor }}" fill-rule="evenodd" clip-rule="evenodd" d="M3.17157 5.17157C2 6.34315 2 8.22876 2 12C2 15.7712 2 17.6569 3.17157 18.8284C4.34315 20 6.22876 20 10 20H14C17.7712 20 19.6569 20 20.8284 18.8284C22 17.6569 22 15.7712 22 12C22 8.22876 22 6.34315 20.8284 5.17157C19.6569 4 17.7712 4 14 4H10C6.22876 4 4.34315 4 3.17157 5.17157ZM18.5762 7.51986C18.8413 7.83807 18.7983 8.31099 18.4801 8.57617L16.2837 10.4066C15.3973 11.1452 14.6789 11.7439 14.0448 12.1517C13.3843 12.5765 12.7411 12.8449 12 12.8449C11.2589 12.8449 10.6157 12.5765 9.95518 12.1517C9.32112 11.7439 8.60271 11.1452 7.71636 10.4066L5.51986 8.57617C5.20165 8.31099 5.15866 7.83807 5.42383 7.51986C5.68901 7.20165 6.16193 7.15866 6.48014 7.42383L8.63903 9.22291C9.57199 10.0004 10.2197 10.5384 10.7666 10.8901C11.2959 11.2306 11.6549 11.3449 12 11.3449C12.3451 11.3449 12.7041 11.2306 13.2334 10.8901C13.7803 10.5384 14.428 10.0004 15.361 9.22291L17.5199 7.42383C17.8381 7.15866 18.311 7.20165 18.5762 7.51986Z"/>
-                        </svg>
-                    </a>
-                    @endif
-                    @if($hasWebsite)
-                    <a href="{{ $role->website }}" target="_blank" rel="noopener noreferrer"
-                       class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
-                       style="background-color: {{ $accentColor }}"
-                       title="{{ App\Utils\UrlUtils::clean($role->website) }}">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24">
-                            <path fill="{{ $contrastColor }}" fill-rule="evenodd" clip-rule="evenodd" d="M12 2C17.52 2 22 6.48 22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2ZM11 19.93C7.05 19.44 4 16.08 4 12C4 11.38 4.08 10.79 4.21 10.21L9 15V16C9 17.1 9.9 18 11 18V19.93ZM17.9 17.39C17.64 16.58 16.9 16 16 16H15V13C15 12.45 14.55 12 14 12H8V10H10C10.55 10 11 9.55 11 9V7H13C14.1 7 15 6.1 15 5V4.59C17.93 5.78 20 8.65 20 12C20 14.08 19.2 15.97 17.9 17.39Z"/>
-                        </svg>
-                    </a>
-                    @endif
-                    @if($hasSocial)
-                        @foreach (json_decode($role->social_links) as $link)
-                        @if ($link)
-                        <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer"
-                           class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
-                           style="background-color: {{ $accentColor }}"
-                           title="{{ App\Utils\UrlUtils::clean($link->url) }}">
-                            <x-url-icon class="w-5 h-5" :color="$contrastColor">
-                                {{ \App\Utils\UrlUtils::clean($link->url) }}
-                            </x-url-icon>
-                        </a>
-                        @endif
-                        @endforeach
-                    @endif
-                </div>
-                @endif
 
                 {{-- Action buttons --}}
                 @if (config('app.hosted') || config('app.is_testing'))
@@ -510,6 +506,65 @@
         @endif
 
       <style {!! nonce_attr() !!}>
+        /* Custom animated tooltips for social icons */
+        .social-tooltip {
+          position: relative;
+        }
+
+        .social-tooltip::before,
+        .social-tooltip::after {
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.15s ease-out;
+          pointer-events: none;
+          z-index: 50;
+        }
+
+        /* Tooltip text bubble */
+        .social-tooltip::before {
+          content: attr(data-tooltip);
+          bottom: calc(100% + 8px);
+          padding: 6px 10px;
+          background: rgba(17, 24, 39, 0.95);
+          color: #fff;
+          font-size: 13px;
+          font-weight: 500;
+          border-radius: 6px;
+          white-space: nowrap;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          transform: translateX(-50%) translateY(4px);
+        }
+
+        /* Arrow/caret pointing down */
+        .social-tooltip::after {
+          content: '';
+          bottom: calc(100% + 2px);
+          border: 6px solid transparent;
+          border-top-color: rgba(17, 24, 39, 0.95);
+          transform: translateX(-50%) translateY(4px);
+        }
+
+        /* Show on hover with animation */
+        .social-tooltip:hover::before,
+        .social-tooltip:hover::after {
+          opacity: 1;
+          visibility: visible;
+          transform: translateX(-50%) translateY(0);
+        }
+
+        /* Dark mode adjustments */
+        .dark .social-tooltip::before {
+          background: rgba(255, 255, 255, 0.95);
+          color: #111827;
+        }
+
+        .dark .social-tooltip::after {
+          border-top-color: rgba(255, 255, 255, 0.95);
+        }
+
         @keyframes view-toggle-bounce-expand {
             0%   { transform: scaleX(1); }
             40%  { transform: scaleX(1.008); }
