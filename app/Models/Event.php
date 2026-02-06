@@ -53,6 +53,7 @@ class Event extends Model
         'custom_fields' => 'array',
         'custom_field_values' => 'array',
         'last_translated_at' => 'datetime',
+        'ticket_price' => 'decimal:2',
     ];
 
     /**

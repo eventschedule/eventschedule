@@ -1533,10 +1533,31 @@ class RoleController extends Controller
             $eventCustomFields = [];
             $fieldsNeedingTranslation = [];
 
+            // Collect all used indices from existing fields being preserved
+            $usedIndices = [];
+            foreach ($submittedFields as $fieldKey => $fieldData) {
+                if (! empty($fieldData['name']) && isset($existingCustomFields[$fieldKey]['index'])) {
+                    $usedIndices[] = $existingCustomFields[$fieldKey]['index'];
+                }
+            }
+
             foreach ($submittedFields as $fieldKey => $fieldData) {
                 // Skip fields without a name
                 if (empty($fieldData['name'])) {
                     continue;
+                }
+
+                // Preserve existing index or assign next available (1-8)
+                $fieldIndex = $existingCustomFields[$fieldKey]['index'] ?? null;
+                if (! $fieldIndex) {
+                    // Find the next available index
+                    for ($i = 1; $i <= 8; $i++) {
+                        if (! in_array($i, $usedIndices)) {
+                            $fieldIndex = $i;
+                            $usedIndices[] = $i;
+                            break;
+                        }
+                    }
                 }
 
                 $eventCustomFields[$fieldKey] = [
@@ -1545,6 +1566,7 @@ class RoleController extends Controller
                     'required' => ! empty($fieldData['required']),
                     'options' => $fieldData['options'] ?? '',
                     'ai_prompt' => $fieldData['ai_prompt'] ?? '',
+                    'index' => $fieldIndex,
                 ];
 
                 // Handle name_en - preserve manually entered value or check if translation needed

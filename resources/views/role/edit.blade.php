@@ -1543,7 +1543,7 @@
                                 $fieldIndex = 0;
                             @endphp
                             @foreach($eventCustomFields as $fieldKey => $field)
-                            <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-custom-field-item" data-field-key="{{ $fieldKey }}">
+                            <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-custom-field-item" data-field-key="{{ $fieldKey }}" data-field-index="{{ $field['index'] ?? '' }}">
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <x-input-label :value="__('messages.field_name') . ' *'" class="text-sm" />
@@ -1589,20 +1589,24 @@
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_prompt_custom_field_help') }}</p>
                                 </div>
                                 <div class="mt-3 flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <input type="checkbox" name="event_custom_fields[{{ $fieldKey }}][required]"
-                                            id="event_field_required_{{ $fieldKey }}"
-                                            value="1"
-                                            {{ !empty($field['required']) ? 'checked' : '' }}
-                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                        <label for="event_field_required_{{ $fieldKey }}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
+                                    <div class="flex items-center gap-4">
+                                        <div class="flex items-center">
+                                            <input type="checkbox" name="event_custom_fields[{{ $fieldKey }}][required]"
+                                                id="event_field_required_{{ $fieldKey }}"
+                                                value="1"
+                                                {{ !empty($field['required']) ? 'checked' : '' }}
+                                                class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                            <label for="event_field_required_{{ $fieldKey }}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
+                                        </div>
+                                        @if(!empty($field['index']))
+                                        <span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_{{ $field['index'] }}}</span>
+                                        @endif
                                     </div>
                                     <button type="button" onclick="removeEventCustomField(this)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                         {{ __('messages.remove') }}
                                     </button>
                                 </div>
                             </div>
-                            @php $fieldIndex++; @endphp
                             @endforeach
                         </div>
 
@@ -3446,6 +3450,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Event Custom Fields Management
 let eventCustomFieldCounter = {{ count($role->event_custom_fields ?? []) }};
+// Track used indices for stable custom field variables
+let usedEventFieldIndices = @json(array_values(array_filter(array_map(fn($f) => $f['index'] ?? null, $role->event_custom_fields ?? []))));
 const aiPromptExamples = @json(array_map(fn($i) => __("messages.ai_prompt_example_$i"), range(1, 20)));
 const aiPromptEgPrefix = @json(__('messages.eg'));
 
@@ -3470,6 +3476,15 @@ document.querySelectorAll('.ai-prompt-textarea').forEach(function(textarea) {
     }
 });
 
+function getNextAvailableFieldIndex() {
+    for (let i = 1; i <= 8; i++) {
+        if (!usedEventFieldIndices.includes(i)) {
+            return i;
+        }
+    }
+    return null;
+}
+
 function addEventCustomField() {
     const container = document.getElementById('event-custom-fields-container');
     const currentCount = container.querySelectorAll('.event-custom-field-item').length;
@@ -3481,8 +3496,14 @@ function addEventCustomField() {
     const fieldKey = 'new_' + eventCustomFieldCounter;
     eventCustomFieldCounter++;
 
+    // Assign next available index
+    const fieldIndex = getNextAvailableFieldIndex();
+    if (fieldIndex) {
+        usedEventFieldIndices.push(fieldIndex);
+    }
+
     const fieldHtml = `
-        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-custom-field-item" data-field-key="${fieldKey}">
+        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-custom-field-item" data-field-key="${fieldKey}" data-field-index="${fieldIndex || ''}">
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_name') !!} *</label>
@@ -3525,12 +3546,15 @@ function addEventCustomField() {
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{!! __('messages.ai_prompt_custom_field_help') !!}</p>
             </div>
             <div class="mt-3 flex items-center justify-between">
-                <div class="flex items-center">
-                    <input type="checkbox" name="event_custom_fields[${fieldKey}][required]"
-                        id="event_field_required_${fieldKey}"
-                        value="1"
-                        class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                    <label for="event_field_required_${fieldKey}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{!! __('messages.field_required') !!}</label>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center">
+                        <input type="checkbox" name="event_custom_fields[${fieldKey}][required]"
+                            id="event_field_required_${fieldKey}"
+                            value="1"
+                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                        <label for="event_field_required_${fieldKey}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{!! __('messages.field_required') !!}</label>
+                    </div>
+                    ${fieldIndex ? `<span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_${fieldIndex}}</span>` : ''}
                 </div>
                 <button type="button" onclick="removeEventCustomField(this)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                     {!! __('messages.remove') !!}
@@ -3550,6 +3574,11 @@ function addEventCustomField() {
 function removeEventCustomField(button) {
     const fieldItem = button.closest('.event-custom-field-item');
     if (fieldItem) {
+        // Free up the index when removing a field
+        const fieldIndex = parseInt(fieldItem.dataset.fieldIndex);
+        if (fieldIndex) {
+            usedEventFieldIndices = usedEventFieldIndices.filter(i => i !== fieldIndex);
+        }
         fieldItem.remove();
         updateEventCustomFieldButton();
     }

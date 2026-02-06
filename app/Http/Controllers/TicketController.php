@@ -192,19 +192,21 @@ class TicketController extends Controller
                     $sale->event_date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
                 }
 
-                // Store event-level custom field values
+                // Store event-level custom field values using stable indices
+                // Fallback to iteration order for backward compatibility with fields without index
                 $eventCustomValues = $request->input('event_custom_values', []);
                 $eventCustomFields = $event->custom_fields ?? [];
-                $fieldIndex = 1;
+                $fallbackIndex = 1;
                 foreach ($eventCustomFields as $fieldKey => $fieldConfig) {
-                    if ($fieldIndex <= 8) {
+                    $index = $fieldConfig['index'] ?? $fallbackIndex;
+                    $fallbackIndex++;
+                    if ($index >= 1 && $index <= 8) {
                         $value = $eventCustomValues[$fieldKey] ?? null;
                         // Sanitize custom field values to prevent stored XSS
                         if ($value !== null) {
                             $value = trim(strip_tags($value));
                         }
-                        $sale->{"custom_value{$fieldIndex}"} = $value;
-                        $fieldIndex++;
+                        $sale->{"custom_value{$index}"} = $value;
                     }
                 }
 
@@ -225,17 +227,19 @@ class TicketController extends Controller
                             'seats' => json_encode(array_fill(1, $quantity, null)),
                         ];
 
-                        // Store ticket-level custom field values
-                        $ticketFieldIndex = 1;
+                        // Store ticket-level custom field values using stable indices
+                        // Fallback to iteration order for backward compatibility with fields without index
+                        $ticketFallbackIndex = 1;
                         foreach ($ticketCustomFields as $fieldKey => $fieldConfig) {
-                            if ($ticketFieldIndex <= 8) {
+                            $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
+                            $ticketFallbackIndex++;
+                            if ($index >= 1 && $index <= 8) {
                                 $value = $ticketCustomValues[$ticketId][$fieldKey] ?? null;
                                 // Sanitize custom field values to prevent stored XSS
                                 if ($value !== null) {
                                     $value = trim(strip_tags($value));
                                 }
-                                $saleTicketData["custom_value{$ticketFieldIndex}"] = $value;
-                                $ticketFieldIndex++;
+                                $saleTicketData["custom_value{$index}"] = $value;
                             }
                         }
 
