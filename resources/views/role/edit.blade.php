@@ -180,8 +180,7 @@
             });
 
             $('#header_image_url').on('change', function() {
-                previewImage(this, 'header_image_preview');
-                $('#header_image_preview').show();
+                previewImage(this, 'header_image_url_preview');
                 updatePreview();
             });
 
@@ -214,7 +213,7 @@
             const input = document.getElementById('header_image_url');
             input.value = '';
             document.getElementById('header_image_url_filename').textContent = '';
-            document.getElementById('header_image_url_clear').style.display = 'none';
+            document.getElementById('header_image_url_preview_clear').style.display = 'none';
             // Hide the custom header preview, but keep preset header preview visible if any
             const headerSelect = document.getElementById('header_image');
             if (headerSelect.value === '') {
@@ -275,26 +274,18 @@
                         }
                     }
 
-                    if (warningMessage == '') {
-                        preview.src = reader.result;
-                        if (clearBtn) {
-                            clearBtn.style.display = 'inline-block';
-                        } else {
-                            preview.style.display = 'block';
-                        }
-                        updatePreview();
-
-                        if (previewId === 'background_image_preview') {
-                            $('#style_background_image img:not(#background_image_preview)').hide();
-                            $('#style_background_image a').hide();
-                        }
+                    // Always show the preview, even with warnings
+                    preview.src = reader.result;
+                    if (clearBtn) {
+                        clearBtn.style.display = 'inline-block';
                     } else {
-                        preview.src = '';
-                        if (clearBtn) {
-                            clearBtn.style.display = 'none';
-                        } else {
-                            preview.style.display = 'none';
-                        }
+                        preview.style.display = 'block';
+                    }
+                    updatePreview();
+
+                    if (previewId === 'background_image_preview') {
+                        $('#style_background_image img:not(#background_image_preview)').hide();
+                        $('#style_background_image a').hide();
                     }
                 };
                 img.src = reader.result;
@@ -1099,7 +1090,7 @@
 
                                 <div id="custom_header_input" style="display:none" class="mt-4">
                                     <input id="header_image_url" name="header_image_url" type="file" class="hidden"
-                                        accept="image/png, image/jpeg" onchange="document.getElementById('header_image_url_filename').textContent = this.files[0]?.name || ''; document.getElementById('header_image_url_clear').style.display = this.files[0] ? 'inline' : 'none';" />
+                                        accept="image/png, image/jpeg" onchange="document.getElementById('header_image_url_filename').textContent = this.files[0]?.name || '';" />
                                     <div class="mt-1 flex items-center gap-3">
                                         <button type="button" onclick="document.getElementById('header_image_url').click()"
                                             class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
@@ -1109,9 +1100,11 @@
                                             {{ __('messages.choose_file') }}
                                         </button>
                                         <span id="header_image_url_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
-                                        <button type="button" id="header_image_url_clear" onclick="clearHeaderFileInput()"
-                                            class="text-gray-400 hover:text-red-500 p-1" style="display: none;">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    </div>
+                                    <div id="header_image_url_preview_clear" class="relative inline-block pt-3" style="display: none;">
+                                        <img id="header_image_url_preview" src="#" alt="Header Image Preview" style="max-height:120px;" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                        <button type="button" onclick="clearHeaderFileInput()" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                             </svg>
                                         </button>
