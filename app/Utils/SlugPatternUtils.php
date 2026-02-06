@@ -150,22 +150,26 @@ class SlugPatternUtils
             '{price}' => self::getPrice($event),
         ]);
 
-        // Add custom field replacements
+        // Add custom field replacements using stable indices
         $customFieldValues = $event?->custom_field_values ?? [];
         $roleCustomFields = $role?->event_custom_fields ?? [];
-        $fieldIndex = 1;
-        foreach ($roleCustomFields as $fieldKey => $fieldConfig) {
-            $value = $customFieldValues[$fieldKey] ?? '';
-            // Convert boolean values to Yes/No for switch type
-            if (($fieldConfig['type'] ?? '') === 'switch') {
-                $value = ($value === '1' || $value === 1 || $value === true) ? 'yes' : 'no';
-            }
-            $replacements['{custom_'.$fieldIndex.'}'] = $value;
-            $fieldIndex++;
-        }
-        // Fill remaining with empty strings (up to 8 custom fields)
-        for ($i = $fieldIndex; $i <= 8; $i++) {
+        // Initialize all custom fields to empty
+        for ($i = 1; $i <= 8; $i++) {
             $replacements['{custom_'.$i.'}'] = '';
+        }
+        // Fill in values using stored index, or fallback to iteration order for backward compatibility
+        $fallbackIndex = 1;
+        foreach ($roleCustomFields as $fieldKey => $fieldConfig) {
+            $index = $fieldConfig['index'] ?? $fallbackIndex;
+            $fallbackIndex++;
+            if ($index >= 1 && $index <= 8) {
+                $value = $customFieldValues[$fieldKey] ?? '';
+                // Convert boolean values to Yes/No for switch type
+                if (($fieldConfig['type'] ?? '') === 'switch') {
+                    $value = ($value === '1' || $value === 1 || $value === true) ? 'yes' : 'no';
+                }
+                $replacements['{custom_'.$index.'}'] = $value;
+            }
         }
 
         return str_replace(array_keys($replacements), array_values($replacements), $pattern);

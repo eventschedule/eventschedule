@@ -1292,22 +1292,33 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.video_already_submitted'));
         }
 
+        // Auto-approve if user is a member of any schedule associated with this event
+        $isApproved = $request->user()->canEditEvent($event);
+
         $video = EventVideo::create([
             'event_id' => $event->id,
             'event_part_id' => $eventPartId ?: null,
             'event_date' => $eventDate,
             'user_id' => $request->user()->id,
             'youtube_url' => $youtubeUrl,
-            'is_approved' => false,
+            'is_approved' => $isApproved,
         ]);
 
         if (! $request->user()->isConnected($role->subdomain)) {
             $request->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
         }
 
-        return redirect()->to($event->getGuestUrl($subdomain))
-            ->with('message', __('messages.video_submitted'))
-            ->with('scroll_to', 'pending-video-'.$video->id);
+        $message = $isApproved
+            ? __('messages.video_submitted_approved')
+            : __('messages.video_submitted');
+
+        $redirect = redirect()->to($event->getGuestUrl($subdomain))->with('message', $message);
+
+        if (! $isApproved) {
+            $redirect = $redirect->with('scroll_to', 'pending-video-'.$video->id);
+        }
+
+        return $redirect;
     }
 
     public function submitComment(Request $request, $subdomain, $event_hash)
@@ -1353,22 +1364,33 @@ class EventController extends Controller
 
         $eventDate = $event->days_of_week ? $request->input('event_date') : null;
 
+        // Auto-approve if user is a member of any schedule associated with this event
+        $isApproved = $request->user()->canEditEvent($event);
+
         $eventComment = EventComment::create([
             'event_id' => $event->id,
             'event_part_id' => $eventPartId ?: null,
             'event_date' => $eventDate,
             'user_id' => $request->user()->id,
             'comment' => $comment,
-            'is_approved' => false,
+            'is_approved' => $isApproved,
         ]);
 
         if (! $request->user()->isConnected($role->subdomain)) {
             $request->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
         }
 
-        return redirect()->to($event->getGuestUrl($subdomain))
-            ->with('message', __('messages.comment_submitted'))
-            ->with('scroll_to', 'pending-comment-'.$eventComment->id);
+        $message = $isApproved
+            ? __('messages.comment_submitted_approved')
+            : __('messages.comment_submitted');
+
+        $redirect = redirect()->to($event->getGuestUrl($subdomain))->with('message', $message);
+
+        if (! $isApproved) {
+            $redirect = $redirect->with('scroll_to', 'pending-comment-'.$eventComment->id);
+        }
+
+        return $redirect;
     }
 
     public function approveVideo(Request $request, $subdomain, $hash)

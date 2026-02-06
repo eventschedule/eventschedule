@@ -283,15 +283,18 @@
 
             {{-- Event-level Custom Fields --}}
             @if ($hasEventCustomFields)
-              @php $fieldIndex = 1; @endphp
+              @php $eventFallbackIndex = 1; @endphp
               @foreach ($event->custom_fields as $fieldKey => $fieldConfig)
-                @if ($fieldIndex <= 8 && $sale->{"custom_value{$fieldIndex}"})
+                @php
+                  $index = $fieldConfig['index'] ?? $eventFallbackIndex;
+                  $eventFallbackIndex++;
+                @endphp
+                @if ($index >= 1 && $index <= 8 && $sale->{"custom_value{$index}"})
                   <div class="flex gap-[8px] items-start mb-[8px]">
                     <span class="text-[12px] text-white/60 print-text-gray font-medium">{{ $fieldConfig['name'] }}:</span>
-                    <span class="text-[12px] text-white print-text-dark">{{ $sale->{"custom_value{$fieldIndex}"} }}</span>
+                    <span class="text-[12px] text-white print-text-dark">{{ $sale->{"custom_value{$index}"} }}</span>
                   </div>
                 @endif
-                @php $fieldIndex++; @endphp
               @endforeach
             @endif
 
@@ -300,15 +303,18 @@
               @if ($saleTicket->ticket->custom_fields && count($saleTicket->ticket->custom_fields) > 0)
                 <div class="mt-[12px] pt-[12px] border-t border-white/10 print:border-slate-200">
                   <p class="text-[11px] text-violet-400 print:text-violet-600 font-semibold mb-[8px]">{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</p>
-                  @php $ticketFieldIndex = 1; @endphp
+                  @php $ticketFallbackIndex = 1; @endphp
                   @foreach ($saleTicket->ticket->custom_fields as $fieldKey => $fieldConfig)
-                    @if ($ticketFieldIndex <= 8 && $saleTicket->{"custom_value{$ticketFieldIndex}"})
+                    @php
+                      $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
+                      $ticketFallbackIndex++;
+                    @endphp
+                    @if ($index >= 1 && $index <= 8 && $saleTicket->{"custom_value{$index}"})
                       <div class="flex gap-[8px] items-start mb-[4px] ml-[12px]">
                         <span class="text-[12px] text-white/60 print-text-gray font-medium">{{ $fieldConfig['name'] }}:</span>
-                        <span class="text-[12px] text-white print-text-dark">{{ $saleTicket->{"custom_value{$ticketFieldIndex}"} }}</span>
+                        <span class="text-[12px] text-white print-text-dark">{{ $saleTicket->{"custom_value{$index}"} }}</span>
                       </div>
                     @endif
-                    @php $ticketFieldIndex++; @endphp
                   @endforeach
                 </div>
               @endif

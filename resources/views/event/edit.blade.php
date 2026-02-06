@@ -2089,8 +2089,7 @@
                                         @endforeach
                                     </select>
                                     <x-text-input type="number" name="ticket_price" step="0.01" min="0"
-                                        class="flex-1" v-model="event.ticket_price"
-                                        placeholder="0.00" />
+                                        class="flex-1" v-model="event.ticket_price" />
                                 </div>
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.external_price_help') }}</p>
                             </div>
@@ -3359,13 +3358,23 @@
       removeTicket(index) {
         this.tickets.splice(index, 1);
       },
+      getNextAvailableEventFieldIndex() {
+        const usedIndices = Object.values(this.eventCustomFields || {}).map(f => f.index).filter(i => i);
+        for (let i = 1; i <= 8; i++) {
+          if (!usedIndices.includes(i)) {
+            return i;
+          }
+        }
+        return null;
+      },
       addEventCustomField() {
         const fieldCount = Object.keys(this.eventCustomFields || {}).length;
         if (fieldCount >= 8) return;
-        const fieldKey = 'field' + (fieldCount + 1);
+        const fieldKey = 'field' + Date.now();
+        const fieldIndex = this.getNextAvailableEventFieldIndex();
         this.eventCustomFields = {
           ...this.eventCustomFields,
-          [fieldKey]: { name: '', name_en: '', type: 'string', required: false }
+          [fieldKey]: { name: '', name_en: '', type: 'string', required: false, index: fieldIndex }
         };
       },
       removeEventCustomField(fieldKey) {
@@ -3376,6 +3385,15 @@
       getEventCustomFieldCount() {
         return Object.keys(this.eventCustomFields || {}).length;
       },
+      getNextAvailableTicketFieldIndex(ticket) {
+        const usedIndices = Object.values(ticket.custom_fields || {}).map(f => f.index).filter(i => i);
+        for (let i = 1; i <= 8; i++) {
+          if (!usedIndices.includes(i)) {
+            return i;
+          }
+        }
+        return null;
+      },
       addTicketCustomField(ticketIndex) {
         const ticket = this.tickets[ticketIndex];
         if (!ticket.custom_fields) {
@@ -3383,10 +3401,11 @@
         }
         const fieldCount = Object.keys(ticket.custom_fields).length;
         if (fieldCount >= 8) return;
-        const fieldKey = 'field' + (fieldCount + 1);
+        const fieldKey = 'field' + Date.now();
+        const fieldIndex = this.getNextAvailableTicketFieldIndex(ticket);
         ticket.custom_fields = {
           ...ticket.custom_fields,
-          [fieldKey]: { name: '', name_en: '', type: 'string', required: false }
+          [fieldKey]: { name: '', name_en: '', type: 'string', required: false, index: fieldIndex }
         };
       },
       removeTicketCustomField(ticketIndex, fieldKey) {

@@ -164,43 +164,45 @@
 
               <div class="flex flex-col gap-4">
                 {{-- Name + follow/manage button --}}
-                <div class="flex items-center justify-between">
-                  @if ($each->isClaimed())
-                    @if (!isset($talentUrl))
-                      @php
-                        $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
-                        $tQueryParams = [];
-                        if (request('category')) $tQueryParams['category'] = request('category');
-                        if (request('schedule')) $tQueryParams['schedule'] = request('schedule');
-                        if (request('date')) {
-                          $tDate = request('date');
-                          if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tDate)) {
-                            $tDateParts = explode('-', $tDate);
-                            $tQueryParams['month'] = (int)$tDateParts[1];
-                            $tQueryParams['year'] = (int)$tDateParts[0];
+                <div class="flex items-center justify-between gap-4">
+                  <div class="min-w-0">
+                    @if ($each->isClaimed())
+                      @if (!isset($talentUrl))
+                        @php
+                          $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
+                          $tQueryParams = [];
+                          if (request('category')) $tQueryParams['category'] = request('category');
+                          if (request('schedule')) $tQueryParams['schedule'] = request('schedule');
+                          if (request('date')) {
+                            $tDate = request('date');
+                            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tDate)) {
+                              $tDateParts = explode('-', $tDate);
+                              $tQueryParams['month'] = (int)$tDateParts[1];
+                              $tQueryParams['year'] = (int)$tDateParts[0];
+                            }
+                          } else {
+                            if (request('month')) $tQueryParams['month'] = request('month');
+                            if (request('year')) $tQueryParams['year'] = request('year');
                           }
-                        } else {
-                          if (request('month')) $tQueryParams['month'] = request('month');
-                          if (request('year')) $tQueryParams['year'] = request('year');
-                        }
-                        if (!empty($tQueryParams)) {
-                          $talentUrl .= '?' . http_build_query($tQueryParams);
-                        }
-                      @endphp
-                    @endif
-                    <a href="{{ $talentUrl }}" class="group flex items-center gap-2 {{ $role->isRtl() ? 'rtl' : '' }}">
-                      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ $each->font_family }}', sans-serif;">
+                          if (!empty($tQueryParams)) {
+                            $talentUrl .= '?' . http_build_query($tQueryParams);
+                          }
+                        @endphp
+                      @endif
+                      <a href="{{ $talentUrl }}" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}">
+                        <h2 class="inline text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ $each->font_family }}', sans-serif;">
+                          {{ $each->translatedName() }}
+                          <svg class="inline-block w-5 h-5 {{ $role->isRtl() ? 'ms-1 scale-x-[-1]' : 'ms-1' }} align-text-bottom fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
+                          </svg>
+                        </h2>
+                      </a>
+                    @else
+                      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ $otherRole->font_family ?? 'sans-serif' }}', sans-serif;">
                         {{ $each->translatedName() }}
                       </h2>
-                      <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
-                      </svg>
-                    </a>
-                  @else
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ $otherRole->font_family ?? 'sans-serif' }}', sans-serif;">
-                      {{ $each->translatedName() }}
-                    </h2>
-                  @endif
+                    @endif
+                  </div>
 
                   @if ($each->isClaimed() && (config('app.hosted') || config('app.is_testing')) && ! is_demo_mode())
                     @if (auth()->user() && auth()->user()->isMember($each->subdomain))
@@ -301,7 +303,7 @@
                 @php
                   $venuePanelUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
                 @endphp
-                <a href="{{ $venuePanelUrl }}" class="group flex items-center gap-2 hover:opacity-80 transition-opacity duration-200 {{ $role->isRtl() ? 'rtl' : '' }}">
+                <a href="{{ $venuePanelUrl }}" class="group inline-flex items-center gap-2 w-fit hover:opacity-80 transition-opacity duration-200 {{ $role->isRtl() ? 'rtl' : '' }}">
                   <h2 class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ $event->venue->font_family }}', sans-serif;">
                     {{ $event->venue->translatedName() }}
                   </h2>
@@ -616,7 +618,7 @@
                       $venueUrl .= '?' . http_build_query($queryParams);
                     }
                   @endphp
-                  <a href="{{ $venueUrl }}" class="group flex items-center gap-1">
+                  <a href="{{ $venueUrl }}" class="group inline-flex items-center gap-1 w-fit">
                     <span class="text-lg font-semibold text-gray-900 dark:text-white group-hover:underline">{{ $event->venue->translatedName() }}</span>
                     <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
