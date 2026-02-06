@@ -718,6 +718,12 @@
         }
     }
 
+    function clearFileInput(inputId) {
+        var input = document.getElementById(inputId);
+        input.value = '';
+        input.dispatchEvent(new Event('change'));
+    }
+
     function previewImage(input) {
         var preview = document.getElementById('preview_img');
         var previewDiv = document.getElementById('image_preview');
@@ -729,12 +735,12 @@
                 filenameSpan.textContent = input.files[0].name;
             }
             var reader = new FileReader();
-            
+
             reader.onload = function(e) {
                 preview.src = e.target.result;
-                previewDiv.style.display = 'block';
+                previewDiv.style.display = 'inline-block';
             }
-            
+
             reader.readAsDataURL(input.files[0]);
 
             // Check file size
@@ -747,6 +753,9 @@
                 warningElement.style.display = 'none';
             }
         } else {
+            if (filenameSpan) {
+                filenameSpan.textContent = '';
+            }
             preview.src = '#';
             previewDiv.style.display = 'none';
             warningElement.textContent = '';
@@ -1103,8 +1112,9 @@
                                 {{ __('messages.image_size_warning') }}
                             </p>
 
-                            <div id="image_preview" class="mt-3" style="display: none;">
-                                <img id="preview_img" src="#" alt="Preview" style="max-height:120px" />
+                            <div id="image_preview" class="mt-3 relative inline-block" style="display: none;">
+                                <img id="preview_img" src="#" alt="Preview" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                <button type="button" onclick="clearFileInput('flyer_image')" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                             </div>
 
                             @if ($event->flyer_image_url)
@@ -1112,13 +1122,20 @@
                                 <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" id="flyer_preview" />
                                 <button type="button"
                                     onclick="deleteFlyer('{{ route('event.delete_image', ['subdomain' => $subdomain]) }}', '{{ \App\Utils\UrlUtils::encodeId($event->id) }}', '{{ csrf_token() }}', this.parentElement)"
-                                    class="absolute -top-1 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
+                                    class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
                                 </button>
                             </div>
                             @endif
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="short_description" :value="__('messages.short_description')" />
+                            <x-text-input id="short_description" name="short_description" type="text" class="mt-1 block w-full" :value="old('short_description', $event->short_description)" maxlength="200" autocomplete="off" />
+                            <x-input-error class="mt-2" :messages="$errors->get('short_description')" />
                         </div>
 
                         <div class="mb-6">
@@ -1607,7 +1624,7 @@
                             {{ __('messages.recurring') }}
                         </h2>
 
-                        <div class="mb-6 sm:flex sm:items-center sm:space-x-10">
+                        <div class="mb-6 space-y-4 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                             <div class="flex items-center">
                                 <input id="one_time" name="schedule_type" type="radio" value="one_time" onchange="onChangeDateType()" {{ $event->days_of_week ? '' : 'CHECKED' }}
                                     class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
