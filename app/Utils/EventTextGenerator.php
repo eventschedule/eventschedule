@@ -146,28 +146,36 @@ class EventTextGenerator
      */
     public static function getPrice($event)
     {
-        if (! $event->tickets || $event->tickets->isEmpty()) {
-            return '';
+        // First check for internal tickets
+        if ($event->tickets && ! $event->tickets->isEmpty()) {
+            $prices = $event->tickets->pluck('price')->filter(function ($price) {
+                return $price !== null;
+            });
+
+            if (! $prices->isEmpty()) {
+                // Check if all tickets are free
+                $allFree = $prices->every(function ($price) {
+                    return $price === 0;
+                });
+
+                if ($allFree) {
+                    return __('messages.free');
+                }
+
+                // Return lowest price
+                return $prices->min();
+            }
         }
 
-        $prices = $event->tickets->pluck('price')->filter(function ($price) {
-            return $price !== null;
-        });
+        // Check for external event price (when tickets are disabled)
+        if (! $event->tickets_enabled && $event->ticket_price !== null) {
+            if ($event->ticket_price == 0) {
+                return __('messages.free');
+            }
 
-        if ($prices->isEmpty()) {
-            return '';
+            return $event->ticket_price;
         }
 
-        // Check if all tickets are free
-        $allFree = $prices->every(function ($price) {
-            return $price === 0;
-        });
-
-        if ($allFree) {
-            return __('messages.free');
-        }
-
-        // Return lowest price
-        return $prices->min();
+        return '';
     }
 }

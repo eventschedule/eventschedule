@@ -534,6 +534,7 @@ return [
     'multiple_events_detected' => 'Multiple events detected',
     'registration_url' => 'Registration URL',
     'registration_url_help' => 'External URL where users can register for this event',
+    'external_price_help' => 'Price for events hosted externally (used in templates)',
     'talent' => 'Talent',
     'confirm_remove_event' => 'Are you sure you want to remove this event?',
     'event_removed' => 'Event successfully removed!',

@@ -476,6 +476,7 @@ return [
     'multiple_events_detected' => 'تم اكتشاف عدة أحداث',
     'registration_url' => 'رابط التسجيل',
     'registration_url_help' => 'رابط خارجي يمكن للمستخدمين التسجيل فيه لهذا الحدث',
+    'external_price_help' => 'السعر للأحداث المستضافة خارجياً (يُستخدم في القوالب)',
     'talent' => 'موهبة',
     'confirm_remove_event' => 'هل أنت متأكد من أنك تريد إزالة هذا الحدث؟',
     'event_removed' => 'تمت إزالة الحدث بنجاح!',

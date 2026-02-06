@@ -480,6 +480,7 @@ return [
     'multiple_events_detected' => 'Mehrere Veranstaltungen erkannt',
     'registration_url' => 'Anmelde-URL',
     'registration_url_help' => 'Externe URL, über die sich Benutzer für diese Veranstaltung anmelden können',
+    'external_price_help' => 'Preis für extern gehostete Veranstaltungen (in Vorlagen verwendet)',
     'talent' => 'Talent',
     'confirm_remove_event' => 'Sind Sie sicher, dass Sie diese Veranstaltung entfernen möchten?',
     'event_removed' => 'Veranstaltung erfolgreich entfernt!',

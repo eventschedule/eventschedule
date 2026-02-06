@@ -484,6 +484,7 @@ return [
     'multiple_events_detected' => 'Plusieurs événements détectés',
     'registration_url' => 'URL d\'inscription',
     'registration_url_help' => 'URL externe où les utilisateurs peuvent s\'inscrire à cet événement',
+    'external_price_help' => 'Prix pour les événements hébergés en externe (utilisé dans les modèles)',
     'talent' => 'Intervenant',
     'confirm_remove_event' => 'Êtes-vous sûr de vouloir supprimer cet événement ?',
     'event_removed' => 'Événement supprimé avec succès !',
