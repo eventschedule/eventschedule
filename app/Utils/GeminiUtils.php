@@ -255,6 +255,8 @@ class GeminiUtils
             'event_postal_code' => '',
             'event_country_code' => '',
             'registration_url' => '',
+            'ticket_price' => 'Price of admission (numeric value only, no currency symbol)',
+            'ticket_currency' => 'Currency code (e.g., USD, EUR, ILS) if price is mentioned',
             'venue_name' => '',
             'venue_name_en' => 'English translation, only if the venue name is not English',
             'venue_email' => '',
@@ -387,6 +389,28 @@ class GeminiUtils
 
                 $data[$key]['category_id'] = $categoryId;
                 unset($data[$key]['category_name']);
+            }
+
+            // Process ticket price - extract numeric value and clean up
+            if (! empty($item['ticket_price'])) {
+                $priceValue = $item['ticket_price'];
+                // Extract numeric value (handles strings like "$20", "20.00", "20 USD", etc.)
+                if (preg_match('/[\d,.]+/', $priceValue, $matches)) {
+                    $numericPrice = str_replace(',', '', $matches[0]);
+                    $data[$key]['ticket_price'] = (float) $numericPrice;
+                } else {
+                    unset($data[$key]['ticket_price']);
+                }
+            }
+
+            // Process ticket currency - normalize to uppercase code
+            if (! empty($item['ticket_currency'])) {
+                $currency = strtoupper(trim($item['ticket_currency']));
+                // Keep only valid 3-letter currency codes
+                if (preg_match('/^[A-Z]{3}$/', $currency)) {
+                    $data[$key]['ticket_currency_code'] = $currency;
+                }
+                unset($data[$key]['ticket_currency']);
             }
 
             // Convert performer data to array format

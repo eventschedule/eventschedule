@@ -2075,6 +2075,26 @@
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.registration_url_help') }}</p>
                             </div>
 
+                            <!-- External Event Price (only visible when tickets are disabled) -->
+                            <div class="mb-6" v-show="!event.tickets_enabled">
+                                <x-input-label :value="__('messages.price')" />
+                                <div class="mt-1 flex gap-3">
+                                    <select name="ticket_currency_code" v-model="event.ticket_currency_code"
+                                        class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        @foreach ($currencies as $currency)
+                                        @if ($loop->index == 2)
+                                        <option disabled>──────</option>
+                                        @endif
+                                        <option value="{{ $currency->value }}">{{ $currency->value }}</option>
+                                        @endforeach
+                                    </select>
+                                    <x-text-input type="number" name="ticket_price" step="0.01" min="0"
+                                        class="flex-1" v-model="event.ticket_price"
+                                        placeholder="0.00" />
+                                </div>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.external_price_help') }}</p>
+                            </div>
+
                             @if ($role->isPro())
                             <div v-show="event.tickets_enabled">
 

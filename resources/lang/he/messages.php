@@ -293,6 +293,7 @@ return [
     'multiple_events_detected' => 'זוהו מספר אירועים',
     'registration_url' => 'קישור להרשמה',
     'registration_url_help' => 'קישור חיצוני בו משתמשים יכולים להירשם לאירוע זה',
+    'external_price_help' => 'מחיר לאירועים המתארחים באתר חיצוני (בשימוש בתבניות)',
     'talent' => 'כניסה לאמנים / אוֹצֵרים / ספקים',
     'confirm_remove_event' => 'האם אתה בטוח שברצונך להסיר אירוע זה?',
     'event_removed' => 'האירוע הוסר בהצלחה!',

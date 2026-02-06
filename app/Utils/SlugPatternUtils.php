@@ -176,25 +176,33 @@ class SlugPatternUtils
      */
     private static function getPrice(?Event $event): string
     {
-        if (! $event || ! $event->tickets || $event->tickets->isEmpty()) {
+        if (! $event) {
             return '';
         }
 
-        $prices = $event->tickets->pluck('price')->filter(function ($price) {
-            return $price !== null;
-        });
+        // First check for internal tickets
+        if ($event->tickets && ! $event->tickets->isEmpty()) {
+            $prices = $event->tickets->pluck('price')->filter(function ($price) {
+                return $price !== null;
+            });
 
-        if ($prices->isEmpty()) {
-            return '';
+            if (! $prices->isEmpty()) {
+                $min = $prices->min();
+                $max = $prices->max();
+
+                if ($min === $max) {
+                    return (string) $min;
+                }
+
+                return $min.'-'.$max;
+            }
         }
 
-        $min = $prices->min();
-        $max = $prices->max();
-
-        if ($min === $max) {
-            return (string) $min;
+        // Check for external event price (when tickets are disabled)
+        if (! $event->tickets_enabled && $event->ticket_price !== null) {
+            return (string) $event->ticket_price;
         }
 
-        return $min.'-'.$max;
+        return '';
     }
 }

@@ -26,6 +26,7 @@ class Event extends Model
         'slug',
         'tickets_enabled',
         'ticket_currency_code',
+        'ticket_price',
         'ticket_notes',
         'terms_url',
         'total_tickets_mode',

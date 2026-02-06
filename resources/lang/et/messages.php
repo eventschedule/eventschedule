@@ -528,6 +528,7 @@ return [
     'multiple_events_detected' => 'Tuvastati mitu sündmust',
     'registration_url' => 'Registreerimise URL',
     'registration_url_help' => 'Väline URL, kus kasutajad saavad sellele sündmusele registreeruda',
+    'external_price_help' => 'Hind väliselt majutatud sündmuste jaoks (kasutatakse mallides)',
     'talent' => 'Talent',
     'confirm_remove_event' => 'Kas olete kindel, et soovite selle sündmuse eemaldada?',
     'event_removed' => 'Sündmuse eemaldamine õnnestus!',

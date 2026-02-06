@@ -484,6 +484,7 @@ return [
     'multiple_events_detected' => 'Múltiples eventos detectados',
     'registration_url' => 'URL de registro',
     'registration_url_help' => 'URL externa donde los usuarios pueden registrarse para este evento',
+    'external_price_help' => 'Precio para eventos alojados externamente (usado en plantillas)',
     'talent' => 'Talento',
     'confirm_remove_event' => '¿Estás seguro de que deseas eliminar este evento?',
     'event_removed' => '¡Evento eliminado con éxito!',
