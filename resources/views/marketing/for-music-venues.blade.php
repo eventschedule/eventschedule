@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Music Venues</x-slot>
 
-    <!-- Hero Section - Venue Dashboard Preview -->
+    <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-24 lg:py-32 overflow-hidden">
         <!-- Subtle stage lighting effect -->
         <div class="absolute inset-0">
@@ -15,7 +15,7 @@
         <div class="absolute inset-0 grid-pattern bg-[size:60px_60px]"></div>
 
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
+            <div class="text-center">
                 <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-gray-200 dark:border-white/10 mb-6">
                     <div class="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse"></div>
                     <span class="text-sm text-gray-600 dark:text-gray-300">For Concert Halls & Live Music Venues</span>
@@ -36,141 +36,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
-            </div>
-
-            <!-- Venue Dashboard Mockup -->
-            <div class="relative max-w-4xl mx-auto">
-                <div class="bg-gray-50 dark:bg-[#12121a] rounded-2xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden">
-                    <!-- Dashboard header -->
-                    <div class="bg-gray-100 dark:bg-[#0d0d12] px-6 py-4 border-b border-gray-200 dark:border-white/5 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-white text-xs font-bold">TE</div>
-                            <div>
-                                <div class="text-gray-900 dark:text-white font-semibold text-sm">The Echo</div>
-                                <div class="text-gray-600 dark:text-gray-500 text-xs">Los Angeles, CA</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-4 text-xs">
-                            <div class="flex items-center gap-2">
-                                <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
-                                <span class="text-gray-500 dark:text-gray-400">Calendar live</span>
-                            </div>
-                            <div class="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 font-medium">2,847 followers</div>
-                        </div>
-                    </div>
-
-                    <!-- Dashboard content -->
-                    <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <!-- Left: This Week -->
-                        <div class="lg:col-span-2 space-y-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="text-gray-900 dark:text-white font-semibold">This Week</h3>
-                                <span class="text-gray-600 dark:text-gray-500 text-xs">Jan 27 - Feb 2</span>
-                            </div>
-
-                            <!-- Tonight's show - highlighted -->
-                            <div class="bg-gradient-to-r from-blue-500/20 to-sky-500/20 rounded-xl border border-blue-500/30 p-4">
-                                <div class="flex items-start justify-between mb-3">
-                                    <div>
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <span class="text-blue-300 text-xs font-medium">TONIGHT</span>
-                                            <span class="text-gray-500 dark:text-gray-400 text-xs">Doors 8pm</span>
-                                        </div>
-                                        <div class="text-gray-900 dark:text-white font-semibold">Luna & The Wolves</div>
-                                        <div class="text-gray-500 dark:text-gray-400 text-sm">Indie Folk / Sold Out</div>
-                                    </div>
-                                    <div class="text-right">
-                                        <div class="text-emerald-400 text-sm font-semibold">247 / 247</div>
-                                        <div class="text-gray-500 dark:text-gray-400 text-xs">tickets sold</div>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-4 text-xs">
-                                    <span class="text-gray-500 dark:text-gray-400">Load-in: 4pm</span>
-                                    <span class="text-gray-500 dark:text-gray-400">Sound check: 5:30pm</span>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Sold Out</span>
-                                </div>
-                            </div>
-
-                            <!-- Other shows -->
-                            <div class="bg-gray-100 dark:bg-[#16161e] rounded-xl border border-gray-200 dark:border-white/5 p-4">
-                                <div class="flex items-start justify-between">
-                                    <div>
-                                        <div class="text-gray-600 dark:text-gray-500 text-xs mb-1">Wed, Jan 29</div>
-                                        <div class="text-gray-900 dark:text-white font-medium">Jazz Wednesday: Marcus Cole Trio</div>
-                                        <div class="text-gray-500 dark:text-gray-400 text-sm">Jazz / Recurring weekly</div>
-                                    </div>
-                                    <div class="text-right">
-                                        <div class="text-gray-900 dark:text-white text-sm">89 / 150</div>
-                                        <div class="text-gray-600 dark:text-gray-500 text-xs">tickets sold</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-gray-100 dark:bg-[#16161e] rounded-xl border border-gray-200 dark:border-white/5 p-4">
-                                <div class="flex items-start justify-between">
-                                    <div>
-                                        <div class="text-gray-600 dark:text-gray-500 text-xs mb-1">Fri, Jan 31</div>
-                                        <div class="text-gray-900 dark:text-white font-medium">Midnight Sons + The Bridges</div>
-                                        <div class="text-gray-500 dark:text-gray-400 text-sm">Indie Rock / Double bill</div>
-                                    </div>
-                                    <div class="text-right">
-                                        <div class="text-gray-900 dark:text-white text-sm">156 / 247</div>
-                                        <div class="text-gray-600 dark:text-gray-500 text-xs">tickets sold</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right: Quick Stats & Actions -->
-                        <div class="space-y-4">
-                            <!-- Booking requests -->
-                            <div class="bg-gray-100 dark:bg-[#16161e] rounded-xl border border-gray-200 dark:border-white/5 p-4">
-                                <div class="flex items-center justify-between mb-3">
-                                    <h4 class="text-gray-900 dark:text-white font-medium text-sm">Booking Requests</h4>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-xs">3 new</span>
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/5">
-                                        <div class="w-6 h-6 rounded bg-gradient-to-br from-blue-500 to-sky-500 text-[10px] text-white flex items-center justify-center font-bold">RW</div>
-                                        <div class="flex-1 min-w-0">
-                                            <div class="text-gray-900 dark:text-white text-xs truncate">River West</div>
-                                            <div class="text-gray-600 dark:text-gray-500 text-[10px]">Alt Country</div>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/5">
-                                        <div class="w-6 h-6 rounded bg-gradient-to-br from-rose-500 to-cyan-500 text-[10px] text-white flex items-center justify-center font-bold">NK</div>
-                                        <div class="flex-1 min-w-0">
-                                            <div class="text-gray-900 dark:text-white text-xs truncate">Neon Kids</div>
-                                            <div class="text-gray-600 dark:text-gray-500 text-[10px]">Synth Pop</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button class="w-full mt-3 py-2 rounded-lg bg-blue-500/20 text-blue-300 text-xs font-medium hover:bg-blue-500/30 transition">
-                                    Review all requests
-                                </button>
-                            </div>
-
-                            <!-- This month's revenue -->
-                            <div class="bg-gray-100 dark:bg-[#16161e] rounded-xl border border-gray-200 dark:border-white/5 p-4">
-                                <h4 class="text-gray-500 dark:text-gray-400 text-xs mb-1">January Revenue</h4>
-                                <div class="text-2xl font-bold text-gray-900 dark:text-white">$18,420</div>
-                                <div class="text-emerald-400 text-xs">+12% vs December</div>
-                                <div class="mt-3 pt-3 border-t border-gray-200 dark:border-white/5">
-                                    <div class="text-gray-600 dark:text-gray-500 text-xs">Platform fees paid</div>
-                                    <div class="text-gray-900 dark:text-white font-semibold">$0.00</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Floating annotation -->
-                <div class="absolute -right-4 top-1/3 hidden xl:block">
-                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-3 py-2 text-emerald-300 text-xs max-w-[140px]">
-                        <div class="font-semibold mb-1">$0 platform fees</div>
-                        <div class="text-emerald-400/70">Every dollar goes to you, not us</div>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
