@@ -147,6 +147,7 @@ return [
     'schedule_style' => 'סגנון לוח הזמנים',
     'event_venue' => 'מקום האירוע',
     'event_details' => 'פרטי האירוע',
+    'short_description' => 'תיאור קצר',
     'solid' => 'מלא',
     'background_color' => 'צבע רקע',
     'custom' => 'מותאם אישית',

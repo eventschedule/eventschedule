@@ -50,7 +50,7 @@ class ListDesign extends AbstractEventDesign
 
     protected function generateEventLayout(): void
     {
-        $y = self::MARGIN;
+        $y = self::MARGIN + $this->headerHeight;
 
         foreach ($this->events as $event) {
             $this->generateEventListItem($event, $y);
@@ -521,7 +521,7 @@ class ListDesign extends AbstractEventDesign
     {
         // Calculate text panel dimensions
         $panelWidth = 520; // Slightly wider for better text spacing
-        $panelHeight = 110; // Slightly taller for better text spacing
+        $panelHeight = $event->short_description ? 135 : 110; // Taller if short description present
         $panelX = $x - 20; // Slightly more left padding for better visual balance
         $panelY = $y + 8; // Slightly higher for better vertical centering
 
@@ -542,11 +542,22 @@ class ListDesign extends AbstractEventDesign
 
         // Truncate long titles
         if (mb_strlen($title) > 35) {
-            $title = mb_substr($title, 0, 35) . '...';
+            $title = mb_substr($title, 0, 35).'...';
         }
 
         $this->addText($title, $textStartX, $textStartY, self::TITLE_FONT_SIZE, $this->c['black'], 'bold');
         $textStartY += self::LINE_HEIGHT;
+
+        // Short description
+        if ($event->short_description) {
+            $shortDesc = $event->short_description;
+            // Truncate to fit layout
+            if (mb_strlen($shortDesc) > 80) {
+                $shortDesc = mb_substr($shortDesc, 0, 80).'...';
+            }
+            $this->addText($shortDesc, $textStartX, $textStartY, 12, $this->c['gray'], 'regular');
+            $textStartY += self::LINE_HEIGHT;
+        }
 
         // Venue
         if ($event->venue) {

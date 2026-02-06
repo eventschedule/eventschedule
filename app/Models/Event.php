@@ -17,6 +17,8 @@ class Event extends Model
         'duration',
         'description',
         'description_en',
+        'short_description',
+        'short_description_en',
         'event_url',
         'event_password',
         'name',
@@ -122,6 +124,18 @@ class Event extends Model
                     $eventRole->save();
                 }
             }
+
+            if ($model->isDirty('short_description') && $model->exists) {
+                $model->short_description_en = null;
+                $model->translation_attempts = 0;
+
+                $eventRoles = EventRole::where('event_id', $model->id)->get();
+                foreach ($eventRoles as $eventRole) {
+                    $eventRole->short_description_translated = null;
+                    $eventRole->translation_attempts = 0;
+                    $eventRole->save();
+                }
+            }
         });
 
         static::deleting(function ($event) {
@@ -210,7 +224,7 @@ class Event extends Model
         // Load venue from event_role table where the role is a venue
         return $this->belongsToMany(Role::class, 'event_role', 'event_id', 'role_id')
             ->where('roles.type', 'venue')
-            ->withPivot('id', 'name_translated', 'description_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id', 'caldav_event_uid', 'caldav_event_etag')
+            ->withPivot('id', 'name_translated', 'short_description_translated', 'description_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id', 'caldav_event_uid', 'caldav_event_etag')
             ->using(EventRole::class);
     }
 
@@ -260,7 +274,7 @@ class Event extends Model
     public function roles()
     {
         return $this->belongsToMany(Role::class)
-            ->withPivot('id', 'name_translated', 'description_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id', 'caldav_event_uid', 'caldav_event_etag')
+            ->withPivot('id', 'name_translated', 'short_description_translated', 'description_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id', 'caldav_event_uid', 'caldav_event_etag')
             ->using(EventRole::class);
     }
 
@@ -754,6 +768,10 @@ class Event extends Model
 
     public function getMetaDescription($date = null)
     {
+        if ($this->short_description) {
+            return \Illuminate\Support\Str::limit($this->translatedShortDescription(), 155);
+        }
+
         $str = $this->translatedName();
 
         if ($this->venue) {
@@ -955,6 +973,17 @@ class Event extends Model
         return $value;
     }
 
+    public function translatedShortDescription()
+    {
+        $value = $this->short_description;
+
+        if ($this->short_description_en && (session()->has('translate') || request()->lang == 'en')) {
+            $value = $this->short_description_en;
+        }
+
+        return $value;
+    }
+
     public function toApiData()
     {
         $data = new \stdClass;
@@ -966,6 +995,7 @@ class Event extends Model
         $data->id = UrlUtils::encodeId($this->id);
         $data->url = $this->getGuestUrl();
         $data->name = $this->name;
+        $data->short_description = $this->short_description;
         $data->description = $this->description;
         $data->starts_at = $this->starts_at;
         $data->duration = $this->duration;

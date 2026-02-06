@@ -155,6 +155,7 @@ return [
     'schedule_style' => 'Stile del programma',
     'event_venue' => 'Sede dell\'evento',
     'event_details' => 'Dettagli dell\'evento',
+    'short_description' => 'Descrizione breve',
     'solid' => 'Solido',
     'background_color' => 'Colore di sfondo',
     'custom' => 'Personalizzato',

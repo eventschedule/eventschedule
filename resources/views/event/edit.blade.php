@@ -721,7 +721,13 @@
     function clearFileInput(inputId) {
         var input = document.getElementById(inputId);
         input.value = '';
-        input.dispatchEvent(new Event('change'));
+        // Directly hide preview instead of relying on change event
+        var previewDiv = document.getElementById('image_preview');
+        var filenameSpan = document.getElementById('flyer_image_filename');
+        var warningElement = document.getElementById('image_size_warning');
+        if (previewDiv) previewDiv.style.display = 'none';
+        if (filenameSpan) filenameSpan.textContent = '';
+        if (warningElement) warningElement.style.display = 'none';
     }
 
     function previewImage(input) {

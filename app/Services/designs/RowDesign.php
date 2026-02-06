@@ -233,7 +233,7 @@ class RowDesign extends AbstractEventDesign
             $scaleFactor = $availableWidth / $totalNaturalWidth;
 
             // Calculate Y position for this row
-            $currentY = self::MARGIN + ($rowIndex * ($totalFlyerHeight + self::MARGIN));
+            $currentY = self::MARGIN + $this->headerHeight + ($rowIndex * ($totalFlyerHeight + self::MARGIN));
 
             // Position flyers in this row with scaled widths
             $currentX = self::MARGIN;

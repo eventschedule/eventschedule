@@ -30,6 +30,15 @@ abstract class AbstractEventDesign
 
     protected const QR_CODE_MARGIN = 2;
 
+    // Header image configuration
+    protected const HEADER_PADDING = 20;
+
+    protected const MAX_HEADER_HEIGHT = 200;
+
+    protected int $headerHeight = 0;
+
+    protected $headerImageResource = null;
+
     // Language and layout
     protected string $lang;
 
@@ -79,6 +88,9 @@ abstract class AbstractEventDesign
         // Calculate dimensions based on design type
         $this->calculateDimensions();
 
+        // Prepare header image (uses totalWidth, adds to totalHeight)
+        $this->prepareHeaderImage();
+
         // Create image
         $this->im = imagecreatetruecolor($this->totalWidth, $this->totalHeight);
         if (! $this->im) {
@@ -96,12 +108,18 @@ abstract class AbstractEventDesign
         if ($this->im) {
             imagedestroy($this->im);
         }
+        if ($this->headerImageResource) {
+            imagedestroy($this->headerImageResource);
+        }
     }
 
     public function generate(): string
     {
         // Apply background based on role's style
         $this->applyBackground();
+
+        // Render header image after background
+        $this->renderHeaderImage();
 
         // Generate event layout based on design type
         $this->generateEventLayout();
@@ -145,6 +163,83 @@ abstract class AbstractEventDesign
     protected function getOption(string $key, $default = null)
     {
         return $this->options[$key] ?? $default;
+    }
+
+    /**
+     * Prepare header image - fetch and measure before canvas creation
+     * This adds headerHeight to totalHeight after calculateDimensions()
+     */
+    protected function prepareHeaderImage(): void
+    {
+        $headerUrl = $this->getOption('header_image_url');
+        if (empty($headerUrl)) {
+            return;
+        }
+
+        // Build full URL/path for the image
+        if (! filter_var($headerUrl, FILTER_VALIDATE_URL)) {
+            if (config('filesystems.default') == 'local') {
+                $headerUrl = url('/storage/'.$headerUrl);
+            } else {
+                $headerUrl = \Storage::url($headerUrl);
+            }
+        }
+
+        // Fetch and measure
+        $imageData = $this->fetchImageWithCurl($headerUrl);
+        if (! $imageData) {
+            return;
+        }
+
+        $this->headerImageResource = imagecreatefromstring($imageData);
+        if (! $this->headerImageResource) {
+            return;
+        }
+
+        // Calculate rendered height (full width, maintain aspect ratio, cap at max)
+        $srcWidth = imagesx($this->headerImageResource);
+        $srcHeight = imagesy($this->headerImageResource);
+
+        $targetWidth = $this->totalWidth - (self::MARGIN * 2);
+        $scaleFactor = $targetWidth / $srcWidth;
+        $targetHeight = (int) ($srcHeight * $scaleFactor);
+
+        // Store the header height (including padding below header)
+        $this->headerHeight = min($targetHeight, self::MAX_HEADER_HEIGHT) + self::HEADER_PADDING;
+
+        // Add header height to total canvas height
+        $this->totalHeight += $this->headerHeight;
+    }
+
+    /**
+     * Render header image onto the canvas
+     */
+    protected function renderHeaderImage(): void
+    {
+        if (! $this->headerImageResource) {
+            return;
+        }
+
+        $srcWidth = imagesx($this->headerImageResource);
+        $srcHeight = imagesy($this->headerImageResource);
+
+        $targetWidth = $this->totalWidth - (self::MARGIN * 2);
+        $scaleFactor = $targetWidth / $srcWidth;
+        $targetHeight = min((int) ($srcHeight * $scaleFactor), self::MAX_HEADER_HEIGHT);
+
+        // Position at top with margin
+        $x = self::MARGIN;
+        $y = self::MARGIN;
+
+        imagecopyresampled(
+            $this->im, $this->headerImageResource,
+            $x, $y, 0, 0,
+            $targetWidth, $targetHeight,
+            $srcWidth, $srcHeight
+        );
+
+        imagedestroy($this->headerImageResource);
+        $this->headerImageResource = null;
     }
 
     /**

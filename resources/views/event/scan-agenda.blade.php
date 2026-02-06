@@ -501,8 +501,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </div>
-                        <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
-                            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -bottom-1 -right-1 bg-red-500 rounded-full flex items-center justify-center">
+                            <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </div>

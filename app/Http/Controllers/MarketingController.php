@@ -1434,6 +1434,126 @@ class MarketingController extends Controller
     }
 
     /**
+     * Demos page - showcase demo schedules grouped by category
+     */
+    public function demos()
+    {
+        $categories = $this->getDemoSchedulesByCategory();
+        $allSchedules = collect($categories)->flatten(1);
+
+        return view('marketing.demos', [
+            'categories' => $categories,
+            'scheduleCount' => $allSchedules->count(),
+            'allSchedules' => $allSchedules->toArray(),
+        ]);
+    }
+
+    /**
+     * Get demo schedules organized by industry category
+     * Hardcoded data - no database query needed
+     * All URLs point to production eventschedule.com
+     */
+    protected function getDemoSchedulesByCategory(): array
+    {
+        $cdn = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/';
+
+        return [
+            'Fitness & Wellness' => [
+                [
+                    'subdomain' => 'meditationclasses',
+                    'name' => 'Meditation Classes',
+                    'url' => 'https://meditationclasses.eventschedule.com/',
+                    'profile_image_url' => $cdn . 'profile_zgssz8ygiijaumtfrlfef6nj5k5ranyj.png',
+                    'header_image_url' => $cdn . 'header_vgfksbfmvvemkszdjobckvd671kcwhme.png',
+                ],
+                [
+                    'subdomain' => 'weekendyogaretreat',
+                    'name' => 'Weekend Yoga Retreat',
+                    'url' => 'https://weekendyogaretreat.eventschedule.com/',
+                    'profile_image_url' => $cdn . 'profile_qgqvo1x435kymu8kt3zsraquy6oxtbnf.jpg',
+                    'header_image_url' => $cdn . 'header_ykwnizihvdrbgm3tbqjw68xb76alhsov.jpeg',
+                ],
+                [
+                    'subdomain' => 'hikingclub',
+                    'name' => 'Hiking Club',
+                    'url' => 'https://hikingclub.eventschedule.com/',
+                    'profile_image_url' => $cdn . 'profile_sxhm71vxwlvncq7jrvuqfgkv2rcut7gj.png',
+                    'header_image_url' => $cdn . 'header_m56se916a8fxcgvnxqpcjlmxptgw4agi.png',
+                ],
+            ],
+            'Music & Entertainment' => [
+                [
+                    'subdomain' => 'battleofthebands',
+                    'name' => 'Battle of the Bands',
+                    'url' => 'https://battleofthebands.eventschedule.com/',
+                    'profile_image_url' => $cdn . 'profile_e5fhxeloqqbrsse0h6ebfqcxb9hazde3.jpg',
+                    'header_image_url' => $cdn . 'header_lfz0saej9fmjeykbdfbzfggtawwhuyjm.jpg',
+                ],
+                [
+                    'subdomain' => 'sufficientgroundscoffeemusic',
+                    'name' => 'Sufficient Grounds',
+                    'url' => 'https://sufficientgroundscoffeemusic.eventschedule.com/',
+                    'profile_image_url' => $cdn . 'profile_k0bzs8x1kftczqkokujyptrzxityvikw.jpg',
+                    'header_image_url' => $cdn . 'header_tiikjxpykpmtxmuz7d5xz4dnjykcugsu.png',
+                ],
+                [
+                    'subdomain' => 'villageidiot',
+                    'name' => 'Village Idiot',
+                    'url' => 'https://villageidiot.eventschedule.com/',
+                    'profile_image_url' => $cdn . 'profile_icfnnvd4dyzue0gxnmueztdomeg4jn0b.png',
+                    'header_image_url' => $cdn . 'header_5n56puz8bznxk31zcgrk3zb7uzq6j4ud.png',
+                ],
+            ],
+            'Community & Recreation' => [
+                [
+                    'subdomain' => 'communityyouthgroup',
+                    'name' => 'Community Youth Group',
+                    'url' => 'https://communityyouthgroup.eventschedule.com/',
+                    'profile_image_url' => $cdn . 'profile_b5wnzly2ez3xqfb10dcrlfurqn2o45df.png',
+                    'header_image_url' => $cdn . 'header_hzqitvvkg7plim8z5d5b3frhyhsft4xc.png',
+                ],
+                [
+                    'subdomain' => 'karateclub',
+                    'name' => 'Karate Club',
+                    'url' => 'https://karateclub.eventschedule.com/',
+                    'profile_image_url' => $cdn . 'profile_x6va3bjn6gxpxcpbdxtxsuml7abbk3tb.jpg',
+                    'header_image_url' => $cdn . 'header_mh1gqreb7mybh1f0duszhoyycytoeydp.jpg',
+                ],
+                [
+                    'subdomain' => 'countyfairgrounds',
+                    'name' => 'County Fairgrounds',
+                    'url' => 'https://countyfairgrounds.eventschedule.com/',
+                    'profile_image_url' => $cdn . 'profile_sbulshtsz2v4vwouu9hiirbrqcfppyxt.png',
+                    'header_image_url' => $cdn . 'header_4jyooykifkivis9ejryngxocu7q3daxd.jpg',
+                ],
+            ],
+            'Creative & Workshops' => [
+                [
+                    'subdomain' => 'nateswoodworkingshop',
+                    'name' => "Nate's Woodworking Shop",
+                    'url' => 'https://nateswoodworkingshop.eventschedule.com/',
+                    'profile_image_url' => $cdn . 'profile_ge7knnonnjpszv152rblnhhexuv8ichh.png',
+                    'header_image_url' => $cdn . 'header_roj0xawh3aa0ufggtssmr2preor6u48j.png',
+                ],
+                [
+                    'subdomain' => 'painting',
+                    'name' => 'Painting',
+                    'url' => 'https://painting.eventschedule.com/',
+                    'profile_image_url' => $cdn . 'profile_md1ntwmdhksyt3zto2yy6n2lh08tml2x.jpg',
+                    'header_image_url' => $cdn . 'header_csjshwe7iujklti4c9vnali5xx2cncea.jpg',
+                ],
+                [
+                    'subdomain' => 'pagesbooknookshop',
+                    'name' => "Pages Book Nook Shop",
+                    'url' => 'https://pagesbooknookshop.eventschedule.com/',
+                    'profile_image_url' => $cdn . 'profile_dz6szbscmjy6rxm2aeynbosmiio7bawa.png',
+                    'header_image_url' => $cdn . 'header_qpteusmpeeuxkacnkheyxooju97tgja3.png',
+                ],
+            ],
+        ];
+    }
+
+    /**
      * Get ticketing features data
      */
     protected function getTicketFeatures(): array

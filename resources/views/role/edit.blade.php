@@ -153,128 +153,6 @@
                 });
             }
 
-            function clearRoleFileInput(inputId, previewId, filenameId) {
-                const input = document.getElementById(inputId);
-                input.value = '';
-                const preview = document.getElementById(previewId);
-                const clearBtn = document.getElementById(previewId + '_clear');
-                const filenameSpan = document.getElementById(filenameId);
-                if (preview) {
-                    preview.src = '';
-                    preview.style.display = 'none';
-                }
-                if (clearBtn) {
-                    clearBtn.style.display = 'none';
-                }
-                if (filenameSpan) {
-                    filenameSpan.textContent = '';
-                }
-                updatePreview();
-            }
-
-            function clearHeaderFileInput() {
-                const input = document.getElementById('header_image_url');
-                input.value = '';
-                document.getElementById('header_image_url_filename').textContent = '';
-                document.getElementById('header_image_url_clear').style.display = 'none';
-                // Hide the custom header preview, but keep preset header preview visible if any
-                const headerSelect = document.getElementById('header_image');
-                if (headerSelect.value === '') {
-                    document.getElementById('header_image_preview').style.display = 'none';
-                }
-                updatePreview();
-            }
-
-            function previewImage(input, previewId) {
-                const preview = document.getElementById(previewId);
-                const clearBtn = document.getElementById(previewId + '_clear');
-                const warningElement = document.getElementById(previewId.split('_')[0] + '_image_size_warning');
-
-                if (!input || !input.files || !input.files[0]) {
-                    if (preview) {
-                        preview.src = '';
-                    }
-                    if (clearBtn) {
-                        clearBtn.style.display = 'none';
-                    } else if (preview) {
-                        preview.style.display = 'none';
-                    }
-                    if (warningElement) {
-                        warningElement.textContent = '';
-                        warningElement.style.display = 'none';
-                    }
-                    updatePreview();
-                    return;
-                }
-
-                const file = input.files[0];
-                const reader = new FileReader();
-
-                reader.onloadend = function () {
-                    const img = new Image();
-                    img.onload = function() {
-                        const width = this.width;
-                        const height = this.height;
-                        const fileSize = file.size / 1024 / 1024; // in MB
-                        let warningMessage = '';
-
-                        if (fileSize > 2.5) {
-                            warningMessage += {!! json_encode(__('messages.image_size_warning'), JSON_UNESCAPED_UNICODE) !!};
-                        }
-
-                        if (width !== height && previewId == 'profile_image_preview') {
-                            if (warningMessage) warningMessage += " ";
-                            warningMessage += {!! json_encode(__('messages.image_not_square'), JSON_UNESCAPED_UNICODE) !!};
-                        }
-
-                        if (warningElement) {
-                            if (warningMessage) {
-                                warningElement.textContent = warningMessage;
-                                warningElement.style.display = 'block';
-                            } else {
-                                warningElement.textContent = '';
-                                warningElement.style.display = 'none';
-                            }
-                        }
-
-                        if (warningMessage == '') {
-                            preview.src = reader.result;
-                            if (clearBtn) {
-                                clearBtn.style.display = 'inline-block';
-                            } else {
-                                preview.style.display = 'block';
-                            }
-                            updatePreview();
-
-                            if (previewId === 'background_image_preview') {
-                                $('#style_background_image img:not(#background_image_preview)').hide();
-                                $('#style_background_image a').hide();
-                            }
-                        } else {
-                            preview.src = '';
-                            if (clearBtn) {
-                                clearBtn.style.display = 'none';
-                            } else {
-                                preview.style.display = 'none';
-                            }
-                        }
-                    };
-                    img.src = reader.result;
-                }
-
-                if (file) {
-                    reader.readAsDataURL(file);
-                } else {
-                    preview.src = '';
-                    preview.style.display = 'none';
-                    if (warningElement) {
-                        warningElement.textContent = '';
-                        warningElement.style.display = 'none';
-                    }
-                    updatePreview();
-                }
-            }
-
             $('#profile_image').on('change', function() {
                 previewImage(this, 'profile_image_preview');
             });
@@ -312,6 +190,128 @@
                 updatePreview();
             });
         });
+
+        function clearRoleFileInput(inputId, previewId, filenameId) {
+            const input = document.getElementById(inputId);
+            input.value = '';
+            const preview = document.getElementById(previewId);
+            const clearBtn = document.getElementById(previewId + '_clear');
+            const filenameSpan = document.getElementById(filenameId);
+            if (preview) {
+                preview.src = '';
+                preview.style.display = 'none';
+            }
+            if (clearBtn) {
+                clearBtn.style.display = 'none';
+            }
+            if (filenameSpan) {
+                filenameSpan.textContent = '';
+            }
+            updatePreview();
+        }
+
+        function clearHeaderFileInput() {
+            const input = document.getElementById('header_image_url');
+            input.value = '';
+            document.getElementById('header_image_url_filename').textContent = '';
+            document.getElementById('header_image_url_clear').style.display = 'none';
+            // Hide the custom header preview, but keep preset header preview visible if any
+            const headerSelect = document.getElementById('header_image');
+            if (headerSelect.value === '') {
+                document.getElementById('header_image_preview').style.display = 'none';
+            }
+            updatePreview();
+        }
+
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            const clearBtn = document.getElementById(previewId + '_clear');
+            const warningElement = document.getElementById(previewId.split('_')[0] + '_image_size_warning');
+
+            if (!input || !input.files || !input.files[0]) {
+                if (preview) {
+                    preview.src = '';
+                }
+                if (clearBtn) {
+                    clearBtn.style.display = 'none';
+                } else if (preview) {
+                    preview.style.display = 'none';
+                }
+                if (warningElement) {
+                    warningElement.textContent = '';
+                    warningElement.style.display = 'none';
+                }
+                updatePreview();
+                return;
+            }
+
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            reader.onloadend = function () {
+                const img = new Image();
+                img.onload = function() {
+                    const width = this.width;
+                    const height = this.height;
+                    const fileSize = file.size / 1024 / 1024; // in MB
+                    let warningMessage = '';
+
+                    if (fileSize > 2.5) {
+                        warningMessage += {!! json_encode(__('messages.image_size_warning'), JSON_UNESCAPED_UNICODE) !!};
+                    }
+
+                    if (width !== height && previewId == 'profile_image_preview') {
+                        if (warningMessage) warningMessage += " ";
+                        warningMessage += {!! json_encode(__('messages.image_not_square'), JSON_UNESCAPED_UNICODE) !!};
+                    }
+
+                    if (warningElement) {
+                        if (warningMessage) {
+                            warningElement.textContent = warningMessage;
+                            warningElement.style.display = 'block';
+                        } else {
+                            warningElement.textContent = '';
+                            warningElement.style.display = 'none';
+                        }
+                    }
+
+                    if (warningMessage == '') {
+                        preview.src = reader.result;
+                        if (clearBtn) {
+                            clearBtn.style.display = 'inline-block';
+                        } else {
+                            preview.style.display = 'block';
+                        }
+                        updatePreview();
+
+                        if (previewId === 'background_image_preview') {
+                            $('#style_background_image img:not(#background_image_preview)').hide();
+                            $('#style_background_image a').hide();
+                        }
+                    } else {
+                        preview.src = '';
+                        if (clearBtn) {
+                            clearBtn.style.display = 'none';
+                        } else {
+                            preview.style.display = 'none';
+                        }
+                    }
+                };
+                img.src = reader.result;
+            }
+
+            if (file) {
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = '';
+                preview.style.display = 'none';
+                if (warningElement) {
+                    warningElement.textContent = '';
+                    warningElement.style.display = 'none';
+                }
+                updatePreview();
+            }
+        }
 
         function onChangeCountry() {
             var selected = $('#country').countrySelect('getSelectedCountryData');

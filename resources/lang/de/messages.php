@@ -305,6 +305,7 @@ return [
     'schedule_style' => 'Zeitplan-Stil',
     'event_venue' => 'Veranstaltungsort',
     'event_details' => 'Veranstaltungsdetails',
+    'short_description' => 'Kurzbeschreibung',
     'solid' => 'Solide',
     'background_color' => 'Hintergrundfarbe',
     'custom' => 'Benutzerdefiniert',

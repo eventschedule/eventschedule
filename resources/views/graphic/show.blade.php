@@ -2,7 +2,7 @@
     <x-slot name="head">
         <script {!! nonce_attr() !!}>
             let graphicData = null;
-            let currentSettings = @json($graphicSettings);
+            let currentSettings = @json($graphicSettings ?? []);
             const isPro = {{ $isPro ? 'true' : 'false' }};
             const isEnterprise = {{ $isEnterprise ? 'true' : 'false' }};
             const currentUserEmail = '{{ auth()->user()->email }}';
@@ -372,6 +372,7 @@
                         // If empty, use default template for better UX
                         const defaultTemplate = `*{day_name}* {date_dmy} | {time}
 *{event_name}*:
+{short_description}
 {venue} | {city}
 {url}`;
                         textTemplate.value = savedValue || defaultTemplate;
@@ -862,6 +863,138 @@
                 restoreTextareaHeights();
             }
 
+            function uploadGraphicHeaderImage(file) {
+                const formData = new FormData();
+                formData.append('header_image', file);
+
+                // Show loading state
+                ['header_image_preview', 'header_image_preview_mobile'].forEach(id => {
+                    const container = document.getElementById(id);
+                    if (container) {
+                        container.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400">{{ __("messages.uploading") }}...</div>';
+                        container.classList.remove('hidden');
+                    }
+                });
+
+                fetch('{{ route("event.graphic_upload_header_image", ["subdomain" => $role->subdomain]) }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update preview for both desktop and mobile
+                        ['header_image_preview', 'header_image_preview_mobile'].forEach(id => {
+                            const container = document.getElementById(id);
+                            if (container) {
+                                container.innerHTML = `
+                                    <div class="relative inline-block">
+                                        <img src="${data.url}" alt="{{ __('messages.graphic_header_image') }}" class="max-h-24 rounded-md border border-gray-200 dark:border-gray-600">
+                                        <button type="button" onclick="deleteGraphicHeaderImage()" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+                                    </div>
+                                `;
+                                container.classList.remove('hidden');
+                            }
+                        });
+                        currentSettings.header_image_url = data.filename;
+                        showNotification('{{ __("messages.saved") }}', 'success');
+                        // Reload the graphic preview
+                        loadGraphic();
+                    } else {
+                        showNotification(data.error || '{{ __("messages.error") }}', 'error');
+                        ['header_image_preview', 'header_image_preview_mobile'].forEach(id => {
+                            const container = document.getElementById(id);
+                            if (container && !currentSettings.header_image_url) {
+                                container.classList.add('hidden');
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error uploading header image:', error);
+                    showNotification('{{ __("messages.error") }}', 'error');
+                    ['header_image_preview', 'header_image_preview_mobile'].forEach(id => {
+                        const container = document.getElementById(id);
+                        if (container && !currentSettings.header_image_url) {
+                            container.classList.add('hidden');
+                        }
+                    });
+                });
+            }
+
+            function deleteGraphicHeaderImage() {
+                if (!confirm('{{ __("messages.are_you_sure") }}')) {
+                    return;
+                }
+
+                fetch('{{ route("event.graphic_delete_header_image", ["subdomain" => $role->subdomain]) }}', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Hide preview for both desktop and mobile
+                        ['header_image_preview', 'header_image_preview_mobile'].forEach(id => {
+                            const container = document.getElementById(id);
+                            if (container) {
+                                container.innerHTML = '';
+                                container.classList.add('hidden');
+                            }
+                        });
+                        // Clear file inputs
+                        ['header_image', 'header_image_mobile'].forEach(id => {
+                            const input = document.getElementById(id);
+                            if (input) input.value = '';
+                        });
+                        currentSettings.header_image_url = null;
+                        showNotification('{{ __("messages.deleted") }}', 'success');
+                        // Reload the graphic preview
+                        loadGraphic();
+                    } else {
+                        showNotification(data.error || '{{ __("messages.error") }}', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting header image:', error);
+                    showNotification('{{ __("messages.error") }}', 'error');
+                });
+            }
+
+            function initHeaderImagePreview() {
+                const headerImageUrl = currentSettings.header_image_url;
+                if (headerImageUrl) {
+                    @if(config('filesystems.default') == 'local')
+                    const imageUrl = '{{ url("/storage") }}/' + headerImageUrl;
+                    @else
+                    const imageUrl = '{{ Storage::url("") }}' + headerImageUrl;
+                    @endif
+
+                    ['header_image_preview', 'header_image_preview_mobile'].forEach(id => {
+                        const container = document.getElementById(id);
+                        if (container) {
+                            container.innerHTML = `
+                                <div class="relative inline-block">
+                                    <img src="${imageUrl}" alt="{{ __('messages.graphic_header_image') }}" class="max-h-24 rounded-md border border-gray-200 dark:border-gray-600">
+                                    <button type="button" onclick="deleteGraphicHeaderImage()" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    </button>
+                                </div>
+                            `;
+                            container.classList.remove('hidden');
+                        }
+                    });
+                }
+            }
+
             document.addEventListener('DOMContentLoaded', function() {
                 updateSettingsUI();
                 initTextareaResize();
@@ -969,6 +1102,9 @@
 
                 // Apply initial screen capture visibility state
                 toggleScreenCapture();
+
+                // Initialize header image preview if exists
+                initHeaderImagePreview();
 
                 loadGraphic();
             });
@@ -1167,6 +1303,22 @@
                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.event_count_help') }}</p>
                         </div>
 
+                        <!-- Header Image -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.graphic_header_image') }}</h4>
+                            <input type="file" id="header_image_mobile" class="hidden" accept="image/jpeg,image/png,image/gif,image/webp" onchange="uploadGraphicHeaderImage(this.files[0])">
+                            <div class="flex items-center gap-3">
+                                <button type="button" onclick="document.getElementById('header_image_mobile').click()" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    {{ __('messages.choose_file') }}
+                                </button>
+                            </div>
+                            <div id="header_image_preview_mobile" class="mt-3 hidden"></div>
+                            <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.graphic_header_help') }}</p>
+                        </div>
+
                         <!-- Screen Capture Rendering (Enterprise Feature) -->
                         @if ($isEnterprise)
                         <div class="mb-5">
@@ -1198,7 +1350,7 @@
                             <textarea id="text_template_mobile" rows="5"
                                 aria-label="{{ __('messages.text_template') }}"
                                 class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-xs font-mono resize-y"
-                                placeholder="*{day_name}* {date_dmy} | {time}&#10;*{event_name}*:&#10;{venue} | {city}&#10;{url}"></textarea>
+                                placeholder="*{day_name}* {date_dmy} | {time}&#10;*{event_name}*:&#10;{short_description}&#10;{venue} | {city}&#10;{url}"></textarea>
                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
                         </div>
 
@@ -1491,6 +1643,22 @@
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.event_count_help') }}</p>
                             </div>
 
+                            <!-- Header Image -->
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.graphic_header_image') }}</h4>
+                                <input type="file" id="header_image" class="hidden" accept="image/jpeg,image/png,image/gif,image/webp" onchange="uploadGraphicHeaderImage(this.files[0])">
+                                <div class="flex items-center gap-3">
+                                    <button type="button" onclick="document.getElementById('header_image').click()" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        {{ __('messages.choose_file') }}
+                                    </button>
+                                </div>
+                                <div id="header_image_preview" class="mt-3 hidden"></div>
+                                <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.graphic_header_help') }}</p>
+                            </div>
+
                             <!-- Screen Capture Rendering (Enterprise Feature) -->
                             @if ($isEnterprise)
                             <div class="mb-5">
@@ -1522,7 +1690,7 @@
                                 <textarea id="text_template" rows="5"
                                     aria-label="{{ __('messages.text_template') }}"
                                     class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-xs font-mono resize-y"
-                                    placeholder="*{day_name}* {date_dmy} | {time}&#10;*{event_name}*:&#10;{venue} | {city}&#10;{url}"></textarea>
+                                    placeholder="*{day_name}* {date_dmy} | {time}&#10;*{event_name}*:&#10;{short_description}&#10;{venue} | {city}&#10;{url}"></textarea>
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
                             </div>
 

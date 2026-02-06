@@ -299,6 +299,11 @@ class Translate extends Command
                         $q->whereNotNull('description')
                             ->where('description', '!=', '')
                             ->whereNull('description_en');
+                    })
+                    ->orWhere(function ($q) {
+                        $q->whereNotNull('short_description')
+                            ->where('short_description', '!=', '')
+                            ->whereNull('short_description_en');
                     });
             });
 
@@ -337,6 +342,7 @@ class Translate extends Command
             if ($event->getLanguageCode() == 'en') {
                 $event->name_en = '';
                 $event->description_en = '';
+                $event->short_description_en = '';
                 $event->save();
 
                 if ($debug) {
@@ -359,6 +365,13 @@ class Translate extends Command
                 $event->description_en = GeminiUtils::translate($event->description, $event->getLanguageCode(), 'en');
                 if ($debug) {
                     $this->info("Translated description from {$event->getLanguageCode()} to en: '{$event->description}' → '{$event->description_en}'");
+                }
+            }
+
+            if ($event->short_description && ! $event->short_description_en) {
+                $event->short_description_en = GeminiUtils::translate($event->short_description, $event->getLanguageCode(), 'en');
+                if ($debug) {
+                    $this->info("Translated short_description from {$event->getLanguageCode()} to en: '{$event->short_description}' → '{$event->short_description_en}'");
                 }
             }
 
@@ -387,7 +400,8 @@ class Translate extends Command
             })
             ->where(function ($query) {
                 $query->whereNull('name_translated')
-                    ->orWhereNull('description_translated');
+                    ->orWhereNull('description_translated')
+                    ->orWhereNull('short_description_translated');
             });
 
         if ($eventId) {
@@ -431,6 +445,7 @@ class Translate extends Command
             if ($eventRole->event->getLanguageCode() == $eventRole->role->language_code) {
                 $eventRole->name_translated = '';
                 $eventRole->description_translated = '';
+                $eventRole->short_description_translated = '';
                 $eventRole->save();
 
                 if ($debug) {
@@ -455,6 +470,15 @@ class Translate extends Command
                 $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, $fromLang, $toLang);
                 if ($debug) {
                     $this->info("Translated event description from {$fromLang} to {$toLang}: '{$eventRole->event->description}' → '{$eventRole->description_translated}'");
+                }
+            }
+
+            if (! $eventRole->short_description_translated && $eventRole->event->short_description) {
+                $fromLang = $eventRole->event->getLanguageCode();
+                $toLang = $eventRole->role->language_code;
+                $eventRole->short_description_translated = GeminiUtils::translate($eventRole->event->short_description, $fromLang, $toLang);
+                if ($debug) {
+                    $this->info("Translated event short_description from {$fromLang} to {$toLang}: '{$eventRole->event->short_description}' → '{$eventRole->short_description_translated}'");
                 }
             }
 
