@@ -153,13 +153,50 @@
                 });
             }
 
+            function clearRoleFileInput(inputId, previewId, filenameId) {
+                const input = document.getElementById(inputId);
+                input.value = '';
+                const preview = document.getElementById(previewId);
+                const clearBtn = document.getElementById(previewId + '_clear');
+                const filenameSpan = document.getElementById(filenameId);
+                if (preview) {
+                    preview.src = '';
+                    preview.style.display = 'none';
+                }
+                if (clearBtn) {
+                    clearBtn.style.display = 'none';
+                }
+                if (filenameSpan) {
+                    filenameSpan.textContent = '';
+                }
+                updatePreview();
+            }
+
+            function clearHeaderFileInput() {
+                const input = document.getElementById('header_image_url');
+                input.value = '';
+                document.getElementById('header_image_url_filename').textContent = '';
+                document.getElementById('header_image_url_clear').style.display = 'none';
+                // Hide the custom header preview, but keep preset header preview visible if any
+                const headerSelect = document.getElementById('header_image');
+                if (headerSelect.value === '') {
+                    document.getElementById('header_image_preview').style.display = 'none';
+                }
+                updatePreview();
+            }
+
             function previewImage(input, previewId) {
                 const preview = document.getElementById(previewId);
+                const clearBtn = document.getElementById(previewId + '_clear');
                 const warningElement = document.getElementById(previewId.split('_')[0] + '_image_size_warning');
 
                 if (!input || !input.files || !input.files[0]) {
                     if (preview) {
                         preview.src = '';
+                    }
+                    if (clearBtn) {
+                        clearBtn.style.display = 'none';
+                    } else if (preview) {
                         preview.style.display = 'none';
                     }
                     if (warningElement) {
@@ -202,16 +239,24 @@
 
                         if (warningMessage == '') {
                             preview.src = reader.result;
-                            preview.style.display = 'block';
+                            if (clearBtn) {
+                                clearBtn.style.display = 'inline-block';
+                            } else {
+                                preview.style.display = 'block';
+                            }
                             updatePreview();
-                            
+
                             if (previewId === 'background_image_preview') {
                                 $('#style_background_image img:not(#background_image_preview)').hide();
                                 $('#style_background_image a').hide();
                             }
                         } else {
                             preview.src = '';
-                            preview.style.display = 'none';
+                            if (clearBtn) {
+                                clearBtn.style.display = 'none';
+                            } else {
+                                preview.style.display = 'none';
+                            }
                         }
                     };
                     img.src = reader.result;
@@ -881,7 +926,7 @@
                             {{ __('messages.contact_info') }}
                         </h2>
 
-                        <div class="mb-3">
+                        <div class="mb-6">
                             <x-input-label for="email" :value="__('messages.email') . ' *'" />
                             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                                 :value="old('email', $role->exists ? $role->email : $user->email)" required />
@@ -998,15 +1043,19 @@
                                     {{ __('messages.image_size_warning') }}
                                 </p>
 
-                                <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px; display:none;" class="pt-3" />
+                                <div id="profile_image_preview_clear" class="relative inline-block pt-3" style="display: none;">
+                                    <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px;" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                    <button type="button" onclick="clearRoleFileInput('profile_image', 'profile_image_preview', 'profile_image_filename')" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                </div>
 
                                 @if ($role->profile_image_url)
                                 <div class="relative inline-block pt-3">
                                     <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
                                     <button type="button"
                                         onclick="deleteRoleImage('{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}', '{{ csrf_token() }}', this.parentElement)"
-                                        class="absolute -top-1 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
+                                        class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                         </svg>
                                     </button>
@@ -1050,7 +1099,7 @@
 
                                 <div id="custom_header_input" style="display:none" class="mt-4">
                                     <input id="header_image_url" name="header_image_url" type="file" class="hidden"
-                                        accept="image/png, image/jpeg" onchange="document.getElementById('header_image_url_filename').textContent = this.files[0]?.name || '';" />
+                                        accept="image/png, image/jpeg" onchange="document.getElementById('header_image_url_filename').textContent = this.files[0]?.name || ''; document.getElementById('header_image_url_clear').style.display = this.files[0] ? 'inline' : 'none';" />
                                     <div class="mt-1 flex items-center gap-3">
                                         <button type="button" onclick="document.getElementById('header_image_url').click()"
                                             class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
@@ -1060,6 +1109,12 @@
                                             {{ __('messages.choose_file') }}
                                         </button>
                                         <span id="header_image_url_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                                        <button type="button" id="header_image_url_clear" onclick="clearHeaderFileInput()"
+                                            class="text-gray-400 hover:text-red-500 p-1" style="display: none;">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
                                     </div>
                                     <x-input-error class="mt-2" :messages="$errors->get('header_image_url')" />
                                     <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
@@ -1078,8 +1133,9 @@
                                     <img src="{{ $role->header_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
                                     <button type="button"
                                         onclick="deleteRoleImage('{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}', '{{ csrf_token() }}', this.parentElement)"
-                                        class="absolute -top-1 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
+                                        class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                         </svg>
                                     </button>
@@ -1168,15 +1224,19 @@
                                         {{ __('messages.image_size_warning') }}
                                     </p>
 
-                                    <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px; display:none;" class="pt-3" />
+                                    <div id="background_image_preview_clear" class="relative inline-block pt-3" style="display: none;">
+                                        <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px;" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                        <button type="button" onclick="clearRoleFileInput('background_image_url', 'background_image_preview', 'background_image_url_filename')" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                    </div>
 
                                     @if ($role->background_image_url)
                                     <div class="relative inline-block pt-3">
                                         <img src="{{ $role->background_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
                                         <button type="button"
                                             onclick="deleteRoleImage('{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}', '{{ csrf_token() }}', this.parentElement)"
-                                            class="absolute -top-1 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
+                                            class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                             </svg>
                                         </button>
@@ -1367,7 +1427,7 @@
 
                         <!-- Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
-                            <nav class="flex space-x-2 sm:space-x-4" aria-label="Tabs">
+                            <nav class="flex space-x-2 sm:space-x-6" aria-label="Tabs">
                                 <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="general">
                                     {{ __('messages.general') }}
                                 </button>
@@ -1786,7 +1846,7 @@
 
                         <!-- Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
-                            <nav class="flex space-x-4" aria-label="Tabs">
+                            <nav class="flex space-x-2 sm:space-x-6" aria-label="Tabs">
                                 <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="google">
                                     Google Calendar
                                 </button>
