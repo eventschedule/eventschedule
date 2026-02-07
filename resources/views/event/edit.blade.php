@@ -2823,7 +2823,7 @@
           return;
         }
 
-        fetch(`/search_roles?type=venue&search=${encodeURIComponent(this.venueEmail)}`, {
+        fetch(`{{ url('/search_roles') }}?type=venue&search=${encodeURIComponent(this.venueEmail)}`, {
           headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json',
@@ -2874,7 +2874,7 @@
           return;
         }
 
-        fetch(`/search_roles?type=member&search=${encodeURIComponent(this.memberEmail)}`, {
+        fetch(`{{ url('/search_roles') }}?type=member&search=${encodeURIComponent(this.memberEmail)}`, {
           headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json',
@@ -3190,7 +3190,7 @@
         formData.append('event_id', '{{ \App\Utils\UrlUtils::encodeId($event->id) }}');
         @endif
         formData.append('_token', '{{ csrf_token() }}');
-        fetch('/{{ $subdomain }}/parse-event-parts', {
+        fetch('{{ url('/' . $subdomain . '/parse-event-parts') }}', {
           method: 'POST',
           body: formData,
           headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -3223,7 +3223,7 @@
         formData.append('event_id', '{{ \App\Utils\UrlUtils::encodeId($event->id) }}');
         @endif
         formData.append('_token', '{{ csrf_token() }}');
-        fetch('/{{ $subdomain }}/parse-event-parts', {
+        fetch('{{ url('/' . $subdomain . '/parse-event-parts') }}', {
           method: 'POST',
           body: formData,
           headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -3705,7 +3705,7 @@
     const statusDiv = document.getElementById(`sync-status-${eventId}`);
     statusDiv.classList.remove('hidden');
     
-    fetch(`/google-calendar/sync-event/${subdomain}/${eventId}`, {
+    fetch(`{{ url('/google-calendar/sync-event') }}/${subdomain}/${eventId}`, {
       method: 'POST',
       headers: {
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -3740,7 +3740,7 @@
     const statusDiv = document.getElementById(`sync-status-${eventId}`);
     statusDiv.classList.remove('hidden');
     
-    fetch(`/google-calendar/unsync-event/${subdomain}/${eventId}`, {
+    fetch(`{{ url('/google-calendar/unsync-event') }}/${subdomain}/${eventId}`, {
       method: 'DELETE',
       headers: {
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),

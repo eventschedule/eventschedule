@@ -438,7 +438,7 @@ function syncEventsFromDropdown() {
         sync_direction: syncDirection
     };
     
-    fetch('/google-calendar/sync/{{ $role->subdomain }}', {
+    fetch('{{ url('/google-calendar/sync/' . $role->subdomain) }}', {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),

@@ -2629,7 +2629,7 @@ function loadGoogleCalendars() {
         return;
     }
 
-    fetch('/google-calendar/calendars')
+    fetch('{{ url('/google-calendar/calendars') }}')
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -2691,7 +2691,7 @@ function syncEvents() {
         sync_direction: selectedDirection.value
     };
     
-    fetch('/google-calendar/sync/{{ $role->subdomain }}', {
+    fetch('{{ url('/google-calendar/sync/' . $role->subdomain) }}', {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -3231,7 +3231,7 @@ document.addEventListener('DOMContentLoaded', function() {
             caldavTestBtn.disabled = true;
             caldavTestBtn.textContent = {!! json_encode(__('messages.testing'), JSON_UNESCAPED_UNICODE) !!};
 
-            fetch('/caldav/test-connection', {
+            fetch('{{ url('/caldav/test-connection') }}', {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -3266,7 +3266,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Discover Calendars
     function discoverCaldavCalendars(serverUrl, username, password) {
-        fetch('/caldav/discover-calendars', {
+        fetch('{{ url('/caldav/discover-calendars') }}', {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -3325,7 +3325,7 @@ document.addEventListener('DOMContentLoaded', function() {
             caldavConnectBtn.disabled = true;
             caldavConnectBtn.textContent = {!! json_encode(__('messages.connecting'), JSON_UNESCAPED_UNICODE) !!};
 
-            fetch('/caldav/settings/' + caldavSubdomain, {
+            fetch('{{ url('/caldav/settings') }}/' + caldavSubdomain, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -3367,7 +3367,7 @@ document.addEventListener('DOMContentLoaded', function() {
             radio.addEventListener('change', function() {
                 const syncDirection = this.value;
 
-                fetch('/caldav/sync-direction/' + caldavSubdomain, {
+                fetch('{{ url('/caldav/sync-direction') }}/' + caldavSubdomain, {
                     method: 'PATCH',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -3410,7 +3410,7 @@ document.addEventListener('DOMContentLoaded', function() {
             caldavDisconnectBtn.disabled = true;
             caldavDisconnectBtn.textContent = {!! json_encode(__('messages.disconnecting'), JSON_UNESCAPED_UNICODE) !!};
 
-            fetch('/caldav/disconnect/' + caldavSubdomain, {
+            fetch('{{ url('/caldav/disconnect') }}/' + caldavSubdomain, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),

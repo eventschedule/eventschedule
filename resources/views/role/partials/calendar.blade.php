@@ -236,29 +236,10 @@
                 </div>
             @endif
 
-            {{-- Mobile Filters (mobile only, hidden in list view since desktop filters are shown) --}}
-            <div v-if="dynamicFilterCount > 0" class="md:hidden flex flex-col gap-2 w-full">
-                <template v-if="dynamicFilterCount === 1">
-                    {{-- Single filter: show directly without button --}}
-                    <label v-if="hasOnlineEvents && groups.length <= 1 && uniqueCategoryIds.length <= 1" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
-                        <span class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.online') }}</span>
-                    </label>
-                    @if(isset($role) && $role->groups && $role->groups->count() > 1)
-                    <select v-if="groups.length > 1 && !hasOnlineEvents && uniqueCategoryIds.length <= 1" v-model="selectedGroup" style="font-family: sans-serif" class="w-full py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                        <option value="">{{ __('messages.all_schedules') }}</option>
-                        @foreach($role->groups as $group)
-                            <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
-                        @endforeach
-                    </select>
-                    @endif
-                    <select v-if="uniqueCategoryIds.length > 1 && !hasOnlineEvents && groups.length <= 1" v-model="selectedCategory" style="font-family: sans-serif" class="w-full py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                        <option value="">{{ __('messages.all_categories') }}</option>
-                        <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
-                    </select>
-                </template>
-                <template v-else>
-                    {{-- Multiple filters: show Filters button --}}
+            {{-- Mobile: Filters + Add Event buttons side-by-side --}}
+            <div class="md:hidden flex flex-row gap-2 w-full">
+                {{-- Mobile Filters Button (always shown when filters exist) --}}
+                <template v-if="dynamicFilterCount > 0">
                     <button @click="showFiltersDrawer = true"
                             class="inline-flex items-center justify-center gap-2 px-4 py-2.5
                                    border border-gray-300 dark:border-gray-600 rounded-md
@@ -274,61 +255,49 @@
                         </span>
                     </button>
                 </template>
+                {{-- Mobile Add Event Button --}}
+                @if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule')
+                    <x-brand-link href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}" class="flex-1">
+                        <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                        </svg>
+                        {{ __('messages.add_event') }}
+                    </x-brand-link>
+                @endif
             </div>
 
-            {{-- Add Event Button --}}
-            @if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule')
-                <x-brand-link href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}" class="w-full md:w-auto">
-                    <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-                    </svg>
-                    {{ __('messages.add_event') }}
-                </x-brand-link>
-            @endif
-
-            {{-- Desktop: Show Filters button when > 2 filters --}}
-            <template v-if="dynamicFilterCount > 2">
+            {{-- Desktop: Filters Button with label - AP only --}}
+            @if ($route == 'admin')
+            <template v-if="dynamicFilterCount > 0">
                 <button @click="showDesktopFiltersModal = true"
                         :class="currentView === 'list' ? 'md:!inline-flex' : ''"
                         class="hidden md:inline-flex items-center justify-center gap-2 px-4 py-2.5
                                border border-gray-300 dark:border-gray-600 rounded-md
                                bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                               text-base font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                               text-base font-semibold hover:bg-gray-50 dark:hover:bg-gray-700
+                               relative">
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3H19C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z"/>
                     </svg>
                     {{ __('messages.filters') }}
+                    {{-- Active filter count badge --}}
                     <span v-if="activeFilterCount > 0"
                           class="ms-1 px-1.5 py-0.5 text-xs bg-[#4E81FA] text-white rounded-full">
                         @{{ activeFilterCount }}
                     </span>
                 </button>
             </template>
+            @endif
 
-            {{-- Desktop: Show inline filters when <= 2 filters --}}
-            <div v-else :class="currentView === 'list' ? 'md:!flex' : ''" class="hidden md:flex flex-row gap-2 w-full md:w-auto">
-                {{-- Schedule Select --}}
-                @if(isset($role) && $role->groups && $role->groups->count() > 1)
-                    <select v-model="selectedGroup" style="font-family: sans-serif" class="py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 min-w-[180px] hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                        <option value="">{{ __('messages.all_schedules') }}</option>
-                        @foreach($role->groups as $group)
-                            <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
-                        @endforeach
-                    </select>
-                @endif
-
-                {{-- Category Select --}}
-                    <select v-if="uniqueCategoryIds.length > 1" v-model="selectedCategory" style="font-family: sans-serif" class="py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 min-w-[180px] hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                        <option value="">{{ __('messages.all_categories') }}</option>
-                        <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
-                    </select>
-
-                {{-- Online Events Checkbox --}}
-                    <label v-if="hasOnlineEvents" class="inline-flex items-center gap-2 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
-                        <span class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.online') }}</span>
-                    </label>
-            </div>
+            {{-- Desktop Add Event Button --}}
+            @if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule')
+                <x-brand-link href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}" class="hidden md:inline-flex w-auto">
+                    <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                    </svg>
+                    {{ __('messages.add_event') }}
+                </x-brand-link>
+            @endif
         </div>
     </div>
 </header>
@@ -1208,7 +1177,7 @@
     </div>
 
 {{-- Mobile Filters Bottom Sheet Drawer --}}
-<div v-if="dynamicFilterCount >= 2 && showFiltersDrawer" class="md:hidden fixed inset-0 z-50">
+<div v-if="dynamicFilterCount >= 1 && showFiltersDrawer" class="md:hidden fixed inset-0 z-50">
     {{-- Backdrop --}}
     <div @click="showFiltersDrawer = false"
          class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity"></div>
@@ -1301,13 +1270,13 @@
 </div>
 
 {{-- Desktop Filters Modal --}}
-<div v-if="dynamicFilterCount > 2 && showDesktopFiltersModal" class="hidden md:block fixed inset-0 z-50">
+<div v-if="dynamicFilterCount > 0 && showDesktopFiltersModal" class="hidden md:block fixed inset-0 z-[100]">
     {{-- Backdrop --}}
     <div @click="showDesktopFiltersModal = false"
-         class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity"></div>
+         class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity z-[100]"></div>
 
     {{-- Modal panel --}}
-    <div class="fixed inset-0 flex items-center justify-center p-4">
+    <div class="fixed inset-0 flex items-center justify-center p-4 z-[101]">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Header --}}
             <div class="px-6 py-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
@@ -2553,7 +2522,7 @@ const calendarApp = createApp({
             try {
                 const oldestEvent = this.pastEvents[this.pastEvents.length - 1];
                 if (!oldestEvent || !oldestEvent.starts_at) return;
-                const baseUrl = '{{ isset($subdomain) ? route("role.list_past_events", ["subdomain" => $subdomain], false) : "" }}';
+                const baseUrl = '{{ isset($subdomain) ? route("role.list_past_events", ["subdomain" => $subdomain]) : "" }}';
                 const url = baseUrl + '?before=' + encodeURIComponent(oldestEvent.starts_at);
                 const response = await fetch(url);
                 const data = await response.json();
@@ -2576,11 +2545,11 @@ const calendarApp = createApp({
             try {
                 let url;
                 if (this.route === 'home') {
-                    url = '{{ route("home.calendar_events", [], false) }}';
+                    url = '{{ route("home.calendar_events") }}';
                 } else if (this.route === 'admin') {
-                    url = '{{ isset($subdomain) ? route("role.admin_calendar_events", ["subdomain" => $subdomain], false) : "" }}';
+                    url = '{{ isset($subdomain) ? route("role.admin_calendar_events", ["subdomain" => $subdomain]) : "" }}';
                 } else {
-                    url = '{{ isset($subdomain) ? route("role.calendar_events", ["subdomain" => $subdomain], false) : "" }}';
+                    url = '{{ isset($subdomain) ? route("role.calendar_events", ["subdomain" => $subdomain]) : "" }}';
                 }
                 const separator = url.includes('?') ? '&' : '?';
                 url += separator + 'month={{ $month }}&year={{ $year }}';
@@ -2697,5 +2666,40 @@ const calendarApp = createApp({
 
 const calendarAppInstance = calendarApp.mount('#calendar-app');
 window.calendarVueApp = calendarAppInstance;
+
+// Update hero filters button visibility and badge (for CP/guest view)
+function updateHeroFiltersButton() {
+    const btn = document.getElementById('hero-filters-btn');
+    const badge = document.getElementById('hero-filters-badge');
+    if (btn && window.calendarVueApp) {
+        const showBtn = window.calendarVueApp.dynamicFilterCount > 0;
+        // Show button only on desktop (md+) when there are filters
+        if (showBtn) {
+            btn.classList.remove('hidden');
+            btn.classList.add('md:flex');
+            btn.style.display = ''; // Let CSS classes control display
+        } else {
+            btn.classList.add('hidden');
+            btn.classList.remove('md:flex');
+            btn.style.display = 'none';
+        }
+        if (badge) {
+            const count = window.calendarVueApp.activeFilterCount;
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+                badge.classList.add('flex');
+            } else {
+                badge.classList.add('hidden');
+                badge.classList.remove('flex');
+            }
+        }
+    }
+}
+
+// Initial update and watch for changes
+updateHeroFiltersButton();
+calendarAppInstance.$watch('dynamicFilterCount', updateHeroFiltersButton);
+calendarAppInstance.$watch('activeFilterCount', updateHeroFiltersButton);
 </script>
 </div>

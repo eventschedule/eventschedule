@@ -21,6 +21,8 @@ trait CalendarDataTrait
             'category_id' => $event->category_id,
             'name' => $event->translatedName(),
             'venue_name' => $event->getVenueDisplayName(),
+            'venue_subdomain' => $event->venue?->subdomain ?: null,
+            'is_free' => !$event->tickets_enabled || $event->areTicketsFree(),
             'starts_at' => $event->starts_at,
             'days_of_week' => $event->days_of_week,
             'local_starts_at' => $event->localStartsAt(),
