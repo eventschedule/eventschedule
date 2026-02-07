@@ -75,7 +75,6 @@ class GraphicController extends Controller
             'frequency' => 'in:daily,weekly,monthly',
             'ai_prompt' => 'nullable|string|max:500',
             'text_template' => 'nullable|string|max:2000',
-            'link_type' => 'in:schedule,registration',
             'layout' => 'in:grid,list,row',
             'send_day' => 'integer|min:0|max:31',
             'send_hour' => 'integer|min:0|max:23',
@@ -199,7 +198,7 @@ class GraphicController extends Controller
 
         // Use request parameters if provided, otherwise fall back to saved settings
         $layout = $request->get('layout', $graphicSettings['layout'] ?? 'grid');
-        $directRegistration = $request->boolean('direct');
+        $directRegistration = $role->direct_registration;
 
         // Validate layout parameter
         if (! in_array($layout, ['grid', 'list', 'row'])) {
@@ -359,7 +358,7 @@ class GraphicController extends Controller
         $graphicSettings = $role->graphic_settings ?? [];
 
         $layout = $request->get('layout', $graphicSettings['layout'] ?? 'grid');
-        $directRegistration = $request->boolean('direct');
+        $directRegistration = $role->direct_registration;
 
         // Validate layout parameter
         if (! in_array($layout, ['grid', 'list', 'row'])) {

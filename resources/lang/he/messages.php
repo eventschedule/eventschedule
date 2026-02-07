@@ -101,6 +101,8 @@ return [
     'rotation' => 'סיבוב',
     'settings' => 'הגדרות',
     'accept_requests' => 'קבל בקשות',
+    'direct_registration' => 'קישור ישיר להרשמה',
+    'direct_registration_help' => 'כאשר מופעל, לחיצה על אירועים בלוח השנה או סריקת קודי QR בגרפיקות של אירועים תפתח את כתובת ההרשמה (לאירועים שיש להם כזו) במקום דף פרטי האירוע.',
     'use_24_hour_time_format' => 'השתמש בפורמט 24 שעות',
     'no_followers' => 'אין עוקבים',
     'share_your_event_schedule_link' => 'שתף את הקישור או קוד ה-QR שלך כדי לקבל יותר עוקבים',

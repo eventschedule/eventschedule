@@ -103,6 +103,8 @@ return [
     'unlisted' => 'Non Elencato',
     'public' => 'Pubblico',
     'accept_requests' => 'Accetta Richieste',
+    'direct_registration' => 'Collegamento Diretto alla Registrazione',
+    'direct_registration_help' => 'Quando abilitato, cliccando sugli eventi nel calendario o scansionando i codici QR nelle grafiche degli eventi si aprirà l\'URL di registrazione (per gli eventi che ne hanno uno) invece della pagina dei dettagli dell\'evento.',
     'request_terms' => 'Termini di Richiesta',
     'enter_request_terms' => 'Inserisci i termini e le condizioni per le richieste di eventi...',
     'use_24_hour_time_format' => 'Usa il formato orario 24 ore',

@@ -84,6 +84,7 @@ class Role extends Model implements MustVerifyEmail
         'slug_pattern',
         'translation_attempts',
         'last_translated_at',
+        'direct_registration',
     ];
 
     /**
@@ -97,6 +98,7 @@ class Role extends Model implements MustVerifyEmail
         'caldav_last_sync_at' => 'datetime',
         'event_custom_fields' => 'array',
         'last_translated_at' => 'datetime',
+        'direct_registration' => 'boolean',
     ];
 
     /**
@@ -1015,7 +1017,6 @@ class Role extends Model implements MustVerifyEmail
             'enabled' => false,
             'frequency' => 'weekly',
             'ai_prompt' => '',
-            'link_type' => 'schedule',
             'layout' => 'grid',
             'send_day' => 1,
             'send_hour' => 9,

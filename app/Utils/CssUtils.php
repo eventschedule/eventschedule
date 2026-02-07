@@ -39,6 +39,20 @@ class CssUtils
      */
     private static function removeDangerousCss(string $css): string
     {
+        // Strip HTML tags to prevent </style><script> breakout attacks
+        $css = strip_tags($css);
+
+        // Decode CSS escape sequences (e.g. \6a avascript -> javascript)
+        // so regex patterns can't be bypassed with encoded characters
+        $css = preg_replace_callback('/\\\\([0-9a-fA-F]{1,6})\s?/', function ($matches) {
+            $codePoint = intval($matches[1], 16);
+            if ($codePoint === 0 || $codePoint > 0x10FFFF) {
+                return '';
+            }
+
+            return mb_chr($codePoint, 'UTF-8');
+        }, $css);
+
         $patterns = [
             '/expression\s*\(/i',
             '/javascript\s*:/i',

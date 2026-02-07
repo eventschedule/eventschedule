@@ -100,6 +100,8 @@ return [
     'rotation' => 'Rotación',
     'settings' => 'Configuración',
     'accept_requests' => 'Aceptar solicitudes',
+    'direct_registration' => 'Enlazar Directamente al Registro',
+    'direct_registration_help' => 'Cuando está habilitado, al hacer clic en eventos en el calendario o escanear códigos QR en gráficos de eventos, se abrirá la URL de registro (para eventos que tengan una) en lugar de la página de detalles del evento.',
     'request_terms' => 'Términos de Solicitud',
     'enter_request_terms' => 'Ingrese los términos y condiciones para las solicitudes de eventos...',
     'use_24_hour_time_format' => 'Usar formato de 24 horas',
