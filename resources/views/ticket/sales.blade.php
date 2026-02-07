@@ -72,7 +72,7 @@ function handleAction(saleId, action) {
         return;
     }
 
-    fetch(`/sales/action/${saleId}`, {
+    fetch(`{{ url('/sales/action') }}/${saleId}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ function handleAction(saleId, action) {
 }
 
 function resendEmail(saleId) {
-    fetch(`/sales/resend-email/${saleId}`, {
+    fetch(`{{ url('/sales/resend-email') }}/${saleId}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             async loadTalentRoles() {
                 try {
-                    const response = await fetch(`/{{ $role->subdomain }}/match-videos`);
+                    const response = await fetch(`{{ url('/' . $role->subdomain . '/match-videos') }}`);
                     const data = await response.json();
                     this.talentRoles = data.map(role => ({
                         ...role,
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 role.error = null;
                 
                 try {
-                    const response = await fetch(`/{{ $role->subdomain }}/search-youtube?q=${encodeURIComponent(role.name)}`);
+                    const response = await fetch(`{{ url('/' . $role->subdomain . '/search-youtube') }}?q=${encodeURIComponent(role.name)}`);
                     const data = await response.json();
                     
                     if (data.success && data.videos) {
@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!role.selectedVideos || role.selectedVideos.length === 0) return;
                 
                 try {
-                    const response = await fetch(`/{{ $role->subdomain }}/save-videos`, {
+                    const response = await fetch(`{{ url('/' . $role->subdomain . '/save-videos') }}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             async skipRole(role) {
                 try {
-                    const response = await fetch(`/{{ $role->subdomain }}/save-videos`, {
+                    const response = await fetch(`{{ url('/' . $role->subdomain . '/save-videos') }}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

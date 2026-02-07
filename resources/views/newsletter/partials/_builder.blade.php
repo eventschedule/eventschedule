@@ -172,6 +172,6 @@ $builderProps = [
 ];
 @endphp
 
-<script src="/js/sortable.min.js" {!! nonce_attr() !!}></script>
+<script src="{{ asset('js/sortable.min.js') }}" {!! nonce_attr() !!}></script>
 <div id="newsletter-builder" data-props="{{ json_encode($builderProps) }}"></div>
 @vite('resources/js/newsletter-builder.js')
