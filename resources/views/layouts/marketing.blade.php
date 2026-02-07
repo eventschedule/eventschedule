@@ -47,6 +47,7 @@
     <link rel="alternate" hreflang="he" href="{{ $canonicalPath }}?lang=he">
     <link rel="alternate" hreflang="nl" href="{{ $canonicalPath }}?lang=nl">
     <link rel="alternate" hreflang="ar" href="{{ $canonicalPath }}?lang=ar">
+    <link rel="alternate" hreflang="et" href="{{ $canonicalPath }}?lang=et">
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
     <meta name="robots" content="index, follow">
     <meta name="author" content="Event Schedule">
@@ -54,7 +55,7 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ str_replace('http://', 'https://', request()->url()) }}">
+    <meta property="og:url" content="{{ $canonicalPath }}">
     <meta property="og:title" content="{{ $title ?? 'Event Schedule' }}">
     <meta property="og:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
     <meta property="og:image" content="{{ config('app.url') }}/images/{{ $socialImage ?? 'social/home.png' }}">
@@ -63,10 +64,23 @@
     <meta property="og:image:alt" content="{{ $title ?? 'Event Schedule' }}">
     <meta property="og:site_name" content="Event Schedule">
     <meta property="og:locale" content="{{ str_replace('-', '_', app()->getLocale()) }}">
+    @php
+        $ogLocaleMap = [
+            'en' => 'en_US', 'es' => 'es_ES', 'de' => 'de_DE',
+            'fr' => 'fr_FR', 'it' => 'it_IT', 'pt' => 'pt_PT',
+            'he' => 'he_IL', 'nl' => 'nl_NL', 'ar' => 'ar_SA', 'et' => 'et_EE',
+        ];
+        $currentOgLocale = str_replace('-', '_', app()->getLocale());
+    @endphp
+    @foreach($ogLocaleMap as $lang => $ogLocale)
+        @if($ogLocale !== $currentOgLocale)
+    <meta property="og:locale:alternate" content="{{ $ogLocale }}">
+        @endif
+    @endforeach
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="{{ str_replace('http://', 'https://', request()->url()) }}">
+    <meta name="twitter:url" content="{{ $canonicalPath }}">
     <meta name="twitter:title" content="{{ $title ?? 'Event Schedule' }}">
     <meta name="twitter:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
     <meta name="twitter:image" content="{{ config('app.url') }}/images/{{ $socialImage ?? 'social/home.png' }}">
@@ -143,6 +157,12 @@
             if ($path !== 'docs') {
                 $breadcrumbs[] = ['name' => 'Documentation', 'url' => url('/docs')];
             }
+            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+        } elseif (str_starts_with($path, 'features/')) {
+            $breadcrumbs[] = ['name' => 'Features', 'url' => url('/features')];
+            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+        } elseif (str_starts_with($path, 'for-')) {
+            $breadcrumbs[] = ['name' => 'Use Cases', 'url' => url('/use-cases')];
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
         } else {
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
