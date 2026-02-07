@@ -419,6 +419,8 @@ return [
     'note_all_events_are_publicly_listed' => 'Ihre Veranstaltung wird öffentlich sichtbar sein',
     'add_to_schedule' => 'Zum Zeitplan hinzufügen',
     'accept_requests' => 'Anfragen akzeptieren',
+    'direct_registration' => 'Direkt zur Anmeldung verlinken',
+    'direct_registration_help' => 'Wenn aktiviert, öffnet das Klicken auf Veranstaltungen im Kalender oder das Scannen von QR-Codes in Veranstaltungsgrafiken die Anmelde-URL (für Veranstaltungen, die eine haben) anstelle der Veranstaltungsdetailseite.',
     'request_terms' => 'Anfragebedingungen',
     'enter_request_terms' => 'Geben Sie die Bedingungen für Veranstaltungsanfragen ein...',
     'upgrade_to_pro' => 'Upgrade auf Pro, um Mitglieder hinzuzufügen',

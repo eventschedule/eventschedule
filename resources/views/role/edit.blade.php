@@ -1517,6 +1517,15 @@
                         </div>
                         @endif
 
+                        <div class="mb-6">
+                            <x-checkbox name="direct_registration"
+                                label="{{ __('messages.direct_registration') }}"
+                                checked="{{ old('direct_registration', $role->direct_registration) }}"
+                                data-custom-attribute="value" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.direct_registration_help') }}</p>
+                            <x-input-error class="mt-2" :messages="$errors->get('direct_registration')" />
+                        </div>
+
                         <!--
                         <div class="mb-6">
                             <x-checkbox name="is_unlisted"

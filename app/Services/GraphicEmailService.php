@@ -30,7 +30,7 @@ class GraphicEmailService
         try {
             $settings = $role->graphic_settings;
             $layout = $settings['layout'] ?? 'grid';
-            $directRegistration = ($settings['link_type'] ?? 'schedule') === 'registration';
+            $directRegistration = $role->direct_registration;
             $excludeRecurring = $settings['exclude_recurring'] ?? false;
 
             // Use saved event_count setting (default 20, matching web preview)

@@ -100,6 +100,8 @@ return [
     'rotation' => 'Rotatie',
     'settings' => 'Instellingen',
     'accept_requests' => 'Accepteer Verzoeken',
+    'direct_registration' => 'Direct Linken naar Registratie',
+    'direct_registration_help' => 'Wanneer ingeschakeld, opent het klikken op evenementen in de kalender of het scannen van QR-codes in evenementafbeeldingen de registratie-URL (voor evenementen die er een hebben) in plaats van de evenementdetailpagina.',
     'request_terms' => 'Verzoek Voorwaarden',
     'enter_request_terms' => 'Voer voorwaarden in voor evenement verzoeken...',
     'use_24_hour_time_format' => 'Gebruik 24-uurs formaat',

@@ -109,6 +109,8 @@ return [
     'unlisted' => 'Unlisted',
     'public' => 'Public',
     'accept_requests' => 'Accept requests',
+    'direct_registration' => 'Link Directly to Registration',
+    'direct_registration_help' => 'When enabled, clicking events on the calendar or scanning QR codes in event graphics will open the registration URL (for events that have one) instead of the event detail page.',
     'request_terms' => 'Request Terms',
     'enter_request_terms' => 'Enter terms and conditions for event requests...',
     'use_24_hour_time_format' => 'Use 24-hour time format',
@@ -1588,4 +1590,13 @@ return [
     'why_create_account_ready_subtitle' => 'Join thousands of event organizers. It\'s free and always will be.',
     'why_create_account_no_cc' => 'No credit card required',
     'why_create_account_learn_more' => 'Learn why',
+
+    // Admin detailed views
+    'recent_sales' => 'Recent Sales',
+    'no_sales_yet' => 'No sales yet.',
+    'method' => 'Method',
+    'amount' => 'Amount',
+    'reference' => 'Reference',
+    'retry' => 'Retry',
+    'retry_success' => 'Retry queued successfully',
 ];

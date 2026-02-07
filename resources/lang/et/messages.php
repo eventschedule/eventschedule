@@ -108,6 +108,8 @@ return [
     'unlisted' => 'Registreerimata',
     'public' => 'Avalik',
     'accept_requests' => 'Nõustuge taotlustega',
+    'direct_registration' => 'Otsene link registreerimisele',
+    'direct_registration_help' => 'Kui see on lubatud, avatakse kalendris sündmustele klõpsates või sündmuste graafikates QR-koode skaneerides registreerimise URL (sündmuste puhul, millel see on) sündmuse üksikasjade lehe asemel.',
     'request_terms' => 'Tingimused taotluseks',
     'enter_request_terms' => 'Sisestage sündmusetaotluste nõuded ja tingimused...',
     'use_24_hour_time_format' => 'Kasutage 24-tunnise ajavormingut',

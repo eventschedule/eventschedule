@@ -49,6 +49,7 @@ class RoleUpdateRequest extends FormRequest
             'event_custom_fields.*.ai_prompt' => ['nullable', 'string', 'max:500'],
             'slug_pattern' => ['nullable', 'string', 'max:500'],
             'event_layout' => ['nullable', 'string', 'in:calendar,list'],
+            'direct_registration' => ['nullable', 'boolean'],
         ];
     }
 }

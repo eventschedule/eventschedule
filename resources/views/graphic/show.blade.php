@@ -9,6 +9,7 @@
             const hasRecurringEvents = @json($hasRecurringEvents);
             const maxEvents = {{ $maxEvents ?? 20 }};
             let currentLayout = '{{ $layout }}';
+            const directRegistration = {{ $role->direct_registration ? 'true' : 'false' }};
 
             function copyToClipboard(text, buttonId) {
                 navigator.clipboard.writeText(text).then(function() {
@@ -54,8 +55,6 @@
 
             function getFormSettings() {
                 // Check desktop first, fall back to mobile
-                const linkType = document.querySelector('input[name="link_type"]:checked')?.value ||
-                                 document.querySelector('input[name="link_type_mobile"]:checked')?.value || 'schedule';
                 const aiPrompt = document.getElementById('ai_prompt')?.value ||
                                  document.getElementById('ai_prompt_mobile')?.value || '';
                 const textTemplate = document.getElementById('text_template')?.value ||
@@ -80,7 +79,7 @@
                                      document.getElementById('url_include_id_mobile')?.checked || false;
 
                 return {
-                    link_type: linkType,
+                    direct_registration: directRegistration,
                     ai_prompt: aiPrompt,
                     text_template: textTemplate,
                     use_screen_capture: useScreenCapture,
@@ -97,16 +96,6 @@
 
             // Sync settings between desktop and mobile forms
             function syncFormFields() {
-                // Sync link type
-                const linkTypeDesktop = document.querySelector('input[name="link_type"]:checked');
-                const linkTypeMobile = document.querySelector('input[name="link_type_mobile"]:checked');
-                if (linkTypeDesktop && linkTypeMobile) {
-                    if (linkTypeDesktop.value !== linkTypeMobile.value) {
-                        const mobileRadio = document.querySelector(`input[name="link_type_mobile"][value="${linkTypeDesktop.value}"]`);
-                        if (mobileRadio) mobileRadio.checked = true;
-                    }
-                }
-
                 // Sync AI prompt
                 const aiPromptDesktop = document.getElementById('ai_prompt');
                 const aiPromptMobile = document.getElementById('ai_prompt_mobile');
@@ -249,7 +238,7 @@
                 // Get current form values instead of saved settings
                 const formSettings = getFormSettings();
                 const layoutParam = '?layout=' + encodeURIComponent(formSettings.layout);
-                const directParam = formSettings.link_type === 'registration' ? '&direct=1' : '';
+                const directParam = formSettings.direct_registration ? '&direct=1' : '';
                 const screenCaptureParam = formSettings.use_screen_capture ? '&use_screen_capture=1' : '';
                 const aiPromptParam = formSettings.ai_prompt ? '&ai_prompt=' + encodeURIComponent(formSettings.ai_prompt) : '';
                 const textTemplateParam = formSettings.text_template ? '&text_template=' + encodeURIComponent(formSettings.text_template) : '';
@@ -310,15 +299,6 @@
             }
 
             function updateSettingsUI() {
-                // Update link type radio buttons (desktop and mobile)
-                const linkType = currentSettings.link_type || 'schedule';
-                ['link_type', 'link_type_mobile'].forEach(name => {
-                    const radioToCheck = document.querySelector(`input[name="${name}"][value="${linkType}"]`);
-                    if (radioToCheck) {
-                        radioToCheck.checked = true;
-                    }
-                });
-
                 // Update email scheduling fields (desktop and mobile)
                 ['email_enabled', 'email_enabled_mobile'].forEach(id => {
                     const enabledCheckbox = document.getElementById(id);
@@ -619,10 +599,6 @@
                 const excludeRecurring = document.getElementById('exclude_recurring') || document.getElementById('exclude_recurring_mobile');
                 const recipientEmails = document.getElementById('recipient_emails') || document.getElementById('recipient_emails_mobile');
 
-                // Get link type from desktop or mobile
-                const linkTypeChecked = document.querySelector('input[name="link_type"]:checked') ||
-                                        document.querySelector('input[name="link_type_mobile"]:checked');
-
                 // Get layout from desktop or mobile
                 const layoutChecked = document.querySelector('input[name="layout"]:checked') ||
                                       document.querySelector('input[name="layout_mobile"]:checked');
@@ -650,7 +626,6 @@
                     send_hour: sendHour ? parseInt(sendHour.value) : 9,
                     ai_prompt: aiPrompt ? aiPrompt.value : '',
                     text_template: textTemplate ? textTemplate.value : '',
-                    link_type: linkTypeChecked ? linkTypeChecked.value : 'schedule',
                     layout: layoutChecked ? layoutChecked.value : 'grid',
                     use_screen_capture: useScreenCapture ? useScreenCapture.checked : false,
                     exclude_recurring: excludeRecurring ? excludeRecurring.checked : false,
@@ -998,17 +973,6 @@
             document.addEventListener('DOMContentLoaded', function() {
                 updateSettingsUI();
                 initTextareaResize();
-
-                // Add change listeners for both desktop and mobile link type radios
-                document.querySelectorAll('input[name="link_type"], input[name="link_type_mobile"]').forEach(radio => {
-                    radio.addEventListener('change', function() {
-                        currentSettings.link_type = this.value;
-                        // Sync to other form
-                        const otherName = this.name === 'link_type' ? 'link_type_mobile' : 'link_type';
-                        const otherRadio = document.querySelector(`input[name="${otherName}"][value="${this.value}"]`);
-                        if (otherRadio) otherRadio.checked = true;
-                    });
-                });
 
                 // Add change listeners for both desktop and mobile frequency selects
                 ['frequency', 'frequency_mobile'].forEach(id => {
@@ -1367,27 +1331,6 @@
                         </div>
                         @endif
 
-                        <!-- Link to Section -->
-                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.link_to') }}</h4>
-                            <div class="flex flex-col gap-3">
-                                <label class="flex items-start cursor-pointer group">
-                                    <input type="radio" name="link_type_mobile" value="schedule" class="w-4 h-4 mt-0.5 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                    <div class="ml-2">
-                                        <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_event_page') }}</span>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.link_to_event_page_desc') }}</p>
-                                    </div>
-                                </label>
-                                <label class="flex items-start cursor-pointer group">
-                                    <input type="radio" name="link_type_mobile" value="registration" class="w-4 h-4 mt-0.5 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                    <div class="ml-2">
-                                        <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_registration') }}</span>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.link_to_registration_desc') }}</p>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
                         <!-- URL Format Section -->
                         <div class="mb-5">
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.url_format') }}</h4>
@@ -1706,27 +1649,6 @@
                                 </div>
                             </div>
                             @endif
-
-                            <!-- Link to Section -->
-                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.link_to') }}</h4>
-                                <div class="flex flex-col gap-3">
-                                    <label class="flex items-start cursor-pointer group">
-                                        <input type="radio" name="link_type" value="schedule" class="w-4 h-4 mt-0.5 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                        <div class="ml-2">
-                                            <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_event_page') }}</span>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.link_to_event_page_desc') }}</p>
-                                        </div>
-                                    </label>
-                                    <label class="flex items-start cursor-pointer group">
-                                        <input type="radio" name="link_type" value="registration" class="w-4 h-4 mt-0.5 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                        <div class="ml-2">
-                                            <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.link_to_registration') }}</span>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.link_to_registration_desc') }}</p>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
 
                             <!-- URL Format Section -->
                             <div class="mb-5">

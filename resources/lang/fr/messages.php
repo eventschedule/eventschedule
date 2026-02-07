@@ -100,6 +100,8 @@ return [
     'rotation' => 'Rotation',
     'settings' => 'Paramètres',
     'accept_requests' => 'Accepter les demandes',
+    'direct_registration' => 'Lien Direct vers l\'Inscription',
+    'direct_registration_help' => 'Lorsqu\'activé, cliquer sur les événements du calendrier ou scanner les codes QR des graphiques d\'événements ouvrira l\'URL d\'inscription (pour les événements qui en ont une) au lieu de la page de détails de l\'événement.',
     'request_terms' => 'Conditions de demande',
     'enter_request_terms' => 'Entrez les termes et conditions pour les demandes d\'événements...',
     'use_24_hour_time_format' => 'Utiliser le format 24 heures',
