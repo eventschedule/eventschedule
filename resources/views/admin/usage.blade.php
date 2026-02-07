@@ -131,62 +131,196 @@
                         <tr>
                             <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
                             <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name / ID</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Source Lang</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Missing Fields</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Content Preview</th>
                             <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Attempts</th>
                             <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Last Attempt</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Action</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         @foreach ($stuckRoles as $record)
+                        @php
+                            $missingFields = [];
+                            if (is_null($record->name_en)) $missingFields[] = 'name_en';
+                            if (is_null($record->description_en)) $missingFields[] = 'description_en';
+                            if (is_null($record->address1_en)) $missingFields[] = 'address1_en';
+                            if (is_null($record->city_en)) $missingFields[] = 'city_en';
+                            if (is_null($record->state_en)) $missingFields[] = 'state_en';
+                            if (is_null($record->request_terms_en)) $missingFields[] = 'request_terms_en';
+                        @endphp
                         <tr>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Role</td>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ $record->name ?: $record->subdomain }} <span class="text-gray-400">#{{ $record->id }}</span></td>
+                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Schedule</td>
+                            <td class="px-4 py-3 text-sm">
+                                <a href="{{ route('role.view_guest', ['subdomain' => $record->subdomain]) }}" class="text-[#4E81FA] hover:underline" target="_blank">{{ $record->name ?: $record->subdomain }}</a>
+                                <span class="text-gray-400">#{{ $record->id }}</span>
+                            </td>
+                            <td class="px-4 py-3 text-sm">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                    {{ strtoupper($record->language_code ?? 'N/A') }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-sm font-mono text-gray-500 dark:text-gray-400">{{ implode(', ', $missingFields) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400" title="{{ $record->name ?: $record->description }}">{{ \Illuminate\Support\Str::limit($record->name ?: $record->description, 50) }}</td>
                             <td class="px-4 py-3 text-sm text-end">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $record->translation_attempts >= $stuckThreshold * 2 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
                                     {{ $record->translation_attempts }}
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $record->last_translated_at ? $record->last_translated_at->diffForHumans() : 'Never' }}</td>
+                            <td class="px-4 py-3 text-sm text-end">
+                                <button onclick="retryTranslation('role', {{ $record->id }})" class="text-xs text-[#4E81FA] hover:underline">@lang('messages.retry')</button>
+                            </td>
                         </tr>
                         @endforeach
                         @foreach ($stuckEvents as $record)
+                        @php
+                            $missingFields = [];
+                            if (is_null($record->name_en)) $missingFields[] = 'name_en';
+                            if (is_null($record->description_en)) $missingFields[] = 'description_en';
+                            $langCode = $record->venue?->language_code;
+                        @endphp
                         <tr>
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Event</td>
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ \Illuminate\Support\Str::limit($record->name, 40) }} <span class="text-gray-400">#{{ $record->id }}</span></td>
+                            <td class="px-4 py-3 text-sm">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                    {{ strtoupper($langCode ?? 'N/A') }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-sm font-mono text-gray-500 dark:text-gray-400">{{ implode(', ', $missingFields) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400" title="{{ $record->name ?: $record->description }}">{{ \Illuminate\Support\Str::limit($record->name ?: $record->description, 50) }}</td>
                             <td class="px-4 py-3 text-sm text-end">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $record->translation_attempts >= $stuckThreshold * 2 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
                                     {{ $record->translation_attempts }}
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $record->last_translated_at ? $record->last_translated_at->diffForHumans() : 'Never' }}</td>
+                            <td class="px-4 py-3 text-sm text-end">
+                                <button onclick="retryTranslation('event', {{ $record->id }})" class="text-xs text-[#4E81FA] hover:underline">@lang('messages.retry')</button>
+                            </td>
                         </tr>
                         @endforeach
                         @foreach ($stuckEventParts as $record)
+                        @php
+                            $missingFields = [];
+                            if (is_null($record->name_en)) $missingFields[] = 'name_en';
+                            if (is_null($record->description_en)) $missingFields[] = 'description_en';
+                            $langCode = $record->event?->venue?->language_code;
+                        @endphp
                         <tr>
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">EventPart</td>
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ \Illuminate\Support\Str::limit($record->name, 40) }} <span class="text-gray-400">#{{ $record->id }} (event #{{ $record->event_id }})</span></td>
+                            <td class="px-4 py-3 text-sm">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                    {{ strtoupper($langCode ?? 'N/A') }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-sm font-mono text-gray-500 dark:text-gray-400">{{ implode(', ', $missingFields) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400" title="{{ $record->name ?: $record->description }}">{{ \Illuminate\Support\Str::limit($record->name ?: $record->description, 50) }}</td>
                             <td class="px-4 py-3 text-sm text-end">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $record->translation_attempts >= $stuckThreshold * 2 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
                                     {{ $record->translation_attempts }}
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $record->last_translated_at ? $record->last_translated_at->diffForHumans() : 'Never' }}</td>
+                            <td class="px-4 py-3 text-sm text-end">
+                                <button onclick="retryTranslation('event_part', {{ $record->id }})" class="text-xs text-[#4E81FA] hover:underline">@lang('messages.retry')</button>
+                            </td>
                         </tr>
                         @endforeach
                         @foreach ($stuckEventRoles as $record)
+                        @php
+                            $missingFields = [];
+                            if (is_null($record->name_translated)) $missingFields[] = 'name_translated';
+                            if (is_null($record->description_translated)) $missingFields[] = 'description_translated';
+                            $langCode = $record->role?->language_code;
+                        @endphp
                         <tr>
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">EventRole</td>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">Event #{{ $record->event_id }}, Role #{{ $record->role_id }} <span class="text-gray-400">#{{ $record->id }}</span></td>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                                {{ $record->event?->name ? \Illuminate\Support\Str::limit($record->event->name, 25) : 'Event #' . $record->event_id }}
+                                @if($record->role?->subdomain)
+                                    <a href="{{ route('role.view_guest', ['subdomain' => $record->role->subdomain]) }}" class="text-[#4E81FA] hover:underline" target="_blank">@ {{ $record->role->subdomain }}</a>
+                                @else
+                                    <span class="text-gray-400">@ Role #{{ $record->role_id }}</span>
+                                @endif
+                                <span class="text-gray-400">#{{ $record->id }}</span>
+                            </td>
+                            <td class="px-4 py-3 text-sm">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                    {{ strtoupper($langCode ?? 'N/A') }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-sm font-mono text-gray-500 dark:text-gray-400">{{ implode(', ', $missingFields) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ \Illuminate\Support\Str::limit($record->event?->name, 50) }}</td>
                             <td class="px-4 py-3 text-sm text-end">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $record->translation_attempts >= $stuckThreshold * 2 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
                                     {{ $record->translation_attempts }}
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $record->last_translated_at ? $record->last_translated_at->diffForHumans() : 'Never' }}</td>
+                            <td class="px-4 py-3 text-sm text-end">
+                                <button onclick="retryTranslation('event_role', {{ $record->id }})" class="text-xs text-[#4E81FA] hover:underline">@lang('messages.retry')</button>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
+
+            <script {!! nonce_attr() !!}>
+                function retryTranslation(type, id) {
+                    const button = event.target;
+                    const originalText = button.textContent;
+                    button.textContent = '...';
+                    button.disabled = true;
+
+                    fetch('{{ route("admin.translation.retry") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ type: type, id: id })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            button.textContent = '{{ __("messages.done") }}';
+                            button.classList.remove('text-[#4E81FA]');
+                            button.classList.add('text-green-600', 'dark:text-green-400');
+                            // Optionally remove the row after a short delay
+                            setTimeout(() => {
+                                button.closest('tr').remove();
+                            }, 1000);
+                        } else {
+                            button.textContent = 'Error';
+                            button.classList.remove('text-[#4E81FA]');
+                            button.classList.add('text-red-600', 'dark:text-red-400');
+                            setTimeout(() => {
+                                button.textContent = originalText;
+                                button.classList.remove('text-red-600', 'dark:text-red-400');
+                                button.classList.add('text-[#4E81FA]');
+                                button.disabled = false;
+                            }, 2000);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        button.textContent = 'Error';
+                        button.classList.remove('text-[#4E81FA]');
+                        button.classList.add('text-red-600', 'dark:text-red-400');
+                        setTimeout(() => {
+                            button.textContent = originalText;
+                            button.classList.remove('text-red-600', 'dark:text-red-400');
+                            button.classList.add('text-[#4E81FA]');
+                            button.disabled = false;
+                        }, 2000);
+                    });
+                }
+            </script>
             @else
             <p class="text-sm text-gray-500 dark:text-gray-400">No stuck translation records found.</p>
             @endif

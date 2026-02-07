@@ -447,6 +447,12 @@ class AdminController extends Controller
         // Revenue trends
         $trendData = $this->getTrendData($startDate, $endDate);
 
+        // Recent sales for detailed table
+        $recentSales = Sale::with('event:id,name')
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get();
+
         return view('admin.revenue', compact(
             'totalRevenue',
             'revenueInPeriod',
@@ -463,7 +469,8 @@ class AdminController extends Controller
             'convertedFromTrial',
             'expiredTrialsNoSub',
             'trendData',
-            'range'
+            'range',
+            'recentSales'
         ));
     }
 
@@ -734,34 +741,37 @@ class AdminController extends Controller
             })
             ->orderByDesc('translation_attempts')
             ->limit(20)
-            ->get(['id', 'name', 'subdomain', 'translation_attempts', 'last_translated_at']);
+            ->get(['id', 'name', 'subdomain', 'translation_attempts', 'last_translated_at', 'language_code', 'description', 'name_en', 'description_en', 'address1_en', 'city_en', 'state_en', 'request_terms_en']);
 
-        $stuckEvents = Event::where('translation_attempts', '>=', $stuckThreshold)
+        $stuckEvents = Event::with('venue:id,language_code')
+            ->where('translation_attempts', '>=', $stuckThreshold)
             ->where(function ($q) {
                 $q->whereNull('name_en')
                     ->orWhereNull('description_en');
             })
             ->orderByDesc('translation_attempts')
             ->limit(20)
-            ->get(['id', 'name', 'translation_attempts', 'last_translated_at']);
+            ->get(['id', 'name', 'description', 'translation_attempts', 'last_translated_at', 'name_en', 'description_en']);
 
-        $stuckEventParts = EventPart::where('translation_attempts', '>=', $stuckThreshold)
+        $stuckEventParts = EventPart::with('event.venue:id,language_code')
+            ->where('translation_attempts', '>=', $stuckThreshold)
             ->where(function ($q) {
                 $q->whereNull('name_en')
                     ->orWhereNull('description_en');
             })
             ->orderByDesc('translation_attempts')
             ->limit(20)
-            ->get(['id', 'name', 'event_id', 'translation_attempts', 'last_translated_at']);
+            ->get(['id', 'name', 'description', 'event_id', 'translation_attempts', 'last_translated_at', 'name_en', 'description_en']);
 
-        $stuckEventRoles = EventRole::where('translation_attempts', '>=', $stuckThreshold)
+        $stuckEventRoles = EventRole::with(['event:id,name', 'role:id,subdomain,language_code'])
+            ->where('translation_attempts', '>=', $stuckThreshold)
             ->where(function ($q) {
                 $q->whereNull('name_translated')
                     ->orWhereNull('description_translated');
             })
             ->orderByDesc('translation_attempts')
             ->limit(20)
-            ->get(['id', 'event_id', 'role_id', 'translation_attempts', 'last_translated_at']);
+            ->get(['id', 'event_id', 'role_id', 'translation_attempts', 'last_translated_at', 'name_translated', 'description_translated']);
 
         return view('admin.usage', compact(
             'categorySummaries',
@@ -1155,6 +1165,36 @@ class AdminController extends Controller
         $role->save();
 
         return redirect()->route('admin.plans')->with('success', 'Plan updated successfully for '.$role->name);
+    }
+
+    /**
+     * Retry translation for a stuck record by resetting translation_attempts to 0.
+     */
+    public function retryTranslation(Request $request)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return response()->json(['error' => 'Not authorized'], 403);
+        }
+
+        $type = $request->input('type');
+        $id = $request->input('id');
+
+        $model = match ($type) {
+            'role' => Role::find($id),
+            'event' => Event::find($id),
+            'event_part' => EventPart::find($id),
+            'event_role' => EventRole::find($id),
+            default => null,
+        };
+
+        if (! $model) {
+            return response()->json(['error' => 'Record not found'], 404);
+        }
+
+        $model->translation_attempts = 0;
+        $model->save();
+
+        return response()->json(['success' => true]);
     }
 
     /**

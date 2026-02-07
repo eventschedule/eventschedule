@@ -1176,7 +1176,8 @@
         </div>
     </div>
 
-{{-- Mobile Filters Bottom Sheet Drawer --}}
+{{-- Mobile Filters Bottom Sheet Drawer - Teleported to body to escape stacking context --}}
+<Teleport to="body">
 <div v-if="dynamicFilterCount >= 1 && showFiltersDrawer" class="md:hidden fixed inset-0 z-50">
     {{-- Backdrop --}}
     <div @click="showFiltersDrawer = false"
@@ -1268,31 +1269,26 @@
         </div>
     </div>
 </div>
+</Teleport>
 
-{{-- Desktop Filters Modal --}}
+{{-- Desktop Filters Modal - Teleported to body to escape stacking context --}}
+<Teleport to="body">
 <div v-if="dynamicFilterCount > 0 && showDesktopFiltersModal" class="hidden md:block fixed inset-0 z-[100]">
     {{-- Backdrop --}}
     <div @click="showDesktopFiltersModal = false"
          class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity z-[100]"></div>
 
     {{-- Modal panel --}}
-    <div class="fixed inset-0 flex items-center justify-center p-4 z-[101]">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+    <div class="fixed inset-0 flex items-center justify-center p-4 z-[101] pointer-events-none">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto pointer-events-auto {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Header --}}
             <div class="px-6 py-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.filters') }}</h3>
-                <div class="flex items-center gap-3">
-                    <button v-if="activeFilterCount > 0"
-                            @click="clearFilters"
-                            class="text-sm text-[#4E81FA] hover:text-[#3d6fd9] font-medium">
-                        {{ __('messages.clear_filters') }}
-                    </button>
-                    <button @click="showDesktopFiltersModal = false" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
-                        </svg>
-                    </button>
-                </div>
+                <button v-if="activeFilterCount > 0"
+                        @click="clearFilters"
+                        class="text-sm text-[#4E81FA] hover:text-[#3d6fd9] font-medium">
+                    {{ __('messages.clear_filters') }}
+                </button>
             </div>
 
             {{-- Schedule Filter --}}
@@ -1365,6 +1361,7 @@
         </div>
     </div>
 </div>
+</Teleport>
 
 <!-- Event Popup Component -->
 <div id="event-popup" class="event-popup">

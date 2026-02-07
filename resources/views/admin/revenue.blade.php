@@ -76,6 +76,68 @@
                 <canvas id="revenueTrendChart"></canvas>
             </div>
         </div>
+
+        {{-- Recent Sales Table --}}
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.recent_sales')</h3>
+            @if ($recentSales->count() > 0)
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.date')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.schedule')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.event')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.customer')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.email')</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.amount')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.method')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.status')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.reference')</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach ($recentSales as $sale)
+                        <tr>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white" title="{{ $sale->created_at->format('Y-m-d H:i:s') }}">
+                                {{ $sale->created_at->diffForHumans() }}
+                            </td>
+                            <td class="px-4 py-3 text-sm">
+                                <a href="{{ route('role.view_guest', ['subdomain' => $sale->subdomain]) }}" class="text-[#4E81FA] hover:underline" target="_blank">{{ $sale->subdomain }}</a>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white" title="{{ $sale->event?->name }}">
+                                {{ \Illuminate\Support\Str::limit($sale->event?->name ?? '-', 30) }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ $sale->name }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $sale->email }}</td>
+                            <td class="px-4 py-3 text-sm text-end font-medium text-gray-900 dark:text-white">${{ number_format($sale->payment_amount, 2) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $sale->payment_method ?? '-' }}</td>
+                            <td class="px-4 py-3 text-sm">
+                                @php
+                                    $statusClasses = match($sale->status) {
+                                        'completed' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                                        'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+                                        'refunded' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+                                        'cancelled', 'expired' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+                                        default => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+                                    };
+                                @endphp
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $statusClasses }}">
+                                    {{ ucfirst($sale->status) }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-sm font-mono text-gray-500 dark:text-gray-400" title="{{ $sale->transaction_reference }}">
+                                {{ $sale->transaction_reference ? \Illuminate\Support\Str::limit($sale->transaction_reference, 15) : '-' }}
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @else
+            <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_sales_yet')</p>
+            @endif
+        </div>
     </div>
 
     {{-- Chart.js --}}

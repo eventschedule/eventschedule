@@ -14,7 +14,7 @@
         "@type": "CollectionPage",
         "name": "Event Schedule Examples",
         "description": "A gallery of {{ $scheduleCount }} live demo schedules showcasing Event Schedule features for various industries",
-        "url": "{{ url('/demos') }}",
+        "url": "{{ url('/examples') }}",
         "numberOfItems": {{ $scheduleCount }},
         "isPartOf": {
             "@type": "WebSite",
@@ -174,22 +174,29 @@
 
                         @if($schedule['header_image_url'] ?? false)
                             {{-- Header image background --}}
-                            <div class="absolute inset-0 bg-cover bg-center bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900/50 dark:to-sky-900/50 transition-transform duration-500 group-hover:scale-110"
-                                 style="background-image: url('{{ $schedule['header_image_url'] }}');"
-                                 role="img"
-                                 aria-label="{{ $schedule['name'] }} header image">
+                            <div class="absolute inset-0 overflow-hidden">
+                                <picture class="absolute inset-0">
+                                    <source srcset="{{ url(webp_path($schedule['header_image_url'])) }}" type="image/webp">
+                                    <img src="{{ url($schedule['header_image_url']) }}"
+                                         alt="{{ $schedule['name'] }} header image"
+                                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                         loading="lazy">
+                                </picture>
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"></div>
                             </div>
 
                             {{-- Content overlay --}}
                             <div class="relative p-8 min-h-[280px] flex flex-col justify-end">
                                 @if($schedule['profile_image_url'] ?? false)
-                                    <img src="{{ $schedule['profile_image_url'] }}"
-                                         alt="{{ $schedule['name'] }} logo"
-                                         class="w-16 h-16 rounded-full object-cover mb-4 ring-4 ring-white/30 shadow-lg transition-transform duration-300 group-hover:-translate-y-1"
-                                         loading="lazy"
-                                         width="64"
-                                         height="64">
+                                    <picture class="w-16 h-16 mb-4 ring-4 ring-white/30 shadow-lg rounded-full overflow-hidden transition-transform duration-300 group-hover:-translate-y-1">
+                                        <source srcset="{{ url(webp_path($schedule['profile_image_url'])) }}" type="image/webp">
+                                        <img src="{{ url($schedule['profile_image_url']) }}"
+                                             alt="{{ $schedule['name'] }} logo"
+                                             class="w-full h-full object-cover"
+                                             loading="lazy"
+                                             width="64"
+                                             height="64">
+                                    </picture>
                                 @else
                                     {{-- Initial letter fallback for schedules without profile image --}}
                                     <div class="w-16 h-16 rounded-full mb-4 flex items-center justify-center text-white text-xl font-bold bg-[#4E81FA] ring-4 ring-white/30 shadow-lg"
@@ -204,12 +211,15 @@
                             <div class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900/50 dark:to-sky-900/50 h-full">
                                 <div class="p-8 min-h-[280px] flex flex-col justify-end">
                                     @if($schedule['profile_image_url'] ?? false)
-                                        <img src="{{ $schedule['profile_image_url'] }}"
-                                             alt="{{ $schedule['name'] }} logo"
-                                             class="w-16 h-16 rounded-full object-cover mb-4 ring-4 ring-gray-200 dark:ring-white/20 shadow-lg transition-transform duration-300 group-hover:-translate-y-1"
-                                             loading="lazy"
-                                             width="64"
-                                             height="64">
+                                        <picture class="w-16 h-16 mb-4 ring-4 ring-gray-200 dark:ring-white/20 shadow-lg rounded-full overflow-hidden transition-transform duration-300 group-hover:-translate-y-1">
+                                            <source srcset="{{ url(webp_path($schedule['profile_image_url'])) }}" type="image/webp">
+                                            <img src="{{ url($schedule['profile_image_url']) }}"
+                                                 alt="{{ $schedule['name'] }} logo"
+                                                 class="w-full h-full object-cover"
+                                                 loading="lazy"
+                                                 width="64"
+                                                 height="64">
+                                        </picture>
                                     @else
                                         <div class="w-16 h-16 rounded-full mb-4 flex items-center justify-center text-white text-xl font-bold bg-[#4E81FA] ring-4 ring-gray-200 dark:ring-white/20 shadow-lg"
                                              aria-hidden="true">

@@ -256,6 +256,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/revenue', [AdminController::class, 'revenue'])->name('admin.revenue');
         Route::get('/admin/analytics', [AdminController::class, 'analytics'])->name('admin.analytics');
         Route::get('/admin/usage', [AdminController::class, 'usage'])->name('admin.usage');
+        Route::post('/admin/translation/retry', [AdminController::class, 'retryTranslation'])->name('admin.translation.retry');
         Route::get('/admin/plans', [AdminController::class, 'plans'])->name('admin.plans');
         Route::get('/admin/plans/{role}/edit', [AdminController::class, 'editPlan'])->name('admin.plans.edit');
         Route::put('/admin/plans/{role}', [AdminController::class, 'updatePlan'])->name('admin.plans.update');
@@ -313,7 +314,7 @@ if (config('app.is_nexus')) {
         Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
         Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
         Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
-        Route::get('/demos', [MarketingController::class, 'demos'])->name('marketing.demos');
+        Route::get('/examples', [MarketingController::class, 'demos'])->name('marketing.demos');
         Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
         Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
         Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
@@ -428,7 +429,7 @@ if (config('app.is_nexus')) {
             Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
             Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
             Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
-            Route::get('/demos', [MarketingController::class, 'demos'])->name('marketing.demos');
+            Route::get('/examples', [MarketingController::class, 'demos'])->name('marketing.demos');
             Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
             Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
             Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
@@ -544,7 +545,8 @@ if (config('app.is_nexus')) {
             Route::get('/features', fn () => redirect('https://eventschedule.com/features', 301));
             Route::get('/pricing', fn () => redirect('https://eventschedule.com/pricing', 301));
             Route::get('/about', fn () => redirect('https://eventschedule.com/about', 301));
-            Route::get('/demos', fn () => redirect('https://eventschedule.com/demos', 301));
+            Route::get('/demos', fn () => redirect('https://eventschedule.com/examples', 301));
+            Route::get('/examples', fn () => redirect('https://eventschedule.com/examples', 301));
             Route::get('/faq', fn () => redirect('https://eventschedule.com/faq', 301));
             Route::get('/ticketing', fn () => redirect('https://eventschedule.com/features/ticketing', 301));
             Route::get('/ai', fn () => redirect('https://eventschedule.com/features/ai', 301));
@@ -655,6 +657,7 @@ if (config('app.is_nexus')) {
     Route::get('/pricing', fn () => redirect()->route('home'));
     Route::get('/about', fn () => redirect()->route('home'));
     Route::get('/demos', fn () => redirect()->route('home'));
+    Route::get('/examples', fn () => redirect()->route('home'));
     Route::get('/faq', fn () => redirect()->route('home'));
     Route::get('/features/ticketing', fn () => redirect()->route('home'));
     Route::get('/features/ai', fn () => redirect()->route('home'));
