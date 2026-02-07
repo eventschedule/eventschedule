@@ -45,7 +45,6 @@
                         <a href="#quick-reference" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Quick Reference</a>
                         <a href="#variables" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">All Variables</a>
                         <a href="#ai-prompt" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">AI Text Prompt</a>
-                        <a href="#link-options" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Link Options</a>
                         <a href="#screen-capture" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Screen Capture</a>
                         <a href="#email-scheduling" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Email Scheduling</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
@@ -451,25 +450,6 @@ https://example.com/event/summer-concert</code></pre>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <code class="text-rose-300">Add relevant hashtags for Instagram</code>
-                                </div>
-                            </div>
-                        </section>
-
-                        <!-- Link Options -->
-                        <section id="link-options" class="doc-section">
-                            <h2 class="doc-heading">Link Options</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                Choose how event links are generated:
-                            </p>
-
-                            <div class="space-y-4 mb-6">
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Link to Event Page</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Links point to the event's page on your schedule where visitors can see full details before taking action.</p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Link Directly to Registration</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Links include a trailing slash which triggers the event's registration URL or ticket purchase flow directly.</p>
                                 </div>
                             </div>
                         </section>
