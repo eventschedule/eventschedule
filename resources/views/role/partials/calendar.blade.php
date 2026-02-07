@@ -71,6 +71,7 @@
                 'recurring_end_value' => $event->recurring_end_value,
                 'start_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
                 'is_online' => !empty($event->event_url),
+                'registration_url' => $event->registration_url,
                 'description_excerpt' => Str::words(strip_tags($event->translatedDescription()), 25, '...'),
                 'duration' => $event->duration,
                 'parts' => $event->parts->map(fn($part) => [
@@ -1242,23 +1243,29 @@
         </div>
 
         {{-- Price Filter --}}
-        <div v-if="hasPriceVariation" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.price') }}</label>
-            <select v-model="selectedPrice" style="font-family: sans-serif"
-                    class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                <option value="">{{ __('messages.all_shows') }} (@{{ eventCountByPrice[''] }})</option>
-                <option value="free">{{ __('messages.free') }} (@{{ eventCountByPrice['free'] }})</option>
-                <option value="paid">{{ __('messages.paid') }} (@{{ eventCountByPrice['paid'] }})</option>
-            </select>
+        <div v-if="hasFreeEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <div @click="showFreeOnly = !showFreeOnly" class="flex items-center justify-between cursor-pointer">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.free') }}</span>
+                <button role="switch" :aria-checked="showFreeOnly.toString()"
+                        class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
+                        :class="showFreeOnly ? 'bg-[#4E81FA]' : 'bg-gray-300 dark:bg-gray-600'">
+                    <span class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200"
+                          :class="showFreeOnly ? 'ltr:translate-x-5 rtl:-translate-x-5' : 'translate-x-0'"></span>
+                </button>
+            </div>
         </div>
 
         {{-- Online Filter --}}
         <div v-if="hasOnlineEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <label class="flex items-center justify-between cursor-pointer">
+            <div @click="showOnlineOnly = !showOnlineOnly" class="flex items-center justify-between cursor-pointer">
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.online') }}</span>
-                <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
-            </label>
+                <button role="switch" :aria-checked="showOnlineOnly.toString()"
+                        class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
+                        :class="showOnlineOnly ? 'bg-[#4E81FA]' : 'bg-gray-300 dark:bg-gray-600'">
+                    <span class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200"
+                          :class="showOnlineOnly ? 'ltr:translate-x-5 rtl:-translate-x-5' : 'translate-x-0'"></span>
+                </button>
+            </div>
         </div>
 
         {{-- Done button --}}
@@ -1333,23 +1340,29 @@
             </div>
 
             {{-- Price Filter --}}
-            <div v-if="hasPriceVariation" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.price') }}</label>
-                <select v-model="selectedPrice" style="font-family: sans-serif"
-                        class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
-                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                    <option value="">{{ __('messages.all_shows') }} (@{{ eventCountByPrice[''] }})</option>
-                    <option value="free">{{ __('messages.free') }} (@{{ eventCountByPrice['free'] }})</option>
-                    <option value="paid">{{ __('messages.paid') }} (@{{ eventCountByPrice['paid'] }})</option>
-                </select>
+            <div v-if="hasFreeEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                <div @click="showFreeOnly = !showFreeOnly" class="flex items-center justify-between cursor-pointer">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.free') }}</span>
+                    <button role="switch" :aria-checked="showFreeOnly.toString()"
+                            class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
+                            :class="showFreeOnly ? 'bg-[#4E81FA]' : 'bg-gray-300 dark:bg-gray-600'">
+                        <span class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200"
+                              :class="showFreeOnly ? 'ltr:translate-x-5 rtl:-translate-x-5' : 'translate-x-0'"></span>
+                    </button>
+                </div>
             </div>
 
             {{-- Online Filter --}}
             <div v-if="hasOnlineEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                <label class="flex items-center justify-between cursor-pointer">
+                <div @click="showOnlineOnly = !showOnlineOnly" class="flex items-center justify-between cursor-pointer">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.online') }}</span>
-                    <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
-                </label>
+                    <button role="switch" :aria-checked="showOnlineOnly.toString()"
+                            class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
+                            :class="showOnlineOnly ? 'bg-[#4E81FA]' : 'bg-gray-300 dark:bg-gray-600'">
+                        <span class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200"
+                              :class="showOnlineOnly ? 'ltr:translate-x-5 rtl:-translate-x-5' : 'translate-x-0'"></span>
+                    </button>
+                </div>
             </div>
 
             {{-- Done button --}}
@@ -1410,6 +1423,7 @@ const calendarApp = createApp({
             route: '{{ $route }}',
             tab: '{{ $tab ?? '' }}',
             embed: {{ isset($embed) && $embed ? 'true' : 'false' }},
+            directRegistration: {{ isset($role) && $role->direct_registration ? 'true' : 'false' }},
             isRtl: {{ isset($role) && $role->isRtl() ? 'true' : 'false' }},
             languageCode: '{{ $isAdminRoute && auth()->check() ? app()->getLocale() : (session()->has('translate') ? 'en' : (isset($role) && $role->language_code ? $role->language_code : 'en')) }}',
             userTimezone: '{{ auth()->check() && auth()->user()->timezone ? auth()->user()->timezone : null }}',
@@ -1418,7 +1432,7 @@ const calendarApp = createApp({
             showDesktopFiltersModal: false,
             showOnlineOnly: false,
             selectedVenue: '',
-            selectedPrice: '',
+            showFreeOnly: false,
             currentView: '{{ $eventLayout ?? "calendar" }}',
             pastEvents: @json($pastEventsForVue ?? []),
             hasMorePastEvents: {{ isset($hasMorePastEvents) && $hasMorePastEvents ? 'true' : 'false' }},
@@ -1435,7 +1449,7 @@ const calendarApp = createApp({
     },
     computed: {
         hasDesktopFilters() {
-            return this.groups.length > 1 || this.uniqueCategoryIds.length > 1 || this.hasOnlineEvents || this.uniqueVenues.length > 1 || this.hasPriceVariation;
+            return this.groups.length > 1 || this.uniqueCategoryIds.length > 1 || this.hasOnlineEvents || this.uniqueVenues.length > 1 || this.hasFreeEvents;
         },
         dynamicFilterCount() {
             let count = 0;
@@ -1443,7 +1457,7 @@ const calendarApp = createApp({
             if (this.uniqueCategoryIds.length > 1) count++;
             if (this.hasOnlineEvents) count++;
             if (this.uniqueVenues.length > 1) count++;
-            if (this.hasPriceVariation) count++;
+            if (this.hasFreeEvents) count++;
             return count;
         },
         activeFilterCount() {
@@ -1452,7 +1466,7 @@ const calendarApp = createApp({
             if (this.selectedCategory) count++;
             if (this.showOnlineOnly) count++;
             if (this.selectedVenue) count++;
-            if (this.selectedPrice) count++;
+            if (this.showFreeOnly) count++;
             return count;
         },
         selectedGroupName() {
@@ -1470,8 +1484,7 @@ const calendarApp = createApp({
             const baseEvents = this.allEvents.filter(e => {
                 if (this.showOnlineOnly && !e.is_online) return false;
                 if (this.selectedVenue && e.venue_subdomain !== this.selectedVenue) return false;
-                if (this.selectedPrice === 'free' && !e.is_free) return false;
-                if (this.selectedPrice === 'paid' && e.is_free) return false;
+                if (this.showFreeOnly && !e.is_free) return false;
                 return true;
             });
 
@@ -1497,8 +1510,7 @@ const calendarApp = createApp({
                     return false;
                 }
                 if (this.selectedVenue && event.venue_subdomain !== this.selectedVenue) return false;
-                if (this.selectedPrice === 'free' && !event.is_free) return false;
-                if (this.selectedPrice === 'paid' && event.is_free) return false;
+                if (this.showFreeOnly && !event.is_free) return false;
                 return true;
             });
             const counts = { '': filteredEvents.length };
@@ -1525,10 +1537,7 @@ const calendarApp = createApp({
                 if (this.selectedVenue && event.venue_subdomain !== this.selectedVenue) {
                     return false;
                 }
-                if (this.selectedPrice === 'free' && !event.is_free) {
-                    return false;
-                }
-                if (this.selectedPrice === 'paid' && event.is_free) {
+                if (this.showFreeOnly && !event.is_free) {
                     return false;
                 }
                 return true;
@@ -1567,7 +1576,7 @@ const calendarApp = createApp({
                 .map(([subdomain, name]) => ({ subdomain, name }))
                 .sort((a, b) => a.name.localeCompare(b.name));
         },
-        hasPriceVariation() {
+        hasFreeEvents() {
             let hasFree = false, hasPaid = false;
             for (const event of this.allEvents) {
                 if (event.is_free) hasFree = true;
@@ -1585,8 +1594,7 @@ const calendarApp = createApp({
                 }
                 if (this.selectedCategory && event.category_id != this.selectedCategory) return false;
                 if (this.showOnlineOnly && !event.is_online) return false;
-                if (this.selectedPrice === 'free' && !event.is_free) return false;
-                if (this.selectedPrice === 'paid' && event.is_free) return false;
+                if (this.showFreeOnly && !event.is_free) return false;
                 return true;
             });
 
@@ -1595,23 +1603,6 @@ const calendarApp = createApp({
                 counts[v.subdomain] = baseEvents.filter(e => e.venue_subdomain === v.subdomain).length;
             });
             return counts;
-        },
-        eventCountByPrice() {
-            const baseEvents = this.allEvents.filter(event => {
-                if (this.selectedGroup) {
-                    const selectedGroupObj = this.groups.find(g => g.slug === this.selectedGroup);
-                    if (selectedGroupObj && event.group_id !== selectedGroupObj.id) return false;
-                }
-                if (this.selectedCategory && event.category_id != this.selectedCategory) return false;
-                if (this.showOnlineOnly && !event.is_online) return false;
-                if (this.selectedVenue && event.venue_subdomain !== this.selectedVenue) return false;
-                return true;
-            });
-            return {
-                '': baseEvents.length,
-                'free': baseEvents.filter(e => e.is_free).length,
-                'paid': baseEvents.filter(e => !e.is_free).length
-            };
         },
         mobileEventsList() {
             // Create a mobile-friendly events list that includes all upcoming occurrences
@@ -2124,7 +2115,7 @@ const calendarApp = createApp({
             this.selectedCategory = '';
             this.showOnlineOnly = false;
             this.selectedVenue = '';
-            this.selectedPrice = '';
+            this.showFreeOnly = false;
         },
         getEventsForDate(dateStr) {
             // Use the pre-calculated events map from the backend
@@ -2153,10 +2144,7 @@ const calendarApp = createApp({
             if (this.selectedVenue && event.venue_subdomain !== this.selectedVenue) {
                 return false;
             }
-            if (this.selectedPrice === 'free' && !event.is_free) {
-                return false;
-            }
-            if (this.selectedPrice === 'paid' && event.is_free) {
+            if (this.showFreeOnly && !event.is_free) {
                 return false;
             }
             return true;
@@ -2222,6 +2210,12 @@ const calendarApp = createApp({
         navigateToEvent(event, e) {
             // Don't navigate if clicking on the edit link or a form/button
             if (e.target.closest('a') || e.target.closest('form') || e.target.closest('button')) return;
+
+            // Check if direct registration is enabled AND event has registration URL
+            if (this.directRegistration && event.registration_url) {
+                window.open(event.registration_url, '_blank');
+                return;
+            }
 
             const url = this.getEventUrl(event);
             const openInNewTab = this.embed || this.route === 'admin';
