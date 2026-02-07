@@ -1460,6 +1460,7 @@ class MarketingController extends Controller
                 [
                     'subdomain' => 'meditationclasses',
                     'name' => 'Meditation Classes',
+                    'description' => 'Daily guided sessions for mindfulness and calm',
                     'url' => 'https://meditationclasses.eventschedule.com/',
                     'profile_image_url' => 'images/examples/profile_meditationclasses.png',
                     'header_image_url' => 'images/examples/header_meditationclasses.png',
@@ -1467,6 +1468,7 @@ class MarketingController extends Controller
                 [
                     'subdomain' => 'weekendyogaretreat',
                     'name' => 'Weekend Yoga Retreat',
+                    'description' => 'Multi-day weekend retreat with yoga classes',
                     'url' => 'https://weekendyogaretreat.eventschedule.com/',
                     'profile_image_url' => 'images/examples/profile_weekendyogaretreat.jpg',
                     'header_image_url' => 'images/examples/header_weekendyogaretreat.jpeg',
@@ -1474,6 +1476,7 @@ class MarketingController extends Controller
                 [
                     'subdomain' => 'hikingclub',
                     'name' => 'Hiking Club',
+                    'description' => 'Weekly group hikes and outdoor adventures',
                     'url' => 'https://hikingclub.eventschedule.com/',
                     'profile_image_url' => 'images/examples/profile_hikingclub.png',
                     'header_image_url' => 'images/examples/header_hikingclub.png',
@@ -1483,6 +1486,7 @@ class MarketingController extends Controller
                 [
                     'subdomain' => 'battleofthebands',
                     'name' => 'Battle of the Bands',
+                    'description' => 'Live competition showcasing local bands',
                     'url' => 'https://battleofthebands.eventschedule.com/',
                     'profile_image_url' => 'images/examples/profile_battleofthebands.jpg',
                     'header_image_url' => 'images/examples/header_battleofthebands.jpg',
@@ -1490,6 +1494,7 @@ class MarketingController extends Controller
                 [
                     'subdomain' => 'sufficientgroundscoffeemusic',
                     'name' => 'Sufficient Grounds',
+                    'description' => 'Acoustic sets and open mic nights at a cafe',
                     'url' => 'https://sufficientgroundscoffeemusic.eventschedule.com/',
                     'profile_image_url' => 'images/examples/profile_sufficientgroundscoffeemusic.jpg',
                     'header_image_url' => 'images/examples/header_sufficientgroundscoffeemusic.png',
@@ -1497,6 +1502,7 @@ class MarketingController extends Controller
                 [
                     'subdomain' => 'villageidiot',
                     'name' => 'Village Idiot',
+                    'description' => 'Weekly live music lineup at a neighborhood pub',
                     'url' => 'https://villageidiot.eventschedule.com/',
                     'profile_image_url' => 'images/examples/profile_villageidiot.png',
                     'header_image_url' => 'images/examples/header_villageidiot.png',
@@ -1506,6 +1512,7 @@ class MarketingController extends Controller
                 [
                     'subdomain' => 'communityyouthgroup',
                     'name' => 'Community Youth Group',
+                    'description' => 'Activities and meetups for young people',
                     'url' => 'https://communityyouthgroup.eventschedule.com/',
                     'profile_image_url' => 'images/examples/profile_communityyouthgroup.png',
                     'header_image_url' => 'images/examples/header_communityyouthgroup.png',
@@ -1513,6 +1520,7 @@ class MarketingController extends Controller
                 [
                     'subdomain' => 'karateclub',
                     'name' => 'Karate Club',
+                    'description' => 'Martial arts classes for all skill levels',
                     'url' => 'https://karateclub.eventschedule.com/',
                     'profile_image_url' => 'images/examples/profile_karateclub.jpg',
                     'header_image_url' => 'images/examples/header_karateclub.jpg',
@@ -1520,6 +1528,7 @@ class MarketingController extends Controller
                 [
                     'subdomain' => 'countyfairgrounds',
                     'name' => 'County Fairgrounds',
+                    'description' => 'Seasonal events, fairs, and community gatherings',
                     'url' => 'https://countyfairgrounds.eventschedule.com/',
                     'profile_image_url' => 'images/examples/profile_countyfairgrounds.png',
                     'header_image_url' => 'images/examples/header_countyfairgrounds.jpg',
@@ -1529,6 +1538,7 @@ class MarketingController extends Controller
                 [
                     'subdomain' => 'nateswoodworkingshop',
                     'name' => "Nate's Woodworking Shop",
+                    'description' => 'Hands-on woodworking classes and projects',
                     'url' => 'https://nateswoodworkingshop.eventschedule.com/',
                     'profile_image_url' => 'images/examples/profile_nateswoodworkingshop.png',
                     'header_image_url' => 'images/examples/header_nateswoodworkingshop.png',
@@ -1536,6 +1546,7 @@ class MarketingController extends Controller
                 [
                     'subdomain' => 'painting',
                     'name' => 'Painting',
+                    'description' => 'Painting sessions for beginners and artists',
                     'url' => 'https://painting.eventschedule.com/',
                     'profile_image_url' => 'images/examples/profile_painting.jpg',
                     'header_image_url' => 'images/examples/header_painting.jpg',
@@ -1543,6 +1554,7 @@ class MarketingController extends Controller
                 [
                     'subdomain' => 'pagesbooknookshop',
                     'name' => 'Pages Book Nook Shop',
+                    'description' => 'Author readings, book clubs, and signings',
                     'url' => 'https://pagesbooknookshop.eventschedule.com/',
                     'profile_image_url' => 'images/examples/profile_pagesbooknookshop.png',
                     'header_image_url' => 'images/examples/header_pagesbooknookshop.png',
