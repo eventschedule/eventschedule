@@ -5,6 +5,32 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Online Events</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule - Online Events",
+        "description": "Host virtual events with ease. Toggle between in-person and online, add your streaming URL, and sell tickets to attendees worldwide.",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": ["Web", "Android", "iOS"],
+        "featureList": [
+            "Toggle online/in-person events",
+            "Any streaming platform support",
+            "Streaming URL on tickets",
+            "Virtual event ticketing",
+            "QR code check-in"
+        ],
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free plan available"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->

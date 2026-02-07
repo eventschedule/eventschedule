@@ -5,6 +5,27 @@
     <x-slot name="breadcrumbTitle">Selfhosting Terms</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Self-Hosting Terms - Event Schedule",
+        "description": "Terms for self-hosting Event Schedule - the rules and guidelines for running your own instance.",
+        "url": "{{ url()->current() }}",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "about": {
+            "@type": "Thing",
+            "name": "Self-Hosting Terms"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Header -->
     <section class="py-16 bg-gray-50 dark:bg-gray-800/50">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

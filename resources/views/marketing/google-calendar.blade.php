@@ -5,6 +5,36 @@
     <x-slot name="breadcrumbTitle">Google Calendar</x-slot>
     <x-slot name="socialImage">social/integrations.png</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule - Google Calendar Sync",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "description": "Real-time two-way sync with Google Calendar. OAuth authentication, webhook updates, and multi-calendar support for seamless event management.",
+        "featureList": [
+            "Two-way Google Calendar sync",
+            "OAuth authentication",
+            "Webhook real-time updates",
+            "Multi-calendar support",
+            "Automatic event creation"
+        ],
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->

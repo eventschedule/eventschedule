@@ -5,6 +5,34 @@
     <x-slot name="socialImage">social/integrations.png</x-slot>
     <x-slot name="breadcrumbTitle">Integrations</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule - Integrations",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "description": "Connect Event Schedule with Google Calendar, CalDAV, Stripe, and Invoice Ninja for a seamless event management experience.",
+        "featureList": [
+            "Google Calendar two-way sync",
+            "CalDAV calendar support",
+            "Stripe payment processing",
+            "Invoice Ninja invoicing"
+        ],
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
+    </x-slot>
 
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">

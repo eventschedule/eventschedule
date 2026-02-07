@@ -5,6 +5,41 @@
     <x-slot name="socialImage">social/selfhost.png</x-slot>
     <x-slot name="breadcrumbTitle">Selfhost</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule - Selfhosted",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Event Management Software",
+        "operatingSystem": "Linux",
+        "description": "Selfhost Event Schedule on your own server. 100% open source with one-click Docker installation, automatic updates, and exclusive AI-powered features.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free and open source"
+        },
+        "featureList": [
+            "One-click Softaculous installation",
+            "Docker deployment",
+            "Automatic updates",
+            "AI-powered auto import",
+            "AI blog generation for SEO",
+            "Full data ownership",
+            "White-label SaaS capability"
+        ],
+        "url": "{{ url()->current() }}",
+        "downloadUrl": "https://github.com/eventschedule/eventschedule",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
+    </x-slot>
+
     <style>
         /* Custom emerald gradient for this page */
         .text-gradient {

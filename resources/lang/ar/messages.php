@@ -508,6 +508,8 @@ return [
     'schedule_url' => 'رابط الجدول',
     'back_to_schedule' => 'العودة إلى الجدول',
     'all_schedules' => 'جميع الجداول',
+    'all_venues' => 'جميع الأماكن',
+    'all_shows' => 'الكل',
     'filters' => 'الفلاتر',
     'clear_filters' => 'مسح الفلاتر',
 

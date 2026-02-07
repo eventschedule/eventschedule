@@ -516,6 +516,8 @@ return [
     'schedule_url' => 'URL del Horario',
     'back_to_schedule' => 'Volver al Horario',
     'all_schedules' => 'Todos los Horarios',
+    'all_venues' => 'Todos los Lugares',
+    'all_shows' => 'Todos',
     'filters' => 'Filtros',
     'clear_filters' => 'Borrar Filtros',
 

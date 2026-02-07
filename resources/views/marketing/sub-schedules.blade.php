@@ -5,6 +5,36 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Sub-Schedules</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule - Sub-Schedules",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "description": "Organize events into categories with unlimited sub-schedules. Perfect for venues with multiple rooms, stages, or event series.",
+        "featureList": [
+            "Unlimited sub-schedules",
+            "Event categorization",
+            "Multiple room support",
+            "Stage management",
+            "Event series organization",
+            "Color-coded categories"
+        ],
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
+    </x-slot>
 
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">

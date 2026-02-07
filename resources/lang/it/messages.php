@@ -364,6 +364,8 @@ return [
     'schedule_url' => 'URL del Programma',
     'back_to_schedule' => 'Torna al Programma',
     'all_schedules' => 'Tutti i Programmi',
+    'all_venues' => 'Tutti i Luoghi',
+    'all_shows' => 'Tutti',
     'filters' => 'Filtri',
     'clear_filters' => 'Cancella filtri',
 

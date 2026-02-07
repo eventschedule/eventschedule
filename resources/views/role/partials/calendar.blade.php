@@ -54,6 +54,8 @@
                 'name' => $event->translatedName(),
                 'short_description' => $event->translatedShortDescription(),
                 'venue_name' => $event->getVenueDisplayName(),
+                'venue_subdomain' => $event->venue?->subdomain ?: null,
+                'is_free' => !$event->tickets_enabled || $event->areTicketsFree(),
                 'starts_at' => $event->starts_at,
                 'days_of_week' => $event->days_of_week,
                 'local_starts_at' => $event->localStartsAt(),
@@ -284,8 +286,27 @@
                 </x-brand-link>
             @endif
 
-            {{-- Schedule and Category Selects Container (desktop only, or always when in list view) --}}
-            <div :class="currentView === 'list' ? 'md:!flex' : ''" class="hidden md:flex flex-row gap-2 w-full md:w-auto">
+            {{-- Desktop: Show Filters button when > 2 filters --}}
+            <template v-if="dynamicFilterCount > 2">
+                <button @click="showDesktopFiltersModal = true"
+                        :class="currentView === 'list' ? 'md:!inline-flex' : ''"
+                        class="hidden md:inline-flex items-center justify-center gap-2 px-4 py-2.5
+                               border border-gray-300 dark:border-gray-600 rounded-md
+                               bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                               text-base font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3H19C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z"/>
+                    </svg>
+                    {{ __('messages.filters') }}
+                    <span v-if="activeFilterCount > 0"
+                          class="ms-1 px-1.5 py-0.5 text-xs bg-[#4E81FA] text-white rounded-full">
+                        @{{ activeFilterCount }}
+                    </span>
+                </button>
+            </template>
+
+            {{-- Desktop: Show inline filters when <= 2 filters --}}
+            <div v-else :class="currentView === 'list' ? 'md:!flex' : ''" class="hidden md:flex flex-row gap-2 w-full md:w-auto">
                 {{-- Schedule Select --}}
                 @if(isset($role) && $role->groups && $role->groups->count() > 1)
                     <select v-model="selectedGroup" style="font-family: sans-serif" class="py-2.5 border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 min-w-[180px] hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
@@ -1224,14 +1245,6 @@
         </div>
         @endif
 
-        {{-- Online Filter --}}
-        <div v-if="hasOnlineEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <label class="flex items-center justify-between cursor-pointer">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.online') }}</span>
-                <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
-            </label>
-        </div>
-
         {{-- Category Filter --}}
         <div v-if="uniqueCategoryIds.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.category') }}</label>
@@ -1245,11 +1258,141 @@
             </select>
         </div>
 
+        {{-- Venue Filter --}}
+        <div v-if="uniqueVenues.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.venue') }}</label>
+            <select v-model="selectedVenue" style="font-family: sans-serif"
+                    class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
+                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
+                <option value="">{{ __('messages.all_venues') }} (@{{ eventCountByVenue[''] }})</option>
+                <option v-for="venue in uniqueVenues" :key="venue.subdomain" :value="venue.subdomain">
+                    @{{ venue.name }} (@{{ eventCountByVenue[venue.subdomain] || 0 }})
+                </option>
+            </select>
+        </div>
+
+        {{-- Price Filter --}}
+        <div v-if="hasPriceVariation" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.price') }}</label>
+            <select v-model="selectedPrice" style="font-family: sans-serif"
+                    class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
+                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
+                <option value="">{{ __('messages.all_shows') }} (@{{ eventCountByPrice[''] }})</option>
+                <option value="free">{{ __('messages.free') }} (@{{ eventCountByPrice['free'] }})</option>
+                <option value="paid">{{ __('messages.paid') }} (@{{ eventCountByPrice['paid'] }})</option>
+            </select>
+        </div>
+
+        {{-- Online Filter --}}
+        <div v-if="hasOnlineEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <label class="flex items-center justify-between cursor-pointer">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.online') }}</span>
+                <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
+            </label>
+        </div>
+
         {{-- Done button --}}
         <div class="px-6 py-4">
                 <x-brand-button @click="showFiltersDrawer = false" class="w-full">
                 {{ __('messages.done') }}
             </x-brand-button>
+        </div>
+    </div>
+</div>
+
+{{-- Desktop Filters Modal --}}
+<div v-if="dynamicFilterCount > 2 && showDesktopFiltersModal" class="hidden md:block fixed inset-0 z-50">
+    {{-- Backdrop --}}
+    <div @click="showDesktopFiltersModal = false"
+         class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity"></div>
+
+    {{-- Modal panel --}}
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+            {{-- Header --}}
+            <div class="px-6 py-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.filters') }}</h3>
+                <div class="flex items-center gap-3">
+                    <button v-if="activeFilterCount > 0"
+                            @click="clearFilters"
+                            class="text-sm text-[#4E81FA] hover:text-[#3d6fd9] font-medium">
+                        {{ __('messages.clear_filters') }}
+                    </button>
+                    <button @click="showDesktopFiltersModal = false" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            {{-- Schedule Filter --}}
+            @if(isset($role) && $role->groups && $role->groups->count() > 1)
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.schedule') }}</label>
+                <select v-model="selectedGroup" style="font-family: sans-serif"
+                        class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
+                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                    <option value="">{{ __('messages.all_schedules') }} (@{{ eventCountByGroup[''] }})</option>
+                    <option v-for="group in groups" :key="group.slug" :value="group.slug">
+                        @{{ group.name }} (@{{ eventCountByGroup[group.slug] || 0 }})
+                    </option>
+                </select>
+            </div>
+            @endif
+
+            {{-- Category Filter --}}
+            <div v-if="uniqueCategoryIds.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.category') }}</label>
+                <select v-model="selectedCategory" style="font-family: sans-serif"
+                        class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
+                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
+                    <option value="">{{ __('messages.all_categories') }} (@{{ eventCountByCategory[''] }})</option>
+                    <option v-for="category in availableCategories" :key="category.id" :value="category.id">
+                        @{{ category.name }} (@{{ eventCountByCategory[category.id] || 0 }})
+                    </option>
+                </select>
+            </div>
+
+            {{-- Venue Filter --}}
+            <div v-if="uniqueVenues.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.venue') }}</label>
+                <select v-model="selectedVenue" style="font-family: sans-serif"
+                        class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
+                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
+                    <option value="">{{ __('messages.all_venues') }} (@{{ eventCountByVenue[''] }})</option>
+                    <option v-for="venue in uniqueVenues" :key="venue.subdomain" :value="venue.subdomain">
+                        @{{ venue.name }} (@{{ eventCountByVenue[venue.subdomain] || 0 }})
+                    </option>
+                </select>
+            </div>
+
+            {{-- Price Filter --}}
+            <div v-if="hasPriceVariation" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.price') }}</label>
+                <select v-model="selectedPrice" style="font-family: sans-serif"
+                        class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
+                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
+                    <option value="">{{ __('messages.all_shows') }} (@{{ eventCountByPrice[''] }})</option>
+                    <option value="free">{{ __('messages.free') }} (@{{ eventCountByPrice['free'] }})</option>
+                    <option value="paid">{{ __('messages.paid') }} (@{{ eventCountByPrice['paid'] }})</option>
+                </select>
+            </div>
+
+            {{-- Online Filter --}}
+            <div v-if="hasOnlineEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                <label class="flex items-center justify-between cursor-pointer">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.online') }}</span>
+                    <input type="checkbox" v-model="showOnlineOnly" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
+                </label>
+            </div>
+
+            {{-- Done button --}}
+            <div class="px-6 py-4">
+                <x-brand-button @click="showDesktopFiltersModal = false" class="w-full">
+                    {{ __('messages.done') }}
+                </x-brand-button>
+            </div>
         </div>
     </div>
 </div>
@@ -1306,7 +1449,10 @@ const calendarApp = createApp({
             userTimezone: '{{ auth()->check() && auth()->user()->timezone ? auth()->user()->timezone : null }}',
             popupTimeout: null,
             showFiltersDrawer: false,
+            showDesktopFiltersModal: false,
             showOnlineOnly: false,
+            selectedVenue: '',
+            selectedPrice: '',
             currentView: '{{ $eventLayout ?? "calendar" }}',
             pastEvents: @json($pastEventsForVue ?? []),
             hasMorePastEvents: {{ isset($hasMorePastEvents) && $hasMorePastEvents ? 'true' : 'false' }},
@@ -1323,13 +1469,15 @@ const calendarApp = createApp({
     },
     computed: {
         hasDesktopFilters() {
-            return this.groups.length > 1 || this.uniqueCategoryIds.length > 1 || this.hasOnlineEvents;
+            return this.groups.length > 1 || this.uniqueCategoryIds.length > 1 || this.hasOnlineEvents || this.uniqueVenues.length > 1 || this.hasPriceVariation;
         },
         dynamicFilterCount() {
             let count = 0;
             if (this.groups.length > 1) count++;
             if (this.uniqueCategoryIds.length > 1) count++;
             if (this.hasOnlineEvents) count++;
+            if (this.uniqueVenues.length > 1) count++;
+            if (this.hasPriceVariation) count++;
             return count;
         },
         activeFilterCount() {
@@ -1337,6 +1485,8 @@ const calendarApp = createApp({
             if (this.selectedGroup) count++;
             if (this.selectedCategory) count++;
             if (this.showOnlineOnly) count++;
+            if (this.selectedVenue) count++;
+            if (this.selectedPrice) count++;
             return count;
         },
         selectedGroupName() {
@@ -1350,10 +1500,14 @@ const calendarApp = createApp({
             return cat ? cat.name : '';
         },
         eventCountByGroup() {
-            // Filter by online first if showOnlineOnly is true
-            const baseEvents = this.showOnlineOnly
-                ? this.allEvents.filter(e => e.is_online)
-                : this.allEvents;
+            // Filter by other active filters (except group)
+            const baseEvents = this.allEvents.filter(e => {
+                if (this.showOnlineOnly && !e.is_online) return false;
+                if (this.selectedVenue && e.venue_subdomain !== this.selectedVenue) return false;
+                if (this.selectedPrice === 'free' && !e.is_free) return false;
+                if (this.selectedPrice === 'paid' && e.is_free) return false;
+                return true;
+            });
 
             const counts = { '': baseEvents.length };
             this.groups.forEach(g => {
@@ -1365,7 +1519,7 @@ const calendarApp = createApp({
             return counts;
         },
         eventCountByCategory() {
-            // Filter by group and online status
+            // Filter by group, online status, venue, and price
             const filteredEvents = this.allEvents.filter(event => {
                 if (this.selectedGroup) {
                     const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
@@ -1376,6 +1530,9 @@ const calendarApp = createApp({
                 if (this.showOnlineOnly && !event.is_online) {
                     return false;
                 }
+                if (this.selectedVenue && event.venue_subdomain !== this.selectedVenue) return false;
+                if (this.selectedPrice === 'free' && !event.is_free) return false;
+                if (this.selectedPrice === 'paid' && event.is_free) return false;
                 return true;
             });
             const counts = { '': filteredEvents.length };
@@ -1397,6 +1554,15 @@ const calendarApp = createApp({
                     return false;
                 }
                 if (this.showOnlineOnly && !event.is_online) {
+                    return false;
+                }
+                if (this.selectedVenue && event.venue_subdomain !== this.selectedVenue) {
+                    return false;
+                }
+                if (this.selectedPrice === 'free' && !event.is_free) {
+                    return false;
+                }
+                if (this.selectedPrice === 'paid' && event.is_free) {
                     return false;
                 }
                 return true;
@@ -1423,6 +1589,63 @@ const calendarApp = createApp({
                 id: id,
                 name: this.categories[id] || `Category ${id}`
             })).sort((a, b) => a.name.localeCompare(b.name));
+        },
+        uniqueVenues() {
+            const venuesMap = new Map();
+            this.allEvents.forEach(event => {
+                if (event.venue_subdomain && event.venue_name) {
+                    venuesMap.set(event.venue_subdomain, event.venue_name);
+                }
+            });
+            return Array.from(venuesMap.entries())
+                .map(([subdomain, name]) => ({ subdomain, name }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+        },
+        hasPriceVariation() {
+            let hasFree = false, hasPaid = false;
+            for (const event of this.allEvents) {
+                if (event.is_free) hasFree = true;
+                else hasPaid = true;
+                if (hasFree && hasPaid) return true;
+            }
+            return false;
+        },
+        eventCountByVenue() {
+            // Filter by group, category, online, price first
+            const baseEvents = this.allEvents.filter(event => {
+                if (this.selectedGroup) {
+                    const selectedGroupObj = this.groups.find(g => g.slug === this.selectedGroup);
+                    if (selectedGroupObj && event.group_id !== selectedGroupObj.id) return false;
+                }
+                if (this.selectedCategory && event.category_id != this.selectedCategory) return false;
+                if (this.showOnlineOnly && !event.is_online) return false;
+                if (this.selectedPrice === 'free' && !event.is_free) return false;
+                if (this.selectedPrice === 'paid' && event.is_free) return false;
+                return true;
+            });
+
+            const counts = { '': baseEvents.length };
+            this.uniqueVenues.forEach(v => {
+                counts[v.subdomain] = baseEvents.filter(e => e.venue_subdomain === v.subdomain).length;
+            });
+            return counts;
+        },
+        eventCountByPrice() {
+            const baseEvents = this.allEvents.filter(event => {
+                if (this.selectedGroup) {
+                    const selectedGroupObj = this.groups.find(g => g.slug === this.selectedGroup);
+                    if (selectedGroupObj && event.group_id !== selectedGroupObj.id) return false;
+                }
+                if (this.selectedCategory && event.category_id != this.selectedCategory) return false;
+                if (this.showOnlineOnly && !event.is_online) return false;
+                if (this.selectedVenue && event.venue_subdomain !== this.selectedVenue) return false;
+                return true;
+            });
+            return {
+                '': baseEvents.length,
+                'free': baseEvents.filter(e => e.is_free).length,
+                'paid': baseEvents.filter(e => !e.is_free).length
+            };
         },
         mobileEventsList() {
             // Create a mobile-friendly events list that includes all upcoming occurrences
@@ -1934,6 +2157,8 @@ const calendarApp = createApp({
             this.selectedGroup = '';
             this.selectedCategory = '';
             this.showOnlineOnly = false;
+            this.selectedVenue = '';
+            this.selectedPrice = '';
         },
         getEventsForDate(dateStr) {
             // Use the pre-calculated events map from the backend
@@ -1957,6 +2182,15 @@ const calendarApp = createApp({
                 return false;
             }
             if (this.showOnlineOnly && !event.is_online) {
+                return false;
+            }
+            if (this.selectedVenue && event.venue_subdomain !== this.selectedVenue) {
+                return false;
+            }
+            if (this.selectedPrice === 'free' && !event.is_free) {
+                return false;
+            }
+            if (this.selectedPrice === 'paid' && event.is_free) {
                 return false;
             }
             return true;

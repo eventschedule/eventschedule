@@ -559,6 +559,8 @@ return [
     'add_subschedule' => 'Lisa alamgraafik',
     'slug' => 'Nälkjas',
     'all_schedules' => 'Kõik ajakavad',
+    'all_venues' => 'Kõik kohad',
+    'all_shows' => 'Kõik',
     'filters' => 'Filtrid',
     'clear_filters' => 'Tühjenda filtrid',
     'schedule_url' => 'Ajasta URL',

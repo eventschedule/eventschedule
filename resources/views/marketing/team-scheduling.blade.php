@@ -5,6 +5,36 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Team Scheduling</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule - Team Scheduling",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "description": "Invite team members, manage permissions, and coordinate schedules together. Collaborate on events with your team using flexible role-based access.",
+        "featureList": [
+            "Team member invitations",
+            "Role-based permissions",
+            "Collaborative event management",
+            "Shared calendar access",
+            "Member availability tracking"
+        ],
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
+    </x-slot>
+
     <style>
         /* Custom cyan gradient for this page */
         .text-gradient {

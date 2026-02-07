@@ -565,6 +565,8 @@ return [
     'add_subschedule' => 'Add Sub-schedule',
     'slug' => 'Slug',
     'all_schedules' => 'All Schedules',
+    'all_venues' => 'All Venues',
+    'all_shows' => 'All',
     'filters' => 'Filters',
     'clear_filters' => 'Clear Filters',
     'schedule_url' => 'Schedule URL',

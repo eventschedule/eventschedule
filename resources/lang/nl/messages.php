@@ -356,6 +356,8 @@ return [
     'schedule_url' => 'Schema-URL',
     'back_to_schedule' => 'Terug naar Schema',
     'all_schedules' => 'Alle Schema\'s',
+    'all_venues' => 'Alle Locaties',
+    'all_shows' => 'Alle',
     'filters' => 'Filters',
     'clear_filters' => 'Filters wissen',
 
