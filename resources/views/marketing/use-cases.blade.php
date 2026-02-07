@@ -5,6 +5,42 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Use Cases</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Event Schedule Use Cases",
+        "description": "Discover how Event Schedule works for musicians, venues, comedians, restaurants, art galleries, and more.",
+        "url": "{{ url()->current() }}",
+        "numberOfItems": 3,
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "For Talent",
+                "description": "Musicians, DJs, performers, and artists who want to share their upcoming shows and build their audience.",
+                "url": "{{ config('app.url') }}/for-talent"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "For Venues",
+                "description": "Bars, clubs, theaters, and event spaces that want to fill their calendar with great events.",
+                "url": "{{ config('app.url') }}/for-venues"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "For Curators",
+                "description": "Event curators and promoters who organize and promote events across multiple venues.",
+                "url": "{{ config('app.url') }}/for-curators"
+            }
+        ]
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->

@@ -4,6 +4,24 @@
     <x-slot name="keywords">contact event schedule, event schedule support, event schedule help, event schedule email</x-slot>
     <x-slot name="breadcrumbTitle">Contact</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "ContactPage",
+        "name": "Contact Event Schedule",
+        "description": "Get in touch with Event Schedule. Reach out via email, social media, or report issues on GitHub.",
+        "url": "{{ url()->current() }}",
+        "mainEntity": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "email": "contact@eventschedule.com",
+            "url": "{{ config('app.url') }}"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->

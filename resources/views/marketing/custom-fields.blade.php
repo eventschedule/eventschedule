@@ -5,6 +5,37 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Custom Fields</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule - Custom Fields",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "description": "Define custom event metadata fields and collect attendee information with flexible form fields including text, dropdown, date, and yes/no options.",
+        "featureList": [
+            "Custom event metadata fields",
+            "Attendee information collection",
+            "Text fields",
+            "Dropdown menus",
+            "Date pickers",
+            "Yes/No fields"
+        ],
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
+    </x-slot>
+
     <style>
         /* Custom amber gradient for this page */
         .text-gradient {

@@ -5,6 +5,27 @@
     <x-slot name="breadcrumbTitle">Terms of Service</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Terms of Service - Event Schedule",
+        "description": "Terms of Service for Event Schedule - the rules and guidelines for using our platform.",
+        "url": "{{ url()->current() }}",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "about": {
+            "@type": "Thing",
+            "name": "Terms of Service"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Header -->
     <section class="py-16 bg-gray-50 dark:bg-gray-800/50">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -5,6 +5,30 @@
     <x-slot name="socialImage">social/saas.png</x-slot>
     <x-slot name="breadcrumbTitle">SaaS</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule White-Label SaaS Platform",
+        "description": "Launch your own white-label ticketing SaaS platform at zero cost. Set your own prices, keep 100% of revenue through your branded platform.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "White-Label SaaS Platform",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free to start, keep 100% of revenue"
+        },
+        "url": "{{ url()->current() }}"
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->

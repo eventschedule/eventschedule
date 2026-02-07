@@ -5,6 +5,37 @@
     <x-slot name="breadcrumbTitle">CalDAV</x-slot>
     <x-slot name="socialImage">social/integrations.png</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule - CalDAV Sync",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "description": "Sync with any CalDAV-compatible calendar server. Works with Nextcloud, Radicale, Fastmail, iCloud, and more. Open standard, selfhosted friendly.",
+        "featureList": [
+            "CalDAV protocol support",
+            "Nextcloud compatibility",
+            "Radicale support",
+            "Fastmail integration",
+            "iCloud sync",
+            "Selfhosted calendar support"
+        ],
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
+    </x-slot>
+
     <style>
         /* Custom teal gradient for this page */
         .text-gradient {

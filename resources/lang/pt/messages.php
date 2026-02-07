@@ -362,6 +362,8 @@ return [
     'schedule_url' => 'URL da Agenda',
     'back_to_schedule' => 'Voltar para Agenda',
     'all_schedules' => 'Todas as Agendas',
+    'all_venues' => 'Todos os Locais',
+    'all_shows' => 'Todos',
     'filters' => 'Filtros',
     'clear_filters' => 'Limpar filtros',
 

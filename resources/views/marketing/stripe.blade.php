@@ -5,6 +5,37 @@
     <x-slot name="breadcrumbTitle">Stripe</x-slot>
     <x-slot name="socialImage">social/integrations.png</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule - Stripe Payments",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "description": "Accept credit cards, Apple Pay, and Google Pay for ticket sales. Secure Stripe Checkout with direct payouts and no platform fees.",
+        "featureList": [
+            "Stripe Checkout integration",
+            "Credit card payments",
+            "Apple Pay support",
+            "Google Pay support",
+            "Direct payouts",
+            "Zero platform fees"
+        ],
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->

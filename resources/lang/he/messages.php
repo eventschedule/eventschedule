@@ -582,6 +582,8 @@ return [
     'error_invoiceninja_connection' => 'שגיאה: נכשל החיבור ל-Invoice Ninja',
     'ticket_not_found' => 'כרטיס לא נמצא',
     'all_schedules' => 'כל לוחות הזמנים',
+    'all_venues' => 'כל המקומות',
+    'all_shows' => 'הכל',
     'filters' => 'מסננים',
     'clear_filters' => 'נקה מסננים',
     'parties_&_festivals' => 'מסיבות ופסטיבלים',

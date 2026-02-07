@@ -5,6 +5,37 @@
     <x-slot name="breadcrumbTitle">Invoice Ninja</x-slot>
     <x-slot name="socialImage">social/integrations.png</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule - Invoice Ninja Integration",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "description": "Generate professional invoices for ticket purchases. Automatic client management, QR code tickets, and seamless payment tracking with Invoice Ninja.",
+        "featureList": [
+            "Professional invoice generation",
+            "Automatic client management",
+            "QR code tickets",
+            "Payment tracking",
+            "B2B ticketing support",
+            "Selfhosted invoicing"
+        ],
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
+    </x-slot>
+
     <style>
         /* Custom emerald gradient for this page */
         .text-gradient {

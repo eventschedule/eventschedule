@@ -5,6 +5,27 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Open Source</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "Event Schedule",
+        "description": "Event Schedule is 100% open source under the Attribution Assurance License (AAL). Selfhost on your own server or integrate with our REST API.",
+        "codeRepository": "https://github.com/eventschedule/eventschedule",
+        "programmingLanguage": ["PHP", "JavaScript", "Vue.js"],
+        "runtimePlatform": "Laravel",
+        "license": "https://opensource.org/licenses/AAL",
+        "author": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "url": "{{ url()->current() }}"
+    }
+    </script>
+    </x-slot>
+
     <style>
         /* Custom gray gradient for this page */
         .text-gradient {

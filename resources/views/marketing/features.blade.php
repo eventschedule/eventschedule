@@ -5,6 +5,37 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Features</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule Features",
+        "description": "Discover all the features that make Event Schedule the best way to manage events, sell tickets, and engage your audience.",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": ["Web", "Android", "iOS"],
+        "featureList": [
+            "Event Ticketing with QR Check-in",
+            "Google Calendar Sync",
+            "AI Event Parsing",
+            "Analytics Dashboard",
+            "Email Newsletters",
+            "Embeddable Calendar Widget",
+            "Custom Fields",
+            "Recurring Events",
+            "Sub-schedules",
+            "Team Scheduling"
+        ],
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free plan available"
+        }
+    }
+    </script>
+    </x-slot>
+
     <style>
         /* Parallax utility classes */
         .parallax-blob {

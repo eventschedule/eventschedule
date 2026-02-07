@@ -512,6 +512,8 @@ return [
     'schedule_url' => 'Zeitplan-URL',
     'back_to_schedule' => 'Zurück zum Zeitplan',
     'all_schedules' => 'Alle Zeitpläne',
+    'all_venues' => 'Alle Veranstaltungsorte',
+    'all_shows' => 'Alle',
     'filters' => 'Filter',
     'clear_filters' => 'Filter löschen',
 

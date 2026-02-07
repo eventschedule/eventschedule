@@ -516,6 +516,8 @@ return [
     'schedule_url' => 'URL du planning',
     'back_to_schedule' => 'Retour au planning',
     'all_schedules' => 'Tous les plannings',
+    'all_venues' => 'Tous les lieux',
+    'all_shows' => 'Tous',
     'filters' => 'Filtres',
     'clear_filters' => 'Effacer les filtres',
 

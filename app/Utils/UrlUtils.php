@@ -65,6 +65,26 @@ class UrlUtils
         return ucfirst($parts[0]);
     }
 
+    public static function getHandle($url)
+    {
+        $url = self::clean($url);
+        $parts = explode('/', $url);
+
+        // Get the last non-empty path segment
+        $handle = '';
+        for ($i = count($parts) - 1; $i >= 0; $i--) {
+            if (! empty($parts[$i]) && strpos($parts[$i], '.') === false) {
+                $handle = $parts[$i];
+                break;
+            }
+        }
+
+        // Remove @ if already present, we'll add it back
+        $handle = ltrim($handle, '@');
+
+        return $handle ? '@'.$handle : '';
+    }
+
     public static function getYouTubeThumbnail($url)
     {
         $videoId = self::extractYouTubeVideoId($url);

@@ -5,6 +5,23 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">{{ __('messages.why_create_account_title') }}</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Why Create an Account - Event Schedule",
+        "description": "Discover the benefits of creating a free Event Schedule account.",
+        "url": "{{ url()->current() }}",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->
