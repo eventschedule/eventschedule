@@ -1,9 +1,9 @@
 <x-marketing-layout>
     {{-- SEO Slots --}}
     <x-slot name="title">Event Schedule Examples | Live Demo Schedules to Explore</x-slot>
-    <x-slot name="description">Explore {{ $scheduleCount }} live demo schedules showcasing Event Schedule. See real examples for fitness studios, music venues, yoga retreats, coworking spaces, and more.</x-slot>
+    <x-slot name="description">Explore {{ $scheduleCount }} live demo schedules showcasing Event Schedule. See real examples for fitness studios, music venues, yoga retreats, community groups, and more.</x-slot>
     <x-slot name="keywords">event schedule examples, event calendar demos, live schedule examples, event management demo, calendar widget examples, venue schedule examples, fitness class schedule, music venue calendar</x-slot>
-    <x-slot name="socialImage">social/demos.png</x-slot>
+    <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Examples</x-slot>
 
     {{-- Structured Data for Rich Results --}}
@@ -60,7 +60,7 @@
                 "name": "Are these real schedules?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "These are demo schedules we've created to showcase different use cases and features. They demonstrate what's possible with Event Schedule for various industries including fitness, music, coworking, and more."
+                    "text": "These are demo schedules we've created to showcase different use cases and features. They demonstrate what's possible with Event Schedule for various industries including fitness, music, community groups, and more."
                 }
             },
             {
@@ -99,11 +99,22 @@
                 <span class="text-gradient">in action</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-                Explore demo schedules for fitness studios, music venues, coworking spaces, and more. Click any example to see Event Schedule live.
+            <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-12">
+                Explore demo schedules for fitness studios, music venues, community groups, and more. Click any example to see Event Schedule live.
             </p>
+
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-[#4E81FA] to-sky-500 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
+                    Create your schedule
+                    <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
         </div>
     </section>
+
+    <div class="h-24 section-fade-to-gray"></div>
 
     {{-- Demo Grid Section with Category Grouping --}}
     <section class="bg-gray-50 dark:bg-[#0d0d14] py-24" aria-labelledby="demos-heading">
@@ -119,13 +130,13 @@
                 ];
                 $categoryColors = [
                     'Fitness & Wellness' => 'bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400',
-                    'Music & Entertainment' => 'bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400',
+                    'Music & Entertainment' => 'bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400',
                     'Community & Recreation' => 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400',
                     'Creative & Workshops' => 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400',
                 ];
                 $categoryHoverColors = [
                     'Fitness & Wellness' => 'hover:shadow-rose-500/20 hover:border-rose-400/50 dark:hover:border-rose-400/30',
-                    'Music & Entertainment' => 'hover:shadow-purple-500/20 hover:border-purple-400/50 dark:hover:border-purple-400/30',
+                    'Music & Entertainment' => 'hover:shadow-sky-500/20 hover:border-sky-400/50 dark:hover:border-sky-400/30',
                     'Community & Recreation' => 'hover:shadow-emerald-500/20 hover:border-emerald-400/50 dark:hover:border-emerald-400/30',
                     'Creative & Workshops' => 'hover:shadow-amber-500/20 hover:border-amber-400/50 dark:hover:border-amber-400/30',
                 ];
@@ -205,6 +216,9 @@
                                     </div>
                                 @endif
                                 <h4 class="text-2xl font-bold text-white mb-2">{{ $schedule['name'] }}</h4>
+                                @if($schedule['description'] ?? false)
+                                    <p class="text-sm text-white/70">{{ $schedule['description'] }}</p>
+                                @endif
                             </div>
                         @else
                             {{-- Fallback gradient background --}}
@@ -227,6 +241,9 @@
                                         </div>
                                     @endif
                                     <h4 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ $schedule['name'] }}</h4>
+                                    @if($schedule['description'] ?? false)
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $schedule['description'] }}</p>
+                                    @endif
                                 </div>
                             </div>
                         @endif
@@ -252,8 +269,10 @@
         </div>
     </section>
 
+    <div class="h-24 section-fade-to-white"></div>
+
     {{-- FAQ Section for Rich Snippets --}}
-    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/10">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-12 text-center">Frequently Asked Questions</h2>
 
@@ -274,7 +293,7 @@
                         <svg class="w-5 h-5 text-gray-500 transition-transform duration-300 ease-out group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                     </summary>
                     <div class="px-6 pb-6">
-                        <p class="text-gray-600 dark:text-gray-400">These are demo schedules we've created to showcase different use cases and features. They demonstrate what's possible with Event Schedule for various industries including fitness, music, coworking, and more.</p>
+                        <p class="text-gray-600 dark:text-gray-400">These are demo schedules we've created to showcase different use cases and features. They demonstrate what's possible with Event Schedule for various industries including fitness, music, community groups, and more.</p>
                     </div>
                 </details>
 
@@ -292,7 +311,7 @@
     </section>
 
     {{-- Use Cases Section (internal linking for SEO) --}}
-    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/10">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -310,8 +329,8 @@
                     </div>
                     <span class="block text-gray-700 dark:text-gray-300 font-medium">Fitness & Yoga</span>
                 </a>
-                <a href="{{ marketing_url('/for-music-venues') }}" class="group p-6 rounded-xl bg-gray-50 dark:bg-white/5 hover:bg-purple-50 dark:hover:bg-purple-500/10 border border-transparent hover:border-purple-200 dark:hover:border-purple-500/20 transition-all text-center">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 mb-3 group-hover:scale-110 transition-transform">
+                <a href="{{ marketing_url('/for-music-venues') }}" class="group p-6 rounded-xl bg-gray-50 dark:bg-white/5 hover:bg-sky-50 dark:hover:bg-sky-500/10 border border-transparent hover:border-sky-200 dark:hover:border-sky-500/20 transition-all text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 mb-3 group-hover:scale-110 transition-transform">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>
                     </div>
                     <span class="block text-gray-700 dark:text-gray-300 font-medium">Music Venues</span>
