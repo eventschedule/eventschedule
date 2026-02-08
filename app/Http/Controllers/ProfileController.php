@@ -29,7 +29,7 @@ class ProfileController extends Controller
             'user' => $request->user(),
         ];
 
-        if (! config('app.hosted') && ! config('app.testing')) {
+        if (! config('app.hosted') && ! config('app.is_testing')) {
             $data['version_installed'] = $updater->source()->getVersionInstalled();
 
             try {
@@ -171,7 +171,7 @@ class ProfileController extends Controller
                         }
                     }
                 } catch (\Exception $e) {
-                    Log::warning('Failed to clean up webhook during user deletion', [
+                    \Log::warning('Failed to clean up webhook during user deletion', [
                         'user_id' => $user->id,
                         'role_id' => $role->id,
                         'webhook_id' => $role->google_webhook_id,

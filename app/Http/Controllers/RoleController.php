@@ -151,7 +151,7 @@ class RoleController extends Controller
                     }
                 }
             } catch (\Exception $e) {
-                Log::warning('Failed to clean up webhook during role deletion', [
+                \Log::warning('Failed to clean up webhook during role deletion', [
                     'role_id' => $role->id,
                     'webhook_id' => $role->google_webhook_id,
                     'error' => $e->getMessage(),
