@@ -109,7 +109,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>.env</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-comment"># Enable SaaS mode with subdomain routing</span>
 <span class="code-variable">IS_HOSTED</span>=<span class="code-value">true</span>
@@ -162,7 +162,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>.env</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-comment"># Logo for light backgrounds (header, emails)</span>
 <span class="code-variable">APP_LOGO_DARK</span>=<span class="code-string">/images/dark_logo.png</span>
@@ -210,7 +210,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>.env</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-comment"># Email address for user feedback (displayed in footer)</span>
 <span class="code-variable">SUPPORT_EMAIL</span>=<span class="code-string">contact@eventschedule.com</span></code></pre>
@@ -239,7 +239,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>.env</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-comment"># Free trial length in days for new Pro subscribers</span>
 <span class="code-variable">TRIAL_DAYS</span>=<span class="code-value">365</span></code></pre>
@@ -285,7 +285,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>DNS (A Records)</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-comment"># A record for main domain</span>
 yourdomain.com.    A    YOUR_SERVER_IP
@@ -299,7 +299,7 @@ yourdomain.com.    A    YOUR_SERVER_IP
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>DNS (CNAME Records)</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-comment"># CNAME for main domain</span>
 yourdomain.com.    CNAME    your-server.hosting.com.
@@ -325,7 +325,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>nginx.conf</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-keyword">server</span> {
     <span class="code-keyword">listen</span> <span class="code-value">443</span> ssl http2;
@@ -353,7 +353,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>apache.conf</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-keyword">&lt;VirtualHost</span> *:443<span class="code-keyword">&gt;</span>
     <span class="code-keyword">ServerName</span> yourdomain.com
@@ -384,7 +384,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>.env</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-comment"># Stripe Platform (for subscription billing)</span>
 <span class="code-variable">STRIPE_PLATFORM_KEY</span>=<span class="code-string">pk_live_your_publishable_key</span>
@@ -411,7 +411,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>.env</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-comment"># Application</span>
 <span class="code-variable">APP_NAME</span>=<span class="code-string">My Events Platform</span>
@@ -517,7 +517,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>bash</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code>php artisan app:setup-demo</code></pre>
                             </div>
@@ -530,7 +530,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>bash</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code>php artisan app:setup-demo</code></pre>
                             </div>
@@ -541,7 +541,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>crontab</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code>0 * * * * cd /path/to/eventschedule && php artisan app:setup-demo >> /dev/null 2>&1</code></pre>
                             </div>
@@ -599,7 +599,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>bash</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code>tail -f storage/logs/laravel.log</code></pre>
                             </div>

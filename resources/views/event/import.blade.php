@@ -1,6 +1,6 @@
-<script src="{{ asset('js/vue.global.prod.js') }}"></script>
+<script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
 
-<style>
+<style {!! nonce_attr() !!}>
     #event-import-app {
         visibility: hidden;
     }
@@ -532,6 +532,97 @@
                             </div>
                         </div>
 
+                        <!-- Configurable Import Fields -->
+                        @php $importFields = $role->import_config['fields'] ?? []; @endphp
+
+                        <!-- Short Description -->
+                        <div class="mt-4" v-if="importFields.short_description || showAllFields" v-show="!savedEvents[idx]">
+                            <x-input-label for="short_description_@{{ idx }}" :value="__('messages.short_description')" />
+                            <x-text-input
+                                id="short_description_@{{ idx }}"
+                                type="text"
+                                class="mt-1 block w-full"
+                                maxlength="200"
+                                v-model="preview.parsed[idx].short_description"
+                                v-bind:readonly="savedEvents[idx]"
+                                autocomplete="off" />
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mt-4" v-if="importFields.description || showAllFields" v-show="!savedEvents[idx]">
+                            <x-input-label for="description_@{{ idx }}" :value="__('messages.description')" />
+                            <textarea
+                                :id="'import_description_' + idx"
+                                :ref="'descriptionEditor_' + idx"
+                                rows="4"
+                                dir="auto"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                v-bind:readonly="savedEvents[idx]">@{{ preview.parsed[idx].event_details }}</textarea>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="mt-4" v-if="importFields.ticket_price || showAllFields" v-show="!savedEvents[idx]">
+                            <x-input-label :value="__('messages.price')" />
+                            <div class="mt-1 flex gap-3">
+                                <select v-model="preview.parsed[idx].ticket_currency_code"
+                                    v-bind:disabled="savedEvents[idx]"
+                                    class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                    @foreach ($currencies as $currency)
+                                    @if ($loop->index == 2)
+                                    <option disabled>──────</option>
+                                    @endif
+                                    <option value="{{ $currency->value }}">{{ $currency->value }}</option>
+                                    @endforeach
+                                </select>
+                                <x-text-input type="number" step="0.01" min="0"
+                                    class="flex-1"
+                                    v-model="preview.parsed[idx].ticket_price"
+                                    v-bind:readonly="savedEvents[idx]" />
+                            </div>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.external_price_help') }}</p>
+                        </div>
+
+                        <!-- Registration URL -->
+                        <div class="mt-4" v-if="importFields.registration_url || showAllFields" v-show="!savedEvents[idx]">
+                            <x-input-label for="registration_url_@{{ idx }}" :value="__('messages.registration_url')" />
+                            <x-text-input
+                                id="registration_url_@{{ idx }}"
+                                type="url"
+                                class="mt-1 block w-full"
+                                v-model="preview.parsed[idx].registration_url"
+                                v-bind:readonly="savedEvents[idx]"
+                                autocomplete="off" />
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.registration_url_help') }}</p>
+                        </div>
+
+                        <!-- Category -->
+                        <div class="mt-4" v-if="importFields.category_id || showAllFields" v-show="!savedEvents[idx]">
+                            <x-input-label for="category_id_@{{ idx }}" :value="__('messages.category')" />
+                            <select
+                                id="category_id_@{{ idx }}"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl') }}"
+                                v-model="preview.parsed[idx].category_id"
+                                v-bind:disabled="savedEvents[idx]">
+                                <option value="">{{ __('messages.please_select') }}</option>
+                                @foreach(get_translated_categories() as $catId => $catName)
+                                <option value="{{ $catId }}">{{ $catName }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Sub-schedule -->
+                        <div class="mt-4" v-if="(importFields.group_id || showAllFields) && groups.length > 0" v-show="!savedEvents[idx]">
+                            <x-input-label for="group_id_@{{ idx }}" :value="__('messages.schedule')" />
+                            <select
+                                id="group_id_@{{ idx }}"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl') }}"
+                                v-model="preview.parsed[idx].group_id"
+                                v-bind:disabled="savedEvents[idx]">
+                                <option value="">{{ __('messages.please_select') }}</option>
+                                <option v-for="group in groups" :key="group.id" :value="group.id">@{{ group.name }}</option>
+                            </select>
+                        </div>
+
                         <!-- Custom Fields Section -->
                         @if (count($role->getEventCustomFields()) > 0)
                         <div class="mt-6">
@@ -916,6 +1007,9 @@
                 dragStartTime: 0,
                 isDragActive: false,
                 showAllFields: false,
+                importFields: @json($role->import_config['fields'] ?? []),
+                groups: @json(($role->groups ?? collect())->map(fn($g) => ['id' => \App\Utils\UrlUtils::encodeId($g->id), 'name' => $g->translatedName()])),
+                descriptionEditors: {},
                 isCurator: {{ $role->isCurator() ? 'true' : 'false' }},
                 detailsImage: null,
                 detailsImageUrl: null,
@@ -1469,6 +1563,14 @@
                             }
                         });
 
+                        // Initialize configurable import field defaults
+                        if (!event.ticket_currency_code) {
+                            event.ticket_currency_code = '{{ $role->currency_code ?? "USD" }}';
+                        }
+                        if (!event.group_id) {
+                            event.group_id = '';
+                        }
+
                         if (event.performers && Array.isArray(event.performers)) {
                             event.performers.forEach((performer, performerIdx) => {
                                 // Initialize video-related properties using Object.assign for reactivity
@@ -1489,10 +1591,12 @@
                         }
                     });
                     }
-                    
+
                     // Initialize datepickers after preview is loaded
                     this.$nextTick(() => {
                         initializeFlatpickr();
+                        // Initialize EasyMDE editors for description fields
+                        this.initDescriptionEditors();
                     });
                 } catch (error) {
                     // Only show error if this is still the latest request
@@ -1683,9 +1787,12 @@
                             short_description_en: parsed.short_description_en,
                             starts_at: dateValue,
                             duration: computedDuration,
-                            description: this.eventDetails ? this.eventDetails : parsed.event_details,
+                            description: this.descriptionEditors[idx] ? this.descriptionEditors[idx].value() : (this.eventDetails ? this.eventDetails : parsed.event_details),
                             social_image: parsed.social_image,
                             registration_url: parsed.registration_url,
+                            ticket_price: parsed.ticket_price,
+                            ticket_currency_code: parsed.ticket_currency_code,
+                            current_role_group_id: parsed.group_id || null,
                             custom_field_values: parsed.custom_field_values || {},
                             category_id: parsed.category_id,
                             @if ($role->isCurator() && !isset($isGuest))
@@ -1761,6 +1868,7 @@
             },
 
             handleClear() {
+                this.destroyDescriptionEditors();
                 this.eventDetails = '';
                 this.detailsImage = null;
                 this.detailsImageUrl = null;
@@ -1780,6 +1888,7 @@
             },
 
             handleClearForNext() {
+                this.destroyDescriptionEditors();
                 // Clear the form state to import another event
                 this.preview = null;
                 this.eventDetails = '';
@@ -1797,6 +1906,30 @@
                 this.$nextTick(() => {
                     document.getElementById('event_details').focus();
                 });
+            },
+
+            initDescriptionEditors() {
+                if (!this.importFields.description && !this.showAllFields) return;
+                if (!this.preview || !this.preview.parsed) return;
+
+                this.preview.parsed.forEach((event, idx) => {
+                    if (this.descriptionEditors[idx] || this.savedEvents[idx]) return;
+                    const el = document.getElementById('import_description_' + idx);
+                    if (!el || !window.initTinyMDE) return;
+                    const editor = window.initTinyMDE(el, () => {
+                        this.preview.parsed[idx].event_details = editor.value();
+                    });
+                    this.descriptionEditors[idx] = editor;
+                });
+            },
+
+            destroyDescriptionEditors() {
+                Object.keys(this.descriptionEditors).forEach(idx => {
+                    if (this.descriptionEditors[idx]) {
+                        this.descriptionEditors[idx].toTextArea();
+                    }
+                });
+                this.descriptionEditors = {};
             },
 
             dragOver(e) {
@@ -1900,8 +2033,25 @@
                 if ({{ isset($isGuest) && $isGuest ? 'true' : 'false' }}) {
                     return;
                 }
-                
+
                 if (confirm('{{ __("messages.confirm_remove_event") }}')) {
+                    // Destroy description editor for this event
+                    if (this.descriptionEditors[idx]) {
+                        this.descriptionEditors[idx].toTextArea();
+                        delete this.descriptionEditors[idx];
+                    }
+                    // Re-index remaining editors
+                    const newEditors = {};
+                    Object.keys(this.descriptionEditors).forEach(key => {
+                        const k = parseInt(key);
+                        if (k > idx) {
+                            newEditors[k - 1] = this.descriptionEditors[k];
+                        } else {
+                            newEditors[k] = this.descriptionEditors[k];
+                        }
+                    });
+                    this.descriptionEditors = newEditors;
+
                     // Remove the event from the parsed array
                     this.preview.parsed.splice(idx, 1);
                     // Remove the corresponding entry in savedEvents array

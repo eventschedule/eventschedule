@@ -826,9 +826,12 @@ class EventController extends Controller
             $venues = array_values($venues->sortBy('name')->toArray());
         }
 
+        $currencies = json_decode(file_get_contents(base_path('storage/currencies.json')));
+
         return view('event.admin-import', [
             'role' => $role,
             'venues' => $venues,
+            'currencies' => $currencies,
         ]);
     }
 
@@ -863,7 +866,9 @@ class EventController extends Controller
             }
         }
 
-        return view('event.guest-import', ['role' => $role, 'isGuest' => true, 'venues' => []]);
+        $currencies = json_decode(file_get_contents(base_path('storage/currencies.json')));
+
+        return view('event.guest-import', ['role' => $role, 'isGuest' => true, 'venues' => [], 'currencies' => $currencies]);
     }
 
     public function parse(Request $request, $subdomain)

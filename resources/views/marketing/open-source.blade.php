@@ -26,7 +26,7 @@
     </script>
     </x-slot>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         /* Custom gray gradient for this page */
         .text-gradient {
             background: linear-gradient(135deg, #6b7280 0%, #374151 50%, #1f2937 100%);

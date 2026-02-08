@@ -117,7 +117,7 @@ class StripeController extends Controller
                 $sale = Sale::where('payment_method', 'stripe')
                     ->where('transaction_reference', $paymentIntent->id)
                     ->first();
-                if ($sale) {
+                if ($sale && $sale->status !== 'paid') {
                     $webhookAmount = $paymentIntent->amount / 100;
 
                     // Validate that the webhook amount matches the expected sale amount

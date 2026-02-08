@@ -1,13 +1,13 @@
 <x-app-admin-layout>
 
 <x-slot name="head">
-    <script src="{{ asset('js/vue.global.prod.js') }}"></script>
+    <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
 </x-slot>
 
 <div class="flex justify-between items-center gap-6 pb-6">
     @if (is_rtl())
         <div class="flex items-center gap-3">
-            <button onclick="history.back()" type="button" class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+            <button type="button" class="js-back-btn inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                 {{ __('messages.back') }}
             </button>
         </div>
@@ -35,12 +35,20 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <button onclick="history.back()" type="button" class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+            <button type="button" class="js-back-btn inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                 {{ __('messages.back') }}
             </button>
         </div>
     @endif
 </div>
+
+<script {!! nonce_attr() !!}>
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.js-back-btn')) {
+            history.back();
+        }
+    });
+</script>
 
 <div id="scan-agenda-app">
     <scan-agenda-app></scan-agenda-app>

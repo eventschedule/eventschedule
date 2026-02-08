@@ -4,7 +4,7 @@
         <div class="flex justify-between items-center mb-6">
             {{-- Schedule Selector --}}
             <div class="min-w-[200px] max-w-xs">
-                <select id="role-filter" onchange="filterByRole(this.value)"
+                <select id="role-filter"
                     class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base">
                     @foreach ($roles as $r)
                         <option value="{{ \App\Utils\UrlUtils::encodeId($r->id) }}" {{ $selectedRoleId == $r->id ? 'selected' : '' }}>
@@ -107,7 +107,7 @@
                                     <button type="submit" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">{{ __('messages.clone') }}</button>
                                 </form>
                                 @if ($newsletter->status === 'draft')
-                                <form method="POST" action="{{ route('newsletter.delete', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                                <form method="POST" action="{{ route('newsletter.delete', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="inline js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}"
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-500 hover:text-red-700">{{ __('messages.delete') }}</button>
@@ -153,14 +153,23 @@
     </div>
 
     <script {!! nonce_attr() !!}>
-        function filterByRole(roleId) {
-            const url = new URL(window.location.href);
-            if (roleId) {
-                url.searchParams.set('role_id', roleId);
+        document.getElementById('role-filter').addEventListener('change', function() {
+            var url = new URL(window.location.href);
+            if (this.value) {
+                url.searchParams.set('role_id', this.value);
             } else {
                 url.searchParams.delete('role_id');
             }
             window.location.href = url.toString();
-        }
+        });
+
+        document.addEventListener('submit', function(e) {
+            var form = e.target.closest('.js-confirm-form');
+            if (form) {
+                if (!confirm(form.getAttribute('data-confirm'))) {
+                    e.preventDefault();
+                }
+            }
+        });
     </script>
 </x-app-admin-layout>

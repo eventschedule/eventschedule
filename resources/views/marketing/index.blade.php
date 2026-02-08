@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/home.png</x-slot>
     <x-slot name="breadcrumbTitle">Home</x-slot>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         /* Homepage-specific animations (not shared across pages) */
         @keyframes gradient-shift {
             0%, 100% { background-position: 0% 50%; }

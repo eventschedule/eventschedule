@@ -700,7 +700,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .text-gradient-sky {
             background: linear-gradient(135deg, #0ea5e9, #3b82f6);
             -webkit-background-clip: text;

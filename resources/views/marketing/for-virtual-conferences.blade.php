@@ -789,7 +789,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .conference-glow-text {
             background: linear-gradient(135deg, #0284c7, #2563eb, #06b6d4);
             -webkit-background-clip: text;

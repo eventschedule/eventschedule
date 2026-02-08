@@ -40,7 +40,7 @@
                             <form method="POST" action="{{ route('auth.google.disconnect') }}" class="inline">
                                 @csrf
                                 <button type="submit"
-                                   onclick="return confirm('{{ __('messages.are_you_sure') }}')"
+                                   data-confirm="{{ __('messages.are_you_sure') }}"
                                    class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
                                     {{ __('messages.disconnect') }}
                                 </button>
@@ -111,7 +111,8 @@
                             </span>
                         </div>
                         <a href="{{ route('google.calendar.disconnect') }}"
-                           onclick="return confirm('{{ __('messages.are_you_sure') }}')"
+                           id="disconnect-google-calendar"
+                           data-confirm="{{ __('messages.are_you_sure') }}"
                            class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
                             {{ __('messages.disconnect') }}
                         </a>
@@ -149,3 +150,25 @@
         </div>
     </div>
 </section>
+
+<script {!! nonce_attr() !!}>
+document.addEventListener('DOMContentLoaded', function() {
+    // Confirm on submit buttons with data-confirm (within forms)
+    document.querySelectorAll('button[data-confirm]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            if (!confirm(this.dataset.confirm)) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // Confirm on links with data-confirm
+    document.querySelectorAll('a[data-confirm]').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            if (!confirm(this.dataset.confirm)) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>

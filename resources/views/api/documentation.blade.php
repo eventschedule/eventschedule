@@ -1,60 +1,67 @@
 <x-app-admin-layout>
     <div>
         <script {!! nonce_attr() !!}>
-            function copyCode(button) {
-                // Find the closest parent div that contains both the button and the pre element
-                const container = button.closest('.bg-gray-800, .bg-gray-950');
-                
+            // Copy code buttons - event delegation
+            document.addEventListener('click', function(e) {
+                var button = e.target.closest('.copy-btn');
+                if (!button) return;
+
+                var container = button.closest('.bg-gray-800, .bg-gray-950');
+
                 if (!container) {
                     console.error('Could not find container for code block');
                     button.textContent = 'Copy failed!';
-                    setTimeout(() => {
+                    setTimeout(function() {
                         button.textContent = 'Copy';
                     }, 2000);
                     return;
                 }
-                
-                const codeBlock = container.querySelector('pre');
-                
+
+                var codeBlock = container.querySelector('pre');
+
                 if (!codeBlock) {
                     console.error('Could not find code block to copy');
                     button.textContent = 'Copy failed!';
-                    setTimeout(() => {
+                    setTimeout(function() {
                         button.textContent = 'Copy';
                     }, 2000);
                     return;
                 }
-                
-                const code = codeBlock.textContent;
-                
-                navigator.clipboard.writeText(code).then(() => {
-                    const originalText = button.textContent;
+
+                var code = codeBlock.textContent;
+
+                navigator.clipboard.writeText(code).then(function() {
+                    var originalText = button.textContent;
                     button.textContent = 'Copied!';
-                    setTimeout(() => {
+                    setTimeout(function() {
                         button.textContent = originalText;
                     }, 2000);
-                }).catch(err => {
+                }).catch(function(err) {
                     console.error('Failed to copy: ', err);
                     button.textContent = 'Copy failed!';
-                    setTimeout(() => {
+                    setTimeout(function() {
                         button.textContent = 'Copy';
                     }, 2000);
                 });
-            }
+            });
 
-            function toggleCurl(button) {
-                const content = button.nextElementSibling;
-                const arrow = button.querySelector('svg');
-                
+            // Toggle cURL example buttons - event delegation
+            document.addEventListener('click', function(e) {
+                var button = e.target.closest('.toggle-curl-btn');
+                if (!button) return;
+
+                var content = button.nextElementSibling;
+                var arrow = button.querySelector('svg');
+
                 content.classList.toggle('hidden');
                 arrow.style.transform = content.classList.contains('hidden') ? '' : 'rotate(-180deg)';
-                
-                const text = button.innerHTML;
+
+                var text = button.innerHTML;
                 button.innerHTML = text.replace(
                     content.classList.contains('hidden') ? 'Hide' : 'Show',
                     content.classList.contains('hidden') ? 'Show' : 'Hide'
                 );
-            }
+            });
         </script>
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -73,8 +80,7 @@
                         <div class="lg:grid lg:grid-cols-2 lg:gap-8">
                             <div class="prose dark:prose-invert">
                                 <p>All API requests must include your API key in the <code>X-API-Key</code> header.</p>
-                                <button onclick="toggleCurl(this)" 
-                                        class="mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
+                                <button class="toggle-curl-btn mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
                                     <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                     </svg>
@@ -84,7 +90,7 @@
                                     <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                         <div class="flex items-center justify-between">
                                             <span>cURL</span>
-                                            <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                            <button class="copy-btn text-xs text-gray-400 hover:text-white">Copy</button>
                                         </div>
                                         <pre class="mt-2 overflow-x-auto"><code>curl -X GET "{{ config('app.url') }}/api/schedules" \
      -H "X-API-Key: your_api_key_here"</code></pre>
@@ -95,7 +101,7 @@
                                 <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                     <div class="flex items-center justify-between">
                                         <span>Request Headers</span>
-                                        <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                        <button class="copy-btn text-xs text-gray-400 hover:text-white">Copy</button>
                                     </div>
                                     <pre class="mt-2 overflow-x-auto"><code>X-API-Key: your_api_key_here</code></pre>
                                 </div>
@@ -118,7 +124,7 @@
                                 <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                     <div class="flex items-center justify-between">
                                         <span>Example Response</span>
-                                        <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                        <button class="copy-btn text-xs text-gray-400 hover:text-white">Copy</button>
                                     </div>
                                     <pre class="mt-2 overflow-x-auto"><code>{
     "data": [...],
@@ -154,7 +160,7 @@
                                 <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                     <div class="flex items-center justify-between">
                                         <span>Pagination Metadata</span>
-                                        <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                        <button class="copy-btn text-xs text-gray-400 hover:text-white">Copy</button>
                                     </div>
                                     <pre class="mt-2 overflow-x-auto"><code>"meta": {
     "current_page": 2,
@@ -184,8 +190,7 @@
                                         <code class="text-sm">/api/schedules</code>
                                     </div>
                                     <p class="mt-4">Returns a paginated list of all schedules you have access to.</p>
-                                    <button onclick="toggleCurl(this)" 
-                                            class="mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
+                                    <button class="toggle-curl-btn mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
                                         <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                         </svg>
@@ -195,7 +200,7 @@
                                         <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                             <div class="flex items-center justify-between">
                                                 <span>cURL</span>
-                                                <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                                <button class="copy-btn text-xs text-gray-400 hover:text-white">Copy</button>
                                             </div>
                                             <pre class="mt-2 overflow-x-auto"><code>curl -X GET "{{ config('app.url') }}/api/schedules?page=1&per_page=100" \
      -H "X-API-Key: your_api_key_here"</code></pre>
@@ -206,7 +211,7 @@
                                     <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                         <div class="flex items-center justify-between">
                                             <span>Response</span>
-                                            <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                            <button class="copy-btn text-xs text-gray-400 hover:text-white">Copy</button>
                                         </div>
                                         <pre class="mt-2 overflow-x-auto"><code>{
     "data": [
@@ -254,8 +259,7 @@
                                         <code class="text-sm">/api/events</code>
                                     </div>
                                     <p class="mt-4">Returns a paginated list of all events.</p>
-                                    <button onclick="toggleCurl(this)" 
-                                            class="mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
+                                    <button class="toggle-curl-btn mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
                                         <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                         </svg>
@@ -265,7 +269,7 @@
                                         <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                             <div class="flex items-center justify-between">
                                                 <span>cURL</span>
-                                                <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                                <button class="copy-btn text-xs text-gray-400 hover:text-white">Copy</button>
                                             </div>
                                             <pre class="mt-2 overflow-x-auto"><code>curl -X GET "{{ config('app.url') }}/api/events" \
      -H "X-API-Key: your_api_key_here"</code></pre>
@@ -276,7 +280,7 @@
                                     <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                         <div class="flex items-center justify-between">
                                             <span>Response</span>
-                                            <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                            <button class="copy-btn text-xs text-gray-400 hover:text-white">Copy</button>
                                         </div>
                                         <pre class="mt-2 overflow-x-auto"><code>{
     "data": [
@@ -335,8 +339,7 @@
                                         </p>
                                     </div>
                                     
-                                    <button onclick="toggleCurl(this)" 
-                                            class="mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
+                                    <button class="toggle-curl-btn mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
                                         <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                         </svg>
@@ -346,7 +349,7 @@
                                         <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                             <div class="flex items-center justify-between">
                                                 <span>cURL</span>
-                                                <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                                <button class="copy-btn text-xs text-gray-400 hover:text-white">Copy</button>
                                             </div>
                                             <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ config('app.url') }}/api/events/{subdomain}" \
      -H "X-API-Key: your_api_key_here" \
@@ -373,8 +376,7 @@
                                         </div>
                                     </div>
                                     
-                                    <button onclick="toggleCurl(this)" 
-                                            class="mt-4 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
+                                    <button class="toggle-curl-btn mt-4 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
                                         <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                         </svg>
@@ -384,7 +386,7 @@
                                         <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                             <div class="flex items-center justify-between">
                                                 <span>cURL</span>
-                                                <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                                <button class="copy-btn text-xs text-gray-400 hover:text-white">Copy</button>
                                             </div>
                                             <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ config('app.url') }}/api/events/{subdomain}" \
     -H "X-API-Key: your_api_key_here" \
@@ -409,7 +411,7 @@
                                     <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                         <div class="flex items-center justify-between">
                                             <span>Response</span>
-                                            <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                            <button class="copy-btn text-xs text-gray-400 hover:text-white">Copy</button>
                                         </div>
                                         <pre class="mt-2 overflow-x-auto"><code>{
     "data": {
@@ -466,8 +468,7 @@
                                         </ul>
                                     </div>
                                     
-                                    <button onclick="toggleCurl(this)" 
-                                            class="mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
+                                    <button class="toggle-curl-btn mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
                                         <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                         </svg>
@@ -477,7 +478,7 @@
                                         <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                             <div class="flex items-center justify-between">
                                                 <span>cURL</span>
-                                                <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                                <button class="copy-btn text-xs text-gray-400 hover:text-white">Copy</button>
                                             </div>
                                             <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ config('app.url') }}/api/sales" \
      -H "X-API-Key: your_api_key_here" \
@@ -510,7 +511,7 @@
                                     <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                         <div class="flex items-center justify-between">
                                             <span>Response</span>
-                                            <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                            <button class="copy-btn text-xs text-gray-400 hover:text-white">Copy</button>
                                         </div>
                                         <pre class="mt-2 overflow-x-auto"><code>{
     "data": {
@@ -596,7 +597,7 @@
                                 <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                     <div class="flex items-center justify-between">
                                         <span>Error Response</span>
-                                        <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                        <button class="copy-btn text-xs text-gray-400 hover:text-white">Copy</button>
                                     </div>
                                     <pre class="mt-2"><code>{
     "data": null,

@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Recurring Events</x-slot>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .text-gradient {
             background: linear-gradient(135deg, #84cc16 0%, #22c55e 50%, #16a34a 100%);
             -webkit-background-clip: text;

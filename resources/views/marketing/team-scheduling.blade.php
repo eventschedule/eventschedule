@@ -35,7 +35,7 @@
     </script>
     </x-slot>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         /* Custom cyan gradient for this page */
         .text-gradient {
             background: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%);

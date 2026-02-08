@@ -652,7 +652,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .text-gradient-lime {
             background: linear-gradient(135deg, #84cc16, #16a34a);
             -webkit-background-clip: text;

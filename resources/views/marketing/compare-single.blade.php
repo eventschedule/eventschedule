@@ -23,7 +23,7 @@
     </script>
     </x-slot>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .compare-table-wrapper {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;

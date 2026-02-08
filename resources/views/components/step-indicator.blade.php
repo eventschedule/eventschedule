@@ -122,7 +122,7 @@
     
 </div>
 
-<style>
+<style {!! nonce_attr() !!}>
 .step-indicator {
     position: relative;
 }

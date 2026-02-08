@@ -749,7 +749,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         /* Circus Color Palette - Light Mode */
         .bg-circus-dark { background-color: #faf5f0; }
         .bg-crimson { background-color: #DC143C; }

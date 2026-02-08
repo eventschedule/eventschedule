@@ -1,5 +1,9 @@
 <script {!! nonce_attr() !!}>
-    function copyCode(button) {
+    // Copy code buttons - event delegation
+    document.addEventListener('click', function(e) {
+        const button = e.target.closest('.doc-copy-btn');
+        if (!button) return;
+
         const codeBlock = button.closest('.doc-code-block');
         const code = codeBlock.querySelector('code').innerText;
 
@@ -13,7 +17,7 @@
                 button.classList.remove('text-green-400');
             }, 2000);
         });
-    }
+    });
 
     // Smooth scroll for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {

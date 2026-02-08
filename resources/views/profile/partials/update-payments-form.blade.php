@@ -44,7 +44,7 @@
                     @endif
                     <x-text-input type="text" class="mt-1 block w-full" :value="$user->stripe_company_name ? $user->stripe_company_name : $user->stripe_account_id" readonly/>
                     <div class="text-xs pt-1">
-                        <form method="POST" action="{{ route('stripe.unlink') }}" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                        <form method="POST" action="{{ route('stripe.unlink') }}" class="inline" data-confirm="{{ __('messages.are_you_sure') }}">
                             @csrf
                             <button type="submit" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</button>
                         </form>
@@ -56,12 +56,12 @@
                 <div class="mt-4">
                     @if (is_demo_mode())
                         <button type="button"
-                            onclick="alert('{{ __('messages.saving_disabled_demo_mode') }}')"
+                            data-alert="{{ __('messages.saving_disabled_demo_mode') }}"
                             class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
                             {{ __('messages.connect_stripe') }}
                         </button>
                     @else
-                        <x-primary-button type="button" onclick="window.location.href='{{ route('stripe.link') }}'">
+                        <x-primary-button type="button" id="connect-stripe-btn" data-href="{{ route('stripe.link') }}">
                             {{ __('messages.connect_stripe') }}
                         </x-primary-button>
                     @endif
@@ -108,7 +108,7 @@
             <div class="mt-4">
                 <x-text-input type="text" class="mt-1 block w-full" :value="$user->invoiceninja_company_name" readonly/>
                 <div class="text-xs pt-1">
-                    <form method="POST" action="{{ route('invoiceninja.unlink') }}" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                    <form method="POST" action="{{ route('invoiceninja.unlink') }}" class="inline" data-confirm="{{ __('messages.are_you_sure') }}">
                         @csrf
                         <button type="submit" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</button>
                     </form>
@@ -142,7 +142,7 @@
                 <div class="flex items-center gap-4 pt-8">
                     @if (is_demo_mode())
                         <button type="button"
-                            onclick="alert('{{ __('messages.saving_disabled_demo_mode') }}')"
+                            data-alert="{{ __('messages.saving_disabled_demo_mode') }}"
                             class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
                             {{ __('messages.save') }}
                         </button>
@@ -169,7 +169,7 @@
             <div class="mt-4">
                 <x-text-input type="text" class="mt-1 block w-full" :value="$user->payment_url" readonly/>
                 <div class="text-xs pt-1">
-                    <form method="POST" action="{{ route('profile.unlink_payment_url') }}" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                    <form method="POST" action="{{ route('profile.unlink_payment_url') }}" class="inline" data-confirm="{{ __('messages.are_you_sure') }}">
                         @csrf
                         <button type="submit" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</button>
                     </form>
@@ -189,7 +189,7 @@
                 <div class="flex items-center gap-4 pt-8">
                     @if (is_demo_mode())
                         <button type="button"
-                            onclick="alert('{{ __('messages.saving_disabled_demo_mode') }}')"
+                            data-alert="{{ __('messages.saving_disabled_demo_mode') }}"
                             class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
                             {{ __('messages.save') }}
                         </button>
@@ -210,6 +210,30 @@
 
 <script {!! nonce_attr() !!}>
 document.addEventListener('DOMContentLoaded', function() {
+    // Confirm before submit for forms with data-confirm
+    document.querySelectorAll('form[data-confirm]').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            if (!confirm(this.dataset.confirm)) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // Alert buttons for demo mode
+    document.querySelectorAll('[data-alert]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            alert(this.dataset.alert);
+        });
+    });
+
+    // Connect Stripe button
+    var connectStripeBtn = document.getElementById('connect-stripe-btn');
+    if (connectStripeBtn) {
+        connectStripeBtn.addEventListener('click', function() {
+            window.location.href = this.dataset.href;
+        });
+    }
+
     const paymentTabs = document.querySelectorAll('.payment-tab');
     const paymentTabContents = document.querySelectorAll('.payment-tab-content');
 

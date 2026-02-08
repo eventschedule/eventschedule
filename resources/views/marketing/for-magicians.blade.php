@@ -643,7 +643,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .text-gradient-blue {
             background: linear-gradient(135deg, #4E81FA, #0EA5E9);
             -webkit-background-clip: text;

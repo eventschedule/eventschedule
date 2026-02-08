@@ -141,8 +141,9 @@
                             </td>
                             <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
                                 <button type="button"
-                                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.unfollow', ['subdomain' => $role->subdomain]) }}'; } return false;"
-                                    class="inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    data-confirm="{{ __('messages.are_you_sure') }}"
+                                    data-href="{{ route('role.unfollow', ['subdomain' => $role->subdomain]) }}"
+                                    class="btn-confirm-navigate inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                                     {{ $role->email ? __('messages.unfollow') : __('messages.delete') }}
                                 </button>
                             </td>
@@ -163,3 +164,15 @@
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.start_following_schedules') }}</p>
 </div>
 @endif
+
+<script {!! nonce_attr() !!}>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-confirm-navigate').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            if (confirm(this.getAttribute('data-confirm'))) {
+                location.href = this.getAttribute('data-href');
+            }
+        });
+    });
+});
+</script>

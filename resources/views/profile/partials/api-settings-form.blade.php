@@ -49,8 +49,8 @@
                     @if(session('show_new_api_key'))
                         <div class="absolute inset-y-0 end-0 flex items-center">
                             <div class="h-full w-px bg-gray-300 dark:bg-gray-600"></div>
-                            <button type="button" 
-                                    onclick="copyApiKey()" 
+                            <button type="button"
+                                    id="copy-api-key-btn"
                                     class="px-3 border border-s-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-e-md flex items-center justify-center group h-full"
                                     title="{{ __('Copy to clipboard') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" 
@@ -90,16 +90,21 @@
 </section>
 
 <script {!! nonce_attr() !!}>
-function copyApiKey() {
-    const apiKeyInput = document.getElementById('api_key');
-    apiKeyInput.select();
-    document.execCommand('copy');
-    
-    const feedback = document.getElementById('copy-feedback');
-    feedback.classList.remove('opacity-0');
-    
-    setTimeout(() => {
-        feedback.classList.add('opacity-0');
-    }, 2000);
-}
-</script> 
+document.addEventListener('DOMContentLoaded', function() {
+    var copyBtn = document.getElementById('copy-api-key-btn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', function() {
+            var apiKeyInput = document.getElementById('api_key');
+            apiKeyInput.select();
+            document.execCommand('copy');
+
+            var feedback = document.getElementById('copy-feedback');
+            feedback.classList.remove('opacity-0');
+
+            setTimeout(function() {
+                feedback.classList.add('opacity-0');
+            }, 2000);
+        });
+    }
+});
+</script>

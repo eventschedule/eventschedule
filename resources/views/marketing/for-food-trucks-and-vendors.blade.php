@@ -616,7 +616,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .text-gradient-food {
             background: linear-gradient(135deg, #f97316, #eab308);
             -webkit-background-clip: text;

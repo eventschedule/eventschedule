@@ -40,7 +40,6 @@
                 <!-- Theme toggle button -->
                 <button
                     id="theme-toggle"
-                    onclick="toggleTheme()"
                     class="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
                     aria-label="Toggle dark mode"
                 >
@@ -82,7 +81,6 @@
                 <!-- Mobile menu button -->
                 <button
                     id="mobile-menu-button"
-                    onclick="toggleMobileMenu()"
                     class="md:hidden p-2 text-gray-600 dark:text-gray-300"
                     aria-label="Toggle menu"
                     aria-expanded="false"
@@ -145,17 +143,16 @@
 </header>
 
 <script {!! nonce_attr() !!}>
-function toggleMobileMenu() {
-    const menu = document.getElementById('mobile-menu');
-    const button = document.getElementById('mobile-menu-button');
-    const isHidden = menu.classList.toggle('hidden');
-    button.setAttribute('aria-expanded', !isHidden);
-}
+document.getElementById('mobile-menu-button').addEventListener('click', function() {
+    var menu = document.getElementById('mobile-menu');
+    var isHidden = menu.classList.toggle('hidden');
+    this.setAttribute('aria-expanded', !isHidden);
+});
 
-function toggleTheme() {
-    const isDark = document.documentElement.classList.contains('dark');
+document.getElementById('theme-toggle').addEventListener('click', function() {
+    var isDark = document.documentElement.classList.contains('dark');
     window.setTheme(isDark ? 'light' : 'dark');
-}
+});
 
 window.updateThemeButtons = function() {
     // Icons auto-update via dark: CSS classes, no manual update needed

@@ -5,7 +5,7 @@
     <x-slot name="keywords">event schedule documentation, user guide, selfhost installation, api documentation, developer docs</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         @keyframes pulse-slow {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }

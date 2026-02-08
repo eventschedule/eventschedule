@@ -84,7 +84,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>Default Template</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code>*{day_name}* {date_dmy} | {time}
 *{event_name}*:

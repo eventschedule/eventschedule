@@ -182,10 +182,9 @@
                 <div class="flex gap-1 rounded-lg bg-gray-800/50 p-1.5 w-full" role="radiogroup" aria-label="Theme selection">
                     <button
                         type="button"
-                        onclick="setTheme('light'); updateThemeButtons();"
                         id="theme-light"
                         data-theme="light"
-                        class="theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 hover:scale-105 active:scale-95 transition-all duration-200"
+                        class="theme-btn js-theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 hover:scale-105 active:scale-95 transition-all duration-200"
                         aria-label="Light theme"
                         title="{{ __('messages.theme_light') }}"
                         aria-pressed="false">
@@ -195,10 +194,9 @@
                     </button>
                     <button
                         type="button"
-                        onclick="setTheme('dark'); updateThemeButtons();"
                         id="theme-dark"
                         data-theme="dark"
-                        class="theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 hover:scale-105 active:scale-95 transition-all duration-200"
+                        class="theme-btn js-theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 hover:scale-105 active:scale-95 transition-all duration-200"
                         aria-label="Dark theme"
                         title="{{ __('messages.theme_dark') }}"
                         aria-pressed="false">
@@ -208,10 +206,9 @@
                     </button>
                     <button
                         type="button"
-                        onclick="setTheme('system'); updateThemeButtons();"
                         id="theme-system"
                         data-theme="system"
-                        class="theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 hover:scale-105 active:scale-95 transition-all duration-200"
+                        class="theme-btn js-theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 hover:scale-105 active:scale-95 transition-all duration-200"
                         aria-label="System theme"
                         title="{{ __('messages.theme_system') }}"
                         aria-pressed="false">
@@ -271,6 +268,14 @@
     
     // Make function globally available
     window.updateThemeButtons = updateThemeButtons;
+
+    // Attach click listeners to theme buttons
+    document.querySelectorAll('.js-theme-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            setTheme(this.getAttribute('data-theme'));
+            updateThemeButtons();
+        });
+    });
     
     // Update buttons immediately on page load
     function initThemeButtons() {

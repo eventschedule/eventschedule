@@ -209,10 +209,8 @@
                       <a href="{{ config('app.url') . route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => 'schedule'], false) }}"
                         class="inline-flex items-center justify-center">
                         <button type="button" name="follow"
-                          style="border-color: {{ $accentColor }}; color: {{ $accentColor }}"
-                          onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';"
-                          onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';"
-                          class="inline-flex items-center rounded-md px-4 py-2 text-xs font-semibold bg-transparent border-2 transition-all duration-200 hover:scale-105 hover:shadow-md">
+                          style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
+                          class="inline-flex items-center rounded-md px-4 py-2 text-xs font-semibold border-2 border-transparent shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md">
                           {{ __('messages.manage') }}
                         </button>
                       </a>
@@ -228,8 +226,8 @@
                     @endif
                   @elseif (auth()->user() && auth()->user()->id === $event->user_id && $each->youtube_links)
                     <button type="button"
-                      onclick="clearVideos('{{ route('event.clear_videos', ['subdomain' => $role->subdomain, 'event_hash' => App\Utils\UrlUtils::encodeId($event->id), 'role_hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}')"
-                      class="inline-flex items-center rounded-md px-3 py-1.5 text-xs font-semibold text-red-600 bg-white dark:bg-gray-800 border border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 shadow-sm">
+                      class="clear-videos-btn inline-flex items-center rounded-md px-3 py-1.5 text-xs font-semibold text-red-600 bg-white dark:bg-gray-800 border border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 shadow-sm"
+                      data-clear-url="{{ route('event.clear_videos', ['subdomain' => $role->subdomain, 'event_hash' => App\Utils\UrlUtils::encodeId($event->id), 'role_hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}">
                       {{ __('messages.clear_videos') }}
                     </button>
                   @endif
@@ -237,20 +235,28 @@
 
                 {{-- Description with expand/collapse --}}
                 @if ($each->description_html)
-                  <div x-data="{ expanded: false, needsExpand: false }" x-init="$nextTick(() => { let el = $refs.collapsed; needsExpand = el.scrollHeight > el.clientHeight })">
-                    <div x-show="!expanded" x-ref="collapsed" class="text-sm text-gray-700 dark:text-gray-300 line-clamp-3 custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
+                  @if(str_word_count(strip_tags($each->description_html)) > 5)
+                    <div x-data="{ expanded: false }" class="text-sm text-gray-700 dark:text-gray-300">
+                      <span x-show="!expanded" class="description-collapsed">
+                        {{ Str::words(strip_tags($each->description_html), 5, '') }}...
+                        <button :aria-expanded="expanded" @click="expanded = true" class="font-medium hover:underline whitespace-nowrap" style="color: {{ $accentColor }};">
+                          {{ __('messages.show_more') }}
+                        </button>
+                      </span>
+                      <div x-show="expanded" x-cloak class="description-expanded">
+                        <div class="custom-content [&>*:first-child]:mt-0 {{ $role->isRtl() ? 'rtl' : '' }}">
+                          {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
+                        </div>
+                        <button :aria-expanded="expanded" @click="expanded = false" class="font-medium hover:underline whitespace-nowrap mt-1" style="color: {{ $accentColor }};">
+                          {{ __('messages.show_less') }}
+                        </button>
+                      </div>
+                    </div>
+                  @else
+                    <div class="text-sm text-gray-700 dark:text-gray-300 custom-content [&>*:first-child]:mt-0 {{ $role->isRtl() ? 'rtl' : '' }}">
                       {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
                     </div>
-                    <div x-show="expanded" x-cloak class="text-sm text-gray-700 dark:text-gray-300 custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
-                      {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
-                    </div>
-                    <button x-show="!expanded && needsExpand" :aria-expanded="expanded" @click="expanded = true" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
-                      {{ __('messages.read_more') }}
-                    </button>
-                    <button x-show="expanded" x-cloak :aria-expanded="expanded" @click="expanded = false" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
-                      {{ __('messages.show_less') }}
-                    </button>
-                  </div>
+                  @endif
                 @endif
 
                 {{-- YouTube videos --}}
@@ -379,8 +385,7 @@
               @if ($event->tickets_enabled && $event->isPro())
               <div class="relative mt-4">
                 <button type="button"
-                    onclick="event.stopPropagation(); var m = document.getElementById('calendar-card-dropdown'); m.classList.toggle('hidden')"
-                    class="inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                    class="calendar-card-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                     style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
                     aria-expanded="true" aria-haspopup="true">
                   {{ __('messages.add_to_calendar') }}
@@ -391,7 +396,7 @@
 
                 {{-- Calendar dropdown menu --}}
                 <div id="calendar-card-dropdown" class="pop-up-menu hidden absolute top-full {{ $role->isRtl() ? 'end-0 origin-top-right' : 'start-0 origin-top-left' }} z-50 mt-2 w-56 divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" tabindex="-1">
-                  <div class="py-1" role="none" onclick="event.stopPropagation()">
+                  <div class="py-1 stop-propagation" role="none">
                     <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1">
                       <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
@@ -426,8 +431,7 @@
         @if (!($event->venue && $event->venue->name) && $event->tickets_enabled && $event->isPro())
         <div class="relative {{ $role->isRtl() ? 'rtl' : '' }}">
           <button type="button"
-              onclick="event.stopPropagation(); var m = document.getElementById('calendar-card-dropdown'); m.classList.toggle('hidden')"
-              class="inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+              class="calendar-card-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
               style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
               aria-expanded="true" aria-haspopup="true">
             {{ __('messages.add_to_calendar') }}
@@ -438,7 +442,7 @@
 
           {{-- Calendar dropdown menu --}}
           <div id="calendar-card-dropdown" class="pop-up-menu hidden absolute top-full {{ $role->isRtl() ? 'end-0 origin-top-right' : 'start-0 origin-top-left' }} z-50 mt-2 w-56 divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" tabindex="-1">
-            <div class="py-1" role="none" onclick="event.stopPropagation()">
+            <div class="py-1 stop-propagation" role="none">
               <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1">
                 <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
@@ -475,10 +479,9 @@
             <button
               type="button"
               name="login"
-              class="inline-flex items-center justify-center rounded-xl text-base duration-300 bg-transparent border-[1px] py-4 px-8 hover:scale-105 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-90"
-              style="border-color: {{ $accentColor }}; color: {{ $accentColor }};"
-              onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';"
-              onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';"
+              class="accent-hover-btn inline-flex items-center justify-center rounded-xl text-base duration-300 bg-transparent border-[1px] py-4 px-8 hover:scale-105 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-90 text-gray-900 dark:text-white"
+              style="border-color: {{ $accentColor }};"
+              data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
             >
               {{ __('messages.create_schedule') }}
             </button>
@@ -648,7 +651,8 @@
           @if (request()->get('tickets') !== 'true')
             <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank"' : '' }}
               @if ($event->payment_method === 'payment_url' && $event->user && $event->user->paymentUrlMobileOnly() && ! is_mobile())
-                onclick="alert('{{ __('messages.payment_url_mobile_only') }}'); return false;"
+                class="payment-mobile-only-link"
+                data-mobile-msg="{{ __('messages.payment_url_mobile_only') }}"
               @endif
             >
                 <button type="button"
@@ -660,8 +664,7 @@
           @endif
         @else
               <button type="button"
-                  onclick="event.stopPropagation(); var m = document.getElementById('calendar-pop-up-menu'); m.classList.toggle('hidden')"
-                  class="inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                  class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
                   id="menu-button" aria-expanded="true" aria-haspopup="true">
               {{ __('messages.add_to_calendar') }}
@@ -672,7 +675,7 @@
 
             {{-- Desktop calendar dropdown --}}
             <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute top-full end-0 z-50 mt-2 w-56 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-                <div class="py-1" role="none" onclick="event.stopPropagation()">
+                <div class="py-1 stop-propagation" role="none">
                     <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-0">
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
@@ -704,7 +707,7 @@
         {{-- Mobile calendar bottom sheet (outside hidden sm:block container so it's visible on mobile) --}}
         @if (!($event->canSellTickets($date) || $event->registration_url))
         <div id="calendar-mobile-sheet" class="hidden fixed inset-0 z-50 sm:hidden">
-          <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75" onclick="document.getElementById('calendar-mobile-sheet').classList.add('hidden')"></div>
+          <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75" id="calendar-mobile-overlay"></div>
           <div class="fixed inset-x-0 bottom-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl">
             <div class="flex justify-center py-3">
               <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
@@ -857,11 +860,11 @@
                   </div>
                   @endif
                   <div class="mt-2 flex gap-3" x-data="{ showVideo: false, showComment: false }">
-                    <button @click="showVideo = !showVideo; showComment = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
+                    <button @click="showVideo = !showVideo; showComment = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                       {{ __('messages.add_video') }}
                     </button>
-                    <button @click="showComment = !showComment; showVideo = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
+                    <button @click="showComment = !showComment; showVideo = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                       {{ __('messages.add_comment') }}
                     </button>
@@ -960,11 +963,11 @@
                   </div>
                   @endif
                   <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false }">
-                    <button @click="showVideo = !showVideo; showComment = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
+                    <button @click="showVideo = !showVideo; showComment = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                       {{ __('messages.add_video') }}
                     </button>
-                    <button @click="showComment = !showComment; showVideo = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
+                    <button @click="showComment = !showComment; showVideo = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                       {{ __('messages.add_comment') }}
                     </button>
@@ -1055,11 +1058,11 @@
           @endif
           @if ($event->parts->count() == 0)
           <div class="flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false }">
-            <button @click="showVideo = !showVideo; showComment = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
+            <button @click="showVideo = !showVideo; showComment = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
               {{ __('messages.add_video') }}
             </button>
-            <button @click="showComment = !showComment; showVideo = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="color: {{ $accentColor }}; border-color: {{ $accentColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'; this.style.color='{{ $contrastColor }}';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='{{ $accentColor }}';">
+            <button @click="showComment = !showComment; showVideo = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
               {{ __('messages.add_comment') }}
             </button>
@@ -1104,7 +1107,8 @@
       @if (request()->get('tickets') !== 'true')
         <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank"' : '' }}
           @if ($event->payment_method === 'payment_url' && $event->user && $event->user->paymentUrlMobileOnly() && ! is_mobile())
-            onclick="alert('{{ __('messages.payment_url_mobile_only') }}'); return false;"
+            class="payment-mobile-only-link"
+            data-mobile-msg="{{ __('messages.payment_url_mobile_only') }}"
           @endif
         >
           <button type="button"
@@ -1116,7 +1120,7 @@
       @endif
     @else
       <button type="button"
-          onclick="document.getElementById('calendar-mobile-sheet').classList.remove('hidden')"
+          id="mobile-calendar-cta"
           class="w-full justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
           style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
         {{ __('messages.add_to_calendar') }}
@@ -1131,6 +1135,78 @@
       }
     }
 
+    // Accent hover buttons (onmouseover/onmouseout replacement)
+    document.querySelectorAll('.accent-hover-btn').forEach(function(btn) {
+      var accent = btn.getAttribute('data-accent');
+      var contrast = btn.getAttribute('data-contrast');
+      btn.addEventListener('mouseover', function() {
+        this.style.backgroundColor = accent;
+        this.style.color = contrast;
+      });
+      btn.addEventListener('mouseout', function() {
+        this.style.backgroundColor = 'transparent';
+        this.style.color = '';
+      });
+    });
+
+    // Clear videos buttons
+    document.querySelectorAll('.clear-videos-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        clearVideos(this.getAttribute('data-clear-url'));
+      });
+    });
+
+    // Calendar card dropdown toggle buttons
+    document.querySelectorAll('.calendar-card-toggle').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var m = document.getElementById('calendar-card-dropdown');
+        m.classList.toggle('hidden');
+      });
+    });
+
+    // Calendar popup toggle button (desktop)
+    var calendarPopupToggle = document.querySelector('.calendar-popup-toggle');
+    if (calendarPopupToggle) {
+      calendarPopupToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var m = document.getElementById('calendar-pop-up-menu');
+        m.classList.toggle('hidden');
+      });
+    }
+
+    // Stop propagation on dropdown menu contents
+    document.querySelectorAll('.stop-propagation').forEach(function(el) {
+      el.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
+    });
+
+    // Payment mobile-only links
+    document.querySelectorAll('.payment-mobile-only-link').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert(this.getAttribute('data-mobile-msg'));
+      });
+    });
+
+    // Mobile calendar sheet overlay (close on click)
+    var mobileOverlay = document.getElementById('calendar-mobile-overlay');
+    if (mobileOverlay) {
+      mobileOverlay.addEventListener('click', function() {
+        document.getElementById('calendar-mobile-sheet').classList.add('hidden');
+      });
+    }
+
+    // Mobile calendar CTA button (open sheet)
+    var mobileCta = document.getElementById('mobile-calendar-cta');
+    if (mobileCta) {
+      mobileCta.addEventListener('click', function() {
+        document.getElementById('calendar-mobile-sheet').classList.remove('hidden');
+      });
+    }
+
+    // Close calendar pop-up menu on document click
     document.addEventListener('click', function() {
       var m = document.getElementById('calendar-pop-up-menu');
       if (m && !m.classList.contains('hidden')) {

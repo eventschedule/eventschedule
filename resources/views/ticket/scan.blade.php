@@ -2,10 +2,10 @@
 
     <x-slot name="head">
 
-        <script src="{{ asset('js/vue.global.prod.js') }}"></script>
-        <script src="{{ asset('js/html5-qrcode.min.js') }}"></script>
+        <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
+        <script src="{{ asset('js/html5-qrcode.min.js') }}" {!! nonce_attr() !!}></script>
 
-        <style>
+        <style {!! nonce_attr() !!}>
             #reader {
                 border: none !important;
                 box-shadow: none !important;

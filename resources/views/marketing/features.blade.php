@@ -36,7 +36,7 @@
     </script>
     </x-slot>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         /* Parallax utility classes */
         .parallax-blob {
             will-change: transform;

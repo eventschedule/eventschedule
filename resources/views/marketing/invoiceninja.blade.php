@@ -36,7 +36,7 @@
     </script>
     </x-slot>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         /* Custom emerald gradient for this page */
         .text-gradient {
             background: linear-gradient(135deg, #10B981 0%, #14B8A6 50%, #06B6D4 100%);

@@ -1,4 +1,4 @@
-<style>
+<style {!! nonce_attr() !!}>
     /* Doc-specific gradient text variants */
     .text-gradient-blue {
         background: linear-gradient(135deg, #3b82f6 0%, #0EA5E9 50%, #4E81FA 100%);

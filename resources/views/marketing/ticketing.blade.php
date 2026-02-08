@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Ticketing</x-slot>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         /* Page-specific scan animation */
         @keyframes scan-line {
             0%, 100% { transform: translateY(0); opacity: 1; }

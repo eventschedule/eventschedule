@@ -90,7 +90,7 @@
             <link href="https://fonts.googleapis.com/css2?family={{ str_replace(['_', ' '], '+', $font) }}:wght@400;700&display=swap" rel="stylesheet">
         @endforeach
 
-        <style>
+        <style {!! nonce_attr() !!}>
         @if (request()->embed)
         html {
             height: 100%;

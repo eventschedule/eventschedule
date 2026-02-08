@@ -629,7 +629,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .text-gradient-workshop {
             background: linear-gradient(135deg, #4E81FA, #0EA5E9, #3b82f6);
             -webkit-background-clip: text;

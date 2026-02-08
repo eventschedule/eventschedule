@@ -2,7 +2,7 @@
 
     <x-slot name="head">
         @if ($tab == 'availability')
-        <style>
+        <style {!! nonce_attr() !!}>
             .day-x {
                 position: absolute;
                 top: 0;
@@ -68,8 +68,8 @@
         </script>
         @elseif (config('services.google.maps') && $tab == 'profile' && $role->formatted_address)
         <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps') }}&callback=initMap"
-            loading="async" defer></script>
-        <style>
+            loading="async" defer {!! nonce_attr() !!}></script>
+        <style {!! nonce_attr() !!}>
         .modal-overlay {
             z-index: 50;
         }
@@ -223,14 +223,14 @@
             {{-- Actions dropdown (always visible) --}}
             <div class="mt-2 md:ms-3">
                 <div class="relative inline-block text-start w-full">
-                    <button type="button" onclick="onPopUpClick('role-actions-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800" id="role-actions-menu-button" aria-expanded="true" aria-haspopup="true">
+                    <button type="button" data-popup-target="role-actions-pop-up-menu" class="popup-toggle inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800" id="role-actions-menu-button" aria-expanded="true" aria-haspopup="true">
                         {{ __('messages.actions') }}
                         <svg class="-me-1 ms-2 h-6 w-6 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
                     </button>
                     <div id="role-actions-pop-up-menu" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="role-actions-menu-button" tabindex="-1">
-                        <div class="py-2" role="none" onclick="onPopUpClick('role-actions-pop-up-menu', event)">
+                        <div class="py-2" role="none" data-popup-target="role-actions-pop-up-menu">
                             {{-- Show edit/view options only when desktop buttons are hidden (mobile) --}}
                             <div class="md:hidden">
                                 <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
@@ -269,7 +269,7 @@
                             </a>
                             @endif
                             @if (auth()->user()->google_token && $role->google_calendar_id)
-                            <a href="#" onclick="syncEventsFromDropdown()" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                            <a href="#" id="sync-events-link" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                 <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M12,18A6,6 0 0,1 6,12C6,11 6.25,10.03 6.7,9.2L5.24,7.74C4.46,8.97 4,10.43 4,12A8,8 0 0,0 12,20C13.57,20 15.03,19.54 16.26,18.76L14.8,17.3C13.97,17.75 13,18 12,18M20,12A8,8 0 0,0 12,4C10.43,4 8.97,4.46 7.74,5.24L9.2,6.7C10.03,6.25 11,6 12,6A6,6 0 0,1 18,12C18,13 17.75,13.97 17.3,14.8L18.76,16.26C19.54,15.03 20,13.57 20,12M14.8,17.3L16.26,18.76L18.76,16.26L17.3,14.8L14.8,17.3M9.2,6.7L7.74,5.24L5.24,7.74L6.7,9.2L9.2,6.7M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z" />
                                 </svg>
@@ -278,7 +278,7 @@
                                 </div>
                             </a>
                             @endif
-                            <a href="#" onclick="handleEventsGraphicClick()" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                            <a href="#" id="events-graphic-link" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                 <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M8.5,13.5L11,16.5L14.5,12L19,18H5L8.5,13.5Z" />
                                 </svg>
@@ -286,7 +286,7 @@
                                     {{ __('messages.events_graphic') }}
                                 </div>
                             </a>
-                            <a href="#" onclick="openEmbedModal()" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                            <a href="#" id="embed-schedule-link" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                 <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
                                 </svg>
@@ -298,7 +298,7 @@
                             <div class="py-2" role="none">
                                 <div class="border-t border-gray-100 dark:border-gray-700"></div>
                             </div>
-                            <form method="POST" action="{{ route('role.delete', ['subdomain' => $role->subdomain]) }}" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')" class="block">
+                            <form method="POST" action="{{ route('role.delete', ['subdomain' => $role->subdomain]) }}" data-confirm="{{ __('messages.are_you_sure') }}" class="form-confirm block">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="w-full group flex items-center px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300 focus:bg-red-50 dark:focus:bg-red-900/20 focus:text-red-700 dark:focus:text-red-300 focus:outline-none transition-colors" role="menuitem" tabindex="0">
@@ -324,7 +324,7 @@
             <span class="text-gray-900 dark:text-gray-100">{{ __('messages.verify_email_address') }}</span> &nbsp;&nbsp;
             <a href="{{ route('role.verification.resend', ['subdomain' => $role->subdomain]) }}"
                     class="inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                    onclick="">
+                    >
                     {{ __('messages.resend_email') }}
             </a>
         </div>
@@ -335,7 +335,7 @@
         <!-- Dropdown menu on small screens -->
         <div class="sm:hidden">
             <label for="current-tab" class="sr-only">{{ __('messages.select_a_tab') }}</label>
-            <select id="current-tab" name="current-tab" onchange="onTabChange()"
+            <select id="current-tab" name="current-tab"
                 class="block w-full rounded-md border-0 py-1.5 ps-3 pe-10 ring-1 ring-inset ring-gray-300 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-inset focus:ring-[#4E81FA]">
                 <option value="schedule" {{ $tab == 'schedule' ? 'selected' : '' }}>{{ __('messages.schedule') }}</option>
                 @if ($role->isCurator())
@@ -426,18 +426,18 @@ function syncEventsFromDropdown() {
         alert('{{ __("messages.google_calendar_not_connected") }}');
         return false;
     @endif
-    
+
     // Show confirmation dialog
     if (!confirm('{{ __("messages.are_you_sure") }}')) {
         return false;
     }
-        
+
     // Use the unified sync endpoint
     const syncDirection = '{{ $role->sync_direction }}' || 'to';
     const requestBody = {
         sync_direction: syncDirection
     };
-    
+
     fetch('{{ url('/google-calendar/sync/' . $role->subdomain) }}', {
         method: 'POST',
         headers: {
@@ -462,6 +462,52 @@ function syncEventsFromDropdown() {
         event.target.disabled = false;
     });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab change select
+    var currentTab = document.getElementById('current-tab');
+    if (currentTab) {
+        currentTab.addEventListener('change', function() {
+            onTabChange();
+        });
+    }
+
+    // Sync events link
+    var syncLink = document.getElementById('sync-events-link');
+    if (syncLink) {
+        syncLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            syncEventsFromDropdown();
+        });
+    }
+
+    // Events graphic link
+    var graphicLink = document.getElementById('events-graphic-link');
+    if (graphicLink) {
+        graphicLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            handleEventsGraphicClick();
+        });
+    }
+
+    // Embed schedule link
+    var embedLink = document.getElementById('embed-schedule-link');
+    if (embedLink) {
+        embedLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            openEmbedModal();
+        });
+    }
+
+    // Form confirm (delete schedule)
+    document.querySelectorAll('.form-confirm').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            if (!confirm(this.getAttribute('data-confirm'))) {
+                e.preventDefault();
+            }
+        });
+    });
+});
 </script>
 
 @include('components.embed-modal')

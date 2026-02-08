@@ -36,7 +36,7 @@
     </script>
     </x-slot>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         /* Custom amber gradient for this page */
         .text-gradient {
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);

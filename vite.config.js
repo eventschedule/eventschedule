@@ -23,6 +23,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/countrySelect.min.js',
                 'resources/js/newsletter-builder.js',
+                'resources/js/color-picker.js',
                 //'resources/js/leaflet.js',
                 'resources/css/app.css',
                 'resources/css/marketing.css',

@@ -208,8 +208,7 @@
             {{-- Cancel Subscription --}}
             @if ($subscription && $subscription->active() && !$subscription->onGracePeriod())
             <div>
-                <form action="{{ route('subscription.cancel', ['subdomain' => $role->subdomain]) }}" method="POST" class="inline"
-                    onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                <form action="{{ route('subscription.cancel', ['subdomain' => $role->subdomain]) }}" method="POST" class="inline form-confirm" data-confirm="{{ __('messages.are_you_sure') }}">
                     @csrf
                     <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:text-red-500 font-medium">
                         {{ __('messages.cancel_subscription') }}
@@ -234,8 +233,8 @@
             @if (!$subscription && $role->plan_type == 'pro' && $role->isPro() && !is_demo_mode())
             <div>
                 <a href="{{ route('role.change_plan', ['subdomain' => $role->subdomain, 'plan_type' => 'free']) }}"
-                    onclick="return confirm('{{ __('messages.are_you_sure') }}')"
-                    class="text-sm text-red-600 dark:text-red-400 hover:text-red-500 font-medium">
+                    data-confirm="{{ __('messages.are_you_sure') }}"
+                    class="link-confirm text-sm text-red-600 dark:text-red-400 hover:text-red-500 font-medium">
                     {{ __('messages.change_to_free_plan') }}
                 </a>
             </div>
@@ -244,3 +243,23 @@
         @endif
     </div>
 </div>
+
+<script {!! nonce_attr() !!}>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.form-confirm').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            if (!confirm(this.getAttribute('data-confirm'))) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    document.querySelectorAll('.link-confirm').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            if (!confirm(this.getAttribute('data-confirm'))) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>

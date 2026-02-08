@@ -115,13 +115,13 @@
         @if ($failedJobsCount > 0 || $pendingJobsCount > 0)
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-wrap gap-3">
             @if ($failedJobsCount > 0)
-            <form method="POST" action="{{ route('admin.queue.retry-all') }}" onsubmit="return confirm('Retry all {{ number_format($failedJobsCount) }} failed jobs?')">
+            <form method="POST" action="{{ route('admin.queue.retry-all') }}" class="js-confirm-form" data-confirm="Retry all {{ number_format($failedJobsCount) }} failed jobs?">
                 @csrf
                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md">
                     Retry All Failed
                 </button>
             </form>
-            <form method="POST" action="{{ route('admin.queue.clear-failed') }}" onsubmit="return confirm('Permanently delete all {{ number_format($failedJobsCount) }} failed jobs?')">
+            <form method="POST" action="{{ route('admin.queue.clear-failed') }}" class="js-confirm-form" data-confirm="Permanently delete all {{ number_format($failedJobsCount) }} failed jobs?">
                 @csrf
                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md">
                     Clear All Failed
@@ -129,7 +129,7 @@
             </form>
             @endif
             @if ($pendingJobsCount > 0)
-            <form method="POST" action="{{ route('admin.queue.flush-pending') }}" onsubmit="return confirm('Permanently delete all {{ number_format($pendingJobsCount) }} pending jobs? This cannot be undone.')">
+            <form method="POST" action="{{ route('admin.queue.flush-pending') }}" class="js-confirm-form" data-confirm="Permanently delete all {{ number_format($pendingJobsCount) }} pending jobs? This cannot be undone.">
                 @csrf
                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md">
                     Flush Pending
@@ -269,5 +269,16 @@
         </div>
         @endif
     </div>
+
+    <script {!! nonce_attr() !!}>
+        document.addEventListener('submit', function(e) {
+            var form = e.target.closest('.js-confirm-form');
+            if (form) {
+                if (!confirm(form.getAttribute('data-confirm'))) {
+                    e.preventDefault();
+                }
+            }
+        });
+    </script>
 
 </x-app-admin-layout>

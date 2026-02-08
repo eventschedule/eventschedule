@@ -619,7 +619,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .stage-glow-text {
             background: linear-gradient(135deg, #06b6d4, #14b8a6, #f59e0b);
             -webkit-background-clip: text;
