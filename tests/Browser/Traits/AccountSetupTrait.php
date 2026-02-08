@@ -13,6 +13,7 @@ trait AccountSetupTrait
     {
         // Sign up
         $browser->visit('/sign_up')
+                ->waitFor('#name', 5)
                 ->type('name', $name)
                 ->type('email', $email)
                 ->type('password', $password)
@@ -30,7 +31,8 @@ trait AccountSetupTrait
     protected function createTestVenue(Browser $browser, string $name = 'Venue', string $address = '123 Test St'): void
     {
         $browser->visit('/new/venue')
-                ->waitForText('New Schedule', 5)
+                ->waitFor('#name', 5)
+                ->pause(500)
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
@@ -48,7 +50,8 @@ trait AccountSetupTrait
     protected function createTestTalent(Browser $browser, string $name = 'Talent'): void
     {
         $browser->visit('/new/talent')
-                ->waitForText('New Schedule', 5)
+                ->waitFor('#name', 5)
+                ->pause(500)
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
@@ -64,11 +67,14 @@ trait AccountSetupTrait
     protected function createTestCurator(Browser $browser, string $name = 'Curator'): void
     {
         $browser->visit('/new/curator')
-                ->waitForText('New Schedule', 5)
+                ->waitFor('#name', 5)
+                ->pause(500)
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
                 ->click('a[data-section="section-settings"]')
+                ->pause(500)
+                ->click('button.settings-tab[data-tab="requests"]')
                 ->waitFor('#accept_requests', 5)
                 ->check('accept_requests')
                 ->click('button[type="submit"]')

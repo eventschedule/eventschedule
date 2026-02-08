@@ -56,10 +56,8 @@ class GroupsTest extends DuskTestCase
     protected function createGroups(Browser $browser): void
     {
         $browser->visit('/talent/edit')
-            ->click('a[data-section="section-settings"]')
-            ->waitFor('#section-settings', 5)
-            ->click('button[data-tab="subschedules"]')
-            ->waitFor('#settings-tab-subschedules', 5);
+            ->click('a[data-section="section-subschedules"]')
+            ->waitFor('#section-subschedules', 5);
 
         // Add first sub-schedule
         $browser->script('addGroupField();');
@@ -72,10 +70,8 @@ class GroupsTest extends DuskTestCase
 
         // Add second sub-schedule
         $browser->visit('/talent/edit')
-            ->click('a[data-section="section-settings"]')
-            ->waitFor('#section-settings', 5)
-            ->click('button[data-tab="subschedules"]')
-            ->waitFor('#settings-tab-subschedules', 5);
+            ->click('a[data-section="section-subschedules"]')
+            ->waitFor('#section-subschedules', 5);
 
         $browser->script('addGroupField();');
 
