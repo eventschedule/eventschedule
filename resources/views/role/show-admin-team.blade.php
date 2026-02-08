@@ -62,9 +62,11 @@
                                 </td>
                                 <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
                                     @if ($member->pivot->level != 'owner')
-                                        <a href="{{ route('role.remove_member', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}"
-                                            data-confirm="{{ __('messages.are_you_sure') }}"
-                                            class="link-confirm text-[#4E81FA] hover:text-[#4E81FA]">{{ __('messages.remove') }}</a>
+                                        <form method="POST" action="{{ route('role.remove_member', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}" data-confirm="{{ __('messages.are_you_sure') }}" class="inline form-confirm">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-[#4E81FA] hover:text-[#4E81FA]">{{ __('messages.remove') }}</button>
+                                        </form>
                                     @endif
                                 </td>
                             </tr>
@@ -79,8 +81,8 @@
 
 <script {!! nonce_attr() !!}>
 document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.link-confirm').forEach(function(link) {
-        link.addEventListener('click', function(e) {
+    document.querySelectorAll('.form-confirm').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
             if (!confirm(this.getAttribute('data-confirm'))) {
                 e.preventDefault();
             }

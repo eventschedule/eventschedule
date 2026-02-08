@@ -120,7 +120,7 @@ class AuditService
                 'created_at' => now(),
             ]);
         } catch (\Exception $e) {
-            // Audit logging should never disrupt actual operations
+            \Log::warning('Audit logging failed: '.$e->getMessage());
         }
     }
 

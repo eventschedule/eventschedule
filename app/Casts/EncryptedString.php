@@ -18,7 +18,7 @@ class EncryptedString implements CastsAttributes
         try {
             return Crypt::decryptString($value);
         } catch (DecryptException $e) {
-            return $value;
+            return null;
         }
     }
 
