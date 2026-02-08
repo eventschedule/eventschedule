@@ -253,11 +253,6 @@
                 fetch('{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + screenCaptureParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + urlIncludeHttpsParam + urlIncludeIdParam)
                     .then(response => {
                         if (!response.ok) {
-                            if (response.status === 404) {
-                                return response.json().then(data => {
-                                    throw new Error(data.error || '{{ __("messages.no_events_found") }}');
-                                });
-                            }
                             throw new Error('Network response was not ok');
                         }
                         return response.json();
@@ -279,7 +274,7 @@
                         textContent.value = data.text;
                     })
                     .catch(error => {
-                        console.error('Error loading graphic:', error);
+                        console.warn('Error loading graphic:', error);
 
                         // Hide spinners on error too
                         textSpinner.classList.add('hidden');
