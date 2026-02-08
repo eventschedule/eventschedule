@@ -939,11 +939,7 @@
             function initHeaderImagePreview() {
                 const headerImageUrl = currentSettings.header_image_url;
                 if (headerImageUrl) {
-                    @if(config('filesystems.default') == 'local')
-                    const imageUrl = '{{ url("/storage") }}/' + headerImageUrl;
-                    @else
-                    const imageUrl = '{{ Storage::url("") }}' + headerImageUrl;
-                    @endif
+                    const imageUrl = @json($headerImagePreviewUrl);
 
                     ['header_image_preview', 'header_image_preview_mobile'].forEach(id => {
                         const container = document.getElementById(id);

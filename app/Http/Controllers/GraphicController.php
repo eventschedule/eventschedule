@@ -44,7 +44,16 @@ class GraphicController extends Controller
             ->where('flyer_image_url', '!=', '')
             ->count();
 
-        return view('graphic.show', compact('role', 'layout', 'isPro', 'isEnterprise', 'graphicSettings', 'hasRecurringEvents', 'maxEvents'));
+        $headerImagePreviewUrl = null;
+        if (! empty($graphicSettings['header_image_url'])) {
+            if (config('filesystems.default') == 'local') {
+                $headerImagePreviewUrl = url('/storage/'.$graphicSettings['header_image_url']);
+            } else {
+                $headerImagePreviewUrl = Storage::url($graphicSettings['header_image_url']);
+            }
+        }
+
+        return view('graphic.show', compact('role', 'layout', 'isPro', 'isEnterprise', 'graphicSettings', 'hasRecurringEvents', 'maxEvents', 'headerImagePreviewUrl'));
     }
 
     public function getSettings($subdomain)
