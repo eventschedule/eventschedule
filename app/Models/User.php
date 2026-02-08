@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\EncryptedString;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
 use App\Services\DemoService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -129,12 +130,13 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'is_admin' => 'boolean',
             'use_24_hour_time' => 'boolean',
-            'invoiceninja_api_key' => 'encrypted',
-            'invoiceninja_webhook_secret' => 'encrypted',
-            'google_token' => 'encrypted',
-            'google_refresh_token' => 'encrypted',
-            'facebook_token' => 'encrypted',
-            'payment_secret' => 'encrypted',
+            'invoiceninja_api_key' => EncryptedString::class,
+            'invoiceninja_webhook_secret' => EncryptedString::class,
+            'google_token' => EncryptedString::class,
+            'google_refresh_token' => EncryptedString::class,
+            'facebook_token' => EncryptedString::class,
+            'payment_secret' => EncryptedString::class,
+            'api_key_expires_at' => 'datetime',
         ];
     }
 

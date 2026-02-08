@@ -143,20 +143,29 @@ class Role extends Model implements MustVerifyEmail
             $address = $model->fullAddress();
 
             if (config('services.google.backend') && $address && $address != $model->geo_address) {
-                $urlAddress = urlencode($address);
-                $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$urlAddress}&key=".config('services.google.backend');
-                $response = file_get_contents($url);
-                $responseData = json_decode($response, true);
+                try {
+                    $response = \Illuminate\Support\Facades\Http::timeout(10)
+                        ->get('https://maps.googleapis.com/maps/api/geocode/json', [
+                            'address' => $address,
+                            'key' => config('services.google.backend'),
+                        ]);
 
-                if ($responseData['status'] == 'OK') {
-                    $latitude = $responseData['results'][0]['geometry']['location']['lat'];
-                    $longitude = $responseData['results'][0]['geometry']['location']['lng'];
+                    if ($response->successful()) {
+                        $responseData = $response->json();
 
-                    $model->formatted_address = $responseData['results'][0]['formatted_address'];
-                    $model->google_place_id = $responseData['results'][0]['place_id'];
-                    $model->geo_address = $address;
-                    $model->geo_lat = $latitude;
-                    $model->geo_lon = $longitude;
+                        if (($responseData['status'] ?? '') == 'OK') {
+                            $latitude = $responseData['results'][0]['geometry']['location']['lat'];
+                            $longitude = $responseData['results'][0]['geometry']['location']['lng'];
+
+                            $model->formatted_address = $responseData['results'][0]['formatted_address'];
+                            $model->google_place_id = $responseData['results'][0]['place_id'];
+                            $model->geo_address = $address;
+                            $model->geo_lat = $latitude;
+                            $model->geo_lon = $longitude;
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Geocoding failed: '.$e->getMessage());
                 }
             }
         });

@@ -2,15 +2,40 @@
 
 namespace App\Utils;
 
+use Sqids\Sqids;
+
 class UrlUtils
 {
+    private static ?Sqids $sqids = null;
+
+    private static function getSqids(): Sqids
+    {
+        if (self::$sqids === null) {
+            // Derive a deterministic alphabet from APP_KEY
+            $key = config('app.key');
+            $defaultAlphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            $chars = str_split($defaultAlphabet);
+
+            // Use APP_KEY as seed for a deterministic shuffle
+            $hash = hash('sha256', $key);
+            for ($i = count($chars) - 1; $i > 0; $i--) {
+                $j = hexdec(substr($hash, ($i * 2) % 60, 2)) % ($i + 1);
+                [$chars[$i], $chars[$j]] = [$chars[$j], $chars[$i]];
+            }
+
+            self::$sqids = new Sqids(implode('', $chars), 6);
+        }
+
+        return self::$sqids;
+    }
+
     public static function encodeId($value)
     {
         if (! $value) {
             return null;
         }
 
-        return base64_encode($value + 389278);
+        return self::getSqids()->encode([$value]);
     }
 
     public static function decodeId($value)
@@ -19,13 +44,21 @@ class UrlUtils
             return null;
         }
 
-        $id = base64_decode($value);
-
-        if (is_numeric($id)) {
-            return $id - 389278;
-        } else {
-            return null;
+        // Try Sqids decode first (verify round-trip to avoid false positives)
+        $decoded = self::getSqids()->decode($value);
+        if (! empty($decoded) && self::getSqids()->encode($decoded) === $value) {
+            return $decoded[0];
         }
+
+        // Fall back to legacy base64 method for backwards compatibility
+        $id = base64_decode($value);
+        if (is_numeric($id)) {
+            \Log::info('Legacy encoded ID used: consider updating URL', ['value' => $value]);
+
+            return $id - 389278;
+        }
+
+        return null;
     }
 
     public static function decodeIdOrFail($value)

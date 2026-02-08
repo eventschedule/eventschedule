@@ -69,6 +69,13 @@ class ApiAuthentication
             return response()->json(['error' => 'Invalid API key'], 401);
         }
 
+        // Check if API key has expired
+        if ($user->api_key_expires_at && now()->greaterThan($user->api_key_expires_at)) {
+            $this->logFailedAttempt($clientIp, 'api_key_expired');
+
+            return response()->json(['error' => 'API key expired'], 401);
+        }
+
         // Reset failed attempts on successful authentication
         Cache::forget($bruteForceKey);
 

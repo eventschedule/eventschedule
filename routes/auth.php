@@ -32,13 +32,15 @@ Route::middleware('guest')->group(function () {
         ->name('password.request');
 
     Route::post('reset-password', [PasswordResetLinkController::class, 'store'])
-        ->name('password.email');
+        ->name('password.email')
+        ->middleware('throttle:5,1');
 
     Route::get('update-password/{token}', [NewPasswordController::class, 'create'])
         ->name('password.reset');
 
     Route::post('update-password', [NewPasswordController::class, 'store'])
-        ->name('password.store');
+        ->name('password.store')
+        ->middleware('throttle:5,1');
 
     Route::get('auth/google', [SocialAuthController::class, 'redirectToGoogle'])
         ->name('auth.google');

@@ -74,6 +74,7 @@ return [
     'current_password' => 'Mot de passe actuel',
     'new_password' => 'Nouveau mot de passe',
     'saved' => 'Enregistré',
+    'deleted' => 'Deleted',
     'profile_information' => 'Informations du profil',
     'update_your_accounts_profile_information_and_email_address' => 'Mettez à jour les informations de profil et l\'adresse e-mail de votre compte.',
     'your_email_address_is_unverified' => 'Votre adresse e-mail n\'est pas vérifiée.',
@@ -237,6 +238,10 @@ return [
     'choose_file' => 'Choisir un fichier',
     'events_graphic' => 'Graphique des événements',
     'graphic' => 'Graphique',
+    'graphic_header_image' => 'Header Image',
+    'graphic_header_help' => 'Upload an image to display at the top of your event graphic.',
+    'no_file_uploaded' => 'No file uploaded',
+    'invalid_file_type' => 'Invalid file type',
     'event_added' => 'Événement ajouté avec succès',
     'please_select' => 'Veuillez sélectionner',
     'claim_email_line1' => 'Inscrivez-vous pour personnaliser la page de l\'événement ou ignorez cet e-mail si vous n\'êtes pas intéressé.',
@@ -1571,4 +1576,13 @@ return [
     'why_create_account_ready_subtitle' => 'Rejoignez des milliers d\'organisateurs d\'événements. C\'est gratuit et le restera toujours.',
     'why_create_account_no_cc' => 'Aucune carte de crédit requise',
     'why_create_account_learn_more' => 'Découvrir pourquoi',
+
+    // Admin detailed views
+    'recent_sales' => 'Recent Sales',
+    'no_sales_yet' => 'No sales yet.',
+    'method' => 'Method',
+    'amount' => 'Amount',
+    'reference' => 'Reference',
+    'retry' => 'Retry',
+    'retry_success' => 'Retry queued successfully',
 ];

@@ -79,6 +79,7 @@ return [
     'current_password' => 'Praegune parool',
     'new_password' => 'Uus parool',
     'saved' => 'Salvestatud',
+    'deleted' => 'Deleted',
     'profile_information' => 'Profiili teave',
     'update_your_accounts_profile_information_and_email_address' => 'Värskenda oma konto profiiliteavet ja e-posti aadressi.',
     'your_email_address_is_unverified' => 'Teie e-posti aadress on kinnitamata.',
@@ -258,6 +259,10 @@ return [
     'flyer_image' => 'Flaieri pilt',
     'events_graphic' => 'Sündmuste graafika',
     'graphic' => 'Graafika',
+    'graphic_header_image' => 'Header Image',
+    'graphic_header_help' => 'Upload an image to display at the top of your event graphic.',
+    'no_file_uploaded' => 'No file uploaded',
+    'invalid_file_type' => 'Invalid file type',
     'event_added' => 'Sündmuse lisamine õnnestus',
     'please_select' => 'Palun valige',
     'claim_email_line1' => 'Registreeruge sündmuse lehe kohandamiseks või ignoreerige seda meili',
@@ -1586,4 +1591,13 @@ return [
     'why_create_account_ready_subtitle' => 'Liitu tuhandete sündmuste korraldajatega. See on tasuta ja jääb selleks alati.',
     'why_create_account_no_cc' => 'Krediitkaarti pole vaja',
     'why_create_account_learn_more' => 'Uuri, miks',
+
+    // Admin detailed views
+    'recent_sales' => 'Recent Sales',
+    'no_sales_yet' => 'No sales yet.',
+    'method' => 'Method',
+    'amount' => 'Amount',
+    'reference' => 'Reference',
+    'retry' => 'Retry',
+    'retry_success' => 'Retry queued successfully',
 ];

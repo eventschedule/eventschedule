@@ -23,17 +23,18 @@
         @if ($role->language_code != 'en')
             <link rel="alternate" hreflang="en" href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => 'en'])) }}">
             <link rel="alternate" hreflang="{{ $role->language_code }}" href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => $role->language_code])) }}">
+            <link rel="alternate" hreflang="x-default" href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => $role->language_code])) }}">
         @endif
 
         @php
-            $localeMap = ['en' => 'en_US', 'es' => 'es_ES', 'de' => 'de_DE', 'fr' => 'fr_FR', 'it' => 'it_IT', 'pt' => 'pt_BR', 'he' => 'he_IL', 'nl' => 'nl_NL', 'ar' => 'ar_SA'];
+            $localeMap = ['en' => 'en_US', 'es' => 'es_ES', 'de' => 'de_DE', 'fr' => 'fr_FR', 'it' => 'it_IT', 'pt' => 'pt_BR', 'he' => 'he_IL', 'nl' => 'nl_NL', 'ar' => 'ar_SA', 'et' => 'et_EE'];
             $ogLocale = $localeMap[$role->language_code] ?? 'en_US';
         @endphp
         <meta property="og:locale" content="{{ $ogLocale }}">
 
         @if ($event && $event->exists)
             @if ($role->language_code != 'en')
-                <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}&{{ 'lang=' . (request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code)) }}">
+                <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}?{{ 'lang=' . (request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code)) }}">
             @else
                 <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}">
             @endif
@@ -45,13 +46,14 @@
             <meta property="og:type" content="event">
             <meta property="og:title" content="{{ $event->translatedName() }}">
             <meta property="og:description" content="{{ $event->getMetaDescription($date) }}">
-            <meta property="og:image" content="{{ $event->getImageUrl() }}">
+            @php $eventOgImage = $event->getImageUrl() ?: (config('app.url') . '/images/social/home.png'); @endphp
+            <meta property="og:image" content="{{ $eventOgImage }}">
             <meta property="og:image:alt" content="{{ $event->translatedName() }}">
             <meta property="og:url" content="{{ $event->getGuestUrl(false, $date) }}">
             <meta property="og:site_name" content="Event Schedule">
             <meta name="twitter:title" content="{{ $event->translatedName() }}">
             <meta name="twitter:description" content="{{ $event->getMetaDescription($date) }}">
-            <meta name="twitter:image" content="{{ $event->getImageUrl() }}">
+            <meta name="twitter:image" content="{{ $eventOgImage }}">
             <meta name="twitter:image:alt" content="{{ $event->translatedName() }}">
             <meta name="twitter:card" content="summary_large_image">
         @elseif ($role->exists)
@@ -61,6 +63,11 @@
                 <link rel="canonical" href="{{ $role->getGuestUrl() }}">
             @endif
             @if ($description = Str::limit(trim(strip_tags($role->translatedDescription())), 155))
+            <meta name="description" content="{{ $description }}">
+            <meta property="og:description" content="{{ $description }}">
+            <meta name="twitter:description" content="{{ $description }}">
+            @else
+            @php $description = 'View the event schedule for ' . $role->translatedName(); @endphp
             <meta name="description" content="{{ $description }}">
             <meta property="og:description" content="{{ $description }}">
             <meta name="twitter:description" content="{{ $description }}">
@@ -74,6 +81,10 @@
             <meta property="og:image" content="{{ $image }}">
             <meta property="og:image:alt" content="{{ $name ?? $role->translatedName() }}">
             <meta name="twitter:image" content="{{ $image }}">
+            @else
+            <meta property="og:image" content="{{ config('app.url') . '/images/social/home.png' }}">
+            <meta property="og:image:alt" content="{{ $name ?? $role->translatedName() }}">
+            <meta name="twitter:image" content="{{ config('app.url') . '/images/social/home.png' }}">
             @endif
             <meta property="og:type" content="website">
             <meta property="og:url" content="{{ $role->getGuestUrl() }}">
@@ -196,7 +207,7 @@
                     $eventDescription = $event->translatedName() . ' - ' . __('messages.event');
                 }
                 $eventUrl = $event->getGuestUrl(false, $date ?? null);
-                $eventImage = $event->getImageUrl();
+                $eventImage = $event->getImageUrl() ?: (config('app.url') . '/images/social/home.png');
                 $startDate = $event->getSchemaStartDate($date ?? null);
                 $endDate = $event->getSchemaEndDate($date ?? null);
                 $location = $event->getSchemaLocation();

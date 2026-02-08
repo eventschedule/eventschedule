@@ -32,11 +32,14 @@ class ApiSettingsController extends Controller
             $user->api_key = substr(hash('sha256', $plaintextKey), 0, 8);
             // Store bcrypt hash for secure verification
             $user->api_key_hash = Hash::make($plaintextKey);
+            // Set default expiration of 1 year
+            $user->api_key_expires_at = now()->addYear();
             $showNewKey = true;
         } elseif (! $enableApi && $user->api_key) {
             // Remove key when disabling
             $user->api_key = null;
             $user->api_key_hash = null;
+            $user->api_key_expires_at = null;
             $showNewKey = false;
         } else {
             // No change to key if just saving with same state

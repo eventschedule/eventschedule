@@ -74,6 +74,7 @@ return [
     'current_password' => 'كلمة المرور الحالية',
     'new_password' => 'كلمة المرور الجديدة',
     'saved' => 'تم الحفظ',
+    'deleted' => 'Deleted',
     'profile_information' => 'معلومات الملف الشخصي',
     'update_your_accounts_profile_information_and_email_address' => 'قم بتحديث معلومات الملف الشخصي وعنوان البريد الإلكتروني لحسابك.',
     'your_email_address_is_unverified' => 'عنوان بريدك الإلكتروني غير مُحقق.',
@@ -610,6 +611,10 @@ return [
     'video_selected' => 'تم اختيار الفيديو',
     'events_graphic' => 'رسم بياني للأحداث',
     'graphic' => 'الرسم',
+    'graphic_header_image' => 'Header Image',
+    'graphic_header_help' => 'Upload an image to display at the top of your event graphic.',
+    'no_file_uploaded' => 'No file uploaded',
+    'invalid_file_type' => 'Invalid file type',
     'get_tickets' => 'احصل على التذاكر',
     'delete_schedule' => 'حذف الجدول',
     'import_events' => 'استيراد الأحداث',
@@ -1572,4 +1577,13 @@ return [
     'why_create_account_ready_subtitle' => 'انضم إلى آلاف منظمي الفعاليات. مجاني وسيبقى كذلك دائمًا.',
     'why_create_account_no_cc' => 'لا حاجة لبطاقة ائتمان',
     'why_create_account_learn_more' => 'اعرف لماذا',
+
+    // Admin detailed views
+    'recent_sales' => 'Recent Sales',
+    'no_sales_yet' => 'No sales yet.',
+    'method' => 'Method',
+    'amount' => 'Amount',
+    'reference' => 'Reference',
+    'retry' => 'Retry',
+    'retry_success' => 'Retry queued successfully',
 ];
