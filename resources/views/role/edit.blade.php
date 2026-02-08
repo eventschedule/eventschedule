@@ -1252,15 +1252,6 @@
                             <div class="mb-6" id="style_background_image" style="display:none">
                                 <x-input-label for="image" :value="__('messages.image')" />
                                 <div class="flex items-center gap-1">
-                                    <button type="button"
-                                            id="prev_image"
-                                            class="color-nav-button"
-                                            data-nav-action="changeBackgroundImage" data-nav-direction="-1"
-                                            title="{{ __('messages.previous') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                                        </svg>
-                                    </button>
                                     <select id="background_image" name="background_image"
                                         class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
                                         data-action="background-image-input">
@@ -1270,6 +1261,15 @@
                                             {{ $name }}</option>
                                         @endforeach
                                     </select>
+                                    <button type="button"
+                                            id="prev_image"
+                                            class="color-nav-button"
+                                            data-nav-action="changeBackgroundImage" data-nav-direction="-1"
+                                            title="{{ __('messages.previous') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                        </svg>
+                                    </button>
                                     <button type="button"
                                             id="next_image"
                                             class="color-nav-button"
