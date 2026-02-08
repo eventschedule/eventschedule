@@ -63,6 +63,7 @@
                 'utc_date' => $event->starts_at ? $event->getStartDateTime(null, false)->format('Y-m-d') : null,
                 'guest_url' => $event->getGuestUrl(isset($subdomain) ? $subdomain : '', ''),
                 'image_url' => $event->getImageUrl(),
+                'flyer_url' => $event->flyer_image_url ?: null,
                 'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
                 'edit_url' => auth()->user() && auth()->user()->canEditEvent($event)
                     ? (isset($role) ? config('app.url') . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false) : config('app.url') . route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($event->id)], false))
@@ -145,7 +146,7 @@
         }
     }
 
-    $accentColor = isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA';
+    $accentColor = $accentColor ?? (isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA');
     $contrastColor = accent_contrast_color($accentColor);
 @endphp
 
@@ -197,14 +198,14 @@
                 @endif
             @elseif ($route == 'home' && !is_demo_mode())
                 <div style="font-family: sans-serif" class="relative inline-block text-left w-full md:w-auto">
-                    <button type="button" onclick="onPopUpClick('calendar-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-5 py-3 text-base font-bold text-gray-500 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                    <button type="button" data-popup-target="calendar-pop-up-menu" class="popup-toggle inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-5 py-3 text-base font-bold text-gray-500 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700" id="menu-button" aria-expanded="true" aria-haspopup="true">
                         {{ __('messages.new_schedule') }}
                         <svg class="-me-1 h-6 w-6 text-gray-400 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
                     </button>
                     <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-                        <div class="py-1" role="none" onclick="onPopUpClick('calendar-pop-up-menu', event)">
+                        <div class="py-1" role="none" data-popup-target="calendar-pop-up-menu">
                         <a href="{{ route('new', ['type' => 'talent']) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700" role="menuitem" tabindex="-1">
                                 <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                 <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
@@ -371,8 +372,8 @@
                     }
                 }
                 @endphp
-                <div class="cursor-pointer relative {{ count($unavailable) ? ($currentDate->month == $month ? 'bg-orange-50 dark:bg-orange-900/30 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-orange-50 dark:bg-orange-900/30 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-500 dark:text-gray-400') : ($currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600') }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
-                    onclick="window.location = '{{ route('event.create', ['subdomain' => $role->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}';">
+                <div class="cursor-pointer relative calendar-day-navigate {{ count($unavailable) ? ($currentDate->month == $month ? 'bg-orange-50 dark:bg-orange-900/30 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-orange-50 dark:bg-orange-900/30 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-500 dark:text-gray-400') : ($currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600') }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
+                    data-href="{{ route('event.create', ['subdomain' => $role->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}">
                     @elseif ($route == 'admin' && $tab == 'availability' && $role->email_verified_at)
                         <div class="{{ $tab == 'availability' && $currentDate->month != $month ? 'hidden md:block' : '' }} cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600 day-element" data-date="{{ $currentDate->format('Y-m-d') }}">
                         @if (is_array($datesUnavailable) && in_array($currentDate->format('Y-m-d'), $datesUnavailable))
@@ -380,8 +381,8 @@
                         @endif
                     @elseif ($route == 'home' && auth()->check())
                         @if ($firstRole)
-                        <div class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
-                            onclick="window.location = '{{ route('event.create', ['subdomain' => $firstRole->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}';">
+                        <div class="cursor-pointer relative calendar-day-navigate {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
+                            data-href="{{ route('event.create', ['subdomain' => $firstRole->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}">
                         @else
                         <div
                             class="relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
@@ -434,7 +435,7 @@
                                     </p>
                                 </a>
                                 <a v-if="event.can_edit" :href="event.edit_url"
-                                    class="absolute end-0 top-0 hidden group-hover:inline-block text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
+                                    class="absolute end-0 top-0 hidden group-hover:inline-block text-gray-900 dark:text-white hover:underline"
                                     @click.stop>
                                     {{ __('messages.edit') }}
                                 </a>
@@ -503,7 +504,10 @@
                                                 </div>
                                                 <div v-if="event.can_edit" class="mt-auto pt-3">
                                                     <a :href="event.edit_url"
-                                                        class="inline-flex items-center px-4 py-1.5 text-sm font-medium text-[#4E81FA] bg-transparent border border-[#4E81FA] rounded-md hover:bg-[#4E81FA] hover:text-white transition-colors duration-200"
+                                                        class="inline-flex items-center px-4 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md border transition-all duration-200 hover:scale-105"
+                                                        style="border-color: {{ $accentColor }}"
+                                                        @mouseenter="$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'"
+                                                        @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color=''"
                                                         @click.stop>
                                                         {{ __('messages.edit') }}
                                                     </a>
@@ -587,7 +591,7 @@
                     <div @click="navigateToEvent(event, $event)" class="block cursor-pointer">
                         <div class="rounded-2xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
                             {{-- Side-by-side layout when flyer image exists --}}
-                            <template v-if="event.image_url">
+                            <template v-if="event.flyer_url">
                                 <div class="flex flex-col md:flex-row" :class="isRtl ? 'md:flex-row-reverse' : ''">
                                     {{-- Details Column --}}
                                     <div class="md:flex-1 md:min-w-0 px-5 py-6 md:px-8 lg:px-16 md:py-8 flex flex-col gap-5">
@@ -728,28 +732,28 @@
                                         {{-- Action buttons row --}}
                                         <div class="flex flex-wrap items-center gap-2">
                                             <a v-if="event.can_edit" :href="event.edit_url"
-                                               class="inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium rounded-md transition-colors duration-200 border"
-                                               style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
+                                               class="inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium text-gray-900 dark:text-white rounded-md border transition-all duration-200 hover:scale-105"
+                                               style="border-color: {{ $accentColor }}"
                                                @mouseenter="$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'"
-                                               @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color='{{ $accentColor }}'"
+                                               @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color=''"
                                                @click.stop>
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>
                                                 {{ __('messages.edit') }}
                                             </a>
                                             <template v-if="isAuthenticated">
                                                 <button @click.stop="toggleVideoForm(event, $event)"
-                                                        class="inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium rounded-md transition-colors duration-200 border"
-                                                        style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
+                                                        class="inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md border"
+                                                        style="border-color: {{ $accentColor }}"
                                                         @mouseenter="$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'"
-                                                        @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color='{{ $accentColor }}'">
+                                                        @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color=''">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                                                     {{ __('messages.add_video') }}
                                                 </button>
                                                 <button @click.stop="toggleCommentForm(event, $event)"
-                                                        class="inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium rounded-md transition-colors duration-200 border"
-                                                        style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
+                                                        class="inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md border"
+                                                        style="border-color: {{ $accentColor }}"
                                                         @mouseenter="$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'"
-                                                        @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color='{{ $accentColor }}'">
+                                                        @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color=''">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                                                     {{ __('messages.add_comment') }}
                                                 </button>
@@ -794,7 +798,7 @@
                                     </div>
                                     {{-- Flyer Image Column --}}
                                     <div class="md:w-[35%] md:flex-shrink-0">
-                                        <img :src="event.image_url" :class="event._isPast ? 'grayscale' : ''" class="w-full" :alt="event.name">
+                                        <img :src="event.flyer_url" :class="event._isPast ? 'grayscale' : ''" class="w-full" :alt="event.name">
                                     </div>
                                 </div>
                             </template>
@@ -803,7 +807,7 @@
                             <template v-else>
                                 {{-- Hero Banner (only when no flyer) --}}
                                 <div v-if="getHeaderImage(event)" class="h-40 relative overflow-hidden">
-                                    <img :src="getHeaderImage(event)" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name">
+                                    <img :src="getHeaderImage(event)" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name" v-on:error="$event.target.closest('.h-40').style.display='none'">
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                                 </div>
 
@@ -946,28 +950,28 @@
                                     {{-- Action buttons row --}}
                                     <div class="flex flex-wrap items-center gap-2">
                                         <a v-if="event.can_edit" :href="event.edit_url"
-                                           class="inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium rounded-md transition-colors duration-200 border"
-                                           style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
+                                           class="inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium text-gray-900 dark:text-white rounded-md border transition-all duration-200 hover:scale-105"
+                                           style="border-color: {{ $accentColor }}"
                                            @mouseenter="$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'"
-                                           @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color='{{ $accentColor }}'"
+                                           @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color=''"
                                            @click.stop>
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>
                                             {{ __('messages.edit') }}
                                         </a>
                                         <template v-if="isAuthenticated">
                                             <button @click.stop="toggleVideoForm(event, $event)"
-                                                    class="inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium rounded-md transition-colors duration-200 border"
-                                                    style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
+                                                    class="inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 border"
+                                                    style="border-color: {{ $accentColor }}"
                                                     @mouseenter="$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'"
-                                                    @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color='{{ $accentColor }}'">
+                                                    @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color=''">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                                                 {{ __('messages.add_video') }}
                                             </button>
                                             <button @click.stop="toggleCommentForm(event, $event)"
-                                                    class="inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium rounded-md transition-colors duration-200 border"
-                                                    style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
+                                                    class="inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 border"
+                                                    style="border-color: {{ $accentColor }}"
                                                     @mouseenter="$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'"
-                                                    @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color='{{ $accentColor }}'">
+                                                    @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color=''">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                                                 {{ __('messages.add_comment') }}
                                             </button>
@@ -1020,10 +1024,10 @@
             <div v-if="!hidePastEvents && hasMorePastEvents" class="mt-6 text-center">
                 <button @click.stop="loadMorePastEvents()"
                         :disabled="loadingPastEvents"
-                        class="inline-flex items-center px-6 py-2.5 text-sm font-semibold rounded-xl border-2 transition-colors duration-200"
-                        style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
+                        class="inline-flex items-center px-6 py-2.5 text-sm font-semibold text-gray-900 dark:text-white rounded-xl border-2 transition-all duration-200 hover:scale-105"
+                        style="border-color: {{ $accentColor }}"
                         @mouseenter="if(!loadingPastEvents){$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'}"
-                        @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color='{{ $accentColor }}'">
+                        @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color=''"
                     <svg v-if="loadingPastEvents" class="animate-spin -ms-1 me-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -1134,15 +1138,17 @@
                                             </div>
                                             <div v-if="event.can_edit" class="mt-auto pt-3">
                                                 <a :href="event.edit_url"
-                                                    class="inline-flex items-center px-4 py-1.5 text-sm font-medium bg-transparent border rounded-md transition-colors duration-200"
-                                                    style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
+                                                    class="inline-flex items-center px-4 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md border transition-all duration-200 hover:scale-105"
+                                                    style="border-color: {{ $accentColor }}"
+                                                    @mouseenter="$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'"
+                                                    @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color=''"
                                                     @click.stop>
                                                     {{ __('messages.edit') }}
                                                 </a>
                                             </div>
                                         </div>
-                                        <div v-if="event.image_url" class="flex-shrink-0 w-24 self-stretch">
-                                            <img :src="event.image_url" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name">
+                                        <div v-if="event.flyer_url" class="flex-shrink-0 w-24 self-stretch">
+                                            <img :src="event.flyer_url" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name">
                                         </div>
                                     </div>
                                 </div>
@@ -1156,10 +1162,10 @@
             <div v-if="!hidePastEvents && hasMorePastEvents" class="mt-6 text-center">
                 <button @click.stop="loadMorePastEvents()"
                         :disabled="loadingPastEvents"
-                        class="inline-flex items-center px-6 py-2.5 text-sm font-semibold rounded-xl border-2 transition-colors duration-200"
-                        style="color: {{ $accentColor }}; border-color: {{ $accentColor }}"
+                        class="inline-flex items-center px-6 py-2.5 text-sm font-semibold text-gray-900 dark:text-white rounded-xl border-2 transition-all duration-200 hover:scale-105"
+                        style="border-color: {{ $accentColor }}"
                         @mouseenter="if(!loadingPastEvents){$event.target.style.backgroundColor='{{ $accentColor }}'; $event.target.style.color='{{ $contrastColor }}'}"
-                        @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color='{{ $accentColor }}'">
+                        @mouseleave="$event.target.style.backgroundColor='transparent'; $event.target.style.color=''"
                     <svg v-if="loadingPastEvents" class="animate-spin -ms-1 me-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -1401,7 +1407,7 @@
     </div>
 </div>
 
-<script src="{{ asset('js/vue.global.prod.js') }}"></script>
+<script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
 <script {!! nonce_attr() !!}>
 const { createApp } = Vue;
 
@@ -2066,11 +2072,13 @@ const calendarApp = createApp({
                 if (view === 'list') {
                     listBtn.style.backgroundColor = accentColor;
                     listBtn.style.color = contrastColor;
-                    listBtn.className = listBtn.className.replace(/\btext-gray-700\b/g, '').replace(/\bdark:text-gray-300\b/g, '').replace(/\bhover:bg-gray-50\b/g, '').replace(/\bdark:hover:bg-gray-700\b/g, '');
+                    listBtn.className = listBtn.className.replace(/\btext-gray-900\b/g, '').replace(/\bdark:text-white\b/g, '').replace(/\bhover:bg-gray-50\b/g, '').replace(/\bdark:hover:bg-gray-700\b/g, '');
                 } else {
                     listBtn.style.backgroundColor = '';
-                    listBtn.style.color = accentColor;
-                    listBtn.className = listBtn.className.replace(/\btext-gray-700\b/g, '').replace(/\bdark:text-gray-300\b/g, '');
+                    listBtn.style.color = '';
+                    if (!listBtn.className.includes('text-gray-900')) {
+                        listBtn.className += ' text-gray-900 dark:text-white';
+                    }
                     if (!listBtn.className.includes('hover:bg-gray-50')) {
                         listBtn.className += ' hover:bg-gray-50 dark:hover:bg-gray-700';
                     }
@@ -2081,11 +2089,13 @@ const calendarApp = createApp({
                 if (view === 'calendar') {
                     calBtn.style.backgroundColor = accentColor;
                     calBtn.style.color = contrastColor;
-                    calBtn.className = calBtn.className.replace(/\btext-gray-700\b/g, '').replace(/\bdark:text-gray-300\b/g, '').replace(/\bhover:bg-gray-50\b/g, '').replace(/\bdark:hover:bg-gray-700\b/g, '');
+                    calBtn.className = calBtn.className.replace(/\btext-gray-900\b/g, '').replace(/\bdark:text-white\b/g, '').replace(/\bhover:bg-gray-50\b/g, '').replace(/\bdark:hover:bg-gray-700\b/g, '');
                 } else {
                     calBtn.style.backgroundColor = '';
-                    calBtn.style.color = accentColor;
-                    calBtn.className = calBtn.className.replace(/\btext-gray-700\b/g, '').replace(/\bdark:text-gray-300\b/g, '');
+                    calBtn.style.color = '';
+                    if (!calBtn.className.includes('text-gray-900')) {
+                        calBtn.className += ' text-gray-900 dark:text-white';
+                    }
                     if (!calBtn.className.includes('hover:bg-gray-50')) {
                         calBtn.className += ' hover:bg-gray-50 dark:hover:bg-gray-700';
                     }
@@ -2692,5 +2702,15 @@ function updateHeroFiltersButton() {
 updateHeroFiltersButton();
 calendarAppInstance.$watch('dynamicFilterCount', updateHeroFiltersButton);
 calendarAppInstance.$watch('activeFilterCount', updateHeroFiltersButton);
+</script>
+
+<script {!! nonce_attr() !!}>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.calendar-day-navigate').forEach(function(el) {
+        el.addEventListener('click', function() {
+            window.location = this.getAttribute('data-href');
+        });
+    });
+});
 </script>
 </div>
