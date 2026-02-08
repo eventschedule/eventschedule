@@ -1005,11 +1005,9 @@ class RoleController extends Controller
 
     public function createMember(Request $request, $subdomain)
     {
-        if (! auth()->user()->isMember($subdomain)) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $this->authorize('manageMembers', $role);
 
         $data = [
             'role' => $role,
@@ -1021,11 +1019,9 @@ class RoleController extends Controller
 
     public function storeMember(MemberAddRequest $request, $subdomain)
     {
-        if (! auth()->user()->isMember($subdomain)) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $this->authorize('manageMembers', $role);
 
         if (! $role->isPro()) {
             return redirect()->back()->with('error', __('messages.upgrade_to_pro'));
@@ -1077,12 +1073,17 @@ class RoleController extends Controller
 
     public function removeMember(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->isMember($subdomain)) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
         $userId = UrlUtils::decodeId($hash);
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        // Allow members to remove themselves, but only the owner can remove others
+        if ($userId == auth()->id()) {
+            if (! auth()->user()->isMember($subdomain)) {
+                return redirect()->back()->with('error', __('messages.not_authorized'));
+            }
+        } else {
+            $this->authorize('manageMembers', $role);
+        }
 
         if ($userId == $role->user_id) {
             return redirect()->back()->with('error', __('messages.cannot_remove_owner'));
@@ -1091,6 +1092,11 @@ class RoleController extends Controller
         $roleUser = RoleUser::where('user_id', $userId)
             ->where('role_id', $role->id)
             ->first();
+
+        if (! $roleUser) {
+            return redirect()->back()->with('error', __('messages.not_found'));
+        }
+
         $roleUser->delete();
 
         AuditService::log(AuditService::SCHEDULE_MEMBER_REMOVE, auth()->id(), 'Role', $role->id, null, null, 'user_id:'.$userId);
