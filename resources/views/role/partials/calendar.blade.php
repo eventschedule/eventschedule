@@ -526,8 +526,8 @@
                     </template>
                 </div>
             </div>
-            <div v-else-if="!isLoadingEvents && {{ $tab != 'availability' ? 'true' : 'false' }}" class="py-10 text-center">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 mx-auto max-w-md">
+            <div v-else-if="!isLoadingEvents && {{ $tab != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
                         {{ __('messages.no_scheduled_events') }}
                     </div>
@@ -1041,8 +1041,8 @@
 
 
             {{-- Empty State --}}
-            <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="py-10 text-center">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 mx-auto max-w-md">
+            <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="pb-4 text-center">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
                         {{ __('messages.no_scheduled_events') }}
                     </div>
@@ -1180,8 +1180,8 @@
             </div>
 
             {{-- Empty State --}}
-            <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="py-10 text-center">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 mx-auto max-w-md">
+            <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="pb-4 text-center">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
                         {{ __('messages.no_scheduled_events') }}
                     </div>
