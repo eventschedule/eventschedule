@@ -232,7 +232,7 @@
                 "organizer": {!! json_encode($organizer, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
                 "offers": {!! json_encode(count($offers) === 1 ? $offers[0] : $offers, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
                 "location": {!! json_encode($location, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
-                "isAccessibleForFree": {{ (!$event->tickets_enabled || $event->areTicketsFree()) ? 'true' : 'false' }},
+                "isAccessibleForFree": {{ $event->isFree() ? 'true' : 'false' }},
                 "inLanguage": "{{ $role->language_code }}"
                 @if ($eventImage)
                 ,

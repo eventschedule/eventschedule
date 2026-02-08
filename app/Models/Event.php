@@ -615,6 +615,15 @@ class Event extends Model
         });
     }
 
+    public function isFree()
+    {
+        if ($this->tickets_enabled) {
+            return $this->areTicketsFree();
+        }
+
+        return $this->ticket_price !== null && $this->ticket_price == 0;
+    }
+
     public function getImageUrl()
     {
         if ($this->flyer_image_url) {

@@ -246,7 +246,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/api/documentation', fn () => redirect()->route('marketing.docs.developer.api'))->name('api.documentation');
 
     Route::patch('/api-settings', [ApiSettingsController::class, 'update'])->name('api-settings.update');
-    Route::post('/api-settings/show-key', [ApiSettingsController::class, 'showApiKey'])->name('api-settings.show-key');
 
     // Admin routes (only for admin users) - protected by admin middleware for defense-in-depth
     Route::middleware(['admin', 'throttle:30,1'])->group(function () {
