@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Notifications\DeletedEventNotification;
 use App\Repos\EventRepo;
 use App\Rules\NoFakeEmail;
+use App\Services\AuditService;
 use App\Utils\GeminiUtils;
 use App\Utils\ImageUtils;
 use App\Utils\MoneyUtils;
@@ -101,6 +102,8 @@ class EventController extends Controller
         if ($request->user()->cannot('delete', $event)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
+
+        AuditService::log(AuditService::EVENT_DELETE, $user->id, 'Event', $event->id, null, null, $event->name);
 
         $event->delete();
 
@@ -562,6 +565,8 @@ class EventController extends Controller
             'year' => $date->year,
         ];
 
+        AuditService::log(AuditService::EVENT_UPDATE, auth()->id(), 'Event', $event->id, null, null, $event->name);
+
         return redirect(route('role.view_admin', $data))
             ->with('message', __('messages.event_updated'));
     }
@@ -597,6 +602,8 @@ class EventController extends Controller
             }
         }
 
+        AuditService::log(AuditService::EVENT_ACCEPT, $user->id, 'Event', $event->id, null, null, $role->name);
+
         return redirect('/'.$subdomain.'/requests')
             ->with('message', __('messages.request_accepted'));
     }
@@ -631,6 +638,8 @@ class EventController extends Controller
                 );
             }
         }
+
+        AuditService::log(AuditService::EVENT_DECLINE, $user->id, 'Event', $event->id, null, null, $role->name);
 
         if ($request->redirect_to == 'schedule') {
             return redirect('/'.$subdomain.'/schedule')
@@ -747,6 +756,8 @@ class EventController extends Controller
             'month' => $date->month,
             'year' => $date->year,
         ];
+
+        AuditService::log(AuditService::EVENT_CREATE, auth()->id(), 'Event', $event->id, null, null, $event->name);
 
         return redirect(route('role.view_admin', $data))
             ->with('message', __('messages.event_created'));

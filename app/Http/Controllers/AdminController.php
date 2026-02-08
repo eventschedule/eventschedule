@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\AnalyticsReferrersDaily;
+use App\Models\AuditLog;
 use App\Models\Event;
 use App\Models\EventPart;
 use App\Models\EventRole;
@@ -1394,5 +1395,51 @@ class AdminController extends Controller
         }
 
         return redirect()->route('admin.queue')->with('success', 'All pending jobs flushed.');
+    }
+
+    /**
+     * Display the audit log.
+     */
+    public function auditLog(Request $request)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $query = AuditLog::with('user')->orderBy('created_at', 'desc');
+
+        // Filter by action category
+        if ($request->filled('category')) {
+            $query->where('action', 'like', $request->input('category').'.%');
+        }
+
+        // Filter by specific user
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->input('user_id'));
+        }
+
+        // Filter by date range
+        if ($request->filled('from')) {
+            $query->where('created_at', '>=', $request->input('from'));
+        }
+        if ($request->filled('to')) {
+            $query->where('created_at', '<=', Carbon::parse($request->input('to'))->endOfDay());
+        }
+
+        // Search metadata/action
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('action', 'like', "%{$search}%")
+                    ->orWhere('metadata', 'like', "%{$search}%")
+                    ->orWhere('ip_address', 'like', "%{$search}%");
+            });
+        }
+
+        $logs = $query->paginate(50)->withQueryString();
+
+        $categories = ['auth', 'profile', 'api', 'schedule', 'event', 'sale', 'admin', 'stripe'];
+
+        return view('admin.audit-log', compact('logs', 'categories'));
     }
 }

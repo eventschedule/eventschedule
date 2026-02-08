@@ -1,3 +1,4 @@
+<style>[v-cloak] { display: none !important; }</style>
 <div class="flex h-full flex-col pt-1" id="calendar-app">
 @php
     $isAdminRoute = $route == 'admin';
@@ -1185,7 +1186,7 @@
 
 {{-- Mobile Filters Bottom Sheet Drawer - Teleported to body to escape stacking context --}}
 <Teleport to="body">
-<div v-if="dynamicFilterCount >= 1 && showFiltersDrawer" class="md:hidden fixed inset-0 z-50">
+<div v-cloak v-if="dynamicFilterCount >= 1 && showFiltersDrawer" class="md:hidden fixed inset-0 z-50">
     {{-- Backdrop --}}
     <div @click="showFiltersDrawer = false"
          class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity"></div>
@@ -1208,7 +1209,7 @@
         </div>
 
         {{-- Schedule Filter --}}
-        @if(isset($role) && $role->groups && $role->groups->count() > 1)
+        @if(isset($role) && $role->groups && $role->groups->count() >= 1)
         <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.schedule') }}</label>
             <select v-model="selectedGroup" style="font-family: sans-serif"
@@ -1223,7 +1224,7 @@
         @endif
 
         {{-- Category Filter --}}
-        <div v-if="uniqueCategoryIds.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+        <div v-if="uniqueCategoryIds.length >= 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.category') }}</label>
             <select v-model="selectedCategory" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
@@ -1236,7 +1237,7 @@
         </div>
 
         {{-- Venue Filter --}}
-        <div v-if="uniqueVenues.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+        <div v-if="uniqueVenues.length >= 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.venue') }}</label>
             <select v-model="selectedVenue" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
@@ -1286,7 +1287,7 @@
 
 {{-- Desktop Filters Modal - Teleported to body to escape stacking context --}}
 <Teleport to="body">
-<div v-if="dynamicFilterCount > 0 && showDesktopFiltersModal" class="hidden md:block fixed inset-0 z-[100]">
+<div v-cloak v-if="dynamicFilterCount > 0 && showDesktopFiltersModal" class="hidden md:block fixed inset-0 z-[100]">
     {{-- Backdrop --}}
     <div @click="showDesktopFiltersModal = false"
          class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity z-[100]"></div>
@@ -1305,7 +1306,7 @@
             </div>
 
             {{-- Schedule Filter --}}
-            @if(isset($role) && $role->groups && $role->groups->count() > 1)
+            @if(isset($role) && $role->groups && $role->groups->count() >= 1)
             <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.schedule') }}</label>
                 <select v-model="selectedGroup" style="font-family: sans-serif"
@@ -1320,7 +1321,7 @@
             @endif
 
             {{-- Category Filter --}}
-            <div v-if="uniqueCategoryIds.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <div v-if="uniqueCategoryIds.length >= 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.category') }}</label>
                 <select v-model="selectedCategory" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
@@ -1333,7 +1334,7 @@
             </div>
 
             {{-- Venue Filter --}}
-            <div v-if="uniqueVenues.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <div v-if="uniqueVenues.length >= 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.venue') }}</label>
                 <select v-model="selectedVenue" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
@@ -1455,14 +1456,14 @@ const calendarApp = createApp({
     },
     computed: {
         hasDesktopFilters() {
-            return this.groups.length > 1 || this.uniqueCategoryIds.length > 1 || this.hasOnlineEvents || this.uniqueVenues.length > 1 || this.hasFreeEvents;
+            return this.groups.length >= 1 || this.uniqueCategoryIds.length >= 1 || this.hasOnlineEvents || this.uniqueVenues.length >= 1 || this.hasFreeEvents;
         },
         dynamicFilterCount() {
             let count = 0;
-            if (this.groups.length > 1) count++;
-            if (this.uniqueCategoryIds.length > 1) count++;
+            if (this.groups.length >= 1) count++;
+            if (this.uniqueCategoryIds.length >= 1) count++;
             if (this.hasOnlineEvents) count++;
-            if (this.uniqueVenues.length > 1) count++;
+            if (this.uniqueVenues.length >= 1) count++;
             if (this.hasFreeEvents) count++;
             return count;
         },

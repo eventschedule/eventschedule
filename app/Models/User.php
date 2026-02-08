@@ -53,6 +53,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'referrer_url',
         'landing_page',
         'use_24_hour_time',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
     ];
 
     /**
@@ -85,6 +88,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'facebook_id',
         'facebook_token',
         'facebook_token_expires_at',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     protected static function boot()
@@ -137,6 +142,9 @@ class User extends Authenticatable implements MustVerifyEmail
             'facebook_token' => EncryptedString::class,
             'payment_secret' => EncryptedString::class,
             'api_key_expires_at' => 'datetime',
+            'two_factor_secret' => EncryptedString::class,
+            'two_factor_recovery_codes' => EncryptedString::class,
+            'two_factor_confirmed_at' => 'datetime',
         ];
     }
 
@@ -322,6 +330,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasGoogleCalendarConnected(): bool
     {
         return ! is_null($this->google_token) && ! is_null($this->google_refresh_token);
+    }
+
+    /**
+     * Check if user has two-factor authentication enabled and confirmed.
+     */
+    public function hasTwoFactorEnabled(): bool
+    {
+        return ! is_null($this->two_factor_secret) && ! is_null($this->two_factor_confirmed_at);
     }
 
     /**

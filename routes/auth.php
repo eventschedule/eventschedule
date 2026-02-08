@@ -9,6 +9,8 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\Auth\TwoFactorChallengeController;
+use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
@@ -48,6 +50,12 @@ Route::middleware('guest')->group(function () {
 
     Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])
         ->name('auth.google.callback');
+
+    Route::get('two-factor-challenge', [TwoFactorChallengeController::class, 'create'])
+        ->name('two-factor.challenge');
+
+    Route::post('two-factor-challenge', [TwoFactorChallengeController::class, 'store'])
+        ->middleware('throttle:5,1');
 });
 
 Route::middleware('auth')->group(function () {
@@ -69,6 +77,22 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:5,1');
 
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
+
+    Route::post('two-factor/enable', [TwoFactorController::class, 'enable'])
+        ->name('two-factor.enable')
+        ->middleware('throttle:5,1');
+
+    Route::post('two-factor/confirm', [TwoFactorController::class, 'confirm'])
+        ->name('two-factor.confirm')
+        ->middleware('throttle:5,1');
+
+    Route::post('two-factor/disable', [TwoFactorController::class, 'disable'])
+        ->name('two-factor.disable')
+        ->middleware('throttle:5,1');
+
+    Route::post('two-factor/recovery-codes', [TwoFactorController::class, 'regenerateRecoveryCodes'])
+        ->name('two-factor.recovery-codes')
+        ->middleware('throttle:5,1');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');

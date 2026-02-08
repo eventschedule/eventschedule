@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\User;
+use App\Services\AuditService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -95,5 +96,7 @@ class ApiAuthentication
             'api_key_hash' => $apiKey ? hash('sha256', $apiKey) : null,
             'timestamp' => now()->toISOString(),
         ]);
+
+        AuditService::log(AuditService::API_AUTH_FAILED, null, null, null, null, null, $reason);
     }
 }

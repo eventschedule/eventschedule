@@ -17,6 +17,7 @@ use App\Notifications\AddedMemberNotification;
 use App\Notifications\DeletedRoleNotification;
 use App\Repos\EventRepo;
 use App\Services\AnalyticsService;
+use App\Services\AuditService;
 use App\Services\DemoService;
 use App\Services\EmailService;
 use App\Utils\ColorUtils;
@@ -174,6 +175,8 @@ class RoleController extends Controller
         AnalyticsDaily::where('role_id', $role->id)->delete();
         AnalyticsReferrersDaily::where('role_id', $role->id)->delete();
         AnalyticsAppearancesDaily::where('role_id', $role->id)->delete();
+
+        AuditService::log(AuditService::SCHEDULE_DELETE, $user->id, 'Role', $role->id, null, null, $role->name);
 
         $role->delete();
 
@@ -1068,6 +1071,8 @@ class RoleController extends Controller
 
         Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
 
+        AuditService::log(AuditService::SCHEDULE_MEMBER_ADD, auth()->id(), 'Role', $role->id, null, null, $user->email);
+
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
             ->with('message', __('messages.member_added'));
     }
@@ -1089,6 +1094,8 @@ class RoleController extends Controller
             ->where('role_id', $role->id)
             ->first();
         $roleUser->delete();
+
+        AuditService::log(AuditService::SCHEDULE_MEMBER_REMOVE, auth()->id(), 'Role', $role->id, null, null, 'user_id:'.$userId);
 
         // If user removed themselves, redirect to home instead of team page
         if ($userId == auth()->id()) {
@@ -1265,6 +1272,8 @@ class RoleController extends Controller
         }
 
         $role->save();
+
+        AuditService::log(AuditService::SCHEDULE_CREATE, $user->id, 'Role', $role->id, null, null, $role->name);
 
         // Handle sync direction and calendar setup for new role
         $syncDirection = $request->input('sync_direction');
@@ -1828,6 +1837,8 @@ class RoleController extends Controller
             $role->background_image_url = $filename;
             $role->save();
         }
+
+        AuditService::log(AuditService::SCHEDULE_UPDATE, auth()->id(), 'Role', $role->id, null, null, $role->name);
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))
             ->with('message', __('messages.updated_schedule'));

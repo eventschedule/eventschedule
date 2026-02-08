@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
@@ -44,6 +45,7 @@ class SocialAuthController extends Controller
         if ($user) {
             // User found by google_id - log them in
             Auth::login($user, true);
+            AuditService::log(AuditService::AUTH_GOOGLE_LOGIN, $user->id);
 
             return redirect()->intended(route('home', absolute: false));
         }
@@ -70,6 +72,7 @@ class SocialAuthController extends Controller
             $user->save();
 
             Auth::login($user, true);
+            AuditService::log(AuditService::AUTH_GOOGLE_LOGIN, $user->id);
 
             return redirect()->intended(route('home', absolute: false));
         }
@@ -119,6 +122,7 @@ class SocialAuthController extends Controller
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page']);
 
         Auth::login($user, true);
+        AuditService::log(AuditService::AUTH_GOOGLE_LOGIN, $user->id, 'User', $user->id, null, null, 'new_account');
 
         return redirect()->intended(route('home', absolute: false));
     }
