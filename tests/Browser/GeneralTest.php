@@ -34,6 +34,7 @@ class GeneralTest extends DuskTestCase
 
             // Log back in
             $browser->visit('/login')
+                ->waitFor('#email', 5)
                 ->type('email', $email)
                 ->type('password', $password)
                 ->press('LOG IN')
