@@ -254,18 +254,6 @@
         </div>
         </div>
 
-        @if (auth()->user() && auth()->user()->isAdmin())
-        <div class="flex items-center my-4">
-            <input type="checkbox" 
-                    id="show_all_fields" 
-                    v-model="showAllFields" 
-                    @change="saveShowAllFieldsPreference"
-                    class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
-            <label for="show_all_fields" class="ms-2 text-sm text-gray-700 dark:text-gray-300">
-                {{ __('messages.show_all_fields') }}
-            </label>
-        </div>
-        @endif
 
         <!-- Hidden file input for details image -->
         <input type="file"

@@ -416,11 +416,7 @@ class EventController extends Controller
         }
 
         if ($event->tickets->count() == 0) {
-            $event->tickets = [
-                [
-                    new Ticket,
-                ],
-            ];
+            $event->tickets = [new Ticket];
         }
 
         // Use the creator role's subdomain to determine the correct groups/sub-schedules
@@ -1061,7 +1057,7 @@ class EventController extends Controller
             $realPath = realpath($imagePath);
             if ($realPath && str_starts_with($realPath, $tempDir.DIRECTORY_SEPARATOR) && file_exists($realPath)) {
                 $file = new \Illuminate\Http\UploadedFile($realPath, basename($realPath));
-                $filename = strtolower('flyer_'.Str::random(32)).'.'.$file->getClientOriginalExtension();
+                $filename = strtolower('flyer_'.Str::random(32).'.'.$file->getClientOriginalExtension());
                 $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
                 $event->flyer_image_url = $filename;
