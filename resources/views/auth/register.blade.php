@@ -19,7 +19,7 @@
                 document.querySelector('button[type="submit"]').disabled = true;
 
                 @if (!is_writable(base_path('.env')))
-                    var testBtn = document.querySelector('button[onclick="testConnection()"]');
+                    var testBtn = document.getElementById('test-connection-btn');
                     if (testBtn) testBtn.disabled = true;
                 @endif
             @endif
@@ -261,6 +261,15 @@
 
         @if (! config('app.hosted'))
 
+            document.addEventListener('DOMContentLoaded', function() {
+                var testConnectionBtn = document.getElementById('test-connection-btn');
+                if (testConnectionBtn) {
+                    testConnectionBtn.addEventListener('click', function() {
+                        testConnection();
+                    });
+                }
+            });
+
             function testConnection() {
                 var host = document.getElementById('database_host').value;
                 var port = document.getElementById('database_port').value;
@@ -332,7 +341,7 @@
 
         </script>
 
-        <style>
+        <style {!! nonce_attr() !!}>
             form button {
                 min-width: 100px;
             }
@@ -414,7 +423,7 @@
 
             <div class="flex items-center justify-between mt-4 space-x-4">
                 <div id="test-result"></div>
-                <x-primary-button type="button" onclick="testConnection()">
+                <x-primary-button type="button" id="test-connection-btn">
                     {{ __('messages.test') }}
                 </x-primary-button>
             </div>
@@ -432,7 +441,7 @@
             <div class="flex flex-col sm:flex-row gap-2">
                 <x-text-input id="email" class="block mt-1 flex-1 min-w-0 w-full sm:w-auto" type="email" name="email" :value="old('email', base64_decode(request()->email))" required
                     autocomplete="email" />
-                <button type="button" id="send-code-btn" onclick="event.preventDefault(); event.stopPropagation(); sendVerificationCode(); return false;" class="mt-1 w-full sm:w-auto sm:flex-shrink-0 whitespace-nowrap inline-flex items-center justify-center px-6 py-3 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-sm text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                <button type="button" id="send-code-btn" class="mt-1 w-full sm:w-auto sm:flex-shrink-0 whitespace-nowrap inline-flex items-center justify-center px-6 py-3 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-sm text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                     {{ __('messages.send_code') }}
                 </button>
             </div>
@@ -492,7 +501,7 @@
 
         <!-- Turnstile widget -->
         @if (\App\Utils\TurnstileUtils::isEnabled())
-            <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad" async defer></script>
+            <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad" async defer {!! nonce_attr() !!}></script>
             <script {!! nonce_attr() !!}>
                 function onTurnstileLoad() {
                     @if (config('app.hosted'))

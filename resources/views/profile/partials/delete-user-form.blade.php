@@ -21,7 +21,7 @@
 
     <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable
         x-on:open-modal.window="if ($event.detail === 'confirm-user-deletion') { $el.querySelector('form')?.reset(); }">
-        <form method="post" action="{{ route('profile.destroy') }}" class="p-6" onkeydown="if(event.key === 'Enter') { event.preventDefault(); return false; }">
+        <form method="post" action="{{ route('profile.destroy') }}" class="p-6" id="delete-account-form">
             @csrf
             @method('delete')
 
@@ -73,3 +73,17 @@
     </x-modal>
     @endif
 </section>
+
+<script {!! nonce_attr() !!}>
+document.addEventListener('DOMContentLoaded', function() {
+    var deleteForm = document.getElementById('delete-account-form');
+    if (deleteForm) {
+        deleteForm.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                return false;
+            }
+        });
+    }
+});
+</script>

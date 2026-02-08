@@ -139,7 +139,7 @@
     </div>
 </div>
 
-<script src="{{ asset('js/vue.global.prod.js') }}"></script>
+<script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
 <script {!! nonce_attr() !!}>
 document.addEventListener('DOMContentLoaded', function() {
     const { createApp } = Vue;

@@ -131,6 +131,10 @@ class User extends Authenticatable implements MustVerifyEmail
             'use_24_hour_time' => 'boolean',
             'invoiceninja_api_key' => 'encrypted',
             'invoiceninja_webhook_secret' => 'encrypted',
+            'google_token' => 'encrypted',
+            'google_refresh_token' => 'encrypted',
+            'facebook_token' => 'encrypted',
+            'payment_secret' => 'encrypted',
         ];
     }
 

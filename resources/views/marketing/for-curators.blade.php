@@ -611,7 +611,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         @media (prefers-reduced-motion: reduce) {
             .animate-pulse-slow,
             .animate-float {

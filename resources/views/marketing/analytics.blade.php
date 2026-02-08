@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Analytics</x-slot>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         /* Custom emerald gradient for this page */
         .text-gradient {
             background: linear-gradient(135deg, #10b981 0%, #059669 50%, #34d399 100%);

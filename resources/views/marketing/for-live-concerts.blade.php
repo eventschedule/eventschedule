@@ -712,7 +712,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .concert-glow-text {
             background: linear-gradient(135deg, #e11d48, #f59e0b, #ea580c);
             -webkit-background-clip: text;

@@ -19,7 +19,8 @@
 
 <div class="flex justify-end pt-5">
     <x-success-link href="{{ route('event.accept_all', ['subdomain' => $role->subdomain]) }}"
-        onclick="return confirm('{{ __('messages.accept_all_confirm', ['count' => count($requests)]) }}')">
+        data-confirm="{{ __('messages.accept_all_confirm', ['count' => count($requests)]) }}"
+        class="link-confirm">
         <svg class="-ms-0.5 me-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd"
                 d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
@@ -91,8 +92,8 @@
         </div>
         <div>
             <div class="-mt-px flex divide-x divide-gray-200 dark:divide-gray-700">
-                <div class="flex w-0 flex-1 cursor-pointer test-accept-event"
-                    onclick="location.href = '{{ route('event.accept', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}'; return false;">
+                <div class="flex w-0 flex-1 cursor-pointer test-accept-event btn-navigate"
+                    data-href="{{ route('event.accept', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}">
                     <div
                         class="relative -me-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bs-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -103,8 +104,9 @@
                         {{ __('messages.accept') }}
                     </div>
                 </div>
-                <div class="-ms-px flex w-0 flex-1 cursor-pointer"
-                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'redirect_to' => 'requests']) }}'; } return false;">
+                <div class="-ms-px flex w-0 flex-1 cursor-pointer btn-confirm-navigate"
+                    data-confirm="{{ __('messages.are_you_sure') }}"
+                    data-href="{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'redirect_to' => 'requests']) }}">
                     <div
                         class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-be-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -119,4 +121,30 @@
     </li>
     @endforeach
 </ul>
+
+<script {!! nonce_attr() !!}>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.link-confirm').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            if (!confirm(this.getAttribute('data-confirm'))) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    document.querySelectorAll('.btn-navigate').forEach(function(el) {
+        el.addEventListener('click', function() {
+            location.href = this.getAttribute('data-href');
+        });
+    });
+
+    document.querySelectorAll('.btn-confirm-navigate').forEach(function(el) {
+        el.addEventListener('click', function() {
+            if (confirm(this.getAttribute('data-confirm'))) {
+                location.href = this.getAttribute('data-href');
+            }
+        });
+    });
+});
+</script>
 @endif

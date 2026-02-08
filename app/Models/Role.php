@@ -967,19 +967,34 @@ class Role extends Model implements MustVerifyEmail
      */
     public function getImportConfigAttribute($value)
     {
+        $defaults = [
+            'urls' => [],
+            'cities' => [],
+            'fields' => [
+                'short_description' => false,
+                'description' => false,
+                'ticket_price' => false,
+                'registration_url' => false,
+                'category_id' => false,
+                'group_id' => false,
+            ],
+        ];
+
         if (! $value) {
-            return [
-                'urls' => [],
-                'cities' => [],
-            ];
+            return $defaults;
         }
 
         $config = json_decode($value, true);
 
-        return $config ?: [
-            'urls' => [],
-            'cities' => [],
-        ];
+        if (! $config) {
+            return $defaults;
+        }
+
+        $config['urls'] = $config['urls'] ?? [];
+        $config['cities'] = $config['cities'] ?? [];
+        $config['fields'] = array_merge($defaults['fields'], $config['fields'] ?? []);
+
+        return $config;
     }
 
     /**

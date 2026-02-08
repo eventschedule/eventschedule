@@ -753,7 +753,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .text-gradient-burgundy {
             background: linear-gradient(135deg, #be123c, #7f1d1d);
             -webkit-background-clip: text;

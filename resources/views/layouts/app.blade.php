@@ -11,7 +11,7 @@
     <link rel="sitemap" type="application/xml" href="{{ config('app.url') . route('sitemap', [], false) }}">    
     
     @if (config('app.hosted') || config('app.report_errors'))
-        <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous"></script>
+        <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous" {!! nonce_attr() !!}></script>
     @endif
 
     @if (isset($meta))
@@ -31,13 +31,13 @@
         <meta name="twitter:card" content="summary_large_image">
     @endif    
 
-    <script src="{{ asset('js/jquery.min.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('js/toastify-js.js') }}"></script>
+    <script src="{{ asset('js/jquery.min.js') }}" {!! nonce_attr() !!}></script>
+    <script type="text/javascript" src="{{ asset('js/toastify-js.js') }}" {!! nonce_attr() !!}></script>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/toastify.min.css') }}">
 
     @if (config('services.google.analytics') && (! auth()->user() || ! auth()->user()->isAdmin()))
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}" {!! nonce_attr() !!}></script>
     <script {!! nonce_attr() !!}>
     window.dataLayer = window.dataLayer || [];
 
@@ -98,6 +98,14 @@
     $(document).on('click', '.pop-up-menu', function(event) {
         event.stopPropagation();
     });
+
+    $(document).on('click', '.popup-toggle[data-popup-target]', function(e) {
+        onPopUpClick($(this).attr('data-popup-target'), e);
+    });
+
+    $(document).on('click', 'div[data-popup-target]', function(e) {
+        onPopUpClick($(this).attr('data-popup-target'), e);
+    });
     </script>
 
     <script {!! nonce_attr() !!}>
@@ -120,7 +128,7 @@
     'resources/js/app.js',
     ])
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .rtl {
             direction: rtl;
             text-align: right;

@@ -738,7 +738,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .watchparty-glow-text {
             background: linear-gradient(135deg, #4f46e5, #06b6d4, #0ea5e9);
             -webkit-background-clip: text;

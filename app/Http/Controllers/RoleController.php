@@ -334,11 +334,11 @@ class RoleController extends Controller
                     $slug = ''; // Clear slug since it's a group, not an event
                 } else {
                     // Try to find event by slug
-                    $event = $this->eventRepo->getEvent($subdomain, $slug, $date, $eventIdParam);
+                    $event = $this->eventRepo->getEvent($subdomain, $slug, $date, $eventIdParam, $role);
                 }
             } else {
                 // Try to find event by slug
-                $event = $this->eventRepo->getEvent($subdomain, $slug, $date, $eventIdParam);
+                $event = $this->eventRepo->getEvent($subdomain, $slug, $date, $eventIdParam, $role);
             }
 
             if ($event) {
@@ -441,7 +441,31 @@ class RoleController extends Controller
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
         $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
 
-        if ($role->isCurator()) {
+        if ($event && ! request()->graphic) {
+            // For event detail view (non-graphic), only check if calendar has events
+            // The calendar partial loads data via Ajax, so we just need existence
+            if ($role->isCurator()) {
+                $hasCalendarEvents = Event::where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
+                    $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                        ->orWhereNotNull('days_of_week');
+                })
+                    ->whereIn('id', function ($query) use ($role) {
+                        $query->select('event_id')
+                            ->from('event_role')
+                            ->where('role_id', $role->id)
+                            ->where('is_accepted', true);
+                    })
+                    ->exists();
+            } else {
+                $hasCalendarEvents = Event::where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
+                    $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                        ->orWhereNotNull('days_of_week');
+                })
+                    ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
+                    ->exists();
+            }
+            $events = $hasCalendarEvents ? collect([true]) : collect();
+        } elseif ($role->isCurator()) {
             $events = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
                 ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
                     $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
@@ -471,39 +495,36 @@ class RoleController extends Controller
             $events = $events->orderBy('starts_at')->get();
         }
 
-        // Fetch past non-recurring events for list view
-        if ($role->isCurator()) {
-            $pastEvents = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
-                ->where('starts_at', '<', Carbon::now('UTC'))
-                ->whereNull('days_of_week')
-                ->whereIn('id', function ($query) use ($role) {
-                    $query->select('event_id')
-                        ->from('event_role')
-                        ->where('role_id', $role->id)
-                        ->where('is_accepted', true);
-                })
-                ->orderByDesc('starts_at')
-                ->limit(51)
-                ->get();
-        } else {
-            $pastEvents = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
-                ->where('starts_at', '<', Carbon::now('UTC'))
-                ->whereNull('days_of_week')
-                ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
-                ->orderByDesc('starts_at')
-                ->limit(51)
-                ->get();
-        }
-
+        // Fetch past non-recurring events only for graphic mode (otherwise loaded via Ajax)
+        $pastEvents = collect();
         $hasMorePastEvents = false;
         if (request()->graphic) {
+            if ($role->isCurator()) {
+                $pastEvents = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
+                    ->where('starts_at', '<', Carbon::now('UTC'))
+                    ->whereNull('days_of_week')
+                    ->whereIn('id', function ($query) use ($role) {
+                        $query->select('event_id')
+                            ->from('event_role')
+                            ->where('role_id', $role->id)
+                            ->where('is_accepted', true);
+                    })
+                    ->orderByDesc('starts_at')
+                    ->limit(51)
+                    ->get();
+            } else {
+                $pastEvents = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
+                    ->where('starts_at', '<', Carbon::now('UTC'))
+                    ->whereNull('days_of_week')
+                    ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
+                    ->orderByDesc('starts_at')
+                    ->limit(51)
+                    ->get();
+            }
             $hasMorePastEvents = $pastEvents->count() > 50;
             if ($hasMorePastEvents) {
                 $pastEvents = $pastEvents->take(50);
             }
-        } else {
-            // Past events will be loaded via Ajax in the calendar partial
-            $pastEvents = collect();
         }
 
         // Track view for analytics (non-member visits only, skip embeds)
@@ -521,7 +542,7 @@ class RoleController extends Controller
             $view = 'role/show-guest-embed';
         } elseif ($event) {
             $view = 'event/show-guest';
-            $event->load(['approvedVideos.user', 'approvedComments.user']);
+            $event->loadMissing(['approvedVideos.user', 'approvedComments.user']);
 
             if (auth()->check()) {
                 $myPendingVideos = \App\Models\EventVideo::where('event_id', $event->id)
@@ -717,7 +738,7 @@ class RoleController extends Controller
         $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
 
         if ($role->isCurator()) {
-            $events = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
+            $events = Event::with('roles', 'parts', 'tickets', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
                 ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
                     $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
                         ->orWhereNotNull('days_of_week');
@@ -731,7 +752,7 @@ class RoleController extends Controller
                 ->orderBy('starts_at')
                 ->get();
         } else {
-            $events = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
+            $events = Event::with('roles', 'parts', 'tickets', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
                 ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
                     $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
                         ->orWhereNotNull('days_of_week');
@@ -747,7 +768,7 @@ class RoleController extends Controller
         }
 
         if ($role->isCurator()) {
-            $pastEvents = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
+            $pastEvents = Event::with('roles', 'parts', 'tickets', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
                 ->where('starts_at', '<', Carbon::now('UTC'))
                 ->whereNull('days_of_week')
                 ->whereIn('id', function ($query) use ($role) {
@@ -760,7 +781,7 @@ class RoleController extends Controller
                 ->limit(51)
                 ->get();
         } else {
-            $pastEvents = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
+            $pastEvents = Event::with('roles', 'parts', 'tickets', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
                 ->where('starts_at', '<', Carbon::now('UTC'))
                 ->whereNull('days_of_week')
                 ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
@@ -798,7 +819,7 @@ class RoleController extends Controller
         $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
 
         if ($role->isCurator()) {
-            $events = Event::with('roles', 'parts')
+            $events = Event::with('roles', 'parts', 'tickets')
                 ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
                     $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
                         ->orWhereNotNull('days_of_week');
@@ -812,7 +833,7 @@ class RoleController extends Controller
                 ->orderBy('starts_at')
                 ->get();
         } else {
-            $events = Event::with('roles', 'parts')
+            $events = Event::with('roles', 'parts', 'tickets')
                 ->where(function ($query) use ($role) {
                     $query->whereHas('roles', function ($query) use ($role) {
                         $query->where('role_id', $role->id)
@@ -1237,10 +1258,9 @@ class RoleController extends Controller
         }
 
         if ($request->has('import_urls') || $request->has('import_cities')) {
-            $importConfig = [
-                'urls' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_urls', [])))),
-                'cities' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_cities', [])))),
-            ];
+            $importConfig = $role->import_config;
+            $importConfig['urls'] = array_map('strtolower', array_filter(array_map('trim', $request->input('import_urls', []))));
+            $importConfig['cities'] = array_map('strtolower', array_filter(array_map('trim', $request->input('import_cities', []))));
             $role->import_config = $importConfig;
         }
 
@@ -1519,9 +1539,21 @@ class RoleController extends Controller
         }
 
         if ($request->has('import_urls') || $request->has('import_cities')) {
-            $importConfig = [
-                'urls' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_urls', [])))),
-                'cities' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_cities', [])))),
+            $importConfig = $role->import_config;
+            $importConfig['urls'] = array_map('strtolower', array_filter(array_map('trim', $request->input('import_urls', []))));
+            $importConfig['cities'] = array_map('strtolower', array_filter(array_map('trim', $request->input('import_cities', []))));
+            $role->import_config = $importConfig;
+        }
+
+        if ($request->has('import_fields')) {
+            $importConfig = $role->import_config;
+            $importConfig['fields'] = [
+                'short_description' => (bool) $request->input('import_fields.short_description'),
+                'description' => (bool) $request->input('import_fields.description'),
+                'ticket_price' => (bool) $request->input('import_fields.ticket_price'),
+                'registration_url' => (bool) $request->input('import_fields.registration_url'),
+                'category_id' => (bool) $request->input('import_fields.category_id'),
+                'group_id' => (bool) $request->input('import_fields.group_id'),
             ];
             $role->import_config = $importConfig;
         }

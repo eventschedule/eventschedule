@@ -3,6 +3,7 @@
     @vite([
     'resources/js/countrySelect.min.js',
     'resources/css/countrySelect.min.css',
+    'resources/js/color-picker.js',
     ])
 
     <!-- Step Indicator for Add Event Flow -->
@@ -14,12 +15,7 @@
 
     <x-slot name="head">
 
-        <style>
-        form button {
-            min-width: 100px;
-            min-height: 40px;
-        }
-
+        <style {!! nonce_attr() !!}>
         .country-select {
             width: 100%;
         }
@@ -43,8 +39,13 @@
             padding: 1rem;
         }
 
+        .dark #preview {
+            border-color: #374151;
+        }
+
         .color-nav-button {
-            padding: 0.5rem;
+            padding: 0.5rem 0.5rem;
+            min-height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -147,9 +148,17 @@
             }
 
             if (acceptRequestsCheckbox && requestTermsSection) {
-                requestTermsSection.style.display = acceptRequestsCheckbox.checked ? 'block' : 'none';                
+                requestTermsSection.style.display = acceptRequestsCheckbox.checked ? 'block' : 'none';
                 acceptRequestsCheckbox.addEventListener('change', function() {
                     requestTermsSection.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+
+            const importFormFieldsSection = document.getElementById('import_form_fields_section');
+            if (acceptRequestsCheckbox && importFormFieldsSection) {
+                importFormFieldsSection.style.display = acceptRequestsCheckbox.checked ? 'block' : 'none';
+                acceptRequestsCheckbox.addEventListener('change', function() {
+                    importFormFieldsSection.style.display = this.checked ? 'block' : 'none';
                 });
             }
 
@@ -163,19 +172,18 @@
                     // Preset header selected
                     headerImageUrl = "{{ asset('images/headers/thumbs') }}" + '/' + headerImageUrl + '.jpg';
                     $('#header_image_preview').attr('src', headerImageUrl).show();
-                    $('#delete_header_image_form').hide();
+                    $('#delete_header_image_button').hide();
                 } else if (headerImageUrl === '') {
                     // Custom option selected - show existing custom image if available
                     var existingCustomUrl = '{{ $role->header_image_url }}';
+                    $('#header_image_preview').hide();
                     if (existingCustomUrl) {
-                        $('#header_image_preview').attr('src', existingCustomUrl).show();
-                        $('#delete_header_image_form').show();
+                        $('#delete_header_image_button').show();
                     }
-                    // Don't hide preview - let file upload handler manage it
                 } else {
                     // 'none' selected
                     $('#header_image_preview').hide();
-                    $('#delete_header_image_form').hide();
+                    $('#delete_header_image_button').hide();
                 }
             });
 
@@ -340,7 +348,20 @@
             };
         }
 
+        function getContrastColor(hex) {
+            hex = hex.replace('#', '');
+            var r = parseInt(hex.substring(0, 2), 16) / 255;
+            var g = parseInt(hex.substring(2, 4), 16) / 255;
+            var b = parseInt(hex.substring(4, 6), 16) / 255;
+            r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+            g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+            b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+            var luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            return luminance > 0.179 ? '#000000' : '#ffffff';
+        }
+
         function updatePreview() {
+            var isDark = document.documentElement.classList.contains('dark');
             var background = $('input[name="background"]:checked').val();
             var backgroundColor = $('#background_color').val();
             var backgroundColors = $('#background_colors').val();
@@ -377,25 +398,22 @@
             var profileSrc = profileImagePreview && profileImagePreview !== '#' ? profileImagePreview : existingProfileImage;
             if (profileSrc) {
                 var marginTop = headerHtml ? '-mt-6' : '-mt-8';
-                profileHtml = '<div class="' + marginTop + ' mb-2"><div class="w-12 h-12 rounded-lg bg-[#F5F9FE] p-0.5 shadow-sm"><img src="' + profileSrc + '" class="w-full h-full object-cover rounded-lg" /></div></div>';
+                var profileBg = isDark ? '#111827' : '#F5F9FE';
+                profileHtml = '<div class="' + marginTop + ' mb-2"><div class="w-12 h-12 rounded-lg p-0.5 shadow-sm" style="background-color: ' + profileBg + '"><img src="' + profileSrc + '" class="w-full h-full object-cover rounded-lg" /></div></div>';
             }
 
             // Build content HTML with accent color elements
             var contentTopPadding = !profileSrc && !headerHtml ? 'pt-3' : '';
+            var cardBg = isDark ? '#111827' : '#F5F9FE';
             var contentHtml =
-                '<div class="bg-[#F5F9FE] rounded-lg flex flex-col ' + (profileSrc && !headerHtml ? 'mt-8' : '') + '">' +
+                '<div class="rounded-lg flex flex-col ' + (profileSrc && !headerHtml ? 'mt-8' : '') + '" style="background-color: ' + cardBg + '">' +
                     headerHtml +
                     '<div class="px-3 pb-3 flex flex-col">' +
                         profileHtml +
                         '<div class="flex items-center justify-between gap-2 ' + contentTopPadding + '">' +
                             '<div class="text-sm font-semibold text-[#151B26]" style="color: ' + fontColor + '; font-family: ' + fontFamily + ';">' + name + '</div>' +
-                            '<div class="flex gap-1.5">' +
-                                '<div class="w-6 h-6 rounded-md flex items-center justify-center shadow-sm" style="background-color: ' + accentColor + '">' +
-                                    '<svg class="w-3 h-3" fill="white" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>' +
-                                '</div>' +
-                                '<div class="w-6 h-6 rounded-md flex items-center justify-center shadow-sm" style="background-color: ' + accentColor + '">' +
-                                    '<svg class="w-3 h-3" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93z"/></svg>' +
-                                '</div>' +
+                            '<div class="rounded-md px-2.5 py-1 text-xs font-semibold shadow-sm" style="background-color: ' + accentColor + '; color: ' + getContrastColor(accentColor) + '">' +
+                                {!! json_encode(__('messages.follow'), JSON_UNESCAPED_UNICODE) !!} +
                             '</div>' +
                         '</div>' +
                     '</div>' +
@@ -412,6 +430,7 @@
                     var customColor1 = $('#custom_color1').val();
                     var customColor2 = $('#custom_color2').val();
                     backgroundColors = customColor1 + ', ' + customColor2;
+                    $('#custom_gradient_preview').css('background', 'linear-gradient(to right, ' + customColor1 + ', ' + customColor2 + ')');
                 }
 
                 if (!backgroundRotation) {
@@ -515,10 +534,10 @@
         function changeBackgroundColor(direction) {
             const select = document.getElementById('background_colors');
             const newIndex = select.selectedIndex + direction;
-            
+
             if (newIndex >= 0 && newIndex < select.options.length) {
                 select.selectedIndex = newIndex;
-                select.dispatchEvent(new Event('input'));
+                updatePreview();
                 updateColorNavButtons();
             }
         }
@@ -535,18 +554,39 @@
         function changeBackgroundImage(direction) {
             const select = document.getElementById('background_image');
             const newIndex = select.selectedIndex + direction;
-            
+
             if (newIndex >= 0 && newIndex < select.options.length) {
                 select.selectedIndex = newIndex;
-                select.dispatchEvent(new Event('input'));
+                updatePreview();
                 updateImageNavButtons();
+                toggleCustomImageInput();
             }
         }
 
         function toggleCustomImageInput() {
             const select = document.getElementById('background_image');
             const customInput = document.getElementById('custom_image_input');
-            customInput.style.display = select.value === '' ? 'block' : 'none';
+            const existingImg = document.getElementById('background_image_existing');
+            const thumbPreview = document.getElementById('background_image_thumb_preview');
+            const bgValue = select.value;
+            const isCustom = bgValue === '';
+
+            // Show/hide built-in background preview thumbnail
+            if (thumbPreview) {
+                if (bgValue && bgValue !== 'none' && bgValue !== '') {
+                    thumbPreview.src = "{{ asset('images/backgrounds/thumbs') }}" + '/' + bgValue + '.jpg';
+                    thumbPreview.style.display = '';
+                } else {
+                    thumbPreview.style.display = 'none';
+                }
+            }
+
+            if (existingImg) {
+                existingImg.style.display = isCustom ? '' : 'none';
+            }
+
+            const hasExistingImage = existingImg && existingImg.style.display !== 'none';
+            customInput.style.display = (isCustom && !hasExistingImage) ? 'block' : 'none';
         }
 
         function updateHeaderNavButtons() { 
@@ -561,19 +601,40 @@
         function changeHeaderImage(direction) {
             const select = document.getElementById('header_image');
             const newIndex = select.selectedIndex + direction;
-            
+
             if (newIndex >= 0 && newIndex < select.options.length) {
                 select.selectedIndex = newIndex;
-                select.dispatchEvent(new Event('input'));
+                updatePreview();
                 updateHeaderNavButtons();
+                toggleCustomHeaderInput();
             }
         }
 
         function toggleCustomHeaderInput() {
             const select = document.getElementById('header_image');
             const customInput = document.getElementById('custom_header_input');
-            // Show custom input only for 'Custom' option (empty value), not for 'none' or presets
-            customInput.style.display = select.value === '' ? 'block' : 'none';
+            const deleteBtn = document.getElementById('delete_header_image_button');
+            const headerPreview = document.getElementById('header_image_preview');
+            const headerValue = select.value;
+            const isCustom = headerValue === '';
+
+            // Show/hide built-in header preview thumbnail
+            if (headerPreview) {
+                if (headerValue && headerValue !== 'none' && headerValue !== '') {
+                    headerPreview.src = "{{ asset('images/headers/thumbs') }}" + '/' + headerValue + '.jpg';
+                    headerPreview.style.display = '';
+                } else {
+                    headerPreview.style.display = 'none';
+                }
+            }
+
+            // Show/hide existing custom image with delete button
+            if (deleteBtn) {
+                deleteBtn.style.display = isCustom ? '' : 'none';
+            }
+
+            const hasExistingCustomImage = deleteBtn && deleteBtn.style.display !== 'none';
+            customInput.style.display = (isCustom && !hasExistingCustomImage) ? 'block' : 'none';
         }
 
         function updateFontNavButtons() {
@@ -634,7 +695,9 @@
 
     <form method="post"
         action="{{ $role->exists ? route('role.update', ['subdomain' => $role->subdomain]) : route('role.store') }}"
-        enctype="multipart/form-data">
+        enctype="multipart/form-data"
+        novalidate
+        id="edit-form">
 
         @csrf
         @if($role->exists)
@@ -754,7 +817,7 @@
                         <div class="mb-6">
                             <x-input-label for="name" :value="__('messages.name') . ' *'" />
                             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
-                                :value="old('name', $role->name)" required autofocus oninput="updatePreview()" />
+                                :value="old('name', $role->name)" required autofocus data-action="update-preview-on-input" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 
@@ -875,17 +938,17 @@
                         <div class="mb-6">
                             <x-input-label for="country" :value="__('messages.country')" />
                             <x-text-input id="country" name="country" type="text" class="mt-1 block w-full"
-                                :value="old('country')" onchange="onChangeCountry()" autocomplete="off" />
+                                :value="old('country')" data-action="change-country" autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('country')" />
                             <input type="hidden" id="country_code" name="country_code" />
                         </div>
 
                         <div class="mb-6">
                             <div class="flex items-center space-x-4">
-                                <x-secondary-button id="view_map_button" onclick="viewMap()">{{ __('messages.view_map') }}</x-secondary-button>
+                                <x-secondary-button id="view_map_button">{{ __('messages.view_map') }}</x-secondary-button>
                                 @if (config('services.google.backend'))
-                                <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
-                                <x-secondary-button id="accept_button" onclick="acceptAddress(event)" class="hidden">{{ __('messages.accept') }}</x-secondary-button>
+                                <x-secondary-button id="validate_button">{{ __('messages.validate_address') }}</x-secondary-button>
+                                <x-secondary-button id="accept_button" class="hidden">{{ __('messages.accept') }}</x-secondary-button>
                                 @endif
                             </div>
                         </div>
@@ -960,7 +1023,7 @@
                         <div class="mb-6">
                             <x-input-label for="country" :value="__('messages.country')" />
                             <x-text-input id="country" name="country" type="text" class="mt-1 block w-full"
-                                :value="old('country')" onchange="onChangeCountry()" autocomplete="off" />
+                                :value="old('country')" data-action="change-country" autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('country')" />
                             <input type="hidden" id="country_code" name="country_code" />
                         </div>
@@ -997,15 +1060,15 @@
                     <!-- Sub-Tab Navigation -->
                     <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
                         <nav class="-mb-px flex space-x-2 sm:space-x-6">
-                            <button type="button" onclick="showStyleTab('images')" id="style-tab-images"
+                            <button type="button" data-style-tab="images" id="style-tab-images"
                                 class="style-tab-button flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-[#4E81FA] text-[#4E81FA]">
                                 {{ __('messages.images') }}
                             </button>
-                            <button type="button" onclick="showStyleTab('background')" id="style-tab-background"
+                            <button type="button" data-style-tab="background" id="style-tab-background"
                                 class="style-tab-button flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
                                 {{ __('messages.background') }}
                             </button>
-                            <button type="button" onclick="showStyleTab('settings')" id="style-tab-settings"
+                            <button type="button" data-style-tab="settings" id="style-tab-settings"
                                 class="style-tab-button flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
                                 {{ __('messages.settings') }}
                             </button>
@@ -1018,32 +1081,36 @@
                             <div class="mb-6">
                                 <x-input-label :value="__('messages.square_profile_image')" />
                                 <input id="profile_image" name="profile_image" type="file" class="hidden"
-                                    accept="image/png, image/jpeg" onchange="document.getElementById('profile_image_filename').textContent = this.files[0]?.name || ''; previewImage(this, 'profile_image_preview');" />
-                                <div class="mt-1 flex items-center gap-3">
-                                    <button type="button" onclick="document.getElementById('profile_image').click()"
-                                        class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
-                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                        {{ __('messages.choose_file') }}
-                                    </button>
-                                    <span id="profile_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                                    accept="image/png, image/jpeg" data-file-trigger="profile_image" data-filename-target="profile_image_filename" data-preview-target="profile_image_preview" />
+                                <div id="profile_image_choose" style="{{ $role->profile_image_url ? 'display:none' : '' }}">
+                                    <div class="mt-1 flex items-center gap-3">
+                                        <button type="button" data-trigger-file-input="profile_image"
+                                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                            {{ __('messages.choose_file') }}
+                                        </button>
+                                        <span id="profile_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                                    </div>
+                                    <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
+                                    <p id="profile_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                        {{ __('messages.image_size_warning') }}
+                                    </p>
                                 </div>
-                                <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
-                                <p id="profile_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
-                                    {{ __('messages.image_size_warning') }}
-                                </p>
 
                                 <div id="profile_image_preview_clear" class="relative inline-block pt-3" style="display: none;">
                                     <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px;" class="rounded-md border border-gray-200 dark:border-gray-600" />
-                                    <button type="button" onclick="clearRoleFileInput('profile_image', 'profile_image_preview', 'profile_image_filename')" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                    <button type="button" data-clear-file-input="profile_image" data-clear-preview="profile_image_preview" data-clear-filename="profile_image_filename" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                                 </div>
 
                                 @if ($role->profile_image_url)
-                                <div class="relative inline-block pt-3">
+                                <div id="profile_image_existing" class="relative inline-block mt-4 pt-1" data-show-on-delete="profile_image_choose">
                                     <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
                                     <button type="button"
-                                        onclick="deleteRoleImage('{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}', '{{ csrf_token() }}', this.parentElement)"
+                                        data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}"
+                                        data-delete-image-token="{{ csrf_token() }}"
+                                        data-delete-image-parent="true"
                                         style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
                                         class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1054,35 +1121,41 @@
                                 @endif
                             </div>
 
+                            @php
+                                $effectiveHeaderImage = $role->header_image;
+                                if ($role->header_image_url && ($effectiveHeaderImage == 'none' || !$effectiveHeaderImage)) {
+                                    $effectiveHeaderImage = ''; // Custom
+                                }
+                            @endphp
                             <div class="mb-6">
                                 <x-input-label for="header_image" :value="__('messages.header_image')" />
-                                <select id="header_image" name="header_image"
-                                    class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
-                                    oninput="updatePreview(); updateHeaderNavButtons(); toggleCustomHeaderInput();">
-                                    <option value="none" {{ $role->header_image == 'none' || (!$role->header_image && !$role->header_image_url) ? 'SELECTED' : '' }}>
-                                        {{ __('messages.none') }}</option>
-                                    @foreach($headers as $header => $name)
-                                    <option value="{{ $header }}"
-                                        {{ $role->header_image == $header ? 'SELECTED' : '' }}>
-                                        {{ $name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="flex gap-2 mt-2">
+                                <div class="flex items-center gap-1">
                                     <button type="button"
                                             id="prev_header"
                                             class="color-nav-button"
-                                            onclick="changeHeaderImage(-1)"
+                                            data-nav-action="changeHeaderImage" data-nav-direction="-1"
                                             title="{{ __('messages.previous') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                                         </svg>
                                     </button>
+                                    <select id="header_image" name="header_image"
+                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                        data-action="header-image-input">
+                                        <option value="none" {{ $effectiveHeaderImage == 'none' || (!$effectiveHeaderImage && !$role->header_image_url) ? 'SELECTED' : '' }}>
+                                            {{ __('messages.none') }}</option>
+                                        @foreach($headers as $header => $name)
+                                        <option value="{{ $header }}"
+                                            {{ $effectiveHeaderImage == $header ? 'SELECTED' : '' }}>
+                                            {{ $name }}</option>
+                                        @endforeach
+                                    </select>
                                     <button type="button"
                                             id="next_header"
                                             class="color-nav-button"
-                                            onclick="changeHeaderImage(1)"
+                                            data-nav-action="changeHeaderImage" data-nav-direction="1"
                                             title="{{ __('messages.next') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                         </svg>
                                     </button>
@@ -1090,9 +1163,9 @@
 
                                 <div id="custom_header_input" style="display:none" class="mt-4">
                                     <input id="header_image_url" name="header_image_url" type="file" class="hidden"
-                                        accept="image/png, image/jpeg" onchange="document.getElementById('header_image_url_filename').textContent = this.files[0]?.name || '';" />
+                                        accept="image/png, image/jpeg" data-file-trigger="header_image_url" data-filename-target="header_image_url_filename" />
                                     <div class="mt-1 flex items-center gap-3">
-                                        <button type="button" onclick="document.getElementById('header_image_url').click()"
+                                        <button type="button" data-trigger-file-input="header_image_url"
                                             class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
                                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -1103,7 +1176,7 @@
                                     </div>
                                     <div id="header_image_url_preview_clear" class="relative inline-block pt-3" style="display: none;">
                                         <img id="header_image_url_preview" src="#" alt="Header Image Preview" style="max-height:120px;" class="rounded-md border border-gray-200 dark:border-gray-600" />
-                                        <button type="button" onclick="clearHeaderFileInput()" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                                        <button type="button" id="clear-header-file-btn" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                             </svg>
@@ -1118,14 +1191,16 @@
                                 <img id="header_image_preview"
                                     src="{{ $role->header_image && $role->header_image !== 'none' ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}"
                                     alt="Header Image Preview"
-                                    style="max-height:120px; {{ ($role->header_image && $role->header_image !== 'none') || $role->header_image_url ? '' : 'display:none;' }}"
+                                    style="max-height:120px; {{ $effectiveHeaderImage && $effectiveHeaderImage !== 'none' ? '' : 'display:none;' }}"
                                     class="pt-3" />
 
                                 @if ($role->header_image_url)
-                                <div id="delete_header_image_button" class="relative inline-block pt-3" style="display: {{ $role->header_image ? 'none' : 'block' }};">
+                                <div id="delete_header_image_button" class="relative inline-block mt-4 pt-1" style="display: {{ $effectiveHeaderImage ? 'none' : 'block' }};">
                                     <img src="{{ $role->header_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
                                     <button type="button"
-                                        onclick="deleteRoleImage('{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}', '{{ csrf_token() }}', this.parentElement)"
+                                        data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}"
+                                        data-delete-image-token="{{ csrf_token() }}"
+                                        data-delete-image-parent="true"
                                         style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
                                         class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1151,7 +1226,7 @@
                                             value="{{ $background }}"
                                             {{ $role->background == $background ? 'checked' : '' }}
                                             class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4"
-                                            onchange="onChangeBackground(); updatePreview();">
+                                            data-action="background-type-change">
                                         <label for="background_type_{{ $background }}" class="ms-2 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.' . $background) }}
                                         </label>
@@ -1164,47 +1239,59 @@
                             <div class="mb-6" id="style_background_solid" style="display:none">
                                 <x-input-label for="background_color" :value="__('messages.background_color')" />
                                 <x-text-input id="background_color" name="background_color" type="color" class="mt-1 block w-1/2"
-                                    :value="old('background_color', $role->background_color)" oninput="updatePreview()" />
+                                    :value="old('background_color', $role->background_color)" data-action="update-preview-on-input" />
                                 <x-input-error class="mt-2" :messages="$errors->get('background_color')" />
                             </div>
 
+                            @php
+                                $effectiveBackgroundImage = $role->background_image;
+                                if ($role->background_image_url && !$effectiveBackgroundImage) {
+                                    $effectiveBackgroundImage = ''; // Custom
+                                }
+                            @endphp
                             <div class="mb-6" id="style_background_image" style="display:none">
                                 <x-input-label for="image" :value="__('messages.image')" />
-                                <select id="background_image" name="background_image"
-                                    class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
-                                    oninput="onChangeBackground(); updatePreview(); updateImageNavButtons(); toggleCustomImageInput();">
-                                    @foreach($backgrounds as $background => $name)
-                                    <option value="{{ $background }}"
-                                        {{ $role->background_image == $background ? 'SELECTED' : '' }}>
-                                        {{ $name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="flex gap-2 mt-2">
+                                <div class="flex items-center gap-1">
                                     <button type="button"
                                             id="prev_image"
                                             class="color-nav-button"
-                                            onclick="changeBackgroundImage(-1)"
+                                            data-nav-action="changeBackgroundImage" data-nav-direction="-1"
                                             title="{{ __('messages.previous') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                                         </svg>
                                     </button>
+                                    <select id="background_image" name="background_image"
+                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                        data-action="background-image-input">
+                                        @foreach($backgrounds as $background => $name)
+                                        <option value="{{ $background }}"
+                                            {{ $effectiveBackgroundImage == $background ? 'SELECTED' : '' }}>
+                                            {{ $name }}</option>
+                                        @endforeach
+                                    </select>
                                     <button type="button"
                                             id="next_image"
                                             class="color-nav-button"
-                                            onclick="changeBackgroundImage(1)"
+                                            data-nav-action="changeBackgroundImage" data-nav-direction="1"
                                             title="{{ __('messages.next') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                         </svg>
                                     </button>
                                 </div>
 
+                                <img id="background_image_thumb_preview"
+                                    src="{{ $role->background_image && $role->background_image !== 'none' ? asset('images/backgrounds/thumbs/' . $role->background_image . '.jpg') : '' }}"
+                                    alt="Background Image Preview"
+                                    style="max-height:200px; max-width:100%; {{ $effectiveBackgroundImage && $effectiveBackgroundImage !== 'none' && $effectiveBackgroundImage !== '' ? '' : 'display:none;' }}"
+                                    class="pt-3" />
+
                                 <div id="custom_image_input" style="display:none" class="mt-4">
                                     <input id="background_image_url" name="background_image_url" type="file" class="hidden"
-                                        accept="image/png, image/jpeg" onchange="document.getElementById('background_image_url_filename').textContent = this.files[0]?.name || ''; updatePreview();" />
+                                        accept="image/png, image/jpeg" data-file-trigger="background_image_url" data-filename-target="background_image_url_filename" data-update-preview="true" />
                                     <div class="mt-1 flex items-center gap-3">
-                                        <button type="button" onclick="document.getElementById('background_image_url').click()"
+                                        <button type="button" data-trigger-file-input="background_image_url"
                                             class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
                                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -1219,14 +1306,16 @@
 
                                     <div id="background_image_preview_clear" class="relative inline-block pt-3" style="display: none;">
                                         <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px;" class="rounded-md border border-gray-200 dark:border-gray-600" />
-                                        <button type="button" onclick="clearRoleFileInput('background_image_url', 'background_image_preview', 'background_image_url_filename')" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                        <button type="button" data-clear-file-input="background_image_url" data-clear-preview="background_image_preview" data-clear-filename="background_image_url_filename" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                                     </div>
 
                                     @if ($role->background_image_url)
-                                    <div class="relative inline-block pt-3">
+                                    <div id="background_image_existing" class="relative inline-block mt-4 pt-1">
                                         <img src="{{ $role->background_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
                                         <button type="button"
-                                            onclick="deleteRoleImage('{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}', '{{ csrf_token() }}', this.parentElement)"
+                                            data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}"
+                                            data-delete-image-token="{{ csrf_token() }}"
+                                            data-delete-image-parent="true"
                                             style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
                                             class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1241,30 +1330,30 @@
                             <div id="style_background_gradient" style="display:none">
                                 <div class="mb-6">
                                     <x-input-label for="background_colors" :value="__('messages.colors')" />
-                                    <select id="background_colors" name="background_colors" oninput="updatePreview(); updateColorNavButtons()"
-                                        class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                        @foreach($gradients as $gradient => $name)
-                                        <option value="{{ $gradient }}"
-                                            {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
-                                            {{ $name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <div class="flex gap-2 mt-2">
+                                    <div class="flex items-center gap-1">
                                         <button type="button"
                                                 id="prev_color"
                                                 class="color-nav-button"
-                                                onclick="changeBackgroundColor(-1)"
+                                                data-nav-action="changeBackgroundColor" data-nav-direction="-1"
                                                 title="{{ __('messages.previous') }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                                             </svg>
                                         </button>
+                                        <select id="background_colors" name="background_colors" data-action="background-colors-input"
+                                            class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                            @foreach($gradients as $gradient => $name)
+                                            <option value="{{ $gradient }}"
+                                                {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
+                                                {{ $name }}</option>
+                                            @endforeach
+                                        </select>
                                         <button type="button"
                                                 id="next_color"
                                                 class="color-nav-button"
-                                                onclick="changeBackgroundColor(1)"
+                                                data-nav-action="changeBackgroundColor" data-nav-direction="1"
                                                 title="{{ __('messages.next') }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                             </svg>
                                         </button>
@@ -1275,14 +1364,23 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('background_colors')" />
 
                                     <div id="custom_colors" style="display:none" class="mt-4">
-                                        <x-text-input id="custom_color1" name="custom_color1" type="color"
-                                            class="mt-1 block w-1/2"
-                                            :value="old('custom_color1', $role->background_colors ? explode(', ', $role->background_colors)[0] : '')"
-                                            oninput="updatePreview()" />
-                                        <x-text-input id="custom_color2" name="custom_color2" type="color"
-                                            class="mt-1 block w-1/2"
-                                            :value="old('custom_color2', $role->background_colors ? explode(', ', $role->background_colors)[1] : '')"
-                                            oninput="updatePreview()" />
+                                        <div class="flex items-center gap-3">
+                                            <x-text-input id="custom_color1" name="custom_color1" type="color"
+                                                class="block flex-1 h-10"
+                                                :value="old('custom_color1', $role->background_colors ? explode(', ', $role->background_colors)[0] : '')"
+                                                data-action="update-preview-on-input" />
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.5" stroke="currentColor"
+                                                class="w-5 h-5 text-gray-400 shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                            </svg>
+                                            <x-text-input id="custom_color2" name="custom_color2" type="color"
+                                                class="block flex-1 h-10"
+                                                :value="old('custom_color2', $role->background_colors ? explode(', ', $role->background_colors)[1] : '')"
+                                                data-action="update-preview-on-input" />
+                                        </div>
+                                        <div id="custom_gradient_preview" class="mt-2 h-3 rounded-full"></div>
                                     </div>
                                 </div>
 
@@ -1291,7 +1389,7 @@
                                     <div class="flex items-center gap-3 mt-1">
                                         <input id="background_rotation" name="background_rotation" type="range"
                                             class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                                            oninput="updatePreview(); document.getElementById('rotation_value').textContent = this.value + '°'"
+                                            data-action="rotation-input"
                                             value="{{ old('background_rotation', $role->background_rotation ?? 0) }}" min="0" max="360" />
                                         <span id="rotation_value" class="text-sm text-gray-600 dark:text-gray-400 w-12 text-end">{{ old('background_rotation', $role->background_rotation ?? 0) }}°</span>
                                     </div>
@@ -1305,36 +1403,36 @@
                             <div class="mb-6">
                                 <x-input-label for="accent_color" :value="__('messages.accent_color')" />
                                 <x-text-input id="accent_color" name="accent_color" type="color" class="mt-1 block w-1/2"
-                                    :value="old('accent_color', $role->accent_color)" oninput="updatePreview()" />
+                                    :value="old('accent_color', $role->accent_color)" data-action="update-preview-on-input" />
                                 <x-input-error class="mt-2" :messages="$errors->get('accent_color')" />
                             </div>
 
                             <div class="mb-6">
                                 <x-input-label for="font_family" :value="__('messages.font_family')" />
-                                <select id="font_family" name="font_family" onchange="onChangeFont(); updateFontNavButtons();"
-                                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                    @foreach($fonts as $font)
-                                    <option value="{{ $font->value }}"
-                                        {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
-                                        {{ $font->label }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="flex gap-2 mt-2">
+                                <div class="flex items-center gap-1">
                                     <button type="button"
                                             id="prev_font"
                                             class="color-nav-button"
-                                            onclick="changeFont(-1)"
+                                            data-nav-action="changeFont" data-nav-direction="-1"
                                             title="{{ __('messages.previous') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                                         </svg>
                                     </button>
+                                    <select id="font_family" name="font_family" data-action="font-family-change"
+                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        @foreach($fonts as $font)
+                                        <option value="{{ $font->value }}"
+                                            {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
+                                            {{ $font->label }}</option>
+                                        @endforeach
+                                    </select>
                                     <button type="button"
                                             id="next_font"
                                             class="color-nav-button"
-                                            onclick="changeFont(1)"
+                                            data-nav-action="changeFont" data-nav-direction="1"
                                             title="{{ __('messages.next') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                         </svg>
                                     </button>
@@ -1443,14 +1541,14 @@
                                 <x-link href="{{ $role->getGuestUrl() }}" target="_blank">
                                     {{ \App\Utils\UrlUtils::clean($role->getGuestUrl()) }}
                                 </x-link>
-                                <button type="button" onclick="copyRoleUrl(this)" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
+                                <button type="button" data-action="copy-role-url" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                                     </svg>
                                 </button>
                                 </button>
                             </p>
-                            <x-secondary-button type="button" onclick="toggleSubdomainEdit()" class="mt-3">
+                            <x-secondary-button type="button" data-action="toggle-subdomain-edit" class="mt-3">
                                 {{ __('messages.edit') }}
                             </x-secondary-button>
                         </div>
@@ -1460,7 +1558,7 @@
                                 <x-input-label for="new_subdomain" :value="__('messages.subdomain')" />
                                 <x-text-input id="new_subdomain" name="new_subdomain" type="text" class="mt-1 block w-full"
                                     :value="old('new_subdomain', $role->subdomain)" required minlength="4" maxlength="50"
-                                    pattern="[a-z0-9-]+" oninput="this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '')" />
+                                    pattern="[a-z0-9-]+" data-action="subdomain-sanitize" />
                                 <x-input-error class="mt-2" :messages="$errors->get('new_subdomain')" />
                             </div>
 
@@ -1471,7 +1569,7 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_domain')" />
                             </div>
 
-                            <x-secondary-button type="button" onclick="toggleSubdomainEdit()" class="mt-3 mb-6">
+                            <x-secondary-button type="button" data-action="toggle-subdomain-edit" class="mt-3 mb-6">
                                 {{ __('messages.cancel') }}
                             </x-secondary-button>
                         </div>
@@ -1490,6 +1588,17 @@
                             </x-link>
                             <x-input-error class="mt-2" :messages="$errors->get('slug_pattern')" />
                         </div>
+
+                        @if ($role->isCurator())
+                        <div class="mb-6">
+                            <x-checkbox name="direct_registration"
+                                label="{{ __('messages.direct_registration') }}"
+                                checked="{{ old('direct_registration', $role->direct_registration) }}"
+                                data-custom-attribute="value" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.direct_registration_help') }}</p>
+                            <x-input-error class="mt-2" :messages="$errors->get('direct_registration')" />
+                        </div>
+                        @endif
 
                         @if ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isCurator()))
                         <div class="mb-6">
@@ -1515,16 +1624,40 @@
                                 placeholder="{{ __('messages.enter_request_terms') }}">{{ old('request_terms', $role->request_terms) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('request_terms')" />
                         </div>
-                        @endif
-
-                        <div class="mb-6">
-                            <x-checkbox name="direct_registration"
-                                label="{{ __('messages.direct_registration') }}"
-                                checked="{{ old('direct_registration', $role->direct_registration) }}"
-                                data-custom-attribute="value" />
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.direct_registration_help') }}</p>
-                            <x-input-error class="mt-2" :messages="$errors->get('direct_registration')" />
+                        <div class="mb-6" id="import_form_fields_section">
+                            <x-input-label :value="__('messages.import_form_fields')" />
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.import_form_fields_help') }}</p>
+                            @php $importFields = $role->import_config['fields'] ?? []; @endphp
+                            <div class="space-y-2">
+                                <x-checkbox name="import_fields[short_description]"
+                                    label="{{ __('messages.short_description') }}"
+                                    checked="{{ old('import_fields.short_description', $importFields['short_description'] ?? false) }}"
+                                    data-custom-attribute="value" />
+                                <x-checkbox name="import_fields[description]"
+                                    label="{{ __('messages.description') }}"
+                                    checked="{{ old('import_fields.description', $importFields['description'] ?? false) }}"
+                                    data-custom-attribute="value" />
+                                <x-checkbox name="import_fields[ticket_price]"
+                                    label="{{ __('messages.price') }}"
+                                    checked="{{ old('import_fields.ticket_price', $importFields['ticket_price'] ?? false) }}"
+                                    data-custom-attribute="value" />
+                                <x-checkbox name="import_fields[registration_url]"
+                                    label="{{ __('messages.registration_url') }}"
+                                    checked="{{ old('import_fields.registration_url', $importFields['registration_url'] ?? false) }}"
+                                    data-custom-attribute="value" />
+                                <x-checkbox name="import_fields[category_id]"
+                                    label="{{ __('messages.category') }}"
+                                    checked="{{ old('import_fields.category_id', $importFields['category_id'] ?? false) }}"
+                                    data-custom-attribute="value" />
+                                @if (($role->groups ?? collect())->count() > 0)
+                                <x-checkbox name="import_fields[group_id]"
+                                    label="{{ __('messages.subschedules') }}"
+                                    checked="{{ old('import_fields.group_id', $importFields['group_id'] ?? false) }}"
+                                    data-custom-attribute="value" />
+                                @endif
+                            </div>
                         </div>
+                        @endif
 
                         <!--
                         <div class="mb-6">
@@ -1563,7 +1696,7 @@
                                     <div>
                                         <x-input-label :value="__('messages.field_type')" class="text-sm" />
                                         <select name="event_custom_fields[{{ $fieldKey }}][type]"
-                                            onchange="toggleEventFieldOptions(this)"
+                                            data-action="toggle-field-options"
                                             class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                             <option value="string" {{ ($field['type'] ?? 'string') === 'string' ? 'selected' : '' }}>{{ __('messages.type_string') }}</option>
                                             <option value="multiline_string" {{ ($field['type'] ?? '') === 'multiline_string' ? 'selected' : '' }}>{{ __('messages.type_multiline_string') }}</option>
@@ -1611,7 +1744,7 @@
                                         <span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_{{ $field['index'] }}}</span>
                                         @endif
                                     </div>
-                                    <button type="button" onclick="removeEventCustomField(this)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                    <button type="button" data-action="remove-custom-field" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                         {{ __('messages.remove') }}
                                     </button>
                                 </div>
@@ -1619,7 +1752,7 @@
                             @endforeach
                         </div>
 
-                        <button type="button" onclick="addEventCustomField()" id="add-event-custom-field-btn" class="text-sm text-[#4E81FA] hover:text-blue-700 {{ count($eventCustomFields) >= 8 ? 'hidden' : '' }}">
+                        <button type="button" data-action="add-custom-field" id="add-event-custom-field-btn" class="text-sm text-[#4E81FA] hover:text-blue-700 {{ count($eventCustomFields) >= 8 ? 'hidden' : '' }}">
                             + {{ __('messages.add_field') }}
                         </button>
 
@@ -1650,31 +1783,12 @@
                                             @endif
                                             <div class="mb-4">
                                                 <x-input-label :value="__('messages.color')" />
-                                                <input type="hidden" name="groups[{{ is_object($group) ? $group->id : $i }}][color]" value="{{ is_object($group) ? $group->color : ($group['color'] ?? '') }}" />
-                                                <div class="mt-1 relative" x-data="{ open: false }">
-                                                    @php $currentColor = is_object($group) ? $group->color : ($group['color'] ?? ''); @endphp
-                                                    <button type="button" @click="open = !open" class="color-trigger w-7 h-7 rounded-full transition-all duration-150 flex items-center justify-center {{ $currentColor ? '' : 'border-2 border-dashed border-gray-300 dark:border-gray-600' }}" {!! $currentColor ? 'style="background-color: ' . $currentColor . '"' : '' !!}>
-                                                        @unless($currentColor)
-                                                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"/></svg>
-                                                        @endunless
-                                                    </button>
-                                                    <div x-show="open" @click.outside="open = false" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute start-0 mt-2 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2.5">
-                                                        <div class="grid grid-cols-7 gap-1.5">
-                                                            @foreach(['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'] as $swatch)
-                                                            <button type="button"
-                                                                class="w-3 h-3 rounded-full group-color-swatch transition-transform duration-150 hover:scale-110 {{ $currentColor === $swatch ? 'outline outline-2 outline-offset-1 outline-gray-800 dark:outline-white' : '' }}"
-                                                                style="background-color: {{ $swatch }}"
-                                                                onclick="selectGroupColor(this, '{{ $swatch }}')"
-                                                                title="{{ $swatch }}"></button>
-                                                            @endforeach
-                                                        </div>
-                                                        <button type="button"
-                                                            class="mt-1.5 w-full text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors duration-150 py-1"
-                                                            onclick="selectGroupColor(this, '')">
-                                                            {{ __('messages.clear') }}
-                                                        </button>
-                                                    </div>
-                                                </div>
+                                                <div class="vue-color-picker" data-props="{{ json_encode([
+                                                    'name' => 'groups[' . (is_object($group) ? $group->id : $i) . '][color]',
+                                                    'initialColor' => is_object($group) ? $group->color : ($group['color'] ?? ''),
+                                                    'colors' => ['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'],
+                                                    'clearLabel' => __('messages.clear'),
+                                                ]) }}"></div>
                                             </div>
                                             @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
                                             <div class="mb-4" id="group-url-display-{{ is_object($group) ? $group->id : $i }}">
@@ -1682,7 +1796,7 @@
                                                     <x-link href="{{ $role->getGuestUrl() }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank">
                                                         {{ \App\Utils\UrlUtils::clean($role->getGuestUrl()) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}
                                                     </x-link>
-                                                    <button type="button" onclick="copyGroupUrl(this, '{{ $role->getGuestUrl() }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}')" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
+                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $role->getGuestUrl() }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                                                         </svg>
@@ -1695,22 +1809,22 @@
                                             </div>
                                             <div class="flex gap-4 items-center justify-between">
                                                 <div class="flex gap-4 items-center">
-                                                    <button type="button" onclick="toggleGroupSlugEdit('{{ is_object($group) ? $group->id : $i }}')" id="edit-button-{{ is_object($group) ? $group->id : $i }}" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" id="edit-button-{{ is_object($group) ? $group->id : $i }}" class="text-sm text-[#4E81FA] hover:text-blue-700">
                                                         {{ __('messages.edit') }}
                                                     </button>
                                                     @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
-                                                    <button type="button" onclick="toggleGroupSlugEdit('{{ is_object($group) ? $group->id : $i }}')" class="hidden text-sm text-[#4E81FA] hover:text-blue-700" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
+                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" class="hidden text-sm text-[#4E81FA] hover:text-blue-700" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
                                                         {{ __('messages.cancel') }}
                                                     </button>
                                                     @endif
                                                 </div>
-                                                <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                     {{ __('messages.remove') }}
                                                 </button>
                                             </div>
                                             @else
                                             <div class="flex gap-4 items-center justify-end">
-                                                <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                     {{ __('messages.remove') }}
                                                 </button>
                                             </div>
@@ -1718,7 +1832,7 @@
                                         </div>
                                     @endforeach
                                 </div>
-                                <button type="button" onclick="addGroupField()" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                <button type="button" data-action="add-group-field" class="text-sm text-[#4E81FA] hover:text-blue-700">
                                     + {{ __('messages.add_subschedule') }}
                                 </button>
                             </div>
@@ -1766,14 +1880,14 @@
                                                 <x-text-input name="import_urls[]" type="url" class="mt-1 block w-full" :value="$url" />
                                             </div>
                                             <div class="flex gap-4 items-center">
-                                                <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                     {{ __('messages.remove') }}
                                                 </button>
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
-                                <button type="button" onclick="addImportUrlField()" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                <button type="button" data-action="add-import-url" class="text-sm text-[#4E81FA] hover:text-blue-700">
                                     + {{ __('messages.add') }}
                                 </button>
                             </div>
@@ -1794,14 +1908,14 @@
                                                 <x-text-input name="import_cities[]" type="text" class="mt-1 block w-full" :value="$city" placeholder="{{ __('messages.placeholder_city') }}" />
                                             </div>
                                             <div class="flex gap-4 items-center">
-                                                <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                     {{ __('messages.remove') }}
                                                 </button>
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
-                                <button type="button" onclick="addImportCityField()" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                <button type="button" data-action="add-import-city" class="text-sm text-[#4E81FA] hover:text-blue-700">
                                     + {{ __('messages.add') }}
                                 </button>
                             </div>
@@ -1810,7 +1924,7 @@
 
                         @if ($role->exists)
                         <div class="mb-6">
-                            <x-secondary-button onclick="testImport(this)" type="button">
+                            <x-secondary-button id="test-import-btn" type="button">
                                 {{ __('messages.test_import') }}
                             </x-secondary-button>
                         </div>
@@ -1931,7 +2045,7 @@
 
                                 @if (false)
                                 <div>
-                                    <x-secondary-button type="button" onclick="syncEvents()" id="sync-events-button">
+                                    <x-secondary-button type="button" id="sync-events-button">
                                         {{ __('messages.sync_events') }}
                                     </x-secondary-button>
                                 </div>
@@ -2348,27 +2462,21 @@ function addGroupField() {
         @endif
         <div class="mb-4">
             <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.color') }}</label>
-            <input type="hidden" name="groups[new_${idx}][color]" value="" />
-            <div class="mt-1 relative" x-data="{ open: false }">
-                <button type="button" @click="open = !open" class="color-trigger w-7 h-7 rounded-full transition-all duration-150 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600">
-                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"/></svg>
-                </button>
-                <div x-show="open" @click.outside="open = false" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute start-0 mt-2 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2.5">
-                    <div class="grid grid-cols-7 gap-1.5">
-                        ${['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'].map(c => '<button type="button" class="w-3 h-3 rounded-full group-color-swatch transition-transform duration-150 hover:scale-110" style="background-color: ' + c + '" onclick="selectGroupColor(this, \'' + c + '\')" title="' + c + '"></button>').join('')}
-                    </div>
-                    <button type="button" class="mt-1.5 w-full text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors duration-150 py-1" onclick="selectGroupColor(this, '')">{{ __('messages.clear') }}</button>
-                </div>
-            </div>
+            <div class="vue-color-picker" data-props='${JSON.stringify({
+                name: "groups[new_" + idx + "][color]",
+                initialColor: "",
+                colors: ["#EF4444","#F97316","#EAB308","#84CC16","#22C55E","#14B8A6","#06B6D4","#0EA5E9","#3B82F6","#6366F1","#A855F7","#EC4899","#F43F5E","#6B7280"],
+                clearLabel: "{{ __('messages.clear') }}",
+            })}'></div>
         </div>
         <div class="flex gap-4 items-center justify-end">
-            <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm" onclick="this.parentElement.parentElement.remove()">
+            <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm" data-action="remove-parent-item">
                 {{ __('messages.remove') }}
             </button>
         </div>
     `;
     container.appendChild(div);
-    Alpine.initTree(div);
+    div.querySelectorAll('.vue-color-picker').forEach(window.mountColorPicker);
 }
 
 function copyRoleUrl(button) {
@@ -2412,38 +2520,6 @@ function copyGroupUrl(button, url) {
             button.innerHTML = originalHTML;
         }, 2000);
     });
-}
-
-function selectGroupColor(element, color) {
-    const container = element.closest('.mb-4');
-    const hiddenInput = container.querySelector('input[type="hidden"]');
-    hiddenInput.value = color;
-
-    container.querySelectorAll('.group-color-swatch').forEach(function(btn) {
-        btn.classList.remove('outline', 'outline-2', 'outline-offset-1', 'outline-gray-800', 'dark:outline-white');
-    });
-
-    if (color && element.classList.contains('group-color-swatch')) {
-        element.classList.add('outline', 'outline-2', 'outline-offset-1', 'outline-gray-800', 'dark:outline-white');
-    }
-
-    const trigger = container.querySelector('.color-trigger');
-    if (trigger) {
-        if (color) {
-            trigger.style.backgroundColor = color;
-            trigger.innerHTML = '';
-            trigger.classList.remove('border-2', 'border-dashed', 'border-gray-300', 'dark:border-gray-600');
-        } else {
-            trigger.style.backgroundColor = '';
-            trigger.innerHTML = '<svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"/></svg>';
-            trigger.classList.add('border-2', 'border-dashed', 'border-gray-300', 'dark:border-gray-600');
-        }
-    }
-
-    const alpineRoot = element.closest('[x-data]');
-    if (alpineRoot && alpineRoot._x_dataStack) {
-        alpineRoot._x_dataStack[0].open = false;
-    }
 }
 
 function toggleGroupSlugEdit(groupId) {
@@ -2564,7 +2640,7 @@ function showImportOutput(output, message, isSuccess = true) {
                     ` : ''}
                     
                     <div class="flex justify-end">
-                        <button onclick="closeImportOutput()" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500">
+                        <button data-action="close-import-output" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500">
                             {{ __("messages.close") }}
                         </button>
                     </div>
@@ -2595,7 +2671,7 @@ function addImportUrlField() {
             <input name="import_urls[new_${idx}]" type="url" id="import_url_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
         </div>
         <div class="flex gap-4 items-center">
-            <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm" onclick="this.parentElement.parentElement.remove()">
+            <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm" data-action="remove-parent-item">
                 {{ __('messages.remove') }}
             </button>
         </div>
@@ -2614,7 +2690,7 @@ function addImportCityField() {
             <input name="import_cities[new_${idx}]" type="text" id="import_city_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" placeholder="{{ __('messages.placeholder_city') }}" />
         </div>
         <div class="flex gap-4 items-center">
-            <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm" onclick="this.parentElement.parentElement.remove()">
+            <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm" data-action="remove-parent-item">
                 {{ __('messages.remove') }}
             </button>
         </div>
@@ -2994,30 +3070,8 @@ document.addEventListener('DOMContentLoaded', function() {
     requestAnimationFrame(scrollToTop);
 
     // Form validation error handling
-    const form = document.querySelector('form');
+    const form = document.getElementById('edit-form');
     if (form) {
-        // Field to section mapping
-        const fieldSectionMap = {
-            'name': 'section-details',
-            'address1': 'section-address',
-            'email': 'section-contact-info'
-        };
-
-        // Function to find section containing a field
-        function findSectionForField(fieldId) {
-            const field = document.getElementById(fieldId);
-            if (!field) return null;
-            
-            // Find the section containing this field
-            let parent = field.closest('.section-content');
-            if (parent) {
-                return parent.id;
-            }
-            
-            // Fallback to mapping
-            return fieldSectionMap[fieldId] || null;
-        }
-
         // Function to highlight section navigation link
         function highlightSectionError(sectionId) {
             if (!sectionId) return;
@@ -3045,6 +3099,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 mobileHeader.classList.remove('validation-error');
             }
         }
+
+        // Highlight sections with server-side validation errors
+        document.querySelectorAll('.section-content').forEach(section => {
+            const hasErrors = section.querySelectorAll('ul.text-red-600, ul.text-red-400').length > 0;
+            if (hasErrors) {
+                highlightSectionError(section.id);
+            }
+        });
 
         // Handle invalid event on ANY required field (including custom fields)
         form.addEventListener('invalid', function(e) {
@@ -3522,7 +3584,7 @@ function addEventCustomField() {
                 <div>
                     <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_type') !!}</label>
                     <select name="event_custom_fields[${fieldKey}][type]"
-                        onchange="toggleEventFieldOptions(this)"
+                        data-action="toggle-field-options"
                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                         <option value="string">{!! __('messages.type_string') !!}</option>
                         <option value="multiline_string">{!! __('messages.type_multiline_string') !!}</option>
@@ -3565,7 +3627,7 @@ function addEventCustomField() {
                     </div>
                     ${fieldIndex ? `<span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_${fieldIndex}}</span>` : ''}
                 </div>
-                <button type="button" onclick="removeEventCustomField(this)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                <button type="button" data-action="remove-custom-field" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                     {!! __('messages.remove') !!}
                 </button>
             </div>
@@ -3628,7 +3690,14 @@ function deleteRoleImage(url, token, element) {
     }).then(response => {
         if (response.ok) {
             if (element) {
+                var showTarget = element.dataset.showOnDelete;
                 element.remove();
+                if (showTarget) {
+                    var target = document.getElementById(showTarget);
+                    if (target) target.style.display = '';
+                }
+                if (typeof toggleCustomHeaderInput === 'function') toggleCustomHeaderInput();
+                if (typeof toggleCustomImageInput === 'function') toggleCustomImageInput();
             } else {
                 location.reload();
             }
@@ -3637,5 +3706,239 @@ function deleteRoleImage(url, token, element) {
         }
     });
 }
+
+// ============================================================
+// Event delegation and addEventListener bindings
+// (replaces all inline event handlers)
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+
+    // --- Navigation action map for prev/next buttons ---
+    var navActionMap = {
+        changeHeaderImage: changeHeaderImage,
+        changeBackgroundImage: changeBackgroundImage,
+        changeBackgroundColor: changeBackgroundColor,
+        changeFont: changeFont
+    };
+
+    // --- Delegated click handler on document ---
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('[data-action]');
+        if (!btn) {
+            // Check for nav action buttons
+            var navBtn = e.target.closest('[data-nav-action]');
+            if (navBtn) {
+                var fn = navActionMap[navBtn.dataset.navAction];
+                if (fn) fn(parseInt(navBtn.dataset.navDirection));
+                return;
+            }
+
+            // Check for style tab buttons
+            var styleTabBtn = e.target.closest('[data-style-tab]');
+            if (styleTabBtn) {
+                showStyleTab(styleTabBtn.dataset.styleTab);
+                return;
+            }
+
+            // Check for trigger file input buttons
+            var triggerBtn = e.target.closest('[data-trigger-file-input]');
+            if (triggerBtn) {
+                var fileInput = document.getElementById(triggerBtn.dataset.triggerFileInput);
+                if (fileInput) fileInput.click();
+                return;
+            }
+
+            // Check for clear file input buttons
+            var clearBtn = e.target.closest('[data-clear-file-input]');
+            if (clearBtn) {
+                clearRoleFileInput(clearBtn.dataset.clearFileInput, clearBtn.dataset.clearPreview, clearBtn.dataset.clearFilename);
+                return;
+            }
+
+            // Check for delete image buttons
+            var deleteBtn = e.target.closest('[data-delete-image-url]');
+            if (deleteBtn) {
+                deleteRoleImage(deleteBtn.dataset.deleteImageUrl, deleteBtn.dataset.deleteImageToken, deleteBtn.parentElement);
+                return;
+            }
+
+            // Check for clear header file button
+            if (e.target.closest('#clear-header-file-btn')) {
+                clearHeaderFileInput();
+                return;
+            }
+
+            return;
+        }
+
+        var action = btn.dataset.action;
+
+        switch (action) {
+            case 'copy-role-url':
+                copyRoleUrl(btn);
+                break;
+            case 'copy-group-url':
+                copyGroupUrl(btn, btn.dataset.copyUrl);
+                break;
+            case 'toggle-subdomain-edit':
+                toggleSubdomainEdit();
+                break;
+            case 'toggle-group-slug':
+                toggleGroupSlugEdit(btn.dataset.groupId);
+                break;
+            case 'remove-parent-item':
+                btn.parentElement.parentElement.remove();
+                break;
+            case 'add-group-field':
+                addGroupField();
+                break;
+            case 'add-import-url':
+                addImportUrlField();
+                break;
+            case 'add-import-city':
+                addImportCityField();
+                break;
+            case 'add-custom-field':
+                addEventCustomField();
+                break;
+            case 'remove-custom-field':
+                removeEventCustomField(btn);
+                break;
+            case 'close-import-output':
+                closeImportOutput();
+                break;
+        }
+    });
+
+    // --- Delegated input handler for data-action elements ---
+    document.addEventListener('input', function(e) {
+        var el = e.target.closest('[data-action]');
+        if (!el) return;
+
+        var action = el.dataset.action;
+
+        switch (action) {
+            case 'update-preview-on-input':
+                updatePreview();
+                break;
+            case 'header-image-input':
+                updatePreview();
+                updateHeaderNavButtons();
+                toggleCustomHeaderInput();
+                break;
+            case 'background-image-input':
+                updatePreview();
+                updateImageNavButtons();
+                toggleCustomImageInput();
+                break;
+            case 'background-colors-input':
+                updatePreview();
+                updateColorNavButtons();
+                break;
+            case 'rotation-input':
+                updatePreview();
+                document.getElementById('rotation_value').textContent = el.value + '\u00B0';
+                break;
+            case 'subdomain-sanitize':
+                el.value = el.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                break;
+        }
+    });
+
+    // --- Delegated change handler for data-action elements ---
+    document.addEventListener('change', function(e) {
+        var el = e.target.closest('[data-action]');
+        if (!el) return;
+
+        var action = el.dataset.action;
+
+        switch (action) {
+            case 'change-country':
+                onChangeCountry();
+                break;
+            case 'background-type-change':
+                onChangeBackground();
+                updatePreview();
+                break;
+            case 'font-family-change':
+                onChangeFont();
+                updateFontNavButtons();
+                break;
+            case 'toggle-field-options':
+                toggleEventFieldOptions(el);
+                break;
+            case 'header-image-input':
+                updatePreview();
+                updateHeaderNavButtons();
+                toggleCustomHeaderInput();
+                break;
+            case 'background-image-input':
+                updatePreview();
+                updateImageNavButtons();
+                toggleCustomImageInput();
+                break;
+            case 'background-colors-input':
+                updatePreview();
+                updateColorNavButtons();
+                break;
+        }
+    });
+
+    // --- File input change handlers (delegated) ---
+    document.addEventListener('change', function(e) {
+        var el = e.target.closest('[data-file-trigger]');
+        if (!el) return;
+
+        var filenameTarget = el.dataset.filenameTarget;
+        if (filenameTarget) {
+            var filenameEl = document.getElementById(filenameTarget);
+            if (filenameEl) {
+                filenameEl.textContent = el.files[0] ? el.files[0].name : '';
+            }
+        }
+
+        var previewTarget = el.dataset.previewTarget;
+        if (previewTarget) {
+            previewImage(el, previewTarget);
+        }
+
+        if (el.dataset.updatePreview === 'true') {
+            updatePreview();
+        }
+    });
+
+    // --- Specific element listeners ---
+
+    // View map button
+    var viewMapBtn = document.getElementById('view_map_button');
+    if (viewMapBtn) {
+        viewMapBtn.addEventListener('click', function() { viewMap(); });
+    }
+
+    // Validate address button
+    var validateBtn = document.getElementById('validate_button');
+    if (validateBtn) {
+        validateBtn.addEventListener('click', function() { onValidateClick(); });
+    }
+
+    // Accept address button
+    var acceptBtn = document.getElementById('accept_button');
+    if (acceptBtn) {
+        acceptBtn.addEventListener('click', function(e) { acceptAddress(e); });
+    }
+
+    // Test import button
+    var testImportBtn = document.getElementById('test-import-btn');
+    if (testImportBtn) {
+        testImportBtn.addEventListener('click', function() { testImport(this); });
+    }
+
+    // Sync events button
+    var syncEventsBtn = document.getElementById('sync-events-button');
+    if (syncEventsBtn) {
+        syncEventsBtn.addEventListener('click', function() { syncEvents(); });
+    }
+
+});
 
 </script>

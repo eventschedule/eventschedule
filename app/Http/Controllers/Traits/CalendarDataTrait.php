@@ -11,9 +11,18 @@ use Illuminate\Support\Str;
 
 trait CalendarDataTrait
 {
-    protected function calendarEventToVueArray(Event $event, ?Role $role, ?string $subdomain): array
+    protected function calendarEventToVueArray(Event $event, ?Role $role, ?string $subdomain, ?array $userAdminRoleIds = null): array
     {
         $groupId = $role ? $event->getGroupIdForSubdomain($role->subdomain) : null;
+
+        $user = auth()->user();
+        $canEdit = false;
+        if ($user && $userAdminRoleIds !== null) {
+            $canEdit = $user->id == $event->user_id
+                || $event->roles->contains(fn ($r) => in_array($r->id, $userAdminRoleIds));
+        } elseif ($user) {
+            $canEdit = $user->canEditEvent($event);
+        }
 
         return [
             'id' => UrlUtils::encodeId($event->id),
@@ -31,8 +40,9 @@ trait CalendarDataTrait
             'utc_date' => $event->starts_at ? $event->getStartDateTime(null, false)->format('Y-m-d') : null,
             'guest_url' => $event->getGuestUrl($subdomain ?? '', ''),
             'image_url' => $event->getImageUrl(),
-            'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
-            'edit_url' => auth()->user() && auth()->user()->canEditEvent($event)
+            'flyer_url' => $event->flyer_image_url ?: null,
+            'can_edit' => $canEdit,
+            'edit_url' => $canEdit
                 ? ($role ? config('app.url').route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)], false) : config('app.url').route('event.edit_admin', ['hash' => UrlUtils::encodeId($event->id)], false))
                 : null,
             'recurring_end_type' => $event->recurring_end_type ?? 'never',
@@ -122,14 +132,19 @@ trait CalendarDataTrait
         $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek(Carbon::SUNDAY);
         $endOfMonth = Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek(Carbon::SATURDAY);
 
+        $user = auth()->user();
+        $userAdminRoleIds = $user
+            ? $user->roles()->wherePivotIn('level', ['owner', 'admin'])->pluck('roles.id')->all()
+            : [];
+
         $eventsForVue = [];
         foreach ($events as $event) {
-            $eventsForVue[] = $this->calendarEventToVueArray($event, $role, $subdomain);
+            $eventsForVue[] = $this->calendarEventToVueArray($event, $role, $subdomain, $userAdminRoleIds);
         }
 
         $pastEventsForVue = [];
         foreach ($pastEvents as $event) {
-            $pastEventsForVue[] = $this->calendarEventToVueArray($event, $role, $subdomain);
+            $pastEventsForVue[] = $this->calendarEventToVueArray($event, $role, $subdomain, $userAdminRoleIds);
         }
 
         $eventsMap = $this->buildEventsMap($events, $startOfMonth, $endOfMonth);

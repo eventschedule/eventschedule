@@ -13,7 +13,7 @@
                         <div class="mt-3">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Preview: ${title}</h3>
-                                <button onclick="closePreview()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                <button class="js-close-preview text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
@@ -33,7 +33,7 @@
                                 </div>
                             </div>
                             <div class="mt-6 flex justify-end">
-                                <button onclick="closePreview()" class="bg-gray-600 dark:bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+                                <button class="js-close-preview bg-gray-600 dark:bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
                                     {{ __('messages.close_preview') }}
                                 </button>
                             </div>
@@ -164,8 +164,7 @@
                                                         {{ __('messages.edit') }}
                                                     </a>
                                                     <form method="POST" action="{{ route('blog.destroy', $post->encodeId()) }}"
-                                                          onsubmit="return confirm('{{ __('messages.confirm_delete_post') }}')"
-                                                          class="inline">
+                                                          class="js-confirm-form inline" data-confirm="{{ __('messages.confirm_delete_post') }}"
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors">
@@ -212,3 +211,20 @@
 
 {{-- Preview Modal Root --}}
 <div id="preview-modal-root"></div>
+
+<script {!! nonce_attr() !!}>
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.js-close-preview')) {
+            closePreview();
+        }
+    });
+
+    document.addEventListener('submit', function(e) {
+        var form = e.target.closest('.js-confirm-form');
+        if (form) {
+            if (!confirm(form.getAttribute('data-confirm'))) {
+                e.preventDefault();
+            }
+        }
+    });
+</script>

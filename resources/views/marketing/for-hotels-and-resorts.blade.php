@@ -706,7 +706,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .text-gradient-slate-gold {
             background: linear-gradient(135deg, #64748b, #d97706);
             -webkit-background-clip: text;

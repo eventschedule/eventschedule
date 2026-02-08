@@ -604,7 +604,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .neon-text {
             background: linear-gradient(135deg, #fbbf24, #f59e0b, #fb7185);
             -webkit-background-clip: text;

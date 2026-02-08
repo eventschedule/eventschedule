@@ -787,7 +787,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         @keyframes marquee-bulb {
             0%, 100% {
                 opacity: 0.3;

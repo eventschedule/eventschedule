@@ -749,7 +749,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .text-gradient-nightclub {
             background: linear-gradient(135deg, #4E81FA, #0EA5E9, #22D3EE);
             -webkit-background-clip: text;

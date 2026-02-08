@@ -48,7 +48,7 @@
     </script>
     </x-slot>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         /* Custom rose/orange gradient for this page */
         .text-gradient {
             background: linear-gradient(135deg, #e11d48 0%, #f97316 50%, #fb923c 100%);

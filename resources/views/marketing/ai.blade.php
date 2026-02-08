@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">AI Import</x-slot>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         /* Page-specific typing animation */
         @keyframes typing {
             0%, 100% { opacity: 1; }

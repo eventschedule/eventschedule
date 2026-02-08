@@ -710,7 +710,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .text-gradient-comedy {
             background: linear-gradient(135deg, #f59e0b, #eab308, #facc15);
             -webkit-background-clip: text;

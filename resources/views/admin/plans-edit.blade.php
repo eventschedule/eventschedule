@@ -21,7 +21,7 @@
                 </a>
                 @endif
             </nav>
-            <button onclick="window.location.reload()" class="mb-4 inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+            <button id="plans-edit-refresh-btn" class="mb-4 inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
                 <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
@@ -118,16 +118,16 @@
 
                     {{-- Quick Action Buttons --}}
                     <div class="mt-3 flex flex-wrap gap-2">
-                        <button type="button" onclick="addDays(30)" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        <button type="button" data-add-days="30" class="js-add-days inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                             @lang('messages.add_30_days')
                         </button>
-                        <button type="button" onclick="addDays(90)" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        <button type="button" data-add-days="90" class="js-add-days inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                             @lang('messages.add_90_days')
                         </button>
-                        <button type="button" onclick="addDays(365)" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        <button type="button" data-add-days="365" class="js-add-days inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                             @lang('messages.add_1_year')
                         </button>
-                        <button type="button" onclick="clearExpiration()" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        <button type="button" id="clear-expiration-btn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                             @lang('messages.clear')
                         </button>
                     </div>
@@ -147,23 +147,30 @@
     </div>
 
     <script {!! nonce_attr() !!}>
-        function addDays(days) {
-            const input = document.getElementById('plan_expires');
-            let startDate;
+        document.getElementById('plans-edit-refresh-btn').addEventListener('click', function() {
+            window.location.reload();
+        });
 
-            if (input.value) {
-                startDate = new Date(input.value);
-            } else {
-                startDate = new Date();
-            }
+        document.querySelectorAll('.js-add-days').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var days = parseInt(this.getAttribute('data-add-days'));
+                var input = document.getElementById('plan_expires');
+                var startDate;
 
-            startDate.setDate(startDate.getDate() + days);
-            input.value = startDate.toISOString().split('T')[0];
-        }
+                if (input.value) {
+                    startDate = new Date(input.value);
+                } else {
+                    startDate = new Date();
+                }
 
-        function clearExpiration() {
+                startDate.setDate(startDate.getDate() + days);
+                input.value = startDate.toISOString().split('T')[0];
+            });
+        });
+
+        document.getElementById('clear-expiration-btn').addEventListener('click', function() {
             document.getElementById('plan_expires').value = '';
-        }
+        });
     </script>
 
 </x-app-admin-layout>

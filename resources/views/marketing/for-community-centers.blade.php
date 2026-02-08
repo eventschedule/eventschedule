@@ -703,7 +703,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .text-gradient-teal {
             background: linear-gradient(135deg, #14b8a6, #06b6d4);
             -webkit-background-clip: text;

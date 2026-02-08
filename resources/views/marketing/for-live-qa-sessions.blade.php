@@ -735,7 +735,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .qa-glow-text {
             background: linear-gradient(135deg, #7c3aed, #a855f7, #d946ef);
             -webkit-background-clip: text;

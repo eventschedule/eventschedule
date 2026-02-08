@@ -132,7 +132,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>SQL</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-keyword">CREATE DATABASE</span> eventschedule;
 <span class="code-keyword">CREATE USER</span> <span class="code-string">'eventschedule'</span>@<span class="code-string">'localhost'</span> <span class="code-keyword">IDENTIFIED BY</span> <span class="code-string">'change_me'</span>;
@@ -159,7 +159,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>bash</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-comment"># Example: Extract to web root</span>
 <span class="code-keyword">cd</span> /var/www
@@ -180,7 +180,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>bash</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-keyword">cd</span> /path/to/eventschedule
 <span class="code-keyword">chmod</span> -R 755 storage
@@ -201,7 +201,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>bash</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-keyword">cp</span> .env.example .env</code></pre>
                             </div>
@@ -230,7 +230,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>crontab</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code>* * * * * php /path/to/eventschedule/artisan schedule:run</code></pre>
                             </div>
@@ -241,7 +241,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>bash</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-keyword">crontab</span> -e</code></pre>
                             </div>

@@ -703,7 +703,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .text-gradient-copper {
             background: linear-gradient(135deg, #d97706, #92400e);
             -webkit-background-clip: text;

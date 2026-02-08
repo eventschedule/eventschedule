@@ -1,7 +1,7 @@
 <x-app-admin-layout>
 
     <x-slot name="head">
-        <style>
+        <style {!! nonce_attr() !!}>
         /* Hide all sections except the first one by default */
         .section-content {
             display: none;

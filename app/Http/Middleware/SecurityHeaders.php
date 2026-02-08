@@ -15,11 +15,16 @@ class SecurityHeaders
      */
     public function handle(Request $request, Closure $next)
     {
-        $response = $next($request);
-
-        // Generate nonce for inline scripts
+        // Generate nonce BEFORE response so Blade templates can use it
         $nonce = base64_encode(Str::random(16));
         $request->attributes->set('csp_nonce', $nonce);
+        \Illuminate\Support\Facades\Vite::useCspNonce($nonce);
+
+        if (app()->bound('debugbar')) {
+            app('debugbar')->getJavascriptRenderer()->setCspNonce($nonce);
+        }
+
+        $response = $next($request);
 
         // Add security headers
         $response->headers->set('X-Content-Type-Options', 'nosniff');
@@ -62,7 +67,7 @@ class SecurityHeaders
             // More permissive CSP for development
             $csp = [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' {$host}:* *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com *.sentry.io challenges.cloudflare.com",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-{$nonce}' 'strict-dynamic' {$host}:* *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com *.sentry.io challenges.cloudflare.com",
                 "style-src 'self' 'unsafe-inline' {$host}:* *.googleapis.com *.gstatic.com *.bootstrapcdn.com rsms.me",
                 "img-src 'self' data: {$host}:* *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com *.ytimg.com eventschedule.nyc3.cdn.digitaloceanspaces.com",
                 "font-src 'self' data: {$host}:* *.googleapis.com *.gstatic.com *.bootstrapcdn.com rsms.me",
@@ -73,10 +78,10 @@ class SecurityHeaders
             ];
         } else {
             // Stricter CSP for production
-            // Note: 'unsafe-inline' is still needed for inline event handlers; consider refactoring to use nonces
+            // Note: 'unsafe-inline' is kept as a fallback for CSP Level 1 browsers; Level 2+ browsers ignore it when nonces are present
             $csp = [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com browser.sentry-cdn.com *.sentry.io challenges.cloudflare.com",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-{$nonce}' 'strict-dynamic' *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com browser.sentry-cdn.com *.sentry.io challenges.cloudflare.com",
                 "style-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com *.bootstrapcdn.com rsms.me",
                 "img-src 'self' data: *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com *.ytimg.com eventschedule.nyc3.cdn.digitaloceanspaces.com",
                 "font-src 'self' data: *.googleapis.com *.gstatic.com *.bootstrapcdn.com rsms.me",

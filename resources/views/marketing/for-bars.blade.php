@@ -594,7 +594,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .text-gradient-amber {
             background: linear-gradient(135deg, #f59e0b, #ea580c);
             -webkit-background-clip: text;

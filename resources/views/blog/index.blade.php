@@ -3,7 +3,7 @@
     <x-slot name="description">Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.</x-slot>
     <x-slot name="keywords">event blog, event scheduling tips, ticketing news, event management insights, venue tips, performer advice</x-slot>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         @keyframes pulse-slow {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }

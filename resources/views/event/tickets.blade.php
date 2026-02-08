@@ -1,7 +1,7 @@
 <x-slot name="head">
-  <script src="{{ asset('js/vue.global.prod.js') }}"></script>
+  <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
   @if (\App\Utils\TurnstileUtils::isEnabled())
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer {!! nonce_attr() !!}></script>
   @endif
   <script {!! nonce_attr() !!}>
     window.addEventListener('DOMContentLoaded', function() {

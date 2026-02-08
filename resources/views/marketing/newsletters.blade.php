@@ -5,7 +5,7 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Newsletters</x-slot>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         /* Custom sky gradient for this page */
         .text-gradient {
             background: linear-gradient(135deg, #0284c7 0%, #0891b2 50%, #38bdf8 100%);

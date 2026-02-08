@@ -713,7 +713,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .classes-glow-text {
             background: linear-gradient(135deg, #059669, #0d9488, #14b8a6);
             -webkit-background-clip: text;

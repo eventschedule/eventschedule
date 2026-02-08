@@ -21,8 +21,8 @@
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
                     {{ __('messages.youtube_videos') }}
                     <button type="button"
-                        class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                        onclick="showAdd('youtube_links')">
+                        class="btn-show-add inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                        data-link-type="youtube_links">
                         {{ __('messages.add') }}
                     </button>
                 </h4>
@@ -46,8 +46,8 @@
                                 <img src="{{ $link->thumbnail_url }}"/>
                             </x-link>
                             <button type="button"
-                                class="mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                                onclick="removeLink('youtube_links', '{{ $link->url }}')">
+                                class="btn-remove-link mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                                data-link-type="youtube_links" data-link-url="{{ $link->url }}"
                                 {{ __('messages.remove') }}
                             </button>
                         </div>
@@ -69,8 +69,8 @@
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
                     {{ __('messages.social_links') }}
                     <button type="button"
-                        class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                        onclick="showAdd('social_links')">
+                        class="btn-show-add inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                        data-link-type="social_links">
                         {{ __('messages.add') }}
                     </button>
                 </h4>
@@ -95,8 +95,8 @@
                                 </p>
                             </x-link>
                             <button type="button"
-                                class="mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                                onclick="removeLink('social_links', '{{ $link->url }}')">
+                                class="btn-remove-link mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                                data-link-type="social_links" data-link-url="{{ $link->url }}"
                                 {{ __('messages.remove') }}
                             </button>
                         </div>
@@ -117,8 +117,8 @@
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
                     {{ __('messages.payment_links') }}
                     <button type="button"
-                        class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                        onclick="showAdd('payment_links')">
+                        class="btn-show-add inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                        data-link-type="payment_links">
                         {{ __('messages.add') }}
                     </button>
                 </h4>
@@ -142,8 +142,8 @@
                                 </p>
                             </x-link>
                             <button type="button"
-                                class="mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                                onclick="removeLink('payment_links', '{{ $link->url }}')">
+                                class="btn-remove-link mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                                data-link-type="payment_links" data-link-url="{{ $link->url }}"
                                 {{ __('messages.remove') }}
                             </button>
                         </div>
@@ -218,7 +218,7 @@ Leaving: "ease-in duration-200"
                         <x-brand-button type="submit" class="w-full sm:col-start-2">{{ __('messages.save') }}</x-brand-button>
                         <button type="button"
                             class="mt-3 inline-flex w-full items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors sm:col-start-1 sm:mt-0"
-                            onclick="hideAdd()">{{ __('messages.cancel') }}</button>
+                            id="btn-hide-add">{{ __('messages.cancel') }}</button>
                     </div>
                 </div>
             </form>
@@ -252,11 +252,32 @@ function removeLink(link_type, link) {
 function initMap() {
     var latitude = "{{ $role->geo_lat }}";
     var longitude = "{{ $role->geo_lon }}";
-    
-    var latLng = new google.maps.LatLng(latitude, longitude);    
+
+    var latLng = new google.maps.LatLng(latitude, longitude);
     var map = new google.maps.Map(document.getElementById('map'), {
         center: latLng,
         zoom: 15
     });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-show-add').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            showAdd(this.getAttribute('data-link-type'));
+        });
+    });
+
+    document.querySelectorAll('.btn-remove-link').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            removeLink(this.getAttribute('data-link-type'), this.getAttribute('data-link-url'));
+        });
+    });
+
+    var btnHideAdd = document.getElementById('btn-hide-add');
+    if (btnHideAdd) {
+        btnHideAdd.addEventListener('click', function() {
+            hideAdd();
+        });
+    }
+});
 </script>

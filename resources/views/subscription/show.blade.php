@@ -1,7 +1,7 @@
 <x-app-admin-layout>
 
     <x-slot name="head">
-        <script src="https://js.stripe.com/v3/"></script>
+        <script src="https://js.stripe.com/v3/" {!! nonce_attr() !!}></script>
     </x-slot>
 
     <div class="max-w-2xl mx-auto py-8">

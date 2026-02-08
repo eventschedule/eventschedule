@@ -677,7 +677,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .fitness-glow-text {
             background: linear-gradient(135deg, #10b981, #14b8a6, #059669);
             -webkit-background-clip: text;

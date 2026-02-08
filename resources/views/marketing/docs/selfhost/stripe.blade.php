@@ -141,7 +141,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>.env</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-comment"># Stripe Direct Payments (selfhosted)</span>
 <span class="code-variable">STRIPE_PLATFORM_KEY</span>=<span class="code-string">pk_live_your_publishable_key</span>
@@ -224,7 +224,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>.env</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-comment"># Stripe Connect (for event creators to receive ticket payments)</span>
 <span class="code-variable">STRIPE_KEY</span>=<span class="code-string">sk_live_your_stripe_secret_key</span>
@@ -306,7 +306,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>.env</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-comment"># Laravel Cashier (for subscription billing)</span>
 <span class="code-variable">STRIPE_PLATFORM_KEY</span>=<span class="code-string">pk_live_your_publishable_key</span>
@@ -459,7 +459,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>bash</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-comment"># Install Stripe CLI</span>
 brew install stripe/stripe-cli/stripe
@@ -480,7 +480,7 @@ stripe listen --forward-to localhost:8000/stripe/subscription-webhook</code></pr
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>bash</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-comment"># Test checkout completion (selfhosted)</span>
 stripe trigger checkout.session.completed

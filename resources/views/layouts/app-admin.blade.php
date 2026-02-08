@@ -133,8 +133,7 @@
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
 
-                                        <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
-                                                this.closest('form').submit();">
+                                        <x-dropdown-link :href="route('logout')" id="logout-link">
                                             {{ __('messages.log_out') }}
                                         </x-dropdown-link>
                                     </form>
@@ -178,5 +177,12 @@
 
         </div>
     </div>
+
+    <script {!! nonce_attr() !!}>
+        document.getElementById('logout-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            this.closest('form').submit();
+        });
+    </script>
 
 </x-app-layout>

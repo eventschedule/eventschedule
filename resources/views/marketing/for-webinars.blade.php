@@ -707,7 +707,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         .webinar-glow-text {
             background: linear-gradient(135deg, #0d9488, #06b6d4, #0ea5e9);
             -webkit-background-clip: text;

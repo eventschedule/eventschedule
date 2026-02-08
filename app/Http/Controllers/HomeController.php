@@ -128,7 +128,7 @@ class HomeController extends Controller
 
         $roleIds = $user->roles()->pluck('roles.id');
 
-        $events = Event::with('roles', 'parts')
+        $events = Event::with('roles', 'parts', 'tickets')
             ->where(function ($query) use ($roleIds, $user) {
                 $query->where(function ($query) use ($roleIds) {
                     $query->whereIn('id', function ($query) use ($roleIds) {

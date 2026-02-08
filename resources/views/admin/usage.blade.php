@@ -170,7 +170,7 @@
                             </td>
                             <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $record->last_translated_at ? $record->last_translated_at->diffForHumans() : 'Never' }}</td>
                             <td class="px-4 py-3 text-sm text-end">
-                                <button onclick="retryTranslation('role', {{ $record->id }})" class="text-xs text-[#4E81FA] hover:underline">@lang('messages.retry')</button>
+                                <button class="js-retry-translation text-xs text-[#4E81FA] hover:underline" data-type="role" data-id="{{ $record->id }}">@lang('messages.retry')</button>
                             </td>
                         </tr>
                         @endforeach
@@ -198,7 +198,7 @@
                             </td>
                             <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $record->last_translated_at ? $record->last_translated_at->diffForHumans() : 'Never' }}</td>
                             <td class="px-4 py-3 text-sm text-end">
-                                <button onclick="retryTranslation('event', {{ $record->id }})" class="text-xs text-[#4E81FA] hover:underline">@lang('messages.retry')</button>
+                                <button class="js-retry-translation text-xs text-[#4E81FA] hover:underline" data-type="event" data-id="{{ $record->id }}">@lang('messages.retry')</button>
                             </td>
                         </tr>
                         @endforeach
@@ -226,7 +226,7 @@
                             </td>
                             <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $record->last_translated_at ? $record->last_translated_at->diffForHumans() : 'Never' }}</td>
                             <td class="px-4 py-3 text-sm text-end">
-                                <button onclick="retryTranslation('event_part', {{ $record->id }})" class="text-xs text-[#4E81FA] hover:underline">@lang('messages.retry')</button>
+                                <button class="js-retry-translation text-xs text-[#4E81FA] hover:underline" data-type="event_part" data-id="{{ $record->id }}">@lang('messages.retry')</button>
                             </td>
                         </tr>
                         @endforeach
@@ -262,7 +262,7 @@
                             </td>
                             <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $record->last_translated_at ? $record->last_translated_at->diffForHumans() : 'Never' }}</td>
                             <td class="px-4 py-3 text-sm text-end">
-                                <button onclick="retryTranslation('event_role', {{ $record->id }})" class="text-xs text-[#4E81FA] hover:underline">@lang('messages.retry')</button>
+                                <button class="js-retry-translation text-xs text-[#4E81FA] hover:underline" data-type="event_role" data-id="{{ $record->id }}">@lang('messages.retry')</button>
                             </td>
                         </tr>
                         @endforeach
@@ -271,8 +271,13 @@
             </div>
 
             <script {!! nonce_attr() !!}>
-                function retryTranslation(type, id) {
-                    const button = event.target;
+                document.addEventListener('click', function(e) {
+                    var button = e.target.closest('.js-retry-translation');
+                    if (!button) return;
+                    retryTranslation(button.getAttribute('data-type'), parseInt(button.getAttribute('data-id')), button);
+                });
+
+                function retryTranslation(type, id, button) {
                     const originalText = button.textContent;
                     button.textContent = '...';
                     button.disabled = true;

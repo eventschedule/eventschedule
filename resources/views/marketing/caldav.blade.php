@@ -36,7 +36,7 @@
     </script>
     </x-slot>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         /* Custom teal gradient for this page */
         .text-gradient {
             background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 50%, #0ea5e9 100%);

@@ -277,9 +277,6 @@
 
                         graphicImage.src = 'data:image/png;base64,' + data.image;
                         textContent.value = data.text;
-
-                        const downloadBtn = document.getElementById('downloadBtn');
-                        downloadBtn.onclick = downloadImage;
                     })
                     .catch(error => {
                         console.error('Error loading graphic:', error);
@@ -868,7 +865,7 @@
                                 container.innerHTML = `
                                     <div class="relative inline-block">
                                         <img src="${data.url}" alt="{{ __('messages.graphic_header_image') }}" class="max-h-24 rounded-md border border-gray-200 dark:border-gray-600">
-                                        <button type="button" onclick="deleteGraphicHeaderImage()" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                                        <button type="button" data-action="delete-header-image" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                         </button>
                                     </div>
@@ -959,7 +956,7 @@
                             container.innerHTML = `
                                 <div class="relative inline-block">
                                     <img src="${imageUrl}" alt="{{ __('messages.graphic_header_image') }}" class="max-h-24 rounded-md border border-gray-200 dark:border-gray-600">
-                                    <button type="button" onclick="deleteGraphicHeaderImage()" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                                    <button type="button" data-action="delete-header-image" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                     </button>
                                 </div>
@@ -1069,6 +1066,106 @@
 
                 // Initialize header image preview if exists
                 initHeaderImagePreview();
+
+                // --- Migrated inline event handlers ---
+
+                // File input change handlers for header image upload
+                ['header_image', 'header_image_mobile'].forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) {
+                        input.addEventListener('change', function() {
+                            uploadGraphicHeaderImage(this.files[0]);
+                        });
+                    }
+                });
+
+                // Choose file buttons that trigger file inputs
+                const headerImageBtn = document.getElementById('header_image_btn');
+                if (headerImageBtn) {
+                    headerImageBtn.addEventListener('click', function() {
+                        document.getElementById('header_image').click();
+                    });
+                }
+                const headerImageBtnMobile = document.getElementById('header_image_btn_mobile');
+                if (headerImageBtnMobile) {
+                    headerImageBtnMobile.addEventListener('click', function() {
+                        document.getElementById('header_image_mobile').click();
+                    });
+                }
+
+                // Screen capture toggle checkboxes
+                ['use_screen_capture', 'use_screen_capture_mobile'].forEach(id => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) {
+                        checkbox.addEventListener('change', function() {
+                            toggleScreenCapture();
+                        });
+                    }
+                });
+
+                // syncFormFields checkboxes
+                ['url_include_https', 'url_include_https_mobile', 'url_include_id', 'url_include_id_mobile', 'exclude_recurring', 'exclude_recurring_mobile'].forEach(id => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) {
+                        checkbox.addEventListener('change', function() {
+                            syncFormFields();
+                        });
+                    }
+                });
+
+                // Test email buttons
+                ['testEmailBtn', 'testEmailBtnMobile'].forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) {
+                        btn.addEventListener('click', function() {
+                            sendTestEmail();
+                        });
+                    }
+                });
+
+                // Save settings buttons
+                ['saveSettingsBtn', 'saveSettingsBtnMobile'].forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) {
+                        btn.addEventListener('click', function() {
+                            saveSettings();
+                        });
+                    }
+                });
+
+                // Run / load graphic buttons
+                ['runBtn', 'runBtnMobile'].forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) {
+                        btn.addEventListener('click', function() {
+                            loadGraphic();
+                        });
+                    }
+                });
+
+                // Copy text button
+                const copyTextBtn = document.getElementById('copyTextBtn');
+                if (copyTextBtn) {
+                    copyTextBtn.addEventListener('click', function() {
+                        copyToClipboard(document.getElementById('eventText').value, 'copyTextBtn');
+                    });
+                }
+
+                // Download image button
+                const downloadBtn = document.getElementById('downloadBtn');
+                if (downloadBtn) {
+                    downloadBtn.addEventListener('click', function() {
+                        downloadImage();
+                    });
+                }
+
+                // Event delegation for dynamically created delete header image buttons
+                document.addEventListener('click', function(e) {
+                    const deleteBtn = e.target.closest('[data-action="delete-header-image"]');
+                    if (deleteBtn) {
+                        deleteGraphicHeaderImage();
+                    }
+                });
 
                 loadGraphic();
             });
@@ -1270,9 +1367,9 @@
                         <!-- Header Image -->
                         <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.graphic_header_image') }}</h4>
-                            <input type="file" id="header_image_mobile" class="hidden" accept="image/jpeg,image/png,image/gif,image/webp" onchange="uploadGraphicHeaderImage(this.files[0])">
+                            <input type="file" id="header_image_mobile" class="hidden" accept="image/jpeg,image/png,image/gif,image/webp">
                             <div class="flex items-center gap-3">
-                                <button type="button" onclick="document.getElementById('header_image_mobile').click()" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                <button type="button" id="header_image_btn_mobile" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
                                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                     </svg>
@@ -1291,7 +1388,7 @@
                             </div>
                             <div class="flex items-center gap-3">
                                 <label class="flex items-center cursor-pointer">
-                                    <input type="checkbox" id="use_screen_capture_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="toggleScreenCapture()">
+                                    <input type="checkbox" id="use_screen_capture_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_screen_capture') }}</span>
                                 </label>
                             </div>
@@ -1336,11 +1433,11 @@
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.url_format') }}</h4>
                             <div class="flex flex-col gap-2">
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="checkbox" id="url_include_https_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="syncFormFields()">
+                                    <input type="checkbox" id="url_include_https_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.url_include_https') }}</span>
                                 </label>
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="checkbox" id="url_include_id_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="syncFormFields()">
+                                    <input type="checkbox" id="url_include_id_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.url_include_id') }}</span>
                                 </label>
                             </div>
@@ -1354,7 +1451,7 @@
                         <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.recurring_events') }}</h4>
                             <label class="flex items-center cursor-pointer group">
-                                <input type="checkbox" id="exclude_recurring_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="syncFormFields()">
+                                <input type="checkbox" id="exclude_recurring_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
                                 <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.exclude_recurring_events') }}</span>
                             </label>
                         </div>
@@ -1430,7 +1527,7 @@
                                         <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.recipient_emails_help') }}</p>
                                     </div>
 
-                                    <button id="testEmailBtnMobile" onclick="sendTestEmail()" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                    <button id="testEmailBtnMobile" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
                                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                                         </svg>
@@ -1452,13 +1549,13 @@
 
                     <!-- Buttons (side by side on mobile) -->
                     <div class="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <button id="saveSettingsBtnMobile" onclick="saveSettings()" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors">
+                        <button id="saveSettingsBtnMobile" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
                             {{ __('messages.save_settings') }}
                         </button>
-                        <button id="runBtnMobile" onclick="loadGraphic()" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md transition-colors">
+                        <button id="runBtnMobile" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md transition-colors">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -1589,9 +1686,9 @@
                             <!-- Header Image -->
                             <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.graphic_header_image') }}</h4>
-                                <input type="file" id="header_image" class="hidden" accept="image/jpeg,image/png,image/gif,image/webp" onchange="uploadGraphicHeaderImage(this.files[0])">
+                                <input type="file" id="header_image" class="hidden" accept="image/jpeg,image/png,image/gif,image/webp">
                                 <div class="flex items-center gap-3">
-                                    <button type="button" onclick="document.getElementById('header_image').click()" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                    <button type="button" id="header_image_btn" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
                                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                         </svg>
@@ -1610,7 +1707,7 @@
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <label class="flex items-center cursor-pointer">
-                                        <input type="checkbox" id="use_screen_capture" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="toggleScreenCapture()">
+                                        <input type="checkbox" id="use_screen_capture" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_screen_capture') }}</span>
                                     </label>
                                 </div>
@@ -1655,11 +1752,11 @@
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.url_format') }}</h4>
                                 <div class="flex flex-col gap-2">
                                     <label class="flex items-center cursor-pointer group">
-                                        <input type="checkbox" id="url_include_https" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="syncFormFields()">
+                                        <input type="checkbox" id="url_include_https" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.url_include_https') }}</span>
                                     </label>
                                     <label class="flex items-center cursor-pointer group">
-                                        <input type="checkbox" id="url_include_id" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="syncFormFields()">
+                                        <input type="checkbox" id="url_include_id" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.url_include_id') }}</span>
                                     </label>
                                 </div>
@@ -1673,7 +1770,7 @@
                             <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.recurring_events') }}</h4>
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="checkbox" id="exclude_recurring" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" onchange="syncFormFields()">
+                                    <input type="checkbox" id="exclude_recurring" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.exclude_recurring_events') }}</span>
                                 </label>
                             </div>
@@ -1749,7 +1846,7 @@
                                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.recipient_emails_help') }}</p>
                                         </div>
 
-                                        <button id="testEmailBtn" onclick="sendTestEmail()" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                        <button id="testEmailBtn" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
                                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                                             </svg>
@@ -1771,13 +1868,13 @@
 
                         <!-- Buttons -->
                         <div class="flex flex-row gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <button id="saveSettingsBtn" onclick="saveSettings()" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors">
+                            <button id="saveSettingsBtn" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors">
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
                                 {{ __('messages.save_settings') }}
                             </button>
-                            <button id="runBtn" onclick="loadGraphic()" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md transition-colors">
+                            <button id="runBtn" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md transition-colors">
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -1794,7 +1891,6 @@
                     <div x-show="activeTab === 'text'" x-cloak class="lg:!block bg-white dark:bg-gray-800 lg:bg-gray-50 lg:dark:bg-gray-900/50 rounded-lg shadow lg:shadow-none dark:shadow-gray-900/50 overflow-hidden flex flex-col lg:border lg:border-gray-200 lg:dark:border-gray-700">
                         <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-end">
                             <button
-                                onclick="copyToClipboard(document.getElementById('eventText').value, 'copyTextBtn')"
                                 id="copyTextBtn"
                                 class="inline-flex items-center px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors"
                             >
@@ -1823,7 +1919,6 @@
                         <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-end">
                             <button
                                 id="downloadBtn"
-                                onclick="downloadImage()"
                                 class="inline-flex items-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md transition-colors"
                             >
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

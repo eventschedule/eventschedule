@@ -78,7 +78,7 @@
     }
     </script>
 
-    <style>
+    <style {!! nonce_attr() !!}>
         @keyframes pulse-slow {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
@@ -283,7 +283,7 @@
             <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-8">
                 <!-- Content -->
                 <div class="prose prose-lg dark:prose-invert max-w-none" style="font-size: 1.125rem;">
-                    <style>
+                    <style {!! nonce_attr() !!}>
                         .prose-lg p { margin-bottom: 2rem !important; }
                         .prose-lg h1 { font-size: 2.5rem !important; font-weight: 800 !important; margin-top: 3rem !important; margin-bottom: 2rem !important; line-height: 1.1 !important; }
                         .prose-lg h2 { font-size: 2rem !important; font-weight: 700 !important; margin-top: 2.5rem !important; margin-bottom: 1.5rem !important; line-height: 1.15 !important; }

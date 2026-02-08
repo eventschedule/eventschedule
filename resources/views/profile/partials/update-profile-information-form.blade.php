@@ -98,9 +98,9 @@
         <div>
             <x-input-label :value="__('messages.square_profile_image')" />
             <input id="profile_image" name="profile_image" type="file" class="hidden"
-                accept="image/png, image/jpeg" onchange="document.getElementById('profile_image_filename').textContent = this.files[0]?.name || ''; document.getElementById('profile_image_clear').style.display = this.files[0] ? 'inline' : 'none';" />
+                accept="image/png, image/jpeg" />
             <div class="mt-1 flex items-center gap-3">
-                <button type="button" onclick="document.getElementById('profile_image').click()"
+                <button type="button" id="profile_image_choose"
                     class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -108,7 +108,7 @@
                     {{ __('messages.choose_file') }}
                 </button>
                 <span id="profile_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
-                <button type="button" id="profile_image_clear" onclick="document.getElementById('profile_image').value = ''; document.getElementById('profile_image_filename').textContent = ''; this.style.display = 'none';"
+                <button type="button" id="profile_image_clear"
                     class="text-gray-400 hover:text-red-500 p-1" style="display: none;">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -125,7 +125,7 @@
         <div class="flex items-center gap-4">
             @if (is_demo_mode())
                 <button type="button"
-                    onclick="alert('{{ __('messages.saving_disabled_demo_mode') }}')"
+                    data-alert="{{ __('messages.saving_disabled_demo_mode') }}"
                     class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
                     {{ __('messages.save') }}
                 </button>
@@ -140,3 +140,41 @@
         </div>
     </form>
 </section>
+
+<script {!! nonce_attr() !!}>
+document.addEventListener('DOMContentLoaded', function() {
+    // Profile image file input change handler
+    var profileImageInput = document.getElementById('profile_image');
+    if (profileImageInput) {
+        profileImageInput.addEventListener('change', function() {
+            document.getElementById('profile_image_filename').textContent = this.files[0]?.name || '';
+            document.getElementById('profile_image_clear').style.display = this.files[0] ? 'inline' : 'none';
+        });
+    }
+
+    // Choose file button
+    var chooseBtn = document.getElementById('profile_image_choose');
+    if (chooseBtn) {
+        chooseBtn.addEventListener('click', function() {
+            document.getElementById('profile_image').click();
+        });
+    }
+
+    // Clear file button
+    var clearBtn = document.getElementById('profile_image_clear');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            document.getElementById('profile_image').value = '';
+            document.getElementById('profile_image_filename').textContent = '';
+            this.style.display = 'none';
+        });
+    }
+
+    // Alert buttons for demo mode
+    document.querySelectorAll('[data-alert]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            alert(this.dataset.alert);
+        });
+    });
+});
+</script>

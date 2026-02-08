@@ -65,7 +65,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>Request Headers</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code>X-API-Key: your_api_key_here</code></pre>
                             </div>
@@ -73,7 +73,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>cURL Example</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-keyword">curl</span> -X GET <span class="code-string">"{{ config('app.url') }}/api/schedules"</span> \
      -H <span class="code-string">"X-API-Key: your_api_key_here"</span></code></pre>
@@ -98,7 +98,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>Example Response</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code>{
     <span class="code-string">"data"</span>: [...],
@@ -147,7 +147,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>Pagination Example</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-keyword">curl</span> -X GET <span class="code-string">"{{ config('app.url') }}/api/schedules?page=2&per_page=50"</span> \
      -H <span class="code-string">"X-API-Key: your_api_key_here"</span></code></pre>
@@ -166,7 +166,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>cURL</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-keyword">curl</span> -X GET <span class="code-string">"{{ config('app.url') }}/api/schedules?page=1&per_page=100"</span> \
      -H <span class="code-string">"X-API-Key: your_api_key_here"</span></code></pre>
@@ -175,7 +175,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>Response</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code>{
     <span class="code-string">"data"</span>: [
@@ -219,7 +219,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>cURL</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-keyword">curl</span> -X GET <span class="code-string">"{{ config('app.url') }}/api/events"</span> \
      -H <span class="code-string">"X-API-Key: your_api_key_here"</span></code></pre>
@@ -228,7 +228,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>Response</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code>{
     <span class="code-string">"data"</span>: [
@@ -278,7 +278,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>cURL (JSON)</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-keyword">curl</span> -X POST <span class="code-string">"{{ config('app.url') }}/api/events/{subdomain}"</span> \
      -H <span class="code-string">"X-API-Key: your_api_key_here"</span> \
@@ -308,7 +308,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>cURL (Flyer Image)</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-keyword">curl</span> -X POST <span class="code-string">"{{ config('app.url') }}/api/events/{subdomain}"</span> \
     -H <span class="code-string">"X-API-Key: your_api_key_here"</span> \
@@ -330,7 +330,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>Response</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code>{
     <span class="code-string">"data"</span>: {
@@ -414,7 +414,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>cURL</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-keyword">curl</span> -X POST <span class="code-string">"{{ config('app.url') }}/api/sales"</span> \
      -H <span class="code-string">"X-API-Key: your_api_key_here"</span> \
@@ -446,7 +446,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>Response</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code>{
     <span class="code-string">"data"</span>: {
@@ -545,7 +545,7 @@
                             <div class="doc-code-block">
                                 <div class="doc-code-header">
                                     <span>Error Response</span>
-                                    <button class="doc-copy-btn" onclick="copyCode(this)">Copy</button>
+                                    <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code>{
     <span class="code-string">"data"</span>: <span class="code-value">null</span>,

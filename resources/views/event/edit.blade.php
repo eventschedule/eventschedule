@@ -31,7 +31,7 @@
 @endphp
 
 <x-slot name="head">
-  <style>
+  <style {!! nonce_attr() !!}>
     form button {
       min-width: 100px;
       min-height: 40px;
@@ -133,7 +133,7 @@
       animation: shake 0.4s ease-in-out;
     }
   </style>
-  <script src="{{ asset('js/vue.global.prod.js') }}"></script>
+  <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
   <script {!! nonce_attr() !!}>
     // --- Global time helper functions (used by main event and parts) ---
     var use24hr = {{ $use24hr ? 'true' : 'false' }};
@@ -805,14 +805,14 @@
         @if ($event->exists)
         {{-- Actions dropdown --}}
         <div class="relative inline-block text-start">
-            <button type="button" onclick="onPopUpClick('event-actions-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700" id="event-actions-menu-button" aria-expanded="true" aria-haspopup="true">
+            <button type="button" class="popup-toggle inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700" id="event-actions-menu-button" data-popup-target="event-actions-pop-up-menu" aria-expanded="true" aria-haspopup="true">
                 {{ __('messages.actions') }}
                 <svg class="-me-1 ms-2 h-6 w-6 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                 </svg>
             </button>
             <div id="event-actions-pop-up-menu" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="event-actions-menu-button" tabindex="-1">
-                <div class="py-2" role="none" onclick="onPopUpClick('event-actions-pop-up-menu', event)">
+                <div class="py-2" role="none" id="event-actions-pop-up-menu-items" data-popup-target="event-actions-pop-up-menu">
                     <a href="{{ route('event.clone', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
@@ -825,7 +825,7 @@
                     <div class="py-2" role="none">
                         <div class="border-t border-gray-100 dark:border-gray-700"></div>
                     </div>
-                    <form method="POST" action="{{ route('event.delete', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')" class="block">
+                    <form method="POST" action="{{ route('event.delete', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" id="event-delete-form" class="block">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="w-full group flex items-center px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300 focus:bg-red-50 dark:focus:bg-red-900/20 focus:text-red-700 dark:focus:text-red-300 focus:outline-none transition-colors" role="menuitem" tabindex="0">
@@ -848,7 +848,9 @@
   <form method="POST"
         @submit="validateForm"
         action="{{ $event->exists ? route('event.update', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : route('event.store', ['subdomain' => $subdomain]) }}"
-        enctype="multipart/form-data">
+        enctype="multipart/form-data"
+        novalidate
+        id="edit-form">
 
         @csrf
 
@@ -1010,7 +1012,7 @@
                                 <x-link href="{{ $event->getGuestUrl($subdomain, false) }}" target="_blank">
                                     {{ \App\Utils\UrlUtils::clean($event->getGuestUrl($subdomain, false)) }}
                                 </x-link>
-                                <button type="button" onclick="copyEventUrl(this)" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
+                                <button type="button" id="copy-event-url-btn" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                                     </svg>
@@ -1102,32 +1104,37 @@
                         <div class="mb-6">
                         <x-input-label :value="__('messages.flyer_image')" />
                         <input id="flyer_image" name="flyer_image" type="file" class="hidden"
-                                accept="image/png, image/jpeg" onchange="previewImage(this);" />
-                            <div class="mt-1 flex items-center gap-3">
-                                <button type="button" onclick="document.getElementById('flyer_image').click()"
-                                    class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
-                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                    {{ __('messages.choose_file') }}
-                                </button>
-                                <span id="flyer_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                                accept="image/png, image/jpeg" />
+                            <div id="flyer_image_choose" style="{{ $event->flyer_image_url ? 'display:none' : '' }}">
+                                <div class="mt-1 flex items-center gap-3">
+                                    <button type="button" id="flyer-choose-btn"
+                                        class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        {{ __('messages.choose_file') }}
+                                    </button>
+                                    <span id="flyer_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                                </div>
+                                <x-input-error class="mt-2" :messages="$errors->get('flyer_image')" />
+                                <p id="image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                    {{ __('messages.image_size_warning') }}
+                                </p>
                             </div>
-                            <x-input-error class="mt-2" :messages="$errors->get('flyer_image')" />
-                            <p id="image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
-                                {{ __('messages.image_size_warning') }}
-                            </p>
 
                             <div id="image_preview" class="mt-3 relative inline-block" style="display: none;">
                                 <img id="preview_img" src="#" alt="Preview" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
-                                <button type="button" onclick="clearFileInput('flyer_image')" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                <button type="button" id="clear-flyer-preview-btn" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                             </div>
 
                             @if ($event->flyer_image_url)
-                            <div class="relative inline-block pt-3">
+                            <div id="flyer_image_existing" class="relative inline-block mt-4 pt-1">
                                 <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" id="flyer_preview" />
                                 <button type="button"
-                                    onclick="deleteFlyer('{{ route('event.delete_image', ['subdomain' => $subdomain]) }}', '{{ \App\Utils\UrlUtils::encodeId($event->id) }}', '{{ csrf_token() }}', this.parentElement)"
+                                    id="delete-flyer-btn"
+                                    data-url="{{ route('event.delete_image', ['subdomain' => $subdomain]) }}"
+                                    data-hash="{{ \App\Utils\UrlUtils::encodeId($event->id) }}"
+                                    data-token="{{ csrf_token() }}"
                                     style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
                                     class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1314,7 +1321,7 @@
                                     <div class="mb-6">
                                         <x-input-label for="venue_country" :value="__('messages.country')" />
                                         <x-text-input id="venue_country" name="venue_country" type="text" class="mt-1 block w-full"
-                                            onchange="onChangeCountry()" autocomplete="off" />
+                                            autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('country')" />
                                         <input type="hidden" id="venue_country_code" name="venue_country_code" 
                                             v-model="venueCountryCode"/>
@@ -1322,10 +1329,10 @@
 
                                     <div class="mb-6">
                                         <div class="flex items-center space-x-4">
-                                            <x-secondary-button id="view_map_button" onclick="viewMap()">{{ __('messages.view_map') }}</x-secondary-button>
+                                            <x-secondary-button id="view_map_button">{{ __('messages.view_map') }}</x-secondary-button>
                                             @if (config('services.google.backend'))
-                                            <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
-                                            <x-secondary-button id="accept_button" onclick="acceptAddress(event)" class="hidden">{{ __('messages.accept') }}</x-secondary-button>
+                                            <x-secondary-button id="validate_button">{{ __('messages.validate_address') }}</x-secondary-button>
+                                            <x-secondary-button id="accept_button" class="hidden">{{ __('messages.accept') }}</x-secondary-button>
                                             @endif
                                             <x-primary-button v-if="showVenueAddressFields" type="button" @click="updateSelectedVenue()">{{ __('messages.done') }}</x-primary-button>
                                         </div>
@@ -1632,13 +1639,13 @@
 
                         <div class="mb-6 space-y-4 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                             <div class="flex items-center">
-                                <input id="one_time" name="schedule_type" type="radio" value="one_time" onchange="onChangeDateType()" {{ $event->days_of_week ? '' : 'CHECKED' }}
+                                <input id="one_time" name="schedule_type" type="radio" value="one_time" {{ $event->days_of_week ? '' : 'CHECKED' }}
                                     class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                 <label for="one_time"
                                     class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.one_time') }}</label>
                             </div>
                             <div class="flex items-center">
-                                <input id="recurring" name="schedule_type" type="radio" value="recurring" onchange="onChangeDateType()"  {{ $event->days_of_week ? 'CHECKED' : '' }}
+                                <input id="recurring" name="schedule_type" type="radio" value="recurring" {{ $event->days_of_week ? 'CHECKED' : '' }}
                                     class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                 <label for="recurring"
                                     class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.recurring') }}</label>
@@ -2520,7 +2527,7 @@
                                 </svg>
                                 <span class="text-sm">{{ __('messages.synced_to_google_calendar') }}</span>
                             </div>
-                            <x-secondary-button type="button" onclick="unsyncEvent('{{ $subdomain }}', {{ $event->id }})">
+                            <x-secondary-button type="button" id="unsync-event-btn" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">
                                 {{ __('messages.remove_from_google_calendar') }}
                             </x-secondary-button>
                         @else
@@ -2530,7 +2537,7 @@
                                 </svg>
                                 <span class="text-sm">{{ __('messages.not_synced_to_google_calendar') }}</span>
                             </div>
-                            <x-primary-button type="button" onclick="syncEvent('{{ $subdomain }}', {{ $event->id }})">
+                            <x-primary-button type="button" id="sync-event-btn" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">
                                 {{ __('messages.sync_to_google_calendar') }}
                             </x-primary-button>
                         @endif
@@ -2550,6 +2557,17 @@
             @endif
 
             @if ($event->exists)
+            <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-fan-content">
+                <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                    </svg>
+                    {{ __('messages.fan_content') }}
+                </span>
+                <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
             <div id="section-fan-content" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                     {{ __('messages.fan_content') }}
@@ -3700,6 +3718,120 @@
   // Store reference for section navigation
   window.vueApp = vueInstance;
 
+  // --- Migrated inline event handlers ---
+
+  // Delete event form confirmation (line 828 originally)
+  var deleteForm = document.getElementById('event-delete-form');
+  if (deleteForm) {
+    deleteForm.addEventListener('submit', function(e) {
+      if (!confirm('{{ __('messages.are_you_sure') }}')) {
+        e.preventDefault();
+      }
+    });
+  }
+
+  // Copy event URL button (line 1013 originally)
+  var copyUrlBtn = document.getElementById('copy-event-url-btn');
+  if (copyUrlBtn) {
+    copyUrlBtn.addEventListener('click', function() {
+      copyEventUrl(this);
+    });
+  }
+
+  // Flyer image file input change (line 1105 originally)
+  var flyerImageInput = document.getElementById('flyer_image');
+  if (flyerImageInput) {
+    flyerImageInput.addEventListener('change', function() {
+      previewImage(this);
+    });
+  }
+
+  // Choose file button for flyer (line 1107 originally)
+  var flyerChooseBtn = document.getElementById('flyer-choose-btn');
+  if (flyerChooseBtn) {
+    flyerChooseBtn.addEventListener('click', function() {
+      document.getElementById('flyer_image').click();
+    });
+  }
+
+  // Clear flyer preview button (line 1123 originally)
+  var clearFlyerPreviewBtn = document.getElementById('clear-flyer-preview-btn');
+  if (clearFlyerPreviewBtn) {
+    clearFlyerPreviewBtn.addEventListener('click', function() {
+      clearFileInput('flyer_image');
+    });
+  }
+
+  // Delete existing flyer button (line 1130 originally)
+  var deleteFlyerBtn = document.getElementById('delete-flyer-btn');
+  if (deleteFlyerBtn) {
+    deleteFlyerBtn.addEventListener('click', function() {
+      deleteFlyer(this.dataset.url, this.dataset.hash, this.dataset.token, this.parentElement);
+    });
+  }
+
+  // Country select change (line 1317 originally)
+  var venueCountryInput = document.getElementById('venue_country');
+  if (venueCountryInput) {
+    venueCountryInput.addEventListener('change', function() {
+      onChangeCountry();
+    });
+  }
+
+  // View map button (line 1325 originally)
+  var viewMapButton = document.getElementById('view_map_button');
+  if (viewMapButton) {
+    viewMapButton.addEventListener('click', function() {
+      viewMap();
+    });
+  }
+
+  // Validate address button (line 1327 originally)
+  var validateButton = document.getElementById('validate_button');
+  if (validateButton) {
+    validateButton.addEventListener('click', function() {
+      onValidateClick();
+    });
+  }
+
+  // Accept address button (line 1328 originally)
+  var acceptButton = document.getElementById('accept_button');
+  if (acceptButton) {
+    acceptButton.addEventListener('click', function(e) {
+      acceptAddress(e);
+    });
+  }
+
+  // Schedule type radio buttons (lines 1635, 1641 originally)
+  var oneTimeRadio = document.getElementById('one_time');
+  if (oneTimeRadio) {
+    oneTimeRadio.addEventListener('change', function() {
+      onChangeDateType();
+    });
+  }
+  var recurringRadio = document.getElementById('recurring');
+  if (recurringRadio) {
+    recurringRadio.addEventListener('change', function() {
+      onChangeDateType();
+    });
+  }
+
+  // Unsync from Google Calendar button (line 2523 originally)
+  var unsyncBtn = document.getElementById('unsync-event-btn');
+  if (unsyncBtn) {
+    unsyncBtn.addEventListener('click', function() {
+      unsyncEvent(this.dataset.subdomain, parseInt(this.dataset.eventId));
+    });
+  }
+
+  // Sync to Google Calendar button (line 2533 originally)
+  var syncBtn = document.getElementById('sync-event-btn');
+  if (syncBtn) {
+    syncBtn.addEventListener('click', function() {
+      syncEvent(this.dataset.subdomain, parseInt(this.dataset.eventId));
+    });
+  }
+
   // Google Calendar sync functions
   function syncEvent(subdomain, eventId) {
     const statusDiv = document.getElementById(`sync-status-${eventId}`);
@@ -3934,29 +4066,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeSections();
     
     // Form validation error handling
-    const form = document.querySelector('form');
+    const form = document.getElementById('edit-form');
     if (form) {
-        // Field to section mapping
-        const fieldSectionMap = {
-            'event_name': 'section-details',
-            'starts_at': 'section-details'
-        };
-
-        // Function to find section containing a field
-        function findSectionForField(fieldId) {
-            const field = document.getElementById(fieldId);
-            if (!field) return null;
-            
-            // Find the section containing this field
-            let parent = field.closest('.section-content');
-            if (parent) {
-                return parent.id;
-            }
-            
-            // Fallback to mapping
-            return fieldSectionMap[fieldId] || null;
-        }
-
         // Function to highlight section navigation link
         function highlightSectionError(sectionId) {
             if (!sectionId) return;
@@ -3984,6 +4095,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 mobileHeader.classList.remove('validation-error');
             }
         }
+
+        // Highlight sections with server-side validation errors
+        document.querySelectorAll('.section-content').forEach(section => {
+            const hasErrors = section.querySelectorAll('ul.text-red-600, ul.text-red-400').length > 0;
+            if (hasErrors) {
+                highlightSectionError(section.id);
+            }
+        });
 
         // Handle invalid event on ANY required field (including custom fields)
         form.addEventListener('invalid', function(e) {
@@ -4096,6 +4215,8 @@ function deleteFlyer(url, hash, token, element) {
     }).then(response => {
         if (response.ok) {
             element.remove();
+            var chooseSection = document.getElementById('flyer_image_choose');
+            if (chooseSection) chooseSection.style.display = '';
         } else {
             alert('Failed to delete image');
         }

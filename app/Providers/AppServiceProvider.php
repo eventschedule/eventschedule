@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Cashier\Cashier;
@@ -41,6 +42,22 @@ class AppServiceProvider extends ServiceProvider
 
             return collect();
         });
+
+        if (config('app.is_testing')) {
+            DB::enableQueryLog();
+
+            $this->app->terminating(function () {
+                $queries = DB::getQueryLog();
+                $count = count($queries);
+                $totalTime = array_sum(array_column($queries, 'time'));
+                $method = request()->method();
+                $url = request()->fullUrl();
+                $timestamp = now()->format('Y-m-d H:i:s');
+
+                $line = "[{$timestamp}] {$method} {$url} — {$count} queries ({$totalTime}ms)".PHP_EOL;
+                file_put_contents(storage_path('logs/queries.log'), $line, FILE_APPEND);
+            });
+        }
 
         View::composer(['layouts.navigation', 'home'], function ($view) {
             $allRoles = app('userRoles');

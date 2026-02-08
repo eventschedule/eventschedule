@@ -26,8 +26,8 @@
             </x-link>
             <div>
                 <div class="-mt-px flex divide-x divide-gray-200 dark:divide-gray-700">
-                    <div class="flex w-0 flex-1 cursor-pointer"
-                        onclick="location.href = '{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}'; return false;">
+                    <div class="flex w-0 flex-1 cursor-pointer btn-navigate"
+                        data-href="{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}">
                         <div
                             class="relative -me-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-es-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700">
                             <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor"
@@ -39,8 +39,9 @@
                             {{ __('messages.schedule') }}
                         </div>
                     </div>
-                    <div class="-ms-px flex w-0 flex-1 cursor-pointer"
-                        onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'redirect_to' => 'schedule']) }}'; } return false;">
+                    <div class="-ms-px flex w-0 flex-1 cursor-pointer btn-confirm-navigate"
+                        data-confirm="{{ __('messages.are_you_sure') }}"
+                        data-href="{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'redirect_to' => 'schedule']) }}">
                         <div
                             class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-ee-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700">
                             <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor"
@@ -59,3 +60,21 @@
     </ul>
 </div>
 @endif
+
+<script {!! nonce_attr() !!}>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-navigate').forEach(function(el) {
+        el.addEventListener('click', function() {
+            location.href = this.getAttribute('data-href');
+        });
+    });
+
+    document.querySelectorAll('.btn-confirm-navigate').forEach(function(el) {
+        el.addEventListener('click', function() {
+            if (confirm(this.getAttribute('data-confirm'))) {
+                location.href = this.getAttribute('data-href');
+            }
+        });
+    });
+});
+</script>

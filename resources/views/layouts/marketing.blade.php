@@ -23,7 +23,7 @@
     @endif
 
     @if (config('app.hosted') || config('app.report_errors'))
-        <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous" defer></script>
+        <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous" defer {!! nonce_attr() !!}></script>
     @endif
 
     <!-- Theme color -->
@@ -189,7 +189,7 @@
 
     @if (config('services.google.analytics') && (! auth()->user() || ! auth()->user()->isAdmin()))
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}" {!! nonce_attr() !!}></script>
     <script {!! nonce_attr() !!}>
     window.dataLayer = window.dataLayer || [];
     function gtag() {
