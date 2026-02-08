@@ -25,7 +25,7 @@ jobs:
         run: composer install --prefer-dist --no-ansi --no-interaction --no-scripts --no-progress
 
       - name: Composer security audit
-        run: composer audit --severity=critical
+        run: composer audit
 
       - name: Install npm dependencies
         run: npm ci
