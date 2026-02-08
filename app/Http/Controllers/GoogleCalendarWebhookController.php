@@ -41,7 +41,7 @@ class GoogleCalendarWebhookController extends Controller
             // Verify the webhook token
             $token = $request->header('X-Goog-Channel-Token');
 
-            if ($token !== config('services.google.webhook_secret')) {
+            if (! $token || ! hash_equals(config('services.google.webhook_secret') ?? '', $token)) {
                 Log::warning('Invalid Google Calendar webhook token', [
                     'token' => $token,
                     'ip' => $request->ip(),
@@ -106,7 +106,7 @@ class GoogleCalendarWebhookController extends Controller
         } catch (\Exception $e) {
             Log::error('Google Calendar webhook error', [
                 'error' => $e->getMessage(),
-                'request' => $request->all(),
+                'channel_id' => $request->header('X-Goog-Channel-ID'),
             ]);
 
             return response('Internal Server Error', 500);

@@ -69,7 +69,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/{slug}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
     });
 } else {
-    Route::match(['get', 'post'], '/update', [AppController::class, 'update'])->name('app.update');
+    Route::match(['get', 'post'], '/update', [AppController::class, 'update'])->name('app.update')->middleware(['auth', 'verified']);
     Route::post('/test_database', [AppController::class, 'testDatabase'])->name('app.test_database');
 }
 

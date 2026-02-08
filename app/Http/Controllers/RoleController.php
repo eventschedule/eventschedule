@@ -53,9 +53,7 @@ class RoleController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (auth()->user()->id != $role->user_id) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
+        $this->authorize('update', $role);
 
         if ($request->image_type == 'profile') {
             if ($role->profile_image_url) {

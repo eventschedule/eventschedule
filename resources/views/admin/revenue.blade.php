@@ -162,10 +162,10 @@
             new Chart(revenueTrendCtx, {
                 type: 'line',
                 data: {
-                    labels: {!! json_encode($trendData['labels']) !!},
+                    labels: @json($trendData['labels']),
                     datasets: [{
                         label: @json(__('messages.revenue')),
-                        data: {!! json_encode($trendData['revenue']) !!},
+                        data: @json($trendData['revenue']),
                         borderColor: '#10B981',
                         backgroundColor: 'rgba(16, 185, 129, 0.1)',
                         fill: true,

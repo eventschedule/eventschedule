@@ -264,12 +264,12 @@
                     let warningMessage = '';
 
                     if (fileSize > 2.5) {
-                        warningMessage += {!! json_encode(__('messages.image_size_warning'), JSON_UNESCAPED_UNICODE) !!};
+                        warningMessage += @json(__('messages.image_size_warning'), JSON_UNESCAPED_UNICODE);
                     }
 
                     if (width !== height && previewId == 'profile_image_preview') {
                         if (warningMessage) warningMessage += " ";
-                        warningMessage += {!! json_encode(__('messages.image_not_square'), JSON_UNESCAPED_UNICODE) !!};
+                        warningMessage += @json(__('messages.image_not_square'), JSON_UNESCAPED_UNICODE);
                     }
 
                     if (warningElement) {
@@ -375,7 +375,7 @@
             var existingProfileImage = '{{ $role->profile_image_url }}';
 
             if (! name) {
-                name = {!! json_encode(__('messages.preview'), JSON_UNESCAPED_UNICODE) !!};
+                name = @json(__('messages.preview'), JSON_UNESCAPED_UNICODE);
             } else if (name.length > 20) {
                 name = name.substring(0, 20) + '...';
             }
@@ -413,7 +413,7 @@
                         '<div class="flex items-center justify-between gap-2 ' + contentTopPadding + '">' +
                             '<div class="text-sm font-semibold text-[#151B26]" style="color: ' + fontColor + '; font-family: ' + fontFamily + ';">' + name + '</div>' +
                             '<div class="rounded-md px-2.5 py-1 text-xs font-semibold shadow-sm" style="background-color: ' + accentColor + '; color: ' + getContrastColor(accentColor) + '">' +
-                                {!! json_encode(__('messages.follow'), JSON_UNESCAPED_UNICODE) !!} +
+                                @json(__('messages.follow'), JSON_UNESCAPED_UNICODE) +
                             '</div>' +
                         '</div>' +
                     '</div>' +
@@ -461,7 +461,7 @@
         }
 
         function onValidateClick() {
-            $('#address_response').text({!! json_encode(__('messages.searching'), JSON_UNESCAPED_UNICODE) !!} + '...').show();
+            $('#address_response').text(@json(__('messages.searching'), JSON_UNESCAPED_UNICODE) + '...').show();
             $('#accept_button').hide();
             var country = $('#country').countrySelect('getSelectedCountryData');
             $.post({
@@ -481,11 +481,11 @@
                         $('#accept_button').show();
                         $('#address_response').data('validated_address', response['data']);
                     } else {
-                        $('#address_response').text({!! json_encode(__('messages.address_not_found'), JSON_UNESCAPED_UNICODE) !!});    
+                        $('#address_response').text(@json(__('messages.address_not_found'), JSON_UNESCAPED_UNICODE));    
                     }
                 },
                 error: function(xhr, status, error) {
-                    $('#address_response').text({!! json_encode(__('messages.an_error_occurred'), JSON_UNESCAPED_UNICODE) !!});
+                    $('#address_response').text(@json(__('messages.an_error_occurred'), JSON_UNESCAPED_UNICODE));
                 }
             });
         }
@@ -503,7 +503,7 @@
                 var url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
                 window.open(url, '_blank');
             } else {
-                alert({!! json_encode(__('messages.please_enter_address'), JSON_UNESCAPED_UNICODE) !!});
+                alert(@json(__('messages.please_enter_address'), JSON_UNESCAPED_UNICODE));
             }
         }
 
@@ -736,6 +736,12 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 3 3 0 005.78-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
                                 </svg>
                                 {{ __('messages.schedule_style') }}
+                            </a>
+                            <a href="#section-subschedules" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-subschedules">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                                </svg>
+                                {{ __('messages.subschedules') }}
                             </a>
                             <a href="#section-settings" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-settings">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -1060,24 +1066,24 @@
                     <!-- Sub-Tab Navigation -->
                     <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
                         <nav class="-mb-px flex space-x-2 sm:space-x-6">
-                            <button type="button" data-style-tab="images" id="style-tab-images"
+                            <button type="button" data-style-tab="branding" id="style-tab-branding"
                                 class="style-tab-button flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-[#4E81FA] text-[#4E81FA]">
-                                {{ __('messages.images') }}
+                                {{ __('messages.branding') }}
                             </button>
                             <button type="button" data-style-tab="background" id="style-tab-background"
                                 class="style-tab-button flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
                                 {{ __('messages.background') }}
                             </button>
-                            <button type="button" data-style-tab="settings" id="style-tab-settings"
+                            <button type="button" data-style-tab="advanced" id="style-tab-advanced"
                                 class="style-tab-button flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
-                                {{ __('messages.settings') }}
+                                {{ __('messages.advanced') }}
                             </button>
                         </nav>
                     </div>
 
 
-                    <!-- Images Tab Content -->
-                    <div id="style-content-images">
+                    <!-- Branding Tab Content -->
+                    <div id="style-content-branding">
                             <div class="mb-6">
                                 <x-input-label :value="__('messages.square_profile_image')" />
                                 <input id="profile_image" name="profile_image" type="file" class="hidden"
@@ -1120,6 +1126,53 @@
                                 </div>
                                 @endif
                             </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="accent_color" :value="__('messages.accent_color')" />
+                                <x-text-input id="accent_color" name="accent_color" type="color" class="mt-1 block w-1/2"
+                                    :value="old('accent_color', $role->accent_color)" data-action="update-preview-on-input" />
+                                <x-input-error class="mt-2" :messages="$errors->get('accent_color')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="font_family" :value="__('messages.font_family')" />
+                                <div class="flex items-center gap-1">
+                                    <select id="font_family" name="font_family" data-action="font-family-change"
+                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        @foreach($fonts as $font)
+                                        <option value="{{ $font->value }}"
+                                            {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
+                                            {{ $font->label }}</option>
+                                        @endforeach
+                                    </select>
+                                    <button type="button"
+                                            id="prev_font"
+                                            class="color-nav-button"
+                                            data-nav-action="changeFont" data-nav-direction="-1"
+                                            title="{{ __('messages.previous') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                        </svg>
+                                    </button>
+                                    <button type="button"
+                                            id="next_font"
+                                            class="color-nav-button"
+                                            data-nav-action="changeFont" data-nav-direction="1"
+                                            title="{{ __('messages.next') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <x-input-error class="mt-2" :messages="$errors->get('font_family')" />
+                                <div id="font_preview" class="mt-3 text-2xl text-gray-900 dark:text-gray-100" style="font-family: '{{ $role->font_family }}', sans-serif;">
+                                    {{ $role->name }}
+                                </div>
+                            </div>
+                    </div>
+
+                    <!-- Background Tab Content -->
+                    <div id="style-content-background" style="display: none;">
 
                             @php
                                 $effectiveHeaderImage = $role->header_image;
@@ -1211,10 +1264,7 @@
                                 @endif
 
                             </div>
-                    </div>
 
-                    <!-- Background Tab Content -->
-                    <div id="style-content-background" style="display: none;">
                             <div class="mb-6">
                                 <x-input-label :value="__('messages.background_type')" />
                                 <div class="mt-2 space-y-2">
@@ -1398,51 +1448,8 @@
                             </div>
                     </div>
 
-                    <!-- Settings Tab Content -->
-                    <div id="style-content-settings" style="display: none;">
-                            <div class="mb-6">
-                                <x-input-label for="accent_color" :value="__('messages.accent_color')" />
-                                <x-text-input id="accent_color" name="accent_color" type="color" class="mt-1 block w-1/2"
-                                    :value="old('accent_color', $role->accent_color)" data-action="update-preview-on-input" />
-                                <x-input-error class="mt-2" :messages="$errors->get('accent_color')" />
-                            </div>
-
-                            <div class="mb-6">
-                                <x-input-label for="font_family" :value="__('messages.font_family')" />
-                                <div class="flex items-center gap-1">
-                                    <select id="font_family" name="font_family" data-action="font-family-change"
-                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                        @foreach($fonts as $font)
-                                        <option value="{{ $font->value }}"
-                                            {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
-                                            {{ $font->label }}</option>
-                                        @endforeach
-                                    </select>
-                                    <button type="button"
-                                            id="prev_font"
-                                            class="color-nav-button"
-                                            data-nav-action="changeFont" data-nav-direction="-1"
-                                            title="{{ __('messages.previous') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                                        </svg>
-                                    </button>
-                                    <button type="button"
-                                            id="next_font"
-                                            class="color-nav-button"
-                                            data-nav-action="changeFont" data-nav-direction="1"
-                                            title="{{ __('messages.next') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                        </svg>
-                                    </button>
-                                </div>
-                                <x-input-error class="mt-2" :messages="$errors->get('font_family')" />
-                                <div id="font_preview" class="mt-3 text-2xl text-gray-900 dark:text-gray-100" style="font-family: '{{ $role->font_family }}', sans-serif;">
-                                    {{ $role->name }}
-                                </div>
-                            </div>
-
+                    <!-- Advanced Tab Content -->
+                    <div id="style-content-advanced" style="display: none;">
                             <div class="mb-6">
                                 <x-input-label :value="__('messages.default_layout')" />
                                 <div class="mt-2 space-y-2">
@@ -1460,6 +1467,7 @@
                                     </div>
                                     @endforeach
                                 </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.default_layout_help') }}</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('event_layout')" />
                             </div>
 
@@ -1468,6 +1476,7 @@
                                 <textarea id="custom_css" name="custom_css" {{ is_demo_mode() ? 'disabled' : '' }}
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm font-mono text-sm"
                                     rows="6">{{ old('custom_css', $role->custom_css) }}</textarea>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.custom_css_help') }}</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_css')" />
                                 @if (is_demo_mode())
                                 <p class="mt-1 text-sm text-yellow-600 dark:text-yellow-400">{{ __('messages.demo_mode_settings_disabled') }}</p>
@@ -1483,6 +1492,105 @@
                             <div id="preview" class="h-[140px] w-full"></div>
                         </div>
                     </div>
+
+                    </div>
+                </div>
+
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-subschedules">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                        </svg>
+                        {{ __('messages.subschedules') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="section-subschedules" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                    <div class="max-w-xl">
+
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                            </svg>
+                            {{ __('messages.subschedules') }}
+                        </h2>
+
+                        <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.subschedules_help') }}</p>
+                        <div class="mb-6">
+                            <div id="groups-list">
+                                @php $groups = $role->groups ?? []; @endphp
+                                <div id="group-items">
+                                    @foreach(old('groups', $groups) as $i => $group)
+                                        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                            <div class="mb-4">
+                                                <x-input-label for="group_name_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.name') . ' *'" />
+                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name : $group['name'] ?? ''" />
+                                            </div>
+                                            @if($role->language_code !== 'en' || app()->getLocale() !== 'en')
+                                            <div class="mb-4">
+                                                <x-input-label for="group_name_en_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.english_name')" />
+                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name_en]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name_en : $group['name_en'] ?? ''" />
+                                            </div>
+                                            @endif
+                                            <div class="mb-4">
+                                                <x-input-label :value="__('messages.color')" />
+                                                <div class="vue-color-picker" data-props="{{ json_encode([
+                                                    'name' => 'groups[' . (is_object($group) ? $group->id : $i) . '][color]',
+                                                    'initialColor' => is_object($group) ? $group->color : ($group['color'] ?? ''),
+                                                    'colors' => ['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'],
+                                                    'clearLabel' => __('messages.clear'),
+                                                ]) }}"></div>
+                                            </div>
+                                            @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
+                                            <div class="mb-4" id="group-url-display-{{ is_object($group) ? $group->id : $i }}">
+                                                <p class="text-sm text-gray-500 flex items-center gap-2">
+                                                    <x-link href="{{ $role->getGuestUrl() }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank">
+                                                        {{ \App\Utils\UrlUtils::clean($role->getGuestUrl()) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}
+                                                    </x-link>
+                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $role->getGuestUrl() }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
+                                                        </svg>
+                                                    </button>
+                                                </p>
+                                            </div>
+                                            <div class="mb-4 {{ (is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])) ? 'hidden' : '' }}" id="group-slug-edit-{{ is_object($group) ? $group->id : $i }}">
+                                                <x-input-label for="group_slug_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.slug')" />
+                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][slug]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->slug : $group['slug'] ?? ''" />
+                                            </div>
+                                            <div class="flex gap-4 items-center justify-between">
+                                                <div class="flex gap-4 items-center">
+                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" id="edit-button-{{ is_object($group) ? $group->id : $i }}" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                                        {{ __('messages.edit') }}
+                                                    </button>
+                                                    @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
+                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" class="hidden text-sm text-[#4E81FA] hover:text-blue-700" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
+                                                        {{ __('messages.cancel') }}
+                                                    </button>
+                                                    @endif
+                                                </div>
+                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                    {{ __('messages.remove') }}
+                                                </button>
+                                            </div>
+                                            @else
+                                            <div class="flex gap-4 items-center justify-end">
+                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                    {{ __('messages.remove') }}
+                                                </button>
+                                            </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <button type="button" data-action="add-group-field" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                    + {{ __('messages.add_subschedule') }}
+                                </button>
+                            </div>
+                            <x-input-error class="mt-2" :messages="$errors->get('groups')" />
+                        </div>
 
                     </div>
                 </div>
@@ -1522,11 +1630,13 @@
                                 <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="general">
                                     {{ __('messages.general') }}
                                 </button>
+                                @if ($role->isCurator() || ((config('app.hosted') || config('app.is_testing')) && $role->isVenue()))
+                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="requests">
+                                    {{ __('messages.requests') }}
+                                </button>
+                                @endif
                                 <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
                                     {{ __('messages.custom_fields') }}
-                                </button>
-                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="subschedules">
-                                    {{ __('messages.subschedules') }}
                                 </button>
                             </nav>
                         </div>
@@ -1600,12 +1710,20 @@
                         </div>
                         @endif
 
+                        </div>
+                        <!-- End Tab Content: General -->
+
+                        <!-- Tab Content: Requests -->
+                        @if ($role->isCurator() || ((config('app.hosted') || config('app.is_testing')) && $role->isVenue()))
+                        <div id="settings-tab-requests" class="settings-tab-content hidden">
+
                         @if ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isCurator()))
                         <div class="mb-6">
                             <x-checkbox name="accept_requests"
                                 label="{{ __('messages.accept_requests') }}"
                                 checked="{{ old('accept_requests', $role->accept_requests) }}"
                                 data-custom-attribute="value" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.accept_requests_help') }}</p>
                             <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
                         </div>
                         <div class="mb-6" id="require_approval_section">
@@ -1613,6 +1731,7 @@
                                 label="{{ __('messages.require_approval') }}"
                                 checked="{{ old('require_approval', $role->exists ? $role->require_approval : true) }}"
                                 data-custom-attribute="value" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.require_approval_help') }}</p>
                             <x-input-error class="mt-2" :messages="$errors->get('require_approval')" />
                         </div>
                         <div class="mb-6" id="request_terms_section">
@@ -1659,18 +1778,9 @@
                         </div>
                         @endif
 
-                        <!--
-                        <div class="mb-6">
-                            <x-checkbox name="is_unlisted"
-                                label="{{ __('messages.is_unlisted') }}"
-                                checked="{{ old('is_unlisted', $role->is_unlisted) }}"
-                                data-custom-attribute="value" />
-                            <x-input-error class="mt-2" :messages="$errors->get('is_unlisted')" />
                         </div>
-                        -->
-
-                        </div>
-                        <!-- End Tab Content: General -->
+                        @endif
+                        <!-- End Tab Content: Requests -->
 
                         <!-- Tab Content: Custom Fields -->
                         <div id="settings-tab-custom-fields" class="settings-tab-content hidden">
@@ -1761,85 +1871,6 @@
                         </p>
                         </div>
                         <!-- End Tab Content: Custom Fields -->
-
-                        <!-- Tab Content: Subschedules -->
-                        <div id="settings-tab-subschedules" class="settings-tab-content hidden">
-                        <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.subschedules_help') }}</p>
-                        <div class="mb-6">
-                            <div id="groups-list">
-                                @php $groups = $role->groups ?? []; @endphp
-                                <div id="group-items">
-                                    @foreach(old('groups', $groups) as $i => $group)
-                                        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                                            <div class="mb-4">
-                                                <x-input-label for="group_name_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.name') . ' *'" />
-                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name : $group['name'] ?? ''" />
-                                            </div>
-                                            @if($role->language_code !== 'en' || app()->getLocale() !== 'en')
-                                            <div class="mb-4">
-                                                <x-input-label for="group_name_en_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.english_name')" />
-                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name_en]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name_en : $group['name_en'] ?? ''" />
-                                            </div>
-                                            @endif
-                                            <div class="mb-4">
-                                                <x-input-label :value="__('messages.color')" />
-                                                <div class="vue-color-picker" data-props="{{ json_encode([
-                                                    'name' => 'groups[' . (is_object($group) ? $group->id : $i) . '][color]',
-                                                    'initialColor' => is_object($group) ? $group->color : ($group['color'] ?? ''),
-                                                    'colors' => ['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'],
-                                                    'clearLabel' => __('messages.clear'),
-                                                ]) }}"></div>
-                                            </div>
-                                            @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
-                                            <div class="mb-4" id="group-url-display-{{ is_object($group) ? $group->id : $i }}">
-                                                <p class="text-sm text-gray-500 flex items-center gap-2">
-                                                    <x-link href="{{ $role->getGuestUrl() }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank">
-                                                        {{ \App\Utils\UrlUtils::clean($role->getGuestUrl()) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}
-                                                    </x-link>
-                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $role->getGuestUrl() }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
-                                                        </svg>
-                                                    </button>
-                                                </p>
-                                            </div>
-                                            <div class="mb-4 {{ (is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])) ? 'hidden' : '' }}" id="group-slug-edit-{{ is_object($group) ? $group->id : $i }}">
-                                                <x-input-label for="group_slug_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.slug')" />
-                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][slug]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->slug : $group['slug'] ?? ''" />
-                                            </div>
-                                            <div class="flex gap-4 items-center justify-between">
-                                                <div class="flex gap-4 items-center">
-                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" id="edit-button-{{ is_object($group) ? $group->id : $i }}" class="text-sm text-[#4E81FA] hover:text-blue-700">
-                                                        {{ __('messages.edit') }}
-                                                    </button>
-                                                    @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
-                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" class="hidden text-sm text-[#4E81FA] hover:text-blue-700" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
-                                                        {{ __('messages.cancel') }}
-                                                    </button>
-                                                    @endif
-                                                </div>
-                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                                    {{ __('messages.remove') }}
-                                                </button>
-                                            </div>
-                                            @else
-                                            <div class="flex gap-4 items-center justify-end">
-                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                                    {{ __('messages.remove') }}
-                                                </button>
-                                            </div>
-                                            @endif
-                                        </div>
-                                    @endforeach
-                                </div>
-                                <button type="button" data-action="add-group-field" class="text-sm text-[#4E81FA] hover:text-blue-700">
-                                    + {{ __('messages.add_subschedule') }}
-                                </button>
-                            </div>
-                            <x-input-error class="mt-2" :messages="$errors->get('groups')" />
-                        </div>
-                        </div>
-                        <!-- End Tab Content: Subschedules -->
 
                     </div>
                 </div>
@@ -2259,6 +2290,7 @@
                     </svg>
                     {{ __('messages.email_settings') }}
                 </h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 -mt-4 mb-6">{{ __('messages.email_settings_help') }}</p>
 
                 @if (is_demo_mode())
                 <div class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
@@ -2412,7 +2444,7 @@ if (document.body) {
 // Style sub-tab navigation
 function showStyleTab(tabName) {
     // Hide all style tab contents
-    const tabContents = ['images', 'background', 'settings'];
+    const tabContents = ['branding', 'background', 'advanced'];
     tabContents.forEach(function(tab) {
         const content = document.getElementById('style-content-' + tab);
         if (content) {
@@ -2438,8 +2470,11 @@ function showStyleTab(tabName) {
 
 // Restore active style tab from localStorage on page load
 document.addEventListener('DOMContentLoaded', function() {
-    const savedStyleTab = localStorage.getItem('styleActiveTab');
+    var savedStyleTab = localStorage.getItem('styleActiveTab');
     if (savedStyleTab) {
+        // Migrate old tab names to new names
+        if (savedStyleTab === 'images') savedStyleTab = 'branding';
+        if (savedStyleTab === 'settings') savedStyleTab = 'advanced';
         showStyleTab(savedStyleTab);
     }
 });
@@ -2560,14 +2595,14 @@ function testImport() {
     const cities = Array.from(cityInputs).map(input => input.value.trim()).filter(city => city);
     
     if (urls.length === 0 && cities.length === 0) {
-        alert({!! json_encode(__('messages.please_enter_urls_or_cities'), JSON_UNESCAPED_UNICODE) !!});
+        alert(@json(__('messages.please_enter_urls_or_cities'), JSON_UNESCAPED_UNICODE));
         return;
     }
     
     // Show loading state
     const button = event.target;
     const originalText = button.textContent;
-    button.textContent = {!! json_encode(__('messages.testing'), JSON_UNESCAPED_UNICODE) !!} + '...';
+    button.textContent = @json(__('messages.testing'), JSON_UNESCAPED_UNICODE) + '...';
     button.disabled = true;
     
     // Only test import if we have a subdomain (existing role)
@@ -2603,7 +2638,7 @@ function testImport() {
     });
     @else
     // For new roles, just show a message
-    alert({!! json_encode(__('messages.save_role_first_to_test_import'), JSON_UNESCAPED_UNICODE) !!});
+    alert(@json(__('messages.save_role_first_to_test_import'), JSON_UNESCAPED_UNICODE));
     button.textContent = originalText;
     button.disabled = false;
     @endif
@@ -2722,7 +2757,7 @@ function loadGoogleCalendars() {
             return response.json();
         })
         .then(data => {
-            select.innerHTML = '<option value="">' + {!! json_encode(__('messages.select_a_calendar'), JSON_UNESCAPED_UNICODE) !!} + '</option>';
+            select.innerHTML = '<option value="">' + @json(__('messages.select_a_calendar'), JSON_UNESCAPED_UNICODE) + '</option>';
             
             if (data.calendars && Array.isArray(data.calendars)) {
                 data.calendars.forEach(calendar => {
@@ -2735,17 +2770,17 @@ function loadGoogleCalendars() {
                     select.appendChild(option);
                 });
             } else {
-                select.innerHTML = '<option value="">' + {!! json_encode(__('messages.no_calendars_available'), JSON_UNESCAPED_UNICODE) !!} + '</option>';
+                select.innerHTML = '<option value="">' + @json(__('messages.no_calendars_available'), JSON_UNESCAPED_UNICODE) + '</option>';
             }
         })
         .catch(error => {
             console.error('Error loading calendars:', error);
-            let errorMessage = {!! json_encode(__('messages.error_loading_calendars'), JSON_UNESCAPED_UNICODE) !!};
+            let errorMessage = @json(__('messages.error_loading_calendars'), JSON_UNESCAPED_UNICODE);
             
             if (error.message.includes('401')) {
-                errorMessage = {!! json_encode(__('messages.google_calendar_not_connected'), JSON_UNESCAPED_UNICODE) !!};
+                errorMessage = @json(__('messages.google_calendar_not_connected'), JSON_UNESCAPED_UNICODE);
             } else if (error.message.includes('403')) {
-                errorMessage = {!! json_encode(__('messages.access_denied_calendar'), JSON_UNESCAPED_UNICODE) !!};
+                errorMessage = @json(__('messages.access_denied_calendar'), JSON_UNESCAPED_UNICODE);
             }
             
             select.innerHTML = '<option value="">' + errorMessage + '</option>';
@@ -2881,7 +2916,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (!email) {
                 testEmailResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
-                testEmailResult.textContent = {!! json_encode(__('messages.please_enter_from_address'), JSON_UNESCAPED_UNICODE) !!};
+                testEmailResult.textContent = @json(__('messages.please_enter_from_address'), JSON_UNESCAPED_UNICODE);
                 testEmailResult.classList.remove('hidden');
                 return;
             }
@@ -2890,7 +2925,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 testEmailResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
-                testEmailResult.textContent = {!! json_encode(__('messages.invalid_email_address'), JSON_UNESCAPED_UNICODE) !!};
+                testEmailResult.textContent = @json(__('messages.invalid_email_address'), JSON_UNESCAPED_UNICODE);
                 testEmailResult.classList.remove('hidden');
                 return;
             }
@@ -2914,7 +2949,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Disable button and show loading
             sendTestEmailBtn.disabled = true;
-            sendTestEmailBtn.textContent = {!! json_encode(__('messages.sending'), JSON_UNESCAPED_UNICODE) !!} + '...';
+            sendTestEmailBtn.textContent = @json(__('messages.sending'), JSON_UNESCAPED_UNICODE) + '...';
             testEmailResult.classList.add('hidden');
             
             // Send AJAX request
@@ -2933,22 +2968,22 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 sendTestEmailBtn.disabled = false;
-                sendTestEmailBtn.textContent = {!! json_encode(__('messages.send_test_email'), JSON_UNESCAPED_UNICODE) !!};
+                sendTestEmailBtn.textContent = @json(__('messages.send_test_email'), JSON_UNESCAPED_UNICODE);
                 
                 if (data.success) {
                     testEmailResult.className = 'mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-800 dark:text-green-200';
-                    testEmailResult.textContent = data.message || {!! json_encode(__('messages.test_email_sent'), JSON_UNESCAPED_UNICODE) !!};
+                    testEmailResult.textContent = data.message || @json(__('messages.test_email_sent'), JSON_UNESCAPED_UNICODE);
                 } else {
                     testEmailResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
-                    testEmailResult.textContent = data.error || {!! json_encode(__('messages.failed_to_send_test_email'), JSON_UNESCAPED_UNICODE) !!};
+                    testEmailResult.textContent = data.error || @json(__('messages.failed_to_send_test_email'), JSON_UNESCAPED_UNICODE);
                 }
                 testEmailResult.classList.remove('hidden');
             })
             .catch(error => {
                 sendTestEmailBtn.disabled = false;
-                sendTestEmailBtn.textContent = {!! json_encode(__('messages.send_test_email'), JSON_UNESCAPED_UNICODE) !!};
+                sendTestEmailBtn.textContent = @json(__('messages.send_test_email'), JSON_UNESCAPED_UNICODE);
                 testEmailResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
-                testEmailResult.textContent = {!! json_encode(__('messages.failed_to_send_test_email'), JSON_UNESCAPED_UNICODE) !!};
+                testEmailResult.textContent = @json(__('messages.failed_to_send_test_email'), JSON_UNESCAPED_UNICODE);
                 testEmailResult.classList.remove('hidden');
                 console.error('Error:', error);
             });
@@ -3230,7 +3265,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Restore active tab from localStorage
     const savedSettingsTab = localStorage.getItem('settingsActiveTab');
     if (savedSettingsTab) {
-        switchSettingsTab(savedSettingsTab);
+        if (document.getElementById('settings-tab-' + savedSettingsTab)) {
+            switchSettingsTab(savedSettingsTab);
+        } else {
+            switchSettingsTab('general');
+        }
     }
 
     settingsTabs.forEach(tab => {
@@ -3290,17 +3329,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const password = document.getElementById('caldav_password').value.trim();
 
             if (!serverUrl || !username || !password) {
-                showCaldavResult({!! json_encode(__('messages.fill_all_fields'), JSON_UNESCAPED_UNICODE) !!}, 'error');
+                showCaldavResult(@json(__('messages.fill_all_fields'), JSON_UNESCAPED_UNICODE), 'error');
                 return;
             }
 
             if (!serverUrl.startsWith('https://')) {
-                showCaldavResult({!! json_encode(__('messages.caldav_https_required'), JSON_UNESCAPED_UNICODE) !!}, 'error');
+                showCaldavResult(@json(__('messages.caldav_https_required'), JSON_UNESCAPED_UNICODE), 'error');
                 return;
             }
 
             caldavTestBtn.disabled = true;
-            caldavTestBtn.textContent = {!! json_encode(__('messages.testing'), JSON_UNESCAPED_UNICODE) !!};
+            caldavTestBtn.textContent = @json(__('messages.testing'), JSON_UNESCAPED_UNICODE);
 
             fetch('{{ url('/caldav/test-connection') }}', {
                 method: 'POST',
@@ -3317,20 +3356,20 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 caldavTestBtn.disabled = false;
-                caldavTestBtn.textContent = {!! json_encode(__('messages.test_connection'), JSON_UNESCAPED_UNICODE) !!};
+                caldavTestBtn.textContent = @json(__('messages.test_connection'), JSON_UNESCAPED_UNICODE);
 
                 if (data.success) {
-                    showCaldavResult({!! json_encode(__('messages.connection_successful'), JSON_UNESCAPED_UNICODE) !!}, 'success');
+                    showCaldavResult(@json(__('messages.connection_successful'), JSON_UNESCAPED_UNICODE), 'success');
                     // Discover calendars
                     discoverCaldavCalendars(serverUrl, username, password);
                 } else {
-                    showCaldavResult(data.message || {!! json_encode(__('messages.connection_failed'), JSON_UNESCAPED_UNICODE) !!}, 'error');
+                    showCaldavResult(data.message || @json(__('messages.connection_failed'), JSON_UNESCAPED_UNICODE), 'error');
                 }
             })
             .catch(error => {
                 caldavTestBtn.disabled = false;
-                caldavTestBtn.textContent = {!! json_encode(__('messages.test_connection'), JSON_UNESCAPED_UNICODE) !!};
-                showCaldavResult({!! json_encode(__('messages.connection_failed'), JSON_UNESCAPED_UNICODE) !!} + ': ' + error.message, 'error');
+                caldavTestBtn.textContent = @json(__('messages.test_connection'), JSON_UNESCAPED_UNICODE);
+                showCaldavResult(@json(__('messages.connection_failed'), JSON_UNESCAPED_UNICODE) + ': ' + error.message, 'error');
             });
         });
     }
@@ -3353,7 +3392,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success && data.calendars && data.calendars.length > 0) {
                 // Populate calendar select
-                caldavCalendarSelect.innerHTML = '<option value="">' + {!! json_encode(__('messages.select_a_calendar'), JSON_UNESCAPED_UNICODE) !!} + '</option>';
+                caldavCalendarSelect.innerHTML = '<option value="">' + @json(__('messages.select_a_calendar'), JSON_UNESCAPED_UNICODE) + '</option>';
                 data.calendars.forEach(calendar => {
                     const option = document.createElement('option');
                     option.value = calendar.url;
@@ -3366,11 +3405,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 caldavSyncDirectionContainer.classList.remove('hidden');
                 caldavConnectContainer.classList.remove('hidden');
             } else {
-                showCaldavResult({!! json_encode(__('messages.no_calendars_found'), JSON_UNESCAPED_UNICODE) !!}, 'error');
+                showCaldavResult(@json(__('messages.no_calendars_found'), JSON_UNESCAPED_UNICODE), 'error');
             }
         })
         .catch(error => {
-            showCaldavResult({!! json_encode(__('messages.error_discovering_calendars'), JSON_UNESCAPED_UNICODE) !!} + ': ' + error.message, 'error');
+            showCaldavResult(@json(__('messages.error_discovering_calendars'), JSON_UNESCAPED_UNICODE) + ': ' + error.message, 'error');
         });
     }
 
@@ -3378,7 +3417,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (caldavConnectBtn) {
         caldavConnectBtn.addEventListener('click', function() {
             if (!caldavSubdomain) {
-                showCaldavResult({!! json_encode(__('messages.save_schedule_first'), JSON_UNESCAPED_UNICODE) !!}, 'error');
+                showCaldavResult(@json(__('messages.save_schedule_first'), JSON_UNESCAPED_UNICODE), 'error');
                 return;
             }
 
@@ -3389,12 +3428,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const syncDirection = document.querySelector('input[name="caldav_sync_direction_new"]:checked')?.value || 'to';
 
             if (!calendarUrl) {
-                showCaldavResult({!! json_encode(__('messages.select_a_calendar'), JSON_UNESCAPED_UNICODE) !!}, 'error');
+                showCaldavResult(@json(__('messages.select_a_calendar'), JSON_UNESCAPED_UNICODE), 'error');
                 return;
             }
 
             caldavConnectBtn.disabled = true;
-            caldavConnectBtn.textContent = {!! json_encode(__('messages.connecting'), JSON_UNESCAPED_UNICODE) !!};
+            caldavConnectBtn.textContent = @json(__('messages.connecting'), JSON_UNESCAPED_UNICODE);
 
             fetch('{{ url('/caldav/settings') }}/' + caldavSubdomain, {
                 method: 'POST',
@@ -3413,20 +3452,20 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 caldavConnectBtn.disabled = false;
-                caldavConnectBtn.textContent = {!! json_encode(__('messages.connect'), JSON_UNESCAPED_UNICODE) !!};
+                caldavConnectBtn.textContent = @json(__('messages.connect'), JSON_UNESCAPED_UNICODE);
 
                 if (data.success) {
-                    showCaldavResult(data.message || {!! json_encode(__('messages.caldav_settings_saved'), JSON_UNESCAPED_UNICODE) !!}, 'success');
+                    showCaldavResult(data.message || @json(__('messages.caldav_settings_saved'), JSON_UNESCAPED_UNICODE), 'success');
                     // Reload page to show connected state
                     setTimeout(() => window.location.reload(), 1500);
                 } else {
-                    showCaldavResult(data.message || {!! json_encode(__('messages.failed_to_save_settings'), JSON_UNESCAPED_UNICODE) !!}, 'error');
+                    showCaldavResult(data.message || @json(__('messages.failed_to_save_settings'), JSON_UNESCAPED_UNICODE), 'error');
                 }
             })
             .catch(error => {
                 caldavConnectBtn.disabled = false;
-                caldavConnectBtn.textContent = {!! json_encode(__('messages.connect'), JSON_UNESCAPED_UNICODE) !!};
-                showCaldavResult({!! json_encode(__('messages.failed_to_save_settings'), JSON_UNESCAPED_UNICODE) !!} + ': ' + error.message, 'error');
+                caldavConnectBtn.textContent = @json(__('messages.connect'), JSON_UNESCAPED_UNICODE);
+                showCaldavResult(@json(__('messages.failed_to_save_settings'), JSON_UNESCAPED_UNICODE) + ': ' + error.message, 'error');
             });
         });
     }
@@ -3452,18 +3491,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(data => {
                     if (data.success) {
                         // Show brief success feedback
-                        showCaldavResult(data.message || {!! json_encode(__('messages.sync_direction_updated'), JSON_UNESCAPED_UNICODE) !!}, 'success');
+                        showCaldavResult(data.message || @json(__('messages.sync_direction_updated'), JSON_UNESCAPED_UNICODE), 'success');
                         setTimeout(() => {
                             if (caldavTestResult) {
                                 caldavTestResult.classList.add('hidden');
                             }
                         }, 2000);
                     } else {
-                        showCaldavResult(data.message || {!! json_encode(__('messages.failed_to_save_settings'), JSON_UNESCAPED_UNICODE) !!}, 'error');
+                        showCaldavResult(data.message || @json(__('messages.failed_to_save_settings'), JSON_UNESCAPED_UNICODE), 'error');
                     }
                 })
                 .catch(error => {
-                    showCaldavResult({!! json_encode(__('messages.failed_to_save_settings'), JSON_UNESCAPED_UNICODE) !!} + ': ' + error.message, 'error');
+                    showCaldavResult(@json(__('messages.failed_to_save_settings'), JSON_UNESCAPED_UNICODE) + ': ' + error.message, 'error');
                 });
             });
         });
@@ -3474,12 +3513,12 @@ document.addEventListener('DOMContentLoaded', function() {
         caldavDisconnectBtn.addEventListener('click', function() {
             if (!caldavSubdomain) return;
 
-            if (!confirm({!! json_encode(__('messages.confirm_disconnect_caldav'), JSON_UNESCAPED_UNICODE) !!})) {
+            if (!confirm(@json(__('messages.confirm_disconnect_caldav'), JSON_UNESCAPED_UNICODE))) {
                 return;
             }
 
             caldavDisconnectBtn.disabled = true;
-            caldavDisconnectBtn.textContent = {!! json_encode(__('messages.disconnecting'), JSON_UNESCAPED_UNICODE) !!};
+            caldavDisconnectBtn.textContent = @json(__('messages.disconnecting'), JSON_UNESCAPED_UNICODE);
 
             fetch('{{ url('/caldav/disconnect') }}/' + caldavSubdomain, {
                 method: 'DELETE',
@@ -3494,14 +3533,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.location.reload();
                 } else {
                     caldavDisconnectBtn.disabled = false;
-                    caldavDisconnectBtn.textContent = {!! json_encode(__('messages.disconnect'), JSON_UNESCAPED_UNICODE) !!};
-                    alert(data.message || {!! json_encode(__('messages.failed_to_disconnect'), JSON_UNESCAPED_UNICODE) !!});
+                    caldavDisconnectBtn.textContent = @json(__('messages.disconnect'), JSON_UNESCAPED_UNICODE);
+                    alert(data.message || @json(__('messages.failed_to_disconnect'), JSON_UNESCAPED_UNICODE));
                 }
             })
             .catch(error => {
                 caldavDisconnectBtn.disabled = false;
-                caldavDisconnectBtn.textContent = {!! json_encode(__('messages.disconnect'), JSON_UNESCAPED_UNICODE) !!};
-                alert({!! json_encode(__('messages.failed_to_disconnect'), JSON_UNESCAPED_UNICODE) !!} + ': ' + error.message);
+                caldavDisconnectBtn.textContent = @json(__('messages.disconnect'), JSON_UNESCAPED_UNICODE);
+                alert(@json(__('messages.failed_to_disconnect'), JSON_UNESCAPED_UNICODE) + ': ' + error.message);
             });
         });
     }
@@ -3677,7 +3716,7 @@ function updateEventCustomFieldButton() {
 }
 
 function deleteRoleImage(url, token, element) {
-    if (!confirm({!! json_encode(__('messages.are_you_sure'), JSON_UNESCAPED_UNICODE) !!})) {
+    if (!confirm(@json(__('messages.are_you_sure'), JSON_UNESCAPED_UNICODE))) {
         return;
     }
 
@@ -3938,6 +3977,15 @@ document.addEventListener('DOMContentLoaded', function() {
     if (syncEventsBtn) {
         syncEventsBtn.addEventListener('click', function() { syncEvents(); });
     }
+
+    // Re-render preview when dark mode changes
+    new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.attributeName === 'class') {
+                updatePreview();
+            }
+        });
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
 });
 
