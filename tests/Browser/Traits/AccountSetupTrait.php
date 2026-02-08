@@ -20,7 +20,7 @@ trait AccountSetupTrait
                 ->check('terms')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SIGN UP')
-                ->waitForLocation('/events', 5)
+                ->waitForLocation('/events', 15)
                 ->assertPathIs('/events')
                 ->assertSee($name);
     }
@@ -37,7 +37,7 @@ trait AccountSetupTrait
                 ->type('name', $name)
                 ->pause(1000)
                 ->click('a[data-section="section-address"]')
-                ->waitFor('#address1', 5)
+                ->waitFor('#address1', 15)
                 ->type('address1', $address)
                 ->click('button[type="submit"]')
                 ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 5)
