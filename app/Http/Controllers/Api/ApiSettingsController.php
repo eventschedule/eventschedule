@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Services\AuditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -19,6 +20,7 @@ class ApiSettingsController extends Controller
         $user = auth()->user();
         $enableApi = $request->boolean('enable_api');
         $plaintextKey = null;
+        $disabled = false;
 
         // Only generate new key if:
         // 1. API was disabled and is now being enabled
@@ -41,12 +43,20 @@ class ApiSettingsController extends Controller
             $user->api_key_hash = null;
             $user->api_key_expires_at = null;
             $showNewKey = false;
+            $disabled = true;
         } else {
             // No change to key if just saving with same state
             $showNewKey = false;
+            $disabled = false;
         }
 
         $user->save();
+
+        if ($enableApi && $showNewKey) {
+            AuditService::log(AuditService::API_KEY_GENERATED, $user->id);
+        } elseif ($disabled) {
+            AuditService::log(AuditService::API_KEY_DISABLED, $user->id);
+        }
 
         return redirect()->to(route('profile.edit').'#section-api')
             ->with('message', 'API settings updated successfully')
