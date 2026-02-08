@@ -527,8 +527,10 @@
                 </div>
             </div>
             <div v-else-if="!isLoadingEvents && {{ $tab != 'availability' ? 'true' : 'false' }}" class="py-10 text-center">
-                <div class="text-xl text-gray-500 dark:text-gray-400">
-                    {{ __('messages.no_scheduled_events') }}
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 mx-auto max-w-md">
+                    <div class="text-xl text-gray-500 dark:text-gray-400">
+                        {{ __('messages.no_scheduled_events') }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -1040,8 +1042,10 @@
 
             {{-- Empty State --}}
             <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="py-10 text-center">
-                <div class="text-xl text-gray-500 dark:text-gray-400">
-                    {{ __('messages.no_scheduled_events') }}
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 mx-auto max-w-md">
+                    <div class="text-xl text-gray-500 dark:text-gray-400">
+                        {{ __('messages.no_scheduled_events') }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -1177,8 +1181,10 @@
 
             {{-- Empty State --}}
             <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="py-10 text-center">
-                <div class="text-xl text-gray-500 dark:text-gray-400">
-                    {{ __('messages.no_scheduled_events') }}
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 mx-auto max-w-md">
+                    <div class="text-xl text-gray-500 dark:text-gray-400">
+                        {{ __('messages.no_scheduled_events') }}
+                    </div>
                 </div>
             </div>
         </div>
