@@ -44,7 +44,7 @@
         }
 
         .color-nav-button {
-            padding: 0.5rem 0.5rem;
+            padding: 0.5rem 0.75rem;
             min-height: 38px;
             display: flex;
             align-items: center;
