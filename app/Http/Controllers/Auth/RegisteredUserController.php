@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Notifications\SignupVerificationCode;
 use App\Rules\NoFakeEmail;
 use App\Rules\ValidTurnstile;
+use App\Services\AuditService;
 use App\Utils\TurnstileUtils;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\Verified;
@@ -325,6 +326,8 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         Auth::login($user, true);
+
+        AuditService::log(AuditService::AUTH_REGISTER, $user->id, 'User', $user->id);
 
         return redirect(route('home', absolute: false));
     }

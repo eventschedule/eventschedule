@@ -366,7 +366,7 @@
             var backgroundColor = $('#background_color').val();
             var backgroundColors = $('#background_colors').val();
             var backgroundRotation = $('#background_rotation').val();
-            var fontColor = $('#font_color').val();
+            var fontColor = isDark ? '#F3F4F6' : '#151B26';
             var fontFamily = $('#font_family').find(':selected').val();
             var accentColor = $('#accent_color').val() || '#4E81FA';
             var name = $('#name').val();
@@ -387,7 +387,7 @@
                 headerHtml = '<div class="w-full h-16 bg-cover bg-center rounded-t-lg" style="background-image: url(\'' + headerUrl + '\')"></div>';
             } else if (headerImage === '') {
                 // Custom header image
-                var customHeaderUrl = $('#header_image_preview').attr('src') || '{{ $role->header_image_url }}';
+                var customHeaderUrl = $('#header_image_url_preview').attr('src') || '{{ $role->header_image_url }}';
                 if (customHeaderUrl) {
                     headerHtml = '<div class="w-full h-16 bg-cover bg-center rounded-t-lg" style="background-image: url(\'' + customHeaderUrl + '\')"></div>';
                 }
@@ -1130,15 +1130,6 @@
                             <div class="mb-6">
                                 <x-input-label for="header_image" :value="__('messages.header_image')" />
                                 <div class="flex items-center gap-1">
-                                    <button type="button"
-                                            id="prev_header"
-                                            class="color-nav-button"
-                                            data-nav-action="changeHeaderImage" data-nav-direction="-1"
-                                            title="{{ __('messages.previous') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                                        </svg>
-                                    </button>
                                     <select id="header_image" name="header_image"
                                         class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
                                         data-action="header-image-input">
@@ -1150,6 +1141,15 @@
                                             {{ $name }}</option>
                                         @endforeach
                                     </select>
+                                    <button type="button"
+                                            id="prev_header"
+                                            class="color-nav-button"
+                                            data-nav-action="changeHeaderImage" data-nav-direction="-1"
+                                            title="{{ __('messages.previous') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                        </svg>
+                                    </button>
                                     <button type="button"
                                             id="next_header"
                                             class="color-nav-button"
@@ -1331,6 +1331,14 @@
                                 <div class="mb-6">
                                     <x-input-label for="background_colors" :value="__('messages.colors')" />
                                     <div class="flex items-center gap-1">
+                                        <select id="background_colors" name="background_colors" data-action="background-colors-input"
+                                            class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                            @foreach($gradients as $gradient => $name)
+                                            <option value="{{ $gradient }}"
+                                                {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
+                                                {{ $name }}</option>
+                                            @endforeach
+                                        </select>
                                         <button type="button"
                                                 id="prev_color"
                                                 class="color-nav-button"
@@ -1340,14 +1348,6 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                                             </svg>
                                         </button>
-                                        <select id="background_colors" name="background_colors" data-action="background-colors-input"
-                                            class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                            @foreach($gradients as $gradient => $name)
-                                            <option value="{{ $gradient }}"
-                                                {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
-                                                {{ $name }}</option>
-                                            @endforeach
-                                        </select>
                                         <button type="button"
                                                 id="next_color"
                                                 class="color-nav-button"
@@ -1410,6 +1410,14 @@
                             <div class="mb-6">
                                 <x-input-label for="font_family" :value="__('messages.font_family')" />
                                 <div class="flex items-center gap-1">
+                                    <select id="font_family" name="font_family" data-action="font-family-change"
+                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        @foreach($fonts as $font)
+                                        <option value="{{ $font->value }}"
+                                            {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
+                                            {{ $font->label }}</option>
+                                        @endforeach
+                                    </select>
                                     <button type="button"
                                             id="prev_font"
                                             class="color-nav-button"
@@ -1419,14 +1427,6 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                                         </svg>
                                     </button>
-                                    <select id="font_family" name="font_family" data-action="font-family-change"
-                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                        @foreach($fonts as $font)
-                                        <option value="{{ $font->value }}"
-                                            {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
-                                            {{ $font->label }}</option>
-                                        @endforeach
-                                    </select>
                                     <button type="button"
                                             id="next_font"
                                             class="color-nav-button"

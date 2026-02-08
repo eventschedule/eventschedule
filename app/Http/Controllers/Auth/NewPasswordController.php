@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Services\AuditService;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -52,6 +53,8 @@ class NewPasswordController extends Controller
                 }
 
                 $user->forceFill($updateData)->save();
+
+                AuditService::log(AuditService::AUTH_PASSWORD_RESET, $user->id);
 
                 event(new PasswordReset($user));
             }

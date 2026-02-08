@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -52,6 +53,8 @@ class PasswordController extends Controller
         $user->update([
             'password' => Hash::make($validated['password']),
         ]);
+
+        AuditService::log(AuditService::AUTH_PASSWORD_CHANGE, $user->id);
 
         return redirect()->to(route('profile.edit').'#section-password')->with('status', 'password-updated');
     }

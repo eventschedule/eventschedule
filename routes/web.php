@@ -260,6 +260,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/plans/{role}/edit', [AdminController::class, 'editPlan'])->name('admin.plans.edit');
         Route::put('/admin/plans/{role}', [AdminController::class, 'updatePlan'])->name('admin.plans.update');
 
+        Route::get('/admin/audit-log', [AdminController::class, 'auditLog'])->name('admin.audit_log');
+
         // Admin queue routes
         Route::get('/admin/queue', [AdminController::class, 'queue'])->name('admin.queue');
         Route::post('/admin/queue/retry/{id}', [AdminController::class, 'queueRetry'])->name('admin.queue.retry');

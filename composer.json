@@ -17,6 +17,7 @@
         "laravel/tinker": "^2.9",
         "league/commonmark": "^2.5",
         "league/flysystem-aws-s3-v3": "^3.28",
+        "pragmarx/google2fa": "^9.0",
         "sentry/sentry-laravel": "^4.10",
         "sqids/sqids": "^0.5.0",
         "stripe/stripe-php": "^16.4"

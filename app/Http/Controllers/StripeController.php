@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AnalyticsEventsDaily;
 use App\Models\Sale;
+use App\Services\AuditService;
 use App\Services\UsageTrackingService;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
@@ -40,6 +41,8 @@ class StripeController extends Controller
             'type' => 'account_onboarding',
         ]);
 
+        AuditService::log(AuditService::STRIPE_LINK, $user->id);
+
         return redirect($link->url);
     }
 
@@ -49,6 +52,8 @@ class StripeController extends Controller
         $user->stripe_account_id = null;
         $user->stripe_completed_at = null;
         $user->save();
+
+        AuditService::log(AuditService::STRIPE_UNLINK, $user->id);
 
         return redirect()->to(route('profile.edit').'#section-payment-methods')->with('message', __('messages.stripe_unlinked'));
     }

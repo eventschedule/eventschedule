@@ -43,3 +43,7 @@ Schedule::call(function () {
 })->daily()->at('03:00')->appendOutputTo(storage_path('logs/sub-audience-blog.log'));
 
 Schedule::call(new ProcessScheduledNewsletters)->everyMinute()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
+    Artisan::call('audit:prune');
+})->daily()->appendOutputTo(storage_path('logs/scheduler.log'));

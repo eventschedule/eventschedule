@@ -9,6 +9,7 @@ use App\Models\Sale;
 use App\Models\User;
 use App\Rules\NoFakeEmail;
 use App\Rules\ValidTurnstile;
+use App\Services\AuditService;
 use App\Services\EmailService;
 use App\Utils\InvoiceNinja;
 use App\Utils\UrlUtils;
@@ -262,6 +263,8 @@ class TicketController extends Controller
 
         // Send email when sale is created
         $this->sendTicketPurchaseEmail($sale, $event);
+
+        AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'event_id:'.$event->id);
 
         if ($total == 0) {
             $sale->status = 'paid';
@@ -663,21 +666,16 @@ class TicketController extends Controller
                 break;
         }
 
-        // Audit log for all payment-related status changes
         if ($actionPerformed) {
-            \Log::info('Sale status change audit', [
-                'action' => $request->action,
-                'sale_id' => $sale->id,
-                'event_id' => $sale->event_id,
-                'previous_status' => $previousStatus,
-                'new_status' => $sale->status,
-                'payment_amount' => $sale->payment_amount,
-                'user_id' => $user->id,
-                'user_email' => $user->email,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'timestamp' => now()->toIso8601String(),
-            ]);
+            $auditAction = match ($request->action) {
+                'refund' => AuditService::SALE_REFUND,
+                default => AuditService::SALE_CHECKIN,
+            };
+            AuditService::log($auditAction, $user->id, 'Sale', $sale->id,
+                ['status' => $previousStatus],
+                ['status' => $sale->status],
+                $request->action.':event_id:'.$sale->event_id
+            );
         }
 
         if ($request->ajax()) {

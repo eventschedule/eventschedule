@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Mail\SupportEmail;
 use App\Notifications\DeletedUserNotification;
+use App\Services\AuditService;
 use App\Utils\InvoiceNinja;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\RedirectResponse;
@@ -101,6 +102,8 @@ class ProfileController extends Controller
             $user->save();
         }
 
+        AuditService::log(AuditService::PROFILE_UPDATE, $request->user()->id, 'User', $request->user()->id);
+
         return Redirect::to(route('profile.edit').'#section-profile')->with('status', 'profile-updated');
     }
 
@@ -137,6 +140,8 @@ class ProfileController extends Controller
                 'Account Deletion Feedback: '.$request->feedback
             ));
         }
+
+        AuditService::log(AuditService::PROFILE_DELETE, $user->id, 'User', $user->id);
 
         Auth::logout();
 
