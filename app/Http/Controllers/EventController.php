@@ -886,6 +886,11 @@ class EventController extends Controller
 
     public function parse(Request $request, $subdomain)
     {
+        $request->validate([
+            'event_details' => 'nullable|string|max:10000',
+            'details_image' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp|max:10240',
+        ]);
+
         $details = request()->input('event_details');
         $file = null;
 
@@ -970,6 +975,11 @@ class EventController extends Controller
 
     public function guestParse(Request $request, $subdomain)
     {
+        $request->validate([
+            'event_details' => 'nullable|string|max:10000',
+            'details_image' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp|max:10240',
+        ]);
+
         $details = request()->input('event_details');
         $file = null;
 

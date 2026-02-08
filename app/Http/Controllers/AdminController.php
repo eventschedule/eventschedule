@@ -1165,7 +1165,7 @@ class AdminController extends Controller
         $role->plan_expires = $validated['plan_expires'];
         $role->save();
 
-        return redirect()->route('admin.plans')->with('success', 'Plan updated successfully for '.$role->name);
+        return redirect()->route('admin.plans')->with('success', 'Plan updated successfully for '.$role->name.'.');
     }
 
     /**

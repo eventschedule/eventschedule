@@ -24,7 +24,7 @@
                             <li>{{ number_format($failedJobsCount) }} failed {{ Str::plural('job', $failedJobsCount) }}</li>
                             @endif
                             @if ($oldestJobAge && $oldestJobAge->diffInMinutes(now()) > 60)
-                            <li>Oldest pending job is {{ $oldestJobAge->diffForHumans(null, true, true) }} old - worker may be stuck</li>
+                            <li>Oldest pending job is {{ $oldestJobAge->diffForHumans(null, true, true) }} old - worker may be stuck.</li>
                             @endif
                         </ul>
                     </div>

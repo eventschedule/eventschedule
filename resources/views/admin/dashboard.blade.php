@@ -247,11 +247,11 @@
             new Chart(trendsCtx, {
                 type: 'line',
                 data: {
-                    labels: {!! json_encode($trendData['labels']) !!},
+                    labels: @json($trendData['labels']),
                     datasets: [
                         {
                             label: @json(__('messages.users')),
-                            data: {!! json_encode($trendData['users']) !!},
+                            data: @json($trendData['users']),
                             borderColor: '#4E81FA',
                             backgroundColor: 'rgba(78, 129, 250, 0.1)',
                             fill: false,
@@ -259,7 +259,7 @@
                         },
                         {
                             label: @json(__('messages.schedules')),
-                            data: {!! json_encode($trendData['schedules']) !!},
+                            data: @json($trendData['schedules']),
                             borderColor: '#10B981',
                             backgroundColor: 'rgba(16, 185, 129, 0.1)',
                             fill: false,
@@ -267,7 +267,7 @@
                         },
                         {
                             label: @json(__('messages.events')),
-                            data: {!! json_encode($trendData['events']) !!},
+                            data: @json($trendData['events']),
                             borderColor: '#8B5CF6',
                             backgroundColor: 'rgba(139, 92, 246, 0.1)',
                             fill: false,

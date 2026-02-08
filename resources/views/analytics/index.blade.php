@@ -401,10 +401,10 @@
             new Chart(viewsCtx, {
             type: 'line',
             data: {
-                labels: {!! json_encode($viewsByPeriod->pluck('period')->toArray()) !!},
+                labels: @json($viewsByPeriod->pluck('period')->toArray()),
                 datasets: [{
                     label: '{{ __("messages.views") }}',
-                    data: {!! json_encode($viewsByPeriod->pluck('view_count')->toArray()) !!},
+                    data: @json($viewsByPeriod->pluck('view_count')->toArray()),
                     borderColor: '#4E81FA',
                     backgroundColor: 'rgba(78, 129, 250, 0.1)',
                     fill: true,
@@ -444,7 +444,7 @@
 
         // Device Breakdown Chart
         const deviceCtx = document.getElementById('deviceChart').getContext('2d');
-        const deviceData = {!! json_encode($deviceBreakdown->toArray()) !!};
+        const deviceData = @json($deviceBreakdown->toArray());
         const deviceLabels = {
             'desktop': '{{ __("messages.desktop") ?? "Desktop" }}',
             'mobile': '{{ __("messages.mobile") ?? "Mobile" }}',
@@ -480,10 +480,10 @@
         new Chart(topEventsCtx, {
             type: 'bar',
             data: {
-                labels: {!! json_encode($topEvents->pluck('event.name')->toArray()) !!},
+                labels: @json($topEvents->pluck('event.name')->toArray()),
                 datasets: [{
                     label: '{{ __("messages.views") }}',
-                    data: {!! json_encode($topEvents->pluck('view_count')->toArray()) !!},
+                    data: @json($topEvents->pluck('view_count')->toArray()),
                     backgroundColor: '#4E81FA'
                 }]
             },
@@ -526,10 +526,10 @@
         new Chart(scheduleCtx, {
             type: 'bar',
             data: {
-                labels: {!! json_encode($viewsBySchedule->pluck('role.name')->toArray()) !!},
+                labels: @json($viewsBySchedule->pluck('role.name')->toArray()),
                 datasets: [{
                     label: '{{ __("messages.views") }}',
-                    data: {!! json_encode($viewsBySchedule->pluck('view_count')->toArray()) !!},
+                    data: @json($viewsBySchedule->pluck('view_count')->toArray()),
                     backgroundColor: '#10B981'
                 }]
             },
@@ -571,10 +571,10 @@
         new Chart(appearancesCtx, {
             type: 'bar',
             data: {
-                labels: {!! json_encode($topAppearances->map(fn($item) => $item['role']->translatedName())->toArray()) !!},
+                labels: @json($topAppearances->map(fn($item) => $item['role']->translatedName())->toArray()),
                 datasets: [{
                     label: '{{ __("messages.views") }}',
-                    data: {!! json_encode($topAppearances->pluck('view_count')->toArray()) !!},
+                    data: @json($topAppearances->pluck('view_count')->toArray()),
                     backgroundColor: '#8B5CF6'
                 }]
             },
@@ -617,10 +617,10 @@
         new Chart(schedulesAppearedOnCtx, {
             type: 'bar',
             data: {
-                labels: {!! json_encode($topSchedulesAppearedOn->map(fn($item) => $item['role']->name)->toArray()) !!},
+                labels: @json($topSchedulesAppearedOn->map(fn($item) => $item['role']->name)->toArray()),
                 datasets: [{
                     label: '{{ __("messages.views") }}',
-                    data: {!! json_encode($topSchedulesAppearedOn->pluck('view_count')->toArray()) !!},
+                    data: @json($topSchedulesAppearedOn->pluck('view_count')->toArray()),
                     backgroundColor: '#EC4899'
                 }]
             },
@@ -667,7 +667,7 @@
             'email': '{{ __("messages.email") }}',
             'other': '{{ __("messages.other") }}'
         };
-        const trafficData = {!! json_encode($trafficSources->toArray()) !!};
+        const trafficData = @json($trafficSources->toArray());
         new Chart(trafficSourcesCtx, {
             type: 'doughnut',
             data: {
@@ -698,10 +698,10 @@
         new Chart(topReferrersCtx, {
             type: 'bar',
             data: {
-                labels: {!! json_encode($topReferrers->pluck('domain')->toArray()) !!},
+                labels: @json($topReferrers->pluck('domain')->toArray()),
                 datasets: [{
                     label: '{{ __("messages.views") }}',
-                    data: {!! json_encode($topReferrers->pluck('view_count')->toArray()) !!},
+                    data: @json($topReferrers->pluck('view_count')->toArray()),
                     backgroundColor: '#F59E0B'
                 }]
             },
@@ -744,10 +744,10 @@
         new Chart(topEventsByRevenueCtx, {
             type: 'bar',
             data: {
-                labels: {!! json_encode($topEventsByRevenue->pluck('event.name')->toArray()) !!},
+                labels: @json($topEventsByRevenue->pluck('event.name')->toArray()),
                 datasets: [{
                     label: '{{ __("messages.revenue") }}',
-                    data: {!! json_encode($topEventsByRevenue->pluck('revenue')->toArray()) !!},
+                    data: @json($topEventsByRevenue->pluck('revenue')->toArray()),
                     backgroundColor: '#10B981'
                 }]
             },

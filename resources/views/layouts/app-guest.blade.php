@@ -11,6 +11,7 @@
         if ($event) {
             $otherRole = $event->getOtherRole($subdomain);
         }
+        $jsonLdFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
     @endphp
 
     <x-slot name="meta">
@@ -222,25 +223,25 @@
             {
                 "@context": "https://schema.org",
                 "@type": "Event",
-                "name": {!! json_encode($eventName, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
-                "description": {!! json_encode($eventDescription, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
-                "startDate": {!! json_encode($startDate, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
-                "endDate": {!! json_encode($endDate, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
-                "url": {!! json_encode($eventUrl, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
-                "eventStatus": {!! json_encode($eventStatus, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
-                "eventAttendanceMode": {!! json_encode($attendanceMode, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
-                "organizer": {!! json_encode($organizer, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
-                "offers": {!! json_encode(count($offers) === 1 ? $offers[0] : $offers, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
-                "location": {!! json_encode($location, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
+                "name": @json($eventName, $jsonLdFlags),
+                "description": @json($eventDescription, $jsonLdFlags),
+                "startDate": @json($startDate, $jsonLdFlags),
+                "endDate": @json($endDate, $jsonLdFlags),
+                "url": @json($eventUrl, $jsonLdFlags),
+                "eventStatus": @json($eventStatus, $jsonLdFlags),
+                "eventAttendanceMode": @json($attendanceMode, $jsonLdFlags),
+                "organizer": @json($organizer, $jsonLdFlags),
+                "offers": @json(count($offers) === 1 ? $offers[0] : $offers, $jsonLdFlags),
+                "location": @json($location, $jsonLdFlags),
                 "isAccessibleForFree": {{ $event->isFree() ? 'true' : 'false' }},
                 "inLanguage": "{{ $role->language_code }}"
                 @if ($eventImage)
                 ,
-                "image": {!! json_encode($eventImage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                "image": @json($eventImage, $jsonLdFlags)
                 @endif
                 @if ($performers)
                 ,
-                "performer": {!! json_encode(count($performers) === 1 ? $performers[0] : $performers, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                "performer": @json(count($performers) === 1 ? $performers[0] : $performers, $jsonLdFlags)
                 @endif
             }
             </script>
@@ -295,25 +296,25 @@
             <script type="application/ld+json" {!! nonce_attr() !!}>
             {
                 "@context": "https://schema.org",
-                "@type": {!! json_encode($schemaType, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
-                "name": {!! json_encode($roleName, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                "@type": @json($schemaType, $jsonLdFlags),
+                "name": @json($roleName, $jsonLdFlags)
                 @if ($roleDescription)
                 ,
-                "description": {!! json_encode($roleDescription, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                "description": @json($roleDescription, $jsonLdFlags)
                 @endif
                 ,
-                "url": {!! json_encode($roleUrl, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                "url": @json($roleUrl, $jsonLdFlags)
                 @if ($roleImage)
                 ,
-                "image": {!! json_encode($roleImage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                "image": @json($roleImage, $jsonLdFlags)
                 @endif
                 @if ($address)
                 ,
-                "address": {!! json_encode($address, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                "address": @json($address, $jsonLdFlags)
                 @endif
                 @if (!empty($sameAs))
                 ,
-                "sameAs": {!! json_encode($sameAs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                "sameAs": @json($sameAs, $jsonLdFlags)
                 @endif
                 ,
                 "inLanguage": "{{ $role->language_code }}"
@@ -336,13 +337,13 @@
                     {
                         "@type": "ListItem",
                         "position": 2,
-                        "name": {!! json_encode($role->translatedName(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
+                        "name": @json($role->translatedName(), $jsonLdFlags),
                         "item": "{{ $role->getGuestUrl() }}"
                     },
                     {
                         "@type": "ListItem",
                         "position": 3,
-                        "name": {!! json_encode($event->translatedName(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
+                        "name": @json($event->translatedName(), $jsonLdFlags),
                         "item": "{{ $event->getGuestUrl(false, $date ?? null) }}"
                     }
                 ]
@@ -363,7 +364,7 @@
                     {
                         "@type": "ListItem",
                         "position": 2,
-                        "name": {!! json_encode($role->translatedName(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
+                        "name": @json($role->translatedName(), $jsonLdFlags),
                         "item": "{{ $role->getGuestUrl() }}"
                     }
                 ]

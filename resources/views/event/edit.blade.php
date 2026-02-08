@@ -1376,6 +1376,7 @@
                             <x-input-label for="event_url" :value="__('messages.event_url')" />
                             <x-text-input id="event_url" name="event_url" type="url" class="mt-1 block w-full"
                                 v-model="event.event_url" autocomplete="off" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.event_url_help') }}</p>
                             <x-input-error class="mt-2" :messages="$errors->get('event_url')" />
                         </div>
                         <div v-if="!isOnline">

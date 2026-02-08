@@ -587,7 +587,7 @@
 
             @if (session('message'))
             Toastify({
-                text: {!! json_encode(session('message'), JSON_UNESCAPED_UNICODE) !!},
+                text: @json(session('message'), JSON_UNESCAPED_UNICODE),
                 duration: 3000,
                 position: 'center',
                 stopOnFocus: true,
@@ -597,7 +597,7 @@
             }).showToast();
             @elseif (session('error'))
             Toastify({
-                text: {!! json_encode(session('error'), JSON_UNESCAPED_UNICODE) !!},
+                text: @json(session('error'), JSON_UNESCAPED_UNICODE),
                 close: true,
                 duration: 10000,
                 position: 'center',
@@ -608,7 +608,7 @@
             }).showToast();
             @elseif (session('warning'))
             Toastify({
-                text: {!! json_encode(session('warning'), JSON_UNESCAPED_UNICODE) !!},
+                text: @json(session('warning'), JSON_UNESCAPED_UNICODE),
                 close: true,
                 duration: 8000,
                 position: 'center',

@@ -296,10 +296,10 @@
             new Chart(topSchedulesCtx, {
                 type: 'bar',
                 data: {
-                    labels: {!! json_encode($topSchedulesByEvents->pluck('name')->toArray()) !!},
+                    labels: @json($topSchedulesByEvents->pluck('name')->toArray()),
                     datasets: [{
                         label: @json(__('messages.events')),
-                        data: {!! json_encode($topSchedulesByEvents->pluck('events_count')->toArray()) !!},
+                        data: @json($topSchedulesByEvents->pluck('events_count')->toArray()),
                         backgroundColor: '#4E81FA'
                     }]
                 },

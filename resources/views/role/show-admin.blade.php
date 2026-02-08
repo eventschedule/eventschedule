@@ -36,7 +36,7 @@
         <script {!! nonce_attr() !!}>
         $(document).ready(function () {
             const availableDays = new Set();
-            const unavailableDays = new Set({!! json_encode($datesUnavailable) !!});
+            const unavailableDays = new Set(@json($datesUnavailable));
             const $saveButton = $('#saveButton');
             const $dayElements = $('.day-element');
 
