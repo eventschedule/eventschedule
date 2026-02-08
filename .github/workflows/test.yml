@@ -74,6 +74,7 @@ jobs:
           sed -i 's/DB_USERNAME=.*/DB_USERNAME=root/' .env
           sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=password/' .env
           sed -i 's/APP_URL=.*/APP_URL=http:\/\/127.0.0.1:8000\nAPP_TESTING=true/' .env
+          sed -i 's/SESSION_SECURE_COOKIE=.*/SESSION_SECURE_COOKIE=false/' .env
 
       - name: Generate application key
         run: php artisan key:generate
@@ -99,9 +100,13 @@ jobs:
         run: |
           cp .env .env.dusk.local
           php artisan dusk tests/Browser/GeneralTest.php
+          php artisan cache:clear
           php artisan dusk tests/Browser/TicketTest.php
+          php artisan cache:clear
           php artisan dusk tests/Browser/CuratorEventTest.php
+          php artisan cache:clear
           php artisan dusk tests/Browser/ApiTest.php
+          php artisan cache:clear
           php artisan dusk tests/Browser/GroupsTest.php
         env:
           APP_ENV: local
