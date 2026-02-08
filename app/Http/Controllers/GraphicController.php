@@ -244,7 +244,7 @@ class GraphicController extends Controller
             ->get();
 
         if ($events->isEmpty()) {
-            return response()->json(['error' => __('messages.no_events_found')], 404);
+            return response()->json(['error' => __('messages.no_events_found')]);
         }
 
         // Use request parameters if provided, otherwise fall back to saved settings
