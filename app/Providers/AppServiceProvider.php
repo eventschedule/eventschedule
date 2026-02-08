@@ -2,8 +2,13 @@
 
 namespace App\Providers;
 
+use App\Models\Event;
+use App\Models\Role;
+use App\Policies\EventPolicy;
+use App\Policies\RolePolicy;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Cashier\Cashier;
@@ -31,6 +36,10 @@ class AppServiceProvider extends ServiceProvider
         if (config('app.env') !== 'local') {
             URL::forceScheme('https');
         }
+
+        // Register authorization policies
+        Gate::policy(Event::class, EventPolicy::class);
+        Gate::policy(Role::class, RolePolicy::class);
 
         // Configure Cashier to use Role model for subscriptions
         Cashier::useCustomerModel(\App\Models\Role::class);

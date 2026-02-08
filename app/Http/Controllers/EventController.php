@@ -19,6 +19,7 @@ use App\Repos\EventRepo;
 use App\Rules\NoFakeEmail;
 use App\Utils\GeminiUtils;
 use App\Utils\ImageUtils;
+use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -42,7 +43,7 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($request->hash);
         $event = Event::findOrFail($event_id);
 
-        if (! $request->user()->canEditEvent($event)) {
+        if ($request->user()->cannot('update', $event)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -76,7 +77,7 @@ class EventController extends Controller
         $user = $request->user();
 
         // Check if user can edit this event
-        if (! $user->canEditEvent($event)) {
+        if ($user->cannot('update', $event)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -97,7 +98,7 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
 
-        if (! $request->user()->canEditEvent($event)) {
+        if ($request->user()->cannot('delete', $event)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -181,7 +182,7 @@ class EventController extends Controller
             // Default behavior for new event
             if ($role->default_tickets) {
                 $defaultTickets = json_decode($role->default_tickets, true);
-                $event->ticket_currency_code = $defaultTickets['currency_code'] ?? 'USD';
+                $event->ticket_currency_code = $defaultTickets['currency_code'] ?? MoneyUtils::getCurrencyForCountry($role->country_code);
                 $event->payment_method = $defaultTickets['payment_method'] ?? 'cash';
                 $event->payment_instructions = $defaultTickets['payment_instructions'] ?? null;
                 $event->expire_unpaid_tickets = $defaultTickets['expire_unpaid_tickets'] ?? false;
@@ -191,7 +192,7 @@ class EventController extends Controller
                 $event->custom_fields = $defaultTickets['custom_fields'] ?? null;
                 $event->tickets = $defaultTickets['tickets'] ?? [new Ticket];
             } else {
-                $event->ticket_currency_code = 'USD';
+                $event->ticket_currency_code = MoneyUtils::getCurrencyForCountry($role->country_code);
                 $event->payment_method = 'cash';
                 $event->tickets = [new Ticket];
             }
@@ -312,7 +313,7 @@ class EventController extends Controller
         $event = Event::with(['tickets', 'roles', 'creatorRole', 'curators', 'parts'])->findOrFail($event_id);
         $user = $request->user();
 
-        if (! $user->canEditEvent($event)) {
+        if ($user->cannot('update', $event)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -407,7 +408,7 @@ class EventController extends Controller
         $event = Event::with(['creatorRole', 'curators', 'parts'])->findOrFail($event_id);
         $user = $request->user();
 
-        if (! $user->canEditEvent($event)) {
+        if ($user->cannot('update', $event)) {
             return redirect()->back();
         }
 
@@ -498,7 +499,7 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
 
-        if (! $request->user()->canEditEvent($event)) {
+        if ($request->user()->cannot('update', $event)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -832,6 +833,7 @@ class EventController extends Controller
             'role' => $role,
             'venues' => $venues,
             'currencies' => $currencies,
+            'defaultCurrency' => MoneyUtils::getCurrencyForCountry($role->country_code),
         ]);
     }
 
@@ -868,7 +870,7 @@ class EventController extends Controller
 
         $currencies = json_decode(file_get_contents(base_path('storage/currencies.json')));
 
-        return view('event.guest-import', ['role' => $role, 'isGuest' => true, 'venues' => [], 'currencies' => $currencies]);
+        return view('event.guest-import', ['role' => $role, 'isGuest' => true, 'venues' => [], 'currencies' => $currencies, 'defaultCurrency' => MoneyUtils::getCurrencyForCountry($role->country_code)]);
     }
 
     public function parse(Request $request, $subdomain)
@@ -937,7 +939,7 @@ class EventController extends Controller
             if ($request->input('event_id')) {
                 $event = Event::findOrFail(UrlUtils::decodeId($request->input('event_id')));
 
-                if (! $request->user()->canEditEvent($event)) {
+                if ($request->user()->cannot('update', $event)) {
                     return response()->json(['error' => __('messages.not_authorized')], 403);
                 }
 
@@ -1403,7 +1405,7 @@ class EventController extends Controller
         $id = UrlUtils::decodeId($hash);
         $video = EventVideo::with('event')->findOrFail($id);
 
-        if (! $request->user()->canEditEvent($video->event)) {
+        if ($request->user()->cannot('update', $video->event)) {
             return redirect()->to(url()->previous().'#section-fan-content')->with('error', __('messages.not_authorized'));
         }
 
@@ -1418,7 +1420,7 @@ class EventController extends Controller
         $id = UrlUtils::decodeId($hash);
         $video = EventVideo::with('event')->findOrFail($id);
 
-        if (! $request->user()->canEditEvent($video->event)) {
+        if ($request->user()->cannot('update', $video->event)) {
             return redirect()->to(url()->previous().'#section-fan-content')->with('error', __('messages.not_authorized'));
         }
 
@@ -1432,7 +1434,7 @@ class EventController extends Controller
         $id = UrlUtils::decodeId($hash);
         $comment = EventComment::with('event')->findOrFail($id);
 
-        if (! $request->user()->canEditEvent($comment->event)) {
+        if ($request->user()->cannot('update', $comment->event)) {
             return redirect()->to(url()->previous().'#section-fan-content')->with('error', __('messages.not_authorized'));
         }
 
@@ -1447,7 +1449,7 @@ class EventController extends Controller
         $id = UrlUtils::decodeId($hash);
         $comment = EventComment::with('event')->findOrFail($id);
 
-        if (! $request->user()->canEditEvent($comment->event)) {
+        if ($request->user()->cannot('update', $comment->event)) {
             return redirect()->to(url()->previous().'#section-fan-content')->with('error', __('messages.not_authorized'));
         }
 
@@ -1540,7 +1542,7 @@ class EventController extends Controller
         $eventId = UrlUtils::decodeId($request->input('event_id'));
         $event = Event::findOrFail($eventId);
 
-        if (! $request->user()->canEditEvent($event)) {
+        if ($request->user()->cannot('update', $event)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 

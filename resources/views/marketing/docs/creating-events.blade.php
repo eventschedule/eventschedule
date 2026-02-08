@@ -125,6 +125,7 @@
                                         <li><strong class="text-gray-900 dark:text-white">Venue:</strong> The Blue Note</li>
                                         <li><strong class="text-gray-900 dark:text-white">Address:</strong> 123 Main Street</li>
                                         <li><strong class="text-gray-900 dark:text-white">Description:</strong> Featuring the John Smith Trio</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Price:</strong> $20</li>
                                     </ul>
                                 </div>
                             </div>
@@ -356,6 +357,10 @@
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Registration URL</span></td>
                                             <td>Link to external registration or <a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">ticketing</a></td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Ticket Price</span></td>
+                                            <td>For events using external ticketing, enter the ticket price. Used in <a href="{{ route('marketing.docs.event_graphics') }}#text-templates" class="text-cyan-400 hover:text-cyan-300">event graphics text templates</a> as <code class="text-xs bg-gray-200 dark:bg-white/10 px-1.5 py-0.5 rounded">{price}</code> and <code class="text-xs bg-gray-200 dark:bg-white/10 px-1.5 py-0.5 rounded">{currency}</code>. Leave blank if unknown, enter 0 for free events.</td>
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Members</span></td>

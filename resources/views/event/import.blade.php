@@ -1565,7 +1565,7 @@
 
                         // Initialize configurable import field defaults
                         if (!event.ticket_currency_code) {
-                            event.ticket_currency_code = '{{ $role->currency_code ?? "USD" }}';
+                            event.ticket_currency_code = '{{ $defaultCurrency }}';
                         }
                         if (!event.group_id) {
                             event.group_id = '';

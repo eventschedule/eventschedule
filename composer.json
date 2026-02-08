@@ -18,6 +18,7 @@
         "league/commonmark": "^2.5",
         "league/flysystem-aws-s3-v3": "^3.28",
         "sentry/sentry-laravel": "^4.10",
+        "sqids/sqids": "^0.5.0",
         "stripe/stripe-php": "^16.4"
     },
     "require-dev": {
