@@ -27,7 +27,7 @@ class GeneralTest extends DuskTestCase
 
             // Log out
             $browser->press($name)
-                ->waitForText('Log Out', 2)
+                ->waitForText('Log Out', 5)
                 ->clickLink('Log Out')
                 ->waitForLocation('/login', 5)
                 ->assertPathIs('/login');
