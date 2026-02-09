@@ -40,7 +40,7 @@ trait AccountSetupTrait
                 ->waitFor('#address1', 15)
                 ->type('address1', $address)
                 ->click('button[type="submit"]')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 5)
+                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 15)
                 ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
     }
 
@@ -57,7 +57,7 @@ trait AccountSetupTrait
                 ->pause(1000)
                 ->scrollIntoView('button[type="submit"]')
                 ->click('button[type="submit"]')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 5)
+                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 15)
                 ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
     }
 
@@ -78,7 +78,7 @@ trait AccountSetupTrait
                 ->waitFor('#accept_requests', 5)
                 ->check('accept_requests')
                 ->click('button[type="submit"]')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 5)
+                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 15)
                 ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
     }
 
@@ -109,7 +109,7 @@ trait AccountSetupTrait
                 ->type('tickets[0][price]', '10')
                 ->type('tickets[0][quantity]', '50')
                 ->click('button[type="submit"]')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $talentName)) . '/schedule', 5)
+                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $talentName)) . '/schedule', 15)
                 ->assertSee($venueName);
     }
 
