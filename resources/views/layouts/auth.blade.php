@@ -2,7 +2,8 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ is_rtl() ? 'rtl' : 'ltr' }}">
 
 <head>
-    
+    <meta name="robots" content="noindex, nofollow">
+
     <meta name="description" content="The simple and free way to share your event schedule">
     <meta property="og:title" content="Event Schedule">
     <meta property="og:description" content="The simple and free way to share your event schedule">

@@ -17,6 +17,7 @@
     @if (isset($meta))
         {{ $meta }}
     @else
+        <meta name="robots" content="noindex, nofollow">
         <link rel="canonical" href="{{ url()->current() }}">
         <meta name="description" content="The simple and free way to share your event schedule">
         <meta property="og:title" content="Event Schedule">

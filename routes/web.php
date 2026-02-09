@@ -24,7 +24,13 @@ use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/robots.txt', function () {
-    $content = "User-agent: *\nDisallow: /login\nDisallow: /register\nDisallow: /password\nDisallow: /checkout\nDisallow: /home\nDisallow: /admin\n\nSitemap: ".config('app.url')."/sitemap.xml\n";
+    $disallowRules = "User-agent: *\nDisallow: /login\nDisallow: /register\nDisallow: /password\nDisallow: /checkout\nDisallow: /home\nDisallow: /admin\n";
+
+    // Only include Sitemap on the main domain, not on app.eventschedule.com
+    $isAppSubdomain = config('app.hosted') && str_starts_with(request()->getHost(), 'app.');
+    $content = $isAppSubdomain
+        ? $disallowRules
+        : $disallowRules . "\nSitemap: " . config('app.url') . "/sitemap.xml\n";
 
     return response($content, 200)->header('Content-Type', 'text/plain');
 });
