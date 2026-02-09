@@ -165,6 +165,43 @@ class AppController extends Controller
         return response()->json(['success' => true]);
     }
 
+    public function robots()
+    {
+        $disallowRules = "User-agent: *\nDisallow: /login\nDisallow: /register\nDisallow: /password\nDisallow: /checkout\nDisallow: /home\nDisallow: /admin\n";
+
+        $isAppSubdomain = config('app.hosted') && str_starts_with(request()->getHost(), 'app.');
+        $content = $isAppSubdomain
+            ? $disallowRules
+            : $disallowRules . "\nSitemap: " . config('app.url') . "/sitemap.xml\n";
+
+        return response($content, 200)->header('Content-Type', 'text/plain');
+    }
+
+    public function tempEventImage($filename = null)
+    {
+        if (! $filename) {
+            abort(404);
+        }
+
+        $filename = basename($filename);
+
+        if (! preg_match('/^[a-zA-Z0-9._-]+$/', $filename)) {
+            abort(404);
+        }
+
+        if (! str_starts_with($filename, 'event_')) {
+            abort(404);
+        }
+
+        $path = storage_path('app/temp/' . $filename);
+
+        if (file_exists($path)) {
+            return response()->file($path);
+        }
+
+        abort(404);
+    }
+
     private function generateDailyBlogPost()
     {
         // Check if we already created a post today
