@@ -23,17 +23,7 @@ use App\Http\Controllers\SubscriptionWebhookController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/robots.txt', function () {
-    $disallowRules = "User-agent: *\nDisallow: /login\nDisallow: /register\nDisallow: /password\nDisallow: /checkout\nDisallow: /home\nDisallow: /admin\n";
-
-    // Only include Sitemap on the main domain, not on app.eventschedule.com
-    $isAppSubdomain = config('app.hosted') && str_starts_with(request()->getHost(), 'app.');
-    $content = $isAppSubdomain
-        ? $disallowRules
-        : $disallowRules . "\nSitemap: " . config('app.url') . "/sitemap.xml\n";
-
-    return response($content, 200)->header('Content-Type', 'text/plain');
-});
+Route::get('/robots.txt', [AppController::class, 'robots']);
 
 if (config('app.hosted') && ! config('app.is_testing')) {
     if (config('app.env') != 'local') {
@@ -287,32 +277,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
-Route::get('/tmp/event-image/{filename?}', function ($filename = null) {
-    if (! $filename) {
-        abort(404);
-    }
-
-    // Prevent path traversal attacks
-    $filename = basename($filename);
-
-    // Only allow alphanumeric characters, hyphens, underscores, and dots
-    if (! preg_match('/^[a-zA-Z0-9._-]+$/', $filename)) {
-        abort(404);
-    }
-
-    // Ensure filename starts with 'event_' prefix for security
-    if (! str_starts_with($filename, 'event_')) {
-        abort(404);
-    }
-
-    $path = storage_path('app/temp/'.$filename);
-
-    if (file_exists($path)) {
-        return response()->file($path);
-    }
-
-    abort(404);
-})->name('event.tmp_image');
+Route::get('/tmp/event-image/{filename?}', [AppController::class, 'tempEventImage'])->name('event.tmp_image');
 
 // Marketing pages - only shown on the nexus (eventschedule.com)
 if (config('app.is_nexus')) {
