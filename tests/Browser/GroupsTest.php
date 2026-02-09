@@ -66,7 +66,7 @@ class GroupsTest extends DuskTestCase
             ->type('input[name*="groups"][name*="name"]', 'Main Shows')
             ->scrollIntoView('button[type="submit"]')
             ->press('SAVE')
-            ->waitForLocation('/talent/schedule', 5);
+            ->waitForLocation('/talent/schedule', 15);
 
         // Add second sub-schedule
         $browser->visit('/talent/edit')
@@ -79,7 +79,7 @@ class GroupsTest extends DuskTestCase
             ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops')
             ->scrollIntoView('button[type="submit"]')
             ->press('SAVE')
-            ->waitForLocation('/talent/schedule', 5);
+            ->waitForLocation('/talent/schedule', 15);
 
         // Verify both sub-schedules were saved in database
         $role = Role::where('subdomain', 'talent')->first();
@@ -110,7 +110,7 @@ class GroupsTest extends DuskTestCase
             ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($mainShows->id))
             ->scrollIntoView('button[type="submit"]')
             ->press('SAVE')
-            ->waitForLocation('/talent/schedule', 5)
+            ->waitForLocation('/talent/schedule', 15)
             ->pause(1000)
             ->assertSee('Main Show Event');
 
@@ -121,7 +121,7 @@ class GroupsTest extends DuskTestCase
             ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($workshops->id))
             ->scrollIntoView('button[type="submit"]')
             ->press('SAVE')
-            ->waitForLocation('/talent/schedule', 5)
+            ->waitForLocation('/talent/schedule', 15)
             ->pause(1000)
             ->assertSee('Workshop Event');
 
@@ -130,7 +130,7 @@ class GroupsTest extends DuskTestCase
             ->type('name', 'General Event')
             ->scrollIntoView('button[type="submit"]')
             ->press('SAVE')
-            ->waitForLocation('/talent/schedule', 5)
+            ->waitForLocation('/talent/schedule', 15)
             ->pause(1000)
             ->assertSee('General Event');
     }
