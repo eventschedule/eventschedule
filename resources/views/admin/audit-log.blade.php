@@ -60,7 +60,6 @@
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">
                                 @if ($log->user)
                                     {{ $log->user->name }}
-                                    <span class="text-gray-400 dark:text-gray-500 text-xs">({{ $log->user->email }})</span>
                                 @else
                                     <span class="text-gray-400 dark:text-gray-500">-</span>
                                 @endif

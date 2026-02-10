@@ -209,7 +209,6 @@
                         <thead>
                             <tr class="border-b border-gray-200 dark:border-gray-700">
                                 <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.name')</th>
-                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.email')</th>
                                 <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.date')</th>
                                 <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.source')</th>
                                 <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.medium')</th>
@@ -224,7 +223,6 @@
                             @foreach($recentSignups as $signup)
                                 <tr class="border-b border-gray-100 dark:border-gray-700/50">
                                     <td class="py-2 pe-4 text-gray-900 dark:text-white">{{ $signup->name }}</td>
-                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->email }}</td>
                                     <td class="py-2 pe-4 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ $signup->created_at->format('M j, Y') }}</td>
                                     <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_source ?? '-' }}</td>
                                     <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_medium ?? '-' }}</td>
