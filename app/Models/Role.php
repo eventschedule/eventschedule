@@ -458,11 +458,22 @@ class Role extends Model implements MustVerifyEmail
     {
         $subdomain = Str::slug($name);
 
-        if (strlen($subdomain) <= 2) {
-            $translated = GeminiUtils::translate($name, 'auto', 'en');
+        // Check if significant content was lost during slugification
+        // (indicates non-Latin characters that Str::slug can't transliterate)
+        $nameChars = mb_strlen(preg_replace('/[^\p{L}\p{N}]/u', '', $name));
+        $slugChars = strlen(preg_replace('/[^a-z0-9]/', '', $subdomain));
 
-            if ($translated && strlen($translated) > 2) {
-                $subdomain = Str::slug($translated);
+        if ($nameChars > 0 && $slugChars < $nameChars / 2) {
+            try {
+                $translated = GeminiUtils::translate($name, 'auto', 'en');
+
+                if ($translated && strlen($translated) > 2) {
+                    $subdomain = Str::slug($translated);
+                } else {
+                    \Log::warning('Subdomain translation returned empty for: ' . $name);
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Subdomain translation failed for: ' . $name . ' - ' . $e->getMessage());
             }
         }
 

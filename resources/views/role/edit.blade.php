@@ -1699,7 +1699,6 @@
                             <x-input-error class="mt-2" :messages="$errors->get('slug_pattern')" />
                         </div>
 
-                        @if ($role->isCurator())
                         <div class="mb-6">
                             <x-checkbox name="direct_registration"
                                 label="{{ __('messages.direct_registration') }}"
@@ -1708,7 +1707,6 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.direct_registration_help') }}</p>
                             <x-input-error class="mt-2" :messages="$errors->get('direct_registration')" />
                         </div>
-                        @endif
 
                         </div>
                         <!-- End Tab Content: General -->
