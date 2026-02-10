@@ -14,7 +14,7 @@
         <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }},</p>
 
         <p style="font-size: 16px; color: #333;">
-            {{ str_replace(':venue', $role->name, __('messages.request_declined')) }}
+            {{ str_replace(':venue', $role->name, __('messages.request_declined_body')) }}
         </p>
 
         <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #718096;">
