@@ -2,7 +2,7 @@
 
 {{ __('messages.hello') }},
 
-{{ str_replace(':venue', $role->name, __('messages.request_accepted')) }}
+{{ str_replace(':venue', $role->name, __('messages.request_accepted_body')) }}
 
 {{ $event->name }}
 {{ $event->localStartsAt(true) }}
