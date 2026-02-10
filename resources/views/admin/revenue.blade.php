@@ -89,7 +89,6 @@
                             <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.schedule')</th>
                             <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.event')</th>
                             <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.customer')</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.email')</th>
                             <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.amount')</th>
                             <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.method')</th>
                             <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.status')</th>
@@ -109,7 +108,6 @@
                                 {{ \Illuminate\Support\Str::limit($sale->event?->name ?? '-', 30) }}
                             </td>
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ $sale->name }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $sale->email }}</td>
                             <td class="px-4 py-3 text-sm text-end font-medium text-gray-900 dark:text-white">${{ number_format($sale->payment_amount, 2) }}</td>
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $sale->payment_method ?? '-' }}</td>
                             <td class="px-4 py-3 text-sm">
