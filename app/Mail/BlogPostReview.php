@@ -43,11 +43,11 @@ class BlogPostReview extends Mailable
         $deleteUrl = URL::temporarySignedRoute(
             'blog.destroy.signed',
             now()->addDays(7),
-            ['blogPost' => $this->blogPost->id]
+            ['blog_post' => $this->blogPost->id]
         );
 
         $viewUrl = blog_url('/'.$this->blogPost->slug);
-        $editUrl = route('blog.edit', ['blogPost' => $this->blogPost->id]);
+        $editUrl = route('blog.edit', ['blog_post' => $this->blogPost->id]);
 
         // Truncate content for email
         $truncatedContent = mb_substr(strip_tags($this->blogPost->content), 0, 1000);
