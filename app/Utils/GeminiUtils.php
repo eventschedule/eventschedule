@@ -768,13 +768,22 @@ class GeminiUtils
         return $normalized;
     }
 
-    public static function translate($text, $from = 'auto', $to = 'en')
+    public static function translate($text, $from = 'auto', $to = 'en', $glossary = [])
     {
         if (empty($text)) {
             return '';
         }
 
-        $prompt = "Translate this text from {$from} to {$to}. Return only the translation as a JSON string:\n{$text}";
+        $glossaryInstruction = '';
+        if (! empty($glossary)) {
+            $glossaryLines = [];
+            foreach ($glossary as $original => $translation) {
+                $glossaryLines[] = "- \"{$original}\" => \"{$translation}\"";
+            }
+            $glossaryInstruction = " Use these exact translations for the following terms:\n".implode("\n", $glossaryLines)."\n";
+        }
+
+        $prompt = "Translate this text from {$from} to {$to}.{$glossaryInstruction} Return only the translation as a JSON string:\n{$text}";
 
         $response = self::sendRequest($prompt);
 

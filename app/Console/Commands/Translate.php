@@ -184,8 +184,13 @@ class Translate extends Command
                 }
             }
 
+            $glossary = [];
+            if ($role->name && $role->name_en) {
+                $glossary[$role->name] = $role->name_en;
+            }
+
             if ($role->description && ! $role->description_en) {
-                $role->description_en = GeminiUtils::translate($role->description, $role->language_code, 'en');
+                $role->description_en = GeminiUtils::translate($role->description, $role->language_code, 'en', $glossary);
                 if ($debug) {
                     $this->info("Translated description from {$role->language_code} to en: '{$role->description}' → '{$role->description_en}'");
                 }
@@ -220,7 +225,7 @@ class Translate extends Command
             }
 
             if ($role->request_terms && ! $role->request_terms_en) {
-                $role->request_terms_en = GeminiUtils::translate($role->request_terms, $role->language_code, 'en');
+                $role->request_terms_en = GeminiUtils::translate($role->request_terms, $role->language_code, 'en', $glossary);
                 if ($debug) {
                     $this->info("Translated request terms from {$role->language_code} to en: '{$role->request_terms}' → '{$role->request_terms_en}'");
                 }
@@ -288,7 +293,7 @@ class Translate extends Command
         $debug = $this->option('debug');
 
         // Get all events that don't have English translations
-        $query = Event::with('roles')
+        $query = Event::with(['roles', 'creatorRole'])
             ->where(function ($query) {
                 $query->where(function ($q) {
                     $q->whereNotNull('name')
@@ -354,22 +359,27 @@ class Translate extends Command
                 continue;
             }
 
+            $glossary = [];
+            if ($event->creatorRole && $event->creatorRole->name && $event->creatorRole->name_en) {
+                $glossary[$event->creatorRole->name] = $event->creatorRole->name_en;
+            }
+
             if ($event->name && ! $event->name_en) {
-                $event->name_en = GeminiUtils::translate($event->name, $event->getLanguageCode(), 'en');
+                $event->name_en = GeminiUtils::translate($event->name, $event->getLanguageCode(), 'en', $glossary);
                 if ($debug) {
                     $this->info("Translated name from {$event->getLanguageCode()} to en: '{$event->name}' → '{$event->name_en}'");
                 }
             }
 
             if ($event->description && ! $event->description_en) {
-                $event->description_en = GeminiUtils::translate($event->description, $event->getLanguageCode(), 'en');
+                $event->description_en = GeminiUtils::translate($event->description, $event->getLanguageCode(), 'en', $glossary);
                 if ($debug) {
                     $this->info("Translated description from {$event->getLanguageCode()} to en: '{$event->description}' → '{$event->description_en}'");
                 }
             }
 
             if ($event->short_description && ! $event->short_description_en) {
-                $event->short_description_en = GeminiUtils::translate($event->short_description, $event->getLanguageCode(), 'en');
+                $event->short_description_en = GeminiUtils::translate($event->short_description, $event->getLanguageCode(), 'en', $glossary);
                 if ($debug) {
                     $this->info("Translated short_description from {$event->getLanguageCode()} to en: '{$event->short_description}' → '{$event->short_description_en}'");
                 }
@@ -501,7 +511,7 @@ class Translate extends Command
         $this->info('Starting translation of event parts...');
         $debug = $this->option('debug');
 
-        $query = EventPart::with('event.roles')
+        $query = EventPart::with(['event.roles', 'event.creatorRole'])
             ->whereHas('event.creatorRole', function ($query) {
                 $query->where('language_code', '!=', 'en');
             })
@@ -569,15 +579,20 @@ class Translate extends Command
                 continue;
             }
 
+            $glossary = [];
+            if ($part->event->creatorRole && $part->event->creatorRole->name && $part->event->creatorRole->name_en) {
+                $glossary[$part->event->creatorRole->name] = $part->event->creatorRole->name_en;
+            }
+
             if ($part->name && ! $part->name_en) {
-                $part->name_en = GeminiUtils::translate($part->name, $languageCode, 'en');
+                $part->name_en = GeminiUtils::translate($part->name, $languageCode, 'en', $glossary);
                 if ($debug) {
                     $this->info("Translated name from {$languageCode} to en: '{$part->name}' → '{$part->name_en}'");
                 }
             }
 
             if ($part->description && ! $part->description_en) {
-                $part->description_en = GeminiUtils::translate($part->description, $languageCode, 'en');
+                $part->description_en = GeminiUtils::translate($part->description, $languageCode, 'en', $glossary);
                 if ($debug) {
                     $this->info("Translated description from {$languageCode} to en: '{$part->description}' → '{$part->description_en}'");
                 }
