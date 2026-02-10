@@ -127,6 +127,9 @@ class GenerateSubAudienceBlog extends Command
             return 0;
         }
 
+        // Randomize order so posts aren't generated linearly by audience
+        shuffle($missing);
+
         // Generate posts (one by default, all if --all flag is set)
         $toGenerate = $generateAll ? $missing : [array_shift($missing)];
 
