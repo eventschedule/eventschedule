@@ -45,10 +45,6 @@ class HomeController extends Controller
         if ($subdomain) {
             $role = Role::whereSubdomain($subdomain)->firstOrFail();
 
-            $user = auth()->user();
-            $user->language_code = $role->language_code;
-            $user->save();
-
             return redirect()->route('role.follow', ['subdomain' => $subdomain]);
         }
 
