@@ -1090,7 +1090,7 @@
         </div>
 
         {{-- List View (Mobile) --}}
-        <div v-show="!isLoadingEvents" class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+        <div v-show="!isLoadingEvents" class="{{ (isset($force_mobile) && $force_mobile) ? 'hidden' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- All events grouped by date --}}
             <div v-if="allMobileListGroups.length > 0" class="space-y-6">
                 <template v-for="(group, groupIndex) in allMobileListGroups" :key="'list-m-' + group.date">
@@ -1447,6 +1447,7 @@ const calendarApp = createApp({
             selectedVenue: '',
             showFreeOnly: false,
             currentView: '{{ $eventLayout ?? "calendar" }}',
+            forceMobile: {{ (isset($force_mobile) && $force_mobile) ? 'true' : 'false' }},
             pastEvents: @json($pastEventsForVue ?? []),
             hasMorePastEvents: {{ isset($hasMorePastEvents) && $hasMorePastEvents ? 'true' : 'false' }},
             loadingPastEvents: false,
@@ -2625,7 +2626,7 @@ const calendarApp = createApp({
     },
     mounted() {
         // Check localStorage for saved view preference
-        if (this.subdomain && this.route !== 'admin') {
+        if (this.subdomain && this.route !== 'admin' && !this.forceMobile) {
             try {
                 const saved = localStorage.getItem('es_view_' + this.subdomain);
                 if (saved && ['calendar', 'list'].includes(saved)) {
