@@ -1010,7 +1010,38 @@ class Event extends Model
         $data->description = $this->description;
         $data->starts_at = $this->starts_at;
         $data->duration = $this->duration;
+        $data->category_id = $this->category_id;
+        $data->event_url = $this->event_url;
+        $data->registration_url = $this->registration_url;
         $data->venue_id = $this->venue ? UrlUtils::encodeId($this->venue->id) : null;
+
+        // Flyer image URL
+        $rawFlyer = $this->getAttributes()['flyer_image_url'] ?? null;
+        $data->flyer_image_url = $rawFlyer ? $this->flyer_image_url : null;
+
+        // Recurring config
+        $data->schedule_type = $this->recurring_frequency ? 'recurring' : 'single';
+        if ($this->recurring_frequency) {
+            $data->recurring_frequency = $this->recurring_frequency;
+            $data->recurring_interval = $this->recurring_interval;
+            $data->days_of_week = $this->days_of_week;
+            $data->recurring_end_type = $this->recurring_end_type;
+            $data->recurring_end_value = $this->recurring_end_value;
+        }
+
+        // Tickets
+        $data->tickets_enabled = (bool) $this->tickets_enabled;
+        if ($this->tickets_enabled && $this->relationLoaded('tickets')) {
+            $data->tickets = $this->tickets->map(function ($ticket) {
+                return [
+                    'id' => UrlUtils::encodeId($ticket->id),
+                    'type' => $ticket->type,
+                    'price' => $ticket->price,
+                    'quantity' => $ticket->quantity,
+                    'description' => $ticket->description,
+                ];
+            })->values();
+        }
 
         $data->members = $this->members()->mapWithKeys(function ($member) {
             return [UrlUtils::encodeId($member->id) => [
@@ -1020,7 +1051,7 @@ class Event extends Model
             ]];
         });
 
-        $data->parts = $this->parts->map(function ($part) {
+        $data->event_parts = $this->parts->map(function ($part) {
             return [
                 'name' => $part->name,
                 'description' => $part->description,
@@ -1028,6 +1059,9 @@ class Event extends Model
                 'end_time' => $part->end_time,
             ];
         })->values();
+
+        $data->created_at = $this->created_at ? $this->created_at->toIso8601String() : null;
+        $data->updated_at = $this->updated_at ? $this->updated_at->toIso8601String() : null;
 
         return $data;
     }

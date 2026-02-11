@@ -468,6 +468,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * For AI Agents page
+     */
+    public function forAiAgents()
+    {
+        return view('marketing.for-ai-agents');
+    }
+
+    /**
      * Use Cases page
      */
     public function useCases()

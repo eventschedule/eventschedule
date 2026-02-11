@@ -470,10 +470,10 @@ class Role extends Model implements MustVerifyEmail
                 if ($translated && strlen($translated) > 2) {
                     $subdomain = Str::slug($translated);
                 } else {
-                    \Log::warning('Subdomain translation returned empty for: ' . $name);
+                    \Log::warning('Subdomain translation returned empty for: '.$name);
                 }
             } catch (\Exception $e) {
-                \Log::warning('Subdomain translation failed for: ' . $name . ' - ' . $e->getMessage());
+                \Log::warning('Subdomain translation failed for: '.$name.' - '.$e->getMessage());
             }
         }
 
@@ -687,12 +687,17 @@ class Role extends Model implements MustVerifyEmail
         }
 
         $data->id = UrlUtils::encodeId($this->id);
+        $data->subdomain = $this->subdomain;
         $data->url = $this->getGuestUrl();
         $data->type = $this->type;
         $data->name = $this->name;
         $data->email = $this->email;
+        $data->phone = $this->phone;
         $data->website = $this->website;
         $data->description = $this->description;
+        $data->timezone = $this->timezone;
+        $data->language_code = $this->language_code;
+        $data->created_at = $this->created_at ? $this->created_at->toIso8601String() : null;
 
         if ($this->isVenue()) {
             $data->address1 = $this->address1;
@@ -700,6 +705,17 @@ class Role extends Model implements MustVerifyEmail
             $data->state = $this->state;
             $data->postal_code = $this->postal_code;
             $data->country_code = $this->country_code;
+        }
+
+        if ($this->relationLoaded('groups')) {
+            $data->groups = $this->groups->map(function ($group) {
+                return [
+                    'id' => UrlUtils::encodeId($group->id),
+                    'name' => $group->name,
+                    'slug' => $group->slug,
+                    'color' => $group->color,
+                ];
+            })->values();
         }
 
         return $data;

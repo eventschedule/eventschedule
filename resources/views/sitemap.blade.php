@@ -392,6 +392,12 @@
         <priority>0.7</priority>
     </url>
     <url>
+        <loc>{{ url('/for-ai-agents') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
         <loc>{{ url('/use-cases') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
