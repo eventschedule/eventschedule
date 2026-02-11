@@ -524,6 +524,12 @@
         <priority>0.7</priority>
     </url>
     <url>
+        <loc>{{ url('/llms.txt') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
         <loc>{{ url('/privacy') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>yearly</changefreq>

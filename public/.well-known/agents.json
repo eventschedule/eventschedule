@@ -1,0 +1,183 @@
+{
+  "version": "0.1.0",
+  "name": "Event Schedule API",
+  "description": "API for creating and managing events, schedules, tickets, and sales. Supports venue, talent, and curator schedule types with automatic translation to 10 languages.",
+  "url": "https://eventschedule.com",
+  "source": {
+    "type": "openapi",
+    "url": "https://eventschedule.com/api/openapi.json"
+  },
+  "flows": [
+    {
+      "name": "register_and_setup",
+      "description": "Register a new account, create a schedule, and add your first event. In hosted mode, email verification is required before registration.",
+      "steps": [
+        {
+          "operationId": "send_verification_code",
+          "description": "Send a verification code to the user's email address (hosted mode only, skip for selfhosted)",
+          "parameters": {
+            "body": {
+              "email": "$user.email"
+            }
+          }
+        },
+        {
+          "operationId": "register",
+          "description": "Create a new account and receive an API key",
+          "parameters": {
+            "body": {
+              "name": "$user.name",
+              "email": "$user.email",
+              "password": "$user.password",
+              "verification_code": "$user.verification_code"
+            }
+          },
+          "outputs": {
+            "api_key": "data.api_key"
+          }
+        },
+        {
+          "operationId": "create_schedule",
+          "description": "Create a schedule to organize events under",
+          "parameters": {
+            "headers": {
+              "X-API-Key": "$steps.register.outputs.api_key"
+            },
+            "body": {
+              "name": "$user.schedule_name",
+              "type": "$user.schedule_type"
+            }
+          },
+          "outputs": {
+            "subdomain": "data.subdomain"
+          }
+        },
+        {
+          "operationId": "create_event",
+          "description": "Create the first event under the new schedule",
+          "parameters": {
+            "headers": {
+              "X-API-Key": "$steps.register.outputs.api_key"
+            },
+            "path": {
+              "subdomain": "$steps.create_schedule.outputs.subdomain"
+            },
+            "body": {
+              "name": "$user.event_name",
+              "starts_at": "$user.event_starts_at"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "create_event_with_tickets",
+      "description": "Create an event with ticket types configured, and optionally upload a flyer image. Requires an existing schedule and API key.",
+      "steps": [
+        {
+          "operationId": "create_event",
+          "description": "Create an event with tickets enabled and ticket types defined",
+          "parameters": {
+            "path": {
+              "subdomain": "$user.subdomain"
+            },
+            "body": {
+              "name": "$user.event_name",
+              "starts_at": "$user.event_starts_at",
+              "tickets_enabled": true,
+              "ticket_currency_code": "$user.currency_code",
+              "payment_method": "$user.payment_method",
+              "tickets": "$user.tickets"
+            }
+          },
+          "outputs": {
+            "event_id": "data.id"
+          }
+        },
+        {
+          "operationId": "upload_flyer",
+          "description": "Optionally upload a flyer image for the event",
+          "parameters": {
+            "path": {
+              "event_id": "$steps.create_event.outputs.event_id"
+            },
+            "body": {
+              "flyer_image": "$user.flyer_image"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "sell_tickets",
+      "description": "List events to find one with tickets, then create a ticket sale for a buyer.",
+      "steps": [
+        {
+          "operationId": "list_events",
+          "description": "List events to find one with tickets available",
+          "parameters": {
+            "query": {
+              "subdomain": "$user.subdomain"
+            }
+          },
+          "outputs": {
+            "event_id": "data[0].id"
+          }
+        },
+        {
+          "operationId": "create_sale",
+          "description": "Create a ticket sale for the selected event",
+          "parameters": {
+            "body": {
+              "event_id": "$steps.list_events.outputs.event_id",
+              "name": "$user.buyer_name",
+              "email": "$user.buyer_email",
+              "tickets": "$user.tickets"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "manage_schedule",
+      "description": "List, view, update, or delete schedules owned by the authenticated user.",
+      "steps": [
+        {
+          "operationId": "list_schedules",
+          "description": "List all schedules owned or administered by the user",
+          "outputs": {
+            "subdomain": "data[0].subdomain"
+          }
+        },
+        {
+          "operationId": "show_schedule",
+          "description": "View details of a specific schedule",
+          "parameters": {
+            "path": {
+              "subdomain": "$steps.list_schedules.outputs.subdomain"
+            }
+          }
+        },
+        {
+          "operationId": "update_schedule",
+          "description": "Update schedule details such as name, description, or contact info",
+          "parameters": {
+            "path": {
+              "subdomain": "$steps.list_schedules.outputs.subdomain"
+            },
+            "body": "$user.updates"
+          }
+        },
+        {
+          "operationId": "delete_schedule",
+          "description": "Permanently delete a schedule and all its data (owner only)",
+          "parameters": {
+            "path": {
+              "subdomain": "$steps.list_schedules.outputs.subdomain"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

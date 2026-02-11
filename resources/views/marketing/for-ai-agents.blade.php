@@ -154,33 +154,14 @@
 
             {{-- Tech tags --}}
             <div class="flex flex-wrap justify-center gap-3 mt-12 animate-reveal delay-300" style="opacity: 0;">
-                @foreach(['OpenAI', 'Claude', 'LangChain', 'MCP', 'Custom Agents', 'REST'] as $tag)
+                @foreach(['OpenAI', 'Claude', 'LangChain', 'Custom Agents', 'REST'] as $tag)
                     <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 text-sm border border-gray-200 dark:border-white/10">{{ $tag }}</span>
                 @endforeach
+                <a href="/llms.txt" class="inline-flex items-center px-3 py-1 rounded-full bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-sm border border-cyan-200 dark:border-cyan-500/20 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition-colors">llms.txt</a>
+                <a href="/.well-known/agents.json" class="inline-flex items-center px-3 py-1 rounded-full bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-sm border border-cyan-200 dark:border-cyan-500/20 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition-colors">agents.json</a>
             </div>
         </div>
     </section>
-
-    {{-- Section 2: Stats --}}
-    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/5">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-                <div>
-                    <div class="text-5xl md:text-6xl font-bold text-cyan-500 mb-2">6</div>
-                    <div class="text-gray-500 dark:text-gray-400 text-lg">Resource types</div>
-                </div>
-                <div>
-                    <div class="text-5xl md:text-6xl font-bold text-emerald-500 mb-2">10</div>
-                    <div class="text-gray-500 dark:text-gray-400 text-lg">Languages with auto-translation</div>
-                </div>
-                <div>
-                    <div class="text-5xl md:text-6xl font-bold text-sky-500 mb-2">300<span class="text-3xl md:text-4xl">/min</span></div>
-                    <div class="text-gray-500 dark:text-gray-400 text-lg">GET requests per minute</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     {{-- Section 3: Features Bento Grid --}}
     <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -281,8 +262,8 @@
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">One link for everything</h3>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Every schedule gets a public URL your agent can share. Events, tickets, and iCal feeds all accessible from one link.</p>
-                    <div class="bg-gray-200 dark:bg-[#0a0a10] rounded-xl border border-gray-200 dark:border-white/10 p-3">
-                        <div class="text-sm font-mono text-sky-600 dark:text-sky-400 truncate">eventschedule.com/your-schedule</div>
+                    <div class="bg-gray-200 dark:bg-[#0f0f18] rounded-xl border border-gray-200 dark:border-white/10 p-3">
+                        <div class="text-sm font-mono text-sky-600 dark:text-sky-300 truncate">your-schedule.eventschedule.com</div>
                     </div>
                 </div>
 
@@ -385,8 +366,8 @@
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">OpenAPI spec</h3>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Download the OpenAPI 3.0 spec to auto-generate client libraries in any language.</p>
-                    <div class="bg-gray-200 dark:bg-[#0a0a10] rounded-xl border border-gray-200 dark:border-white/10 p-3 mb-4">
-                        <div class="text-sm font-mono text-cyan-600 dark:text-cyan-400 truncate">/api/openapi.json</div>
+                    <div class="bg-gray-200 dark:bg-[#0f0f18] rounded-xl border border-gray-200 dark:border-white/10 p-3 mb-4">
+                        <div class="text-sm font-mono text-cyan-600 dark:text-cyan-300 truncate">/api/openapi.json</div>
                     </div>
                     <div class="flex flex-wrap gap-2">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-xs border border-cyan-200 dark:border-cyan-500/20">Python</span>
@@ -417,6 +398,7 @@
                     name="AI Assistants"
                     description="Give your AI assistant the ability to create and manage events for users through natural conversation."
                     icon-color="cyan"
+                    blog-slug="for-ai-assistants"
                 >
                     <x-slot:icon>
                         <svg class="w-6 h-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -430,6 +412,7 @@
                     name="Developer Tools & Scripts"
                     description="Automate event management with scripts, CLI tools, and custom integrations using the REST API."
                     icon-color="teal"
+                    blog-slug="for-developer-tools"
                 >
                     <x-slot:icon>
                         <svg class="w-6 h-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -443,6 +426,7 @@
                     name="Community Bots"
                     description="Build Discord, Slack, or Telegram bots that create events and notify community members automatically."
                     icon-color="emerald"
+                    blog-slug="for-community-bots"
                 >
                     <x-slot:icon>
                         <svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -456,6 +440,7 @@
                     name="Booking Platforms"
                     description="Integrate event creation and ticket management into your existing booking or reservation system."
                     icon-color="sky"
+                    blog-slug="for-booking-platforms"
                 >
                     <x-slot:icon>
                         <svg class="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -469,6 +454,7 @@
                     name="Calendar Aggregators"
                     description="Pull events from Event Schedule into aggregation services and cross-platform calendar views."
                     icon-color="blue"
+                    blog-slug="for-calendar-aggregators"
                 >
                     <x-slot:icon>
                         <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -482,6 +468,7 @@
                     name="Custom Integrations"
                     description="Use the OpenAPI spec to generate client libraries and build custom integrations in any language."
                     icon-color="amber"
+                    blog-slug="for-custom-integrations"
                 >
                     <x-slot:icon>
                         <svg class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
