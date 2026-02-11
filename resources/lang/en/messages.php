@@ -1639,4 +1639,9 @@ return [
     'two_factor_invalid_recovery_code' => 'The recovery code you entered is invalid.',
     'two_factor_code_required' => 'Please enter an authentication code or recovery code.',
     'verify' => 'Verify',
+
+    // Admin session security
+    'admin_confirm_password' => 'For security, please confirm your password to access the admin area.',
+    'admin_session_changed' => 'Your session details changed. Please confirm your password again.',
+    'admin_password_required' => 'You must set a password before accessing the admin area.',
 ];

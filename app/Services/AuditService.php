@@ -71,6 +71,12 @@ class AuditService
 
     const ADMIN_QUEUE_ACTION = 'admin.queue_action';
 
+    const ADMIN_PASSWORD_CONFIRMED = 'admin.password_confirmed';
+
+    const ADMIN_PASSWORD_FAILED = 'admin.password_failed';
+
+    const ADMIN_SESSION_CHANGED = 'admin.session_changed';
+
     // Payment actions
     const STRIPE_LINK = 'stripe.link';
 
