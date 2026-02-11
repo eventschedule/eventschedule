@@ -243,6 +243,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::patch('/api-settings', [ApiSettingsController::class, 'update'])->name('api-settings.update');
 
+    // Admin password confirmation (outside admin middleware - the admin middleware redirects here)
+    Route::get('/admin/confirm-password', [AdminController::class, 'showConfirmPassword'])
+        ->name('admin.password.confirm.show');
+    Route::post('/admin/confirm-password', [AdminController::class, 'confirmPassword'])
+        ->name('admin.password.confirm')
+        ->middleware('throttle:5,1');
+
     // Admin routes (only for admin users) - protected by admin middleware for defense-in-depth
     Route::middleware(['admin', 'throttle:30,1'])->group(function () {
         Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');

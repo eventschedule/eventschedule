@@ -13,17 +13,74 @@ use App\Models\Role;
 use App\Models\Sale;
 use App\Models\UsageDaily;
 use App\Models\User;
+use App\Services\AuditService;
 use App\Services\DemoService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 use Laravel\Cashier\Subscription;
 
 class AdminController extends Controller
 {
+    /**
+     * Show the admin password confirmation form.
+     */
+    public function showConfirmPassword(Request $request): View|RedirectResponse
+    {
+        if (! $request->user()->isAdmin()) {
+            return redirect()->route('home');
+        }
+
+        return view('admin.confirm-password');
+    }
+
+    /**
+     * Confirm the admin's password and bind session to IP + User Agent.
+     */
+    public function confirmPassword(Request $request): RedirectResponse
+    {
+        if (! $request->user()->isAdmin()) {
+            return redirect()->route('home');
+        }
+
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        if (! Auth::guard('web')->validate([
+            'email' => $request->user()->email,
+            'password' => $request->password,
+        ])) {
+            AuditService::log(
+                AuditService::ADMIN_PASSWORD_FAILED,
+                $request->user()->id,
+            );
+
+            throw ValidationException::withMessages([
+                'password' => __('auth.password'),
+            ]);
+        }
+
+        $request->session()->put('admin_password_confirmed_at', time());
+        $request->session()->put('admin_ip', $request->ip());
+        $request->session()->put('admin_user_agent', (string) $request->userAgent());
+        $request->session()->regenerate();
+
+        AuditService::log(
+            AuditService::ADMIN_PASSWORD_CONFIRMED,
+            $request->user()->id,
+        );
+
+        return redirect()->intended(route('admin.dashboard', absolute: false));
+    }
+
     /**
      * Display the admin dashboard (overview/highlights).
      */
