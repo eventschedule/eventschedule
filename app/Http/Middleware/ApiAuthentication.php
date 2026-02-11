@@ -23,11 +23,15 @@ class ApiAuthentication
             return response()->json(['error' => 'API key is required'], 401);
         }
 
-        // Rate limiting per IP
-        $rateLimitKey = 'api_rate_limit:'.$clientIp;
+        // Tiered rate limiting per IP based on HTTP method
+        $isWriteOperation = in_array($request->method(), ['POST', 'PUT', 'DELETE']);
+        $rateLimitKey = $isWriteOperation
+            ? 'api_rate_limit_write:'.$clientIp
+            : 'api_rate_limit_read:'.$clientIp;
+        $rateLimit = $isWriteOperation ? 30 : 300;
         $attempts = Cache::get($rateLimitKey, 0);
 
-        if ($attempts >= 60) { // 60 requests per minute
+        if ($attempts >= $rateLimit) {
             $this->logFailedAttempt($clientIp, 'rate_limit_exceeded');
 
             return response()->json(['error' => 'Rate limit exceeded'], 429);

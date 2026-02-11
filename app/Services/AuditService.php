@@ -37,6 +37,10 @@ class AuditService
 
     const API_AUTH_FAILED = 'api.auth_failed';
 
+    const API_REGISTER = 'api.register';
+
+    const API_LOGIN = 'api.login';
+
     // Schedule actions
     const SCHEDULE_CREATE = 'schedule.create';
 

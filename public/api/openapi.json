@@ -1,0 +1,2508 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Event Schedule API",
+    "version": "1.0",
+    "description": "API for managing events, schedules, and tickets on Event Schedule. To get started, register an account, then create a schedule before adding events. Write operations require a Pro plan. New accounts get a trial period."
+  },
+  "servers": [
+    {
+      "url": "{baseUrl}/api",
+      "variables": {
+        "baseUrl": {
+          "default": "https://eventschedule.com"
+        }
+      }
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/register/send-code": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Send verification code",
+        "description": "Sends a 6-digit verification code to the provided email address. This is only required in hosted mode (eventschedule.com). Selfhosted instances do not require email verification. Rate limited to 5 codes per email per hour.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Email address to send the verification code to"
+                  },
+                  "website": {
+                    "type": "string",
+                    "description": "Honeypot field. Must be left empty or omitted."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verification code sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Verification code sent to user@example.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Registration codes not required (selfhosted mode)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error or email already registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many verification code requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Register a new account",
+        "description": "Creates a new user account and returns an API key. In hosted mode, a verification code (from /register/send-code) is required. In selfhosted mode, registration is only allowed if no users exist yet. Rate limited to 3 registrations per IP per hour.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email", "password"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "description": "Full name of the user"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 255,
+                    "description": "Email address for the account"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "description": "Account password (minimum 8 characters)"
+                  },
+                  "verification_code": {
+                    "type": "string",
+                    "description": "6-digit verification code from /register/send-code (required in hosted mode only)"
+                  },
+                  "timezone": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "description": "IANA timezone identifier",
+                    "example": "America/New_York"
+                  },
+                  "language_code": {
+                    "type": "string",
+                    "description": "Preferred language code",
+                    "enum": ["en", "es", "de", "fr", "it", "pt", "he", "nl", "ar", "et"]
+                  },
+                  "website": {
+                    "type": "string",
+                    "description": "Honeypot field. Must be left empty or omitted."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Account created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "api_key": {
+                          "type": "string",
+                          "description": "API key for authenticating future requests. Store this securely."
+                        },
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer",
+                              "description": "User ID"
+                            },
+                            "name": {
+                              "type": "string",
+                              "description": "User's full name"
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "description": "User's email address"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Registration is closed (selfhosted mode with existing users)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many registration attempts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Login to an existing account",
+        "description": "Authenticates with email and password, returning a new API key. Login generates a new API key each time, replacing any existing key. Store the key securely. Accounts with two-factor authentication enabled must generate an API key from the web UI instead. Rate limited to 5 attempts per IP per 15 minutes.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Account email address"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Account password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "api_key": {
+                          "type": "string",
+                          "description": "New API key for authenticating future requests. Store this securely."
+                        },
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer",
+                              "description": "User ID"
+                            },
+                            "name": {
+                              "type": "string",
+                              "description": "User's full name"
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "description": "User's email address"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid email or password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Account has two-factor authentication enabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many login attempts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/schedules": {
+      "get": {
+        "tags": ["Schedules"],
+        "summary": "List schedules",
+        "description": "Returns a paginated list of schedules owned or administered by the authenticated user.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter schedules by name (partial match)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter schedules by type",
+            "schema": {
+              "type": "string",
+              "enum": ["venue", "talent", "curator"]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (default 1)",
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of results per page (default 100, max 1000)",
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of schedules",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Schedule"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Schedules"],
+        "summary": "Create a schedule",
+        "description": "Creates a new schedule. In hosted mode, new schedules receive a Pro trial period. The subdomain is automatically generated from the schedule name.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "type"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "description": "Name of the schedule"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["venue", "talent", "curator"],
+                    "description": "Type of schedule"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 255,
+                    "description": "Contact email for the schedule"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Description of the schedule (supports markdown)"
+                  },
+                  "timezone": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "description": "IANA timezone identifier",
+                    "example": "America/New_York"
+                  },
+                  "language_code": {
+                    "type": "string",
+                    "description": "Language code for the schedule",
+                    "enum": ["en", "es", "de", "fr", "it", "pt", "he", "nl", "ar", "et"]
+                  },
+                  "website": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "description": "Website URL for the schedule"
+                  },
+                  "address1": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "description": "Street address (primarily for venue type)"
+                  },
+                  "city": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "description": "City (primarily for venue type)"
+                  },
+                  "state": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "description": "State or province (primarily for venue type)"
+                  },
+                  "postal_code": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "description": "Postal or ZIP code (primarily for venue type)"
+                  },
+                  "country_code": {
+                    "type": "string",
+                    "maxLength": 10,
+                    "description": "Country code (primarily for venue type)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Schedule created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Schedule"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/schedules/{subdomain}": {
+      "get": {
+        "tags": ["Schedules"],
+        "summary": "Show a schedule",
+        "description": "Returns details of a specific schedule. The authenticated user must be an owner or admin of the schedule.",
+        "parameters": [
+          {
+            "name": "subdomain",
+            "in": "path",
+            "required": true,
+            "description": "The subdomain identifier of the schedule",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schedule details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Schedule"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Schedule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Schedules"],
+        "summary": "Update a schedule",
+        "description": "Updates an existing schedule. Requires a Pro plan. Only the fields provided will be updated. The authenticated user must be an owner or admin of the schedule.",
+        "parameters": [
+          {
+            "name": "subdomain",
+            "in": "path",
+            "required": true,
+            "description": "The subdomain identifier of the schedule",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "description": "Name of the schedule"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 255,
+                    "description": "Contact email for the schedule"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Description of the schedule (supports markdown)"
+                  },
+                  "timezone": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "description": "IANA timezone identifier"
+                  },
+                  "language_code": {
+                    "type": "string",
+                    "description": "Language code for the schedule",
+                    "enum": ["en", "es", "de", "fr", "it", "pt", "he", "nl", "ar", "et"]
+                  },
+                  "website": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "description": "Website URL for the schedule"
+                  },
+                  "address1": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "description": "Street address"
+                  },
+                  "city": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "description": "City"
+                  },
+                  "state": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "description": "State or province"
+                  },
+                  "postal_code": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "description": "Postal or ZIP code"
+                  },
+                  "country_code": {
+                    "type": "string",
+                    "maxLength": 10,
+                    "description": "Country code"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Schedule updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Schedule"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not a Pro account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Schedule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Schedules"],
+        "summary": "Delete a schedule",
+        "description": "Permanently deletes a schedule and all associated data. Only the schedule owner can perform this action.",
+        "parameters": [
+          {
+            "name": "subdomain",
+            "in": "path",
+            "required": true,
+            "description": "The subdomain identifier of the schedule",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schedule deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Schedule deleted successfully"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Only the schedule owner can delete it",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Schedule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/schedules/{subdomain}/groups": {
+      "get": {
+        "tags": ["Sub-schedules"],
+        "summary": "List sub-schedules",
+        "description": "Returns all sub-schedules for a given schedule. The authenticated user must be an owner or admin of the schedule.",
+        "parameters": [
+          {
+            "name": "subdomain",
+            "in": "path",
+            "required": true,
+            "description": "The subdomain identifier of the parent schedule",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of sub-schedules",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Group"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Schedule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Sub-schedules"],
+        "summary": "Create a sub-schedule",
+        "description": "Creates a new sub-schedule within a schedule. Requires a Pro plan. The slug is automatically generated from the name.",
+        "parameters": [
+          {
+            "name": "subdomain",
+            "in": "path",
+            "required": true,
+            "description": "The subdomain identifier of the parent schedule",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "description": "Name of the sub-schedule"
+                  },
+                  "color": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "description": "Color for the sub-schedule (e.g. hex code)",
+                    "example": "#4E81FA"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sub-schedule created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Group"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not a Pro account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Schedule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/schedules/{subdomain}/groups/{group_id}": {
+      "put": {
+        "tags": ["Sub-schedules"],
+        "summary": "Update a sub-schedule",
+        "description": "Updates an existing sub-schedule. Requires a Pro plan. Only the fields provided will be updated.",
+        "parameters": [
+          {
+            "name": "subdomain",
+            "in": "path",
+            "required": true,
+            "description": "The subdomain identifier of the parent schedule",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the sub-schedule",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "description": "Name of the sub-schedule"
+                  },
+                  "color": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "description": "Color for the sub-schedule (e.g. hex code)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sub-schedule updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Group"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not a Pro account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Schedule or sub-schedule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Sub-schedules"],
+        "summary": "Delete a sub-schedule",
+        "description": "Permanently deletes a sub-schedule. Requires a Pro plan.",
+        "parameters": [
+          {
+            "name": "subdomain",
+            "in": "path",
+            "required": true,
+            "description": "The subdomain identifier of the parent schedule",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the sub-schedule",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sub-schedule deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Sub-schedule deleted successfully"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not a Pro account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Schedule or sub-schedule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events": {
+      "get": {
+        "tags": ["Events"],
+        "summary": "List events",
+        "description": "Returns a paginated list of events owned by the authenticated user. Can be filtered by schedule, date range, and paginated.",
+        "parameters": [
+          {
+            "name": "subdomain",
+            "in": "query",
+            "description": "Filter events by schedule subdomain",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "starts_after",
+            "in": "query",
+            "description": "Filter events starting on or after this date",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2025-01-01"
+            }
+          },
+          {
+            "name": "starts_before",
+            "in": "query",
+            "description": "Filter events starting on or before this date",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2025-12-31"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (default 1)",
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of results per page (default 100, max 1000)",
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Event"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events/{id}": {
+      "get": {
+        "tags": ["Events"],
+        "summary": "Show an event",
+        "description": "Returns details of a specific event. The authenticated user must own the event or be an owner/admin on one of its associated schedules.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the event",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Event"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized to view this event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Events"],
+        "summary": "Update an event",
+        "description": "Updates an existing event. Requires a Pro plan. Supports partial updates - only the fields provided will be changed. Existing tickets, event parts, and recurring configuration are preserved if not explicitly provided.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the event",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Event"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Event updated successfully"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized or not a Pro account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Events"],
+        "summary": "Delete an event",
+        "description": "Permanently deletes an event. The authenticated user must have permission to edit the event.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the event",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Event deleted successfully"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized to delete this event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events/{subdomain}": {
+      "post": {
+        "tags": ["Events"],
+        "summary": "Create an event",
+        "description": "Creates a new event under the specified schedule. Requires a Pro plan. The authenticated user must be an owner or admin of the schedule. For venue schedules, the venue is automatically set. For talent schedules, the member is automatically set.",
+        "parameters": [
+          {
+            "name": "subdomain",
+            "in": "path",
+            "required": true,
+            "description": "The subdomain identifier of the schedule to create the event under",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Event created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Event"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Event created successfully"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized or not a Pro account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Schedule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events/flyer/{event_id}": {
+      "post": {
+        "tags": ["Events"],
+        "summary": "Upload event flyer image",
+        "description": "Uploads a flyer image for an event. Requires a Pro plan. The authenticated user must own the event. Any existing flyer image will be replaced.",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the event",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["flyer_image"],
+                "properties": {
+                  "flyer_image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "The flyer image file to upload"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Flyer uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Event"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Flyer uploaded successfully"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized or not a Pro account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories": {
+      "get": {
+        "tags": ["Categories"],
+        "summary": "List event categories",
+        "description": "Returns all available event categories that can be used when creating or updating events.",
+        "responses": {
+          "200": {
+            "description": "List of categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Category"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sales": {
+      "post": {
+        "tags": ["Sales"],
+        "summary": "Create a sale",
+        "description": "Creates a new ticket sale for an event. The event must have tickets enabled and belong to a Pro schedule. Tickets can be referenced by encoded ticket ID or by ticket type name. Sales are created with 'unpaid' status unless the total is zero (free tickets), in which case they are automatically marked as 'paid'.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["event_id", "name", "email", "tickets"],
+                "properties": {
+                  "event_id": {
+                    "type": "string",
+                    "description": "Encoded ID of the event"
+                  },
+                  "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "description": "Name of the ticket buyer"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 255,
+                    "description": "Email of the ticket buyer"
+                  },
+                  "tickets": {
+                    "type": "object",
+                    "description": "Map of ticket identifier (encoded ticket ID or ticket type name) to quantity",
+                    "additionalProperties": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "example": {
+                      "General Admission": 2,
+                      "VIP": 1
+                    }
+                  },
+                  "event_date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Specific date for recurring events (Y-m-d format). If omitted, defaults to the event's start date."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sale created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Sale"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Sale created successfully"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error or tickets not available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "API key obtained from /login or /register. Keys expire after one year."
+      }
+    },
+    "schemas": {
+      "Schedule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Encoded schedule ID"
+          },
+          "subdomain": {
+            "type": "string",
+            "description": "Unique subdomain identifier for the schedule"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Public URL of the schedule"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["venue", "talent", "curator"],
+            "description": "Type of schedule"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the schedule"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "nullable": true,
+            "description": "Contact email"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true,
+            "description": "Contact phone number"
+          },
+          "website": {
+            "type": "string",
+            "nullable": true,
+            "description": "Website URL"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Schedule description (may contain markdown)"
+          },
+          "timezone": {
+            "type": "string",
+            "nullable": true,
+            "description": "IANA timezone identifier"
+          },
+          "language_code": {
+            "type": "string",
+            "nullable": true,
+            "description": "Language code"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "ISO 8601 creation timestamp"
+          },
+          "address1": {
+            "type": "string",
+            "nullable": true,
+            "description": "Street address (venue type only)"
+          },
+          "city": {
+            "type": "string",
+            "nullable": true,
+            "description": "City (venue type only)"
+          },
+          "state": {
+            "type": "string",
+            "nullable": true,
+            "description": "State or province (venue type only)"
+          },
+          "postal_code": {
+            "type": "string",
+            "nullable": true,
+            "description": "Postal or ZIP code (venue type only)"
+          },
+          "country_code": {
+            "type": "string",
+            "nullable": true,
+            "description": "Country code (venue type only)"
+          },
+          "groups": {
+            "type": "array",
+            "description": "Sub-schedules belonging to this schedule",
+            "items": {
+              "$ref": "#/components/schemas/Group"
+            }
+          }
+        }
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Encoded event ID"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Public URL of the event"
+          },
+          "name": {
+            "type": "string",
+            "description": "Event name"
+          },
+          "short_description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Brief event description"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Full event description (may contain markdown)"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Event start date and time in UTC (Y-m-d H:i:s)"
+          },
+          "duration": {
+            "type": "number",
+            "nullable": true,
+            "description": "Event duration in hours"
+          },
+          "category_id": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Category ID from /categories"
+          },
+          "event_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "External URL for the event"
+          },
+          "registration_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "External registration URL"
+          },
+          "venue_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Encoded ID of the associated venue schedule"
+          },
+          "flyer_image_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "URL of the flyer image"
+          },
+          "schedule_type": {
+            "type": "string",
+            "enum": ["single", "recurring"],
+            "description": "Whether this is a single or recurring event"
+          },
+          "recurring_frequency": {
+            "type": "string",
+            "nullable": true,
+            "enum": ["daily", "weekly", "every_n_weeks", "monthly_date", "monthly_weekday", "yearly"],
+            "description": "Recurrence frequency (only present for recurring events)"
+          },
+          "recurring_interval": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Interval for every_n_weeks frequency (only present for recurring events)"
+          },
+          "days_of_week": {
+            "type": "string",
+            "nullable": true,
+            "description": "7-character string where each position represents a day (Sunday to Saturday), '1' means active (only present for recurring events)",
+            "example": "0101010"
+          },
+          "recurring_end_type": {
+            "type": "string",
+            "nullable": true,
+            "enum": ["never", "on_date", "after_events"],
+            "description": "How the recurrence ends (only present for recurring events)"
+          },
+          "recurring_end_value": {
+            "type": "string",
+            "nullable": true,
+            "description": "End date (Y-m-d) or number of occurrences, depending on recurring_end_type"
+          },
+          "tickets_enabled": {
+            "type": "boolean",
+            "description": "Whether ticket sales are enabled for this event"
+          },
+          "tickets": {
+            "type": "array",
+            "description": "Ticket types for this event (only present when tickets are enabled)",
+            "items": {
+              "$ref": "#/components/schemas/Ticket"
+            }
+          },
+          "members": {
+            "type": "object",
+            "description": "Map of encoded member schedule IDs to member details",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Member name"
+                },
+                "email": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "Member email"
+                },
+                "youtube_url": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "Member's YouTube URL"
+                }
+              }
+            }
+          },
+          "event_parts": {
+            "type": "array",
+            "description": "Sub-sections or segments of the event",
+            "items": {
+              "$ref": "#/components/schemas/EventPart"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "ISO 8601 creation timestamp"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "ISO 8601 last update timestamp"
+          }
+        }
+      },
+      "EventInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Event name (required for create)"
+          },
+          "starts_at": {
+            "type": "string",
+            "description": "Start date and time in Y-m-d H:i:s format (required for create)",
+            "example": "2025-06-15 19:00:00"
+          },
+          "duration": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 24,
+            "description": "Event duration in hours"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 10000,
+            "description": "Full event description (supports markdown)"
+          },
+          "short_description": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Brief event description"
+          },
+          "event_url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 255,
+            "description": "External URL for the event"
+          },
+          "event_password": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Password to protect the event page"
+          },
+          "registration_url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 255,
+            "description": "External registration URL"
+          },
+          "category_id": {
+            "type": "integer",
+            "description": "Category ID from /categories"
+          },
+          "category": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Category name (alternative to category_id)"
+          },
+          "tickets_enabled": {
+            "type": "boolean",
+            "description": "Whether to enable ticket sales"
+          },
+          "ticket_currency_code": {
+            "type": "string",
+            "description": "3-letter ISO currency code for tickets",
+            "example": "USD"
+          },
+          "payment_method": {
+            "type": "string",
+            "enum": ["stripe", "invoiceninja", "payment_url", "manual"],
+            "description": "Payment method for ticket sales"
+          },
+          "payment_instructions": {
+            "type": "string",
+            "maxLength": 5000,
+            "description": "Instructions for manual payment"
+          },
+          "schedule_type": {
+            "type": "string",
+            "enum": ["single", "recurring"],
+            "description": "Whether this is a single or recurring event"
+          },
+          "recurring_frequency": {
+            "type": "string",
+            "enum": ["daily", "weekly", "every_n_weeks", "monthly_date", "monthly_weekday", "yearly"],
+            "description": "Recurrence frequency (required when schedule_type is recurring)"
+          },
+          "recurring_interval": {
+            "type": "integer",
+            "minimum": 2,
+            "description": "Interval for every_n_weeks frequency"
+          },
+          "recurring_end_type": {
+            "type": "string",
+            "enum": ["never", "on_date", "after_events"],
+            "description": "How the recurrence should end"
+          },
+          "recurring_end_value": {
+            "type": "string",
+            "description": "End date (Y-m-d) for on_date, or number of occurrences for after_events"
+          },
+          "venue_id": {
+            "type": "string",
+            "description": "Encoded ID of a venue schedule to associate with the event"
+          },
+          "venue_name": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Venue name (used to look up an existing venue schedule)"
+          },
+          "venue_address1": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Venue address (used together with venue_name to look up an existing venue schedule)"
+          },
+          "members": {
+            "type": "array",
+            "description": "Array of member objects with name and/or email to associate talent schedules with the event",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Member name (used to look up an existing talent schedule)"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "description": "Member email (used to look up an existing talent schedule)"
+                }
+              }
+            }
+          },
+          "schedule": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Sub-schedule slug to assign this event to"
+          },
+          "tickets": {
+            "type": "array",
+            "description": "Ticket types for the event",
+            "items": {
+              "type": "object",
+              "required": ["type"],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "maxLength": 255,
+                  "description": "Ticket type name (e.g. General Admission, VIP)"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Number of tickets available (0 or omit for unlimited)"
+                },
+                "price": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Ticket price (0 for free)"
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 1000,
+                  "description": "Ticket description"
+                }
+              }
+            }
+          },
+          "event_parts": {
+            "type": "array",
+            "description": "Sub-sections or segments of the event",
+            "items": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "maxLength": 255,
+                  "description": "Part name"
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 1000,
+                  "description": "Part description"
+                },
+                "start_time": {
+                  "type": "string",
+                  "description": "Start time for this part"
+                },
+                "end_time": {
+                  "type": "string",
+                  "description": "End time for this part"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Group": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Encoded sub-schedule ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Sub-schedule name"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly slug"
+          },
+          "color": {
+            "type": "string",
+            "nullable": true,
+            "description": "Color associated with this sub-schedule"
+          }
+        }
+      },
+      "Ticket": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Encoded ticket ID"
+          },
+          "type": {
+            "type": "string",
+            "description": "Ticket type name"
+          },
+          "price": {
+            "type": "number",
+            "description": "Ticket price"
+          },
+          "quantity": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Number of tickets available (null for unlimited)"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Ticket description"
+          }
+        }
+      },
+      "EventPart": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Part name"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Part description"
+          },
+          "start_time": {
+            "type": "string",
+            "nullable": true,
+            "description": "Start time for this part"
+          },
+          "end_time": {
+            "type": "string",
+            "nullable": true,
+            "description": "End time for this part"
+          }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Category ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Category name"
+          }
+        }
+      },
+      "Sale": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Encoded sale ID"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Encoded event ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Buyer name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Buyer email"
+          },
+          "event_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of the event occurrence"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["unpaid", "paid"],
+            "description": "Payment status"
+          },
+          "payment_method": {
+            "type": "string",
+            "nullable": true,
+            "description": "Payment method used"
+          },
+          "payment_amount": {
+            "type": "number",
+            "description": "Total payment amount"
+          },
+          "transaction_reference": {
+            "type": "string",
+            "nullable": true,
+            "description": "External transaction reference"
+          },
+          "secret": {
+            "type": "string",
+            "description": "Secret key for accessing the ticket (only visible to event owner)"
+          },
+          "tickets": {
+            "type": "array",
+            "description": "Tickets included in this sale",
+            "items": {
+              "type": "object",
+              "properties": {
+                "ticket_id": {
+                  "type": "string",
+                  "description": "Encoded ticket ID"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "description": "Number of tickets purchased"
+                },
+                "price": {
+                  "type": "number",
+                  "description": "Price per ticket"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Ticket type name"
+                }
+              }
+            }
+          },
+          "total_quantity": {
+            "type": "integer",
+            "description": "Total number of tickets in this sale"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "ISO 8601 creation timestamp"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "ISO 8601 last update timestamp"
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "current_page": {
+            "type": "integer",
+            "description": "Current page number"
+          },
+          "from": {
+            "type": "integer",
+            "nullable": true,
+            "description": "First item number on this page"
+          },
+          "last_page": {
+            "type": "integer",
+            "description": "Last page number"
+          },
+          "per_page": {
+            "type": "integer",
+            "description": "Items per page"
+          },
+          "to": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Last item number on this page"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of items"
+          },
+          "path": {
+            "type": "string",
+            "format": "uri",
+            "description": "Base URL for pagination"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "errors": {
+            "type": "object",
+            "nullable": true,
+            "description": "Field-level validation errors (keyed by field name, values are arrays of error messages)",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": ["error"]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Register, login, and manage API keys. Authentication endpoints have their own rate limits: registration is limited to 3 per IP per hour, login to 5 per IP per 15 minutes, and verification codes to 5 per email per hour."
+    },
+    {
+      "name": "Schedules",
+      "description": "Manage schedules. A schedule represents a venue, talent, or curator that hosts events. Create a schedule before adding events."
+    },
+    {
+      "name": "Sub-schedules",
+      "description": "Manage sub-schedules within a schedule. Sub-schedules allow you to organize events into categories within a schedule. Requires a Pro plan for write operations."
+    },
+    {
+      "name": "Events",
+      "description": "Manage events. Events belong to schedules and can have tickets, recurring configurations, and associated members. Write operations require a Pro plan. Rate limits: GET requests are limited to 300 per minute, POST/PUT/DELETE requests are limited to 30 per minute."
+    },
+    {
+      "name": "Categories",
+      "description": "List available event categories."
+    },
+    {
+      "name": "Sales",
+      "description": "Create ticket sales for events. Events must have tickets enabled and belong to a Pro schedule."
+    }
+  ]
+}

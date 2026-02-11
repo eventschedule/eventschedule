@@ -8,6 +8,7 @@ use App\Models\Sale;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ApiSaleController extends Controller
@@ -26,10 +27,14 @@ class ApiSaleController extends Controller
         ]);
 
         $eventId = UrlUtils::decodeId($request->event_id);
-        $event = Event::with(['roles', 'tickets'])->findOrFail($eventId);
+        $event = Event::with(['roles', 'tickets'])->find($eventId);
 
-        // Verify event belongs to authenticated user
-        if ($event->user_id !== auth()->id()) {
+        if (! $event) {
+            return response()->json(['error' => 'Event not found'], 404);
+        }
+
+        // Verify user can edit the event (owner or owner/admin on associated schedule)
+        if (! auth()->user()->canEditEvent($event)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -74,40 +79,10 @@ class ApiSaleController extends Controller
         // Determine event_date
         $eventDate = $request->event_date;
         if (! $eventDate) {
-            $eventDate = $event->starts_at
-                ? Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d')
-                : Carbon::now()->format('Y-m-d');
-        }
-
-        // Check ticket availability
-        foreach ($ticketIds as $ticketId => $quantity) {
-            $ticket = $event->tickets()->find($ticketId);
-
-            if ($ticket->quantity > 0) {
-                // Handle combined mode logic
-                if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
-                    $totalSold = $event->tickets->sum(function ($t) use ($eventDate) {
-                        $ticketSold = $t->sold ? json_decode($t->sold, true) : [];
-
-                        return $ticketSold[$eventDate] ?? 0;
-                    });
-                    $totalQuantity = $event->getSameTicketQuantity();
-                    $remainingTickets = $totalQuantity - $totalSold;
-
-                    $totalRequested = array_sum($ticketIds);
-                    if ($totalRequested > $remainingTickets) {
-                        return response()->json(['error' => 'Tickets not available. Remaining: '.$remainingTickets], 422);
-                    }
-                } else {
-                    $sold = json_decode($ticket->sold, true) ?? [];
-                    $soldCount = $sold[$eventDate] ?? 0;
-                    $remainingTickets = $ticket->quantity - $soldCount;
-
-                    if ($quantity > $remainingTickets) {
-                        return response()->json(['error' => 'Tickets not available for ticket '.UrlUtils::encodeId($ticketId).'. Remaining: '.$remainingTickets], 422);
-                    }
-                }
+            if (! $event->starts_at) {
+                return response()->json(['error' => 'Event has no start date. Please provide event_date parameter.'], 422);
             }
+            $eventDate = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
         }
 
         // Get subdomain from event
@@ -124,38 +99,81 @@ class ApiSaleController extends Controller
             return response()->json(['error' => 'Unable to determine subdomain for event'], 422);
         }
 
-        // Create sale
-        $sale = new Sale;
-        $sale->event_id = $event->id;
-        $sale->user_id = auth()->id();
-        $sale->name = $request->name;
-        $sale->email = $request->email;
-        $sale->secret = strtolower(Str::random(32));
-        $sale->event_date = $eventDate;
-        $sale->subdomain = $subdomain;
-        $sale->payment_method = $event->payment_method;
-        $sale->status = 'unpaid';
-        $sale->save();
+        // Use a transaction with row locking to prevent overselling
+        try {
+            $sale = DB::transaction(function () use ($event, $ticketIds, $eventDate, $request, $subdomain) {
+                // Re-fetch tickets with a lock to prevent race conditions
+                $lockedTickets = $event->tickets()->lockForUpdate()->get();
 
-        // Create sale tickets
-        foreach ($ticketIds as $ticketId => $quantity) {
-            $sale->saleTickets()->create([
-                'sale_id' => $sale->id,
-                'ticket_id' => $ticketId,
-                'quantity' => $quantity,
-                'seats' => json_encode(array_fill(1, $quantity, null)),
-            ]);
-        }
+                // Check ticket availability
+                foreach ($ticketIds as $ticketId => $quantity) {
+                    $ticket = $lockedTickets->find($ticketId);
 
-        // Calculate and set payment amount
-        $total = $sale->calculateTotal();
-        $sale->payment_amount = $total;
-        $sale->save();
+                    if ($ticket->quantity > 0) {
+                        // Handle combined mode logic
+                        if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
+                            $totalSold = $lockedTickets->sum(function ($t) use ($eventDate) {
+                                $ticketSold = $t->sold ? json_decode($t->sold, true) : [];
 
-        // If total is 0, mark as paid (free tickets)
-        if ($total == 0) {
-            $sale->status = 'paid';
-            $sale->save();
+                                return $ticketSold[$eventDate] ?? 0;
+                            });
+                            $totalQuantity = $event->getSameTicketQuantity();
+                            $remainingTickets = $totalQuantity - $totalSold;
+
+                            $totalRequested = array_sum($ticketIds);
+                            if ($totalRequested > $remainingTickets) {
+                                throw new \RuntimeException('Tickets not available. Remaining: '.$remainingTickets);
+                            }
+                        } else {
+                            $sold = json_decode($ticket->sold, true) ?? [];
+                            $soldCount = $sold[$eventDate] ?? 0;
+                            $remainingTickets = $ticket->quantity - $soldCount;
+
+                            if ($quantity > $remainingTickets) {
+                                throw new \RuntimeException('Tickets not available for ticket '.UrlUtils::encodeId($ticketId).'. Remaining: '.$remainingTickets);
+                            }
+                        }
+                    }
+                }
+
+                // Create sale
+                $sale = new Sale;
+                $sale->event_id = $event->id;
+                $sale->user_id = auth()->id();
+                $sale->name = $request->name;
+                $sale->email = $request->email;
+                $sale->secret = strtolower(Str::random(32));
+                $sale->event_date = $eventDate;
+                $sale->subdomain = $subdomain;
+                $sale->payment_method = $event->payment_method;
+                $sale->status = 'unpaid';
+                $sale->save();
+
+                // Create sale tickets
+                foreach ($ticketIds as $ticketId => $quantity) {
+                    $sale->saleTickets()->create([
+                        'sale_id' => $sale->id,
+                        'ticket_id' => $ticketId,
+                        'quantity' => $quantity,
+                        'seats' => json_encode(array_fill(1, $quantity, null)),
+                    ]);
+                }
+
+                // Calculate and set payment amount
+                $total = $sale->calculateTotal();
+                $sale->payment_amount = $total;
+                $sale->save();
+
+                // If total is 0, mark as paid (free tickets)
+                if ($total == 0) {
+                    $sale->status = 'paid';
+                    $sale->save();
+                }
+
+                return $sale;
+            });
+        } catch (\RuntimeException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
         }
 
         // Reload sale with relationships for API response
