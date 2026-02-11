@@ -171,7 +171,10 @@ class ApiEventController extends Controller
         ]));
 
         // Pre-processing: venue, members, group, category
-        $this->preprocessEventRequest($request, $role, $encodedRoleId);
+        $errorResponse = $this->preprocessEventRequest($request, $role, $encodedRoleId);
+        if ($errorResponse) {
+            return $errorResponse;
+        }
 
         $event = $this->eventRepo->saveEvent($role, $request, null);
 
@@ -340,7 +343,10 @@ class ApiEventController extends Controller
 
         // Pre-processing: venue, members, group, category
         $currentRole->loadMissing('groups');
-        $this->preprocessEventRequest($request, $currentRole, $encodedRoleId);
+        $errorResponse = $this->preprocessEventRequest($request, $currentRole, $encodedRoleId);
+        if ($errorResponse) {
+            return $errorResponse;
+        }
 
         $event = $this->eventRepo->saveEvent($currentRole, $request, $event);
 
