@@ -23,6 +23,7 @@
   "paths": {
     "/register/send-code": {
       "post": {
+        "operationId": "send_verification_code",
         "tags": ["Authentication"],
         "summary": "Send verification code",
         "description": "Sends a 6-digit verification code to the provided email address. This is only required in hosted mode (eventschedule.com). Selfhosted instances do not require email verification. Rate limited to 5 codes per email per hour.",
@@ -106,6 +107,7 @@
     },
     "/register": {
       "post": {
+        "operationId": "register",
         "tags": ["Authentication"],
         "summary": "Register a new account",
         "description": "Creates a new user account and returns an API key. In hosted mode, a verification code (from /register/send-code) is required. In selfhosted mode, registration is only allowed if no users exist yet. Rate limited to 3 registrations per IP per hour.",
@@ -233,6 +235,7 @@
     },
     "/login": {
       "post": {
+        "operationId": "login",
         "tags": ["Authentication"],
         "summary": "Login to an existing account",
         "description": "Authenticates with email and password, returning a new API key. Login generates a new API key each time, replacing any existing key. Store the key securely. Accounts with two-factor authentication enabled must generate an API key from the web UI instead. Rate limited to 5 attempts per IP per 15 minutes.",
@@ -344,6 +347,7 @@
     },
     "/schedules": {
       "get": {
+        "operationId": "list_schedules",
         "tags": ["Schedules"],
         "summary": "List schedules",
         "description": "Returns a paginated list of schedules owned or administered by the authenticated user.",
@@ -422,6 +426,7 @@
         }
       },
       "post": {
+        "operationId": "create_schedule",
         "tags": ["Schedules"],
         "summary": "Create a schedule",
         "description": "Creates a new schedule. In hosted mode, new schedules receive a Pro trial period. The subdomain is automatically generated from the schedule name.",
@@ -540,6 +545,7 @@
     },
     "/schedules/{subdomain}": {
       "get": {
+        "operationId": "show_schedule",
         "tags": ["Schedules"],
         "summary": "Show a schedule",
         "description": "Returns details of a specific schedule. The authenticated user must be an owner or admin of the schedule.",
@@ -593,6 +599,7 @@
         }
       },
       "put": {
+        "operationId": "update_schedule",
         "tags": ["Schedules"],
         "summary": "Update a schedule",
         "description": "Updates an existing schedule. Requires a Pro plan. Only the fields provided will be updated. The authenticated user must be an owner or admin of the schedule.",
@@ -733,6 +740,7 @@
         }
       },
       "delete": {
+        "operationId": "delete_schedule",
         "tags": ["Schedules"],
         "summary": "Delete a schedule",
         "description": "Permanently deletes a schedule and all associated data. Only the schedule owner can perform this action.",
@@ -804,6 +812,7 @@
     },
     "/schedules/{subdomain}/groups": {
       "get": {
+        "operationId": "list_groups",
         "tags": ["Sub-schedules"],
         "summary": "List sub-schedules",
         "description": "Returns all sub-schedules for a given schedule. The authenticated user must be an owner or admin of the schedule.",
@@ -860,6 +869,7 @@
         }
       },
       "post": {
+        "operationId": "create_group",
         "tags": ["Sub-schedules"],
         "summary": "Create a sub-schedule",
         "description": "Creates a new sub-schedule within a schedule. Requires a Pro plan. The slug is automatically generated from the name.",
@@ -959,6 +969,7 @@
     },
     "/schedules/{subdomain}/groups/{group_id}": {
       "put": {
+        "operationId": "update_group",
         "tags": ["Sub-schedules"],
         "summary": "Update a sub-schedule",
         "description": "Updates an existing sub-schedule. Requires a Pro plan. Only the fields provided will be updated.",
@@ -1063,6 +1074,7 @@
         }
       },
       "delete": {
+        "operationId": "delete_group",
         "tags": ["Sub-schedules"],
         "summary": "Delete a sub-schedule",
         "description": "Permanently deletes a sub-schedule. Requires a Pro plan.",
@@ -1143,6 +1155,7 @@
     },
     "/events": {
       "get": {
+        "operationId": "list_events",
         "tags": ["Events"],
         "summary": "List events",
         "description": "Returns a paginated list of events owned by the authenticated user. Can be filtered by schedule, date range, and paginated.",
@@ -1234,6 +1247,7 @@
     },
     "/events/{id}": {
       "get": {
+        "operationId": "show_event",
         "tags": ["Events"],
         "summary": "Show an event",
         "description": "Returns details of a specific event. The authenticated user must own the event or be an owner/admin on one of its associated schedules.",
@@ -1297,6 +1311,7 @@
         }
       },
       "put": {
+        "operationId": "update_event",
         "tags": ["Events"],
         "summary": "Update an event",
         "description": "Updates an existing event. Requires a Pro plan. Supports partial updates - only the fields provided will be changed. Existing tickets, event parts, and recurring configuration are preserved if not explicitly provided.",
@@ -1389,6 +1404,7 @@
         }
       },
       "delete": {
+        "operationId": "delete_event",
         "tags": ["Events"],
         "summary": "Delete an event",
         "description": "Permanently deletes an event. The authenticated user must have permission to edit the event.",
@@ -1460,6 +1476,7 @@
     },
     "/events/{subdomain}": {
       "post": {
+        "operationId": "create_event",
         "tags": ["Events"],
         "summary": "Create an event",
         "description": "Creates a new event under the specified schedule. Requires a Pro plan. The authenticated user must be an owner or admin of the schedule. For venue schedules, the venue is automatically set. For talent schedules, the member is automatically set.",
@@ -1554,6 +1571,7 @@
     },
     "/events/flyer/{event_id}": {
       "post": {
+        "operationId": "upload_flyer",
         "tags": ["Events"],
         "summary": "Upload event flyer image",
         "description": "Uploads a flyer image for an event. Requires a Pro plan. The authenticated user must own the event. Any existing flyer image will be replaced.",
@@ -1646,6 +1664,7 @@
     },
     "/categories": {
       "get": {
+        "operationId": "list_categories",
         "tags": ["Categories"],
         "summary": "List event categories",
         "description": "Returns all available event categories that can be used when creating or updating events.",
@@ -1683,6 +1702,7 @@
     },
     "/sales": {
       "post": {
+        "operationId": "create_sale",
         "tags": ["Sales"],
         "summary": "Create a sale",
         "description": "Creates a new ticket sale for an event. The event must have tickets enabled and belong to a Pro schedule. Tickets can be referenced by encoded ticket ID or by ticket type name. Sales are created with 'unpaid' status unless the total is zero (free tickets), in which case they are automatically marked as 'paid'.",

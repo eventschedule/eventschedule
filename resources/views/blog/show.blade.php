@@ -230,6 +230,7 @@
                             'for-virtual-conferences' => ['from' => 'sky-500', 'to' => 'blue-500', 'shadow' => 'sky-500/25'],
                             'for-live-qa-sessions' => ['from' => 'violet-500', 'to' => 'purple-500', 'shadow' => 'violet-500/25'],
                             'for-watch-parties' => ['from' => 'indigo-500', 'to' => 'cyan-500', 'shadow' => 'indigo-500/25'],
+                            'for-ai-agents' => ['from' => 'cyan-600', 'to' => 'emerald-600', 'shadow' => 'cyan-500/25'],
                         ];
                         $colors = $colorMap[$subAudienceInfo->parent_page] ?? ['from' => 'violet-500', 'to' => 'purple-500', 'shadow' => 'violet-500/25'];
                     @endphp
