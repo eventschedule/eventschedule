@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ is_rtl() ? 'rtl' : 'ltr' }}" class="overflow-x-hidden">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ is_rtl() ? 'rtl' : 'ltr' }}" class="overflow-x-clip">
 <head class="h-full bg-white">
     <title>{{ $title ?? 'Event Schedule' }}</title>
     <!-- Version: {{ config('self-update.version_installed') }} -->
@@ -717,7 +717,7 @@
     {{ isset($head) ? $head : '' }}
 
 </head> 
-<body class="font-sans antialiased h-full bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
+<body class="font-sans antialiased h-full bg-gray-50 dark:bg-gray-900 overflow-x-clip">
 
     {{ $slot }}
 

@@ -484,7 +484,7 @@
                         {{-- Date Header --}}
                         <div class="sticky top-0 z-10 {{ $stickyBleedClass }} {{ (isset($force_mobile) && $force_mobile) ? 'bg-[#F5F9FE] dark:bg-gray-800' : 'bg-white dark:bg-gray-900' }}"
                             :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
-                            <div class="px-4 pb-5 pt-3 flex items-center gap-4">
+                            <div class="pb-5 pt-3 px-4 flex items-center gap-4">
                                 <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
                                 <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></div>
                                 <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
@@ -1110,7 +1110,7 @@
                     </div>
                     {{-- Date Header --}}
                     <div class="sticky top-0 z-10 {{ $stickyBleedClass }} bg-white dark:bg-gray-800">
-                        <div :class="groupIndex === 0 ? 'pb-5 pt-0' : 'pb-5 pt-3'" class="px-4 flex items-center gap-4">
+                        <div class="pb-5 pt-3 px-4 flex items-center gap-4">
                             <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
                             <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></div>
                             <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
