@@ -208,7 +208,7 @@ class GroupsTest extends DuskTestCase
         $response = $this->createEventViaApi($apiKey, 'Invalid Schedule Event', 'invalid-schedule');
         $this->assertEquals(422, $response['httpCode'], 'Invalid schedule should return 422');
 
-        $this->assertStringContainsString('Schedule not found', $response['data']['error']);
+        $this->assertStringContainsString('Sub-schedule not found', $response['data']['error']);
     }
 
     /**
