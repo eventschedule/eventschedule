@@ -182,36 +182,36 @@ class Role extends Model implements MustVerifyEmail
                 $model->translation_attempts = 0;
             }
 
-            if ($model->isDirty('name')) {
+            if ($model->isDirty('name') && ! $model->isDirty('name_en')) {
                 $model->name_en = null;
             }
 
-            if ($model->isDirty('description')) {
+            if ($model->isDirty('description') && ! $model->isDirty('description_en')) {
                 $model->description_en = null;
                 $model->description_html_en = null;
             }
 
-            if ($model->isDirty('short_description')) {
+            if ($model->isDirty('short_description') && ! $model->isDirty('short_description_en')) {
                 $model->short_description_en = null;
             }
 
-            if ($model->isDirty('address1')) {
+            if ($model->isDirty('address1') && ! $model->isDirty('address1_en')) {
                 $model->address1_en = null;
             }
 
-            if ($model->isDirty('address2')) {
+            if ($model->isDirty('address2') && ! $model->isDirty('address2_en')) {
                 $model->address2_en = null;
             }
 
-            if ($model->isDirty('city')) {
+            if ($model->isDirty('city') && ! $model->isDirty('city_en')) {
                 $model->city_en = null;
             }
 
-            if ($model->isDirty('state')) {
+            if ($model->isDirty('state') && ! $model->isDirty('state_en')) {
                 $model->state_en = null;
             }
 
-            if ($model->isDirty('request_terms')) {
+            if ($model->isDirty('request_terms') && ! $model->isDirty('request_terms_en')) {
                 $model->request_terms_en = null;
             }
         });

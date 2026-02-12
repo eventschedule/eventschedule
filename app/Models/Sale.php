@@ -91,8 +91,8 @@ class Sale extends Model
             $data->secret = $this->secret;
         }
 
-        $data->created_at = $this->created_at ? $this->created_at->toISOString() : null;
-        $data->updated_at = $this->updated_at ? $this->updated_at->toISOString() : null;
+        $data->created_at = $this->created_at ? $this->created_at->toIso8601String() : null;
+        $data->updated_at = $this->updated_at ? $this->updated_at->toIso8601String() : null;
 
         // Include tickets
         $data->tickets = $this->saleTickets->map(function ($saleTicket) {

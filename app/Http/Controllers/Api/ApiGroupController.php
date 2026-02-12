@@ -15,6 +15,7 @@ class ApiGroupController extends Controller
     {
         return auth()->user()->roles()
             ->where('subdomain', $subdomain)
+            ->where('is_deleted', false)
             ->wherePivotIn('level', ['owner', 'admin'])
             ->first();
     }

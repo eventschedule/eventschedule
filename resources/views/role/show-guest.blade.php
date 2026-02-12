@@ -57,7 +57,7 @@
             />
             @endif
           </div>
-          <div id="schedule-header" class="px-6 lg:px-16 pb-4 relative z-10 {{ $isRtl ? 'rtl' : '' }}">
+          <div id="schedule-header" class="px-6 lg:px-16 pb-1 md:pb-4 relative z-10 {{ $isRtl ? 'rtl' : '' }}">
             @if ($role->profile_image_url)
             <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] mx-auto {{ $isRtl ? 'sm:mr-0 sm:ml-auto' : 'sm:mx-0 sm:-ml-2' }} mb-3 sm:mb-6 bg-white dark:bg-gray-900 flex items-center justify-center">
               <img

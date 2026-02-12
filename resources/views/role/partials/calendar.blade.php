@@ -2,6 +2,7 @@
 <div class="flex h-full flex-col" id="calendar-app">
 @php
     $isAdminRoute = $route == 'admin';
+    $stickyBleedClass = ($route === 'guest' && !(isset($embed) && $embed)) ? '-mx-5 px-5' : '-mx-4 px-4';
     $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek(Carbon\Carbon::SUNDAY);
     $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek(Carbon\Carbon::SATURDAY);
     $currentDate = $startOfMonth->copy();
@@ -246,11 +247,11 @@
             @endif
 
             {{-- Mobile: Filters + Add Event buttons side-by-side --}}
-            <div class="md:hidden flex flex-row gap-2 w-full">
+            <div class="md:hidden flex flex-row gap-2 w-full mb-3">
                 {{-- Mobile Filters Button (always shown when filters exist) --}}
                 <template v-if="dynamicFilterCount > 0">
                     <button @click="showFiltersDrawer = true"
-                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5
+                            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5
                                    border border-gray-300 dark:border-gray-600 rounded-md
                                    bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
                                    text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
@@ -467,7 +468,7 @@
                 <div id="mobileEventsList" class="space-y-6">
                     <template v-for="(group, groupIndex) in eventsGroupedByDate" :key="'date-' + group.date">
                         {{-- Date Header --}}
-                        <div class="sticky top-0 z-10 -mx-4 px-4 {{ (isset($force_mobile) && $force_mobile) ? 'bg-[#F5F9FE] dark:bg-gray-800' : 'bg-white dark:bg-gray-900' }}"
+                        <div class="sticky top-0 z-10 {{ $stickyBleedClass }} {{ (isset($force_mobile) && $force_mobile) ? 'bg-[#F5F9FE] dark:bg-gray-800' : 'bg-white dark:bg-gray-900' }}"
                             :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
                             <div class="px-4 pb-5 pt-3 flex items-center gap-4">
                                 <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
@@ -1059,7 +1060,7 @@
         {{-- List View Skeleton (Mobile) --}}
         <div v-if="currentView === 'list' && isLoadingEvents" class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }} animate-pulse">
             {{-- Date Header Skeleton --}}
-            <div class="sticky top-0 z-10 -mx-4 px-4 bg-white dark:bg-gray-800">
+            <div class="sticky top-0 z-10 {{ $stickyBleedClass }} bg-white dark:bg-gray-800">
                 <div class="px-4 pb-5 pt-3 flex items-center gap-4">
                     <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
                     <div class="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
@@ -1110,7 +1111,7 @@
                         <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                     </div>
                     {{-- Date Header --}}
-                    <div class="sticky top-0 z-10 -mx-4 px-4 bg-white dark:bg-gray-800">
+                    <div class="sticky top-0 z-10 {{ $stickyBleedClass }} bg-white dark:bg-gray-800">
                         <div class="px-4 pb-5 pt-3 flex items-center gap-4">
                             <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
                             <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></div>
