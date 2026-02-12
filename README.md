@@ -79,6 +79,7 @@
 - 🎨 **Profile Themes:** Customize header images, background gradients, and fonts.
 
 ### Developer Tools
+- 🤖 **AI Agent Support:** Manage events programmatically with [AI agent workflows](https://eventschedule.com/.well-known/agents.json), an [OpenAPI 3.0 spec](https://eventschedule.com/api/openapi.json), and [llms.txt](https://eventschedule.com/llms.txt) for seamless integration with AI agents and developer tools.
 - 🔌 **REST API:** Access and manage your events programmatically through a REST API.
 - 🚀 **Automatic App Updates:** Keep the platform up to date effortlessly with one-click automatic updates.
 

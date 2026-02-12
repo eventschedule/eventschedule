@@ -90,7 +90,7 @@ class ApiScheduleController extends Controller
                 'name' => 'required|string|max:255',
                 'type' => 'required|string|in:venue,talent,curator',
                 'email' => 'nullable|email|max:255',
-                'description' => 'nullable|string',
+                'description' => 'nullable|string|max:10000',
                 'short_description' => 'nullable|string|max:200',
                 'timezone' => 'nullable|string|max:100',
                 'language_code' => 'nullable|string|in:'.implode(',', config('app.supported_languages', ['en'])),
@@ -110,7 +110,7 @@ class ApiScheduleController extends Controller
 
         $user = auth()->user();
 
-        if ($user->roles()->where('is_deleted', false)->count() >= 100) {
+        if (config('app.hosted') && $user->roles()->where('is_deleted', false)->count() >= 100) {
             return response()->json(['error' => 'Maximum number of schedules reached'], 422);
         }
 
@@ -179,7 +179,7 @@ class ApiScheduleController extends Controller
             $request->validate([
                 'name' => 'sometimes|required|string|max:255',
                 'email' => 'nullable|email|max:255',
-                'description' => 'nullable|string',
+                'description' => 'nullable|string|max:10000',
                 'short_description' => 'nullable|string|max:200',
                 'timezone' => 'nullable|string|max:100',
                 'language_code' => 'nullable|string|in:'.implode(',', config('app.supported_languages', ['en'])),

@@ -507,6 +507,8 @@ class AdminController extends Controller
 
         // Recent sales for detailed table
         $recentSales = Sale::with('event:id,name')
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
             ->orderByDesc('created_at')
             ->limit(50)
             ->get();
@@ -549,6 +551,7 @@ class AdminController extends Controller
 
         // Traffic & Analytics
         $totalViews = AnalyticsDaily::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->whereDoesntHave('role', fn ($q) => $q->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)->orWhere('subdomain', 'like', 'demo-%'))
             ->selectRaw('SUM(desktop_views) as desktop, SUM(mobile_views) as mobile, SUM(tablet_views) as tablet, SUM(unknown_views) as unknown')
             ->first();
 
@@ -558,6 +561,7 @@ class AdminController extends Controller
         $totalPageViews = $desktopViews + $mobileViews + $tabletViews + ($totalViews->unknown ?? 0);
 
         $trafficSources = AnalyticsReferrersDaily::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->whereDoesntHave('role', fn ($q) => $q->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)->orWhere('subdomain', 'like', 'demo-%'))
             ->selectRaw('source, SUM(views) as views')
             ->groupBy('source')
             ->pluck('views', 'source')
@@ -726,6 +730,11 @@ class AdminController extends Controller
         // Top roles by usage
         $topRoles = UsageDaily::inDateRange($startDate, $endDate)
             ->where('role_id', '>', 0)
+            ->whereNotIn('role_id', function ($q) {
+                $q->select('id')->from('roles')
+                    ->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
+                    ->orWhere('subdomain', 'like', 'demo-%');
+            })
             ->select('role_id', DB::raw('SUM(`count`) as total'))
             ->groupBy('role_id')
             ->orderByDesc('total')
@@ -797,6 +806,8 @@ class AdminController extends Controller
                     ->orWhereNull('state_en')
                     ->orWhereNull('request_terms_en');
             })
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
             ->orderByDesc('translation_attempts')
             ->limit(20)
             ->get(['id', 'name', 'subdomain', 'translation_attempts', 'last_translated_at', 'language_code', 'description', 'name_en', 'description_en', 'address1_en', 'city_en', 'state_en', 'request_terms_en']);
@@ -807,6 +818,7 @@ class AdminController extends Controller
                 $q->whereNull('name_en')
                     ->orWhereNull('description_en');
             })
+            ->whereDoesntHave('roles', fn ($q) => $q->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)->orWhere('subdomain', 'like', 'demo-%'))
             ->orderByDesc('translation_attempts')
             ->limit(20)
             ->get(['id', 'name', 'description', 'translation_attempts', 'last_translated_at', 'name_en', 'description_en']);
@@ -817,6 +829,7 @@ class AdminController extends Controller
                 $q->whereNull('name_en')
                     ->orWhereNull('description_en');
             })
+            ->whereHas('event', fn ($q) => $q->whereDoesntHave('roles', fn ($r) => $r->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)->orWhere('subdomain', 'like', 'demo-%')))
             ->orderByDesc('translation_attempts')
             ->limit(20)
             ->get(['id', 'name', 'description', 'event_id', 'translation_attempts', 'last_translated_at', 'name_en', 'description_en']);
@@ -827,6 +840,7 @@ class AdminController extends Controller
                 $q->whereNull('name_translated')
                     ->orWhereNull('description_translated');
             })
+            ->whereHas('role', fn ($q) => $q->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)->where('subdomain', 'not like', 'demo-%'))
             ->orderByDesc('translation_attempts')
             ->limit(20)
             ->get(['id', 'event_id', 'role_id', 'translation_attempts', 'last_translated_at', 'name_translated', 'description_translated']);
