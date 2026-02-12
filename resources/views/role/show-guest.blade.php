@@ -526,7 +526,7 @@
         @if(!$event)
         <button id="hero-filters-btn-mobile"
                 data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
-                class="md:hidden my-3 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5
+                class="md:hidden mt-3 mb-3 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5
                        border border-gray-300 dark:border-gray-600 rounded-md
                        bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
                        text-base font-semibold {{ $isRtl ? 'rtl' : '' }}"
@@ -649,7 +649,7 @@
       </style>
 
       <div
-        class="calendar-panel-border mt-6 mb-6 px-0 md:px-6 lg:px-16 pt-0 md:pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
+        class="calendar-panel-border mt-2 md:mt-6 mb-6 px-0 md:px-6 lg:px-16 pt-0 md:pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
         id="calendar-panel-wrapper"
         data-view-width
         style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
