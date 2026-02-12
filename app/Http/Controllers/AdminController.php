@@ -69,8 +69,6 @@ class AdminController extends Controller
         }
 
         $request->session()->put('admin_password_confirmed_at', time());
-        $request->session()->put('admin_ip', $request->ip());
-        $request->session()->put('admin_user_agent', (string) $request->userAgent());
         $request->session()->regenerate();
 
         AuditService::log(

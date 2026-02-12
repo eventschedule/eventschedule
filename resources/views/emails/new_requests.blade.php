@@ -15,10 +15,7 @@
 
         <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
             <p style="margin: 0; font-size: 18px; color: #333;">
-                <strong>{{ $requestCount }}</strong> pending {{ Str::plural('request', $requestCount) }}
-            </p>
-            <p style="margin: 10px 0 0 0; color: #666;">
-                for <strong>{{ $role->name }}</strong>
+                <strong>{{ $requestCount }}</strong> pending {{ Str::plural('request', $requestCount) }} for <strong>{{ $role->name }}</strong>
             </p>
         </div>
 
