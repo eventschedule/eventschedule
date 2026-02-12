@@ -40,10 +40,6 @@
                     "type": "string",
                     "format": "email",
                     "description": "Email address to send the verification code to"
-                  },
-                  "website": {
-                    "type": "string",
-                    "description": "Honeypot field. Must be left empty or omitted."
                   }
                 }
               }
@@ -150,10 +146,6 @@
                     "type": "string",
                     "description": "Preferred language code",
                     "enum": ["en", "es", "de", "fr", "it", "pt", "he", "nl", "ar", "et"]
-                  },
-                  "website": {
-                    "type": "string",
-                    "description": "Honeypot field. Must be left empty or omitted."
                   }
                 }
               }
@@ -243,7 +235,7 @@
         "operationId": "login",
         "tags": ["Authentication"],
         "summary": "Login to an existing account",
-        "description": "Authenticates with email and password, returning a new API key. Login generates a new API key each time, replacing any existing key. Store the key securely. Accounts with two-factor authentication enabled must generate an API key from the web UI instead. Rate limited to 5 attempts per IP per 15 minutes.",
+        "description": "Authenticates with email and password, returning a new API key. If an active API key already exists, returns a 409 error - disable and re-enable API access in account settings to generate a new key. Store the key securely. Accounts with two-factor authentication enabled must generate an API key from the web UI instead. Rate limited to 5 attempts per IP per 15 minutes.",
         "security": [],
         "requestBody": {
           "required": true,
@@ -314,6 +306,16 @@
           },
           "401": {
             "description": "Invalid email or password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "An active API key already exists",
             "content": {
               "application/json": {
                 "schema": {

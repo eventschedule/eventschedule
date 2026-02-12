@@ -28,6 +28,10 @@ class ApiGroupController extends Controller
             return response()->json(['error' => 'Schedule not found'], 404);
         }
 
+        if (! $role->isPro()) {
+            return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
+        }
+
         $groups = $role->groups->map(function ($group) {
             return [
                 'id' => UrlUtils::encodeId($group->id),

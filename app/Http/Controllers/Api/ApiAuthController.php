@@ -227,7 +227,16 @@ class ApiAuthController extends Controller
             return response()->json(['error' => 'This account has two-factor authentication enabled. Please generate an API key from the web UI.'], 403);
         }
 
-        // Generate new API key (replaces any existing key)
+        // Check if user already has a valid API key
+        if ($user->api_key_hash && $user->api_key_expires_at && now()->lessThan($user->api_key_expires_at)) {
+            Cache::forget($loginRateKey);
+
+            return response()->json([
+                'error' => 'An active API key already exists. To generate a new key, disable and re-enable API access in your account settings.',
+            ], 409);
+        }
+
+        // Generate new API key
         $plaintextKey = bin2hex(random_bytes(16));
         $user->api_key = substr(hash('sha256', $plaintextKey), 0, 8);
         $user->api_key_hash = Hash::make($plaintextKey);
