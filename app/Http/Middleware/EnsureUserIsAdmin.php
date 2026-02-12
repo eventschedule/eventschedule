@@ -28,7 +28,7 @@ class EnsureUserIsAdmin
         }
 
         $session = $request->session();
-        $currentIp = $request->ip();
+        $currentIp = $this->getClientIp($request);
         $currentUserAgent = (string) $request->userAgent();
 
         // Check 2: IP + User Agent binding - if either doesn't match, force re-auth
@@ -81,5 +81,10 @@ class EnsureUserIsAdmin
         }
 
         return $next($request);
+    }
+
+    private function getClientIp(Request $request): string
+    {
+        return $request->header('CF-Connecting-IP') ?? $request->ip();
     }
 }
