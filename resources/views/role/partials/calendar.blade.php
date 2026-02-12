@@ -246,7 +246,8 @@
                 </div>
             @endif
 
-            {{-- Mobile: Filters + Add Event buttons side-by-side --}}
+            {{-- Mobile: Filters + Add Event buttons side-by-side (not shown on guest route - hero version used instead) --}}
+            @if ($route != 'guest')
             <div class="md:hidden flex flex-row gap-2 w-full mb-3">
                 {{-- Mobile Filters Button (always shown when filters exist) --}}
                 <template v-if="dynamicFilterCount > 0">
@@ -275,6 +276,7 @@
                     </x-brand-link>
                 @endif
             </div>
+            @endif
 
             {{-- Desktop: Filters Button with label - AP only --}}
             @if ($route == 'admin')
@@ -2689,20 +2691,25 @@ window.calendarVueApp = calendarAppInstance;
 function updateHeroFiltersButton() {
     const btn = document.getElementById('hero-filters-btn');
     const badge = document.getElementById('hero-filters-badge');
-    if (btn && window.calendarVueApp) {
+    const btnMobile = document.getElementById('hero-filters-btn-mobile');
+    const badgeMobile = document.getElementById('hero-filters-badge-mobile');
+    if (window.calendarVueApp) {
         const showBtn = window.calendarVueApp.dynamicFilterCount > 0;
-        // Show button only on desktop (md+) when there are filters
-        if (showBtn) {
-            btn.classList.remove('hidden');
-            btn.classList.add('md:flex');
-            btn.style.display = ''; // Let CSS classes control display
-        } else {
-            btn.classList.add('hidden');
-            btn.classList.remove('md:flex');
-            btn.style.display = 'none';
+        const count = window.calendarVueApp.activeFilterCount;
+
+        // Desktop hero button
+        if (btn) {
+            if (showBtn) {
+                btn.classList.remove('hidden');
+                btn.classList.add('md:flex');
+                btn.style.display = ''; // Let CSS classes control display
+            } else {
+                btn.classList.add('hidden');
+                btn.classList.remove('md:flex');
+                btn.style.display = 'none';
+            }
         }
         if (badge) {
-            const count = window.calendarVueApp.activeFilterCount;
             if (count > 0) {
                 badge.textContent = count;
                 badge.classList.remove('hidden');
@@ -2710,6 +2717,25 @@ function updateHeroFiltersButton() {
             } else {
                 badge.classList.add('hidden');
                 badge.classList.remove('flex');
+            }
+        }
+
+        // Mobile hero button
+        if (btnMobile) {
+            if (showBtn) {
+                btnMobile.style.display = ''; // Let CSS classes control display (md:hidden)
+            } else {
+                btnMobile.style.display = 'none';
+            }
+        }
+        if (badgeMobile) {
+            if (count > 0) {
+                badgeMobile.textContent = count;
+                badgeMobile.classList.remove('hidden');
+                badgeMobile.classList.add('inline-flex');
+            } else {
+                badgeMobile.classList.add('hidden');
+                badgeMobile.classList.remove('inline-flex');
             }
         }
     }

@@ -1038,20 +1038,20 @@
                                     </svg>
                                 </button>
                             </div>
+                            @if ($role->isCurator() || !($event->venue && $event->venue->isClaimed() && $event->role() && $event->role()->isClaimed()))
                             <div id="event-slug-edit" class="hidden">
                                 <x-input-label for="event_slug" :value="__('messages.slug')" />
                                 <x-text-input id="event_slug" name="slug" type="text" class="mt-1 block w-full"
                                     :value="old('slug', $event->slug)" />
                                 <x-input-error class="mt-2" :messages="$errors->get('slug')" />
                             </div>
-                            <div class="flex gap-4 items-center">
-                                <button type="button" id="edit-slug-btn" class="text-sm text-[#4E81FA] hover:text-blue-700">
-                                    {{ __('messages.edit') }}
-                                </button>
-                                <button type="button" id="cancel-slug-btn" class="hidden text-sm text-[#4E81FA] hover:text-blue-700">
-                                    {{ __('messages.cancel') }}
-                                </button>
-                            </div>
+                            <x-secondary-button type="button" id="edit-slug-btn" class="mt-3">
+                                {{ __('messages.edit') }}
+                            </x-secondary-button>
+                            <x-secondary-button type="button" id="cancel-slug-btn" class="hidden mt-3">
+                                {{ __('messages.cancel') }}
+                            </x-secondary-button>
+                            @endif
                             @endif
                         </div>
 
@@ -2777,7 +2777,7 @@
         memberEmail: "",
         memberName: "",
         memberYoutubeUrl: "",
-        showMemberTypeRadio: false,
+        showMemberTypeRadio: @json(empty($selectedMembers)),
         showVenueAddressFields: false,
         isInPerson: false,
         isOnline: false,
