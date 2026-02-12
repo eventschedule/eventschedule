@@ -111,6 +111,7 @@ return [
     'accept_requests' => 'Accetta Richieste',
     'accept_requests_help' => 'Allow others to submit events to your schedule.',
     'direct_registration' => 'Collegamento Diretto alla Registrazione',
+    'first_day_of_week' => 'Primo Giorno della Settimana',
     'direct_registration_help' => 'Quando abilitato, cliccando sugli eventi nel calendario o nelle grafiche degli eventi si aprirà l\'URL di registrazione (per gli eventi che ne hanno uno) invece della pagina dei dettagli dell\'evento.',
     'request_terms' => 'Termini di Richiesta',
     'enter_request_terms' => 'Inserisci i termini e le condizioni per le richieste di eventi...',

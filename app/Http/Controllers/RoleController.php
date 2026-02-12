@@ -796,7 +796,7 @@ class RoleController extends Controller
             $pastEvents = $pastEvents->take(50);
         }
 
-        return $this->buildCalendarResponse($events, $pastEvents, $hasMorePastEvents, $role, $subdomain, (int) $month, (int) $year, $timezone);
+        return $this->buildCalendarResponse($events, $pastEvents, $hasMorePastEvents, $role, $subdomain, (int) $month, (int) $year, $timezone, $role->first_day_of_week ?? 0);
     }
 
     public function adminCalendarEvents(Request $request, $subdomain): JsonResponse
@@ -849,7 +849,7 @@ class RoleController extends Controller
                 ->get();
         }
 
-        return $this->buildCalendarResponse($events, collect(), false, $role, $subdomain, (int) $month, (int) $year, $timezone);
+        return $this->buildCalendarResponse($events, collect(), false, $role, $subdomain, (int) $month, (int) $year, $timezone, $role->first_day_of_week ?? 0);
     }
 
     public function viewAdmin(Request $request, $subdomain, $tab = 'schedule')

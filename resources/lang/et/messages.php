@@ -114,6 +114,7 @@ return [
     'accept_requests' => 'Nõustuge taotlustega',
     'accept_requests_help' => 'Allow others to submit events to your schedule.',
     'direct_registration' => 'Otsene link registreerimisele',
+    'first_day_of_week' => 'Nädala Esimene Päev',
     'direct_registration_help' => 'Kui see on lubatud, avatakse kalendris sündmustele klõpsates või sündmuste graafikates registreerimise URL (sündmuste puhul, millel see on) sündmuse üksikasjade lehe asemel.',
     'request_terms' => 'Tingimused taotluseks',
     'enter_request_terms' => 'Sisestage sündmusetaotluste nõuded ja tingimused...',

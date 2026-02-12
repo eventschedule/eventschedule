@@ -3,8 +3,10 @@
 @php
     $isAdminRoute = $route == 'admin';
     $stickyBleedClass = ($route === 'guest' && !(isset($embed) && $embed)) ? '-mx-5 px-5' : '-mx-4 px-4';
-    $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek(Carbon\Carbon::SUNDAY);
-    $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek(Carbon\Carbon::SATURDAY);
+    $firstDay = $role->first_day_of_week ?? 0;
+    $lastDay = ($firstDay + 6) % 7;
+    $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek($firstDay);
+    $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek($lastDay);
     $currentDate = $startOfMonth->copy();
     $totalDays = $endOfMonth->diffInDays($startOfMonth) + 1;
     $totalWeeks = ceil($totalDays / 7);
@@ -357,7 +359,11 @@
         <div v-show="!isLoadingEvents" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
             <div
                 class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-center text-xs font-semibold leading-6 text-gray-700 dark:text-gray-300">
-                @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $day)
+                @php
+                    $dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+                    $dayKeys = array_merge(array_slice($dayKeys, $firstDay), array_slice($dayKeys, 0, $firstDay));
+                @endphp
+                @foreach ($dayKeys as $day)
                 <div class="flex justify-center bg-white dark:bg-gray-900 py-2">
                     {{ __('messages.' . $day) }}
                 </div>
