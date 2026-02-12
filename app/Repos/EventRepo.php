@@ -328,6 +328,15 @@ class EventRepo
 
         $event->fill($request->all());
 
+        // Handle slug update for existing events
+        if (! $isNewEvent) {
+            if ($request->filled('slug')) {
+                $event->slug = Str::slug($request->slug) ?: $event->getOriginal('slug');
+            } else {
+                $event->slug = $event->getOriginal('slug');
+            }
+        }
+
         // Generate slug after event data is populated (needs starts_at for date variables)
         if ($isNewEvent) {
             $event->slug = SlugPatternUtils::generateSlug(
