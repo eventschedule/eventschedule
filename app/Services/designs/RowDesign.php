@@ -674,6 +674,8 @@ class RowDesign extends AbstractEventDesign
 
                 // Event variables
                 '{event_name}' => $event->translatedName() ?? $event->name ?? '',
+                '{short_description}' => $event->translatedShortDescription() ?? '',
+                '{description}' => strip_tags($event->translatedDescription() ?? ''),
 
                 // Venue variables
                 '{venue}' => $event->venue ? ($event->venue->translatedName() ?? '') : '',

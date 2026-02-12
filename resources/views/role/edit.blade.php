@@ -821,7 +821,7 @@
 
 
                         <div class="mb-6">
-                            <x-input-label for="name" :value="__('messages.name') . ' *'" />
+                            <x-input-label for="name" :value="__('messages.schedule_name') . ' *'" />
                             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
                                 :value="old('name', $role->name)" required autofocus data-action="update-preview-on-input" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
@@ -833,6 +833,22 @@
                             <x-text-input id="name_en" name="name_en" type="text" class="mt-1 block w-full"
                                 :value="old('name_en', $role->name_en)" />
                             <x-input-error class="mt-2" :messages="$errors->get('name_en')" />
+                        </div>
+                        @endif
+
+                        <div class="mb-6">
+                            <x-input-label for="short_description" :value="__('messages.short_description')" />
+                            <x-text-input id="short_description" name="short_description" type="text" class="mt-1 block w-full"
+                                :value="old('short_description', $role->short_description)" maxlength="200" />
+                            <x-input-error class="mt-2" :messages="$errors->get('short_description')" />
+                        </div>
+
+                        @if ($role->short_description_en)
+                        <div class="mb-6">
+                            <x-input-label for="short_description_en" :value="__('messages.short_description') . ' (' . __('messages.english') . ')'" />
+                            <x-text-input id="short_description_en" name="short_description_en" type="text" class="mt-1 block w-full"
+                                :value="old('short_description_en', $role->short_description_en)" maxlength="200" />
+                            <x-input-error class="mt-2" :messages="$errors->get('short_description_en')" />
                         </div>
                         @endif
 

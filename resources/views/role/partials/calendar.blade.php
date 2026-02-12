@@ -1,5 +1,5 @@
 <style>[v-cloak] { display: none !important; }</style>
-<div class="flex h-full flex-col pt-1" id="calendar-app">
+<div class="flex h-full flex-col" id="calendar-app">
 @php
     $isAdminRoute = $route == 'admin';
     $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek(Carbon\Carbon::SUNDAY);
@@ -155,7 +155,13 @@
 <div>
 
 @if (! request()->graphic)
-<header class="{{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}" :class="currentView === 'list' ? (hasDesktopFilters ? 'pt-2 pb-4' : 'pt-0 pb-0') : 'pt-2 pb-4'">
+<header class="{{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}"
+    @if ($route == 'guest')
+        :class="currentView === 'list' ? 'pt-0 pb-0' : 'pt-2 pb-4'"
+    @else
+        :class="currentView === 'list' ? (hasDesktopFilters ? 'pt-2 pb-4' : 'pt-0 pb-0') : 'pt-2 pb-4'"
+    @endif
+>
     {{-- Main container: Stacks content on mobile, aligns in a row on desktop. --}}
     <div class="flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-4">
 
@@ -2034,12 +2040,14 @@ const calendarApp = createApp({
                     wrapper.classList.remove('calendar-panel-border');
                     wrapper.style.paddingLeft = '0';
                     wrapper.style.paddingRight = '0';
+                    wrapper.style.paddingTop = '0';
                     wrapper.style.paddingBottom = '0';
                 } else {
                     wrapper.classList.remove('calendar-panel-border-transparent');
                     wrapper.classList.add('calendar-panel-border');
                     wrapper.style.paddingLeft = '';
                     wrapper.style.paddingRight = '';
+                    wrapper.style.paddingTop = '';
                     wrapper.style.paddingBottom = '';
                 }
             }

@@ -119,6 +119,11 @@ class Translate extends Command
                             ->whereNull('state_en');
                     })
                     ->orWhere(function ($q) {
+                        $q->whereNotNull('short_description')
+                            ->where('short_description', '!=', '')
+                            ->whereNull('short_description_en');
+                    })
+                    ->orWhere(function ($q) {
                         $q->whereNotNull('request_terms')
                             ->where('request_terms', '!=', '')
                             ->whereNull('request_terms_en');
@@ -193,6 +198,13 @@ class Translate extends Command
                 $role->description_en = GeminiUtils::translate($role->description, $role->language_code, 'en', $glossary);
                 if ($debug) {
                     $this->info("Translated description from {$role->language_code} to en: '{$role->description}' → '{$role->description_en}'");
+                }
+            }
+
+            if ($role->short_description && ! $role->short_description_en) {
+                $role->short_description_en = GeminiUtils::translate($role->short_description, $role->language_code, 'en', $glossary);
+                if ($debug) {
+                    $this->info("Translated short_description from {$role->language_code} to en: '{$role->short_description}' → '{$role->short_description_en}'");
                 }
             }
 

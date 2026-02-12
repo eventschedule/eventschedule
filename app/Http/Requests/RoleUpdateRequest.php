@@ -47,6 +47,7 @@ class RoleUpdateRequest extends FormRequest
             'event_custom_fields.*.options' => ['nullable', 'string', 'max:500'],
             'event_custom_fields.*.required' => ['nullable'],
             'event_custom_fields.*.ai_prompt' => ['nullable', 'string', 'max:500'],
+            'short_description' => ['nullable', 'string', 'max:200'],
             'slug_pattern' => ['nullable', 'string', 'max:500'],
             'event_layout' => ['nullable', 'string', 'in:calendar,list'],
             'direct_registration' => ['nullable', 'boolean'],
