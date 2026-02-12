@@ -662,10 +662,14 @@ class Role extends Model implements MustVerifyEmail
         }
     }
 
-    public function getGuestUrl()
+    public function getGuestUrl($useCustomDomain = false)
     {
         if (! $this->isClaimed()) {
             return '';
+        }
+
+        if ($useCustomDomain && $this->custom_domain) {
+            return $this->custom_domain;
         }
 
         return route('role.view_guest', ['subdomain' => $this->subdomain]);
