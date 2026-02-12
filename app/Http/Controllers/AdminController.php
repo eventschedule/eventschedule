@@ -42,7 +42,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Confirm the admin's password and bind session to IP + User Agent.
+     * Confirm the admin's password and bind session to User Agent.
      */
     public function confirmPassword(Request $request): RedirectResponse
     {
