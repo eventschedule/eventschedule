@@ -13,7 +13,7 @@ class EnsureUserIsAdmin
      * Handle an incoming request.
      *
      * Ensures the authenticated user has admin privileges,
-     * binds admin sessions to IP + User Agent, and requires
+     * binds admin sessions to User Agent, and requires
      * password confirmation before accessing admin pages.
      */
     public function handle(Request $request, Closure $next): Response
@@ -28,25 +28,21 @@ class EnsureUserIsAdmin
         }
 
         $session = $request->session();
-        $currentIp = $this->getClientIp($request);
         $currentUserAgent = (string) $request->userAgent();
 
-        // Check 2: IP + User Agent binding - if either doesn't match, force re-auth
-        $storedIp = $session->get('admin_ip');
+        // Check 2: User Agent binding - if it doesn't match, force re-auth
         $storedUserAgent = $session->get('admin_user_agent');
-        if ($storedIp !== null && ($storedIp !== $currentIp || $storedUserAgent !== $currentUserAgent)) {
+        if ($storedUserAgent !== null && $storedUserAgent !== $currentUserAgent) {
             AuditService::log(
                 AuditService::ADMIN_SESSION_CHANGED,
                 $request->user()->id,
                 null, null, null, null,
                 json_encode([
-                    'old_ip' => $storedIp,
-                    'new_ip' => $currentIp,
-                    'ip_changed' => $storedIp !== $currentIp,
-                    'ua_changed' => $storedUserAgent !== $currentUserAgent,
+                    'old_ua' => $storedUserAgent,
+                    'new_ua' => $currentUserAgent,
                 ])
             );
-            $session->forget(['admin_ip', 'admin_user_agent', 'admin_password_confirmed_at']);
+            $session->forget(['admin_user_agent', 'admin_password_confirmed_at']);
 
             if ($request->expectsJson()) {
                 return response()->json(['error' => __('messages.admin_session_changed')], 403);
@@ -74,17 +70,11 @@ class EnsureUserIsAdmin
             return redirect()->guest(route('admin.password.confirm.show'));
         }
 
-        // Store IP + UA on first confirmed admin access
-        if (! $session->has('admin_ip')) {
-            $session->put('admin_ip', $currentIp);
+        // Store UA on first confirmed admin access
+        if (! $session->has('admin_user_agent')) {
             $session->put('admin_user_agent', $currentUserAgent);
         }
 
         return $next($request);
-    }
-
-    private function getClientIp(Request $request): string
-    {
-        return $request->header('CF-Connecting-IP') ?? $request->ip();
     }
 }
