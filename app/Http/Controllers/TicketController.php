@@ -747,10 +747,12 @@ class TicketController extends Controller
             $role = $event->venue ?: $event->roles->first();
             $emailService = new EmailService;
 
-            $success = $emailService->sendTicketEmail($sale, $role, queue: false);
+            $result = $emailService->sendTicketEmail($sale, $role, queue: false);
 
-            if ($success) {
+            if ($result === true) {
                 return response()->json(['success' => true, 'message' => __('messages.email_sent_successfully')]);
+            } elseif ($result === EmailService::ERROR_NOT_CONFIGURED) {
+                return response()->json(['error' => __('messages.email_not_configured')], 422);
             } else {
                 return response()->json(['error' => __('messages.failed_to_send_email')], 500);
             }
