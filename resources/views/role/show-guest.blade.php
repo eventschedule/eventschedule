@@ -12,7 +12,7 @@
     $hasHeaderImage = ($role->header_image && $role->header_image !== 'none') || $role->header_image_url;
   @endphp
 
-  @if ($role->profile_image_url && !$hasHeaderImage && $role->language_code == 'en')
+  @if ($role->profile_image_url && !$hasHeaderImage)
   <div class="pt-8"></div>
   @endif
 
@@ -34,7 +34,7 @@
             <div class="absolute -top-40 bottom-0 left-1/2 -translate-x-1/2 w-screen bg-cover bg-no-repeat bg-top md:hidden -z-10"
                  style="background-image: url('{{ $mobileBannerUrl }}');"></div>
         @endif
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl mb-3 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} transition-[max-width] duration-300 ease-in-out mx-auto"
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl mb-0 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} transition-[max-width] duration-300 ease-in-out mx-auto"
           data-view-width
           style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
         >
@@ -59,7 +59,7 @@
           </div>
           <div id="schedule-header" class="px-6 lg:px-16 pb-4 relative z-10 {{ $isRtl ? 'rtl' : '' }}">
             @if ($role->profile_image_url)
-            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] {{ $isRtl ? '-mr-2 sm:ml-auto sm:mr-0' : '-ml-2' }} mb-3 sm:mb-6 bg-white dark:bg-gray-900 flex items-center justify-center">
+            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] mx-auto {{ $isRtl ? 'sm:mr-0 sm:ml-auto' : 'sm:mx-0 sm:-ml-2' }} mb-3 sm:mb-6 bg-white dark:bg-gray-900 flex items-center justify-center">
               <img
                 class="rounded-md w-[120px] h-[120px] object-cover"
                 src="{{ $role->profile_image_url }}"
@@ -81,6 +81,11 @@
                 <h1 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ $role->font_family }}', sans-serif;">
                   {!! str_replace(' , ', '<br>', e($role->translatedName())) !!}
                 </h1>
+                @if($role->translatedShortDescription())
+                <p class="text-sm text-[#33383C] dark:text-gray-300 mb-2">
+                  {{ $role->translatedShortDescription() }}
+                </p>
+                @endif
                 @if($role->isVenue())
                 <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($role->bestAddress()) }}"
                    target="_blank" rel="noopener noreferrer"
@@ -223,6 +228,11 @@
                   <h1 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ $role->font_family }}', sans-serif;">
                     {!! str_replace(' , ', '<br>', e($role->translatedName())) !!}
                   </h1>
+                  @if($role->translatedShortDescription())
+                  <p class="text-sm text-[#33383C] dark:text-gray-300 mb-2">
+                    {{ $role->translatedShortDescription() }}
+                  </p>
+                  @endif
                   @if($role->isVenue())
                   <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($role->bestAddress()) }}"
                      target="_blank" rel="noopener noreferrer"
@@ -590,7 +600,7 @@
           background: rgba(255,255,255,0.95) !important;
           backdrop-filter: blur(4px) !important;
           border-radius: 1rem !important;
-          margin-top: 1rem;
+          margin-top: 0.375rem;
         }
         .dark .calendar-panel-border {
           background: rgba(30,30,30,0.95) !important;
@@ -600,6 +610,7 @@
           border-radius: 0 !important;
           box-shadow: none !important;
           border: none !important;
+          margin-top: 0.375rem;
         }
         @media (max-width: 767px) {
           .calendar-panel-border {
