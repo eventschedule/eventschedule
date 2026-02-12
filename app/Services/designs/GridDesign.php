@@ -296,6 +296,25 @@ class GridDesign extends AbstractEventDesign
                 '{city}' => $event->venue ? ($event->venue->translatedCity() ?? '') : '',
             ];
 
+            // Add custom field replacements using stable indices
+            $customFieldValues = $event->custom_field_values ?? [];
+            $roleCustomFields = $this->role->event_custom_fields ?? [];
+            for ($i = 1; $i <= 8; $i++) {
+                $replacements['{custom_'.$i.'}'] = '';
+            }
+            $fallbackIndex = 1;
+            foreach ($roleCustomFields as $fieldKey => $fieldConfig) {
+                $index = $fieldConfig['index'] ?? $fallbackIndex;
+                $fallbackIndex++;
+                if ($index >= 1 && $index <= 8) {
+                    $value = $customFieldValues[$fieldKey] ?? '';
+                    if (($fieldConfig['type'] ?? '') === 'switch') {
+                        $value = ($value === '1' || $value === 1 || $value === true) ? __('messages.yes') : __('messages.no');
+                    }
+                    $replacements['{custom_'.$index.'}'] = $value;
+                }
+            }
+
             return str_replace(array_keys($replacements), array_values($replacements), $template);
         } catch (\Exception $e) {
             return $template;

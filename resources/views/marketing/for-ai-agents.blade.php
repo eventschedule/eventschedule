@@ -162,7 +162,7 @@
             </div>
         </div>
     </section>
-    {{-- Section 3: Features Bento Grid --}}
+    {{-- Section 2: Features Bento Grid --}}
     <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
@@ -380,7 +380,7 @@
         </div>
     </section>
 
-    {{-- Section 4: Built for every kind of integration --}}
+    {{-- Section 3: Built for every kind of integration --}}
     <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
@@ -480,7 +480,7 @@
         </div>
     </section>
 
-    {{-- Section 5: Quick Start --}}
+    {{-- Section 4: Quick Start --}}
     <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/5">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
@@ -523,7 +523,7 @@
         </div>
     </section>
 
-    {{-- Section 6: CTA --}}
+    {{-- Section 5: CTA --}}
     <section class="relative bg-white dark:bg-[#0a0a0f] py-24 overflow-hidden border-t border-cyan-200 dark:border-cyan-900/20">
         {{-- Mesh gradient background --}}
         <div class="absolute inset-0">
