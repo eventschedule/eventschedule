@@ -375,7 +375,7 @@ return [
     'all_schedules' => 'Todas as Agendas',
     'all_venues' => 'Todos os Locais',
     'all_shows' => 'Todos',
-    'filters' => 'Filtros',
+    'filters' => 'Filtrar eventos',
     'clear_filters' => 'Limpar filtros',
 
     // Categories

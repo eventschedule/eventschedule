@@ -575,7 +575,7 @@ return [
     'all_schedules' => 'Kõik ajakavad',
     'all_venues' => 'Kõik kohad',
     'all_shows' => 'Kõik',
-    'filters' => 'Filtrid',
+    'filters' => 'Filtreeri sündmusi',
     'clear_filters' => 'Tühjenda filtrid',
     'schedule_url' => 'Ajasta URL',
     'back_to_schedule' => 'Tagasi ajakava juurde',

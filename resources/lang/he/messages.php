@@ -601,7 +601,7 @@ return [
     'all_schedules' => 'כל לוחות הזמנים',
     'all_venues' => 'כל המקומות',
     'all_shows' => 'הכל',
-    'filters' => 'מסננים',
+    'filters' => 'סינון אירועים',
     'clear_filters' => 'נקה מסננים',
     'parties_&_festivals' => 'מסיבות ופסטיבלים',
     'concerts' => 'קונצרטים',

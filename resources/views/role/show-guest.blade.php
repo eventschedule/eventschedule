@@ -424,7 +424,7 @@
         @if(!$event)
         <button id="hero-filters-btn-mobile"
                 data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
-                class="md:hidden mt-3 mb-1 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5
+                class="md:hidden mt-2 mb-1 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5
                        border border-gray-300 dark:border-gray-600 rounded-md
                        bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
                        text-base font-semibold {{ $isRtl ? 'rtl' : '' }}"

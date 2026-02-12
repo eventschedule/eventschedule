@@ -528,7 +528,7 @@ return [
     'all_schedules' => 'Alle Zeitpläne',
     'all_venues' => 'Alle Veranstaltungsorte',
     'all_shows' => 'Alle',
-    'filters' => 'Filter',
+    'filters' => 'Veranstaltungen filtern',
     'clear_filters' => 'Filter löschen',
 
     // Categories

@@ -520,7 +520,7 @@ return [
     'all_schedules' => 'جميع الجداول',
     'all_venues' => 'جميع الأماكن',
     'all_shows' => 'الكل',
-    'filters' => 'الفلاتر',
+    'filters' => 'تصفية الأحداث',
     'clear_filters' => 'مسح الفلاتر',
 
     // Categories
