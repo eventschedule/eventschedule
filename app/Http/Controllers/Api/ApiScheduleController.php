@@ -74,6 +74,10 @@ class ApiScheduleController extends Controller
             return response()->json(['error' => 'Schedule not found'], 404);
         }
 
+        if (! $role->isPro()) {
+            return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
+        }
+
         return response()->json([
             'data' => $role->toApiData(),
         ], 200, [], JSON_PRETTY_PRINT);
@@ -116,6 +120,14 @@ class ApiScheduleController extends Controller
             'timezone', 'language_code', 'website', 'address1', 'city',
             'state', 'postal_code', 'country_code',
         ]));
+
+        if (! $role->timezone) {
+            $role->timezone = $user->timezone;
+        }
+        if (! $role->language_code) {
+            $role->language_code = $user->language_code ?? 'en';
+        }
+
         $role->subdomain = Role::generateSubdomain($request->name);
         $role->user_id = $user->id;
         $role->background_colors = ColorUtils::randomGradient();

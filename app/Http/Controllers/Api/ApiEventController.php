@@ -9,6 +9,7 @@ use App\Models\RoleUser;
 use App\Repos\EventRepo;
 use App\Services\AuditService;
 use App\Utils\UrlUtils;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -198,6 +199,13 @@ class ApiEventController extends Controller
             'members', 'schedule', 'tickets', 'event_parts',
         ]));
 
+        // Convert UTC starts_at to user's local timezone (saveEvent converts local back to UTC)
+        if ($request->has('starts_at')) {
+            $utcTime = Carbon::createFromFormat('Y-m-d H:i:s', $request->starts_at, 'UTC');
+            $localTime = $utcTime->setTimezone(auth()->user()->timezone)->format('Y-m-d H:i:s');
+            $request->merge(['starts_at' => $localTime]);
+        }
+
         // Convert days_of_week string to individual checkbox params for saveEvent()
         $this->convertDaysOfWeek($request);
 
@@ -329,6 +337,11 @@ class ApiEventController extends Controller
         // Preserve starts_at in user's local format if not being changed
         if (! $request->has('starts_at')) {
             $request->merge(['starts_at' => $event->localStartsAt(false)]);
+        } else {
+            // Convert UTC starts_at to user's local timezone (saveEvent converts local back to UTC)
+            $utcTime = Carbon::createFromFormat('Y-m-d H:i:s', $request->starts_at, 'UTC');
+            $localTime = $utcTime->setTimezone(auth()->user()->timezone)->format('Y-m-d H:i:s');
+            $request->merge(['starts_at' => $localTime]);
         }
 
         // Preserve tickets_enabled if not being changed

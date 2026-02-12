@@ -82,13 +82,11 @@ class NewsletterSegment extends Model
     protected function resolveManual(): Collection
     {
         return $this->segmentUsers()
-            ->with('user')
             ->get()
-            ->filter(fn ($su) => $su->user)
             ->map(fn ($su) => (object) [
                 'user_id' => $su->user_id,
-                'email' => strtolower($su->user->email),
-                'name' => $su->user->name,
+                'email' => strtolower($su->email),
+                'name' => $su->name,
             ]);
     }
 

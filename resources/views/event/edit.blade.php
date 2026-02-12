@@ -789,8 +789,19 @@
         }
     }
 
+    @php
+        $eventEditUrl = $event->exists ? $event->getGuestUrl($subdomain, false, true) : '';
+        if ($event->exists && $role->direct_registration && $event->registration_url) {
+            if (str_contains($eventEditUrl, '?')) {
+                $eventEditUrl = str_replace('?', '/?', $eventEditUrl);
+            } else {
+                $eventEditUrl .= '/';
+            }
+        }
+    @endphp
+
     function copyEventUrl(button) {
-        const url = '{{ $event->exists ? $event->getGuestUrl($subdomain, false, true) : "" }}';
+        const url = '{{ $eventEditUrl }}';
         navigator.clipboard.writeText(url).then(() => {
             const originalHTML = button.innerHTML;
             button.innerHTML = `
@@ -1029,8 +1040,8 @@
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                             @if ($event->exists)
                             <div id="event-url-display" class="text-sm text-gray-500 flex items-center gap-2">
-                                <x-link href="{{ $event->getGuestUrl($subdomain, false, true) }}" target="_blank">
-                                    {{ \App\Utils\UrlUtils::clean($event->getGuestUrl($subdomain, false, true)) }}
+                                <x-link href="{{ $eventEditUrl }}" target="_blank">
+                                    {{ \App\Utils\UrlUtils::clean($eventEditUrl) }}
                                 </x-link>
                                 <button type="button" id="copy-event-url-btn" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -1616,7 +1627,7 @@
                                         <x-primary-button id="add-member-btn" type="button" @click="addMember">
                                             {{ __('messages.done') }}
                                         </x-primary-button>
-                                        <x-secondary-button type="button" @click="cancelAddMember">
+                                        <x-secondary-button v-if="selectedMembers.length > 0" type="button" @click="cancelAddMember">
                                             {{ __('messages.cancel') }}
                                         </x-secondary-button>
                                     </div>
@@ -1624,7 +1635,7 @@
                                 </div>
 
                                 <div v-if="memberType === 'use_existing' && filteredMembers.length > 0" class="mt-4">
-                                    <x-secondary-button type="button" @click="cancelAddMember">
+                                    <x-secondary-button v-if="selectedMembers.length > 0" type="button" @click="cancelAddMember">
                                         {{ __('messages.cancel') }}
                                     </x-secondary-button>
                                 </div>

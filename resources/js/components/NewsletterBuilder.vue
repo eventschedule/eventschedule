@@ -31,7 +31,7 @@
 
                         <!-- Subject -->
                         <div>
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 px-5 py-4">{{ t.subject }}</h3>
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 px-5 py-4">{{ t.subject }} *</h3>
                             <div class="px-5 pb-5">
                                 <input id="subject" name="subject" type="text"
                                     class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"

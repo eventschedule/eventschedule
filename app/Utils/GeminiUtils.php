@@ -585,9 +585,6 @@ class GeminiUtils
             if (empty($data[$key]['event_address']) && ! empty($role->address1)) {
                 $data[$key]['event_address'] = $role->address1;
             }
-            if (empty($data[$key]['event_city']) && ! empty($role->city)) {
-                $data[$key]['event_city'] = $role->city;
-            }
             if (empty($data[$key]['event_country_code']) && ! empty($role->country_code)) {
                 $data[$key]['event_country_code'] = $role->country_code;
             }

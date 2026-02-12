@@ -6,7 +6,7 @@ return [
 
     'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE'],
 
-    'allowed_origins' => [env('APP_URL')],
+    'allowed_origins' => ['*'],
 
     'allowed_origins_patterns' => [],
 

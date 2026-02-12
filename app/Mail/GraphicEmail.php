@@ -63,9 +63,12 @@ class GraphicEmail extends Mailable
     public function content(): Content
     {
         return new Content(
+            view: 'emails.graphic_email',
             text: 'emails.graphic_email_text',
             with: [
+                'role' => $this->role,
                 'eventText' => $this->eventText,
+                'scheduleUrl' => $this->role->getGuestUrl(),
             ]
         );
     }
