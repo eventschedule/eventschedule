@@ -34,8 +34,33 @@ class ApiEventController extends Controller
             self::MAX_PER_PAGE
         );
 
+        try {
+            $request->validate([
+                'starts_after' => 'nullable|date_format:Y-m-d',
+                'starts_before' => 'nullable|date_format:Y-m-d',
+                'subdomain' => 'nullable|string',
+                'per_page' => 'nullable|integer|min:1|max:500',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
+
         $events = Event::with(['roles', 'tickets', 'parts'])
             ->where('user_id', auth()->id());
+
+        // Filter out non-Pro events
+        $events->whereHas('roles', function ($q) {
+            $q->where(function ($q2) {
+                $q2->where('plan_type', 'pro')
+                    ->where(function ($q3) {
+                        $q3->whereNull('plan_expires')
+                            ->orWhere('plan_expires', '>=', now()->format('Y-m-d'));
+                    });
+            });
+        });
 
         // Filter by schedule subdomain
         if ($request->has('subdomain')) {
@@ -274,10 +299,6 @@ class ApiEventController extends Controller
         }
 
         if (! $currentRole) {
-            $currentRole = $event->roles->first();
-        }
-
-        if (! $currentRole) {
             return response()->json(['error' => 'No schedule found for this event that you have access to'], 422);
         }
 
@@ -479,7 +500,7 @@ class ApiEventController extends Controller
             if ($group) {
                 $request->merge(['current_role_group_id' => UrlUtils::encodeId($group->id)]);
             } else {
-                return response()->json(['error' => 'Schedule not found: ' . $request->schedule], 422);
+                return response()->json(['error' => 'Schedule not found: '.$request->schedule], 422);
             }
         }
 
@@ -496,7 +517,7 @@ class ApiEventController extends Controller
             }
 
             if (! $request->has('category_id')) {
-                return response()->json(['error' => 'Category not found: ' . $request->category], 422);
+                return response()->json(['error' => 'Category not found: '.$request->category], 422);
             }
         }
 
@@ -516,6 +537,10 @@ class ApiEventController extends Controller
 
             if ($venue) {
                 $request->merge(['venue_id' => UrlUtils::encodeId($venue->id)]);
+            } else {
+                return response()->json([
+                    'error' => 'Venue not found: '.$request->venue_name,
+                ], 422);
             }
         }
 
@@ -544,7 +569,9 @@ class ApiEventController extends Controller
                 if ($talent) {
                     $processedMembers[UrlUtils::encodeId($talent->id)] = $memberData;
                 } else {
-                    $processedMembers[] = $memberData;
+                    return response()->json([
+                        'error' => 'Talent member not found: '.($memberData['name'] ?? $memberData['email'] ?? 'unknown'),
+                    ], 422);
                 }
             }
 

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Notifications\SignupVerificationCode;
 use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
+use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -182,7 +183,7 @@ class ApiAuthController extends Controller
             'data' => [
                 'api_key' => $plaintextKey,
                 'user' => [
-                    'id' => $user->id,
+                    'id' => UrlUtils::encodeId($user->id),
                     'name' => $user->name,
                     'email' => $user->email,
                 ],
@@ -241,7 +242,7 @@ class ApiAuthController extends Controller
             'data' => [
                 'api_key' => $plaintextKey,
                 'user' => [
-                    'id' => $user->id,
+                    'id' => UrlUtils::encodeId($user->id),
                     'name' => $user->name,
                     'email' => $user->email,
                 ],
