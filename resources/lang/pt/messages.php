@@ -117,6 +117,7 @@ return [
     'share_your_event_schedule_link' => 'Compartilhe seu link ou código QR de agenda de eventos para conseguir mais seguidores',
     'qr_code' => 'Código QR',
     'date' => 'Data',
+    'sent_date' => 'Data de envio',
     'social_links' => 'Links Sociais',
     'add' => 'Adicionar',
     'remove' => 'Remover',
@@ -1309,6 +1310,7 @@ return [
     'no_newsletters_description' => 'Crie uma newsletter para compartilhar novidades e eventos com seus assinantes.',
     'send_now' => 'Enviar agora',
     'send_at' => 'Enviar em',
+    'sent' => 'Enviado',
     'schedule_newsletter' => 'Agendar',
     'cancel_schedule' => 'Cancelar agendamento',
     'scheduled_for' => 'Agendada para',
@@ -1623,4 +1625,7 @@ return [
     'two_factor_invalid_recovery_code' => 'The recovery code you entered is invalid.',
     'two_factor_code_required' => 'Please enter an authentication code or recovery code.',
     'verify' => 'Verify',
+    'admin_confirm_password' => 'Por segurança, confirme sua senha para acessar a área de administração.',
+    'admin_session_changed' => 'Os detalhes da sua sessão foram alterados. Por favor, confirme sua senha novamente.',
+    'admin_password_required' => 'Você deve definir uma senha antes de acessar a área de administração.',
 ];

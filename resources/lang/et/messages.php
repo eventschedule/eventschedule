@@ -122,6 +122,7 @@ return [
     'share_your_event_schedule_link' => 'Jagage oma sündmuse ajakava linki või QR-koodi, et saada rohkem jälgijaid',
     'qr_code' => 'QR-kood',
     'date' => 'Kuupäev',
+    'sent_date' => 'Saatmise kuupäev',
     'social_links' => 'Sotsiaalsed lingid',
     'create_account' => 'Loo konto',
     'continue_as_guest' => 'Jätka külalisena',
@@ -1313,6 +1314,7 @@ return [
     'no_newsletters_description' => 'Looge uudiskiri, et jagada oma tellijatega uuendusi ja sündmusi.',
     'send_now' => 'Saada kohe',
     'send_at' => 'Saada aadressil',
+    'sent' => 'Saadetud',
     'schedule_newsletter' => 'Ajakava',
     'cancel_schedule' => 'Tühista ajakava',
     'scheduled_for' => 'Plaanitud',
@@ -1639,4 +1641,7 @@ return [
     'two_factor_invalid_recovery_code' => 'The recovery code you entered is invalid.',
     'two_factor_code_required' => 'Please enter an authentication code or recovery code.',
     'verify' => 'Verify',
+    'admin_confirm_password' => 'Turvalisuse huvides kinnitage oma parool, et pääseda haldusliidesesse.',
+    'admin_session_changed' => 'Teie seansi andmed muutusid. Palun kinnitage oma parool uuesti.',
+    'admin_password_required' => 'Enne haldusliidesesse pääsemist peate määrama parooli.',
 ];

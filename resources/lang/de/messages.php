@@ -109,6 +109,7 @@ return [
     'share_your_event_schedule_link' => 'Teilen Sie Ihren Veranstaltungsplan-Link oder QR-Code, um mehr Follower zu gewinnen',
     'qr_code' => 'QR-Code',
     'date' => 'Datum',
+    'sent_date' => 'Sendedatum',
     'social_links' => 'Soziale Links',
     'add' => 'Hinzufügen',
     'remove' => 'Entfernen',
@@ -1305,6 +1306,7 @@ return [
     'no_newsletters_description' => 'Erstellen Sie einen Newsletter, um Neuigkeiten und Veranstaltungen mit Ihren Abonnenten zu teilen.',
     'send_now' => 'Jetzt senden',
     'send_at' => 'Senden um',
+    'sent' => 'Gesendet',
     'schedule_newsletter' => 'Planen',
     'cancel_schedule' => 'Planung abbrechen',
     'scheduled_for' => 'Geplant fur',
@@ -1628,4 +1630,7 @@ return [
     'two_factor_invalid_recovery_code' => 'The recovery code you entered is invalid.',
     'two_factor_code_required' => 'Please enter an authentication code or recovery code.',
     'verify' => 'Verify',
+    'admin_confirm_password' => 'Bitte bestätigen Sie aus Sicherheitsgründen Ihr Passwort, um auf den Adminbereich zuzugreifen.',
+    'admin_session_changed' => 'Ihre Sitzungsdaten haben sich geändert. Bitte bestätigen Sie Ihr Passwort erneut.',
+    'admin_password_required' => 'Sie müssen ein Passwort festlegen, bevor Sie auf den Adminbereich zugreifen können.',
 ];
