@@ -28,7 +28,10 @@ class ApiScheduleController extends Controller
             self::MAX_PER_PAGE
         );
 
-        $schedules = Role::with('groups')->where('user_id', auth()->id())->where('is_deleted', false);
+        $schedules = auth()->user()->roles()
+            ->with('groups')
+            ->wherePivotIn('level', ['owner', 'admin'])
+            ->where('is_deleted', false);
 
         if ($request->has('name')) {
             $name = str_replace(['%', '_'], ['\\%', '\\_'], $request->name);
