@@ -51,6 +51,7 @@ class RoleUpdateRequest extends FormRequest
             'slug_pattern' => ['nullable', 'string', 'max:500'],
             'event_layout' => ['nullable', 'string', 'in:calendar,list'],
             'direct_registration' => ['nullable', 'boolean'],
+            'first_day_of_week' => ['nullable', 'integer', 'min:0', 'max:6'],
         ];
     }
 }

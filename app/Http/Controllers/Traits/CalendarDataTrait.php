@@ -127,10 +127,11 @@ trait CalendarDataTrait
         ];
     }
 
-    protected function buildCalendarResponse($events, $pastEvents, bool $hasMorePastEvents, ?Role $role, ?string $subdomain, int $month, int $year, string $timezone): JsonResponse
+    protected function buildCalendarResponse($events, $pastEvents, bool $hasMorePastEvents, ?Role $role, ?string $subdomain, int $month, int $year, string $timezone, int $firstDayOfWeek = 0): JsonResponse
     {
-        $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek(Carbon::SUNDAY);
-        $endOfMonth = Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek(Carbon::SATURDAY);
+        $lastDay = ($firstDayOfWeek + 6) % 7;
+        $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek($firstDayOfWeek);
+        $endOfMonth = Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek($lastDay);
 
         $user = auth()->user();
         $userAdminRoleIds = $user

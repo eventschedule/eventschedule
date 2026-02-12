@@ -106,6 +106,7 @@ return [
     'accept_requests' => 'Accepter les demandes',
     'accept_requests_help' => 'Allow others to submit events to your schedule.',
     'direct_registration' => 'Lien Direct vers l\'Inscription',
+    'first_day_of_week' => 'Premier Jour de la Semaine',
     'direct_registration_help' => 'Lorsqu\'activé, cliquer sur les événements du calendrier ou les graphiques d\'événements ouvrira l\'URL d\'inscription (pour les événements qui en ont une) au lieu de la page de détails de l\'événement.',
     'request_terms' => 'Conditions de demande',
     'enter_request_terms' => 'Entrez les termes et conditions pour les demandes d\'événements...',

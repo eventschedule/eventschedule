@@ -144,7 +144,7 @@ class HomeController extends Controller
             ->orderBy('starts_at')
             ->get();
 
-        return $this->buildCalendarResponse($events, collect(), false, null, null, (int) $month, (int) $year, $timezone);
+        return $this->buildCalendarResponse($events, collect(), false, null, null, (int) $month, (int) $year, $timezone, 0);
     }
 
     public function sitemap()

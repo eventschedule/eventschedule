@@ -87,6 +87,7 @@ class Role extends Model implements MustVerifyEmail
         'translation_attempts',
         'last_translated_at',
         'direct_registration',
+        'first_day_of_week',
     ];
 
     /**

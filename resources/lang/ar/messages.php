@@ -424,6 +424,7 @@ return [
     'accept_requests' => 'قبول الطلبات',
     'accept_requests_help' => 'Allow others to submit events to your schedule.',
     'direct_registration' => 'رابط مباشر للتسجيل',
+    'first_day_of_week' => 'أول يوم في الأسبوع',
     'direct_registration_help' => 'عند التفعيل، سيؤدي النقر على الأحداث في التقويم أو رسومات الأحداث إلى فتح رابط التسجيل (للأحداث التي تحتوي على واحد) بدلاً من صفحة تفاصيل الحدث.',
     'request_terms' => 'شروط الطلب',
     'enter_request_terms' => 'أدخل الشروط والأحكام لطلبات الأحداث...',

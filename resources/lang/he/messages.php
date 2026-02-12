@@ -109,6 +109,7 @@ return [
     'accept_requests' => 'קבל בקשות',
     'accept_requests_help' => 'Allow others to submit events to your schedule.',
     'direct_registration' => 'קישור ישיר להרשמה',
+    'first_day_of_week' => 'יום ראשון בשבוע',
     'direct_registration_help' => 'כאשר מופעל, לחיצה על אירועים בלוח השנה או בגרפיקות של אירועים תפתח את כתובת ההרשמה (לאירועים שיש להם כזו) במקום דף פרטי האירוע.',
     'use_24_hour_time_format' => 'השתמש בפורמט 24 שעות',
     'no_followers' => 'אין עוקבים',

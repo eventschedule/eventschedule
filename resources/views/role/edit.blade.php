@@ -1654,6 +1654,9 @@
                                 <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
                                     {{ __('messages.custom_fields') }}
                                 </button>
+                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="advanced">
+                                    {{ __('messages.advanced') }}
+                                </button>
                             </nav>
                         </div>
 
@@ -1885,6 +1888,23 @@
                         </p>
                         </div>
                         <!-- End Tab Content: Custom Fields -->
+
+                        <!-- Tab Content: Advanced -->
+                        <div id="settings-tab-advanced" class="settings-tab-content hidden">
+                            <div class="mb-6">
+                                <x-input-label for="first_day_of_week" :value="__('messages.first_day_of_week')" />
+                                <select name="first_day_of_week" id="first_day_of_week"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                    @foreach ([0 => 'sunday', 1 => 'monday', 2 => 'tuesday', 3 => 'wednesday', 4 => 'thursday', 5 => 'friday', 6 => 'saturday'] as $value => $dayName)
+                                    <option value="{{ $value }}" {{ old('first_day_of_week', $role->first_day_of_week ?? 0) == $value ? 'selected' : '' }}>
+                                        {{ __('messages.' . $dayName) }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                <x-input-error class="mt-2" :messages="$errors->get('first_day_of_week')" />
+                            </div>
+                        </div>
+                        <!-- End Tab Content: Advanced -->
 
                     </div>
                 </div>

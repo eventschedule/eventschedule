@@ -108,6 +108,7 @@ return [
     'accept_requests' => 'Accepteer Verzoeken',
     'accept_requests_help' => 'Allow others to submit events to your schedule.',
     'direct_registration' => 'Direct Linken naar Registratie',
+    'first_day_of_week' => 'Eerste Dag van de Week',
     'direct_registration_help' => 'Wanneer ingeschakeld, opent het klikken op evenementen in de kalender of de evenementafbeeldingen de registratie-URL (voor evenementen die er een hebben) in plaats van de evenementdetailpagina.',
     'request_terms' => 'Verzoek Voorwaarden',
     'enter_request_terms' => 'Voer voorwaarden in voor evenement verzoeken...',

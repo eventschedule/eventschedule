@@ -431,6 +431,7 @@ return [
     'accept_requests' => 'Anfragen akzeptieren',
     'accept_requests_help' => 'Allow others to submit events to your schedule.',
     'direct_registration' => 'Direkt zur Anmeldung verlinken',
+    'first_day_of_week' => 'Erster Wochentag',
     'direct_registration_help' => 'Wenn aktiviert, öffnet das Klicken auf Veranstaltungen im Kalender oder die Veranstaltungsgrafiken die Anmelde-URL (für Veranstaltungen, die eine haben) anstelle der Veranstaltungsdetailseite.',
     'request_terms' => 'Anfragebedingungen',
     'enter_request_terms' => 'Geben Sie die Bedingungen für Veranstaltungsanfragen ein...',

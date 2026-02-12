@@ -114,6 +114,7 @@ return [
     'accept_requests' => 'Accept requests',
     'accept_requests_help' => 'Allow others to submit events to your schedule.',
     'direct_registration' => 'Link Directly to Registration',
+    'first_day_of_week' => 'First Day of Week',
     'direct_registration_help' => 'When enabled, clicking events on the calendar or the event graphics will open the registration URL (for events that have one) instead of the event detail page.',
     'request_terms' => 'Request Terms',
     'enter_request_terms' => 'Enter terms and conditions for event requests...',
