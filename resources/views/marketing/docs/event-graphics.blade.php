@@ -120,7 +120,8 @@ https://example.com/event/summer-concert</code></pre>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Event Basics</h4>
                                     <div class="space-y-2 text-sm">
-                                        <div class="flex justify-between"><code class="text-rose-300">{event_name}</code> <span class="text-gray-500">Event title</span></div>
+                                        <div class="flex justify-between"><code class="text-rose-300">{event_name}</code> <span class="text-gray-500">Event Name</span></div>
+                                        <div class="flex justify-between"><code class="text-rose-300">{short_description}</code> <span class="text-gray-500">Short Description</span></div>
                                         <div class="flex justify-between"><code class="text-rose-300">{url}</code> <span class="text-gray-500">Event link</span></div>
                                         <div class="flex justify-between"><code class="text-rose-300">{description}</code> <span class="text-gray-500">Description</span></div>
                                     </div>
@@ -258,17 +259,17 @@ https://example.com/event/summer-concert</code></pre>
                                     <tbody>
                                         <tr>
                                             <td><code class="doc-inline-code">{event_name}</code></td>
-                                            <td>Event name (translated)</td>
+                                            <td>Event Name</td>
                                             <td>Summer Concert</td>
                                         </tr>
                                         <tr>
                                             <td><code class="doc-inline-code">{short_description}</code></td>
-                                            <td>Short event summary</td>
+                                            <td>Short Description</td>
                                             <td>Live jazz with local artists</td>
                                         </tr>
                                         <tr>
                                             <td><code class="doc-inline-code">{description}</code></td>
-                                            <td>Event description</td>
+                                            <td>Description</td>
                                             <td>Join us for a night of music...</td>
                                         </tr>
                                         <tr>

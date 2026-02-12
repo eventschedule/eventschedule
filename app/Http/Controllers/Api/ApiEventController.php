@@ -29,11 +29,6 @@ class ApiEventController extends Controller
 
     public function index(Request $request)
     {
-        $perPage = min(
-            (int) $request->input('per_page', self::DEFAULT_PER_PAGE),
-            self::MAX_PER_PAGE
-        );
-
         try {
             $request->validate([
                 'starts_after' => 'nullable|date_format:Y-m-d',
@@ -48,18 +43,17 @@ class ApiEventController extends Controller
             ], 422);
         }
 
-        $events = Event::with(['roles', 'tickets', 'parts'])
+        $perPage = min(
+            (int) $request->input('per_page', self::DEFAULT_PER_PAGE),
+            self::MAX_PER_PAGE
+        );
+
+        $events = Event::with(['roles', 'tickets', 'parts', 'venue'])
             ->where('user_id', auth()->id());
 
         // Filter out non-Pro events
         $events->whereHas('roles', function ($q) {
-            $q->where(function ($q2) {
-                $q2->where('plan_type', 'pro')
-                    ->where(function ($q3) {
-                        $q3->whereNull('plan_expires')
-                            ->orWhere('plan_expires', '>=', now()->format('Y-m-d'));
-                    });
-            });
+            $q->wherePro();
         });
 
         // Filter by schedule subdomain
@@ -99,7 +93,7 @@ class ApiEventController extends Controller
 
     public function show(Request $request, $id)
     {
-        $event = Event::with(['roles', 'tickets', 'parts'])->find(UrlUtils::decodeId($id));
+        $event = Event::with(['roles', 'tickets', 'parts', 'venue'])->find(UrlUtils::decodeId($id));
 
         if (! $event) {
             return response()->json(['error' => 'Event not found'], 404);
@@ -203,7 +197,7 @@ class ApiEventController extends Controller
 
         $event = $this->eventRepo->saveEvent($role, $request, null);
 
-        $event->load(['roles', 'tickets', 'parts']);
+        $event->load(['roles', 'tickets', 'parts', 'venue']);
 
         return response()->json([
             'data' => $event->toApiData(),
@@ -215,7 +209,7 @@ class ApiEventController extends Controller
 
     public function update(Request $request, $id)
     {
-        $event = Event::with(['roles', 'tickets', 'parts'])->find(UrlUtils::decodeId($id));
+        $event = Event::with(['roles', 'tickets', 'parts', 'venue'])->find(UrlUtils::decodeId($id));
 
         if (! $event) {
             return response()->json(['error' => 'Event not found'], 404);
@@ -371,7 +365,7 @@ class ApiEventController extends Controller
 
         $event = $this->eventRepo->saveEvent($currentRole, $request, $event);
 
-        $event->load(['roles', 'tickets', 'parts']);
+        $event->load(['roles', 'tickets', 'parts', 'venue']);
 
         return response()->json([
             'data' => $event->toApiData(),
@@ -558,7 +552,7 @@ class ApiEventController extends Controller
                             $q->where('name', $memberData['name']);
                         })
                             ->when(isset($memberData['email']), function ($q) use ($memberData) {
-                                $q->orWhere('email', $memberData['email']);
+                                $q->where('email', $memberData['email']);
                             });
                     })
                     ->where('type', 'talent')

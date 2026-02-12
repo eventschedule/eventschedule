@@ -49,6 +49,8 @@ class Role extends Model implements MustVerifyEmail
         'language_code',
         'description',
         'description_en',
+        'short_description',
+        'short_description_en',
         'accept_requests',
         'use_24_hour_time',
         'timezone',
@@ -176,7 +178,7 @@ class Role extends Model implements MustVerifyEmail
                 $model->sendEmailVerificationNotification();
             }
 
-            if ($model->isDirty(['name', 'description', 'address1', 'address2', 'city', 'state', 'request_terms'])) {
+            if ($model->isDirty(['name', 'short_description', 'description', 'address1', 'address2', 'city', 'state', 'request_terms'])) {
                 $model->translation_attempts = 0;
             }
 
@@ -187,6 +189,10 @@ class Role extends Model implements MustVerifyEmail
             if ($model->isDirty('description')) {
                 $model->description_en = null;
                 $model->description_html_en = null;
+            }
+
+            if ($model->isDirty('short_description')) {
+                $model->short_description_en = null;
             }
 
             if ($model->isDirty('address1')) {
@@ -755,6 +761,35 @@ class Role extends Model implements MustVerifyEmail
         return $this->plan_expires >= now()->format('Y-m-d') && $this->plan_type == 'pro';
     }
 
+    public function scopeWherePro($query)
+    {
+        if (! config('app.hosted') || config('app.is_testing')) {
+            return $query;
+        }
+
+        if (auth()->check() && auth()->user()->isAdmin()) {
+            return $query;
+        }
+
+        return $query->where(function ($q) {
+            $q->whereHas('subscriptions', function ($sq) {
+                $sq->whereIn('stripe_status', ['active', 'trialing']);
+            })
+                ->orWhere(function ($q2) {
+                    $q2->whereNotNull('trial_ends_at')
+                        ->where('trial_ends_at', '>=', now());
+                })
+                ->orWhere(function ($q2) {
+                    $q2->where('plan_type', 'pro')
+                        ->where('plan_expires', '>=', now()->format('Y-m-d'));
+                })
+                ->orWhere(function ($q2) {
+                    $q2->where('plan_type', 'enterprise')
+                        ->where('plan_expires', '>=', now()->format('Y-m-d'));
+                });
+        });
+    }
+
     public function isEnterprise()
     {
         // Selfhosted deployments get all features
@@ -833,6 +868,17 @@ class Role extends Model implements MustVerifyEmail
 
         if ($this->name_en && (session()->has('translate') || request()->lang == 'en')) {
             $value = $this->name_en;
+        }
+
+        return $value;
+    }
+
+    public function translatedShortDescription()
+    {
+        $value = $this->short_description;
+
+        if ($this->short_description_en && (session()->has('translate') || request()->lang == 'en')) {
+            $value = $this->short_description_en;
         }
 
         return $value;

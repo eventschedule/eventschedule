@@ -600,7 +600,7 @@
           background: rgba(255,255,255,0.95) !important;
           backdrop-filter: blur(4px) !important;
           border-radius: 1rem !important;
-          margin-top: 0.375rem;
+          margin-top: 1rem;
         }
         .dark .calendar-panel-border {
           background: rgba(30,30,30,0.95) !important;
@@ -610,7 +610,7 @@
           border-radius: 0 !important;
           box-shadow: none !important;
           border: none !important;
-          margin-top: 0.375rem;
+          margin-top: 1rem;
         }
         @media (max-width: 767px) {
           .calendar-panel-border {
