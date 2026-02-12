@@ -115,6 +115,7 @@ return [
     'share_your_event_schedule_link' => 'שתף את הקישור או קוד ה-QR שלך כדי לקבל יותר עוקבים',
     'qr_code' => 'קוד QR',
     'date' => 'תאריך',
+    'sent_date' => 'תאריך שליחה',
     'social_links' => 'קישורים חברתיים',
     'add' => 'הוסף',
     'remove' => 'הסר',
@@ -1303,6 +1304,7 @@ return [
     'no_newsletters_description' => 'צרו ניוזלטר כדי לשתף עדכונים ואירועים עם המנויים שלכם.',
     'send_now' => 'שלח עכשיו',
     'send_at' => 'שלח ב',
+    'sent' => 'נשלח',
     'schedule_newsletter' => 'תזמון',
     'cancel_schedule' => 'ביטול תזמון',
     'scheduled_for' => 'מתוזמן ל',
@@ -1617,4 +1619,7 @@ return [
     'two_factor_invalid_recovery_code' => 'The recovery code you entered is invalid.',
     'two_factor_code_required' => 'Please enter an authentication code or recovery code.',
     'verify' => 'Verify',
+    'admin_confirm_password' => 'מטעמי אבטחה, אנא אשר את הסיסמה שלך כדי לגשת לאזור הניהול.',
+    'admin_session_changed' => 'פרטי ההפעלה שלך השתנו. אנא אשר את הסיסמה שלך שוב.',
+    'admin_password_required' => 'עליך להגדיר סיסמה לפני הגישה לאזור הניהול.',
 ];

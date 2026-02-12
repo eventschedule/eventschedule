@@ -108,6 +108,7 @@ return [
     'share_your_event_schedule_link' => 'شارك رابط أو كود QR لجدول أحداثك لجذب المزيد من المتابعين',
     'qr_code' => 'كود QR',
     'date' => 'التاريخ',
+    'sent_date' => 'تاريخ الإرسال',
     'social_links' => 'روابط اجتماعية',
     'add' => 'إضافة',
     'remove' => 'إزالة',
@@ -1302,6 +1303,7 @@ return [
     'no_newsletters_description' => 'أنشئ نشرة بريدية لمشاركة التحديثات والفعاليات مع المشتركين.',
     'send_now' => 'أرسل الآن',
     'send_at' => 'أرسل في',
+    'sent' => 'مُرسَل',
     'schedule_newsletter' => 'جدولة',
     'cancel_schedule' => 'إلغاء الجدولة',
     'scheduled_for' => 'مجدولة في',
@@ -1625,4 +1627,7 @@ return [
     'two_factor_invalid_recovery_code' => 'The recovery code you entered is invalid.',
     'two_factor_code_required' => 'Please enter an authentication code or recovery code.',
     'verify' => 'Verify',
+    'admin_confirm_password' => 'لأسباب أمنية، يرجى تأكيد كلمة المرور للوصول إلى منطقة الإدارة.',
+    'admin_session_changed' => 'تم تغيير تفاصيل جلستك. يرجى تأكيد كلمة المرور مرة أخرى.',
+    'admin_password_required' => 'يجب عليك تعيين كلمة مرور قبل الوصول إلى منطقة الإدارة.',
 ];

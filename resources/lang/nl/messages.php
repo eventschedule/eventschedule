@@ -116,6 +116,7 @@ return [
     'share_your_event_schedule_link' => 'Deel je evenementenschema-link of QR-code om meer volgers te krijgen',
     'qr_code' => 'QR-code',
     'date' => 'Datum',
+    'sent_date' => 'Verzenddatum',
     'social_links' => 'Sociale Links',
     'add' => 'Toevoegen',
     'remove' => 'Verwijderen',
@@ -1308,6 +1309,7 @@ return [
     'no_newsletters_description' => 'Maak een nieuwsbrief om updates en evenementen te delen met uw abonnees.',
     'send_now' => 'Nu verzenden',
     'send_at' => 'Verzenden om',
+    'sent' => 'Verzonden',
     'schedule_newsletter' => 'Inplannen',
     'cancel_schedule' => 'Planning annuleren',
     'scheduled_for' => 'Ingepland voor',
@@ -1622,4 +1624,7 @@ return [
     'two_factor_invalid_recovery_code' => 'The recovery code you entered is invalid.',
     'two_factor_code_required' => 'Please enter an authentication code or recovery code.',
     'verify' => 'Verify',
+    'admin_confirm_password' => 'Bevestig voor de veiligheid uw wachtwoord om toegang te krijgen tot het beheergebied.',
+    'admin_session_changed' => 'Uw sessiegegevens zijn gewijzigd. Bevestig uw wachtwoord opnieuw.',
+    'admin_password_required' => 'U moet een wachtwoord instellen voordat u toegang kunt krijgen tot het beheergebied.',
 ];
