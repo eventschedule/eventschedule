@@ -2093,7 +2093,7 @@
           },
           "starts_at": {
             "type": "string",
-            "description": "Start date and time in Y-m-d H:i:s format (required for create)",
+            "description": "Start date and time in UTC (Y-m-d H:i:s format, required for create)",
             "example": "2025-06-15 19:00:00"
           },
           "duration": {

@@ -4,7 +4,6 @@ namespace App\Services\designs;
 
 use App\Models\Event;
 use App\Services\AbstractEventDesign;
-use Carbon\Carbon;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 
@@ -123,7 +122,7 @@ class GridDesign extends AbstractEventDesign
         $this->addMultilineText($title, $titleX, $titleY, self::TITLE_FONT_SIZE, $this->c['white'], 'bold', $maxTitleWidth);
 
         // Event date
-        if ($event->start_date) {
+        if ($event->starts_at) {
             $dateText = $this->formatEventDate($event);
             $dateX = $titleX;
             $dateY = $titleY + 25;
@@ -148,34 +147,6 @@ class GridDesign extends AbstractEventDesign
         // Create semi-transparent black background
         $bgColor = imagecolorallocatealpha($this->im, 0, 0, 0, 100);
         imagefilledrectangle($this->im, $x, $bgY, $x + self::FLYER_WIDTH, $bgY + $bgHeight, $bgColor);
-    }
-
-    /**
-     * Format event date for display with localized month names
-     */
-    protected function formatEventDate(Event $event): string
-    {
-        try {
-            Carbon::setLocale($this->lang);
-            $startDate = Carbon::parse($event->start_date);
-
-            if ($event->end_date) {
-                $endDate = Carbon::parse($event->end_date);
-
-                if ($startDate->isSameDay($endDate)) {
-                    // Same day event
-                    return $startDate->translatedFormat('M j, Y');
-                } else {
-                    // Multi-day event
-                    return $startDate->translatedFormat('M j').' - '.$endDate->translatedFormat('M j, Y');
-                }
-            } else {
-                // Single date event
-                return $startDate->translatedFormat('M j, Y');
-            }
-        } catch (\Exception $e) {
-            return 'Date TBD';
-        }
     }
 
     /**
@@ -240,85 +211,6 @@ class GridDesign extends AbstractEventDesign
 
         // Add white text
         $this->addText($text, (int) $textX, $textY, $fontSize, $this->c['white'], 'bold');
-    }
-
-    /**
-     * Get the overlay text for an event, parsing variables if a template is provided
-     */
-    protected function getOverlayText(Event $event): string
-    {
-        $template = $this->getOption('overlay_text');
-
-        // If no custom template, use default date format
-        if (empty($template)) {
-            return $this->formatEventDate($event);
-        }
-
-        return $this->parseOverlayText($template, $event);
-    }
-
-    /**
-     * Parse overlay text template with event variables
-     */
-    protected function parseOverlayText(string $template, Event $event): string
-    {
-        try {
-            Carbon::setLocale($this->lang);
-            $startDate = Carbon::parse($event->start_date);
-            $endDate = $event->end_date ? Carbon::parse($event->end_date) : null;
-
-            // Determine time format based on role's 24h setting
-            $timeFormat = $this->role->use_24_hour_time ? 'H:i' : 'g:i A';
-
-            $replacements = [
-                // Date variables
-                '{date_mdy}' => $startDate->format('n/j'),
-                '{date_dmy}' => $startDate->format('j/n'),
-                '{date_full_mdy}' => $startDate->format('m/d/Y'),
-                '{date_full_dmy}' => $startDate->format('d/m/Y'),
-                '{day_name}' => $startDate->translatedFormat('l'),
-                '{day_short}' => $startDate->translatedFormat('D'),
-                '{month}' => $startDate->format('n'),
-                '{month_name}' => $startDate->translatedFormat('F'),
-                '{month_short}' => $startDate->translatedFormat('M'),
-                '{day}' => $startDate->format('j'),
-                '{year}' => $startDate->format('Y'),
-                '{time}' => $startDate->format($timeFormat),
-                '{end_time}' => $endDate ? $endDate->format($timeFormat) : '',
-
-                // Event variables
-                '{event_name}' => $event->translatedName() ?? $event->name ?? '',
-                '{short_description}' => $event->translatedShortDescription() ?? '',
-                '{description}' => strip_tags($event->translatedDescription() ?? ''),
-
-                // Venue variables
-                '{venue}' => $event->venue ? ($event->venue->translatedName() ?? '') : '',
-                '{city}' => $event->venue ? ($event->venue->translatedCity() ?? '') : '',
-            ];
-
-            // Add custom field replacements using stable indices
-            $customFieldValues = $event->custom_field_values ?? [];
-            $roleCustomFields = $this->role->event_custom_fields ?? [];
-            for ($i = 1; $i <= 8; $i++) {
-                $replacements['{custom_'.$i.'}'] = '';
-            }
-            $fallbackIndex = 1;
-            foreach ($roleCustomFields as $fieldKey => $fieldConfig) {
-                $index = $fieldConfig['index'] ?? $fallbackIndex;
-                $fallbackIndex++;
-                if ($index >= 1 && $index <= 8) {
-                    $value = $customFieldValues[$fieldKey] ?? '';
-                    if (($fieldConfig['type'] ?? '') === 'switch') {
-                        $value = ($value === '1' || $value === 1 || $value === true) ? __('messages.yes') : __('messages.no');
-                    }
-                    $replacements['{custom_'.$index.'}'] = $value;
-                }
-            }
-
-            return str_replace(array_keys($replacements), array_values($replacements), $template);
-        } catch (\Exception $e) {
-            return $template;
-        }
     }
 
     /**

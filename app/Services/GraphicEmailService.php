@@ -76,6 +76,7 @@ class GraphicEmailService
                 'date_position' => $datePosition,
                 'max_per_row' => $maxPerRow,
                 'overlay_text' => $overlayText,
+                'header_image_url' => $settings['header_image_url'] ?? null,
             ];
 
             // Generate the graphic image

@@ -35,7 +35,7 @@
                         @endif
                     </div>
                     <form method="POST" action="{{ route('newsletter.segment.delete', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
-                        class="js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}"
+                        class="js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="text-red-500 hover:text-red-700 text-sm">{{ __('messages.delete') }}</button>

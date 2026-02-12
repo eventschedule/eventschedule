@@ -179,7 +179,14 @@ class GraphicController extends Controller
         try {
             $service = new GraphicEmailService;
             // Send to all recipients in a single email (service handles parsing)
-            $service->sendGraphicEmail($role, $recipientEmails);
+            $result = $service->sendGraphicEmail($role, $recipientEmails);
+
+            if (! $result) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.no_events_found'),
+                ], 400);
+            }
 
             return response()->json([
                 'success' => true,

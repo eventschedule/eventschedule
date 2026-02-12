@@ -53,7 +53,7 @@
                         <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.sent') }}</th>
                         <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.open_rate') }}</th>
                         <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.click_rate') }}</th>
-                        <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.date') }}</th>
+                        <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.sent_date') }}</th>
                         <th class="px-6 py-3"></th>
                     </tr>
                 </thead>

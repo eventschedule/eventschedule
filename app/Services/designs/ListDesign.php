@@ -567,7 +567,7 @@ class ListDesign extends AbstractEventDesign
         }
 
         // Date and time
-        if ($event->start_date) {
+        if ($event->starts_at) {
             $dateTime = $this->formatEventDateTime($event);
             $this->addText($dateTime, $textStartX, $textStartY, self::DATE_FONT_SIZE, $this->c['black'], 'regular');
         }
@@ -679,26 +679,27 @@ class ListDesign extends AbstractEventDesign
     {
         try {
             Carbon::setLocale($this->lang);
-            $startDate = Carbon::parse($event->start_date);
+            $startDate = $event->getStartDateTime(null, true);
+            $timeFormat = $this->role->use_24_hour_time ? 'H:i' : 'g:i A';
 
-            if ($event->end_date) {
-                $endDate = Carbon::parse($event->end_date);
+            if ($event->duration > 0 && $event->duration >= 24) {
+                $endDate = $event->getEndDateTime(null, true);
 
-                $timeFormat = $this->role->use_24_hour_time ? 'H:i' : 'g:i A';
-
-                if ($startDate->isSameDay($endDate)) {
-                    // Same day event
-                    return $startDate->translatedFormat('M j, Y').' at '.$startDate->format($timeFormat).' - '.$endDate->format($timeFormat);
-                } else {
+                if (! $startDate->isSameDay($endDate)) {
                     // Multi-day event
                     return $startDate->translatedFormat('M j, Y').' - '.$endDate->translatedFormat('M j, Y');
                 }
-            } else {
-                $timeFormat = $this->role->use_24_hour_time ? 'H:i' : 'g:i A';
-
-                // Single date event
-                return $startDate->translatedFormat('M j, Y').' at '.$startDate->format($timeFormat);
             }
+
+            if ($event->duration > 0) {
+                $endDate = $event->getEndDateTime(null, true);
+
+                // Same day event with time range
+                return $startDate->translatedFormat('M j, Y').' at '.$startDate->format($timeFormat).' - '.$endDate->format($timeFormat);
+            }
+
+            // Single date event with start time only
+            return $startDate->translatedFormat('M j, Y').' at '.$startDate->format($timeFormat);
         } catch (\Exception $e) {
             return 'Date TBD';
         }
