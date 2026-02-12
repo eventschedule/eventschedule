@@ -823,7 +823,7 @@
                             <template v-else>
                                 {{-- Hero Banner (only when no flyer) --}}
                                 <div v-if="getHeaderImage(event)" class="h-40 relative overflow-hidden">
-                                    <img :src="getHeaderImage(event)" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name" v-on:error="if($event?.target?.closest('.h-40'))$event.target.closest('.h-40').style.display='none'">
+                                    <img :src="getHeaderImage(event)" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name" v-on:error="$event?.target?.closest('.h-40') && ($event.target.closest('.h-40').style.display='none')">
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                                 </div>
 
