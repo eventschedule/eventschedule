@@ -48,8 +48,12 @@ class ApiEventController extends Controller
             self::MAX_PER_PAGE
         );
 
-        $events = Event::with(['roles', 'tickets', 'parts', 'venue'])
-            ->where('user_id', auth()->id());
+        $events = Event::with(['roles', 'tickets', 'parts'])
+            ->whereHas('roles', function ($q) {
+                $q->whereIn('roles.id', auth()->user()->roles()
+                    ->wherePivotIn('level', ['owner', 'admin'])
+                    ->pluck('roles.id'));
+            });
 
         // Filter out non-Pro events
         $events->whereHas('roles', function ($q) {
@@ -93,7 +97,7 @@ class ApiEventController extends Controller
 
     public function show(Request $request, $id)
     {
-        $event = Event::with(['roles', 'tickets', 'parts', 'venue'])->find(UrlUtils::decodeId($id));
+        $event = Event::with(['roles', 'tickets', 'parts'])->find(UrlUtils::decodeId($id));
 
         if (! $event) {
             return response()->json(['error' => 'Event not found'], 404);
@@ -102,6 +106,10 @@ class ApiEventController extends Controller
         // Auth: user must own the event or be owner/admin on one of its roles
         if (! auth()->user()->canEditEvent($event)) {
             return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if (! $event->isPro()) {
+            return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
         }
 
         return response()->json([
@@ -201,7 +209,7 @@ class ApiEventController extends Controller
 
         $event = $this->eventRepo->saveEvent($role, $request, null);
 
-        $event->load(['roles', 'tickets', 'parts', 'venue']);
+        $event->load(['roles', 'tickets', 'parts']);
 
         return response()->json([
             'data' => $event->toApiData(),
@@ -213,7 +221,7 @@ class ApiEventController extends Controller
 
     public function update(Request $request, $id)
     {
-        $event = Event::with(['roles', 'tickets', 'parts', 'venue'])->find(UrlUtils::decodeId($id));
+        $event = Event::with(['roles', 'tickets', 'parts'])->find(UrlUtils::decodeId($id));
 
         if (! $event) {
             return response()->json(['error' => 'Event not found'], 404);
@@ -368,7 +376,7 @@ class ApiEventController extends Controller
 
         $event = $this->eventRepo->saveEvent($currentRole, $request, $event);
 
-        $event->load(['roles', 'tickets', 'parts', 'venue']);
+        $event->load(['roles', 'tickets', 'parts']);
 
         return response()->json([
             'data' => $event->toApiData(),
@@ -421,7 +429,7 @@ class ApiEventController extends Controller
 
     public function flyer(Request $request, $event_id)
     {
-        $event = Event::with(['roles', 'tickets', 'parts', 'venue'])->find(UrlUtils::decodeId($event_id));
+        $event = Event::with(['roles', 'tickets', 'parts'])->find(UrlUtils::decodeId($event_id));
 
         if (! $event) {
             return response()->json(['error' => 'Event not found'], 404);

@@ -35,7 +35,7 @@ class ApiSaleController extends Controller
         }
 
         $eventId = UrlUtils::decodeId($request->event_id);
-        $event = Event::with(['roles', 'tickets'])->find($eventId);
+        $event = Event::with(['roles', 'tickets', 'creatorRole'])->find($eventId);
 
         if (! $event) {
             return response()->json(['error' => 'Event not found'], 404);
@@ -46,17 +46,19 @@ class ApiSaleController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
+        // Check if non-recurring event is in the past
+        if (! $event->days_of_week && $event->starts_at && Carbon::parse($event->starts_at)->isPast()) {
+            return response()->json(['error' => 'Cannot sell tickets for events in the past'], 422);
+        }
+
         // Verify event has tickets enabled and is Pro
         if (! $event->canSellTickets()) {
             return response()->json(['error' => 'Event does not have tickets enabled or is not a Pro account'], 422);
         }
 
-        // Check if trying to buy tickets for a past recurring event occurrence
-        if ($event->days_of_week && $request->event_date) {
-            $startDateTime = $event->getStartDateTime($request->event_date, true);
-            if ($startDateTime->isPast()) {
-                return response()->json(['error' => 'Cannot buy tickets for events in the past.'], 422);
-            }
+        // Require event_date for recurring events
+        if ($event->days_of_week && ! $request->event_date) {
+            return response()->json(['error' => 'The event_date parameter is required for recurring events'], 422);
         }
 
         // Validate tickets - support both ticket ID and ticket type
@@ -93,6 +95,14 @@ class ApiSaleController extends Controller
             $eventDate = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
         }
 
+        // Check if recurring event occurrence is in the past
+        if ($event->days_of_week) {
+            $startDateTime = $event->getStartDateTime($eventDate, true);
+            if ($startDateTime->isPast()) {
+                return response()->json(['error' => 'Cannot sell tickets for events in the past'], 422);
+            }
+        }
+
         // Get subdomain from event
         $subdomain = null;
         if ($event->creatorRole) {
@@ -116,6 +126,10 @@ class ApiSaleController extends Controller
                 // Check ticket availability
                 foreach ($ticketIds as $ticketId => $quantity) {
                     $ticket = $lockedTickets->find($ticketId);
+
+                    if (! $ticket) {
+                        throw new \RuntimeException('Ticket no longer available');
+                    }
 
                     if ($ticket->quantity > 0) {
                         // Handle combined mode logic

@@ -752,7 +752,8 @@ class Event extends Model
 
         $slug = $this->slug;
 
-        if ($venueSubdomain && $roleSubdomain) {
+        $isCurator = $this->creatorRole && $this->creatorRole->isCurator();
+        if ($venueSubdomain && $roleSubdomain && !$isCurator) {
             $slug = $venueSubdomain == $subdomain ? $roleSubdomain : $venueSubdomain;
         }
 
