@@ -182,6 +182,7 @@ class ApiAuthController extends Controller
         return response()->json([
             'data' => [
                 'api_key' => $plaintextKey,
+                'api_key_expires_at' => $user->api_key_expires_at->toIso8601String(),
                 'user' => [
                     'id' => UrlUtils::encodeId($user->id),
                     'name' => $user->name,
@@ -241,6 +242,7 @@ class ApiAuthController extends Controller
         return response()->json([
             'data' => [
                 'api_key' => $plaintextKey,
+                'api_key_expires_at' => $user->api_key_expires_at->toIso8601String(),
                 'user' => [
                     'id' => UrlUtils::encodeId($user->id),
                     'name' => $user->name,

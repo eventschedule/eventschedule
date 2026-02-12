@@ -175,6 +175,11 @@
                           "type": "string",
                           "description": "API key for authenticating future requests. Store this securely."
                         },
+                        "api_key_expires_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "ISO 8601 timestamp when the API key expires"
+                        },
                         "user": {
                           "type": "object",
                           "properties": {
@@ -276,6 +281,11 @@
                         "api_key": {
                           "type": "string",
                           "description": "New API key for authenticating future requests. Store this securely."
+                        },
+                        "api_key_expires_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "ISO 8601 timestamp when the API key expires"
                         },
                         "user": {
                           "type": "object",
@@ -753,7 +763,7 @@
         "operationId": "delete_schedule",
         "tags": ["Schedules"],
         "summary": "Delete a schedule",
-        "description": "Permanently deletes a schedule and all associated data. Only the schedule owner can perform this action.",
+        "description": "Soft-deletes a schedule, marking it as deleted. The schedule will no longer appear in listings or be accessible. Only the schedule owner can perform this action.",
         "parameters": [
           {
             "name": "subdomain",
