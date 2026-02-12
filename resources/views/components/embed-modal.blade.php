@@ -118,7 +118,7 @@ function copyEmbedUrl() {
     urlInput.setSelectionRange(0, 99999); // For mobile devices
     navigator.clipboard.writeText(urlInput.value).then(() => {
         showCopySuccess('embed-url-btn');
-    });
+    }).catch(() => {});
 }
 
 function copyIframeCode() {
@@ -127,7 +127,7 @@ function copyIframeCode() {
     codeTextarea.setSelectionRange(0, 99999); // For mobile devices
     navigator.clipboard.writeText(codeTextarea.value).then(() => {
         showCopySuccess('iframe-code-btn');
-    });
+    }).catch(() => {});
 }
 
 function showCopySuccess(buttonId) {

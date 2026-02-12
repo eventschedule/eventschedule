@@ -90,7 +90,7 @@ if (! $isHosted && ! file_exists(__DIR__.'/../.env')) {
             }, 2000);
         }
         if (navigator.clipboard) {
-            navigator.clipboard.writeText(text).then(showSuccess);
+            navigator.clipboard.writeText(text).then(showSuccess).catch(function() {});
         } else {
             var ta = document.createElement("textarea");
             ta.value = text;
