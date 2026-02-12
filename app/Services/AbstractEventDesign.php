@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Utils\EventTextGenerator;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 abstract class AbstractEventDesign
@@ -1587,5 +1589,117 @@ abstract class AbstractEventDesign
     protected function containsArabicCharacters(string $text): bool
     {
         return preg_match('/[\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\x{FB50}-\x{FDFF}\x{FE70}-\x{FEFF}]/u', $text);
+    }
+
+    /**
+     * Get the overlay text for an event, parsing variables if a template is provided
+     */
+    protected function getOverlayText(Event $event): string
+    {
+        $template = $this->getOption('overlay_text');
+
+        // If no custom template, use default date format
+        if (empty($template)) {
+            return $this->formatEventDate($event);
+        }
+
+        return $this->parseOverlayText($template, $event);
+    }
+
+    /**
+     * Parse overlay text template with event variables
+     */
+    protected function parseOverlayText(string $template, Event $event): string
+    {
+        try {
+            Carbon::setLocale($this->lang);
+            $startDate = $event->getStartDateTime(null, true);
+            $endDate = $event->duration > 0 ? $event->getEndDateTime(null, true) : null;
+
+            // Determine time format based on role's 24h setting
+            $timeFormat = $this->role->use_24_hour_time ? 'H:i' : 'g:i A';
+
+            $replacements = [
+                // Date variables
+                '{date_mdy}' => $startDate->format('n/j'),
+                '{date_dmy}' => $startDate->format('j/n'),
+                '{date_full_mdy}' => $startDate->format('m/d/Y'),
+                '{date_full_dmy}' => $startDate->format('d/m/Y'),
+                '{day_name}' => $startDate->translatedFormat('l'),
+                '{day_short}' => $startDate->translatedFormat('D'),
+                '{month}' => $startDate->format('n'),
+                '{month_name}' => $startDate->translatedFormat('F'),
+                '{month_short}' => $startDate->translatedFormat('M'),
+                '{day}' => $startDate->format('j'),
+                '{year}' => $startDate->format('Y'),
+                '{time}' => $startDate->format($timeFormat),
+                '{end_time}' => $endDate ? $endDate->format($timeFormat) : '',
+                '{duration}' => $event->duration ?? '',
+
+                // Event variables
+                '{event_name}' => $event->translatedName() ?? $event->name ?? '',
+                '{short_description}' => $event->translatedShortDescription() ?? '',
+                '{description}' => strip_tags($event->translatedDescription() ?? ''),
+
+                // Venue variables
+                '{venue}' => $event->venue ? ($event->venue->translatedName() ?? '') : '',
+                '{city}' => $event->venue ? ($event->venue->translatedCity() ?? '') : '',
+                '{address}' => $event->venue ? ($event->venue->address1 ?? '') : '',
+                '{state}' => $event->venue ? ($event->venue->state ?? '') : '',
+                '{country}' => $event->venue ? ($event->venue->country ?? '') : '',
+
+                // Ticket variables
+                '{currency}' => $event->ticket_currency_code ?? '',
+                '{price}' => EventTextGenerator::getPrice($event),
+            ];
+
+            // Add custom field replacements using stable indices
+            $customFieldValues = $event->custom_field_values ?? [];
+            $roleCustomFields = $this->role->event_custom_fields ?? [];
+            for ($i = 1; $i <= 8; $i++) {
+                $replacements['{custom_'.$i.'}'] = '';
+            }
+            $fallbackIndex = 1;
+            foreach ($roleCustomFields as $fieldKey => $fieldConfig) {
+                $index = $fieldConfig['index'] ?? $fallbackIndex;
+                $fallbackIndex++;
+                if ($index >= 1 && $index <= 8) {
+                    $value = $customFieldValues[$fieldKey] ?? '';
+                    if (($fieldConfig['type'] ?? '') === 'switch') {
+                        $value = ($value === '1' || $value === 1 || $value === true) ? __('messages.yes') : __('messages.no');
+                    }
+                    $replacements['{custom_'.$index.'}'] = $value;
+                }
+            }
+
+            return str_replace(array_keys($replacements), array_values($replacements), $template);
+        } catch (\Exception $e) {
+            return $template;
+        }
+    }
+
+    /**
+     * Format event date for display with localized month names
+     */
+    protected function formatEventDate(Event $event): string
+    {
+        try {
+            Carbon::setLocale($this->lang);
+            $startDate = $event->getStartDateTime(null, true);
+
+            if ($event->duration > 0 && $event->duration >= 24) {
+                $endDate = $event->getEndDateTime(null, true);
+
+                if (! $startDate->isSameDay($endDate)) {
+                    // Multi-day event
+                    return $startDate->translatedFormat('M j').' - '.$endDate->translatedFormat('M j, Y');
+                }
+            }
+
+            // Single date event
+            return $startDate->translatedFormat('M j, Y');
+        } catch (\Exception $e) {
+            return 'Date TBD';
+        }
     }
 }
