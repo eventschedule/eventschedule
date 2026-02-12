@@ -69,7 +69,6 @@ class AdminController extends Controller
         }
 
         $request->session()->put('admin_password_confirmed_at', time());
-        $request->session()->regenerate();
 
         AuditService::log(
             AuditService::ADMIN_PASSWORD_CONFIRMED,
