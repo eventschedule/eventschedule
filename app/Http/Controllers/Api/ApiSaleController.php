@@ -10,21 +10,29 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ApiSaleController extends Controller
 {
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'event_id' => 'required|string',
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255',
-            'tickets' => 'required|array',
-            'tickets.*' => 'required|integer|min:1',
-            // Note: status parameter is intentionally not accepted from API input for security
-            // Sales are always created as 'unpaid' and must go through proper payment flow
-            'event_date' => 'nullable|date_format:Y-m-d',
-        ]);
+        try {
+            $request->validate([
+                'event_id' => 'required|string',
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255',
+                'tickets' => 'required|array',
+                'tickets.*' => 'required|integer|min:1',
+                // Note: status parameter is intentionally not accepted from API input for security
+                // Sales are always created as 'unpaid' and must go through proper payment flow
+                'event_date' => 'nullable|date_format:Y-m-d',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
 
         $eventId = UrlUtils::decodeId($request->event_id);
         $event = Event::with(['roles', 'tickets'])->find($eventId);
@@ -113,7 +121,7 @@ class ApiSaleController extends Controller
                         // Handle combined mode logic
                         if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
                             $totalSold = $lockedTickets->sum(function ($t) use ($eventDate) {
-                                $ticketSold = $t->sold ? json_decode($t->sold, true) : [];
+                                $ticketSold = $t->sold ? (json_decode($t->sold, true) ?? []) : [];
 
                                 return $ticketSold[$eventDate] ?? 0;
                             });
@@ -125,7 +133,7 @@ class ApiSaleController extends Controller
                                 throw new \RuntimeException('Tickets not available. Remaining: '.$remainingTickets);
                             }
                         } else {
-                            $sold = json_decode($ticket->sold, true) ?? [];
+                            $sold = ($ticket->sold ? json_decode($ticket->sold, true) : null) ?? [];
                             $soldCount = $sold[$eventDate] ?? 0;
                             $remainingTickets = $ticket->quantity - $soldCount;
 

@@ -31,7 +31,8 @@ class ApiScheduleController extends Controller
         $schedules = auth()->user()->roles()
             ->with('groups')
             ->wherePivotIn('level', ['owner', 'admin'])
-            ->where('is_deleted', false);
+            ->where('is_deleted', false)
+            ->wherePro();
 
         if ($request->has('name')) {
             $name = str_replace(['%', '_'], ['\\%', '\\_'], $request->name);
@@ -65,6 +66,7 @@ class ApiScheduleController extends Controller
         $role = auth()->user()->roles()
             ->with('groups')
             ->where('subdomain', $subdomain)
+            ->where('is_deleted', false)
             ->wherePivotIn('level', ['owner', 'admin'])
             ->first();
 
@@ -149,6 +151,7 @@ class ApiScheduleController extends Controller
     {
         $role = auth()->user()->roles()
             ->where('subdomain', $subdomain)
+            ->where('is_deleted', false)
             ->wherePivotIn('level', ['owner', 'admin'])
             ->first();
 
@@ -204,6 +207,7 @@ class ApiScheduleController extends Controller
 
         $role = $user->roles()
             ->where('subdomain', $subdomain)
+            ->where('is_deleted', false)
             ->wherePivotIn('level', ['owner'])
             ->first();
 

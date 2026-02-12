@@ -102,7 +102,9 @@ class Event extends Model
             }
 
             if ($model->isDirty('name') && $model->exists) {
-                $model->name_en = null;
+                if (! $model->isDirty('name_en')) {
+                    $model->name_en = null;
+                }
                 $model->translation_attempts = 0;
 
                 $eventRoles = EventRole::where('event_id', $model->id)->get();
@@ -114,8 +116,10 @@ class Event extends Model
             }
 
             if ($model->isDirty('description') && $model->exists) {
-                $model->description_en = null;
-                $model->description_html_en = null;
+                if (! $model->isDirty('description_en')) {
+                    $model->description_en = null;
+                    $model->description_html_en = null;
+                }
                 $model->translation_attempts = 0;
 
                 $eventRoles = EventRole::where('event_id', $model->id)->get();
@@ -128,7 +132,9 @@ class Event extends Model
             }
 
             if ($model->isDirty('short_description') && $model->exists) {
-                $model->short_description_en = null;
+                if (! $model->isDirty('short_description_en')) {
+                    $model->short_description_en = null;
+                }
                 $model->translation_attempts = 0;
 
                 $eventRoles = EventRole::where('event_id', $model->id)->get();
@@ -1053,6 +1059,7 @@ class Event extends Model
 
         $data->event_parts = $this->parts->map(function ($part) {
             return [
+                'id' => UrlUtils::encodeId($part->id),
                 'name' => $part->name,
                 'description' => $part->description,
                 'start_time' => $part->start_time,

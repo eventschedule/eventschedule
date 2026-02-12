@@ -770,7 +770,7 @@
     }
 
     function copyEventUrl(button) {
-        const url = '{{ $event->exists ? $event->getGuestUrl($subdomain, false) : "" }}';
+        const url = '{{ $event->exists ? $event->getGuestUrl($subdomain, false, true) : "" }}';
         navigator.clipboard.writeText(url).then(() => {
             const originalHTML = button.innerHTML;
             button.innerHTML = `
@@ -1009,8 +1009,8 @@
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                             @if ($event->exists)
                             <div class="text-sm text-gray-500 flex items-center gap-2">
-                                <x-link href="{{ $event->getGuestUrl($subdomain, false) }}" target="_blank">
-                                    {{ \App\Utils\UrlUtils::clean($event->getGuestUrl($subdomain, false)) }}
+                                <x-link href="{{ $event->getGuestUrl($subdomain, false, true) }}" target="_blank">
+                                    {{ \App\Utils\UrlUtils::clean($event->getGuestUrl($subdomain, false, true)) }}
                                 </x-link>
                                 <button type="button" id="copy-event-url-btn" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">

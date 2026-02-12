@@ -111,17 +111,13 @@ class ApiEventController extends Controller
 
     public function store(Request $request, $subdomain)
     {
-        $role = Role::with('groups')->subdomain($subdomain)->first();
+        $role = Role::with('groups')->subdomain($subdomain)->where('is_deleted', false)->first();
 
         if (! $role) {
             return response()->json(['error' => 'Schedule not found'], 404);
         }
 
         $encodedRoleId = UrlUtils::encodeId($role->id);
-
-        if (! $role->isPro()) {
-            return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
-        }
 
         // Check for owner/admin level
         $userRole = auth()->user()->roles()
@@ -131,6 +127,10 @@ class ApiEventController extends Controller
 
         if (! $userRole) {
             return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if (! $role->isPro()) {
+            return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
         }
 
         try {
@@ -154,6 +154,7 @@ class ApiEventController extends Controller
                 'recurring_interval' => 'nullable|integer|min:2',
                 'recurring_end_type' => 'nullable|string|in:never,on_date,after_events',
                 'recurring_end_value' => 'nullable|string',
+                'days_of_week' => 'nullable|string|size:7|regex:/^[01]{7}$/',
                 'venue_id' => 'nullable',
                 'venue_name' => 'nullable|string|max:255',
                 'venue_address1' => 'nullable|string|max:255',
@@ -184,10 +185,13 @@ class ApiEventController extends Controller
             'category_id', 'category', 'tickets_enabled', 'ticket_currency_code',
             'payment_method', 'payment_instructions',
             'schedule_type', 'recurring_frequency', 'recurring_interval',
-            'recurring_end_type', 'recurring_end_value',
+            'recurring_end_type', 'recurring_end_value', 'days_of_week',
             'venue_id', 'venue_name', 'venue_address1',
             'members', 'schedule', 'tickets', 'event_parts',
         ]));
+
+        // Convert days_of_week string to individual checkbox params for saveEvent()
+        $this->convertDaysOfWeek($request);
 
         // Pre-processing: venue, members, group, category
         $errorResponse = $this->preprocessEventRequest($request, $role, $encodedRoleId);
@@ -244,6 +248,7 @@ class ApiEventController extends Controller
                 'recurring_interval' => 'nullable|integer|min:2',
                 'recurring_end_type' => 'nullable|string|in:never,on_date,after_events',
                 'recurring_end_value' => 'nullable|string',
+                'days_of_week' => 'nullable|string|size:7|regex:/^[01]{7}$/',
                 'venue_id' => 'nullable',
                 'venue_name' => 'nullable|string|max:255',
                 'venue_address1' => 'nullable|string|max:255',
@@ -274,7 +279,7 @@ class ApiEventController extends Controller
             'category_id', 'category', 'tickets_enabled', 'ticket_currency_code',
             'payment_method', 'payment_instructions',
             'schedule_type', 'recurring_frequency', 'recurring_interval',
-            'recurring_end_type', 'recurring_end_value',
+            'recurring_end_type', 'recurring_end_value', 'days_of_week',
             'venue_id', 'venue_name', 'venue_address1',
             'members', 'schedule', 'tickets', 'event_parts',
         ]));
@@ -307,14 +312,9 @@ class ApiEventController extends Controller
                 'recurring_end_type' => $event->recurring_end_type,
                 'recurring_end_value' => $event->recurring_end_value,
             ]);
-            // Preserve days_of_week checkboxes
-            if ($event->days_of_week) {
-                $days = str_split($event->days_of_week);
-                foreach ($days as $index => $day) {
-                    if ($day === '1') {
-                        $request->merge(['days_of_week_'.$index => 'on']);
-                    }
-                }
+            // Preserve days_of_week if not explicitly provided
+            if (! $request->has('days_of_week') && $event->days_of_week) {
+                $request->merge(['days_of_week' => $event->days_of_week]);
             }
         }
 
@@ -355,6 +355,9 @@ class ApiEventController extends Controller
             })->toArray();
             $request->merge(['event_parts' => $existingParts]);
         }
+
+        // Convert days_of_week string to individual checkbox params for saveEvent()
+        $this->convertDaysOfWeek($request);
 
         // Pre-processing: venue, members, group, category
         $currentRole->loadMissing('groups');
@@ -418,13 +421,13 @@ class ApiEventController extends Controller
 
     public function flyer(Request $request, $event_id)
     {
-        $event = Event::find(UrlUtils::decodeId($event_id));
+        $event = Event::with(['roles', 'tickets', 'parts', 'venue'])->find(UrlUtils::decodeId($event_id));
 
         if (! $event) {
             return response()->json(['error' => 'Event not found'], 404);
         }
 
-        if ($event->user_id !== auth()->id()) {
+        if (! auth()->user()->canEditEvent($event)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -547,13 +550,11 @@ class ApiEventController extends Controller
             $processedMembers = [];
             foreach ($request->members as $memberId => $memberData) {
                 $talent = Role::where('is_deleted', false)
-                    ->where(function ($query) use ($memberData) {
-                        $query->when(isset($memberData['name']), function ($q) use ($memberData) {
-                            $q->where('name', $memberData['name']);
-                        })
-                            ->when(isset($memberData['email']), function ($q) use ($memberData) {
-                                $q->orWhere('email', $memberData['email']);
-                            });
+                    ->when(isset($memberData['name']), function ($q) use ($memberData) {
+                        $q->where('name', $memberData['name']);
+                    })
+                    ->when(isset($memberData['email']), function ($q) use ($memberData) {
+                        $q->where('email', $memberData['email']);
                     })
                     ->where('type', 'talent')
                     ->whereIn('id', $roleIds)
@@ -570,6 +571,22 @@ class ApiEventController extends Controller
             }
 
             $request->merge(['members' => $processedMembers]);
+        }
+    }
+
+    /**
+     * Convert days_of_week string (e.g. "0101010") to individual checkbox params
+     * that saveEvent() expects (days_of_week_0 through days_of_week_6).
+     */
+    private function convertDaysOfWeek(Request $request)
+    {
+        if ($request->has('days_of_week') && $request->days_of_week) {
+            $days = str_split($request->days_of_week);
+            foreach ($days as $index => $day) {
+                if ($day === '1') {
+                    $request->merge(['days_of_week_'.$index => 'on']);
+                }
+            }
         }
     }
 }

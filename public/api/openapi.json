@@ -179,8 +179,8 @@
                           "type": "object",
                           "properties": {
                             "id": {
-                              "type": "integer",
-                              "description": "User ID"
+                              "type": "string",
+                              "description": "Encoded user ID"
                             },
                             "name": {
                               "type": "string",
@@ -281,8 +281,8 @@
                           "type": "object",
                           "properties": {
                             "id": {
-                              "type": "integer",
-                              "description": "User ID"
+                              "type": "string",
+                              "description": "Encoded user ID"
                             },
                             "name": {
                               "type": "string",
@@ -382,12 +382,12 @@
           {
             "name": "per_page",
             "in": "query",
-            "description": "Number of results per page (default 100, max 1000)",
+            "description": "Number of results per page (default 100, max 500)",
             "schema": {
               "type": "integer",
               "default": 100,
               "minimum": 1,
-              "maximum": 1000
+              "maximum": 500
             }
           }
         ],
@@ -1211,12 +1211,12 @@
           {
             "name": "per_page",
             "in": "query",
-            "description": "Number of results per page (default 100, max 1000)",
+            "description": "Number of results per page (default 100, max 500)",
             "schema": {
               "type": "integer",
               "default": 100,
               "minimum": 1,
-              "maximum": 1000
+              "maximum": 500
             }
           }
         ],
@@ -2181,6 +2181,12 @@
             "type": "string",
             "description": "End date (Y-m-d) for on_date, or number of occurrences for after_events"
           },
+          "days_of_week": {
+            "type": "string",
+            "pattern": "^[01]{7}$",
+            "description": "7-character string where each position represents a day (Sunday to Saturday), '1' means the event recurs on that day. Only used with weekly or every_n_weeks frequency.",
+            "example": "0101010"
+          },
           "venue_id": {
             "type": "string",
             "description": "Encoded ID of a venue schedule to associate with the event"
@@ -2330,6 +2336,10 @@
       "EventPart": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "Encoded part ID"
+          },
           "name": {
             "type": "string",
             "description": "Part name"
