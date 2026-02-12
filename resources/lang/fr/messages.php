@@ -532,7 +532,7 @@ return [
     'all_schedules' => 'Tous les plannings',
     'all_venues' => 'Tous les lieux',
     'all_shows' => 'Tous',
-    'filters' => 'Filtres',
+    'filters' => 'Filtrer les événements',
     'clear_filters' => 'Effacer les filtres',
 
     // Categories

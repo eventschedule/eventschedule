@@ -576,7 +576,7 @@ return [
     'all_schedules' => 'All Schedules',
     'all_venues' => 'All Venues',
     'all_shows' => 'All',
-    'filters' => 'Filters',
+    'filters' => 'Filter Events',
     'clear_filters' => 'Clear Filters',
     'schedule_url' => 'Schedule URL',
     'back_to_schedule' => 'Back to Schedule',

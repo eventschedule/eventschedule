@@ -377,7 +377,7 @@ return [
     'all_schedules' => 'Tutti i Programmi',
     'all_venues' => 'Tutti i Luoghi',
     'all_shows' => 'Tutti',
-    'filters' => 'Filtri',
+    'filters' => 'Filtra eventi',
     'clear_filters' => 'Cancella filtri',
 
     // Categories

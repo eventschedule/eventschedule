@@ -369,7 +369,7 @@ return [
     'all_schedules' => 'Alle Schema\'s',
     'all_venues' => 'Alle Locaties',
     'all_shows' => 'Alle',
-    'filters' => 'Filters',
+    'filters' => 'Evenementen filteren',
     'clear_filters' => 'Filters wissen',
 
     // Categories

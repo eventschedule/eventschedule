@@ -3655,7 +3655,7 @@
       },
     },
     mounted() {
-      this.showMemberTypeRadio = false;
+      this.showMemberTypeRadio = this.selectedMembers.length === 0;
       this.$nextTick(() => updateRecurringFieldVisibility());
 
       const isCloned = @json($isCloned ?? false);
