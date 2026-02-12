@@ -2700,11 +2700,9 @@ function updateHeroFiltersButton() {
         // Desktop hero button
         if (btn) {
             if (showBtn) {
-                btn.classList.remove('hidden');
                 btn.classList.add('md:flex');
-                btn.style.display = ''; // Let CSS classes control display
+                btn.style.display = '';
             } else {
-                btn.classList.add('hidden');
                 btn.classList.remove('md:flex');
                 btn.style.display = 'none';
             }
