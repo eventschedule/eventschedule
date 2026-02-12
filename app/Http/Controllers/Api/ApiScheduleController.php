@@ -277,7 +277,8 @@ class ApiScheduleController extends Controller
 
         Notification::route('mail', $emails)->notify(new DeletedRoleNotification($role, $user));
 
-        $role->delete();
+        $role->is_deleted = true;
+        $role->save();
 
         return response()->json([
             'data' => [

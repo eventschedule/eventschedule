@@ -152,18 +152,18 @@ class ApiEventController extends Controller
                 'event_url' => 'nullable|url|max:255',
                 'event_password' => 'nullable|string|max:255',
                 'registration_url' => 'nullable|url|max:255',
-                'category_id' => 'nullable|integer',
+                'category_id' => 'nullable|integer|in:'.implode(',', array_keys(config('app.event_categories', []))),
                 'category' => 'nullable|string|max:255',
                 'tickets_enabled' => 'nullable|boolean',
                 'ticket_currency_code' => 'nullable|string|size:3',
                 'payment_method' => 'nullable|string|in:stripe,invoiceninja,payment_url,manual',
                 'payment_instructions' => 'nullable|string|max:5000',
                 'schedule_type' => 'nullable|string|in:single,recurring',
-                'recurring_frequency' => 'nullable|string|in:daily,weekly,every_n_weeks,monthly_date,monthly_weekday,yearly',
+                'recurring_frequency' => 'required_if:schedule_type,recurring|nullable|string|in:daily,weekly,every_n_weeks,monthly_date,monthly_weekday,yearly',
                 'recurring_interval' => 'nullable|integer|min:2',
                 'recurring_end_type' => 'nullable|string|in:never,on_date,after_events',
                 'recurring_end_value' => 'nullable|string',
-                'days_of_week' => 'nullable|string|size:7|regex:/^[01]{7}$/',
+                'days_of_week' => 'required_if:recurring_frequency,weekly|required_if:recurring_frequency,every_n_weeks|nullable|string|size:7|regex:/^[01]{7}$/',
                 'venue_id' => 'nullable',
                 'venue_name' => 'nullable|string|max:255',
                 'venue_address1' => 'nullable|string|max:255',
@@ -253,18 +253,18 @@ class ApiEventController extends Controller
                 'event_url' => 'nullable|url|max:255',
                 'event_password' => 'nullable|string|max:255',
                 'registration_url' => 'nullable|url|max:255',
-                'category_id' => 'nullable|integer',
+                'category_id' => 'nullable|integer|in:'.implode(',', array_keys(config('app.event_categories', []))),
                 'category' => 'nullable|string|max:255',
                 'tickets_enabled' => 'nullable|boolean',
                 'ticket_currency_code' => 'nullable|string|size:3',
                 'payment_method' => 'nullable|string|in:stripe,invoiceninja,payment_url,manual',
                 'payment_instructions' => 'nullable|string|max:5000',
                 'schedule_type' => 'nullable|string|in:single,recurring',
-                'recurring_frequency' => 'nullable|string|in:daily,weekly,every_n_weeks,monthly_date,monthly_weekday,yearly',
+                'recurring_frequency' => 'required_if:schedule_type,recurring|nullable|string|in:daily,weekly,every_n_weeks,monthly_date,monthly_weekday,yearly',
                 'recurring_interval' => 'nullable|integer|min:2',
                 'recurring_end_type' => 'nullable|string|in:never,on_date,after_events',
                 'recurring_end_value' => 'nullable|string',
-                'days_of_week' => 'nullable|string|size:7|regex:/^[01]{7}$/',
+                'days_of_week' => 'required_if:recurring_frequency,weekly|required_if:recurring_frequency,every_n_weeks|nullable|string|size:7|regex:/^[01]{7}$/',
                 'venue_id' => 'nullable',
                 'venue_name' => 'nullable|string|max:255',
                 'venue_address1' => 'nullable|string|max:255',
@@ -476,7 +476,7 @@ class ApiEventController extends Controller
         }
 
         $file = $request->file('flyer_image');
-        $filename = strtolower('flyer_'.Str::random(32).'.'.$file->getClientOriginalExtension());
+        $filename = strtolower('flyer_'.Str::random(32).'.'.($file->guessExtension() ?? 'jpg'));
         $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
         $event->flyer_image_url = $filename;
