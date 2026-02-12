@@ -131,8 +131,8 @@ class ApiTest extends DuskTestCase
         $eventData = [
             'name' => 'API Created Event',
             'starts_at' => date('Y-m-d H:i:s', strtotime('+5 days')),
-            'venue_address1' => '456 API Street',
-            'venue_name' => 'API Venue'
+            'venue_address1' => '123 Test St',
+            'venue_name' => 'Venue'
         ];
 
         $ch = curl_init();

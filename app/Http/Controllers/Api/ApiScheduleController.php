@@ -85,6 +85,7 @@ class ApiScheduleController extends Controller
                 'type' => 'required|string|in:venue,talent,curator',
                 'email' => 'nullable|email|max:255',
                 'description' => 'nullable|string',
+                'short_description' => 'nullable|string|max:200',
                 'timezone' => 'nullable|string|max:100',
                 'language_code' => 'nullable|string|in:'.implode(',', config('app.supported_languages', ['en'])),
                 'website' => 'nullable|string|max:255',
@@ -109,8 +110,8 @@ class ApiScheduleController extends Controller
 
         $role = new Role;
         $role->fill($request->only([
-            'name', 'type', 'email', 'description', 'timezone',
-            'language_code', 'website', 'address1', 'city',
+            'name', 'type', 'email', 'description', 'short_description',
+            'timezone', 'language_code', 'website', 'address1', 'city',
             'state', 'postal_code', 'country_code',
         ]));
         $role->subdomain = Role::generateSubdomain($request->name);
@@ -164,6 +165,7 @@ class ApiScheduleController extends Controller
                 'name' => 'sometimes|required|string|max:255',
                 'email' => 'nullable|email|max:255',
                 'description' => 'nullable|string',
+                'short_description' => 'nullable|string|max:200',
                 'timezone' => 'nullable|string|max:100',
                 'language_code' => 'nullable|string|in:'.implode(',', config('app.supported_languages', ['en'])),
                 'website' => 'nullable|string|max:255',
@@ -181,8 +183,8 @@ class ApiScheduleController extends Controller
         }
 
         $role->fill($request->only([
-            'name', 'email', 'description', 'timezone',
-            'language_code', 'website', 'address1', 'city',
+            'name', 'email', 'description', 'short_description',
+            'timezone', 'language_code', 'website', 'address1', 'city',
             'state', 'postal_code', 'country_code',
         ]));
         $role->save();

@@ -701,6 +701,7 @@ class Role extends Model implements MustVerifyEmail
         $data->phone = $this->phone;
         $data->website = $this->website;
         $data->description = $this->description;
+        $data->short_description = $this->short_description;
         $data->timezone = $this->timezone;
         $data->language_code = $this->language_code;
         $data->created_at = $this->created_at ? $this->created_at->toIso8601String() : null;

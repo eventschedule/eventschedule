@@ -458,6 +458,11 @@
                     "type": "string",
                     "description": "Description of the schedule (supports markdown)"
                   },
+                  "short_description": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "Short description of the schedule (plain text, max 200 characters)"
+                  },
                   "timezone": {
                     "type": "string",
                     "maxLength": 100,
@@ -635,6 +640,11 @@
                   "description": {
                     "type": "string",
                     "description": "Description of the schedule (supports markdown)"
+                  },
+                  "short_description": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "Short description of the schedule (plain text, max 200 characters)"
                   },
                   "timezone": {
                     "type": "string",
@@ -1865,6 +1875,11 @@
             "type": "string",
             "nullable": true,
             "description": "Schedule description (may contain markdown)"
+          },
+          "short_description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Short description of the schedule (plain text, max 200 characters)"
           },
           "timezone": {
             "type": "string",
