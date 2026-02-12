@@ -2560,7 +2560,7 @@ function copyRoleUrl(button) {
         setTimeout(() => {
             button.innerHTML = originalHTML;
         }, 2000);
-    });
+    }).catch(() => {});
 }
 
 function toggleSubdomainEdit() {
@@ -2588,7 +2588,7 @@ function copyGroupUrl(button, url) {
         setTimeout(() => {
             button.innerHTML = originalHTML;
         }, 2000);
-    });
+    }).catch(() => {});
 }
 
 function toggleGroupSlugEdit(groupId) {

@@ -812,7 +812,7 @@
             setTimeout(() => {
                 button.innerHTML = originalHTML;
             }, 2000);
-        });
+        }).catch(() => {});
     }
 
     </script>
@@ -3204,7 +3204,7 @@
         if (!this.agendaShowDescription) return;
         this.$nextTick(() => {
           const textarea = this.$refs['partDescription_' + part.uid];
-          if (textarea && textarea[0] && !this.partEditors[part.uid]) {
+          if (textarea && textarea[0] && !this.partEditors[part.uid] && window.initTinyMDE) {
             this.partEditors[part.uid] = window.initTinyMDE(textarea[0], () => {
               part.description = this.partEditors[part.uid].value();
             });

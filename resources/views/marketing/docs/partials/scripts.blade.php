@@ -16,7 +16,7 @@
                 button.textContent = originalText;
                 button.classList.remove('text-green-400');
             }, 2000);
-        });
+        }).catch(() => {});
     });
 
     // Smooth scroll for anchor links
