@@ -12,23 +12,29 @@ use Illuminate\Support\Facades\Mail;
 
 class EmailService
 {
+    const ERROR_NOT_CONFIGURED = 'not_configured';
+
+    const ERROR_SEND_FAILED = 'send_failed';
+
+    const ERROR_SKIPPED = 'skipped';
+
     /**
      * Send ticket purchase email
      */
-    public function sendTicketEmail(Sale $sale, ?Role $role = null, bool $queue = true): bool
+    public function sendTicketEmail(Sale $sale, ?Role $role = null, bool $queue = true): string|true
     {
         // Skip sending to test/example email addresses
         if ($this->isTestEmail($sale->email)) {
             Log::info('Skipping email to test address: '.$sale->email);
 
-            return false;
+            return self::ERROR_SKIPPED;
         }
 
         // Skip sending for demo role
         if (is_demo_role($role)) {
             Log::info('Skipping email for demo role');
 
-            return false;
+            return self::ERROR_SKIPPED;
         }
 
         try {
@@ -48,7 +54,13 @@ class EmailService
             if (config('app.hosted')) {
                 // For hosted users, only send if role has email settings
                 if (! $role || ! $role->hasEmailSettings()) {
-                    return false;
+                    return self::ERROR_NOT_CONFIGURED;
+                }
+            } else {
+                // For selfhosted, check if a real mail transport is configured
+                $mailer = config('mail.default');
+                if (in_array($mailer, ['log', 'array'])) {
+                    return self::ERROR_NOT_CONFIGURED;
                 }
             }
 
@@ -79,7 +91,7 @@ class EmailService
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return false;
+            return self::ERROR_SEND_FAILED;
         }
     }
 
