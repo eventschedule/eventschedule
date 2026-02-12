@@ -1562,10 +1562,10 @@
                                             @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
                                             <div class="mb-4" id="group-url-display-{{ is_object($group) ? $group->id : $i }}">
                                                 <p class="text-sm text-gray-500 flex items-center gap-2">
-                                                    <x-link href="{{ $role->getGuestUrl() }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank">
-                                                        {{ \App\Utils\UrlUtils::clean($role->getGuestUrl()) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}
+                                                    <x-link href="{{ $role->getGuestUrl(true) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank">
+                                                        {{ \App\Utils\UrlUtils::clean($role->getGuestUrl(true)) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}
                                                     </x-link>
-                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $role->getGuestUrl() }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
+                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $role->getGuestUrl(true) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                                                         </svg>
@@ -1667,8 +1667,8 @@
                         <div class="mb-6" id="url-display">
                             <x-input-label :value="__('messages.schedule_url')" />
                             <p class="text-sm text-gray-500 flex items-center gap-2 mt-1">
-                                <x-link href="{{ $role->getGuestUrl() }}" target="_blank">
-                                    {{ \App\Utils\UrlUtils::clean($role->getGuestUrl()) }}
+                                <x-link href="{{ $role->getGuestUrl(true) }}" target="_blank">
+                                    {{ \App\Utils\UrlUtils::clean($role->getGuestUrl(true)) }}
                                 </x-link>
                                 <button type="button" data-action="copy-role-url" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -2549,7 +2549,7 @@ function addGroupField() {
 }
 
 function copyRoleUrl(button) {
-    const url = '{{ $role->exists ? $role->getGuestUrl() : "" }}';
+    const url = '{{ $role->exists ? $role->getGuestUrl(true) : "" }}';
     navigator.clipboard.writeText(url).then(() => {
         const originalHTML = button.innerHTML;
         button.innerHTML = `

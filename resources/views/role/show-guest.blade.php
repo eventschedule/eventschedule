@@ -100,7 +100,7 @@
               </div>
 
               {{-- Icons + Buttons together on same row (centered) --}}
-              <div class="flex flex-wrap justify-center gap-3">
+              <div class="flex flex-col items-center gap-3">
                 {{-- Social icons --}}
                 @if($hasEmail || $hasWebsite || $hasSocial)
                 <div class="flex flex-row gap-3 items-center">
@@ -143,7 +143,7 @@
 
                 {{-- Action buttons --}}
                 @if (config('app.hosted') || config('app.is_testing'))
-                <div class="flex flex-row flex-wrap gap-3 items-center">
+                <div class="flex flex-row flex-wrap gap-3 items-center justify-center">
                   @if (($role->isCurator() || $role->isVenue()) && $role->accept_requests)
                   <a
                     href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}"
@@ -481,7 +481,7 @@
         @endphp
         @foreach($upcomingEventsWithVideos as $eventData)
         @endforeach
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}">
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mt-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}">
           <!-- Carousel Container -->
           <div class="relative group">
             <!-- Carousel Track -->
@@ -634,9 +634,11 @@
         @media (max-width: 767px) {
           .calendar-panel-border {
             background: transparent !important;
+            backdrop-filter: none !important;
             border-radius: 0 !important;
             box-shadow: none !important;
             border: none !important;
+            margin-top: 0 !important;
           }
           .dark .calendar-panel-border {
             background: transparent !important;
@@ -646,7 +648,7 @@
       </style>
 
       <div
-        class="calendar-panel-border mb-6 px-0 md:px-6 lg:px-16 pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
+        class="calendar-panel-border mb-6 px-0 md:px-6 lg:px-16 pt-0 md:pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
         id="calendar-panel-wrapper"
         data-view-width
         style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"

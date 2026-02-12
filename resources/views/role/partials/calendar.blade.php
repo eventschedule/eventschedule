@@ -1216,7 +1216,7 @@
         </div>
 
         {{-- Schedule Filter --}}
-        @if(isset($role) && $role->groups && $role->groups->count() >= 1)
+        @if(isset($role) && $role->groups && $role->groups->count() > 1)
         <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.schedule') }}</label>
             <select v-model="selectedGroup" style="font-family: sans-serif"
@@ -1231,7 +1231,7 @@
         @endif
 
         {{-- Category Filter --}}
-        <div v-if="uniqueCategoryIds.length >= 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+        <div v-if="availableCategories.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.category') }}</label>
             <select v-model="selectedCategory" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
@@ -1244,7 +1244,7 @@
         </div>
 
         {{-- Venue Filter --}}
-        <div v-if="uniqueVenues.length >= 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+        <div v-if="uniqueVenues.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.venue') }}</label>
             <select v-model="selectedVenue" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
@@ -1313,7 +1313,7 @@
             </div>
 
             {{-- Schedule Filter --}}
-            @if(isset($role) && $role->groups && $role->groups->count() >= 1)
+            @if(isset($role) && $role->groups && $role->groups->count() > 1)
             <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.schedule') }}</label>
                 <select v-model="selectedGroup" style="font-family: sans-serif"
@@ -1328,7 +1328,7 @@
             @endif
 
             {{-- Category Filter --}}
-            <div v-if="uniqueCategoryIds.length >= 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <div v-if="availableCategories.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.category') }}</label>
                 <select v-model="selectedCategory" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
@@ -1341,7 +1341,7 @@
             </div>
 
             {{-- Venue Filter --}}
-            <div v-if="uniqueVenues.length >= 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <div v-if="uniqueVenues.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.venue') }}</label>
                 <select v-model="selectedVenue" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
@@ -1464,14 +1464,14 @@ const calendarApp = createApp({
     },
     computed: {
         hasDesktopFilters() {
-            return this.groups.length >= 1 || this.uniqueCategoryIds.length >= 1 || this.hasOnlineEvents || this.uniqueVenues.length >= 1 || this.hasFreeEvents;
+            return this.groups.length > 1 || this.availableCategories.length > 1 || this.hasOnlineEvents || this.uniqueVenues.length > 1 || this.hasFreeEvents;
         },
         dynamicFilterCount() {
             let count = 0;
-            if (this.groups.length >= 1) count++;
-            if (this.uniqueCategoryIds.length >= 1) count++;
+            if (this.groups.length > 1) count++;
+            if (this.availableCategories.length > 1) count++;
             if (this.hasOnlineEvents) count++;
-            if (this.uniqueVenues.length >= 1) count++;
+            if (this.uniqueVenues.length > 1) count++;
             if (this.hasFreeEvents) count++;
             return count;
         },
@@ -1866,7 +1866,13 @@ const calendarApp = createApp({
             if (this.selectedCategory && !this.availableCategories.find(cat => cat.id == this.selectedCategory)) {
                 this.selectedCategory = '';
             }
-        }
+        },
+        showFiltersDrawer(open) {
+            document.body.style.overflow = open ? 'hidden' : '';
+        },
+        showDesktopFiltersModal(open) {
+            document.body.style.overflow = open ? 'hidden' : '';
+        },
     },
     methods: {
         matchesFrequency(event, date) {

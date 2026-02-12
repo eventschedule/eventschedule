@@ -138,7 +138,7 @@
             </nav>
         </div>
         -->
-        <div class="flex items-top justify-between">
+        <div class="flex items-start justify-between">
             @if ($role->profile_image_url)
                 <div class="pe-4">
                     <img src="{{ $role->profile_image_url }}" class="rounded-lg h-14 w-14 flex-none">
