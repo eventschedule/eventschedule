@@ -769,6 +769,26 @@
         }
     }
 
+    function toggleEventSlugEdit() {
+        const urlDisplay = document.getElementById('event-url-display');
+        const slugEdit = document.getElementById('event-slug-edit');
+        const editButton = document.getElementById('edit-slug-btn');
+        const cancelButton = document.getElementById('cancel-slug-btn');
+
+        if (urlDisplay.classList.contains('hidden')) {
+            urlDisplay.classList.remove('hidden');
+            slugEdit.classList.add('hidden');
+            editButton.classList.remove('hidden');
+            cancelButton.classList.add('hidden');
+        } else {
+            urlDisplay.classList.add('hidden');
+            slugEdit.classList.remove('hidden');
+            editButton.classList.add('hidden');
+            cancelButton.classList.remove('hidden');
+            document.getElementById('event_slug').focus();
+        }
+    }
+
     function copyEventUrl(button) {
         const url = '{{ $event->exists ? $event->getGuestUrl($subdomain, false, true) : "" }}';
         navigator.clipboard.writeText(url).then(() => {
@@ -1008,7 +1028,7 @@
                                 autofocus required autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                             @if ($event->exists)
-                            <div class="text-sm text-gray-500 flex items-center gap-2">
+                            <div id="event-url-display" class="text-sm text-gray-500 flex items-center gap-2">
                                 <x-link href="{{ $event->getGuestUrl($subdomain, false, true) }}" target="_blank">
                                     {{ \App\Utils\UrlUtils::clean($event->getGuestUrl($subdomain, false, true)) }}
                                 </x-link>
@@ -1018,25 +1038,22 @@
                                     </svg>
                                 </button>
                             </div>
+                            <div id="event-slug-edit" class="hidden">
+                                <x-input-label for="event_slug" :value="__('messages.slug')" />
+                                <x-text-input id="event_slug" name="slug" type="text" class="mt-1 block w-full"
+                                    :value="old('slug', $event->slug)" />
+                                <x-input-error class="mt-2" :messages="$errors->get('slug')" />
+                            </div>
+                            <div class="flex gap-4 items-center">
+                                <button type="button" id="edit-slug-btn" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                    {{ __('messages.edit') }}
+                                </button>
+                                <button type="button" id="cancel-slug-btn" class="hidden text-sm text-[#4E81FA] hover:text-blue-700">
+                                    {{ __('messages.cancel') }}
+                                </button>
+                            </div>
                             @endif
                         </div>
-
-                        <!--
-                        <x-input-label for="event_slug" :value="__('messages.url')" />
-                            <div class="mt-1 flex">
-                                <x-text-input type="text" 
-                                    class="block w-1/2 rounded-e-none bg-gray-100 dark:bg-gray-800" 
-                                    :value="''"
-                                    readonly />
-                                <x-text-input id="event_slug" 
-                                    name="slug" 
-                                    type="text" 
-                                    class="block w-1/2 rounded-s-none border-s-0"
-                                    :value="old('slug', $event->slug)"
-                                    placeholder="{{ __('messages.auto_generated') }}"                                    autocomplete="off" />
-                            </div>
-                            <x-input-error class="mt-2" :messages="$errors->get('slug')" />
-                        -->
 
                         @if($effectiveRole->groups && count($effectiveRole->groups))
                         <div class="mb-6">
@@ -3736,6 +3753,20 @@
   if (copyUrlBtn) {
     copyUrlBtn.addEventListener('click', function() {
       copyEventUrl(this);
+    });
+  }
+
+  // Edit/Cancel slug buttons
+  var editSlugBtn = document.getElementById('edit-slug-btn');
+  if (editSlugBtn) {
+    editSlugBtn.addEventListener('click', function() {
+      toggleEventSlugEdit();
+    });
+  }
+  var cancelSlugBtn = document.getElementById('cancel-slug-btn');
+  if (cancelSlugBtn) {
+    cancelSlugBtn.addEventListener('click', function() {
+      toggleEventSlugEdit();
     });
   }
 
