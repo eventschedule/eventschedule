@@ -494,7 +494,7 @@ class ApiEventController extends Controller
             if ($group) {
                 $request->merge(['current_role_group_id' => UrlUtils::encodeId($group->id)]);
             } else {
-                return response()->json(['error' => 'Schedule not found: '.$request->schedule], 422);
+                return response()->json(['error' => 'Sub-schedule not found: '.$request->schedule], 422);
             }
         }
 
@@ -552,7 +552,7 @@ class ApiEventController extends Controller
                             $q->where('name', $memberData['name']);
                         })
                             ->when(isset($memberData['email']), function ($q) use ($memberData) {
-                                $q->where('email', $memberData['email']);
+                                $q->orWhere('email', $memberData['email']);
                             });
                     })
                     ->where('type', 'talent')
