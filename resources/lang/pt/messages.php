@@ -425,6 +425,7 @@ return [
     'portuguese' => 'Português',
     'spanish' => 'Espanhol',
     'estonian' => 'Estoniano',
+    'russian' => 'Russian',
     'sun' => 'Dom',
     'mon' => 'Seg',
     'tue' => 'Ter',
