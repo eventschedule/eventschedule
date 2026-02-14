@@ -15,22 +15,22 @@
 
             <!-- Desktop Navigation -->
             <div class="hidden md:flex items-center space-x-8">
-                <a href="{{ marketing_url('/features') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/features') || request()->is('features') ? 'text-blue-600 dark:text-blue-400 font-medium border-b-2 border-blue-600 dark:border-blue-400 pb-0.5' : '' }}">
+                <a href="{{ marketing_url('/features') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 pb-0.5 {{ request()->is('*/features') || request()->is('features') ? 'text-blue-600 dark:text-blue-400 font-medium !border-blue-600 dark:!border-blue-400 hover:!border-blue-600 dark:hover:!border-blue-400' : '' }}">
                     Features
                 </a>
-                <a href="{{ marketing_url('/pricing') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/pricing') || request()->is('pricing') ? 'text-blue-600 dark:text-blue-400 font-medium border-b-2 border-blue-600 dark:border-blue-400 pb-0.5' : '' }}">
+                <a href="{{ marketing_url('/pricing') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 pb-0.5 {{ request()->is('*/pricing') || request()->is('pricing') ? 'text-blue-600 dark:text-blue-400 font-medium !border-blue-600 dark:!border-blue-400 hover:!border-blue-600 dark:hover:!border-blue-400' : '' }}">
                     Pricing
                 </a>
-                <a href="{{ marketing_url('/features/integrations') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/integrations') || request()->is('integrations') ? 'text-blue-600 dark:text-blue-400 font-medium border-b-2 border-blue-600 dark:border-blue-400 pb-0.5' : '' }}">
+                <a href="{{ marketing_url('/features/integrations') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 pb-0.5 {{ request()->is('*/integrations') || request()->is('integrations') ? 'text-blue-600 dark:text-blue-400 font-medium !border-blue-600 dark:!border-blue-400 hover:!border-blue-600 dark:hover:!border-blue-400' : '' }}">
                     Integrations
                 </a>
-                <a href="{{ marketing_url('/selfhost') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/selfhost') || request()->is('selfhost') ? 'text-blue-600 dark:text-blue-400 font-medium border-b-2 border-blue-600 dark:border-blue-400 pb-0.5' : '' }}">
+                <a href="{{ marketing_url('/selfhost') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 pb-0.5 {{ request()->is('*/selfhost') || request()->is('selfhost') ? 'text-blue-600 dark:text-blue-400 font-medium !border-blue-600 dark:!border-blue-400 hover:!border-blue-600 dark:hover:!border-blue-400' : '' }}">
                     Selfhost
                 </a>
-                <a href="{{ marketing_url('/docs') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/docs*') || request()->is('docs*') ? 'text-blue-600 dark:text-blue-400 font-medium border-b-2 border-blue-600 dark:border-blue-400 pb-0.5' : '' }}">
+                <a href="{{ marketing_url('/docs') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 pb-0.5 {{ request()->is('*/docs*') || request()->is('docs*') ? 'text-blue-600 dark:text-blue-400 font-medium !border-blue-600 dark:!border-blue-400 hover:!border-blue-600 dark:hover:!border-blue-400' : '' }}">
                     Docs
                 </a>
-                <a href="{{ marketing_url('/about') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/about') || request()->is('about') ? 'text-blue-600 dark:text-blue-400 font-medium border-b-2 border-blue-600 dark:border-blue-400 pb-0.5' : '' }}">
+                <a href="{{ marketing_url('/about') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 pb-0.5 {{ request()->is('*/about') || request()->is('about') ? 'text-blue-600 dark:text-blue-400 font-medium !border-blue-600 dark:!border-blue-400 hover:!border-blue-600 dark:hover:!border-blue-400' : '' }}">
                     About
                 </a>
             </div>
