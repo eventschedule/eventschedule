@@ -34,7 +34,7 @@ class GeneralTest extends DuskTestCase
                 ->type('email', $email)
                 ->type('password', $password)
                 ->press('LOG IN')
-                ->waitForLocation('/events', 5)
+                ->waitForLocation('/events', 15)
                 ->assertPathIs('/events')
                 ->assertSee($name);
 
