@@ -145,7 +145,7 @@
                   "language_code": {
                     "type": "string",
                     "description": "Preferred language code",
-                    "enum": ["en", "es", "de", "fr", "it", "pt", "he", "nl", "ar", "et"]
+                    "enum": ["en", "es", "de", "fr", "it", "pt", "he", "nl", "ar", "et", "ru"]
                   }
                 }
               }
@@ -484,7 +484,7 @@
                   "language_code": {
                     "type": "string",
                     "description": "Language code for the schedule",
-                    "enum": ["en", "es", "de", "fr", "it", "pt", "he", "nl", "ar", "et"]
+                    "enum": ["en", "es", "de", "fr", "it", "pt", "he", "nl", "ar", "et", "ru"]
                   },
                   "website": {
                     "type": "string",
@@ -666,7 +666,7 @@
                   "language_code": {
                     "type": "string",
                     "description": "Language code for the schedule",
-                    "enum": ["en", "es", "de", "fr", "it", "pt", "he", "nl", "ar", "et"]
+                    "enum": ["en", "es", "de", "fr", "it", "pt", "he", "nl", "ar", "et", "ru"]
                   },
                   "website": {
                     "type": "string",
