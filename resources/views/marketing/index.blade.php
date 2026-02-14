@@ -4,6 +4,9 @@
     <x-slot name="keywords">event schedule, event calendar, free event management, ticketing platform, QR check-in, venue calendar, performer schedule, sell tickets online, event organizer software, event newsletters, embed event calendar, recurring events</x-slot>
     <x-slot name="socialImage">social/home.png</x-slot>
     <x-slot name="breadcrumbTitle">Home</x-slot>
+    <x-slot name="preload">
+        <link rel="preload" as="image" type="image/webp" href="{{ url(webp_path('/images/screenshots/marketing_1_800w.jpg')) }}">
+    </x-slot>
 
     <style {!! nonce_attr() !!}>
         /* Homepage-specific animations (not shared across pages) */
@@ -174,10 +177,13 @@
                         ];
                         @endphp
                         @foreach($screenshots as $index => $screenshot)
+                        @php
+                            $smallPath = str_replace('.jpg', '_800w.jpg', $screenshot[0]);
+                        @endphp
                         <div class="flex-shrink-0 w-full overflow-hidden">
                             <picture>
-                                <source srcset="{{ url(webp_path($screenshot[0])) }}" type="image/webp">
-                                <img src="{{ url($screenshot[0]) }}" alt="{{ $screenshot[1] }}" width="1872" height="2560" class="block w-full h-auto scale-[1.05]" @if($index === 0) fetchpriority="high" @else loading="lazy" @endif />
+                                <source srcset="{{ url(webp_path($smallPath)) }}" type="image/webp">
+                                <img src="{{ url($smallPath) }}" alt="{{ $screenshot[1] }}" width="800" height="1094" class="block w-full h-auto scale-[1.05]" @if($index === 0) fetchpriority="high" @else loading="lazy" decoding="async" @endif />
                             </picture>
                         </div>
                         @endforeach

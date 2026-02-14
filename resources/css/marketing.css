@@ -40,14 +40,17 @@ html {
 
 .animate-pulse-slow {
     animation: pulse-slow 3s ease-in-out infinite;
+    will-change: opacity;
 }
 
 .animate-float {
     animation: float 6s ease-in-out infinite;
+    will-change: transform;
 }
 
 .animate-sync {
     animation: sync-pulse 2s ease-in-out infinite;
+    will-change: opacity, transform;
 }
 
 /* ========================================
@@ -135,7 +138,7 @@ html {
    ======================================== */
 
 .bento-card {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .bento-card:hover {
@@ -143,7 +146,7 @@ html {
 }
 
 .faq-item {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .faq-item:hover {
@@ -151,7 +154,7 @@ html {
 }
 
 .feature-card {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .feature-card:hover {
@@ -160,7 +163,7 @@ html {
 }
 
 .pricing-card {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .pricing-card:hover {
@@ -168,7 +171,7 @@ html {
 }
 
 .persona-card {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .persona-card:hover {

@@ -23,7 +23,14 @@
     @endif
 
     @if (config('app.hosted') || config('app.report_errors'))
-        <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous" defer {!! nonce_attr() !!}></script>
+    <script {!! nonce_attr() !!}>
+        window.addEventListener('load', function() {
+            var s = document.createElement('script');
+            s.src = "{{ config('app.sentry_js_dsn') }}";
+            s.crossOrigin = 'anonymous';
+            document.head.appendChild(s);
+        });
+    </script>
     @endif
 
     <!-- Theme color -->
@@ -205,10 +212,12 @@
     </script>
     @endif
 
+    {{ $preload ?? '' }}
+
     @vite([
-        'resources/css/app.css',
+        'resources/css/marketing-app.css',
         'resources/css/marketing.css',
-        'resources/js/app.js',
+        'resources/js/marketing.js',
     ])
 
     <script {!! nonce_attr() !!}>
