@@ -271,7 +271,7 @@
                           <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer"
                              class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
                              data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
-                              <x-url-icon class="w-5 h-5">
+                              <x-url-icon class="w-5 h-5" color="currentColor">
                                   {{ \App\Utils\UrlUtils::clean($link->url) }}
                               </x-url-icon>
                           </a>

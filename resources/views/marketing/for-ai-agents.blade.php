@@ -162,8 +162,28 @@
             </div>
         </div>
     </section>
+    {{-- Stats Section --}}
+    <section class="bg-white dark:bg-[#0a0a0f] py-16 border-t border-gray-200 dark:border-white/5">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-3 gap-6 text-center">
+                <div class="p-6">
+                    <div class="text-4xl font-bold text-cyan-400 mb-2">40+ hours</div>
+                    <div class="text-gray-500 dark:text-gray-400 text-sm">to build event management from scratch</div>
+                </div>
+                <div class="p-6 border-x border-gray-200 dark:border-white/5">
+                    <div class="text-4xl font-bold text-amber-400 mb-2">0%</div>
+                    <div class="text-gray-500 dark:text-gray-400 text-sm">platform fees on ticket sales</div>
+                </div>
+                <div class="p-6">
+                    <div class="text-4xl font-bold text-sky-400 mb-2">< 5 min</div>
+                    <div class="text-gray-500 dark:text-gray-400 text-sm">to your first API call</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     {{-- Section 2: Features Bento Grid --}}
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -201,7 +221,7 @@
                                     <div class="text-sm text-gray-600 dark:text-gray-300 font-mono leading-relaxed">
                                         {<br>
                                         &nbsp;&nbsp;<span class="text-cyan-600 dark:text-cyan-400">"name"</span>: <span class="text-emerald-600 dark:text-emerald-400">"AI Meetup"</span>,<br>
-                                        &nbsp;&nbsp;<span class="text-cyan-600 dark:text-cyan-400">"starts_at"</span>: <span class="text-emerald-600 dark:text-emerald-400">"2025-06-15"</span>,<br>
+                                        &nbsp;&nbsp;<span class="text-cyan-600 dark:text-cyan-400">"starts_at"</span>: <span class="text-emerald-600 dark:text-emerald-400">"2026-06-15"</span>,<br>
                                         &nbsp;&nbsp;<span class="text-cyan-600 dark:text-cyan-400">"venue"</span>: <span class="text-emerald-600 dark:text-emerald-400">"Tech Hub SF"</span><br>
                                         }
                                     </div>
@@ -496,8 +516,11 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Get your API key</h3>
                     <p class="text-gray-500 dark:text-gray-400 text-sm">
-                        Sign up for free and generate an API key from your account settings. Pro plan required for write operations.
+                        <a href="{{ route('sign_up') }}" class="text-cyan-600 dark:text-cyan-400 hover:underline font-medium">Sign up for free</a> and generate an API key from your account settings. Pro plan required for write operations.
                     </p>
+                    <div class="mt-4 bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3 text-left">
+                        <div class="text-xs font-mono text-gray-500 dark:text-gray-400 leading-relaxed truncate">Authorization: Bearer YOUR_API_KEY</div>
+                    </div>
                 </div>
 
                 <div class="text-center">
@@ -508,6 +531,9 @@
                     <p class="text-gray-500 dark:text-gray-400 text-sm">
                         POST to /api/schedules with a name and subdomain. Your schedule is live instantly.
                     </p>
+                    <div class="mt-4 bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3 text-left">
+                        <div class="text-xs font-mono text-gray-500 dark:text-gray-400 leading-relaxed">curl -X POST /api/schedules \<br>&nbsp;&nbsp;-d '{"name": "My Schedule"}'</div>
+                    </div>
                 </div>
 
                 <div class="text-center">
@@ -518,6 +544,9 @@
                     <p class="text-gray-500 dark:text-gray-400 text-sm">
                         Create events, set up tickets, and manage your schedule programmatically. Check the API docs for the full reference.
                     </p>
+                    <div class="mt-4 bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3 text-left">
+                        <div class="text-xs font-mono text-gray-500 dark:text-gray-400 leading-relaxed">curl -X POST /api/events \<br>&nbsp;&nbsp;-d '{"name": "AI Meetup"}'</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -538,15 +567,20 @@
             <p class="text-xl text-gray-500 dark:text-gray-400 mb-10 max-w-2xl mx-auto">
                 Full REST API. OpenAPI spec. Zero platform fees.
             </p>
-            <a href="{{ route('marketing.docs.developer.api') }}" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-cyan-600 to-emerald-600 rounded-2xl overflow-hidden hover:scale-105 transition-transform duration-150 will-change-transform shadow-xl shadow-cyan-500/20">
-                <span class="absolute inset-0 animate-shimmer"></span>
-                <span class="relative z-10 flex items-center gap-2">
-                    Read the API Docs
-                    <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </span>
-            </a>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{{ route('sign_up') }}" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-cyan-600 to-emerald-600 rounded-2xl overflow-hidden hover:scale-105 transition-transform duration-150 will-change-transform shadow-xl shadow-cyan-500/20">
+                    <span class="absolute inset-0 animate-shimmer"></span>
+                    <span class="relative z-10 flex items-center gap-2">
+                        Get Started Free
+                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </span>
+                </a>
+                <a href="{{ route('marketing.docs.developer.api') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-700 dark:text-gray-200 border-2 border-gray-300 dark:border-white/20 rounded-2xl hover:border-cyan-500 dark:hover:border-cyan-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-all">
+                    Read API Docs
+                </a>
+            </div>
             <p class="mt-6 text-gray-500 text-sm">Pro plan required for write operations</p>
         </div>
     </section>
