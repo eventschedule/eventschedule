@@ -106,7 +106,7 @@
                                 </svg>
                                 Field Types
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Five flexible field types</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Five flexible field types</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Choose the right input type for each piece of information you need to collect from attendees.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Text</span>
@@ -162,7 +162,7 @@
                         </svg>
                         Per-Order
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Event-level fields</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Event-level fields</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Collect information once per order. Great for details that apply to the entire purchase.</p>
 
                     <div class="space-y-3">
@@ -189,7 +189,7 @@
                         </svg>
                         Per-Ticket
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Ticket-specific fields</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Ticket-specific fields</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Collect info for each ticket type. Only shown when that specific ticket is selected.</p>
 
                     <div class="space-y-3">
@@ -220,7 +220,7 @@
                                 </svg>
                                 Validation
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Required or optional</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Required or optional</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg">Mark fields as required to ensure you get the information you need, or leave them optional for flexibility. Up to 8 fields per level.</p>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-6 border border-gray-200 dark:border-white/10">

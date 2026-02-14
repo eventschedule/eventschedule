@@ -90,7 +90,7 @@
                                 </svg>
                                 Unlimited
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Create as many as you need</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Create as many as you need</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Add unlimited sub-schedules to organize your events. Perfect for venues with multiple rooms, stages, or different event series running simultaneously.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Main Stage</span>
@@ -136,7 +136,7 @@
                         </svg>
                         Filtering
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Easy filtering for visitors</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Easy filtering for visitors</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">When you have multiple sub-schedules, visitors see a dropdown filter on your calendar. They can quickly find events in the room or series they care about.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3">
@@ -157,7 +157,7 @@
                         </svg>
                         Direct Links
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Shareable URLs</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Shareable URLs</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Each sub-schedule gets its own URL. Share links directly to specific rooms or event series. Visitors land on exactly what they want to see.</p>
 
                     <div class="space-y-2">
@@ -186,7 +186,7 @@
                                 </svg>
                                 API Support
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Automate with the API</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Automate with the API</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg">Create events programmatically and assign them to sub-schedules using the API. Pass the <code class="text-blue-300 bg-blue-500/20 px-1 rounded">schedule</code> parameter when creating events.</p>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 font-mono text-sm">

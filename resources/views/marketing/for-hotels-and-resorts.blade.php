@@ -96,7 +96,7 @@
                                 </svg>
                                 Newsletter
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Guests know what's happening before they ask.</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Guests know what's happening before they ask.</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Pool party tonight, wine tasting tomorrow, live jazz this weekend - one click emails every subscribed guest. Keep your property buzzing with activity.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Direct to guests</span>
@@ -145,7 +145,7 @@
                         </svg>
                         Spaces
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Every space, one dashboard</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Every space, one dashboard</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Pool, ballroom, spa, restaurant. Filter by space and avoid double-bookings across your property.</p>
 
                     <div class="space-y-2">
@@ -180,7 +180,7 @@
                         </svg>
                         Tickets
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sell tickets, keep 100%</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sell tickets, keep 100%</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Ticketed wine dinners, cooking classes, spa packages. Sell directly to guests with no platform fees.</p>
 
                     <!-- Ticket visual -->
@@ -210,7 +210,7 @@
                                 </svg>
                                 Activity Calendar
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">A full week of guest activities</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">A full week of guest activities</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Plan every day of your guests' stay. From morning yoga to evening entertainment, keep the schedule fresh and engaging.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Recurring events</span>
@@ -253,7 +253,7 @@
                         </svg>
                         Google Calendar
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Syncs with Google Calendar</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Syncs with Google Calendar</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Two-way sync keeps your property calendar and Google Calendar in perfect harmony. Update once, reflected everywhere.</p>
 
                     <div class="flex justify-center">
@@ -291,7 +291,7 @@
                         </svg>
                         Team
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your whole team, connected</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your whole team, connected</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Events manager, concierge, spa director, F&B coordinator. Everyone updates the same calendar.</p>
 
                     <div class="space-y-2">
@@ -327,7 +327,7 @@
                         </svg>
                         Analytics
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Know what guests love</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Know what guests love</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">See which activities get the most views, RSVPs, and ticket sales. Double down on what works.</p>
 
                     <div class="space-y-3">

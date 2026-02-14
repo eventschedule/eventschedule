@@ -136,7 +136,7 @@
                                 </svg>
                                 Weekly Lineup Blast
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Drop your weekend lineup</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Drop your weekend lineup</h2>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-6">Thursday rolls around, you blast out the weekend's DJs to everyone who follows you. No algorithm. No pay-to-play. Just your crowd, hyped and ready.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">One-click send</span>
@@ -185,7 +185,7 @@
                         </svg>
                         Guest List
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Get on the list</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Get on the list</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Fans sign up for your guest list right from your calendar. Reduced cover before 11pm - the status thing that fills your early crowd.</p>
 
                     <div class="space-y-2">
@@ -214,7 +214,7 @@
                         </svg>
                         Branded Nights
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your signature nights</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your signature nights</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Latin Fridays. 80s Saturdays. Techno Sundays. Set them up once - they show automatically every week. Build the brand.</p>
 
                     <!-- Mini week view with colors -->
@@ -261,7 +261,7 @@
                                 </svg>
                                 VIP & Bottle Service
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Table bookings, handled</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Table bookings, handled</h2>
                             <p class="text-gray-600 dark:text-gray-400 text-lg">VIP table requests, bottle service inquiries, birthday packages - all in one inbox. See party size, minimum spend, special requests. Your biggest revenue driver, organized.</p>
                             <div class="flex flex-wrap gap-3 mt-4">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Table reservations</span>
@@ -301,7 +301,7 @@
                         </svg>
                         DJ Inbox
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">DJs come to you</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">DJs come to you</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Artists submit to play your club. See their SoundCloud, genre, and past gigs. Accept or pass - no endless email threads.</p>
 
                     <div class="space-y-2">
@@ -331,7 +331,7 @@
                         </svg>
                         Social Graphics
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Insta-ready lineups</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Insta-ready lineups</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Auto-generate lineup graphics for Instagram stories and posts. Your DJs, your branding, ready to share.</p>
 
                     <div class="flex justify-center">
@@ -367,7 +367,7 @@
                         </svg>
                         Ticketing
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sold out Saturdays</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sold out Saturdays</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">NYE. Headliner shows. Theme party takeovers. Sell tickets, scan QR codes at the door. Zero platform fees.</p>
 
                     <div class="flex items-center gap-3">

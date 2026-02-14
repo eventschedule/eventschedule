@@ -111,7 +111,7 @@
                         </svg>
                         Invoicing
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Professional invoices</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Professional invoices</h2>
                     <p class="text-gray-500 dark:text-gray-300 mb-6">Every ticket purchase automatically generates a professional invoice in Invoice Ninja with all the details.</p>
 
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -135,7 +135,7 @@
                         </svg>
                         Clients
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Client management</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Client management</h2>
                     <p class="text-gray-500 dark:text-gray-300 mb-4">Automatically creates new clients or links to existing ones. Build your customer database with every sale.</p>
 
                     <div class="space-y-2">
@@ -163,7 +163,7 @@
                         </svg>
                         Tickets
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">QR code tickets</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">QR code tickets</h2>
                     <p class="text-gray-500 dark:text-gray-300 mb-4">The invoice includes a unique QR code for event check-in. Customers can use the invoice as their ticket.</p>
 
                     <div class="flex justify-center">
@@ -282,7 +282,7 @@
                                 </svg>
                                 Self-service
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Client portal</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Client portal</h2>
                             <p class="text-gray-500 dark:text-gray-300 text-lg">Customers access their invoices through Invoice Ninja's client portal. View history, download PDFs, and pay online.</p>
                         </div>
                         <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-2xl p-6 border border-gray-200 dark:border-white/10">
@@ -319,7 +319,7 @@
                         </svg>
                         Real-time
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Webhook sync</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Webhook sync</h2>
                     <p class="text-gray-500 dark:text-gray-300 mb-4">Payment notifications flow back automatically. When customers pay, tickets are marked as confirmed instantly.</p>
 
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-3 border border-gray-200 dark:border-white/10">
@@ -338,7 +338,7 @@
                         </svg>
                         Global
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">100+ currencies</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">100+ currencies</h2>
                     <p class="text-gray-500 dark:text-gray-300 mb-4">Invoice in any currency supported by Invoice Ninja. Perfect for international events and clients.</p>
 
                     <div class="flex flex-wrap gap-2">
@@ -359,7 +359,7 @@
                                 </svg>
                                 Selfhosted
                             </div>
-                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Selfhosted friendly</h3>
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Selfhosted friendly</h2>
                             <p class="text-gray-500 dark:text-gray-300 mb-4">Works with your own Invoice Ninja installation. Full control over your invoicing data and branding.</p>
                         </div>
                         <div class="space-y-3">

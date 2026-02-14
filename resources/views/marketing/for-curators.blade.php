@@ -59,7 +59,7 @@
                                 </svg>
                                 AI-Powered
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Smart event import</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Smart event import</h2>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-6">Paste a URL, drop an image of a flyer or agenda, or copy text from anywhere. AI extracts event details automatically, even multiple events from a single image. No more manual data entry.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">URL parsing</span>
@@ -107,7 +107,7 @@
                         </svg>
                         City Search
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Discover local events</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Discover local events</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Search for events by city. Import what you find directly to your schedule with one click.</p>
 
                     <div class="bg-white dark:bg-gray-900 rounded-xl p-3 border border-gray-200 dark:border-white/10 mb-3">
@@ -144,7 +144,7 @@
                         </svg>
                         Approval
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Review before publishing</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Review before publishing</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Events from external sources go to your inbox. Review, edit, and approve before they appear on your schedule.</p>
 
                     <div class="space-y-2">
@@ -181,7 +181,7 @@
                                 </svg>
                                 Aggregation
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Unified calendar</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Unified calendar</h2>
                             <p class="text-gray-600 dark:text-gray-400 text-lg">Pull events from venues, performers, and other curators. Display everything in one clean, searchable calendar.</p>
                         </div>
                         <div class="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-200 dark:border-white/10">
@@ -227,7 +227,7 @@
                         </svg>
                         Graphics
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Email schedule graphics</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Email schedule graphics</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Generate shareable graphics of your weekly or monthly schedule. Perfect for newsletters and social media.</p>
 
                     <div class="bg-gradient-to-br from-blue-100 to-blue-100 dark:from-blue-950 dark:to-blue-950 rounded-xl border border-blue-300 dark:border-blue-400/30 p-3">
@@ -257,7 +257,7 @@
                         </svg>
                         Followers
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Build your audience</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Build your audience</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Visitors can follow your schedule. They get notified when you add new events.</p>
 
                     <div class="text-center">
@@ -280,7 +280,7 @@
                         </svg>
                         Calendar Sync
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Google Calendar sync</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Google Calendar sync</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Two-way sync keeps your curated calendar and Google Calendar in perfect harmony.</p>
 
                     <div class="flex items-center justify-center gap-3">

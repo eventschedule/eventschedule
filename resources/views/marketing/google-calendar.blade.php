@@ -90,7 +90,7 @@
                         </svg>
                         Secure
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">OAuth 2.0 authentication</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">OAuth 2.0 authentication</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Connect with one click using Google's secure OAuth. No passwords stored. Automatic token refresh keeps you connected.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -122,7 +122,7 @@
                         </svg>
                         Real-time
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Instant webhook updates</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Instant webhook updates</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Changes in Google Calendar appear instantly. Webhook notifications mean no polling delays.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -148,7 +148,7 @@
                         </svg>
                         Flexible
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Three sync modes</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Three sync modes</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-4">Choose your direction: push events to Google, pull events from Google, or sync both ways.</p>
 
                     <div class="space-y-2">
@@ -183,7 +183,7 @@
                                 </svg>
                                 Multi-Calendar
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Choose your calendar</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Choose your calendar</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg">Select which Google Calendar to sync with for each schedule. Perfect if you manage multiple calendars for work, personal, or different projects.</p>
                         </div>
                         <div class="space-y-3">
@@ -214,7 +214,7 @@
                         </svg>
                         Reliable
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Background processing</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Background processing</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-4">Sync jobs run in the background. Your schedule stays fast while events sync reliably behind the scenes.</p>
 
                     <div class="flex items-center gap-2">

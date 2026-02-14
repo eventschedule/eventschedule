@@ -96,7 +96,7 @@
                                 </svg>
                                 Bookings
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">One link for event planners</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">One link for event planners</h2>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-6">Wedding planners, corporate event coordinators, and party hosts find your availability, videos, and rates. Professional booking made simple.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Corporate events</span>
@@ -138,7 +138,7 @@
                         </svg>
                         Newsletter
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Reach fans directly</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Reach fans directly</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">New show? Email your audience directly. No paying Facebook to reach your own followers.</p>
 
                     <div class="flex justify-center">
@@ -163,7 +163,7 @@
                         </svg>
                         Virtual Magic
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Stream shows worldwide</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Stream shows worldwide</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Perform for audiences anywhere. Sell tickets globally for your virtual magic shows.</p>
 
                     <div class="flex justify-center">
@@ -191,7 +191,7 @@
                                 </svg>
                                 Ticketing
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Keep 100% of ticket sales</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Keep 100% of ticket sales</h2>
                             <p class="text-gray-600 dark:text-gray-400 text-lg">Your show, your revenue. Zero platform fees. Stripe goes directly to you. QR tickets for easy check-in.</p>
                         </div>
                         <div class="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-200 dark:border-white/10">
@@ -223,7 +223,7 @@
                         </svg>
                         Calendar
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sync with Google Calendar</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sync with Google Calendar</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Two-way sync keeps everything updated. Add a show anywhere, see it everywhere.</p>
 
                     <div class="flex items-center justify-center gap-3">
@@ -260,7 +260,7 @@
                         </svg>
                         Team
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Coordinate your crew</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Coordinate your crew</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Assistants, agents, technicians - everyone sees the schedule. No double-bookings.</p>
 
                     <div class="space-y-2">
@@ -289,7 +289,7 @@
                         </svg>
                         Graphics
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Share-ready images</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Share-ready images</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Auto-generate promotional graphics for social media. Perfect for Instagram and Facebook.</p>
 
                     <div class="flex justify-center">

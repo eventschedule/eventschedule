@@ -76,7 +76,7 @@
                                 </svg>
                                 Newsletter
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Tell your regulars what's on</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Tell your regulars what's on</h2>
                             <p class="text-gray-500 dark:text-white/80 text-lg mb-6">No algorithm. No pay-to-play. Wednesday trivia's back? New band this Friday? One click sends the week's lineup straight to everyone who wants to know.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Skip the algorithm</span>
@@ -125,7 +125,7 @@
                         </svg>
                         Recurring Events
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Trivia Wednesdays. Jazz Fridays.</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Trivia Wednesdays. Jazz Fridays.</h2>
                     <p class="text-gray-500 dark:text-white/80 mb-6">Bars run on weekly rhythms. Set up recurring events once, they show automatically.</p>
 
                     <!-- Mini week view -->
@@ -170,7 +170,7 @@
                         </svg>
                         Specials
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Announce what's pouring</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Announce what's pouring</h2>
                     <p class="text-gray-500 dark:text-white/80 mb-6">New keg? Brewery collab? Whiskey tasting? Let your crowd know what's special this week.</p>
 
                     <!-- Tap handles visual -->
@@ -198,7 +198,7 @@
                                 </svg>
                                 Watch Parties
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Game on the big screen</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Game on the big screen</h2>
                             <p class="text-gray-500 dark:text-white/80 text-lg mb-4">NFL Sundays, UFC fight nights, World Cup matches. Your sports fans follow to know what's showing and when.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live sports</span>
@@ -232,7 +232,7 @@
                         </svg>
                         Ticketing
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Charge at the door</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Charge at the door</h2>
                     <p class="text-gray-500 dark:text-white/80 mb-6">Comedy night? Special tasting? Sell tickets, scan QR codes at entry. Zero platform fees.</p>
 
                     <div class="flex justify-center">
@@ -252,7 +252,7 @@
                         </svg>
                         Booking Inbox
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Bands come to you</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Bands come to you</h2>
                     <p class="text-gray-500 dark:text-white/80 mb-6">Musicians and DJs request to play. Review, approve, book - without the back-and-forth.</p>
 
                     <div class="space-y-2">
@@ -282,7 +282,7 @@
                         </svg>
                         Analytics
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">See what fills seats</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">See what fills seats</h2>
                     <p class="text-gray-500 dark:text-white/80 mb-6">Which nights draw crowds? What events get shares? Know what's working.</p>
 
                     <div class="space-y-2">

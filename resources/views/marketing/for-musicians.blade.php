@@ -96,7 +96,7 @@
                                 </svg>
                                 Direct to Fans
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Announce tours directly to fans</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Announce tours directly to fans</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">New album dropping? Going on tour? Send custom show graphics directly to your fans' inbox. No algorithm gatekeeping. Your music, your audience.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Tour announcements</span>
@@ -141,7 +141,7 @@
                             </svg>
                             Ticketing
                         </div>
-                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Zero platform fees on tickets</h3>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Zero platform fees on tickets</h2>
                         <p class="text-gray-500 dark:text-gray-400 mb-6">Pre-sales and door sales. 100% of Stripe payments go to you. QR check-in at the venue.</p>
 
                         <div class="bg-emerald-500/20 rounded-xl border border-emerald-400/30 p-4">
@@ -168,7 +168,7 @@
                         </svg>
                         Share Link
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">One link for Spotify, Bandcamp & EPK</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">One link for Spotify, Bandcamp & EPK</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Put it in your Spotify bio, Bandcamp page, EPK, or website. All your gigs in one place.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -196,7 +196,7 @@
                                 </svg>
                                 Venue Sync
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Venues book you, it auto-appears</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Venues book you, it auto-appears</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg">When venues add your show to their calendar, it automatically appears on yours. One booking, both schedules updated.</p>
                         </div>
                         <div class="flex items-center justify-center">
@@ -242,7 +242,7 @@
                         </svg>
                         Team
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Band, manager & agent access</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Band, manager & agent access</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Invite band members, your manager, or booking agent. Everyone can add gigs and see what's coming up.</p>
 
                     <div class="space-y-2">
@@ -278,7 +278,7 @@
                         </svg>
                         Calendar Sync
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Google Calendar for gigs & rehearsals</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Google Calendar for gigs & rehearsals</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Two-way sync. Gigs, rehearsals, recording sessions, soundchecks - all in one place.</p>
 
                     <div class="flex items-center justify-center gap-3">
@@ -315,7 +315,7 @@
                         </svg>
                         Followers
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Fans follow your tour</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Fans follow your tour</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Location-based notifications. When you add a show near them, they get notified automatically.</p>
 
                     <div class="flex items-center justify-center">

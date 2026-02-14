@@ -76,7 +76,7 @@
                                 </svg>
                                 Flexible Recurrence
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Choose your frequency</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Choose your frequency</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Pick from six recurrence options to match any schedule. Daily, weekly, biweekly, monthly, or yearly.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Daily</span>
@@ -121,7 +121,7 @@
                         </svg>
                         End Conditions
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Control the run</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Control the run</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Choose when your recurring series stops.</p>
 
                     <div class="space-y-3">
@@ -148,7 +148,7 @@
                         </svg>
                         Per-Event Tickets
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sell per event</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sell per event</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Each occurrence has its own ticket count and sales.</p>
 
                     <div class="space-y-2">
@@ -183,7 +183,7 @@
                                 </svg>
                                 Calendar View
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">See the series</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">See the series</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg">All recurring dates appear on your schedule automatically, regardless of frequency. Guests see each occurrence individually with its own ticket availability.</p>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10">
@@ -239,7 +239,7 @@
                                 </svg>
                                 Auto Sync
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Syncs automatically</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Syncs automatically</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg">Recurring events sync to Google Calendar as individual occurrences. Each date appears separately so attendees see the full series.</p>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -283,7 +283,7 @@
                         </svg>
                         Use Cases
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Built for regulars</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Built for regulars</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Perfect for events that repeat on any schedule.</p>
 
                     <div class="flex flex-wrap gap-2">
@@ -318,7 +318,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                             </svg>
                         </div>
-                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-lime-600 dark:group-hover:text-lime-400 transition-colors">Read the guide</h3>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-lime-600 dark:group-hover:text-lime-400 transition-colors">Read the guide</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Learn how to get the most out of recurring events.</p>
                         <span class="inline-flex items-center text-lime-500 dark:text-lime-400 font-medium group-hover:gap-3 gap-2 transition-all">
                             Read guide
@@ -332,7 +332,7 @@
                 <!-- Next feature -->
                 <a href="{{ marketing_url('/features/custom-fields') }}" class="group block">
                     <div class="h-full bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900 dark:to-yellow-900 rounded-3xl border border-amber-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
-                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">Custom Fields</h3>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">Custom Fields</h2>
                         <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Collect additional info from ticket buyers with text, dropdown, date, and yes/no fields.</p>
                         <span class="inline-flex items-center text-amber-500 dark:text-amber-400 font-medium group-hover:gap-3 gap-2 transition-all">
                             Learn more

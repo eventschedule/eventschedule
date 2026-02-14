@@ -103,7 +103,7 @@
                                 </svg>
                                 Your Schedule
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-serif text-gray-900 dark:text-white mb-4">Every reading. One place.</h3>
+                            <h2 class="text-3xl lg:text-4xl font-serif text-gray-900 dark:text-white mb-4">Every reading. One place.</h2>
                             <p class="text-gray-500 dark:text-stone-400 text-lg mb-6">Coffee shops on Tuesdays. The bar series on Thursdays. That bookstore feature next month. Stop telling people to check your Instagram - give them one link that's always current.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-200 dark:bg-stone-800 text-gray-500 dark:text-stone-400 text-sm border border-gray-300 dark:border-stone-700">Open mics</span>
@@ -146,7 +146,7 @@
                         </svg>
                         Newsletter
                     </div>
-                    <h3 class="text-2xl font-serif text-gray-900 dark:text-white mb-3">Your readers, direct reach</h3>
+                    <h2 class="text-2xl font-serif text-gray-900 dark:text-white mb-3">Your readers, direct reach</h2>
                     <p class="text-gray-500 dark:text-stone-400 mb-6">New chapbook? Upcoming feature? Email the people who actually want to hear from you. No algorithm deciding who sees it.</p>
 
                     <!-- Mini email mockup -->
@@ -172,7 +172,7 @@
                         </svg>
                         Workshops
                     </div>
-                    <h3 class="text-2xl font-serif text-gray-900 dark:text-white mb-3">Fill your workshops</h3>
+                    <h2 class="text-2xl font-serif text-gray-900 dark:text-white mb-3">Fill your workshops</h2>
                     <p class="text-gray-500 dark:text-stone-400 mb-6">Teaching pays. List your writing workshops, craft classes, and generative sessions. Let students find and register easily.</p>
 
                     <div class="space-y-2">
@@ -197,7 +197,7 @@
                                 </svg>
                                 Tickets & Books
                             </div>
-                            <h3 class="text-3xl font-serif text-gray-900 dark:text-white mb-4">Keep what you earn</h3>
+                            <h2 class="text-3xl font-serif text-gray-900 dark:text-white mb-4">Keep what you earn</h2>
                             <p class="text-gray-500 dark:text-stone-400 text-lg">Sell tickets to your readings. Bundle with your chapbook. Zero platform fees - because poetry doesn't pay enough to give away a percentage.</p>
                         </div>
                         <div class="bg-stone-950 rounded-xl border border-stone-800 p-5">
@@ -232,7 +232,7 @@
                         </svg>
                         Online
                     </div>
-                    <h3 class="text-2xl font-serif text-gray-900 dark:text-white mb-3 group-hover:text-sky-200 transition-colors">Read to anywhere</h3>
+                    <h2 class="text-2xl font-serif text-gray-900 dark:text-white mb-3 group-hover:text-sky-200 transition-colors">Read to anywhere</h2>
                     <p class="text-gray-500 dark:text-stone-400 mb-4">Host virtual readings and workshops. Your audience isn't just local - poetry travels well over Zoom.</p>
 
                     <span class="inline-flex items-center text-sky-400/80 text-sm font-medium group-hover:gap-2 gap-1 transition-all">
@@ -251,7 +251,7 @@
                         </svg>
                         Sync
                     </div>
-                    <h3 class="text-2xl font-serif text-gray-900 dark:text-white mb-3">Google Calendar sync</h3>
+                    <h2 class="text-2xl font-serif text-gray-900 dark:text-white mb-3">Google Calendar sync</h2>
                     <p class="text-gray-500 dark:text-stone-400 mb-6">Two-way sync. Add a reading to your personal calendar, it shows up on your public schedule.</p>
 
                     <div class="flex items-center justify-center gap-3">
@@ -279,7 +279,7 @@
                         </svg>
                         Graphics
                     </div>
-                    <h3 class="text-2xl font-serif text-gray-900 dark:text-white mb-3">Post-ready images</h3>
+                    <h2 class="text-2xl font-serif text-gray-900 dark:text-white mb-3">Post-ready images</h2>
                     <p class="text-gray-500 dark:text-stone-400 mb-6">Auto-generate promo graphics. Share to Instagram without opening Canva.</p>
 
                     <div class="flex justify-center">

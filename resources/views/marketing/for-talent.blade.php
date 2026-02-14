@@ -59,7 +59,7 @@
                                 </svg>
                                 Share Everywhere
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">One link for all your gigs</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">One link for all your gigs</h2>
                             <p class="text-gray-600 dark:text-gray-400 text-lg mb-6">Get a custom URL for your schedule. Share it on social media, your website, or anywhere else. Fans can see all your upcoming shows in one place.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Custom URL</span>
@@ -104,7 +104,7 @@
                         </svg>
                         Venues
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Play at multiple venues</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Play at multiple venues</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Link your schedule to venue calendars. When they post your show, it appears on your schedule automatically.</p>
 
                     <div class="space-y-2">
@@ -137,7 +137,7 @@
                         </svg>
                         Calendar Sync
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Two-way Google sync</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Two-way Google sync</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Connect your Google Calendar. Changes sync both ways automatically via real-time webhooks.</p>
 
                     <div class="flex items-center justify-center gap-3">
@@ -176,7 +176,7 @@
                                 </svg>
                                 Ticketing
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Sell tickets direct</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Sell tickets direct</h2>
                             <p class="text-gray-600 dark:text-gray-400 text-lg">No middleman. Accept payments via Stripe with zero platform fees. You keep what you earn.</p>
                         </div>
                         <div class="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-200 dark:border-white/10">
@@ -208,7 +208,7 @@
                         </svg>
                         Availability
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Track availability</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Track availability</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Block off dates when you're unavailable. Venues can see when you're free before reaching out.</p>
 
                     <div class="grid grid-cols-7 gap-1 text-center text-xs">
@@ -242,7 +242,7 @@
                         </svg>
                         Team
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Band collaboration</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Band collaboration</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Invite band members to manage the schedule together. Everyone stays in sync.</p>
 
                     <div class="space-y-2">
@@ -278,7 +278,7 @@
                         </svg>
                         Graphics
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Event graphics</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Event graphics</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">Auto-generate promotional images for social media. Perfect for Instagram and Facebook posts.</p>
 
                     <div class="flex justify-center">

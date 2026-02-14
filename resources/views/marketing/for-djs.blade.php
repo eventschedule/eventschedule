@@ -141,7 +141,7 @@
                                 </svg>
                                 Residency Tracker
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Track your residencies & guest spots</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Track your residencies & guest spots</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Weekly residency at Output? Monthly at Basement? One schedule shows everything - your regular slots AND one-off bookings.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Weekly residencies</span>
@@ -190,7 +190,7 @@
                         </svg>
                         Late Night
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Built for late nights</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Built for late nights</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Sets that start at 11 PM and end at 6 AM? No problem. We handle overnight events correctly.</p>
 
                     <div class="flex justify-center">
@@ -216,7 +216,7 @@
                         </svg>
                         Club Sync
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Clubs book you, fans know instantly</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Clubs book you, fans know instantly</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">When promoters add you to their lineup, it auto-appears on your schedule. No double-entry.</p>
 
                     <div class="flex items-center justify-center gap-2">
@@ -246,7 +246,7 @@
                                 </svg>
                                 Share Link
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">One link for Linktree, RA, SoundCloud</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">One link for Linktree, RA, SoundCloud</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Drop your schedule link anywhere. Fans see all upcoming sets - residencies, festivals, guest spots.</p>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10">
@@ -280,7 +280,7 @@
                         </svg>
                         Newsletter
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Email the dancefloor directly</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Email the dancefloor directly</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">No algorithm throttling. One click sends set graphics to everyone who wants to come dance.</p>
 
                     <div class="flex items-center justify-center">
@@ -315,7 +315,7 @@
                         </svg>
                         Graphics
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Promo flyers, auto-generated</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Promo flyers, auto-generated</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Download graphics sized for Instagram stories, RA event pages, WhatsApp groups.</p>
 
                     <div class="flex justify-center">
@@ -343,7 +343,7 @@
                         </svg>
                         Ticketing
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your door, your money</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your door, your money</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Sell advance tickets with zero platform cut. Stripe pays you direct.</p>
 
                     <div class="flex justify-center">

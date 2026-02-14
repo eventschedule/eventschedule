@@ -69,7 +69,7 @@
                                 </svg>
                                 QR Tickets
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Contactless check-in</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Contactless check-in</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Every ticket comes with a unique QR code. Scan with any smartphone to check in attendees instantly. No special hardware required.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Instant validation</span>
@@ -103,7 +103,7 @@
                         </svg>
                         Ticket Types
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Multiple tiers</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Multiple tiers</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">GA, VIP, early bird, group rates. Create as many ticket types as you need.</p>
 
                     <div class="space-y-3">
@@ -139,7 +139,7 @@
                         </svg>
                         Payments
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Flexible payments</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Flexible payments</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Choose Stripe for instant checkout or Invoice Ninja for B2B invoicing.</p>
 
                     <div class="flex justify-center gap-4">
@@ -165,7 +165,7 @@
                                 </svg>
                                 Reservations
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Hold now, pay later</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Hold now, pay later</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Let customers reserve tickets without paying upfront. Set expiration times and automatic reminders.</p>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-6 border border-gray-200 dark:border-white/10">

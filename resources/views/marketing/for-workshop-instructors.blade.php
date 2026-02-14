@@ -112,7 +112,7 @@
                                 </svg>
                                 Workshop Announcements
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Announce new workshops, fill seats instantly</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Announce new workshops, fill seats instantly</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">One click sends your upcoming workshops to every student who follows you. No algorithm decides who sees it.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Email newsletters</span>
@@ -161,7 +161,7 @@
                         </svg>
                         Zero-Fee Ticketing
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Keep 100% of every sale</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Keep 100% of every sale</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">No platform fees. No per-ticket charges. Every dollar your students pay goes to you.</p>
 
                     <div class="bg-emerald-500/20 rounded-xl border border-emerald-400/30 p-4 text-center">
@@ -182,7 +182,7 @@
                         </svg>
                         One Link
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">One link for everything</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">One link for everything</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Share one URL. Students see all your upcoming workshops, book, and pay.</p>
 
                     <div class="bg-blue-500/20 rounded-xl border border-blue-400/30 p-4">
@@ -210,7 +210,7 @@
                                 </svg>
                                 Workshop Series
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Build a curriculum that keeps students coming back</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Build a curriculum that keeps students coming back</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Create multi-session series with progressive skill building. Offer series discounts to encourage full enrollment.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multi-session series</span>
@@ -268,7 +268,7 @@
                         </svg>
                         Capacity Management
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Never overbook a class</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Never overbook a class</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Set seat limits per workshop. Students see availability in real time.</p>
 
                     <div class="space-y-3">
@@ -295,7 +295,7 @@
                         </svg>
                         Google Calendar
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Two-way calendar sync</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Two-way calendar sync</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Your workshops appear in Google Calendar. Changes sync both ways automatically.</p>
 
                     <div class="bg-blue-500/20 rounded-xl border border-blue-400/30 p-3">
@@ -330,7 +330,7 @@
                         </svg>
                         Analytics
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Know what sells</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Know what sells</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">See which workshops fill fastest, which days work best, and how your audience grows.</p>
 
                     <div class="flex items-end gap-2 h-24">

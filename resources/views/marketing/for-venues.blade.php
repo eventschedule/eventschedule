@@ -59,7 +59,7 @@
                                 </svg>
                                 Public Calendar
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Beautiful event calendar</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Beautiful event calendar</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Showcase all your upcoming events on a mobile-friendly calendar. Embed it on your website or share the link directly.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Embeddable</span>
@@ -106,7 +106,7 @@
                         </svg>
                         Booking Inbox
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Accept performance requests</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Accept performance requests</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Artists can request to play at your venue. Review, approve, or decline right from your dashboard.</p>
 
                     <div class="space-y-2">
@@ -143,7 +143,7 @@
                         </svg>
                         Ticketing
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sell tickets with QR check-in</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sell tickets with QR check-in</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Multiple ticket types, Stripe payments, and contactless check-in. Use any smartphone to scan.</p>
 
                     <div class="flex justify-center">
@@ -165,7 +165,7 @@
                                 </svg>
                                 Sub-schedules
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Multiple rooms & stages</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Multiple rooms & stages</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Organize events by space. Main stage, rooftop bar, private room. Each gets its own filterable schedule.</p>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10">
@@ -204,7 +204,7 @@
                         </svg>
                         Team
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Staff management</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Staff management</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Give your team access to manage events. Set permissions so everyone has the right level of control.</p>
 
                     <div class="space-y-2">
@@ -242,7 +242,7 @@
                                 </svg>
                                 Calendar Sync
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Google Calendar sync</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Google Calendar sync</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Two-way sync keeps your venue calendar and Google Calendar in perfect harmony. Changes flow both ways automatically.</p>
                         </div>
                         <div class="flex items-center justify-center gap-3">
@@ -280,7 +280,7 @@
                         </svg>
                         Graphics
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Event graphics</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Event graphics</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Auto-generate promotional images for social media. Perfect for Instagram and Facebook posts.</p>
 
                     <div class="flex justify-center">
@@ -309,7 +309,7 @@
                                 </svg>
                                 Fan Engagement
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Fan videos & comments</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Fan videos & comments</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">After the show, fans share YouTube clips and comments on your events. You approve what goes live. Build a gallery of great nights at your venue.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">YouTube videos</span>
