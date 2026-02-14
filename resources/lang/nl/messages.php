@@ -419,6 +419,7 @@ return [
     'portuguese' => 'Portugees',
     'spanish' => 'Spaans',
     'estonian' => 'Ests',
+    'russian' => 'Russian',
     'sun' => 'Zo',
     'mon' => 'Ma',
     'tue' => 'Di',

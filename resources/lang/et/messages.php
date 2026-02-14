@@ -177,6 +177,7 @@ return [
     'portuguese' => 'portugali keel',
     'spanish' => 'hispaania keel',
     'estonian' => 'eesti keel',
+    'russian' => 'vene keel',
     'sun' => 'Pühapäev',
     'mon' => 'Esmaspäev',
     'tue' => 'Teisipäev',

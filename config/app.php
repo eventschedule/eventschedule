@@ -173,6 +173,7 @@ return [
         'nl', // Dutch
         'pt', // Portuguese
         'et', // Estonian
+        'ru', // Russian
     ],
 
 ];
