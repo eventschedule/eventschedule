@@ -182,7 +182,7 @@
                                 Aggregation
                             </div>
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Unified calendar</h3>
-                            <p class="text-gray-600 dark:text-gray-400 text-lg">Pull events from venues, performers, and other curators. Display everything in one beautiful, searchable calendar.</p>
+                            <p class="text-gray-600 dark:text-gray-400 text-lg">Pull events from venues, performers, and other curators. Display everything in one clean, searchable calendar.</p>
                         </div>
                         <div class="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-200 dark:border-white/10">
                             <div class="text-xs text-gray-500 dark:text-gray-400 mb-3">Sources</div>
@@ -326,7 +326,7 @@
                     Already have a community?
                 </h2>
                 <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                    If you're sharing events in a WhatsApp group, Facebook group, or anywhere else—you're already a curator.
+                    If you're sharing events in a WhatsApp group, Facebook group, or anywhere else, you're already a curator.
                 </p>
             </div>
 
@@ -433,7 +433,7 @@
                                 </svg>
                             </div>
                             <h4 class="text-gray-900 dark:text-white font-semibold mb-1">Reach new people</h4>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm">Anyone can discover your events—even outside your group</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">Anyone can discover your events, even outside your group</p>
                         </div>
                     </div>
                 </div>
@@ -470,7 +470,7 @@
                                 Online Events
                             </div>
                             <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Stream to the world</h3>
-                            <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">Share live performances with fans worldwide. Add your streaming URL and sell tickets to viewers anywhere—no venue required.</p>
+                            <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">Share live performances with fans worldwide. Add your streaming URL and sell tickets to viewers anywhere. No venue required.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Live streaming</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-gray-300 text-sm">Global ticket sales</span>

@@ -652,7 +652,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Art Gallery and Studio Event Management Software",
         "operatingSystem": "Web",
-        "description": "Fill your gallery with collectors. Announce exhibitions, sell tickets to opening nights, and email your collectors directly. Reach your audience—no algorithm. Free forever.",
+        "description": "Fill your gallery with collectors. Announce exhibitions, sell tickets to opening nights, and email your collectors directly. Reach your audience directly. No algorithm. Free forever.",
         "offers": {
             "@type": "Offer",
             "price": "0",

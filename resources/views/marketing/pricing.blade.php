@@ -19,7 +19,7 @@
                 "name": "Free",
                 "price": "0",
                 "priceCurrency": "USD",
-                "description": "Beautiful event calendars, mobile-optimized design, custom schedule URLs, team collaboration, venue maps, and Google Calendar sync.",
+                "description": "Professional event calendars, mobile-optimized design, custom schedule URLs, team collaboration, venue maps, and Google Calendar sync.",
                 "availability": "https://schema.org/InStock"
             },
             {
@@ -175,7 +175,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-600 dark:text-gray-300">Beautiful, mobile-optimized design</span>
+                            <span class="text-gray-600 dark:text-gray-300">Mobile-optimized, professional design</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">

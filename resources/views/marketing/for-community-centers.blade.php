@@ -320,7 +320,7 @@
                                 Public Calendar
                             </div>
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Everything happening at your center</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Public events, recurring programs, meetings, and classes - all in one beautiful calendar. Embed on your website or share the link.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Public events, recurring programs, meetings, and classes - all in one professional calendar. Embed on your website or share the link.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Mobile-friendly</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Embeddable</span>

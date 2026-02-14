@@ -107,7 +107,7 @@
                                 Class Newsletter
                             </div>
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Send weekly class updates directly to students</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Schedule changes? New class added? Sub instructor this week? Send beautiful class schedules directly to your students' inbox. No algorithm gatekeeping.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Schedule changes? New class added? Sub instructor this week? Send branded class schedules directly to your students' inbox. No algorithm gatekeeping.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Weekly schedule</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Class changes</span>

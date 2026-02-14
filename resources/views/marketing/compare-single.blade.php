@@ -172,7 +172,7 @@
                     Where Event Schedule Shines
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-                    Key advantages over {{ $name }} that make Event Schedule the better choice.
+                    Key advantages over {{ $name }} that make Event Schedule a strong alternative.
                 </p>
             </div>
 

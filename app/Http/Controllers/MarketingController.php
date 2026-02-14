@@ -1077,7 +1077,7 @@ class MarketingController extends Controller
                 'keywords' => 'luma alternative, luma alternative open source, lu.ma alternative, event platform comparison, luma competitor',
                 'about' => 'Luma (lu.ma) is a modern event platform popular with tech communities and creators. It offers sleek event pages, built-in video streaming, and community features.',
                 'competitor_strengths' => [
-                    'Beautiful, modern event page design with strong visual focus',
+                    'Polished, modern event page design with strong visual focus',
                     'Built-in video streaming for virtual events',
                     'Popular in tech and startup communities with strong network effects',
                 ],
@@ -1370,7 +1370,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'Event Graphics',
-                        'description' => 'Generate beautiful, shareable event graphics automatically. Perfect for social media promotion - something Google Calendar simply cannot do.',
+                        'description' => 'Generate custom, shareable event graphics automatically. Perfect for social media promotion - something Google Calendar simply cannot do.',
                         'icon' => 'image',
                         'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
                         'border' => 'border-rose-200 dark:border-rose-500/20',
@@ -1378,7 +1378,7 @@ class MarketingController extends Controller
                         'icon_color' => 'text-rose-600 dark:text-rose-400',
                     ],
                     [
-                        'title' => 'Beautiful Embeds',
+                        'title' => 'Professional Embeds',
                         'description' => 'Embed fully customizable calendars on your website. Google Calendar embeds are rigid and difficult to style to match your brand.',
                         'icon' => 'code',
                         'gradient' => 'from-blue-50 to-blue-50 dark:from-blue-900/30 dark:to-blue-900/30',

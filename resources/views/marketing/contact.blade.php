@@ -111,7 +111,7 @@
                         </div>
                         <h4 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Community Discussions</h4>
                         <p class="text-gray-500 dark:text-blue-100/70 mb-6">
-                            Have a question or idea? Start a conversation on GitHub Discussions — it's the best way to connect with us and the community.
+                            Have a question or idea? Start a conversation on GitHub Discussions. It's a great way to connect with us and the community.
                         </p>
                         <a href="https://github.com/eventschedule/eventschedule/discussions" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-200 hover:bg-blue-300 dark:bg-white/10 dark:hover:bg-white/20 border border-blue-300 dark:border-white/20 rounded-xl text-blue-900 dark:text-white font-medium transition-all">
                             GitHub Discussions

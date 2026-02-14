@@ -411,7 +411,7 @@
                     Perfect for all types of comedy
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400">
-                    Whether you're doing tight fives or touring theaters, we've got you covered.
+                    Whether you're doing tight fives or touring theaters, Event Schedule has you sorted.
                 </p>
             </div>
 

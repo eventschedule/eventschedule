@@ -84,7 +84,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-                Invite your team, assign permissions, and manage events together seamlessly.
+                Invite your team, assign permissions, and manage events together.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
@@ -330,7 +330,7 @@
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Collaborate</h3>
                     <p class="text-gray-600 dark:text-gray-300">
-                        Your team can now create events, update schedules, and coordinate together seamlessly.
+                        Your team can now create events, update schedules, and coordinate together.
                     </p>
                 </div>
             </div>

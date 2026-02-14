@@ -130,7 +130,7 @@
                         <!-- Calendar Integrations -->
                         <section id="calendar-integrations" class="doc-section">
                             <h2 class="doc-heading">Calendar Integrations</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Sync your schedule with external calendar systems for seamless event management.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Sync your schedule with external calendar systems for smooth event management.</p>
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -223,7 +223,7 @@
         "@context": "https://schema.org",
         "@type": "HowTo",
         "name": "How to Set Up Auto Import and Calendar Sync",
-        "description": "Configure sub-schedules, auto import from URLs, and connect Google Calendar or CalDAV for seamless event synchronization.",
+        "description": "Configure sub-schedules, auto import from URLs, and connect Google Calendar or CalDAV for smooth event synchronization.",
         "totalTime": "PT10M",
         "step": [
             {

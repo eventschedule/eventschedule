@@ -15,7 +15,7 @@
                 "name": "What is Event Schedule?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Event Schedule is a free, open-source platform that lets you create beautiful, shareable event calendars and sell tickets. Whether you're a musician sharing gig dates, a venue managing your lineup, or a food truck posting daily locations, Event Schedule gives you a professional calendar your audience can easily access."
+                    "text": "Event Schedule is a free, open-source platform that lets you create professional, shareable event calendars and sell tickets. Whether you're a musician sharing gig dates, a venue managing your lineup, or a food truck posting daily locations, Event Schedule gives you a professional calendar your audience can easily access."
                 }
             },
             {
@@ -264,7 +264,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Event Schedule is a free, open-source platform that lets you create beautiful, shareable event calendars and sell tickets. Whether you're a musician sharing gig dates, a venue managing your lineup, or a food truck posting daily locations, Event Schedule gives you a professional calendar your audience can easily access.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Event Schedule is a free, open-source platform that lets you create professional, shareable event calendars and sell tickets. Whether you're a musician sharing gig dates, a venue managing your lineup, or a food truck posting daily locations, Event Schedule gives you a professional calendar your audience can easily access.</p>
                         </div>
                     </div>
 

@@ -97,7 +97,7 @@
                                 Direct to Fans
                             </div>
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Announce tours directly to fans</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">New album dropping? Going on tour? Send beautiful show graphics directly to your fans' inbox. No algorithm gatekeeping. Your music, your audience.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">New album dropping? Going on tour? Send custom show graphics directly to your fans' inbox. No algorithm gatekeeping. Your music, your audience.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Tour announcements</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Album releases</span>

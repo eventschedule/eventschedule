@@ -108,7 +108,7 @@
                                 Exhibition Announcements
                             </div>
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Tell collectors when you're showing</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">New exhibition opening? Art fair booth? Send beautiful announcements directly to collectors and fans. No algorithm deciding who sees your work.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">New exhibition opening? Art fair booth? Send branded announcements directly to collectors and fans. No algorithm deciding who sees your work.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Solo shows</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Group exhibitions</span>
