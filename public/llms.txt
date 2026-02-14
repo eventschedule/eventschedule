@@ -2,7 +2,7 @@
 
 > Event Schedule is an open-source platform for sharing events, selling tickets, and bringing communities together. It provides a full REST API with OpenAPI 3.0 spec for programmatic event management.
 
-Event Schedule supports three schedule types: **venue** (physical locations like bars, theaters, galleries), **talent** (performers like musicians, DJs, comedians), and **curator** (event organizers and promoters). Authentication uses API key via `X-API-Key` header, obtained through registration or login. Read operations are free; write operations require a Pro plan. Rate limits: 300 GET requests per minute, 30 POST/PUT/DELETE requests per minute. Events auto-translate to 10 languages. The platform is available as hosted SaaS at eventschedule.com or selfhosted.
+Event Schedule supports three schedule types: **venue** (physical locations like bars, theaters, galleries), **talent** (performers like musicians, DJs, comedians), and **curator** (event organizers and promoters). Authentication uses API key via `X-API-Key` header, obtained through registration or login. Read operations are free; write operations require a Pro plan. Rate limits: 300 GET requests per minute, 30 POST/PUT/DELETE requests per minute. Events auto-translate to 11 languages. The platform is available as hosted SaaS at eventschedule.com or selfhosted.
 
 ## API Documentation
 

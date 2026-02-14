@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "name": "Event Schedule API",
-  "description": "API for creating and managing events, schedules, tickets, and sales. Supports venue, talent, and curator schedule types with automatic translation to 10 languages.",
+  "description": "API for creating and managing events, schedules, tickets, and sales. Supports venue, talent, and curator schedule types with automatic translation to 11 languages.",
   "url": "https://eventschedule.com",
   "source": {
     "type": "openapi",

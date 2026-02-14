@@ -85,7 +85,7 @@
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Language</span></td>
-                                            <td>Sets the interface language. Ten languages are supported: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, and Estonian.</td>
+                                            <td>Sets the interface language. Eleven languages are supported: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, and Russian.</td>
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">24-Hour Time</span></td>
