@@ -552,6 +552,7 @@ return [
     'portuguese' => 'פורטוגזית',
     'spanish' => 'ספרדית',
     'estonian' => 'אסטונית',
+    'russian' => 'רוּסִי',
     'sun' => 'א',
     'mon' => 'ב',
     'tue' => 'ג',

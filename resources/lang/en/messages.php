@@ -177,6 +177,7 @@ return [
     'portuguese' => 'Portuguese',
     'spanish' => 'Spanish',
     'estonian' => 'Estonian',
+    'russian' => 'Russian',
     'sun' => 'Sun',
     'mon' => 'Mon',
     'tue' => 'Tue',

@@ -160,6 +160,7 @@ return [
     'portuguese' => 'Portugais',
     'spanish' => 'Espagnol',
     'estonian' => 'Estonien',
+    'russian' => 'Russe',
     'sun' => 'Dim',
     'mon' => 'Lun',
     'tue' => 'Mar',
