@@ -15,6 +15,7 @@ import { Portuguese } from 'flatpickr/dist/l10n/pt.js';
 import { Hebrew } from 'flatpickr/dist/l10n/he.js';
 import { Dutch } from 'flatpickr/dist/l10n/nl.js';
 import { Arabic } from 'flatpickr/dist/l10n/ar.js';
+import { Russian } from 'flatpickr/dist/l10n/ru.js';
 
 // Map Laravel locale codes to flatpickr locale objects
 window.flatpickrLocales = {
@@ -26,7 +27,8 @@ window.flatpickrLocales = {
     pt: Portuguese,
     he: Hebrew,
     nl: Dutch,
-    ar: Arabic
+    ar: Arabic,
+    ru: Russian
 };
 
 //import Toastify from 'toastify-js';

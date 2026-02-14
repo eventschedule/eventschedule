@@ -48,6 +48,7 @@
     <link rel="alternate" hreflang="nl" href="{{ $canonicalPath }}?lang=nl">
     <link rel="alternate" hreflang="ar" href="{{ $canonicalPath }}?lang=ar">
     <link rel="alternate" hreflang="et" href="{{ $canonicalPath }}?lang=et">
+    <link rel="alternate" hreflang="ru" href="{{ $canonicalPath }}?lang=ru">
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
     <meta name="robots" content="index, follow">
     <meta name="author" content="Event Schedule">
@@ -68,7 +69,7 @@
         $ogLocaleMap = [
             'en' => 'en_US', 'es' => 'es_ES', 'de' => 'de_DE',
             'fr' => 'fr_FR', 'it' => 'it_IT', 'pt' => 'pt_PT',
-            'he' => 'he_IL', 'nl' => 'nl_NL', 'ar' => 'ar_SA', 'et' => 'et_EE',
+            'he' => 'he_IL', 'nl' => 'nl_NL', 'ar' => 'ar_SA', 'et' => 'et_EE', 'ru' => 'ru_RU',
         ];
         $currentOgLocale = str_replace('-', '_', app()->getLocale());
     @endphp
