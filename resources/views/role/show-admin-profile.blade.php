@@ -36,7 +36,7 @@
                 <li class="py-4">
                     <div class="flex">
                         <div class="me-4 flex-shrink-0 text-gray-500">
-                            <x-url-icon>
+                            <x-url-icon class="w-5 h-5" color="currentColor">
                                 {{ \App\Utils\UrlUtils::clean($link->url) }}
                             </x-url-icon>
                         </div>
@@ -47,7 +47,7 @@
                             </x-link>
                             <button type="button"
                                 class="btn-remove-link mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                                data-link-type="youtube_links" data-link-url="{{ $link->url }}"
+                                data-link-type="youtube_links" data-link-url="{{ $link->url }}">
                                 {{ __('messages.remove') }}
                             </button>
                         </div>
@@ -83,7 +83,7 @@
                 <li class="py-4">
                     <div class="flex">
                         <div class="me-4 flex-shrink-0 pt-1 text-gray-500">
-                            <x-url-icon>
+                            <x-url-icon class="w-5 h-5" color="currentColor">
                                 {{ \App\Utils\UrlUtils::clean($link->url) }}
                             </x-url-icon>
                         </div>
@@ -96,7 +96,7 @@
                             </x-link>
                             <button type="button"
                                 class="btn-remove-link mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                                data-link-type="social_links" data-link-url="{{ $link->url }}"
+                                data-link-type="social_links" data-link-url="{{ $link->url }}">
                                 {{ __('messages.remove') }}
                             </button>
                         </div>
@@ -130,7 +130,7 @@
                 <li class="py-4">
                     <div class="flex">
                         <div class="me-4 flex-shrink-0 pt-1 text-gray-500">
-                            <x-url-icon>
+                            <x-url-icon class="w-5 h-5" color="currentColor">
                                 {{ \App\Utils\UrlUtils::clean($link->url) }}
                             </x-url-icon>
                         </div>
@@ -143,7 +143,7 @@
                             </x-link>
                             <button type="button"
                                 class="btn-remove-link mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                                data-link-type="payment_links" data-link-url="{{ $link->url }}"
+                                data-link-type="payment_links" data-link-url="{{ $link->url }}">
                                 {{ __('messages.remove') }}
                             </button>
                         </div>
