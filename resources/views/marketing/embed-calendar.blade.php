@@ -60,7 +60,7 @@
                                 </svg>
                                 One Line
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Copy and paste</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Copy and paste</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Just one iframe tag is all you need. Copy the code from your schedule settings and paste it into your website.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">No JavaScript</span>
@@ -95,7 +95,7 @@
                         </svg>
                         Preview
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Preview first</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Preview first</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">See exactly what the embed will look like before adding it to your site.</p>
 
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border border-gray-300 dark:border-white/20 overflow-hidden">
@@ -123,7 +123,7 @@
                         </svg>
                         Clean Layout
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Just the calendar</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Just the calendar</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">The embed shows only your events, without headers, footers, or navigation. Clean and focused.</p>
 
                     <div class="flex gap-3">
@@ -152,7 +152,7 @@
                                 </svg>
                                 URL Parameters
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Customize via URL</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Customize via URL</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg">Control the language, filter by sub-schedule, and more using simple query parameters in the embed URL.</p>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10 space-y-3">
@@ -182,7 +182,7 @@
                                 </svg>
                                 Availability
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Available on paid plans</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Available on paid plans</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Embedding requires a paid plan on the hosted platform because the server needs to allow framing via X-Frame-Options headers. Selfhosted users get this free.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-300 text-sm">Pro plan</span>
@@ -220,7 +220,7 @@
                         </svg>
                         Feedback
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Built-in feedback</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Built-in feedback</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Click the copy button and get instant confirmation that the code is on your clipboard.</p>
 
                     <div class="flex flex-col items-center gap-3">
@@ -264,7 +264,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                             </svg>
                         </div>
-                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Read the guide</h3>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Read the guide</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Learn how to get the most out of embedding your calendar.</p>
                         <span class="inline-flex items-center text-blue-500 dark:text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
                             Read guide
@@ -278,7 +278,7 @@
                 <!-- Next feature -->
                 <a href="{{ marketing_url('/features/custom-fields') }}" class="group block">
                     <div class="h-full bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-3xl border border-amber-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
-                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">Custom Fields</h3>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">Custom Fields</h2>
                         <p class="text-gray-500 dark:text-white/80 text-lg mb-4">Collect dietary preferences, t-shirt sizes, or any info you need from ticket buyers.</p>
                         <span class="inline-flex items-center text-amber-400 font-medium group-hover:gap-3 gap-2 transition-all">
                             Learn more

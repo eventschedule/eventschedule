@@ -88,7 +88,7 @@
                         </svg>
                         Checkout
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Stripe Checkout</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Stripe Checkout</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Hosted payment page handles everything. Customers complete payment on Stripe's secure checkout.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -126,7 +126,7 @@
                         </svg>
                         Global
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">135+ currencies</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">135+ currencies</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-4">Sell tickets in your local currency. Stripe handles conversion and international payments.</p>
 
                     <div class="flex flex-wrap gap-2">
@@ -146,7 +146,7 @@
                         </svg>
                         Real-time
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Instant confirmation</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Instant confirmation</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-4">Webhooks notify us the moment payment completes. Tickets are delivered instantly via email.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-3 border border-gray-200 dark:border-white/10">
@@ -167,7 +167,7 @@
                                 </svg>
                                 SaaS Mode
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Stripe Connect</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Stripe Connect</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg">On our hosted platform, event creators connect their own Stripe accounts. Payments go directly to them - we never hold your money.</p>
                         </div>
                         <div class="space-y-3">
@@ -211,7 +211,7 @@
                         </svg>
                         Self-service
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Billing portal</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Billing portal</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-4">Customers manage their own payment methods, view invoices, and update billing details through Stripe's portal.</p>
 
                     <div class="flex flex-wrap gap-2">

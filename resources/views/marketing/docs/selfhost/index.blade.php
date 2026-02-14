@@ -76,7 +76,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Installation Guide</h3>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Installation Guide</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Set up Event Schedule on your own server with this step-by-step guide.</p>
                         <div class="inline-flex items-center text-sm font-medium text-cyan-600 dark:text-cyan-400">
                             Read Guide
@@ -95,7 +95,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">SaaS Setup</h3>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">SaaS Setup</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Configure Event Schedule for SaaS deployment with subdomain-based multi-tenant routing.</p>
                         <div class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400">
                             Read Guide
@@ -114,7 +114,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Stripe Integration</h3>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Stripe Integration</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Set up Stripe Connect for ticket sales and Laravel Cashier for subscription billing.</p>
                         <div class="inline-flex items-center text-sm font-medium text-sky-600 dark:text-sky-400">
                             Read Guide
@@ -133,7 +133,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Google Calendar</h3>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Google Calendar</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Enable bidirectional sync between Event Schedule and Google Calendar.</p>
                         <div class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400">
                             Read Guide

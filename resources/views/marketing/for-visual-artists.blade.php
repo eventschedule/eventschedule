@@ -107,7 +107,7 @@
                                 </svg>
                                 Exhibition Announcements
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Tell collectors when you're showing</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Tell collectors when you're showing</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">New exhibition opening? Art fair booth? Send branded announcements directly to collectors and fans. No algorithm deciding who sees your work.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Solo shows</span>
@@ -152,7 +152,7 @@
                             </svg>
                             Ticketing
                         </div>
-                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Zero platform fees on tickets</h3>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Zero platform fees on tickets</h2>
                         <p class="text-gray-500 dark:text-gray-400 mb-6">Opening receptions, workshops, studio visits. 100% of Stripe payments go to you.</p>
 
                         <div class="bg-emerald-500/20 rounded-xl border border-emerald-400/30 p-4">
@@ -179,7 +179,7 @@
                         </svg>
                         Share Link
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">One link for your portfolio & shows</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">One link for your portfolio & shows</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Put it in your website, Instagram bio, or artist statement. All your exhibitions in one place.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -207,7 +207,7 @@
                                 </svg>
                                 Venue Sync
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Galleries add your show, it auto-appears</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Galleries add your show, it auto-appears</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg">When a gallery adds your exhibition to their calendar, it automatically appears on yours. One listing, both schedules updated.</p>
                         </div>
                         <div class="flex items-center justify-center">
@@ -253,7 +253,7 @@
                         </svg>
                         Graphics
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Auto-generated promo images</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Auto-generated promo images</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Share exhibition announcements on social media instantly. No design tools needed.</p>
 
                     <div class="flex justify-center">
@@ -280,7 +280,7 @@
                         </svg>
                         Calendar Sync
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Google Calendar for shows & deadlines</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Google Calendar for shows & deadlines</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Two-way sync. Exhibitions, install dates, openings, and submission deadlines all in one place.</p>
 
                     <div class="flex items-center justify-center gap-3">
@@ -317,7 +317,7 @@
                         </svg>
                         Analytics
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Know your audience</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Know your audience</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">See who views your schedule, which shows get the most interest, and where your collectors are.</p>
 
                     <div class="space-y-2">

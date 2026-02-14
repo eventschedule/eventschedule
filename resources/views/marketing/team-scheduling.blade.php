@@ -113,7 +113,7 @@
                                 </svg>
                                 Invite Members
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Invite team members via email</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Invite team members via email</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Add teammates by email address. They'll receive an invitation and can join instantly, even if they don't have an account yet.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Email invitations</span>
@@ -166,7 +166,7 @@
                         </svg>
                         Permissions
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Role-based access</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Role-based access</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Assign the right level of access to each team member based on their responsibilities.</p>
 
                     <div class="space-y-3">
@@ -208,7 +208,7 @@
                         </svg>
                         Collaboration
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Shared editing</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Shared editing</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">All team members with the right permissions can create and edit events on your schedule.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -234,7 +234,7 @@
                                 </svg>
                                 Availability
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Track member availability</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Track member availability</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg">Team members can mark dates when they're unavailable, helping you coordinate schedules and plan events when everyone can participate.</p>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-6 border border-gray-200 dark:border-white/10">

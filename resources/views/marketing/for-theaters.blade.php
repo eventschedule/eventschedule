@@ -76,7 +76,7 @@
                                 </svg>
                                 Show Runs
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Opening night to closing curtain</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Opening night to closing curtain</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Set up your production once with all performance dates. Thursday preview, weekend matinees, final Sunday - all linked together. Patrons see the full run at a glance.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Show runs</span>
@@ -127,7 +127,7 @@
                         </svg>
                         Newsletter
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your audience. No middleman.</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your audience. No middleman.</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">New show announced? One click emails every subscriber. No algorithm, no paying Facebook to reach your own patrons.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-amber-400/20">
@@ -148,7 +148,7 @@
                         </svg>
                         Seating
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Orchestra. Mezzanine. Balcony.</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Orchestra. Mezzanine. Balcony.</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Different prices for different seats. Student rush, senior discounts, preview pricing - set it all up once.</p>
 
                     <div class="space-y-2">
@@ -177,7 +177,7 @@
                                 </svg>
                                 Box Office
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Scan tickets at the door</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Scan tickets at the door</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Use any smartphone as a box office scanner. See who's checked in, catch duplicates, track attendance. No expensive hardware.</p>
                             <div class="flex flex-wrap gap-3 mt-6">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Will call</span>
@@ -208,7 +208,7 @@
                         </svg>
                         Venues
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Main stage. Black box. Studio.</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Main stage. Black box. Studio.</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Separate calendars for each theater space. Patrons filter by venue, you avoid double-booking.</p>
 
                     <div class="space-y-2">
@@ -238,7 +238,7 @@
                         </svg>
                         Analytics
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Which shows sell out?</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Which shows sell out?</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Comedies vs. dramas? Matinees vs. evenings? Data to plan your next season.</p>
 
                     <div class="space-y-3">
@@ -280,7 +280,7 @@
                         </svg>
                         Graphics
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Show posters, ready to share</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Show posters, ready to share</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Auto-generate promotional images sized for Instagram, Facebook, and your lobby display.</p>
 
                     <div class="flex justify-center">
@@ -316,7 +316,7 @@
                                 </svg>
                                 Online Events
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-rose-300 transition-colors">Stream to the world</h3>
+                            <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-rose-300 transition-colors">Stream to the world</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Can't make it to the theater? Sell tickets to viewers at home. Live stream your productions worldwide. Virtual ticket buyers get the link, everyone else stays out.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live streaming</span>

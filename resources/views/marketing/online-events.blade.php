@@ -85,7 +85,7 @@
                                 </svg>
                                 Easy Toggle
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Switch in one click</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Switch in one click</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Toggle any event between in-person and online with a single checkbox. Add your streaming URL and you're ready to go live.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">In-Person</span>
@@ -122,7 +122,7 @@
                         </svg>
                         Any Platform
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your platform, your choice</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your platform, your choice</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Works with any streaming service. Just paste your URL and attendees will see it on the event page and their ticket.</p>
 
                     <div class="space-y-2">
@@ -153,7 +153,7 @@
                         </svg>
                         On Your Ticket
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Link on every ticket</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Link on every ticket</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Ticket holders see the streaming URL when they view their ticket. No searching through emails for the link.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -178,7 +178,7 @@
                                 </svg>
                                 Full Ticketing
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Sell tickets to virtual events</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Sell tickets to virtual events</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg">All ticketing features work for online events. Multiple ticket types, QR codes, attendee management, and secure payments with Stripe.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-4">

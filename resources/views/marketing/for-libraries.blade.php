@@ -102,7 +102,7 @@
                                 </svg>
                                 Newsletter
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">New program? Your patrons are first to know.</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">New program? Your patrons are first to know.</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Summer reading kickoff, new author visit, special workshops - one click emails everyone who signed up. No algorithm decides who sees your announcements.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Your patrons, direct reach</span>
@@ -151,7 +151,7 @@
                         </svg>
                         Recurring
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Weekly programs, set once</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Weekly programs, set once</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Story time every Tuesday, book club every month. Set it once and it appears automatically.</p>
 
                     <div class="space-y-2">
@@ -186,7 +186,7 @@
                         </svg>
                         Author Events
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Showcase visiting authors</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Showcase visiting authors</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Author readings, book signings, and Q&A sessions. Let patrons register and never miss an event.</p>
 
                     <div class="flex justify-center">
@@ -216,7 +216,7 @@
                                 </svg>
                                 Community Programs
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Programs for every age group</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Programs for every age group</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">From toddler story time to senior tech help. Organize programs by audience so patrons find exactly what they need.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Filter by age group</span>
@@ -256,7 +256,7 @@
                         </svg>
                         Free Tickets
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Zero fee registration</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Zero fee registration</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Free tickets for free programs. Manage capacity for story time, workshops, and special events without any fees.</p>
 
                     <div class="flex justify-center">
@@ -280,7 +280,7 @@
                         </svg>
                         Google Calendar
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sync with Google Calendar</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sync with Google Calendar</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Two-way sync keeps your library's Google Calendar and Event Schedule in perfect harmony.</p>
 
                     <div class="flex justify-center">
@@ -315,7 +315,7 @@
                         </svg>
                         Analytics
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Track program attendance</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Track program attendance</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">See which programs draw the most patrons. Make data-driven decisions for your programming.</p>
 
                     <div class="space-y-3">

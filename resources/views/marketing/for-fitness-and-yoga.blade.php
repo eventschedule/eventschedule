@@ -106,7 +106,7 @@
                                 </svg>
                                 Class Newsletter
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Send weekly class updates directly to students</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Send weekly class updates directly to students</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Schedule changes? New class added? Sub instructor this week? Send branded class schedules directly to your students' inbox. No algorithm gatekeeping.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Weekly schedule</span>
@@ -164,7 +164,7 @@
                             </svg>
                             Drop-in Ticketing
                         </div>
-                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Zero platform fees on class passes</h3>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Zero platform fees on class passes</h2>
                         <p class="text-gray-500 dark:text-gray-400 mb-6">Sell drop-in passes and class packs. 100% of Stripe payments go to you. No monthly booking fees.</p>
 
                         <div class="bg-green-500/20 rounded-xl border border-green-400/30 p-4">
@@ -191,7 +191,7 @@
                         </svg>
                         Share Link
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">One link for all your classes</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">One link for all your classes</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Put it in your Instagram bio, website, or printed on your studio flyers. All your classes in one place.</p>
 
                     <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -219,7 +219,7 @@
                                 </svg>
                                 Recurring Classes
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Set it once, runs every week</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Set it once, runs every week</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg">Create your weekly class schedule once. Recurring events auto-populate your calendar so students always know what's coming up.</p>
                         </div>
                         <div class="flex items-center justify-center">
@@ -266,7 +266,7 @@
                         </svg>
                         Team
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Multi-instructor teams</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Multi-instructor teams</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Invite your teaching team. Everyone can add classes and manage the schedule together.</p>
 
                     <div class="space-y-2">
@@ -302,7 +302,7 @@
                         </svg>
                         Calendar Sync
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Google Calendar two-way sync</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Google Calendar two-way sync</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Classes, private sessions, workshops - all synced with your personal calendar automatically.</p>
 
                     <div class="flex items-center justify-center gap-3">
@@ -339,7 +339,7 @@
                         </svg>
                         Analytics
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">See which classes are most popular</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">See which classes are most popular</h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">Track views, clicks, and ticket sales per class to optimize your schedule.</p>
 
                     <div class="space-y-2">

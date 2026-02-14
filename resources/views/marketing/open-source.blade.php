@@ -111,7 +111,7 @@
                                 </svg>
                                 Open Source
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Fully transparent code</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Fully transparent code</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Every line of code is available on GitHub under the Attribution Assurance License (AAL). Inspect, modify, or contribute. No hidden functionality, no surprises.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Open Source (AAL)</span>
@@ -148,7 +148,7 @@
                         </svg>
                         Selfhost
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your server, your data</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Your server, your data</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Install via Softaculous (one-click) or Docker. Keep full control of your data.</p>
 
                     <div class="space-y-3">
@@ -185,7 +185,7 @@
                         </svg>
                         REST API
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Build integrations</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Build integrations</h2>
                     <p class="text-gray-600 dark:text-white/80 mb-6">Programmatically manage schedules and events. Create custom workflows and automations.</p>
 
                     <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl p-4 code-block text-xs">
@@ -205,7 +205,7 @@
                                 </svg>
                                 API Endpoints
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Full CRUD operations</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Full CRUD operations</h2>
                             <p class="text-gray-600 dark:text-white/80 text-lg">Manage your schedules, events, and ticket sales programmatically. API access requires a Pro subscription.</p>
                         </div>
                         <div class="space-y-3">

@@ -99,7 +99,7 @@
                                 </svg>
                                 Newsletter
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Tell shoppers what's fresh this week</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Tell shoppers what's fresh this week</h2>
                             <p class="text-gray-500 dark:text-white/80 text-lg mb-6">No algorithm. No pay-to-play. New vendor this Saturday? Strawberries are in season? One click sends the market update straight to everyone who wants to know.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Skip the algorithm</span>
@@ -148,7 +148,7 @@
                         </svg>
                         Recurring Events
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Every Saturday. Rain or shine.</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Every Saturday. Rain or shine.</h2>
                     <p class="text-gray-500 dark:text-white/80 mb-6">Markets run on weekly rhythms. Set up recurring market days once, they show automatically.</p>
 
                     <!-- Mini week view -->
@@ -193,7 +193,7 @@
                         </svg>
                         Vendors
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Show your vendor lineup</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Show your vendor lineup</h2>
                     <p class="text-gray-500 dark:text-white/80 mb-6">Shoppers want to know who's there before they come. Show them the full lineup.</p>
 
                     <!-- Vendor list visual -->
@@ -232,7 +232,7 @@
                                 </svg>
                                 Seasonal Calendar
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Plan your whole season</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Plan your whole season</h2>
                             <p class="text-gray-500 dark:text-white/80 text-lg mb-4">Spring opening to winter holiday markets. Lay out the full season so shoppers know what to expect all year long.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Full season view</span>
@@ -275,7 +275,7 @@
                         </svg>
                         Special Events
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">More than just shopping</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">More than just shopping</h2>
                     <p class="text-gray-500 dark:text-white/80 mb-6">Cooking demos, live music, kids activities. Make your market a destination.</p>
 
                     <div class="space-y-2">
@@ -302,7 +302,7 @@
                         </svg>
                         Google Calendar
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sync with Google Calendar</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sync with Google Calendar</h2>
                     <p class="text-gray-500 dark:text-white/80 mb-6">Shoppers add your market to their calendar with one click. Never miss a market day.</p>
 
                     <div class="flex justify-center">
@@ -333,7 +333,7 @@
                         </svg>
                         Analytics
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">See what draws crowds</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">See what draws crowds</h2>
                     <p class="text-gray-500 dark:text-white/80 mb-6">Which events get shares? What markets are most popular? Know what's working.</p>
 
                     <div class="space-y-2">

@@ -73,7 +73,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{{ __('messages.why_create_account_without') }}</h3>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ __('messages.why_create_account_without') }}</h2>
                     </div>
                     <div class="space-y-4">
                         <div class="flex items-center gap-3 text-gray-600 dark:text-gray-400">
@@ -93,7 +93,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{{ __('messages.why_create_account_with') }}</h3>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ __('messages.why_create_account_with') }}</h2>
                     </div>
                     <div class="space-y-4">
                         <div class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
@@ -123,7 +123,7 @@
                                 </svg>
                                 {{ __('messages.profile') }}
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">{{ __('messages.why_create_account_customize_title') }}</h3>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">{{ __('messages.why_create_account_customize_title') }}</h2>
                             <p class="text-gray-600 dark:text-gray-400 text-lg">{{ __('messages.why_create_account_customize_desc') }}</p>
                         </div>
                         <div class="flex-shrink-0 w-full lg:w-auto">
@@ -159,7 +159,7 @@
                         </svg>
                         {{ __('messages.email') }}
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('messages.why_create_account_notifications_title') }}</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('messages.why_create_account_notifications_title') }}</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">{{ __('messages.why_create_account_notifications_desc') }}</p>
 
                     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-white/10 p-3">
@@ -180,7 +180,7 @@
                         </svg>
                         {{ __('messages.edit') }}
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('messages.why_create_account_edit_title') }}</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('messages.why_create_account_edit_title') }}</h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">{{ __('messages.why_create_account_edit_desc') }}</p>
 
                     <div class="space-y-2">
@@ -215,7 +215,7 @@
                                 </svg>
                                 {{ __('messages.dashboard') }}
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">{{ __('messages.why_create_account_track_title') }}</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">{{ __('messages.why_create_account_track_title') }}</h2>
                             <p class="text-gray-600 dark:text-gray-400 text-lg">{{ __('messages.why_create_account_track_desc') }}</p>
                         </div>
                         <div class="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-200 dark:border-white/10">
@@ -247,7 +247,7 @@
                         </svg>
                         {{ __('messages.reputation') }}
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('messages.why_create_account_reputation_title') }}</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('messages.why_create_account_reputation_title') }}</h2>
                     <p class="text-gray-600 dark:text-gray-400">{{ __('messages.why_create_account_reputation_desc') }}</p>
                 </div>
 
@@ -259,7 +259,7 @@
                         </svg>
                         {{ __('messages.curators') }}
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('messages.why_create_account_connect_title') }}</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('messages.why_create_account_connect_title') }}</h2>
                     <p class="text-gray-600 dark:text-gray-400">{{ __('messages.why_create_account_connect_desc') }}</p>
                 </div>
 
@@ -271,7 +271,7 @@
                         </svg>
                         {{ __('messages.fast') }}
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('messages.why_create_account_fast_title') }}</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('messages.why_create_account_fast_title') }}</h2>
                     <p class="text-gray-600 dark:text-gray-400">{{ __('messages.why_create_account_fast_desc') }}</p>
                 </div>
 
@@ -285,7 +285,7 @@
                                 </svg>
                                 {{ __('messages.free') }}
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">{{ __('messages.why_create_account_features_title') }}</h3>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">{{ __('messages.why_create_account_features_title') }}</h2>
                             <p class="text-gray-600 dark:text-gray-400 text-lg">{{ __('messages.why_create_account_features_desc') }}</p>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
@@ -325,7 +325,7 @@
                         </svg>
                         {{ __('messages.data') }}
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('messages.why_create_account_data_title') }}</h3>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('messages.why_create_account_data_title') }}</h2>
                     <p class="text-gray-600 dark:text-gray-400">{{ __('messages.why_create_account_data_desc') }}</p>
                 </div>
 
