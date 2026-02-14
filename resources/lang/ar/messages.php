@@ -156,7 +156,7 @@ return [
     'portuguese' => 'البرتغالية',
     'spanish' => 'الإسبانية',
     'estonian' => 'الإستونية',
-    'russian' => 'Russian',
+    'russian' => 'الروسية',
     'sun' => 'الأحد',
     'mon' => 'الإثنين',
     'tue' => 'الثلاثاء',
