@@ -88,7 +88,7 @@
             "Schedule and event management",
             "Ticket creation and sales tracking",
             "Recurring event patterns",
-            "Auto-translation to 10 languages",
+            "Auto-translation to 11 languages",
             "Rate limiting at 300 GET requests per minute",
             "API key authentication"
         ],
@@ -339,7 +339,7 @@
                         i18n
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Multi-language</h3>
-                    <p class="text-gray-600 dark:text-white/80 mb-6">Events auto-translate to 10 languages. Reach a global audience without extra work.</p>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">Events auto-translate to 11 languages. Reach a global audience without extra work.</p>
                     <div class="space-y-2">
                         <div class="flex items-center gap-3">
                             <span class="text-sm font-mono text-teal-600 dark:text-teal-400 w-8">EN</span>

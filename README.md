@@ -75,7 +75,7 @@
 ### Customization
 - 📝 **Custom Fields:** Collect additional information from ticket buyers with customizable form fields at both event and ticket levels. Supports text, dropdown, date, and yes/no field types.
 - 🎨 **Custom CSS Styling:** Personalize your schedule's appearance with custom CSS to match your brand identity.
-- 🌐 **Multi-Language Interface:** App available in 10 languages (English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian).
+- 🌐 **Multi-Language Interface:** App available in 11 languages (English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, Russian).
 - 🎨 **Profile Themes:** Customize header images, background gradients, and fonts.
 
 ### Developer Tools

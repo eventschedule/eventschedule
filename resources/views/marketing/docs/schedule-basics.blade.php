@@ -200,7 +200,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Language</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose from 10 supported languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, and Estonian. This affects the interface language on your schedule page.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose from 11 supported languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, and Russian. This affects the interface language on your schedule page.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Timezone</h4>

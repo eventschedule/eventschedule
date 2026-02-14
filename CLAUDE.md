@@ -135,7 +135,7 @@ Key configuration in `.env`:
 
 ## Localization
 
-10 languages supported in `resources/lang/`: EN, ES, DE, FR, IT, PT, HE, NL, AR, ET
+11 languages supported in `resources/lang/`: EN, ES, DE, FR, IT, PT, HE, NL, AR, ET, RU
 
 ```bash
 # Check for missing translation keys across all languages
