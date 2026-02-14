@@ -678,7 +678,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Brewery and Winery Event Management Software",
         "operatingSystem": "Web",
-        "description": "Fill your tasting room with fans. Announce new releases, host tastings, and sell tickets to brewery events. Email your fans directly—no algorithm. Free forever.",
+        "description": "Fill your tasting room with fans. Announce new releases, host tastings, and sell tickets to brewery events. Email your fans directly. No algorithm. Free forever.",
         "offers": {
             "@type": "Offer",
             "price": "0",

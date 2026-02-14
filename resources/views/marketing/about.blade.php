@@ -81,7 +81,7 @@
                             Event Schedule was created to solve a simple problem: making it easy for anyone with events to share them with their audience.
                         </p>
                         <p>
-                            Whether you're a musician with upcoming shows, a venue with a packed calendar, an event curator aggregating local happenings, or a food truck appearing at different spots each day, you deserve a simple, beautiful way to let people know where you'll be.
+                            Whether you're a musician with upcoming shows, a venue with a packed calendar, an event curator aggregating local happenings, or a food truck appearing at different spots each day, you deserve a simple, professional way to let people know where you'll be.
                         </p>
                         <p>
                             We believe sharing your schedule shouldn't require expensive software or technical expertise. That's why we built Event Schedule to be free, fast, and easy to use.
@@ -100,7 +100,7 @@
                     Built for everyone with events
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400">
-                    No matter how you share your time, we've got you covered.
+                    No matter how you share your time, Event Schedule works for all of them.
                 </p>
             </div>
 
@@ -232,7 +232,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Simple by Design</h3>
                     <p class="text-gray-600 dark:text-gray-400">
-                        No bloat, no complexity. We focus on the features that matter and make them work beautifully.
+                        No bloat, no complexity. We focus on the features that matter and make them work well.
                     </p>
                 </div>
             </div>
@@ -258,7 +258,7 @@
                     </h2>
 
                     <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-8 max-w-2xl mx-auto">
-                        Event Schedule is created by the same team that built Invoice Ninja, the leading source-available invoicing platform trusted by hundreds of thousands of businesses worldwide. We bring the same commitment to quality, transparency, and user-focused design to Event Schedule.
+                        Event Schedule is created by the same team that built Invoice Ninja, a popular source-available invoicing platform trusted by hundreds of thousands of businesses worldwide. We bring the same commitment to quality, transparency, and user-focused design to Event Schedule.
                     </p>
 
                     <div class="flex flex-wrap justify-center gap-4">

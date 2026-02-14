@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Newsletter Builder for Events | Drag-and-Drop Email Marketing - Event Schedule</x-slot>
-    <x-slot name="description">Send beautiful newsletters to followers and ticket buyers. Drag-and-drop editor, five professional templates, audience segments, A/B testing, and real-time delivery analytics.</x-slot>
+    <x-slot name="description">Send branded newsletters to followers and ticket buyers. Drag-and-drop editor, five professional templates, audience segments, A/B testing, and real-time delivery analytics.</x-slot>
     <x-slot name="keywords">event newsletter, email marketing events, drag and drop email builder, newsletter templates, audience segments, A/B testing, email analytics, event marketing</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Newsletters</x-slot>
@@ -47,7 +47,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-                Send beautiful newsletters to your followers and ticket buyers with a drag-and-drop editor, professional templates, audience segments, A/B testing, and delivery analytics.
+                Send branded newsletters to your followers and ticket buyers with a drag-and-drop editor, professional templates, audience segments, A/B testing, and delivery analytics.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
@@ -350,7 +350,7 @@
                 Start sending newsletters today
             </h2>
             <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                Reach your audience with beautiful emails. No credit card required.
+                Reach your audience with branded emails. No credit card required.
             </p>
             <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-sky-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                 Start for free
@@ -370,7 +370,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Email Marketing Software",
         "operatingSystem": "Web",
-        "description": "Send beautiful newsletters to followers and ticket buyers with a drag-and-drop editor, professional templates, audience segments, A/B testing, and real-time delivery analytics.",
+        "description": "Send branded newsletters to followers and ticket buyers with a drag-and-drop editor, professional templates, audience segments, A/B testing, and real-time delivery analytics.",
         "offers": {
             "@type": "Offer",
             "price": "0",

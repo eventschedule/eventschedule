@@ -156,7 +156,7 @@
                             </svg>
                             <h3 class="font-semibold text-gray-900 dark:text-white">Newsletters</h3>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Send beautiful emails to your audience.</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Send branded emails to your audience.</p>
                     </div>
                 </a>
 

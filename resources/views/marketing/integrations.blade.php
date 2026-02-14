@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Integrations | Google Calendar, Stripe & More - Event Schedule</x-slot>
-    <x-slot name="description">Connect Event Schedule with Google Calendar, CalDAV, Stripe, and Invoice Ninja for a seamless event management experience.</x-slot>
+    <x-slot name="description">Connect Event Schedule with Google Calendar, CalDAV, Stripe, and Invoice Ninja for a streamlined event management experience.</x-slot>
     <x-slot name="keywords">event schedule integrations, Google Calendar sync, CalDAV sync, Stripe payments, Invoice Ninja, calendar integration, payment processing</x-slot>
     <x-slot name="socialImage">social/integrations.png</x-slot>
     <x-slot name="breadcrumbTitle">Integrations</x-slot>
@@ -13,7 +13,7 @@
         "name": "Event Schedule - Integrations",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
-        "description": "Connect Event Schedule with Google Calendar, CalDAV, Stripe, and Invoice Ninja for a seamless event management experience.",
+        "description": "Connect Event Schedule with Google Calendar, CalDAV, Stripe, and Invoice Ninja for a streamlined event management experience.",
         "featureList": [
             "Google Calendar two-way sync",
             "CalDAV calendar support",
@@ -59,7 +59,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-                Connect with the tools you already use. Sync calendars and accept payments seamlessly.
+                Connect with the tools you already use. Sync calendars and accept payments with ease.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
@@ -162,7 +162,7 @@
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-teal-600 dark:group-hover:text-teal-300 transition-colors">CalDAV</h3>
 
                     <div class="flex-grow">
-                        <p class="text-gray-600 dark:text-white/80 mb-6">Sync with any CalDAV server—Nextcloud, Radicale, Fastmail, and more. Two-way sync keeps events in harmony.</p>
+                        <p class="text-gray-600 dark:text-white/80 mb-6">Sync with any CalDAV server: Nextcloud, Radicale, Fastmail, and more. Two-way sync keeps events in harmony.</p>
 
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
                             <div class="flex items-center gap-3 mb-3">
@@ -306,7 +306,7 @@
                     Why integrate?
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400">
-                    Keep your workflow seamless with tools that work together.
+                    Keep your workflow smooth with tools that work together.
                 </p>
             </div>
 

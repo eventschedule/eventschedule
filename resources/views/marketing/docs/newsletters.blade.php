@@ -27,7 +27,7 @@
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Newsletters</h1>
             </div>
             <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
-                Create and send beautiful newsletters to your followers and ticket buyers. Announce upcoming events, share digests, and keep your audience engaged.
+                Create and send branded newsletters to your followers and ticket buyers. Announce upcoming events, share digests, and keep your audience engaged.
             </p>
         </div>
     </section>

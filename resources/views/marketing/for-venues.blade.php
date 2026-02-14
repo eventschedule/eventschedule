@@ -591,7 +591,7 @@
                                 Online Events
                             </div>
                             <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-300 transition-colors">Stream to the world</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Share live performances with fans worldwide. Add your streaming URL and sell tickets to viewers anywhere—no venue required.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Share live performances with fans worldwide. Add your streaming URL and sell tickets to viewers anywhere. No venue required.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live streaming</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Global ticket sales</span>

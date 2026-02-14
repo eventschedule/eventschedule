@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Google Calendar Sync - Event Schedule</x-slot>
-    <x-slot name="description">Real-time two-way sync with Google Calendar. OAuth authentication, webhook updates, and multi-calendar support for seamless event management.</x-slot>
+    <x-slot name="description">Real-time two-way sync with Google Calendar. OAuth authentication, webhook updates, and multi-calendar support for smooth event management.</x-slot>
     <x-slot name="keywords">Google Calendar sync, calendar integration, two-way sync, OAuth, calendar webhook, automatic sync, real-time sync</x-slot>
     <x-slot name="breadcrumbTitle">Google Calendar</x-slot>
     <x-slot name="socialImage">social/integrations.png</x-slot>
@@ -13,7 +13,7 @@
         "name": "Event Schedule - Google Calendar Sync",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
-        "description": "Real-time two-way sync with Google Calendar. OAuth authentication, webhook updates, and multi-calendar support for seamless event management.",
+        "description": "Real-time two-way sync with Google Calendar. OAuth authentication, webhook updates, and multi-calendar support for smooth event management.",
         "featureList": [
             "Two-way Google Calendar sync",
             "OAuth authentication",
@@ -278,7 +278,7 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Auto-sync</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-sm">
-                        Events sync instantly via webhooks. Create, update, or delete—changes flow automatically.
+                        Events sync instantly via webhooks. Create, update, or delete. Changes flow automatically.
                     </p>
                 </div>
             </div>

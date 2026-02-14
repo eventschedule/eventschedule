@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Management Features | Ticketing, Calendar Sync & More - Event Schedule</x-slot>
-    <x-slot name="description">Discover all the features that make Event Schedule the best way to manage events, sell tickets, and engage your audience.</x-slot>
+    <x-slot name="description">Discover all the features that make Event Schedule a simple, powerful way to manage events, sell tickets, and engage your audience.</x-slot>
     <x-slot name="keywords">event management features, online ticketing, QR code check-in, Google Calendar sync, AI event parsing, custom domain events, recurring events, event API</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Features</x-slot>
@@ -11,7 +11,7 @@
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Event Schedule Features",
-        "description": "Discover all the features that make Event Schedule the best way to manage events, sell tickets, and engage your audience.",
+        "description": "Discover all the features that make Event Schedule a simple, powerful way to manage events, sell tickets, and engage your audience.",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": ["Web", "Android", "iOS"],
         "featureList": [
@@ -87,7 +87,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-                Everything you need to run events, from calendars and ticketing to newsletters and analytics.
+                Everything you need to fill seats, from calendars and ticketing to newsletters and analytics.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
@@ -268,7 +268,7 @@
                                 Newsletters
                             </div>
                             <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Engage your audience</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Send beautiful newsletters to followers and ticket buyers. Drag-and-drop builder, audience segments, A/B testing, and delivery analytics.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Send branded newsletters to followers and ticket buyers. Drag-and-drop builder, audience segments, A/B testing, and delivery analytics.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Drag-and-drop builder</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">A/B testing</span>
@@ -705,7 +705,7 @@
                                 Team Scheduling
                             </div>
                             <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors">Collaborate together</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Invite team members via email, assign roles, and manage events together seamlessly.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Invite team members via email, assign roles, and manage events together.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Invite members</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Custom permissions</span>

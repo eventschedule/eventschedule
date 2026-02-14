@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Restaurants | Turn First-Time Diners into Regulars</x-slot>
-    <x-slot name="description">Email your regulars directly and fill every seat. Announce seasonal menus, sell tickets to wine dinners and prix fixe events, and reach your regulars directly—no algorithm. Free forever.</x-slot>
+    <x-slot name="description">Email your regulars directly and fill every seat. Announce seasonal menus, sell tickets to wine dinners and prix fixe events, and reach your regulars directly. No algorithm. Free forever.</x-slot>
     <x-slot name="keywords">restaurant event calendar, restaurant email marketing, wine dinner tickets, chef's table reservations, restaurant specials software, cooking class tickets, restaurant event management, supper club software, prix fixe ticketing</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Restaurants</x-slot>
@@ -728,7 +728,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Restaurant Event Management Software",
         "operatingSystem": "Web",
-        "description": "Email your regulars directly and fill every seat. Announce seasonal menus, sell tickets to wine dinners and prix fixe events, and reach your regulars directly—no algorithm. Free forever.",
+        "description": "Email your regulars directly and fill every seat. Announce seasonal menus, sell tickets to wine dinners and prix fixe events, and reach your regulars directly. No algorithm. Free forever.",
         "offers": {
             "@type": "Offer",
             "price": "0",

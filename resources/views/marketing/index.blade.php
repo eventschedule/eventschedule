@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule - Plan, Promote & Share Event Calendars</x-slot>
-    <x-slot name="description">Create beautiful event calendars, sell tickets with no platform fees, and check in attendees with QR codes. Free for venues, performers, and communities.</x-slot>
+    <x-slot name="description">Create professional event calendars, sell tickets with no platform fees, and check in attendees with QR codes. Free for venues, performers, and communities.</x-slot>
     <x-slot name="keywords">event schedule, event calendar, free event management, ticketing platform, QR check-in, venue calendar, performer schedule, sell tickets online, event organizer software, event newsletters, embed event calendar, recurring events</x-slot>
     <x-slot name="socialImage">social/home.png</x-slot>
     <x-slot name="breadcrumbTitle">Home</x-slot>
@@ -100,7 +100,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Grow your audience",
-                "text": "Fans follow your schedule. Send them newsletters, notify them of new events, and build lasting connections."
+                "text": "Fans follow your schedule. Send them newsletters and notify them when you add new events."
             }
         ]
     }
@@ -140,7 +140,7 @@
 
                     <!-- Subheadline -->
                     <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-xl mb-12 animate-reveal delay-200">
-                        The simplest way for venues, performers, and communities to share events, sell tickets, and grow their audience.
+                        Share events, sell tickets, and grow your audience. Built for venues, performers, and communities.
                     </p>
 
                     <!-- CTA Buttons -->
@@ -154,6 +154,7 @@
                             </span>
                             <div class="absolute inset-0 animate-shimmer"></div>
                         </a>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-3 sm:mt-0 sm:self-center">Set up in under 2 minutes</p>
                     </div>
                 </div>
 
@@ -232,10 +233,10 @@
             <!-- Section header -->
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Everything you need to run events
+                    Everything you need to fill seats
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-                    From scheduling to check-ins, we've got you covered.
+                    One platform for scheduling, ticketing, newsletters, and check-ins.
                 </p>
             </div>
 
@@ -271,7 +272,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">AI-Powered</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm flex-grow">Auto-extract event details from flyers, agendas, and setlists. Scan printed agendas to populate event parts. Translate instantly.</p>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm flex-grow">Paste a flyer or scan a printed agenda and let AI extract the details. Translate your events into 11 languages instantly.</p>
                     <span class="inline-flex items-center mt-auto text-sm font-medium text-sky-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -286,7 +287,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">Newsletters</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm flex-grow">Send beautiful emails to followers and ticket buyers with a drag-and-drop editor and A/B testing.</p>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm flex-grow">Send branded emails to followers and ticket buyers with a drag-and-drop editor and A/B testing.</p>
                     <span class="inline-flex items-center mt-auto text-sm font-medium text-cyan-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -361,7 +362,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">Team Scheduling</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Invite team members, manage permissions, and coordinate schedules together.</p>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Invite your team so everyone can add events and manage tickets without sharing a login.</p>
                     <span class="inline-flex items-center mt-3 text-sm font-medium text-cyan-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -406,7 +407,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">Fan Videos & Comments</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Fans add YouTube videos and comments to your events. All submissions need your approval. Build community around your shows.</p>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Fans add YouTube videos and comments to your events, with your approval before anything goes live. Build community around your shows.</p>
                     <span class="inline-flex items-center mt-3 text-sm font-medium text-orange-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -421,7 +422,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Open Source & API</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Selfhost on your own server. Full REST API for custom integrations. Open source.</p>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Selfhost for full control over your data. Integrate with your existing tools through our REST API.</p>
                     <span class="inline-flex items-center mt-3 text-sm font-medium text-gray-600 dark:text-gray-300 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -554,7 +555,7 @@
                         </svg>
                     </div>
                     <div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Open source</div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Selfhost on your own server. Open source.</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Selfhost on your own server. Your data, your rules.</p>
                 </div>
             </div>
         </div>
@@ -579,7 +580,7 @@
                         <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-cyan-500">directly</span>
                     </h2>
                     <p class="text-lg text-gray-500 dark:text-gray-400 mb-8 max-w-lg">
-                        Send beautiful newsletters to your followers and ticket buyers. No third-party email tools needed.
+                        Send branded newsletters to your followers and ticket buyers. No third-party email tools needed.
                     </p>
 
                     <!-- Feature badges -->
@@ -814,7 +815,7 @@
                             <div class="h-px flex-1 bg-gradient-to-r from-emerald-300 dark:from-emerald-500/50 to-transparent"></div>
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Grow your audience</h3>
-                        <p class="text-gray-600 dark:text-gray-400">Fans follow your schedule. Send them newsletters, notify them of new events, and build lasting connections.</p>
+                        <p class="text-gray-600 dark:text-gray-400">Fans follow your schedule. Send them newsletters and notify them when you add new events.</p>
                     </div>
                 </div>
             </div>
@@ -834,7 +835,7 @@
                 <span class="text-gradient">your schedule?</span>
             </h2>
             <p class="text-xl text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
-                Join musicians, venues, and organizers who use Event Schedule to connect with their audience.
+                Start sharing your schedule with your audience today.
             </p>
             <a href="{{ route('sign_up') }}" class="group relative inline-flex items-center justify-center px-12 py-6 text-xl font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl overflow-hidden transition-all hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/30">
                 <span class="relative z-10 flex items-center gap-3">
