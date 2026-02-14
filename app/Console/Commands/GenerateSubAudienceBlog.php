@@ -208,7 +208,8 @@ class GenerateSubAudienceBlog extends Command
         try {
             Mail::to($adminEmail)->send(new BlogPostReview($post));
             $this->line('  Sent review email to '.$adminEmail);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            \Log::error('Failed to send blog post review email: '.$e->getMessage(), ['exception' => $e]);
             $this->warn('  Failed to send review email: '.$e->getMessage());
         }
     }

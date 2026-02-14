@@ -30,7 +30,7 @@ class BlogPostReview extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '[Auto-Generated] New Blog Post: '.$this->blogPost->title,
+            subject: 'New Blog Post for Review: '.$this->blogPost->title,
         );
     }
 
