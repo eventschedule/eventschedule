@@ -136,6 +136,13 @@ class AppController extends Controller
             }
 
             \Artisan::call('app:translate');
+
+            // Generate blog posts early (before slower operations) to avoid timeout issues
+            if (config('app.hosted')) {
+                \Artisan::call('app:generate-sub-audience-blog');
+                $this->generateDailyBlogPost();
+            }
+
             \Artisan::call('app:send-graphic-emails');
             \Artisan::call('google:refresh-webhooks');
 
@@ -146,17 +153,8 @@ class AppController extends Controller
                 Cache::put('notified_pending_today', true, now()->endOfDay());
             }
 
-            if (config('app.hosted')) {
-                \Artisan::call('app:generate-sub-audience-blog');
-            }
-
             if (! config('app.hosted')) {
                 \Artisan::call('app:import-curator-events');
-            }
-
-            // Auto-generate daily blog post (once per day)
-            if (config('app.hosted')) {
-                $this->generateDailyBlogPost();
             }
         } finally {
             $lock->release();
@@ -257,8 +255,8 @@ class AppController extends Controller
             if ($supportEmail) {
                 Mail::to($supportEmail)->send(new BlogPostReview($blogPost));
             }
-        } catch (\Exception $e) {
-            \Log::warning('Failed to send blog post review email: '.$e->getMessage());
+        } catch (\Throwable $e) {
+            \Log::error('Failed to send blog post review email: '.$e->getMessage(), ['exception' => $e]);
         }
     }
 }
