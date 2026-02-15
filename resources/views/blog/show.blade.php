@@ -4,9 +4,12 @@
     @if($post->tags)
     <x-slot name="keywords">{{ implode(', ', $post->tags) }}, event scheduling, ticketing</x-slot>
     @endif
+    <x-slot name="ogType">article</x-slot>
+    @if($post->featured_image_url)
+    <x-slot name="socialImage">{{ $post->featured_image_url }}</x-slot>
+    @endif
 
-    <!-- Additional Meta Tags -->
-    <meta property="og:type" content="article">
+    <x-slot name="headMeta">
     @if($post->published_at)
         <meta property="article:published_time" content="{{ $post->published_at->toISOString() }}">
     @endif
@@ -17,6 +20,7 @@
             <meta property="article:tag" content="{{ $tag }}">
         @endforeach
     @endif
+    </x-slot>
 
     <!-- BlogPosting Structured Data -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
@@ -276,6 +280,9 @@
                         <source srcset="{{ webp_path($post->featured_image_url) }}" type="image/webp">
                         <img src="{{ $post->featured_image_url }}"
                              alt="{{ $post->title }}"
+                             width="896"
+                             height="384"
+                             fetchpriority="high"
                              class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-2xl shadow-lg">
                     </picture>
                 </div>
@@ -314,6 +321,10 @@
                                                 <source srcset="{{ webp_path($relatedPost->featured_image_url) }}" type="image/webp">
                                                 <img src="{{ $relatedPost->featured_image_url }}"
                                                      alt="{{ $relatedPost->title }}"
+                                                     width="288"
+                                                     height="128"
+                                                     loading="lazy"
+                                                     decoding="async"
                                                      class="w-full h-32 object-cover rounded-xl">
                                             </picture>
                                         </div>

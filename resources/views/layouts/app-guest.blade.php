@@ -49,6 +49,10 @@
             <meta property="og:description" content="{{ $event->getMetaDescription($date) }}">
             @php $eventOgImage = $event->getImageUrl() ?: (config('app.url') . '/images/social/home.png'); @endphp
             <meta property="og:image" content="{{ $eventOgImage }}">
+            @if (! $event->getImageUrl())
+            <meta property="og:image:width" content="1200">
+            <meta property="og:image:height" content="630">
+            @endif
             <meta property="og:image:alt" content="{{ $event->translatedName() }}">
             <meta property="og:url" content="{{ $event->getGuestUrl(false, $date) }}">
             <meta property="og:site_name" content="Event Schedule">
@@ -68,7 +72,16 @@
             <meta property="og:description" content="{{ $description }}">
             <meta name="twitter:description" content="{{ $description }}">
             @else
-            @php $description = 'View the event schedule for ' . $role->translatedName(); @endphp
+            @php
+                $description = 'View the event schedule for ' . $role->translatedName();
+                if ($role->translatedShortDescription()) {
+                    $description .= ' - ' . $role->translatedShortDescription();
+                }
+                if ($role->isVenue() && $role->shortAddress()) {
+                    $description .= ' | ' . $role->shortAddress();
+                }
+                $description = Str::limit($description, 155);
+            @endphp
             <meta name="description" content="{{ $description }}">
             <meta property="og:description" content="{{ $description }}">
             <meta name="twitter:description" content="{{ $description }}">
@@ -84,6 +97,8 @@
             <meta name="twitter:image" content="{{ $image }}">
             @else
             <meta property="og:image" content="{{ config('app.url') . '/images/social/home.png' }}">
+            <meta property="og:image:width" content="1200">
+            <meta property="og:image:height" content="630">
             <meta property="og:image:alt" content="{{ $name ?? $role->translatedName() }}">
             <meta name="twitter:image" content="{{ config('app.url') . '/images/social/home.png' }}">
             @endif
@@ -427,13 +442,13 @@
         <!-- Per the AAL license, please do not remove the link to Event Schedule -->
         @if (config('app.is_nexus'))
             <p class="text-[#F5F9FE] text-base text-center flex items-center justify-center gap-2 {{ $isRtl ? 'flex-row-reverse' : '' }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
-                <span>{!! str_replace(':link', '<bdi dir="ltr"><a href="' . marketing_url() . '" target="_blank" class="text-white hover:underline">' . marketing_domain() . '</a></bdi>',  __('messages.try_event_schedule')) !!}</span>
+                <span>{!! str_replace(':link', '<bdi dir="ltr"><a href="' . marketing_url() . '" target="_blank" rel="noopener" class="text-white hover:underline">' . marketing_domain() . '</a></bdi>',  __('messages.try_event_schedule')) !!}</span>
                 <span>•</span>
-                <span>{!! __('messages.supported_by', ['link' => '<a href="https://invoiceninja.com" target="_blank" class="text-white hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>']) !!}</span>
+                <span>{!! __('messages.supported_by', ['link' => '<a href="https://invoiceninja.com" target="_blank" rel="noopener noreferrer nofollow" class="text-white hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>']) !!}</span>
             </p>
         @else
             <p class="text-[#F5F9FE] text-base text-center" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
-                {!! str_replace(':link', '<bdi dir="ltr"><a href="' . marketing_url() . '" target="_blank" class="text-white hover:underline">' . marketing_domain() . '</a></bdi>',  __('messages.try_event_schedule')) !!}
+                {!! str_replace(':link', '<bdi dir="ltr"><a href="' . marketing_url() . '" target="_blank" rel="noopener" class="text-white hover:underline">' . marketing_domain() . '</a></bdi>',  __('messages.try_event_schedule')) !!}
             </p>
         @endif
       </div>
@@ -442,7 +457,7 @@
 
     @if (! request()->embed && ! config('app.is_nexus') && $role->showBranding())
     <div class="flex justify-{{ $isRtl ? 'start' : 'end' }} p-4">
-        <a href="https://eventschedule.com" target="_blank" title="{{ __('messages.powered_by_event_schedule') }}" class="block rounded-full bg-gray-400 p-[1px]">
+        <a href="https://eventschedule.com" target="_blank" rel="noopener" title="{{ __('messages.powered_by_event_schedule') }}" class="block rounded-full bg-gray-400 p-[1px]">
             <img src="{{ url('/images/favicon.png') }}" alt="Event Schedule" class="h-6 w-6 rounded-full">
         </a>
     </div>

@@ -48,12 +48,14 @@
               <img
                 class="block max-h-72 w-full object-cover"
                 src="{{ asset('images/headers') }}/{{ $role->header_image }}.png"
+                alt="{{ $role->translatedName() }}"
               />
             </picture>
             @elseif ($role->header_image_url)
             <img
               class="block max-h-72 w-full object-cover"
               src="{{ $role->header_image_url }}"
+              alt="{{ $role->translatedName() }}"
             />
             @endif
           </div>
@@ -88,7 +90,7 @@
                 @endif
                 @if($role->isVenue())
                 <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($role->bestAddress()) }}"
-                   target="_blank" rel="noopener noreferrer"
+                   target="_blank" rel="noopener noreferrer nofollow"
                    class="inline-flex items-center gap-1.5 text-sm text-[#33383C] dark:text-gray-300 hover:text-[#4E81FA] hover:underline transition-colors duration-200">
                   <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z"/>
@@ -115,7 +117,7 @@
                     </a>
                     @endif
                     @if($hasWebsite)
-                    <a href="{{ $role->website }}" target="_blank" rel="noopener noreferrer"
+                    <a href="{{ $role->website }}" target="_blank" rel="noopener noreferrer nofollow"
                        class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
                        style="background-color: {{ $accentColor }}"
                        data-tooltip="Website: {{ App\Utils\UrlUtils::clean($role->website) }}">
@@ -127,7 +129,7 @@
                     @if($hasSocial)
                         @foreach (json_decode($role->social_links) as $link)
                         @if ($link)
-                        <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer"
+                        <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
                            class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
                            style="background-color: {{ $accentColor }}"
                            data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
@@ -195,17 +197,17 @@
               <div class="text-start w-full mt-2">
                 @if(str_word_count(strip_tags($role->translatedDescription())) > 5)
                 <div x-data="{ expanded: false }" class="text-sm text-[#33383C] dark:text-gray-300">
-                  <span x-show="!expanded" class="description-collapsed">
-                    {{ Str::words(strip_tags($role->translatedDescription()), 5, '') }}...
-                    <button :aria-expanded="expanded" @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap">
+                  <div x-show="!expanded">
+                    <span>{{ Str::words(strip_tags($role->translatedDescription()), 5, '...') }}</span>
+                    <button @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap">
                       {{ __('messages.show_more') }}
                     </button>
-                  </span>
-                  <div x-show="expanded" x-cloak class="description-expanded">
+                  </div>
+                  <div x-show="expanded" x-cloak>
                     <div class="custom-content [&>*:first-child]:mt-0">
                       {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                     </div>
-                    <button :aria-expanded="expanded" @click="expanded = false; window.scrollTo({ top: 0, behavior: 'smooth' })" class="text-[#4E81FA] hover:underline whitespace-nowrap mt-1">
+                    <button @click="expanded = false; window.scrollTo({ top: 0, behavior: 'smooth' })" class="text-[#4E81FA] hover:underline whitespace-nowrap mt-1">
                       {{ __('messages.show_less') }}
                     </button>
                   </div>
@@ -235,7 +237,7 @@
                   @endif
                   @if($role->isVenue())
                   <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($role->bestAddress()) }}"
-                     target="_blank" rel="noopener noreferrer"
+                     target="_blank" rel="noopener noreferrer nofollow"
                      class="flex items-center gap-1.5 text-sm text-[#33383C] dark:text-gray-300 hover:text-[#4E81FA] hover:underline transition-colors duration-200">
                     <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                       <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z"/>
@@ -257,7 +259,7 @@
                       </a>
                       @endif
                       @if($hasWebsite)
-                      <a href="{{ $role->website }}" target="_blank" rel="noopener noreferrer"
+                      <a href="{{ $role->website }}" target="_blank" rel="noopener noreferrer nofollow"
                          class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
                          data-tooltip="Website: {{ App\Utils\UrlUtils::clean($role->website) }}">
                           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -268,7 +270,7 @@
                       @if($hasSocial)
                           @foreach (json_decode($role->social_links) as $link)
                           @if ($link)
-                          <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer"
+                          <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
                              class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
                              data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
                               <x-url-icon class="w-5 h-5" color="currentColor">
@@ -375,17 +377,17 @@
               @if($role->translatedDescription())
               @if(str_word_count(strip_tags($role->translatedDescription())) > 5)
               <div x-data="{ expanded: false }" class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
-                <span x-show="!expanded" class="description-collapsed">
-                  {{ Str::words(strip_tags($role->translatedDescription()), 5, '') }}...
-                  <button :aria-expanded="expanded" @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap">
+                <div x-show="!expanded">
+                  <span>{{ Str::words(strip_tags($role->translatedDescription()), 5, '...') }}</span>
+                  <button @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap">
                     {{ __('messages.show_more') }}
                   </button>
-                </span>
-                <div x-show="expanded" x-cloak class="description-expanded">
+                </div>
+                <div x-show="expanded" x-cloak>
                   <div class="custom-content [&>*:first-child]:mt-0">
                     {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                   </div>
-                  <button :aria-expanded="expanded" @click="expanded = false; window.scrollTo({ top: 0, behavior: 'smooth' })" class="text-[#4E81FA] hover:underline whitespace-nowrap mt-1">
+                  <button @click="expanded = false; window.scrollTo({ top: 0, behavior: 'smooth' })" class="text-[#4E81FA] hover:underline whitespace-nowrap mt-1">
                     {{ __('messages.show_less') }}
                   </button>
                 </div>
