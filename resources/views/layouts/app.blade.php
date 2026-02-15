@@ -135,11 +135,18 @@
             text-align: right;
         }
         
+        [dir="rtl"] select,
+        select.rtl,
         .rtl select {
             text-align: right;
             direction: rtl;
+            background-position: left 0.5rem center;
+            padding-left: 2.5rem;
+            padding-right: 0.75rem;
         }
-        
+
+        [dir="rtl"] select option,
+        select.rtl option,
         .rtl select option {
             text-align: right;
             direction: rtl;
@@ -524,6 +531,7 @@
             font-size: 1.15rem !important;
             line-height: 1.5 !important;
             padding: 0.75rem 1rem !important;
+            font-family: inherit !important;
         }
 
         /* Exception for country picker - needs proper padding for flag */
