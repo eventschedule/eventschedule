@@ -740,7 +740,7 @@
         @endif
 
         {{-- Flyer image --}}
-        @if ($event->flyer_image_url)
+        @if ($event->flyer_image_url && request()->get('tickets') !== 'true')
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
           <img src="{{ $event->flyer_image_url }}" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}" class="w-full" loading="lazy" decoding="async"/>
         </div>
