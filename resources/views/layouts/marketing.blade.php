@@ -41,6 +41,11 @@
     @php
         $path = request()->path();
         $canonicalPath = $path === '/' ? config('app.url') : config('app.url') . '/' . ltrim(rtrim($path, '/'), '/');
+        $langParam = request()->get('lang');
+        $validLangs = ['en', 'es', 'de', 'fr', 'it', 'pt', 'he', 'nl', 'ar', 'et', 'ru'];
+        if ($langParam && in_array($langParam, $validLangs)) {
+            $canonicalPath .= '?lang=' . $langParam;
+        }
     @endphp
     <link rel="canonical" href="{{ $canonicalPath }}">
     <!-- Hreflang tags for all supported languages -->
@@ -97,7 +102,7 @@
     <meta name="twitter:title" content="{{ $title ?? 'Event Schedule' }}">
     <meta name="twitter:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
     <meta name="twitter:image" content="{{ $ogImage }}">
-    <meta name="twitter:image:alt" content="Event Schedule">
+    <meta name="twitter:image:alt" content="{{ $title ?? 'Event Schedule' }}">
     <meta name="twitter:site" content="@ScheduleEvent">
 
     <!-- Structured Data -->
@@ -107,7 +112,15 @@
         "@type": "WebSite",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
-        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}"
+        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "{{ config('app.url') }}/?search={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+        }
     }
     </script>
     <script type="application/ld+json" {!! nonce_attr() !!}>

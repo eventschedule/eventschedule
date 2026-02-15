@@ -1672,7 +1672,19 @@ abstract class AbstractEventDesign
                 }
             }
 
-            return str_replace(array_keys($replacements), array_values($replacements), $template);
+            $result = str_replace(array_keys($replacements), array_values($replacements), $template);
+
+            // Clean up orphaned | separators when venue or city (or other fields) are blank
+            $lines = explode("\n", $result);
+            $lines = array_map(function ($line) {
+                $line = preg_replace('/\s*\|\s*\|\s*/', ' | ', $line); // collapse "| |" into single "|"
+                $line = preg_replace('/^\s*\|\s*/', '', $line);        // trim leading "|"
+                $line = preg_replace('/\s*\|\s*$/', '', $line);        // trim trailing "|"
+
+                return $line;
+            }, $lines);
+
+            return implode("\n", $lines);
         } catch (\Exception $e) {
             return $template;
         }
