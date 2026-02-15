@@ -5,6 +5,27 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Nightclubs</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule for Nightclubs",
+        "description": "Fill your club with DJ lineups and themed nights. Email your crowd directly. Sell tickets, accept DJ bookings. Free forever.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Event Management",
+        "audience": {
+            "@type": "Audience",
+            "audienceType": "Nightclubs"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->

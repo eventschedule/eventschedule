@@ -5,6 +5,27 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Farmers Markets</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule for Farmers Markets",
+        "description": "Grow your farmers market community. Share vendor lineups, seasonal schedules, and special events. Email shoppers directly. Free forever.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Event Management",
+        "audience": {
+            "@type": "Audience",
+            "audienceType": "Farmers Markets"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->

@@ -5,6 +5,23 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Embed Calendar</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule Embed Calendar",
+        "description": "Embed your event calendar on any website with one line of code. Responsive iframe with dark mode support and 11 languages.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Embeddable Calendar Widget"
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background -->

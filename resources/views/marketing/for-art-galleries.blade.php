@@ -5,6 +5,27 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Art Galleries</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule for Art Galleries",
+        "description": "Fill your gallery with collectors. Announce exhibitions, sell tickets to opening nights, and email your collectors directly. Free forever.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Event Management",
+        "audience": {
+            "@type": "Audience",
+            "audienceType": "Art Galleries & Studios"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Animated background with purple/violet and gold tones -->

@@ -5,6 +5,27 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Fitness & Yoga</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule for Fitness & Yoga",
+        "description": "Share your class schedule, sell drop-in passes, and reach students directly with newsletters. Zero platform fees.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Event Management",
+        "audience": {
+            "@type": "Audience",
+            "audienceType": "Fitness & Yoga Instructors"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section - Mesh Gradient -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Mesh gradient background -->

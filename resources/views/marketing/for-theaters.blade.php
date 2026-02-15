@@ -5,6 +5,27 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Theaters</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule for Theaters",
+        "description": "Manage show runs from opening night to closing curtain, sell tickets with zero platform fees, and email your patrons directly.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Event Management",
+        "audience": {
+            "@type": "Audience",
+            "audienceType": "Theaters"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section with Theater Marquee Effect -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-24 lg:py-32 overflow-hidden">
         <!-- Stage curtain glow effect -->

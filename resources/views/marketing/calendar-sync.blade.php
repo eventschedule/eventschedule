@@ -5,6 +5,23 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Calendar Sync</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule Calendar Sync",
+        "description": "Two-way sync with Google Calendar and CalDAV. Real-time webhook updates. Let attendees add events to Apple, Google, or Outlook calendars instantly.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Calendar Synchronization"
+    }
+    </script>
+    </x-slot>
+
 
     <!-- Hero Section -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">

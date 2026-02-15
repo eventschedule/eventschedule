@@ -5,6 +5,23 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Ticketing</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule Ticketing",
+        "description": "Sell tickets directly through your event schedule with QR codes, multiple ticket types, and secure payment processing. Zero platform fees.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Event Ticketing"
+    }
+    </script>
+    </x-slot>
+
     <style {!! nonce_attr() !!}>
         /* Page-specific scan animation */
         @keyframes scan-line {

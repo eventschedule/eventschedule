@@ -5,6 +5,23 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Recurring Events</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule Recurring Events",
+        "description": "Set events to repeat daily, weekly, biweekly, monthly, or yearly with flexible end conditions, per-occurrence tickets, and automatic Google Calendar sync.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Recurring Event Scheduling"
+    }
+    </script>
+    </x-slot>
+
     <style {!! nonce_attr() !!}>
         .text-gradient {
             background: linear-gradient(135deg, #84cc16 0%, #22c55e 50%, #16a34a 100%);

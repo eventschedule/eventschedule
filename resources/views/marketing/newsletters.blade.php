@@ -5,6 +5,23 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Newsletters</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule Newsletters",
+        "description": "Send branded newsletters to followers and ticket buyers. Drag-and-drop editor, professional templates, audience segments, A/B testing, and delivery analytics.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Event Email Marketing"
+    }
+    </script>
+    </x-slot>
+
     <style {!! nonce_attr() !!}>
         /* Custom sky gradient for this page */
         .text-gradient {
