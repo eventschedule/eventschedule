@@ -809,6 +809,10 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
 
+        if (! auth()->user()->isMember($subdomain)) {
+            return back()->with('error', __('messages.not_authorized'));
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
         $role->events()->detach($event->id);
 

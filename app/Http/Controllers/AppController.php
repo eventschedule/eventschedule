@@ -52,6 +52,19 @@ class AppController extends Controller
             return response()->json(['success' => false, 'error' => 'Not available'], 403);
         }
 
+        // Require authentication unless this is the initial setup (no users exist yet)
+        if (! auth()->check()) {
+            try {
+                $hasUsers = \App\Models\User::exists();
+            } catch (\Exception $e) {
+                // Table may not exist yet during initial setup
+                $hasUsers = false;
+            }
+            if ($hasUsers) {
+                return response()->json(['success' => false, 'error' => 'Unauthorized'], 403);
+            }
+        }
+
         $host = $request->input('host');
         $port = $request->input('port');
         $database = $request->input('database');
@@ -132,7 +145,7 @@ class AppController extends Controller
                     ]);
                 }
             } catch (\Exception $e) {
-                \Log::warning('Queue processing failed: ' . $e->getMessage());
+                \Log::warning('Queue processing failed: '.$e->getMessage());
             }
 
             \Artisan::call('app:translate');
@@ -170,7 +183,7 @@ class AppController extends Controller
         $isAppSubdomain = config('app.hosted') && str_starts_with(request()->getHost(), 'app.');
         $content = $isAppSubdomain
             ? $disallowRules
-            : $disallowRules . "\nSitemap: " . config('app.url') . "/sitemap.xml\n";
+            : $disallowRules."\nSitemap: ".config('app.url')."/sitemap.xml\n";
 
         return response($content, 200)->header('Content-Type', 'text/plain');
     }
@@ -191,7 +204,7 @@ class AppController extends Controller
             abort(404);
         }
 
-        $path = storage_path('app/temp/' . $filename);
+        $path = storage_path('app/temp/'.$filename);
 
         if (file_exists($path)) {
             return response()->file($path);

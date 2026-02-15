@@ -151,8 +151,8 @@ class TicketController extends Controller
                             // Handle combined mode logic
                             if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
                                 // Lock all tickets for combined mode
-                                $event->tickets()->lockForUpdate()->get();
-                                $totalSold = $event->tickets->sum(function ($ticket) use ($request) {
+                                $lockedTickets = $event->tickets()->lockForUpdate()->get();
+                                $totalSold = $lockedTickets->sum(function ($ticket) use ($request) {
                                     $ticketSold = $ticket->sold ? json_decode($ticket->sold, true) : [];
 
                                     return $ticketSold[$request->event_date] ?? 0;
@@ -328,7 +328,7 @@ class TicketController extends Controller
                         'customer_name' => $sale->name,
                     ],
                     'success_url' => route('checkout.success', $data).'?session_id={CHECKOUT_SESSION_ID}',
-                    'cancel_url' => route('checkout.cancel', $data),
+                    'cancel_url' => route('checkout.cancel', $data).'?secret='.$sale->secret,
                 ],
                 [
                     'stripe_account' => $event->user->stripe_account_id,
@@ -347,7 +347,7 @@ class TicketController extends Controller
                     'sale_id' => UrlUtils::encodeId($sale->id),
                 ],
                 'success_url' => route('checkout.success', $data).'?session_id={CHECKOUT_SESSION_ID}&direct=1',
-                'cancel_url' => route('checkout.cancel', $data),
+                'cancel_url' => route('checkout.cancel', $data).'?secret='.$sale->secret,
             ]);
         }
 
@@ -453,7 +453,12 @@ class TicketController extends Controller
                 $sale->status = 'paid';
                 $sale->payment_amount = $session->amount_total / 100;
                 $sale->transaction_reference = $session->payment_intent;
-                AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+                // For hosted mode (non-direct), record analytics here because
+                // the webhook cannot reliably find the sale by transaction_reference
+                if (! $isDirect) {
+                    AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+                }
+                // For selfhosted (direct) mode, analytics are recorded by the checkout.session.completed webhook
             }
             $sale->save();
         } catch (\Exception $e) {
@@ -467,6 +472,17 @@ class TicketController extends Controller
     public function cancel($subdomain, $sale_id)
     {
         $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
+
+        // Verify the secret from the URL to prevent unauthorized cancellations
+        $secret = request()->query('secret');
+        if (! $secret || ! hash_equals($sale->secret, $secret)) {
+            abort(403);
+        }
+
+        if ($sale->status !== 'unpaid') {
+            return redirect($sale->event->getGuestUrl($subdomain, $sale->event_date).'&tickets=true');
+        }
+
         $sale->status = 'cancelled';
         $sale->save();
 
