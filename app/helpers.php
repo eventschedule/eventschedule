@@ -85,10 +85,6 @@ if (! function_exists('is_rtl')) {
      */
     function is_rtl(): bool
     {
-        if (session()->has('translate')) {
-            return false;
-        }
-
         $locale = app()->getLocale();
 
         return in_array($locale, ['ar', 'he']);
