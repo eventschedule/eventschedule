@@ -239,7 +239,7 @@
                     <div x-data="{ expanded: false }" class="text-sm text-gray-700 dark:text-gray-300">
                       <span x-show="!expanded" class="description-collapsed">
                         {{ Str::words(html_entity_decode(strip_tags($each->description_html)), 5, '') }}...
-                        <button :aria-expanded="expanded" @click="expanded = true" class="font-medium hover:underline whitespace-nowrap" style="color: {{ $accentColor }};">
+                        <button :aria-expanded="expanded" @click="expanded = true" class="font-medium hover:underline whitespace-nowrap text-blue-600 dark:text-blue-400">
                           {{ __('messages.show_more') }}
                         </button>
                       </span>
@@ -247,7 +247,7 @@
                         <div class="custom-content [&>*:first-child]:mt-0 {{ $role->isRtl() ? 'rtl' : '' }}">
                           {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
                         </div>
-                        <button :aria-expanded="expanded" @click="expanded = false" class="font-medium hover:underline whitespace-nowrap mt-1" style="color: {{ $accentColor }};">
+                        <button :aria-expanded="expanded" @click="expanded = false" class="font-medium hover:underline whitespace-nowrap mt-1 text-blue-600 dark:text-blue-400">
                           {{ __('messages.show_less') }}
                         </button>
                       </div>
@@ -330,10 +330,10 @@
                   <div x-show="expanded" x-cloak class="text-sm text-gray-700 dark:text-gray-300 custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
                     {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->venue->translatedDescription()) !!}
                   </div>
-                  <button x-show="!expanded && needsExpand" :aria-expanded="expanded" @click="expanded = true" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
+                  <button x-show="!expanded && needsExpand" :aria-expanded="expanded" @click="expanded = true" class="text-sm font-medium hover:underline mt-1 text-blue-600 dark:text-blue-400">
                     {{ __('messages.read_more') }}
                   </button>
-                  <button x-show="expanded" x-cloak :aria-expanded="expanded" @click="expanded = false" class="text-sm font-medium hover:underline mt-1" style="color: {{ $accentColor }};">
+                  <button x-show="expanded" x-cloak :aria-expanded="expanded" @click="expanded = false" class="text-sm font-medium hover:underline mt-1 text-blue-600 dark:text-blue-400">
                     {{ __('messages.show_less') }}
                   </button>
                 </div>
