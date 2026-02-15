@@ -40,27 +40,28 @@
     <!-- SEO Meta Tags -->
     @php
         $path = request()->path();
-        $canonicalPath = $path === '/' ? config('app.url') : config('app.url') . '/' . ltrim(rtrim($path, '/'), '/');
+        $basePath = $path === '/' ? config('app.url') : config('app.url') . '/' . ltrim(rtrim($path, '/'), '/');
+        $canonicalPath = $basePath;
         $langParam = request()->get('lang');
         $validLangs = ['en', 'es', 'de', 'fr', 'it', 'pt', 'he', 'nl', 'ar', 'et', 'ru'];
         if ($langParam && in_array($langParam, $validLangs)) {
-            $canonicalPath .= '?lang=' . $langParam;
+            $canonicalPath = $basePath . '?lang=' . $langParam;
         }
     @endphp
     <link rel="canonical" href="{{ $canonicalPath }}">
     <!-- Hreflang tags for all supported languages -->
-    <link rel="alternate" hreflang="x-default" href="{{ $canonicalPath }}">
-    <link rel="alternate" hreflang="en" href="{{ $canonicalPath }}?lang=en">
-    <link rel="alternate" hreflang="es" href="{{ $canonicalPath }}?lang=es">
-    <link rel="alternate" hreflang="de" href="{{ $canonicalPath }}?lang=de">
-    <link rel="alternate" hreflang="fr" href="{{ $canonicalPath }}?lang=fr">
-    <link rel="alternate" hreflang="it" href="{{ $canonicalPath }}?lang=it">
-    <link rel="alternate" hreflang="pt" href="{{ $canonicalPath }}?lang=pt">
-    <link rel="alternate" hreflang="he" href="{{ $canonicalPath }}?lang=he">
-    <link rel="alternate" hreflang="nl" href="{{ $canonicalPath }}?lang=nl">
-    <link rel="alternate" hreflang="ar" href="{{ $canonicalPath }}?lang=ar">
-    <link rel="alternate" hreflang="et" href="{{ $canonicalPath }}?lang=et">
-    <link rel="alternate" hreflang="ru" href="{{ $canonicalPath }}?lang=ru">
+    <link rel="alternate" hreflang="x-default" href="{{ $basePath }}">
+    <link rel="alternate" hreflang="en" href="{{ $basePath }}?lang=en">
+    <link rel="alternate" hreflang="es" href="{{ $basePath }}?lang=es">
+    <link rel="alternate" hreflang="de" href="{{ $basePath }}?lang=de">
+    <link rel="alternate" hreflang="fr" href="{{ $basePath }}?lang=fr">
+    <link rel="alternate" hreflang="it" href="{{ $basePath }}?lang=it">
+    <link rel="alternate" hreflang="pt" href="{{ $basePath }}?lang=pt">
+    <link rel="alternate" hreflang="he" href="{{ $basePath }}?lang=he">
+    <link rel="alternate" hreflang="nl" href="{{ $basePath }}?lang=nl">
+    <link rel="alternate" hreflang="ar" href="{{ $basePath }}?lang=ar">
+    <link rel="alternate" hreflang="et" href="{{ $basePath }}?lang=et">
+    <link rel="alternate" hreflang="ru" href="{{ $basePath }}?lang=ru">
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="author" content="Event Schedule">
