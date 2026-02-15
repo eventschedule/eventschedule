@@ -25,10 +25,12 @@
           }
         </style>
 
-        <div class="calendar-panel-border px-4 pb-6 max-w-5xl mx-auto" id="calendar-panel-wrapper">
+        <div class="pt-4">
+            <div class="calendar-panel-border px-4 pb-6 max-w-5xl mx-auto" id="calendar-panel-wrapper">
 
-            @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'eventLayout' => $role->event_layout ?? 'calendar', 'pastEvents' => $pastEvents ?? collect()])
+                @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'eventLayout' => $role->event_layout ?? 'calendar', 'pastEvents' => $pastEvents ?? collect()])
 
+            </div>
         </div>
 
     @endif
