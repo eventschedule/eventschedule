@@ -57,16 +57,21 @@
     <link rel="alternate" hreflang="et" href="{{ $canonicalPath }}?lang=et">
     <link rel="alternate" hreflang="ru" href="{{ $canonicalPath }}?lang=ru">
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="author" content="Event Schedule">
     <meta name="keywords" content="{{ $keywords ?? 'event schedule, event calendar, ticketing, QR check-in, event management, venues, performers, sell tickets' }}">
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{{ $ogType ?? 'website' }}">
     <meta property="og:url" content="{{ $canonicalPath }}">
     <meta property="og:title" content="{{ $title ?? 'Event Schedule' }}">
     <meta property="og:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
-    <meta property="og:image" content="{{ config('app.url') }}/images/{{ $socialImage ?? 'social/home.png' }}">
+    @php
+        $ogImage = isset($socialImage)
+            ? (str_starts_with($socialImage, 'http') ? $socialImage : config('app.url') . '/images/' . $socialImage)
+            : config('app.url') . '/images/social/home.png';
+    @endphp
+    <meta property="og:image" content="{{ $ogImage }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="{{ $title ?? 'Event Schedule' }}">
@@ -91,7 +96,7 @@
     <meta name="twitter:url" content="{{ $canonicalPath }}">
     <meta name="twitter:title" content="{{ $title ?? 'Event Schedule' }}">
     <meta name="twitter:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
-    <meta name="twitter:image" content="{{ config('app.url') }}/images/{{ $socialImage ?? 'social/home.png' }}">
+    <meta name="twitter:image" content="{{ $ogImage }}">
     <meta name="twitter:image:alt" content="Event Schedule">
     <meta name="twitter:site" content="@ScheduleEvent">
 
@@ -171,6 +176,9 @@
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
         } elseif (str_starts_with($path, 'for-')) {
             $breadcrumbs[] = ['name' => 'Use Cases', 'url' => url('/use-cases')];
+            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+        } elseif (str_ends_with($path, '-alternative')) {
+            $breadcrumbs[] = ['name' => 'Compare', 'url' => url('/compare')];
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
         } else {
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
@@ -290,6 +298,8 @@
         })();
     </script>
 
+
+    {{ $headMeta ?? '' }}
 
 </head>
 <body class="font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">

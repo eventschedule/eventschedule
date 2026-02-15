@@ -790,6 +790,10 @@ class Event extends Model
             return \Illuminate\Support\Str::limit($this->translatedShortDescription(), 155);
         }
 
+        if ($this->description_html) {
+            return \Illuminate\Support\Str::limit(trim(strip_tags($this->translatedDescription())), 155);
+        }
+
         $str = $this->translatedName();
 
         if ($this->venue) {

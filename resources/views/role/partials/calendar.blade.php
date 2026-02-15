@@ -2754,4 +2754,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+<noscript>
+    <ul>
+        @foreach ($events as $noscriptEvent)
+        <li>
+            <a href="{{ $noscriptEvent->getGuestUrl($role->subdomain) }}">
+                {{ $noscriptEvent->translatedName() }} - {{ $noscriptEvent->localStartsAt(true) }}
+            </a>
+        </li>
+        @endforeach
+    </ul>
+</noscript>
 </div>

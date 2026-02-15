@@ -391,9 +391,18 @@
     </section>
 
     <!-- Why Integrate Section -->
-    <section class="bg-gray-50 dark:bg-[#0a0a0f] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section class="relative bg-gray-50 dark:bg-[#0a0a0f] py-24 overflow-hidden">
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px] animate-pulse-slow"></div>
+        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-sky-600/10 rounded-full blur-[120px] animate-pulse-slow"></div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-6">
+                    <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Seamless workflow</span>
+                </div>
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Why integrate?
                 </h2>
@@ -403,9 +412,10 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-2xl p-8 border border-blue-200 dark:border-white/10 shadow-sm">
-                    <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <div class="feature-card bg-white/80 dark:bg-white/5 rounded-2xl p-8 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-500/30 transition-all duration-300">
+                    <div class="w-12 h-1 rounded-full bg-gradient-to-r from-blue-500 to-sky-500 mb-6"></div>
+                    <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-sky-500 shadow-lg shadow-blue-500/25 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                     </div>
@@ -415,9 +425,10 @@
                     </p>
                 </div>
 
-                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl p-8 border border-emerald-200 dark:border-white/10 shadow-sm">
-                    <div class="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <div class="feature-card bg-white/80 dark:bg-white/5 rounded-2xl p-8 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-xl hover:border-emerald-300 dark:hover:border-emerald-500/30 transition-all duration-300">
+                    <div class="w-12 h-1 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 mb-6"></div>
+                    <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/25 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                     </div>
@@ -427,9 +438,10 @@
                     </p>
                 </div>
 
-                <div class="bg-gradient-to-br from-blue-100 to-blue-100 dark:from-blue-900 dark:to-blue-900 rounded-2xl p-8 border border-blue-200 dark:border-white/10 shadow-sm">
-                    <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <div class="feature-card bg-white/80 dark:bg-white/5 rounded-2xl p-8 border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-500/30 transition-all duration-300">
+                    <div class="w-12 h-1 rounded-full bg-gradient-to-r from-blue-500 to-sky-500 mb-6"></div>
+                    <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-sky-500 shadow-lg shadow-blue-500/25 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </div>
