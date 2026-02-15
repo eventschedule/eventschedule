@@ -144,6 +144,7 @@ class StripeController extends Controller
                     $sale->status = 'paid';
                     $sale->save();
 
+                    AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
                     UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
                 }
                 break;

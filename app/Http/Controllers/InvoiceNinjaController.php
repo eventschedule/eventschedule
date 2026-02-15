@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AnalyticsEventsDaily;
 use App\Models\Sale;
 use App\Models\User;
 use App\Utils\InvoiceNinja;
@@ -106,6 +107,8 @@ class InvoiceNinjaController extends Controller
             $sale->payment_amount = $webhookAmount;
             $sale->status = 'paid';
             $sale->save();
+
+            AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
         }
 
         return response()->json(['status' => 'success']);
