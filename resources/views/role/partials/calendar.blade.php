@@ -2755,6 +2755,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <noscript>
+    @if ($events->isNotEmpty() && $events->first() instanceof \App\Models\Event)
     <ul>
         @foreach ($events as $noscriptEvent)
         <li>
@@ -2764,5 +2765,6 @@ document.addEventListener('DOMContentLoaded', function() {
         </li>
         @endforeach
     </ul>
+    @endif
 </noscript>
 </div>
