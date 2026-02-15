@@ -72,13 +72,11 @@ The CSP allows these external domains for legitimate resources:
 
 **Styles:**
 - `*.googleapis.com` - Google Fonts CSS
-- `*.gstatic.com` - Google static content  
-- `rsms.me` - Inter font CSS
+- `*.gstatic.com` - Google static content
 
 **Fonts:**
 - `*.googleapis.com` - Google Fonts
 - `*.gstatic.com` - Google Fonts files
-- `rsms.me` - Inter font files
 - `data:` - Inline font data (base64 encoded fonts)
 
 **Images:**

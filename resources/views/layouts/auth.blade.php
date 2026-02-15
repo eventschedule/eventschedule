@@ -43,10 +43,6 @@
 
     <title>Event Schedule</title>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://rsms.me/">
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 

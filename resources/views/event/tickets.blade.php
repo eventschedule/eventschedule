@@ -334,7 +334,7 @@
             </div>
         </div>
 
-        <div class="mt-6 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+        <div class="mt-6 bg-white dark:bg-gray-700/50 rounded-lg p-4">
             <div class="flex justify-between items-center">
                 <span class="text-gray-600 dark:text-gray-400">@lang('messages.total')</span>
                 <span class="text-xl font-bold text-gray-900 dark:text-gray-100">@{{ formatPrice(totalAmount) }}</span>
@@ -349,6 +349,10 @@
         </div>
 
         <div class="flex justify-center items-center py-4 gap-8">
+            <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+                {{ strtoupper(__('messages.cancel')) }}
+            </a>
+
             <x-brand-button
                 type="submit"
                 class="mt-4 text-lg px-6"
@@ -356,10 +360,6 @@
             >
                 {{ strtoupper(__('messages.checkout')) }}
             </x-brand-button>
-            
-            <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
-                {{ strtoupper(__('messages.cancel')) }}
-            </a>
         </div>
 
         @if ($event->payment_method == 'cash' && $event->payment_instructions_html)

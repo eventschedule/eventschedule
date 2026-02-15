@@ -68,9 +68,9 @@ class SecurityHeaders
             $csp = [
                 "default-src 'self'",
                 "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-{$nonce}' {$host}:* *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com *.sentry.io challenges.cloudflare.com",
-                "style-src 'self' 'unsafe-inline' {$host}:* *.googleapis.com *.gstatic.com *.bootstrapcdn.com rsms.me",
+                "style-src 'self' 'unsafe-inline' {$host}:* *.googleapis.com *.gstatic.com *.bootstrapcdn.com",
                 "img-src 'self' data: {$host}:* *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com *.ytimg.com eventschedule.nyc3.cdn.digitaloceanspaces.com",
-                "font-src 'self' data: {$host}:* *.googleapis.com *.gstatic.com *.bootstrapcdn.com rsms.me",
+                "font-src 'self' data: {$host}:* *.googleapis.com *.gstatic.com *.bootstrapcdn.com",
                 "connect-src 'self' {$host}:* ws://{$host}:* wss://{$host}:* *.googleapis.com *.google-analytics.com *.googletagmanager.com *.jsdelivr.net *.stripe.com *.sentry.io *.sentry-cdn.com",
                 "frame-src 'self' *.{$host} *.stripe.com *.youtube.com *.youtube-nocookie.com *.googletagmanager.com challenges.cloudflare.com",
                 "object-src 'none'",
@@ -82,9 +82,9 @@ class SecurityHeaders
             $csp = [
                 "default-src 'self'",
                 "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-{$nonce}' *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com browser.sentry-cdn.com *.sentry.io challenges.cloudflare.com",
-                "style-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com *.bootstrapcdn.com rsms.me",
+                "style-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com *.bootstrapcdn.com",
                 "img-src 'self' data: *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com *.ytimg.com eventschedule.nyc3.cdn.digitaloceanspaces.com",
-                "font-src 'self' data: *.googleapis.com *.gstatic.com *.bootstrapcdn.com rsms.me",
+                "font-src 'self' data: *.googleapis.com *.gstatic.com *.bootstrapcdn.com",
                 "connect-src 'self' *.googleapis.com *.google-analytics.com *.googletagmanager.com *.jsdelivr.net *.stripe.com *.sentry.io *.sentry-cdn.com",
                 "frame-src 'self' *.eventschedule.com *.stripe.com *.youtube.com *.youtube-nocookie.com *.googletagmanager.com challenges.cloudflare.com",
                 "object-src 'none'",
