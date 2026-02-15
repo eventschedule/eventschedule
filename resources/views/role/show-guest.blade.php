@@ -199,7 +199,7 @@
                 <div x-data="{ expanded: false }" class="text-sm text-[#33383C] dark:text-gray-300">
                   <div x-show="!expanded">
                     <span>{{ Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...') }}</span>
-                    <button @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap">
+                    <button @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">
                       {{ __('messages.show_more') }}
                     </button>
                   </div>
@@ -207,7 +207,7 @@
                     <div class="custom-content [&>*:first-child]:mt-0">
                       {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                     </div>
-                    <button @click="expanded = false; window.scrollTo({ top: 0, behavior: 'smooth' })" class="text-[#4E81FA] hover:underline whitespace-nowrap mt-1">
+                    <button @click="expanded = false; window.scrollTo({ top: 0, behavior: 'smooth' })" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
                       {{ __('messages.show_less') }}
                     </button>
                   </div>
@@ -379,7 +379,7 @@
               <div x-data="{ expanded: false }" class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
                 <div x-show="!expanded">
                   <span>{{ Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...') }}</span>
-                  <button @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap">
+                  <button @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">
                     {{ __('messages.show_more') }}
                   </button>
                 </div>
@@ -387,7 +387,7 @@
                   <div class="custom-content [&>*:first-child]:mt-0">
                     {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                   </div>
-                  <button @click="expanded = false; window.scrollTo({ top: 0, behavior: 'smooth' })" class="text-[#4E81FA] hover:underline whitespace-nowrap mt-1">
+                  <button @click="expanded = false; window.scrollTo({ top: 0, behavior: 'smooth' })" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
                     {{ __('messages.show_less') }}
                   </button>
                 </div>
@@ -692,10 +692,6 @@
 [v-cloak] {
   display: none !important;
 }
-[x-cloak] {
-  display: none !important;
-}
-
 /* Carousel styles */
 .scrollbar-hide {
   -ms-overflow-style: none;

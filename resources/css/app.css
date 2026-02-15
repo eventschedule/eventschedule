@@ -4,6 +4,10 @@
 @tailwind components;
 @tailwind utilities;
 
+[x-cloak] {
+  display: none !important;
+}
+
 /* Flatpickr date picker overrides - reduce excessive padding */
 .flatpickr-months .flatpickr-month {
     overflow: visible;
