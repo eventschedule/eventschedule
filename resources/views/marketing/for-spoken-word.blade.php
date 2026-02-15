@@ -5,6 +5,27 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Spoken Word</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule for Spoken Word",
+        "description": "Share your poetry readings, open mics, and workshops. Sell tickets directly, reach fans with newsletters. Zero platform fees.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Event Management",
+        "audience": {
+            "@type": "Audience",
+            "audienceType": "Spoken Word Artists"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section - Typewriter/Literary Theme -->
     <section class="relative bg-white dark:bg-[#0f0e0c] py-32 overflow-hidden">
         <!-- Paper texture overlay -->

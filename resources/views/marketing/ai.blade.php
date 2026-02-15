@@ -5,6 +5,23 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">AI Import</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule AI Import",
+        "description": "Smart event import with AI. Paste text or drop an image and AI extracts all the details automatically. Instant translation included.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "AI Event Import"
+    }
+    </script>
+    </x-slot>
+
     <style {!! nonce_attr() !!}>
         /* Page-specific typing animation */
         @keyframes typing {

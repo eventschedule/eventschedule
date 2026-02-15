@@ -5,6 +5,27 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Dance Groups</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule for Dance Groups",
+        "description": "Share your dance performances with fans worldwide. Sell tickets to recitals and workshops with zero fees. Free forever.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Event Management",
+        "audience": {
+            "@type": "Audience",
+            "audienceType": "Dance Groups"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section - Movement/Flow Theme -->
     <section class="relative bg-gradient-to-b from-white via-gray-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-950 py-32 overflow-hidden">
         <!-- Flowing gradient shapes suggesting movement -->

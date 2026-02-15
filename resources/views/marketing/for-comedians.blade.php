@@ -5,6 +5,27 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Comedians</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule for Comedians",
+        "description": "Track your mics, guest spots, and headlines. Email fans directly. Zero fees when you sell tickets. Free forever.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Event Management",
+        "audience": {
+            "@type": "Audience",
+            "audienceType": "Comedians"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section - Comedy Club Stage Vibe -->
     <section class="relative bg-white dark:bg-[#0f0808] py-32 overflow-hidden">
         <!-- Brick wall texture overlay -->

@@ -5,6 +5,27 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Circus & Acrobatics</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule for Circus & Acrobatics",
+        "description": "Share your circus performances, sell tickets directly, and reach your audience with newsletters. Zero platform fees.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Event Management",
+        "audience": {
+            "@type": "Audience",
+            "audienceType": "Circus & Acrobatic Performers"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section - The Big Top -->
     <section class="relative bg-circus-dark py-32 overflow-hidden">
         <!-- Tent stripe background -->

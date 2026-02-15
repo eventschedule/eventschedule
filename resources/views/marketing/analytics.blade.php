@@ -5,6 +5,23 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Analytics</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule Analytics",
+        "description": "Track page views, device breakdown, traffic sources, and conversion rates. Privacy-first analytics with no external services required.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Event Analytics"
+    }
+    </script>
+    </x-slot>
+
     <style {!! nonce_attr() !!}>
         /* Custom emerald gradient for this page */
         .text-gradient {
