@@ -103,10 +103,11 @@ class UrlUtils
         $url = self::clean($url);
         $parts = explode('/', $url);
 
+        // First part is always the domain, skip it
         // Get the last non-empty path segment
         $handle = '';
-        for ($i = count($parts) - 1; $i >= 0; $i--) {
-            if (! empty($parts[$i]) && strpos($parts[$i], '.') === false) {
+        for ($i = count($parts) - 1; $i >= 1; $i--) {
+            if (! empty($parts[$i])) {
                 $handle = $parts[$i];
                 break;
             }

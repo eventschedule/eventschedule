@@ -133,6 +133,17 @@ class EventTextGenerator
 
         $result = str_replace(array_keys($replacements), array_values($replacements), $template);
 
+        // Clean up orphaned | separators when venue or city (or other fields) are blank
+        $resultLines = explode("\n", $result);
+        $resultLines = array_map(function ($line) {
+            $line = preg_replace('/\s*\|\s*\|\s*/', ' | ', $line); // collapse "| |" into single "|"
+            $line = preg_replace('/^\s*\|\s*/', '', $line);        // trim leading "|"
+            $line = preg_replace('/\s*\|\s*$/', '', $line);        // trim trailing "|"
+
+            return $line;
+        }, $resultLines);
+        $result = implode("\n", $resultLines);
+
         // Remove lines where all variables were blank (only separators/formatting remain)
         $lines = explode("\n", $result);
         $filteredLines = array_filter($lines, function ($line) {
