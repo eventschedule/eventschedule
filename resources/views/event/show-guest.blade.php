@@ -238,7 +238,7 @@
                   @if(str_word_count(strip_tags($each->description_html)) > 5)
                     <div x-data="{ expanded: false }" class="text-sm text-gray-700 dark:text-gray-300">
                       <span x-show="!expanded" class="description-collapsed">
-                        {{ Str::words(strip_tags($each->description_html), 5, '') }}...
+                        {{ Str::words(html_entity_decode(strip_tags($each->description_html)), 5, '') }}...
                         <button :aria-expanded="expanded" @click="expanded = true" class="font-medium hover:underline whitespace-nowrap" style="color: {{ $accentColor }};">
                           {{ __('messages.show_more') }}
                         </button>

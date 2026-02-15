@@ -198,7 +198,7 @@
                 @if(str_word_count(strip_tags($role->translatedDescription())) > 5)
                 <div x-data="{ expanded: false }" class="text-sm text-[#33383C] dark:text-gray-300">
                   <div x-show="!expanded">
-                    <span>{{ Str::words(strip_tags($role->translatedDescription()), 5, '...') }}</span>
+                    <span>{{ Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...') }}</span>
                     <button @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap">
                       {{ __('messages.show_more') }}
                     </button>
@@ -378,7 +378,7 @@
               @if(str_word_count(strip_tags($role->translatedDescription())) > 5)
               <div x-data="{ expanded: false }" class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
                 <div x-show="!expanded">
-                  <span>{{ Str::words(strip_tags($role->translatedDescription()), 5, '...') }}</span>
+                  <span>{{ Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...') }}</span>
                   <button @click="expanded = true" class="text-[#4E81FA] hover:underline whitespace-nowrap">
                     {{ __('messages.show_more') }}
                   </button>
