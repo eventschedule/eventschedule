@@ -1031,7 +1031,7 @@
             </div>
 
             {{-- Load More Button --}}
-            <div v-if="!hidePastEvents && hasMorePastEvents" class="mt-6 text-center">
+            <div v-if="!hidePastEvents && hasMorePastEvents && activeFilterCount === 0" class="mt-6 text-center">
                 <button @click.stop="loadMorePastEvents()"
                         :disabled="loadingPastEvents"
                         class="hover-accent inline-flex items-center px-6 py-2.5 text-sm font-semibold text-gray-900 dark:text-white rounded-xl border-2 transition-all duration-200 hover:scale-105"
@@ -1167,7 +1167,7 @@
             </div>
 
             {{-- Load More Button --}}
-            <div v-if="!hidePastEvents && hasMorePastEvents" class="mt-6 text-center">
+            <div v-if="!hidePastEvents && hasMorePastEvents && activeFilterCount === 0" class="mt-6 text-center">
                 <button @click.stop="loadMorePastEvents()"
                         :disabled="loadingPastEvents"
                         class="hover-accent inline-flex items-center px-6 py-2.5 text-sm font-semibold text-gray-900 dark:text-white rounded-xl border-2 transition-all duration-200 hover:scale-105"
@@ -1458,8 +1458,7 @@ const calendarApp = createApp({
             playingVideo: null,
             openCommentForm: {},
             isLoadingEvents: {{ request()->graphic ? 'false' : 'true' }},
-            uniqueCategoryIds: @json($uniqueCategoryIds ?? []),
-            hasOnlineEvents: {{ ($hasOnlineEvents ?? false) ? 'true' : 'false' }}
+            uniqueCategoryIds: @json($uniqueCategoryIds ?? [])
         }
     },
     computed: {
@@ -1496,7 +1495,7 @@ const calendarApp = createApp({
         },
         eventCountByGroup() {
             // Filter by other active filters (except group)
-            const baseEvents = this.allEvents.filter(e => {
+            const baseEvents = this.futureEvents.filter(e => {
                 if (this.showOnlineOnly && !e.is_online) return false;
                 if (this.selectedVenue && e.venue_subdomain !== this.selectedVenue) return false;
                 if (this.showFreeOnly && !e.is_free) return false;
@@ -1514,7 +1513,7 @@ const calendarApp = createApp({
         },
         eventCountByCategory() {
             // Filter by group, online status, venue, and price
-            const filteredEvents = this.allEvents.filter(event => {
+            const filteredEvents = this.futureEvents.filter(event => {
                 if (this.selectedGroup) {
                     const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
                     if (selectedGroupObj && event.group_id !== selectedGroupObj.id) {
@@ -1533,6 +1532,12 @@ const calendarApp = createApp({
                 counts[c.id] = filteredEvents.filter(e => e.category_id == c.id).length;
             });
             return counts;
+        },
+        futureEvents() {
+            return this.allEvents.filter(event => {
+                if (event.days_of_week && event.days_of_week.length > 0) return true;
+                return !this.isPastEvent(event.local_date);
+            });
         },
         filteredEvents() {
             return this.allEvents.filter(event => {
@@ -1560,7 +1565,7 @@ const calendarApp = createApp({
         },
         availableCategories() {
             // Get events filtered only by group (not by category) to show all available categories
-            const groupFilteredEvents = this.allEvents.filter(event => {
+            const groupFilteredEvents = this.futureEvents.filter(event => {
                 if (this.selectedGroup) {
                     // Find the group by slug to get its ID for filtering
                     const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
@@ -1582,7 +1587,7 @@ const calendarApp = createApp({
         },
         uniqueVenues() {
             const venuesMap = new Map();
-            this.allEvents.forEach(event => {
+            this.futureEvents.forEach(event => {
                 if (event.venue_subdomain && event.venue_name) {
                     venuesMap.set(event.venue_subdomain, event.venue_name);
                 }
@@ -1593,16 +1598,19 @@ const calendarApp = createApp({
         },
         hasFreeEvents() {
             let hasFree = false, hasPaid = false;
-            for (const event of this.allEvents) {
+            for (const event of this.futureEvents) {
                 if (event.is_free) hasFree = true;
                 else hasPaid = true;
                 if (hasFree && hasPaid) return true;
             }
             return false;
         },
+        hasOnlineEvents() {
+            return this.futureEvents.some(e => e.is_online);
+        },
         eventCountByVenue() {
             // Filter by group, category, online, price first
-            const baseEvents = this.allEvents.filter(event => {
+            const baseEvents = this.futureEvents.filter(event => {
                 if (this.selectedGroup) {
                     const selectedGroupObj = this.groups.find(g => g.slug === this.selectedGroup);
                     if (selectedGroupObj && event.group_id !== selectedGroupObj.id) return false;
@@ -1756,6 +1764,8 @@ const calendarApp = createApp({
             return events.slice(0, 50);
         },
         flatPastEvents() {
+            if (this.activeFilterCount > 0) return [];
+
             // Start with server-provided past events (one-time)
             const events = this.pastEvents.filter(event => this.isEventVisible(event));
 
@@ -2582,7 +2592,7 @@ const calendarApp = createApp({
                 this.pastEvents = data.pastEvents || [];
                 this.hasMorePastEvents = data.hasMorePastEvents || false;
                 this.uniqueCategoryIds = data.filterMeta.uniqueCategoryIds;
-                this.hasOnlineEvents = data.filterMeta.hasOnlineEvents;
+
             } catch (e) {
                 console.error('Failed to load calendar events:', e);
             } finally {
