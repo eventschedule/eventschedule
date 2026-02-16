@@ -25,8 +25,12 @@ class BlogController extends Controller
         }
 
         // Filter by month
-        if ($request->has('month') && $request->has('year')) {
+        $monthLabel = null;
+        if ($request->has('month') && $request->has('year')
+            && is_numeric($request->month) && is_numeric($request->year)
+            && $request->month >= 1 && $request->month <= 12) {
             $query->byMonth($request->year, $request->month);
+            $monthLabel = Carbon::create($request->year, $request->month)->format('F Y');
         }
 
         $posts = $query->paginate(10);
@@ -61,7 +65,7 @@ class BlogController extends Controller
             ->sortByDesc('month')
             ->values();
 
-        return view('blog.index', compact('posts', 'allTags', 'archives'));
+        return view('blog.index', compact('posts', 'allTags', 'archives', 'monthLabel'));
     }
 
     /**
@@ -115,6 +119,21 @@ class BlogController extends Controller
         BlogPost::create($data);
 
         return redirect()->route('blog.admin.index')->with('message', 'Blog post created successfully.');
+    }
+
+    /**
+     * RSS feed of recent blog posts.
+     */
+    public function feed()
+    {
+        $posts = BlogPost::published()
+            ->orderBy('published_at', 'desc')
+            ->take(20)
+            ->get();
+
+        return response()
+            ->view('blog.feed', compact('posts'))
+            ->header('Content-Type', 'application/rss+xml; charset=UTF-8');
     }
 
     /**

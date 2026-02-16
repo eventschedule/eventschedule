@@ -4,6 +4,32 @@
     <x-slot name="description">Learn how to track views, devices, traffic sources, and conversions with Event Schedule's built-in analytics dashboard.</x-slot>
     <x-slot name="keywords">analytics, event analytics, view tracking, traffic sources, conversion rate, device breakdown, event schedule</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Analytics Documentation - Event Schedule",
+        "description": "Learn how to track views, devices, traffic sources, and conversions with Event Schedule built-in analytics dashboard.",
+        "author": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "{{ config('app.url') }}/images/light_logo.png"
+            }
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "{{ url()->current() }}"
+        }
+    }
+    </script>
+    </x-slot>
 
     @include('marketing.docs.partials.styles')
 
@@ -20,7 +46,7 @@
 
             <div class="flex items-center gap-4 mb-4">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/20">
-                    <svg class="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                 </div>

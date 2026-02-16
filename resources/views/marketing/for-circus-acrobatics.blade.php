@@ -66,7 +66,7 @@
             <div class="flex flex-wrap justify-center gap-4">
                 <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-gray-900 rounded-sm hover:scale-105 transition-all shadow-lg shadow-gold/25 marquee-button" style="background: linear-gradient(to right, #FFD700, #fbbf24);">
                     Create your performance schedule
-                    <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -93,7 +93,7 @@
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <div class="inline-flex items-center gap-2 px-4 py-2 rounded-sm bg-crimson/20 border border-crimson/30 mb-6">
-                    <svg class="w-5 h-5 text-crimson-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="w-5 h-5 text-crimson-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
                     <span class="text-crimson-light font-medium uppercase tracking-wider text-sm">The Show Must Go Online</span>
@@ -123,7 +123,7 @@
                                 </div>
 
                                 <!-- Aerialist silhouette performing -->
-                                <svg class="w-24 h-24 text-gold/50" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg aria-hidden="true" class="w-24 h-24 text-gold/50" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M50 5 L50 95" stroke="currentColor" stroke-width="1.5" opacity="0.6"/>
                                     <circle cx="50" cy="30" r="5" fill="currentColor"/>
                                     <path d="M50 35 L50 55" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -135,7 +135,7 @@
 
                                 <!-- Viewer count -->
                                 <div class="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 bg-black/60 rounded text-xs text-ivory">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                    <svg aria-hidden="true" class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                                     </svg>
                                     847 watching
@@ -179,7 +179,7 @@
                 <div class="space-y-6">
                     <div class="flex gap-4">
                         <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gold/20 flex items-center justify-center">
-                            <svg class="w-5 h-5 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
@@ -190,7 +190,7 @@
                     </div>
                     <div class="flex gap-4">
                         <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gold/20 flex items-center justify-center">
-                            <svg class="w-5 h-5 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                             </svg>
                         </div>
@@ -201,7 +201,7 @@
                     </div>
                     <div class="flex gap-4">
                         <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gold/20 flex items-center justify-center">
-                            <svg class="w-5 h-5 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
@@ -213,7 +213,7 @@
 
                     <a href="{{ url('/features/online-events') }}" class="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-crimson hover:bg-crimson/80 text-ivory font-semibold rounded-sm transition-colors">
                         Learn about online events
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
@@ -404,7 +404,7 @@
                 <!-- Big Top Tents -->
                 <div class="group relative bg-gradient-to-br from-crimson/10 to-circus-dark rounded-lg p-6 border border-crimson/20 hover:border-gold/40 transition-all text-center">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-crimson/20 mb-4 mx-auto group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-crimson-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-crimson-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                         </svg>
                     </div>
@@ -414,7 +414,7 @@
                 <!-- Theaters -->
                 <div class="group relative bg-gradient-to-br from-rose-900/10 to-circus-dark rounded-lg p-6 border border-rose-900/20 hover:border-gold/40 transition-all text-center">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-rose-900/20 mb-4 mx-auto group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
@@ -424,7 +424,7 @@
                 <!-- Street & Busking -->
                 <div class="group relative bg-gradient-to-br from-amber-900/10 to-circus-dark rounded-lg p-6 border border-amber-900/20 hover:border-gold/40 transition-all text-center">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-amber-900/20 mb-4 mx-auto group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
@@ -435,7 +435,7 @@
                 <!-- Festivals -->
                 <div class="group relative bg-gradient-to-br from-orange-900/10 to-circus-dark rounded-lg p-6 border border-orange-900/20 hover:border-gold/40 transition-all text-center">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-orange-900/20 mb-4 mx-auto group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                         </svg>
                     </div>
@@ -445,7 +445,7 @@
                 <!-- Corporate -->
                 <div class="group relative bg-gradient-to-br from-gold/10 to-circus-dark rounded-lg p-6 border border-gold/20 hover:border-gold/40 transition-all text-center">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-gold/20 mb-4 mx-auto group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     </div>
@@ -455,7 +455,7 @@
                 <!-- Cruise Ships -->
                 <div class="group relative bg-gradient-to-br from-sky-900/10 to-circus-dark rounded-lg p-6 border border-sky-900/20 hover:border-gold/40 transition-all text-center">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-sky-900/20 mb-4 mx-auto group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
@@ -486,7 +486,7 @@
                     blog-slug="for-aerialists"
                 >
                     <x-slot:icon>
-                        <svg class="w-7 h-7 text-red-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg aria-hidden="true" class="w-7 h-7 text-red-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 2V22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
                             <circle cx="12" cy="7" r="2" fill="currentColor"/>
                             <path d="M12 9V14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -506,7 +506,7 @@
                     blog-slug="for-circus-troupes"
                 >
                     <x-slot:icon>
-                        <svg class="w-7 h-7 text-rose-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg aria-hidden="true" class="w-7 h-7 text-rose-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="7" cy="18" r="2" fill="currentColor"/>
                             <circle cx="17" cy="18" r="2" fill="currentColor"/>
                             <circle cx="12" cy="12" r="2" fill="currentColor"/>
@@ -528,7 +528,7 @@
                     blog-slug="for-fire-performers"
                 >
                     <x-slot:icon>
-                        <svg class="w-7 h-7 text-orange-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg aria-hidden="true" class="w-7 h-7 text-orange-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="12" cy="10" r="2" fill="currentColor"/>
                             <path d="M12 12V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                             <path d="M10 16L8 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -551,7 +551,7 @@
                     blog-slug="for-contortionists"
                 >
                     <x-slot:icon>
-                        <svg class="w-7 h-7 text-sky-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg aria-hidden="true" class="w-7 h-7 text-sky-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="18" cy="14" r="2" fill="currentColor"/>
                             <path d="M16 14C14 14 12 16 10 16C8 16 6 14 6 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                             <path d="M6 12C6 10 7 8 9 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -571,7 +571,7 @@
                     blog-slug="for-jugglers-prop-artists"
                 >
                     <x-slot:icon>
-                        <svg class="w-7 h-7 text-amber-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg aria-hidden="true" class="w-7 h-7 text-amber-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="12" cy="14" r="2" fill="currentColor"/>
                             <path d="M12 16V21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                             <path d="M10 19L8 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -595,7 +595,7 @@
                     blog-slug="for-stilt-walkers"
                 >
                     <x-slot:icon>
-                        <svg class="w-7 h-7 text-amber-700" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg aria-hidden="true" class="w-7 h-7 text-amber-700" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="12" cy="4" r="2" fill="currentColor"/>
                             <path d="M12 6V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                             <path d="M12 8L8 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -634,7 +634,7 @@
                         </div>
                         <!-- Calendar with events icon -->
                         <div class="w-16 h-16 mx-auto mb-4 text-rose-600">
-                            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg aria-hidden="true" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <rect x="8" y="12" width="48" height="44" rx="4" stroke="currentColor" stroke-width="2.5"/>
                                 <path d="M8 24H56" stroke="currentColor" stroke-width="2.5"/>
                                 <path d="M20 8V16M44 8V16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
@@ -661,7 +661,7 @@
                         </div>
                         <!-- Link/share icon with spotlight -->
                         <div class="w-16 h-16 mx-auto mb-4 text-amber-600">
-                            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg aria-hidden="true" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <!-- Chain link -->
                                 <path d="M26 32H38M22 32C22 28 25 24 30 24H34C39 24 42 28 42 32C42 36 39 40 34 40H30C25 40 22 36 22 32Z" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
                                 <!-- Share arrows radiating out -->
@@ -688,7 +688,7 @@
                         </div>
                         <!-- Audience/followers with hearts icon -->
                         <div class="w-16 h-16 mx-auto mb-4 text-rose-500">
-                            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg aria-hidden="true" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <!-- Performer at top -->
                                 <circle cx="32" cy="14" r="6" fill="currentColor"/>
                                 <path d="M32 20V28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
@@ -729,7 +729,7 @@
             </p>
             <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-900 hover:bg-amber-400 rounded-sm hover:scale-105 transition-all shadow-xl" style="background-color: #FFD700;">
                 Get Started Free
-                <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
             </a>

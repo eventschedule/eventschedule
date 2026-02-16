@@ -371,7 +371,7 @@
                                         <div class="bg-white dark:bg-white/10 rounded-lg px-2 py-1 text-[10px] text-gray-600 dark:text-gray-300">Very practical demos</div>
                                     </div>
                                     <div class="flex items-center gap-1 pt-1">
-                                        <svg class="w-3 h-3 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" class="w-3 h-3 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         <span class="text-rose-600 dark:text-rose-400 text-[10px]">Approved by organizer</span>

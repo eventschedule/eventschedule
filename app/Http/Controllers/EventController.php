@@ -303,6 +303,10 @@ class EventController extends Controller
             }
         }
 
+        if (! $subdomain) {
+            abort(403);
+        }
+
         return redirect(route('event.edit', ['subdomain' => $subdomain, 'hash' => $hash]));
     }
 
@@ -1261,6 +1265,10 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($event_hash);
         $event = Event::with('parts')->findOrFail($event_id);
 
+        if (! $event->roles()->where('role_id', $role->id)->where('is_accepted', true)->exists()) {
+            abort(404);
+        }
+
         $request->validate([
             'youtube_url' => ['required', 'string', 'url', 'max:500'],
             'event_part_id' => ['nullable', 'string'],
@@ -1358,6 +1366,10 @@ class EventController extends Controller
 
         $event_id = UrlUtils::decodeId($event_hash);
         $event = Event::with('parts')->findOrFail($event_id);
+
+        if (! $event->roles()->where('role_id', $role->id)->where('is_accepted', true)->exists()) {
+            abort(404);
+        }
 
         $request->validate([
             'comment' => ['required', 'string', 'max:1000'],

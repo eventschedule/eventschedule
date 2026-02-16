@@ -29,6 +29,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     if (config('app.env') != 'local') {
         Route::domain('blog.eventschedule.com')->group(function () {
             Route::get('/', [BlogController::class, 'index'])->name('blog.index');
+            Route::get('/feed', [BlogController::class, 'feed'])->name('blog.feed');
             Route::get('/{slug}', [BlogController::class, 'show'])->name('blog.show');
         });
     }
@@ -207,9 +208,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/{subdomain}/events-graphic/header-image', [GraphicController::class, 'uploadHeaderImage'])->name('event.graphic_upload_header_image');
     Route::delete('/{subdomain}/events-graphic/header-image', [GraphicController::class, 'deleteHeaderImage'])->name('event.graphic_delete_header_image');
     Route::get('/{subdomain}/clear-videos/{event_hash}/{role_hash}', [EventController::class, 'clearVideos'])->name('event.clear_videos');
-    Route::get('/{subdomain}/requests/accept-event/{hash}', [EventController::class, 'accept'])->name('event.accept');
-    Route::get('/{subdomain}/requests/decline-event/{hash}', [EventController::class, 'decline'])->name('event.decline');
-    Route::get('/{subdomain}/requests/accept-all', [EventController::class, 'acceptAll'])->name('event.accept_all');
+    Route::post('/{subdomain}/requests/accept-event/{hash}', [EventController::class, 'accept'])->name('event.accept');
+    Route::post('/{subdomain}/requests/decline-event/{hash}', [EventController::class, 'decline'])->name('event.decline');
+    Route::post('/{subdomain}/requests/accept-all', [EventController::class, 'acceptAll'])->name('event.accept_all');
     Route::post('/{subdomain}/profile/update-links', [RoleController::class, 'updateLinks'])->name('role.update_links');
     Route::post('/{subdomain}/profile/remove-links', [RoleController::class, 'removeLinks'])->name('role.remove_links');
     Route::get('/{subdomain}/followers/qr-code', [RoleController::class, 'qrCode'])->name('role.qr_code');
@@ -743,6 +744,7 @@ if (config('app.is_nexus')) {
 // Hosted mode uses blog.eventschedule.com subdomain (defined above)
 if (config('app.is_testing') || config('app.env') == 'local' || ! config('app.hosted')) {
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+    Route::get('/blog/feed', [BlogController::class, 'feed'])->name('blog.feed');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 }
 

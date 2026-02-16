@@ -4,6 +4,32 @@
     <x-slot name="description">Learn about advanced schedule features including sub-schedules, auto import, calendar integrations, and email settings.</x-slot>
     <x-slot name="keywords">sub-schedules, categories, auto import, google calendar, caldav, email settings, schedule configuration</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Advanced Schedule Settings - Event Schedule",
+        "description": "Learn about advanced schedule features including sub-schedules, auto import, calendar integrations, and email settings.",
+        "author": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "{{ config('app.url') }}/images/light_logo.png"
+            }
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "{{ url()->current() }}"
+        }
+    }
+    </script>
+    </x-slot>
 
     @include('marketing.docs.partials.styles')
 
@@ -20,7 +46,7 @@
 
             <div class="flex items-center gap-4 mb-4">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-500/20">
-                    <svg class="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                     </svg>
                 </div>

@@ -37,11 +37,11 @@
 
         <!-- Abstract flowing lines suggesting dance movement -->
         <div class="absolute inset-0 overflow-hidden opacity-20">
-            <svg class="absolute top-20 left-10 w-64 h-64 text-rose-300" viewBox="0 0 200 200" fill="none">
+            <svg aria-hidden="true" class="absolute top-20 left-10 w-64 h-64 text-rose-300" viewBox="0 0 200 200" fill="none">
                 <path d="M20,100 Q60,20 100,100 T180,100" stroke="currentColor" stroke-width="1" fill="none" opacity="0.5"/>
                 <path d="M20,120 Q70,40 110,120 T180,120" stroke="currentColor" stroke-width="1" fill="none" opacity="0.3"/>
             </svg>
-            <svg class="absolute bottom-32 right-20 w-48 h-48 text-cyan-300" viewBox="0 0 200 200" fill="none">
+            <svg aria-hidden="true" class="absolute bottom-32 right-20 w-48 h-48 text-cyan-300" viewBox="0 0 200 200" fill="none">
                 <path d="M100,20 Q180,60 100,100 T100,180" stroke="currentColor" stroke-width="1" fill="none" opacity="0.5"/>
             </svg>
         </div>
@@ -62,7 +62,7 @@
 
             <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-rose-500 to-cyan-600 rounded-full hover:scale-105 transition-all shadow-lg shadow-rose-500/25 hover:shadow-rose-500/40">
                 Create your schedule
-                <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
             </a>
@@ -110,19 +110,19 @@
                     </p>
                     <ul class="space-y-4">
                         <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-rose-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-rose-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             <span class="text-stone-600 dark:text-stone-300">Two-way Google Calendar sync for rehearsals and shows</span>
                         </li>
                         <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-rose-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-rose-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             <span class="text-stone-600 dark:text-stone-300">Multiple venues - theater, studio, outdoor stages</span>
                         </li>
                         <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-rose-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-rose-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             <span class="text-stone-600 dark:text-stone-300">Share one link everywhere - programs, posters, social bios</span>
@@ -272,7 +272,7 @@
             <div class="grid md:grid-cols-3 gap-8">
                 <div class="bg-gray-100 dark:bg-stone-800/50 rounded-2xl p-6 border border-gray-200 dark:border-stone-700">
                     <div class="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     </div>
@@ -281,7 +281,7 @@
                 </div>
                 <div class="bg-gray-100 dark:bg-stone-800/50 rounded-2xl p-6 border border-gray-200 dark:border-stone-700">
                     <div class="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
                     </div>
@@ -290,7 +290,7 @@
                 </div>
                 <div class="bg-gray-100 dark:bg-stone-800/50 rounded-2xl p-6 border border-gray-200 dark:border-stone-700">
                     <div class="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
@@ -309,7 +309,7 @@
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300 text-sm font-medium mb-4 border border-sky-500/20">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
                                 Livestream
@@ -322,7 +322,7 @@
                             </p>
                             <span class="inline-flex items-center text-sky-400 text-sm font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn about online events
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
                             </span>
@@ -523,19 +523,19 @@
                     </p>
                     <ul class="space-y-3 text-stone-600 dark:text-gray-400">
                         <li class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Square posts for feed
                         </li>
                         <li class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Vertical for stories
                         </li>
                         <li class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Your branding, automatically applied
@@ -625,7 +625,7 @@
 
             <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-rose-500 to-cyan-600 rounded-full hover:scale-105 transition-all shadow-lg shadow-rose-500/25 hover:shadow-rose-500/40">
                 Create Your Schedule
-                <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
             </a>

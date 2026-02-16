@@ -4,6 +4,32 @@
     <x-slot name="description">Set up Event Schedule on your own server with this step-by-step installation guide. Learn how to configure the database, environment, and cron jobs.</x-slot>
     <x-slot name="keywords">event schedule installation, selfhosted setup, laravel installation, event calendar setup, manual installation guide</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Installation Guide - Event Schedule",
+        "description": "Set up Event Schedule on your own server with this step-by-step installation guide. Learn how to configure the database, environment, and cron jobs.",
+        "author": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "{{ config('app.url') }}/images/light_logo.png"
+            }
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "{{ url()->current() }}"
+        }
+    }
+    </script>
+    </x-slot>
 
     @include('marketing.docs.partials.styles')
 
@@ -20,7 +46,7 @@
 
             <div class="flex items-center gap-4 mb-4">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-500/20">
-                    <svg class="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                 </div>

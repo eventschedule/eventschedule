@@ -449,7 +449,7 @@
             <div class="flex flex-wrap justify-center items-center gap-x-10 gap-y-8">
                 <!-- Google Calendar -->
                 <a href="{{ marketing_url('/google-calendar') }}" class="group flex flex-col items-center gap-2">
-                    <svg class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                    <svg aria-hidden="true" class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
                         <path d="M18.316 5.684H5.684v12.632h12.632V5.684z" class="fill-gray-300 group-hover:fill-white dark:fill-gray-600 dark:group-hover:fill-white/20"/>
                         <path d="M21.053 22H5.684l-2.631-2.632V5.684L5.684 3h12.632L21.053 5.684V22z" class="fill-gray-400 group-hover:fill-[#4285F4] dark:fill-gray-500 dark:group-hover:fill-[#4285F4]"/>
                         <path d="M18.316 22l2.737-2.632V22h-2.737z" class="fill-gray-500 group-hover:fill-[#1A73E8] dark:fill-gray-600 dark:group-hover:fill-[#1A73E8]"/>
@@ -465,7 +465,7 @@
                 </a>
                 <!-- Stripe -->
                 <a href="{{ marketing_url('/stripe') }}" class="group flex flex-col items-center gap-2">
-                    <svg class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                    <svg aria-hidden="true" class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
                         <rect x="1" y="4" width="22" height="16" rx="3" class="fill-gray-400 group-hover:fill-[#635BFF] dark:fill-gray-500 dark:group-hover:fill-[#635BFF]"/>
                         <path d="M11.2 10.3c0-.66.6-1.12 1.45-1.12.95 0 1.95.45 2.55 1.05l.8-1.85c-.7-.55-1.7-.95-3.05-.95-2.2 0-3.6 1.15-3.6 3.05 0 3 4.1 2.5 4.1 3.8 0 .55-.5.95-1.35.95-1.1 0-2.3-.55-3-1.15l-.85 1.85c.85.7 2.1 1.15 3.55 1.15 2.25 0 3.75-1.1 3.75-3.05 0-3.25-4.35-2.7-4.35-3.73z" class="fill-white dark:fill-gray-300"/>
                     </svg>
@@ -473,7 +473,7 @@
                 </a>
                 <!-- Invoice Ninja -->
                 <a href="{{ marketing_url('/invoiceninja') }}" class="group flex flex-col items-center gap-2">
-                    <svg class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                    <svg aria-hidden="true" class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
                         <rect x="3" y="5" width="18" height="16" rx="2" class="fill-gray-400 group-hover:fill-[#000] dark:fill-gray-500 dark:group-hover:fill-white"/>
                         <path d="M7.5 10h9M7.5 13h6M7.5 16h3" class="stroke-white group-hover:stroke-white dark:stroke-gray-800 dark:group-hover:stroke-gray-900" stroke-width="1.5" stroke-linecap="round"/>
                         <path d="M12 2L9 5h6l-3-3z" class="fill-gray-500 group-hover:fill-[#2E7D32] dark:fill-gray-600 dark:group-hover:fill-[#4CAF50]"/>
@@ -482,7 +482,7 @@
                 </a>
                 <!-- CalDAV -->
                 <a href="{{ marketing_url('/caldav') }}" class="group flex flex-col items-center gap-2">
-                    <svg class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                    <svg aria-hidden="true" class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
                         <rect x="3" y="5" width="18" height="17" rx="2" class="fill-gray-400 group-hover:fill-[#F57C00] dark:fill-gray-500 dark:group-hover:fill-[#F57C00]"/>
                         <rect x="3" y="5" width="18" height="5" rx="2" class="fill-gray-500 group-hover:fill-[#E65100] dark:fill-gray-600 dark:group-hover:fill-[#E65100]"/>
                         <circle cx="7" cy="7.5" r="1" class="fill-white/80"/>
@@ -493,7 +493,7 @@
                 </a>
                 <!-- Apple Calendar -->
                 <a href="{{ marketing_url('/features/calendar-sync') }}" class="group flex flex-col items-center gap-2">
-                    <svg class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                    <svg aria-hidden="true" class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
                         <rect x="3" y="5" width="18" height="17" rx="3" class="fill-gray-400 group-hover:fill-white dark:fill-gray-500 dark:group-hover:fill-gray-800"/>
                         <rect x="3" y="5" width="18" height="6" rx="3" class="fill-gray-500 group-hover:fill-[#EF4444] dark:fill-gray-600 dark:group-hover:fill-[#EF4444]"/>
                         <text x="7.5" y="9.5" class="fill-white" font-size="5" font-weight="bold" font-family="system-ui">31</text>
@@ -505,7 +505,7 @@
                 </a>
                 <!-- Outlook -->
                 <a href="{{ marketing_url('/features/calendar-sync') }}" class="group flex flex-col items-center gap-2">
-                    <svg class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
+                    <svg aria-hidden="true" class="h-10 w-10 opacity-50 group-hover:opacity-100 transition-all duration-300" viewBox="0 0 24 24" fill="none">
                         <rect x="3" y="4" width="18" height="17" rx="2" class="fill-gray-400 group-hover:fill-[#0078D4] dark:fill-gray-500 dark:group-hover:fill-[#0078D4]"/>
                         <rect x="12" y="4" width="9" height="8.5" rx="1" class="fill-gray-500 group-hover:fill-[#0063B1] dark:fill-gray-600 dark:group-hover:fill-[#0063B1]"/>
                         <path d="M13 5.5l4 3-4 3" class="stroke-white" stroke-width="1" fill="none" stroke-linejoin="round"/>
@@ -698,7 +698,7 @@
                 <div class="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm">
                     <div class="flex items-center gap-1 mb-4">
                         @for ($i = 0; $i < 5; $i++)
-                        <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg aria-hidden="true" class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
                         @endfor
@@ -721,7 +721,7 @@
                 <div class="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm">
                     <div class="flex items-center gap-1 mb-4">
                         @for ($i = 0; $i < 5; $i++)
-                        <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg aria-hidden="true" class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
                         @endfor
@@ -744,7 +744,7 @@
                 <div class="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm">
                     <div class="flex items-center gap-1 mb-4">
                         @for ($i = 0; $i < 5; $i++)
-                        <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg aria-hidden="true" class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
                         @endfor

@@ -4,6 +4,32 @@
     <x-slot name="description">Learn how to configure Event Schedule for SaaS deployment with subdomain-based multi-tenant routing, custom branding, and Stripe subscriptions.</x-slot>
     <x-slot name="keywords">saas setup, multi-tenant, subdomain routing, white-label, event schedule deployment</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "SaaS Setup Documentation - Event Schedule",
+        "description": "Learn how to configure Event Schedule for SaaS deployment with subdomain-based multi-tenant routing, custom branding, and Stripe subscriptions.",
+        "author": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "{{ config('app.url') }}/images/light_logo.png"
+            }
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "{{ url()->current() }}"
+        }
+    }
+    </script>
+    </x-slot>
 
     @include('marketing.docs.partials.styles')
 
@@ -20,7 +46,7 @@
 
             <div class="flex items-center gap-4 mb-4">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/20">
-                    <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
                     </svg>
                 </div>

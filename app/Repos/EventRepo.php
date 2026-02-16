@@ -701,6 +701,7 @@ class EventRepo
         if ($subdomainRole && $lookupEventId) {
             $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user'])
                 ->where('id', $lookupEventId)
+                ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id)->where('is_accepted', true))
                 ->first();
 
             if ($event) {

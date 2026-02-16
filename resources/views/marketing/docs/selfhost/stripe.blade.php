@@ -4,6 +4,32 @@
     <x-slot name="description">Set up Stripe payments for Event Schedule based on your deployment type: selfhosted or SaaS operator.</x-slot>
     <x-slot name="keywords">stripe integration, stripe connect, direct payments, laravel cashier, payment processing, ticket sales, subscription billing, selfhosted, invoice ninja</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Stripe Integration Documentation - Event Schedule",
+        "description": "Set up Stripe payments for Event Schedule based on your deployment type: selfhosted or SaaS operator.",
+        "author": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "{{ config('app.url') }}/images/light_logo.png"
+            }
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "{{ url()->current() }}"
+        }
+    }
+    </script>
+    </x-slot>
 
     @include('marketing.docs.partials.styles')
 
@@ -20,7 +46,7 @@
 
             <div class="flex items-center gap-4 mb-4">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/20">
-                    <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
                 </div>
@@ -60,7 +86,7 @@
 
                             <div class="bg-green-500/10 border border-green-500/20 rounded-xl p-4 mb-6">
                                 <div class="flex items-start gap-3">
-                                    <svg class="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg aria-hidden="true" class="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     <div>
@@ -118,7 +144,7 @@
 
                             <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-6">
                                 <div class="flex items-start gap-3">
-                                    <svg class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg aria-hidden="true" class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     <div>
@@ -166,7 +192,7 @@
 
                             <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
                                 <div class="flex items-start gap-3">
-                                    <svg class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg aria-hidden="true" class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                     </svg>
                                     <div>
@@ -399,7 +425,7 @@
 
                             <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-6">
                                 <div class="flex items-start gap-3">
-                                    <svg class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg aria-hidden="true" class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     <div>
