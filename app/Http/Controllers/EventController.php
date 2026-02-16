@@ -1265,7 +1265,7 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($event_hash);
         $event = Event::with('parts')->findOrFail($event_id);
 
-        if (! $event->roles()->where('role_id', $role->id)->where('is_accepted', true)->exists()) {
+        if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
             abort(404);
         }
 
@@ -1367,7 +1367,7 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($event_hash);
         $event = Event::with('parts')->findOrFail($event_id);
 
-        if (! $event->roles()->where('role_id', $role->id)->where('is_accepted', true)->exists()) {
+        if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
             abort(404);
         }
 

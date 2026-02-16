@@ -81,7 +81,7 @@ class TicketController extends Controller
         $event = Event::findOrFail(UrlUtils::decodeId($request->event_id));
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        if (! $event->roles()->where('role_id', $role->id)->exists()) {
+        if (! $event->roles()->wherePivot('role_id', $role->id)->exists()) {
             abort(403);
         }
 
@@ -141,7 +141,7 @@ class TicketController extends Controller
         // Use database transaction with row locking to prevent race conditions
         // that could lead to overselling tickets
         try {
-            $sale = DB::transaction(function () use ($request, $event, $user) {
+            $sale = DB::transaction(function () use ($request, $event, $user, $subdomain) {
                 // Check ticket availability with row locking
                 foreach ($request->tickets as $ticketId => $quantity) {
                     if ($quantity > 0) {
