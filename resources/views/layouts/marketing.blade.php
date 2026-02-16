@@ -113,15 +113,7 @@
         "@type": "WebSite",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
-        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}",
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": {
-                "@type": "EntryPoint",
-                "urlTemplate": "{{ config('app.url') }}/?search={search_term_string}"
-            },
-            "query-input": "required name=search_term_string"
-        }
+        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}"
     }
     </script>
     <script type="application/ld+json" {!! nonce_attr() !!}>
@@ -146,23 +138,6 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule",
-        "description": "The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": ["Web", "Android", "iOS"],
-        "screenshot": "{{ config('app.url') }}/images/social/home.png",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
-        }
-    }
-    </script>
-
     {{ $structuredData ?? '' }}
 
     @if (!request()->is('/') && !request()->is(''))
