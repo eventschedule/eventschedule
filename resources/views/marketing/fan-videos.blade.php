@@ -13,34 +13,26 @@
         "mainEntity": [
             {
                 "@type": "Question",
-                "name": "Do fans need an account to submit videos or comments?",
+                "name": "Are fan videos moderated before appearing?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes, fans need to sign up or log in before submitting. If they start writing before signing in, their content is saved and submitted after login."
+                    "text": "Yes. All fan-submitted videos and comments require your approval before they appear on your schedule. You have full control over what gets published."
                 }
             },
             {
                 "@type": "Question",
-                "name": "Do I have to approve every submission?",
+                "name": "What video platforms are supported?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes, all fan videos and comments require your approval before they appear publicly on your event page."
+                    "text": "Fans can share videos from YouTube, Vimeo, and other major platforms by pasting a link. The video is embedded directly on your event page."
                 }
             },
             {
                 "@type": "Question",
-                "name": "Can fans add content to specific parts of my event?",
+                "name": "Where do fan videos appear?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes, if your event has an agenda or setlist, fans can attach videos and comments to individual segments."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Is there a limit on comment length?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Comments can be up to 1,000 characters."
+                    "text": "Approved videos and comments appear on the individual event page where they were submitted. They help build social proof and community engagement around your events."
                 }
             }
         ]
@@ -390,67 +382,42 @@
             </div>
 
             <div class="space-y-4" x-data="{ open: null }">
-                <div class="bg-gradient-to-br from-rose-100 to-orange-100 dark:from-rose-900 dark:to-orange-900 rounded-2xl border border-rose-200 dark:border-white/10 shadow-sm overflow-hidden">
+                <!-- Q1: blue-to-sky -->
+                <div class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
                     <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Do fans need an account to submit videos or comments?
-                        </h3>
-                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" aria-hidden="true" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Are fan videos moderated before appearing?</h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
                     <div x-show="open === 1" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes, fans need to sign up or log in before submitting. If they start writing before signing in, their content is saved and submitted after login.
-                        </p>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">Yes. All fan-submitted videos and comments require your approval before they appear on your schedule. You have full control over what gets published.</p>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-rose-100 to-amber-100 dark:from-rose-900 dark:to-amber-900 rounded-2xl border border-rose-200 dark:border-white/10 shadow-sm overflow-hidden">
+                <!-- Q2: blue-to-cyan -->
+                <div class="bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
                     <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Do I have to approve every submission?
-                        </h3>
-                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" aria-hidden="true" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">What video platforms are supported?</h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
                     <div x-show="open === 2" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes, all fan videos and comments require your approval before they appear publicly on your event page.
-                        </p>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">Fans can share videos from YouTube, Vimeo, and other major platforms by pasting a link. The video is embedded directly on your event page.</p>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900 dark:to-amber-900 rounded-2xl border border-orange-200 dark:border-white/10 shadow-sm overflow-hidden">
+                <!-- Q3: emerald-to-teal -->
+                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
                     <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Can fans add content to specific parts of my event?
-                        </h3>
-                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" aria-hidden="true" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Where do fan videos appear?</h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
                     <div x-show="open === 3" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes, if your event has an agenda or setlist, fans can attach videos and comments to individual segments.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900 dark:to-yellow-900 rounded-2xl border border-amber-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Is there a limit on comment length?
-                        </h3>
-                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" aria-hidden="true" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    <div x-show="open === 4" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Comments can be up to 1,000 characters.
-                        </p>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">Approved videos and comments appear on the individual event page where they were submitted. They help build social proof and community engagement around your events.</p>
                     </div>
                 </div>
             </div>
@@ -530,6 +497,51 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Features -->
+    <section class="bg-white dark:bg-[#0a0a0f] py-20">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Related features</h2>
+            <div class="space-y-3">
+                <x-feature-link-card
+                    name="Newsletters"
+                    description="Send branded newsletters to followers and ticket buyers"
+                    :url="marketing_url('/features/newsletters')"
+                    icon-color="sky"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-feature-link-card>
+                <x-feature-link-card
+                    name="Online Events"
+                    description="Host virtual events with Zoom, Google Meet, and more"
+                    :url="marketing_url('/features/online-events')"
+                    icon-color="blue"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-feature-link-card>
+                <x-feature-link-card
+                    name="Embed Calendar"
+                    description="Embed your event schedule on any website"
+                    :url="marketing_url('/features/embed-calendar')"
+                    icon-color="teal"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                        </svg>
+                    </x-slot:icon>
+                </x-feature-link-card>
             </div>
         </div>
     </section>

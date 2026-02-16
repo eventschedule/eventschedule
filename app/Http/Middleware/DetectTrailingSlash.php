@@ -27,10 +27,11 @@ class DetectTrailingSlash
                 $appHost = parse_url(config('app.url'), PHP_URL_HOST);
                 $requestHost = $request->getHost();
 
-                if ($requestHost === $appHost || $requestHost === 'www.' . $appHost || str_starts_with($requestHost, 'blog.')) {
+                if ($requestHost === $appHost || $requestHost === 'www.'.$appHost || str_starts_with($requestHost, 'blog.')) {
                     $cleanPath = rtrim($path, '/');
                     $query = parse_url($uri, PHP_URL_QUERY);
-                    return redirect($cleanPath . ($query ? '?' . $query : ''), 301);
+
+                    return redirect($cleanPath.($query ? '?'.$query : ''), 301);
                 }
             }
 

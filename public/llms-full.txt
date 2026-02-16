@@ -285,7 +285,7 @@ curl -H "X-API-Key: es_abc123..." https://eventschedule.com/api/schedules
 
 ### Permissions
 
-- **Read operations** (GET requests): Available on all plans, including free.
+- **Read operations** (GET requests): Require authentication. Schedule and event list/detail endpoints only return data for Pro schedules (non-Pro schedules are filtered out or return 403).
 - **Write operations** (POST/PUT/DELETE): Require a Pro plan. New accounts get a trial period.
 
 ---
@@ -295,6 +295,8 @@ curl -H "X-API-Key: es_abc123..." https://eventschedule.com/api/schedules
 **Base URL**: `https://eventschedule.com/api` (hosted) or `https://yourdomain.com/api` (selfhosted)
 
 All request and response bodies use JSON (`Content-Type: application/json`) unless otherwise noted. All timestamps are in UTC.
+
+**Terminology note**: In API responses, the `groups` field refers to **sub-schedules** (color-coded event categories within a schedule). The `members` field maps talent schedule IDs to member details.
 
 ---
 
@@ -439,9 +441,10 @@ curl -X POST https://eventschedule.com/api/login \
 
 #### GET /schedules
 
-List schedules owned or administered by the authenticated user.
+List schedules owned or administered by the authenticated user. Only schedules on the Pro plan are included in the results.
 
 **Authentication**: Required
+**Plan**: Pro required (non-Pro schedules are silently filtered out)
 
 **Query parameters**:
 | Parameter | Type | Default | Description |
@@ -468,8 +471,18 @@ curl https://eventschedule.com/api/schedules \
       "type": "venue",
       "name": "The Blue Note",
       "email": "info@thebluenote.com",
+      "phone": "+1-212-555-0100",
+      "website": "https://thebluenote.com",
+      "description": "New York City's premier jazz club since 1981.",
+      "short_description": "Premier jazz club in NYC",
       "timezone": "America/New_York",
+      "language_code": "en",
       "created_at": "2026-02-16T12:00:00Z",
+      "address1": "131 W 3rd St",
+      "city": "New York",
+      "state": "NY",
+      "postal_code": "10012",
+      "country_code": "US",
       "groups": []
     }
   ],
@@ -484,6 +497,8 @@ curl https://eventschedule.com/api/schedules \
   }
 }
 ```
+
+**Note**: The `address1`, `city`, `state`, `postal_code`, and `country_code` fields are only present for venue-type schedules.
 
 **Error responses**:
 - `401` - Missing or invalid API key
@@ -558,6 +573,7 @@ curl -X POST https://eventschedule.com/api/schedules \
 Get details of a specific schedule.
 
 **Authentication**: Required (must be owner or admin)
+**Plan**: Pro required (returns 403 for non-Pro schedules)
 
 **Path parameters**:
 | Parameter | Type | Description |
@@ -599,6 +615,7 @@ curl https://eventschedule.com/api/schedules/the-blue-note \
 
 **Error responses**:
 - `401` - Missing or invalid API key
+- `403` - Not a Pro account
 - `404` - Schedule not found
 
 ---
@@ -694,6 +711,7 @@ Sub-schedules allow you to organize events into color-coded categories within a 
 List all sub-schedules for a schedule.
 
 **Authentication**: Required (must be owner or admin)
+**Plan**: Pro required (returns 403 for non-Pro schedules)
 
 **Path parameters**:
 | Parameter | Type | Description |
@@ -728,6 +746,7 @@ curl https://eventschedule.com/api/schedules/the-blue-note/groups \
 
 **Error responses**:
 - `401` - Missing or invalid API key
+- `403` - Not a Pro account
 - `404` - Schedule not found
 
 ---
@@ -869,9 +888,10 @@ curl -X DELETE https://eventschedule.com/api/schedules/the-blue-note/groups/gP5r
 
 #### GET /events
 
-List events owned by the authenticated user. Can be filtered by schedule and date range.
+List events owned by the authenticated user. Can be filtered by schedule and date range. Only events belonging to Pro schedules are included in the results.
 
 **Authentication**: Required
+**Plan**: Pro required (events on non-Pro schedules are silently filtered out)
 
 **Query parameters**:
 | Parameter | Type | Default | Description |
@@ -896,9 +916,15 @@ curl "https://eventschedule.com/api/events?subdomain=the-blue-note&starts_after=
       "id": "vN4wR8",
       "url": "https://the-blue-note.eventschedule.com/e/vN4wR8/jazz-night",
       "name": "Jazz Night with Miles Davis Tribute",
+      "short_description": "Classic jazz tribute night",
+      "description": "An evening of classic jazz featuring a world-class tribute to Miles Davis.",
       "starts_at": "2026-03-15 20:00:00",
       "duration": 3,
       "category_id": 4,
+      "event_url": null,
+      "registration_url": null,
+      "venue_id": "mK7pQ2",
+      "flyer_image_url": null,
       "schedule_type": "single",
       "tickets_enabled": true,
       "tickets": [
@@ -938,6 +964,7 @@ curl "https://eventschedule.com/api/events?subdomain=the-blue-note&starts_after=
 Get details of a specific event.
 
 **Authentication**: Required (must own the event or be owner/admin on an associated schedule)
+**Plan**: Pro required (returns 403 for events on non-Pro schedules)
 
 **Path parameters**:
 | Parameter | Type | Description |
@@ -967,11 +994,6 @@ curl https://eventschedule.com/api/events/vN4wR8 \
     "venue_id": "mK7pQ2",
     "flyer_image_url": null,
     "schedule_type": "single",
-    "recurring_frequency": null,
-    "recurring_interval": null,
-    "days_of_week": null,
-    "recurring_end_type": null,
-    "recurring_end_value": null,
     "tickets_enabled": true,
     "tickets": [
       {
@@ -999,7 +1021,7 @@ curl https://eventschedule.com/api/events/vN4wR8 \
 
 **Error responses**:
 - `401` - Missing or invalid API key
-- `403` - Unauthorized to view this event
+- `403` - Unauthorized to view this event, or not a Pro account
 - `404` - Event not found
 
 ---
@@ -1173,6 +1195,7 @@ curl -X PUT https://eventschedule.com/api/events/vN4wR8 \
 Permanently delete an event.
 
 **Authentication**: Required (must have permission to edit)
+**Plan**: Pro required
 
 **Path parameters**:
 | Parameter | Type | Description |
@@ -1196,7 +1219,7 @@ curl -X DELETE https://eventschedule.com/api/events/vN4wR8 \
 
 **Error responses**:
 - `401` - Missing or invalid API key
-- `403` - Unauthorized to delete this event
+- `403` - Unauthorized to delete this event, or not a Pro account
 - `404` - Event not found
 
 ---
@@ -1217,7 +1240,7 @@ Upload a flyer image for an event. Any existing flyer image will be replaced.
 **Request body**:
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| flyer_image | file | Yes | The flyer image file to upload |
+| flyer_image | file | Yes | The flyer image file (accepted formats: jpg, jpeg, png, gif, webp; max size: 10 MB) |
 
 **Example**:
 ```bash
@@ -1244,6 +1267,7 @@ curl -X POST https://eventschedule.com/api/events/flyer/vN4wR8 \
 - `401` - Missing or invalid API key
 - `403` - Unauthorized or not a Pro account
 - `404` - Event not found
+- `422` - Validation error (wrong file type or exceeds 10 MB)
 
 ---
 
@@ -1422,11 +1446,11 @@ curl -X POST https://eventschedule.com/api/sales \
 | timezone | string | Yes | IANA timezone identifier |
 | language_code | string | Yes | Language code |
 | created_at | datetime | Yes | ISO 8601 creation timestamp |
-| address1 | string | Yes | Street address (venue type) |
-| city | string | Yes | City (venue type) |
-| state | string | Yes | State or province (venue type) |
-| postal_code | string | Yes | Postal/ZIP code (venue type) |
-| country_code | string | Yes | Country code (venue type) |
+| address1 | string | Yes | Street address. Only present for venue-type schedules |
+| city | string | Yes | City. Only present for venue-type schedules |
+| state | string | Yes | State or province. Only present for venue-type schedules |
+| postal_code | string | Yes | Postal/ZIP code. Only present for venue-type schedules |
+| country_code | string | Yes | Country code. Only present for venue-type schedules |
 | groups | array | No | Sub-schedules belonging to this schedule |
 
 ### Event Object
@@ -1446,14 +1470,14 @@ curl -X POST https://eventschedule.com/api/sales \
 | venue_id | string | Yes | Encoded ID of associated venue schedule |
 | flyer_image_url | string | Yes | URL of the flyer image |
 | schedule_type | string | No | "single" or "recurring" |
-| recurring_frequency | string | Yes | Recurrence frequency (recurring events only) |
-| recurring_interval | integer | Yes | Interval for every_n_weeks |
-| days_of_week | string | Yes | 7-char day pattern (recurring events only) |
-| recurring_end_type | string | Yes | How recurrence ends |
-| recurring_end_value | string | Yes | End date or occurrence count |
+| recurring_frequency | string | Yes | Recurrence frequency. Only present for recurring events |
+| recurring_interval | integer | Yes | Interval for every_n_weeks. Only present for recurring events |
+| days_of_week | string | Yes | 7-char day pattern. Only present for recurring events |
+| recurring_end_type | string | Yes | How recurrence ends. Only present for recurring events |
+| recurring_end_value | string | Yes | End date or occurrence count. Only present for recurring events |
 | tickets_enabled | boolean | No | Whether ticket sales are enabled |
-| tickets | array | No | Ticket types (when tickets enabled) |
-| members | object | No | Map of member schedule IDs to member details |
+| tickets | array | No | Ticket types. Only present when tickets_enabled is true |
+| members | object | No | Map of encoded member schedule IDs to member objects (name, email, youtube_url) |
 | event_parts | array | No | Event sub-sections/segments |
 | created_at | datetime | Yes | ISO 8601 creation timestamp |
 | updated_at | datetime | Yes | ISO 8601 last update timestamp |
@@ -1477,6 +1501,16 @@ curl -X POST https://eventschedule.com/api/sales \
 | description | string | Yes | Part description |
 | start_time | string | Yes | Start time |
 | end_time | string | Yes | End time |
+
+### Member Object
+
+Returned within the `members` field of an Event. The `members` field is an object where keys are encoded schedule IDs and values are member objects.
+
+| Field | Type | Nullable | Description |
+|-------|------|----------|-------------|
+| name | string | No | Member name |
+| email | string | Yes | Member email |
+| youtube_url | string | Yes | Member's YouTube URL |
 
 ### Sale Object
 
@@ -1713,119 +1747,20 @@ List, view, update, or delete schedules.
 
 ## Features
 
-### Ticketing
+Beyond the API endpoints documented above, Event Schedule includes these platform features:
 
-Event Schedule provides a complete ticketing system with zero platform fees.
-
-- **Multiple ticket types**: Create different tiers (General Admission, VIP, etc.) with different prices and quantities.
-- **Unlimited or limited quantity**: Set a specific number of tickets available, or leave unlimited.
-- **Free tickets**: Set price to 0 for free events with RSVP tracking.
-- **QR code tickets**: Each sale generates a unique QR code that can be scanned at the door.
-- **Check-in**: Scan QR codes or manually check in attendees from the admin portal.
-- **Reservations**: Tickets can be held as "unpaid" and settled later.
-- **Payment methods**: Stripe (hosted via Stripe Connect, selfhosted via direct integration), Invoice Ninja (B2B invoicing), custom payment URL, or manual payment with instructions.
-- **Currency support**: Any ISO 4217 currency code.
-- **Per-occurrence sales**: For recurring events, tickets are sold per individual occurrence date.
-
-### Calendar Sync
-
-Sync events bidirectionally with external calendars.
-
-- **Google Calendar**: Full OAuth 2.0 integration with bidirectional sync. Changes in Event Schedule push to Google Calendar and vice versa via webhooks. Supports multiple calendars per schedule.
-- **CalDAV**: Connect to any CalDAV-compatible calendar server for sync.
-- **iCal feed**: Each schedule provides an iCal (.ics) feed URL that can be subscribed to from any calendar application.
-
-### Analytics
-
-Privacy-first analytics built into the platform.
-
-- **Page views**: Track views per event and per schedule.
-- **Device breakdown**: See what devices and browsers visitors use.
-- **Traffic sources**: Understand where visitors come from (referrers, direct, social).
-- **Conversion tracking**: For ticketed events, track the funnel from page view to ticket purchase.
-- **No cookies**: Analytics are collected without cookies, respecting visitor privacy.
-
-### Newsletters
-
-Built-in email newsletter system for engaging your audience.
-
-- **Drag-and-drop builder**: Visual email builder for creating newsletters.
-- **Templates**: Pre-built templates for event announcements and updates.
-- **Subscriber management**: Manage subscriber lists with import/export.
-- **Segments**: Target specific subscriber groups.
-- **A/B testing**: Test subject lines and content variations.
-- **Tracking**: Open rates, click rates, and engagement metrics.
-- **Automatic event digests**: Auto-generate newsletter content from upcoming events.
-
-### Event Graphics
-
-Automatically generate promotional images for events.
-
-- **Auto-generated posters**: Event details are rendered into shareable graphic images.
-- **Multiple layouts**: Choose from different graphic styles and layouts.
-- **Schedule-wide graphics**: Generate a single graphic showing all upcoming events for a schedule.
-- **Social media ready**: Graphics are sized for sharing on social media platforms.
-
-### Sub-schedules
-
-Organize events into color-coded categories within a schedule.
-
-- **Color coding**: Assign colors to sub-schedules for visual distinction on the calendar.
-- **Filtering**: Visitors can filter the schedule view by sub-schedule.
-- **Separate URLs**: Each sub-schedule has its own URL for direct access.
-- **API management**: Create, update, and delete sub-schedules via the API.
-
-### Custom Fields
-
-Add custom data fields to events and ticket purchases.
-
-- **Five field types**: Text, number, date, dropdown (select), and checkbox.
-- **Event fields**: Add custom metadata to events (e.g., age restriction, dress code).
-- **Attendee fields**: Collect custom information from ticket buyers (e.g., dietary preferences, t-shirt size).
-- **Required or optional**: Configure whether fields must be filled in.
-
-### Fan Videos and Comments
-
-Allow fans and attendees to contribute content to events.
-
-- **YouTube video submissions**: Fans can submit YouTube video URLs to events.
-- **Comments**: Attendees can leave comments on events.
-- **Approval workflow**: All submissions go through an approval queue before appearing publicly.
-- **Moderation**: Event owners can approve, reject, or remove submissions.
-
-### Embedding
-
-Embed your schedule on any website with a single line of code.
-
-- **iframe embed**: Copy a single `<iframe>` tag to embed your full schedule on any website.
-- **Responsive**: The embed automatically adjusts to the container width.
-- **Themed**: The embed respects light and dark mode settings.
-
-### AI Features
-
-AI-powered tools for event management (powered by Google Gemini).
-
-- **Event parsing**: Paste unstructured text or upload a flyer image, and AI extracts structured event data (name, date, time, description, etc.).
-- **Auto-translation**: Events are automatically translated to all 11 supported languages.
-- **Import**: Bulk import events from text descriptions.
-
-### Recurring Events
-
-Create events that repeat on a schedule with six frequency patterns.
-
-- **Six patterns**: Daily, weekly, every N weeks, monthly by date, monthly by weekday, yearly.
-- **Flexible days**: For weekly events, choose which days of the week.
-- **End conditions**: Recur forever, until a specific date, or for a set number of occurrences.
-- **Per-occurrence ticketing**: Sell tickets separately for each occurrence of a recurring event.
-- **Individual editing**: Each occurrence can be viewed and managed independently.
-
-### Team Collaboration
-
-Work together with multiple users on a schedule.
-
-- **Multiple admins**: Invite other users as administrators of your schedule.
-- **Role-based access**: Owners have full control, admins can manage events and settings.
-- **Activity across schedules**: Users can own or admin multiple schedules.
+- **Ticketing**: Multiple ticket types, QR code tickets, check-in, free or paid events. Payment via Stripe, Invoice Ninja, custom URL, or manual. Zero platform fees. Per-occurrence sales for recurring events.
+- **Calendar sync**: Bidirectional Google Calendar sync (OAuth 2.0 + webhooks), CalDAV support, and iCal feed URLs.
+- **Analytics**: Privacy-first (no cookies) page view tracking, device/browser breakdown, traffic sources, and conversion funnels.
+- **Newsletters**: Drag-and-drop email builder with templates, subscriber management, A/B testing, and automatic event digests.
+- **Event graphics**: Auto-generated promotional images in multiple layouts, sized for social media sharing.
+- **Sub-schedules**: Color-coded event categories within a schedule, with filtering and separate URLs. Manageable via API.
+- **Custom fields**: Text, number, date, dropdown, and checkbox fields for events and ticket purchases.
+- **Fan videos and comments**: YouTube video submissions and comments on events, with approval workflow.
+- **Embedding**: Responsive iframe embed for any website, with light/dark mode support.
+- **AI features**: Gemini-powered event parsing from text/images, auto-translation to 11 languages, and bulk import.
+- **Recurring events**: Six frequency patterns (daily, weekly, every N weeks, monthly by date/weekday, yearly) with flexible end conditions.
+- **Team collaboration**: Multiple admins per schedule with role-based access.
 
 ---
 
@@ -1839,7 +1774,7 @@ All core features are available for free:
 - Calendar sync
 - Event graphics
 - Analytics
-- API read access (GET requests)
+- API access (with Pro schedules)
 - iCal feed
 - Embedding
 
@@ -1923,92 +1858,11 @@ Event Schedule supports 11 languages:
 
 ## Selfhosted Deployment
 
-### Requirements
+Event Schedule can be selfhosted on your own infrastructure. Requires PHP 8.1+, MySQL/PostgreSQL, and a web server. Install via Softaculous (one-click), Docker, or manual setup.
 
-- PHP 8.1 or higher
-- MySQL or PostgreSQL database
-- Composer (PHP dependency manager)
-- Node.js and npm (for building frontend assets)
-- Web server (Apache or Nginx)
+Key differences from hosted mode: path-based routing instead of subdomains, no email verification, direct Stripe or Invoice Ninja for payments.
 
-### Installation Methods
-
-1. **Softaculous**: One-click install available on hosting panels with Softaculous.
-2. **Docker**: Docker image available for containerized deployment.
-3. **Manual**: Clone the repository and configure manually.
-
-### Manual Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/eventschedule/eventschedule.git
-cd eventschedule
-
-# Install PHP dependencies
-composer install --no-dev
-
-# Install and build frontend
-npm install
-npm run build
-
-# Configure environment
-cp .env.example .env
-php artisan key:generate
-
-# Set up database
-php artisan migrate
-php artisan storage:link
-
-# Set permissions
-chmod -R 775 storage bootstrap/cache
-```
-
-### Key Environment Variables
-
-```env
-# Application
-APP_URL=https://yourdomain.com
-IS_HOSTED=false
-
-# Database
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_DATABASE=eventschedule
-DB_USERNAME=root
-DB_PASSWORD=secret
-
-# Stripe (for payments)
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_PUBLISHABLE_KEY=pk_live_...
-
-# Google Calendar (optional)
-GOOGLE_CLIENT_ID=...
-GOOGLE_CLIENT_SECRET=...
-
-# AI Features (optional)
-GEMINI_API_KEY=...
-
-# Error reporting (optional)
-REPORT_ERRORS=false
-```
-
-### Cron Job
-
-A cron job is required for scheduled tasks (releasing expired ticket reservations, syncing calendars, etc.):
-
-```
-* * * * * cd /path/to/eventschedule && php artisan schedule:run >> /dev/null 2>&1
-```
-
-### Differences from Hosted Mode
-
-| Feature | Hosted | Selfhosted |
-|---------|--------|------------|
-| Routing | Subdomains (venue.eventschedule.com) | Path-based (yourdomain.com/venue) |
-| Registration | Email verification required | First user only, no verification |
-| Payments | Stripe Connect | Direct Stripe or Invoice Ninja |
-| Custom domains | Pro feature | N/A (you control the domain) |
-| Updates | Automatic | Manual (git pull, migrate, build) |
+For full installation instructions, see the [Selfhost Guide](https://eventschedule.com/docs/selfhost/installation).
 
 ---
 

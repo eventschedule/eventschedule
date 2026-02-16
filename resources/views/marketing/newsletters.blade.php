@@ -20,6 +20,38 @@
         "serviceType": "Event Email Marketing"
     }
     </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "How do subscribers join my newsletter?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Visitors can follow your schedule directly from your public schedule page. You can also target ticket buyers and manually add email addresses. All subscribers can unsubscribe with one click."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How many newsletters can I send?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "The free plan includes 10 newsletters per month per schedule. The Pro plan increases this to 100 newsletters per month, giving you plenty of capacity for regular audience communication."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How does email deliverability work?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Event Schedule handles email delivery infrastructure for you with proper authentication headers. Pro users can also configure custom SMTP servers per schedule for maximum deliverability and branding control."
+                }
+            }
+        ]
+    }
+    </script>
     </x-slot>
 
     <style {!! nonce_attr() !!}>
@@ -384,6 +416,115 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="bg-gray-100 dark:bg-black/30 py-24">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Frequently asked questions
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Everything you need to know about newsletters.
+                </p>
+            </div>
+
+            <div class="space-y-4" x-data="{ open: null }">
+                <div class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            How do subscribers join my newsletter?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 1" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Visitors can follow your schedule directly from your public schedule page. You can also target ticket buyers and manually add email addresses. All subscribers can unsubscribe with one click.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            How many newsletters can I send?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 2" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            The free plan includes 10 newsletters per month per schedule. The Pro plan increases this to 100 newsletters per month, giving you plenty of capacity for regular audience communication.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            How does email deliverability work?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 3" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Event Schedule handles email delivery infrastructure for you with proper authentication headers. Pro users can also configure custom SMTP servers per schedule for maximum deliverability and branding control.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Features -->
+    <section class="bg-white dark:bg-[#0a0a0f] py-20">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Related features</h2>
+            <div class="space-y-3">
+                <x-feature-link-card
+                    name="Ticketing"
+                    description="Sell tickets with QR check-in and zero platform fees"
+                    :url="marketing_url('/features/ticketing')"
+                    icon-color="sky"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-feature-link-card>
+                <x-feature-link-card
+                    name="Fan Videos"
+                    description="Let fans share videos and comments on your events"
+                    :url="marketing_url('/features/fan-videos')"
+                    icon-color="rose"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-feature-link-card>
+                <x-feature-link-card
+                    name="Recurring Events"
+                    description="Set events to repeat on any schedule automatically"
+                    :url="marketing_url('/features/recurring-events')"
+                    icon-color="green"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </x-slot:icon>
+                </x-feature-link-card>
             </div>
         </div>
     </section>

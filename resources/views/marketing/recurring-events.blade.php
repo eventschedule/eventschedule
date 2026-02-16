@@ -20,6 +20,38 @@
         "serviceType": "Recurring Event Scheduling"
     }
     </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What recurrence patterns are available?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "You can set events to repeat daily, weekly on specific days, every N weeks, monthly on the same date, monthly on the same weekday, or yearly. Each pattern supports flexible end conditions."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I edit a single occurrence without changing the whole series?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Each occurrence of a recurring event is an independent event with its own details, tickets, and attendance tracking. You can edit any single occurrence without affecting the rest of the series."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do recurring events sync with Google Calendar?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Recurring events sync to Google Calendar as individual occurrences. Each date appears separately in your Google Calendar, and changes sync both ways automatically."
+                }
+            }
+        ]
+    }
+    </script>
     </x-slot>
 
     <style {!! nonce_attr() !!}>
@@ -390,6 +422,115 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="bg-gray-100 dark:bg-black/30 py-24">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Frequently asked questions
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Everything you need to know about recurring events.
+                </p>
+            </div>
+
+            <div class="space-y-4" x-data="{ open: null }">
+                <div class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            What recurrence patterns are available?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 1" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            You can set events to repeat daily, weekly on specific days, every N weeks, monthly on the same date, monthly on the same weekday, or yearly. Each pattern supports flexible end conditions.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I edit a single occurrence without changing the whole series?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 2" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Each occurrence of a recurring event is an independent event with its own details, tickets, and attendance tracking. You can edit any single occurrence without affecting the rest of the series.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            How do recurring events sync with Google Calendar?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 3" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Recurring events sync to Google Calendar as individual occurrences. Each date appears separately in your Google Calendar, and changes sync both ways automatically.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Features -->
+    <section class="bg-white dark:bg-[#0a0a0f] py-20">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Related features</h2>
+            <div class="space-y-3">
+                <x-feature-link-card
+                    name="Calendar Sync"
+                    description="Two-way sync with Google Calendar"
+                    :url="marketing_url('/features/calendar-sync')"
+                    icon-color="blue"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-feature-link-card>
+                <x-feature-link-card
+                    name="Online Events"
+                    description="Host virtual events with Zoom, Google Meet, and more"
+                    :url="marketing_url('/features/online-events')"
+                    icon-color="sky"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-feature-link-card>
+                <x-feature-link-card
+                    name="Ticketing"
+                    description="Sell tickets with QR check-in and zero platform fees"
+                    :url="marketing_url('/features/ticketing')"
+                    icon-color="emerald"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-feature-link-card>
             </div>
         </div>
     </section>

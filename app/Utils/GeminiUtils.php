@@ -241,6 +241,8 @@ class GeminiUtils
         $fields = [
             'event_name' => '',
             'event_name_en' => 'only if the event_name is not English',
+            'event_short_name' => 'A short version of the event name for URLs (2-5 words max)',
+            'event_short_name_en' => 'English translation, only if the event_short_name is not English',
             'short_description' => 'A brief one-line summary of the event (max 200 characters)',
             'short_description_en' => 'English translation, only if the short_description is not English',
             'event_date_time' => 'YYYY-MM-DD HH:MM',

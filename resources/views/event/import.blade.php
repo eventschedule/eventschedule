@@ -1771,6 +1771,8 @@
                             members: members,
                             name: eventName,
                             name_en: parsed.event_name_en,
+                            short_name: parsed.event_short_name,
+                            short_name_en: parsed.event_short_name_en,
                             short_description: parsed.short_description,
                             short_description_en: parsed.short_description_en,
                             starts_at: dateValue,

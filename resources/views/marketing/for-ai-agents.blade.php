@@ -1,7 +1,7 @@
 <x-marketing-layout>
     <x-slot name="title">API for AI Agents & Developers - Event Schedule</x-slot>
-    <x-slot name="description">Full REST API with OpenAPI spec for AI agents and developers. Create events, manage tickets, and automate scheduling programmatically. Zero platform fees.</x-slot>
-    <x-slot name="keywords">event API, AI agent scheduling, REST API events, OpenAPI event management, developer event platform, programmatic event creation, AI scheduling API, event automation API</x-slot>
+    <x-slot name="description">Full REST API with OpenAPI spec, llms.txt, and agents.json for AI agents and developers. Create events, manage tickets, and automate scheduling programmatically. Zero platform fees.</x-slot>
+    <x-slot name="keywords">event API, AI agent scheduling, REST API events, OpenAPI event management, developer event platform, programmatic event creation, AI scheduling API, event automation API, llms.txt, agents.json, LLM API</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For AI Agents</x-slot>
 
@@ -85,6 +85,8 @@
         "featureList": [
             "Full REST API with JSON responses",
             "OpenAPI 3.0 specification",
+            "llms.txt and llms-full.txt LLM discovery files",
+            "agents.json workflow definitions",
             "Schedule and event management",
             "Ticket creation and sales tracking",
             "Recurring event patterns",
@@ -97,6 +99,46 @@
             "@type": "Organization",
             "name": "Event Schedule"
         }
+    }
+    </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is llms.txt?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "llms.txt is an emerging standard that helps AI models discover and understand your platform. Event Schedule provides both llms.txt (a concise summary for initial discovery and routing) and llms-full.txt (a complete, self-contained reference so agents can work without following additional links)."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What can I do with the Event Schedule API?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "You can create, read, update, and delete schedules, events, tickets, sub-schedules, and sales. The API supports smart event creation with venue auto-resolution, member matching, recurring event patterns, and auto-translation to 11 languages."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is the Event Schedule API free to use?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Read operations are free on any Pro schedule. Write operations (creating and updating events, tickets, etc.) require a Pro plan. Ticket sales have zero platform fees - you keep 100% of revenue minus payment processing."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How does API authentication work?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Authentication uses API keys passed via the X-API-Key header. Generate your API key from your account settings after signing up. Read-only endpoints on public schedules don't require authentication."
+                }
+            }
+        ]
     }
     </script>
     </x-slot>
@@ -401,6 +443,86 @@
         </div>
     </section>
 
+    {{-- AI-Native Discovery Files --}}
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24 border-t border-gray-200 dark:border-white/5">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    AI-native discovery
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Standard discovery files so AI agents can find and understand the API without human help.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {{-- llms.txt --}}
+                <a href="/llms.txt" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-950/50 dark:to-teal-950/50 border border-cyan-200 dark:border-cyan-800/50 p-6 hover:border-cyan-400 dark:hover:border-cyan-600 transition-colors">
+                    <div class="inline-flex items-center px-2.5 py-1 rounded-full bg-cyan-100 dark:bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 text-xs font-mono font-medium mb-4">llms.txt</div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Quick overview</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Concise summary for initial discovery and routing. Helps agents decide whether this API is relevant to a task.</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-mono text-gray-400 dark:text-gray-500">/llms.txt</span>
+                        <span class="inline-flex items-center text-sm font-medium text-cyan-600 dark:text-cyan-400 group-hover:gap-2 gap-1 transition-all">
+                            View file
+                            <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </span>
+                    </div>
+                </a>
+
+                {{-- llms-full.txt --}}
+                <a href="/llms-full.txt" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/50 dark:to-green-950/50 border border-emerald-200 dark:border-emerald-800/50 p-6 hover:border-emerald-400 dark:hover:border-emerald-600 transition-colors">
+                    <div class="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-mono font-medium mb-4">llms-full.txt</div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Complete reference</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Self-contained docs with full API details. No link-following needed for agents to start working.</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-mono text-gray-400 dark:text-gray-500">/llms-full.txt</span>
+                        <span class="inline-flex items-center text-sm font-medium text-emerald-600 dark:text-emerald-400 group-hover:gap-2 gap-1 transition-all">
+                            View file
+                            <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </span>
+                    </div>
+                </a>
+
+                {{-- agents.json --}}
+                <a href="/.well-known/agents.json" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/50 dark:to-cyan-950/50 border border-teal-200 dark:border-teal-800/50 p-6 hover:border-teal-400 dark:hover:border-teal-600 transition-colors">
+                    <div class="inline-flex items-center px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300 text-xs font-mono font-medium mb-4">agents.json</div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Agent workflows</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Pre-defined multi-step workflows for common tasks. Agents can execute sequences without custom logic.</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-mono text-gray-400 dark:text-gray-500">/.well-known/agents.json</span>
+                        <span class="inline-flex items-center text-sm font-medium text-teal-600 dark:text-teal-400 group-hover:gap-2 gap-1 transition-all">
+                            View file
+                            <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </span>
+                    </div>
+                </a>
+
+                {{-- openapi.json --}}
+                <a href="/api/openapi.json" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-950/50 dark:to-blue-950/50 border border-sky-200 dark:border-sky-800/50 p-6 hover:border-sky-400 dark:hover:border-sky-600 transition-colors">
+                    <div class="inline-flex items-center px-2.5 py-1 rounded-full bg-sky-100 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 text-xs font-mono font-medium mb-4">openapi.json</div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">OpenAPI 3.0 spec</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Machine-readable specification for auto-generating client libraries and tool definitions.</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-mono text-gray-400 dark:text-gray-500">/api/openapi.json</span>
+                        <span class="inline-flex items-center text-sm font-medium text-sky-600 dark:text-sky-400 group-hover:gap-2 gap-1 transition-all">
+                            View file
+                            <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
     {{-- Section 3: Built for every kind of integration --}}
     <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -594,6 +716,86 @@
                         </svg>
                     </x-slot:icon>
                 </x-feature-link-card>
+            </div>
+        </div>
+    </section>
+
+    {{-- FAQ Section --}}
+    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/5">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Frequently asked questions
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Everything you need to know about the API and LLM discovery files.
+                </p>
+            </div>
+
+            <div class="space-y-4" x-data="{ open: null }">
+                <div class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            What is llms.txt?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 1" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            llms.txt is an emerging standard that helps AI models discover and understand your platform. Event Schedule provides both <a href="/llms.txt" class="text-cyan-600 dark:text-cyan-400 hover:underline font-medium">llms.txt</a> (a concise summary for initial discovery and routing) and <a href="/llms-full.txt" class="text-cyan-600 dark:text-cyan-400 hover:underline font-medium">llms-full.txt</a> (a complete, self-contained reference so agents can work without following additional links).
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            What can I do with the API?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 2" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            You can create, read, update, and delete schedules, events, tickets, sub-schedules, and sales. The API supports smart event creation with venue auto-resolution, member matching, recurring event patterns, and auto-translation to 11 languages.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Is the API free to use?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 3" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Read operations are free on any Pro schedule. Write operations (creating and updating events, tickets, etc.) require a Pro plan. Ticket sales have zero platform fees - you keep 100% of revenue minus payment processing.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            How does authentication work?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 4" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Authentication uses API keys passed via the <code class="text-sm bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded">X-API-Key</code> header. Generate your API key from your account settings after signing up. Read-only endpoints on public schedules don't require authentication.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
