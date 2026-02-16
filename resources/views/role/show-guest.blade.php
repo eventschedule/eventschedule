@@ -194,9 +194,9 @@
 
               {{-- Description below --}}
               @if($role->translatedDescription())
-              <div class="text-start w-full mt-2">
+              <div class="w-full mt-2">
                 @if(str_word_count(strip_tags($role->translatedDescription())) > 5)
-                <div x-data="{ expanded: false }" class="text-sm text-[#33383C] dark:text-gray-300">
+                <div x-data="{ expanded: false }" class="text-start text-sm text-[#33383C] dark:text-gray-300">
                   <div x-show="!expanded">
                     <span>{{ Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...') }}</span>
                     <button @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">
@@ -213,7 +213,7 @@
                   </div>
                 </div>
                 @else
-                <div class="text-sm text-[#33383C] dark:text-gray-300 custom-content [&>*:first-child]:mt-0">
+                <div class="text-center text-sm text-[#33383C] dark:text-gray-300 custom-content [&>*:first-child]:mt-0">
                   {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                 </div>
                 @endif

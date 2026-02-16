@@ -458,7 +458,7 @@
     @if (! request()->embed && ! config('app.is_nexus') && $role->showBranding())
     <div class="flex justify-{{ $isRtl ? 'start' : 'end' }} p-4">
         <a href="https://eventschedule.com" target="_blank" rel="noopener" title="{{ __('messages.powered_by_event_schedule') }}" class="block rounded-full bg-gray-400 p-[1px]">
-            <img src="{{ url('/images/favicon.png') }}" alt="Event Schedule" class="h-6 w-6 rounded-full">
+            <img src="{{ url('/images/logo.webp') }}" alt="Event Schedule" class="h-6 w-6 rounded-full">
         </a>
     </div>
     @endif
