@@ -1,0 +1,2049 @@
+# Event Schedule
+
+> Event Schedule is an open-source platform for sharing events, selling tickets, and bringing communities together. This document is a complete, self-contained reference for the Event Schedule platform and API.
+
+## Platform Overview
+
+Event Schedule is an open-source event management platform available as hosted SaaS at eventschedule.com or as a selfhosted deployment. It provides a full REST API with OpenAPI 3.0 spec for programmatic event management, ticketing with zero platform fees, Google Calendar sync, AI-powered event parsing, auto-generated event graphics, newsletters, analytics, and more.
+
+### Schedule Types
+
+Every account organizes events under one or more **schedules**. There are three types:
+
+- **Venue** - Physical locations like bars, theaters, galleries, and event spaces. Venue schedules include address fields and are automatically linked as the venue when creating events.
+- **Talent** - Performers like musicians, DJs, comedians, and speakers. Talent schedules are automatically linked as members when creating events.
+- **Curator** - Event organizers, promoters, and community leaders who curate events across different venues and talent.
+
+### Deployment Modes
+
+- **Hosted** (eventschedule.com): Multi-tenant SaaS using subdomains (e.g., `my-venue.eventschedule.com`). Email verification required for registration. Payments via Stripe Connect.
+- **Selfhosted**: Single-tenant deployment using path-based routing (e.g., `yourdomain.com/my-venue`). No email verification needed. Direct Stripe integration or Invoice Ninja for payments.
+
+### Key Differentiators
+
+- **Zero platform fees**: Event Schedule charges no percentage on ticket sales. You only pay standard payment processor fees.
+- **Open source**: Full source code available. Selfhost on your own infrastructure.
+- **AI-powered**: Gemini-powered event parsing from text/images, auto-translation to 11 languages.
+- **API-first**: Complete REST API with OpenAPI 3.0 spec and agents.json for AI agent integration.
+
+---
+
+## Getting Started
+
+This walkthrough shows how to register, create a schedule, create an event with tickets, and sell tickets using the API.
+
+### Step 1: Send Verification Code (hosted mode only)
+
+In hosted mode (eventschedule.com), you must verify your email before registering. Skip this step for selfhosted instances.
+
+```bash
+curl -X POST https://eventschedule.com/api/register/send-code \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com"
+  }'
+```
+
+Response:
+```json
+{
+  "data": {
+    "message": "Verification code sent to user@example.com"
+  }
+}
+```
+
+### Step 2: Register an Account
+
+```bash
+curl -X POST https://eventschedule.com/api/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Jane Smith",
+    "email": "user@example.com",
+    "password": "securepassword123",
+    "verification_code": "123456",
+    "timezone": "America/New_York"
+  }'
+```
+
+Response (201 Created):
+```json
+{
+  "data": {
+    "api_key": "es_abc123...",
+    "api_key_expires_at": "2027-02-16T00:00:00Z",
+    "user": {
+      "id": "xR3kL9",
+      "name": "Jane Smith",
+      "email": "user@example.com"
+    }
+  }
+}
+```
+
+Store the `api_key` securely. It expires after one year.
+
+### Step 3: Create a Schedule
+
+```bash
+curl -X POST https://eventschedule.com/api/schedules \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: es_abc123..." \
+  -d '{
+    "name": "The Blue Note",
+    "type": "venue",
+    "email": "info@thebluenote.com",
+    "timezone": "America/New_York",
+    "address1": "131 W 3rd St",
+    "city": "New York",
+    "state": "NY",
+    "postal_code": "10012",
+    "country_code": "US"
+  }'
+```
+
+Response (201 Created):
+```json
+{
+  "data": {
+    "id": "mK7pQ2",
+    "subdomain": "the-blue-note",
+    "url": "https://the-blue-note.eventschedule.com",
+    "type": "venue",
+    "name": "The Blue Note",
+    "email": "info@thebluenote.com",
+    "timezone": "America/New_York",
+    "address1": "131 W 3rd St",
+    "city": "New York",
+    "state": "NY",
+    "postal_code": "10012",
+    "country_code": "US",
+    "created_at": "2026-02-16T12:00:00Z",
+    "groups": []
+  }
+}
+```
+
+The `subdomain` is auto-generated from the name and used in subsequent API calls.
+
+### Step 4: Create an Event with Tickets
+
+```bash
+curl -X POST https://eventschedule.com/api/events/the-blue-note \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: es_abc123..." \
+  -d '{
+    "name": "Jazz Night with Miles Davis Tribute",
+    "starts_at": "2026-03-15 20:00:00",
+    "duration": 3,
+    "description": "An evening of classic jazz featuring a world-class tribute to Miles Davis.",
+    "short_description": "Classic jazz tribute night",
+    "category": "Concerts",
+    "tickets_enabled": true,
+    "ticket_currency_code": "USD",
+    "payment_method": "stripe",
+    "tickets": [
+      {
+        "type": "General Admission",
+        "price": 25.00,
+        "quantity": 100
+      },
+      {
+        "type": "VIP",
+        "price": 75.00,
+        "quantity": 20,
+        "description": "Front row seating with complimentary drinks"
+      }
+    ]
+  }'
+```
+
+Response (201 Created):
+```json
+{
+  "data": {
+    "id": "vN4wR8",
+    "url": "https://the-blue-note.eventschedule.com/e/vN4wR8/jazz-night-with-miles-davis-tribute",
+    "name": "Jazz Night with Miles Davis Tribute",
+    "short_description": "Classic jazz tribute night",
+    "description": "An evening of classic jazz featuring a world-class tribute to Miles Davis.",
+    "starts_at": "2026-03-15 20:00:00",
+    "duration": 3,
+    "category_id": 4,
+    "schedule_type": "single",
+    "tickets_enabled": true,
+    "tickets": [
+      {
+        "id": "tK2mP5",
+        "type": "General Admission",
+        "price": 25.00,
+        "quantity": 100,
+        "description": null
+      },
+      {
+        "id": "tL8nQ3",
+        "type": "VIP",
+        "price": 75.00,
+        "quantity": 20,
+        "description": "Front row seating with complimentary drinks"
+      }
+    ],
+    "members": {},
+    "event_parts": [],
+    "created_at": "2026-02-16T12:05:00Z",
+    "updated_at": "2026-02-16T12:05:00Z"
+  },
+  "meta": {
+    "message": "Event created successfully"
+  }
+}
+```
+
+### Step 5: Sell Tickets
+
+```bash
+curl -X POST https://eventschedule.com/api/sales \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: es_abc123..." \
+  -d '{
+    "event_id": "vN4wR8",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "tickets": {
+      "General Admission": 2,
+      "VIP": 1
+    }
+  }'
+```
+
+Response (201 Created):
+```json
+{
+  "data": {
+    "id": "sA9bC1",
+    "event_id": "vN4wR8",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "event_date": "2026-03-15",
+    "status": "unpaid",
+    "payment_method": "stripe",
+    "payment_amount": 125.00,
+    "transaction_reference": null,
+    "secret": "abc123xyz789",
+    "tickets": [
+      {
+        "ticket_id": "tK2mP5",
+        "quantity": 2,
+        "price": 25.00,
+        "type": "General Admission"
+      },
+      {
+        "ticket_id": "tL8nQ3",
+        "quantity": 1,
+        "price": 75.00,
+        "type": "VIP"
+      }
+    ],
+    "total_quantity": 3,
+    "created_at": "2026-02-16T12:10:00Z",
+    "updated_at": "2026-02-16T12:10:00Z"
+  },
+  "meta": {
+    "message": "Sale created successfully"
+  }
+}
+```
+
+---
+
+## Authentication
+
+The Event Schedule API uses API key authentication via the `X-API-Key` header.
+
+### Obtaining an API Key
+
+There are two ways to get an API key:
+
+1. **Register** a new account via `POST /api/register` - returns an API key in the response.
+2. **Login** to an existing account via `POST /api/login` - returns a new API key.
+
+### Using the API Key
+
+Include the key in the `X-API-Key` header on all authenticated requests:
+
+```bash
+curl -H "X-API-Key: es_abc123..." https://eventschedule.com/api/schedules
+```
+
+### Key Details
+
+- **Expiration**: API keys expire after 1 year. The expiration date is returned in `api_key_expires_at`.
+- **One key per account**: Only one active API key per account. If a key already exists, `POST /api/login` returns a 409 error. Disable and re-enable API access in account settings to generate a new key.
+- **Two-factor authentication**: Accounts with 2FA enabled cannot generate API keys via the login endpoint. Generate the key from the web UI instead.
+- **Storage format**: Keys use a prefix for lookup and bcrypt hash for verification. Store the full key securely; it cannot be retrieved after creation.
+
+### Permissions
+
+- **Read operations** (GET requests): Available on all plans, including free.
+- **Write operations** (POST/PUT/DELETE): Require a Pro plan. New accounts get a trial period.
+
+---
+
+## API Reference
+
+**Base URL**: `https://eventschedule.com/api` (hosted) or `https://yourdomain.com/api` (selfhosted)
+
+All request and response bodies use JSON (`Content-Type: application/json`) unless otherwise noted. All timestamps are in UTC.
+
+---
+
+### Authentication Endpoints
+
+#### POST /register/send-code
+
+Send a 6-digit verification code to an email address. Required before registration in hosted mode only. Selfhosted instances do not require email verification.
+
+**Authentication**: None
+
+**Request body**:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| email | string | Yes | Email address to send the verification code to |
+
+**Example**:
+```bash
+curl -X POST https://eventschedule.com/api/register/send-code \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com"}'
+```
+
+**Success response** (200):
+```json
+{
+  "data": {
+    "message": "Verification code sent to user@example.com"
+  }
+}
+```
+
+**Error responses**:
+- `400` - Registration codes not required (selfhosted mode)
+- `422` - Validation error or email already registered
+- `429` - Too many verification code requests (limit: 5 per email per hour)
+
+---
+
+#### POST /register
+
+Create a new user account and receive an API key.
+
+**Authentication**: None
+
+**Request body**:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| name | string | Yes | Full name of the user (max 255 chars) |
+| email | string | Yes | Email address for the account (max 255 chars) |
+| password | string | Yes | Account password (min 8 characters) |
+| verification_code | string | Hosted only | 6-digit code from /register/send-code |
+| timezone | string | No | IANA timezone identifier (e.g., "America/New_York") |
+| language_code | string | No | Preferred language: en, es, de, fr, it, pt, he, nl, ar, et, ru |
+
+**Example**:
+```bash
+curl -X POST https://eventschedule.com/api/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Jane Smith",
+    "email": "user@example.com",
+    "password": "securepassword123",
+    "verification_code": "123456",
+    "timezone": "America/New_York"
+  }'
+```
+
+**Success response** (201):
+```json
+{
+  "data": {
+    "api_key": "es_abc123...",
+    "api_key_expires_at": "2027-02-16T00:00:00Z",
+    "user": {
+      "id": "xR3kL9",
+      "name": "Jane Smith",
+      "email": "user@example.com"
+    }
+  }
+}
+```
+
+**Error responses**:
+- `403` - Registration is closed (selfhosted mode with existing users)
+- `422` - Validation error (invalid email, password too short, etc.)
+- `429` - Too many registration attempts (limit: 3 per IP per hour)
+
+**Notes**:
+- In selfhosted mode, registration is only allowed when no users exist yet (first user setup).
+- In hosted mode, the `verification_code` field is required.
+
+---
+
+#### POST /login
+
+Authenticate with email and password to receive a new API key.
+
+**Authentication**: None
+
+**Request body**:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| email | string | Yes | Account email address |
+| password | string | Yes | Account password |
+
+**Example**:
+```bash
+curl -X POST https://eventschedule.com/api/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "securepassword123"
+  }'
+```
+
+**Success response** (200):
+```json
+{
+  "data": {
+    "api_key": "es_abc123...",
+    "api_key_expires_at": "2027-02-16T00:00:00Z",
+    "user": {
+      "id": "xR3kL9",
+      "name": "Jane Smith",
+      "email": "user@example.com"
+    }
+  }
+}
+```
+
+**Error responses**:
+- `401` - Invalid email or password
+- `403` - Account has two-factor authentication enabled (use web UI to generate API key)
+- `409` - An active API key already exists (disable and re-enable API access in account settings)
+- `422` - Validation error
+- `429` - Too many login attempts (limit: 5 per IP per 15 minutes)
+
+---
+
+### Schedule Endpoints
+
+#### GET /schedules
+
+List schedules owned or administered by the authenticated user.
+
+**Authentication**: Required
+
+**Query parameters**:
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| name | string | - | Filter by name (partial match) |
+| type | string | - | Filter by type: venue, talent, or curator |
+| page | integer | 1 | Page number |
+| per_page | integer | 100 | Results per page (max 500) |
+
+**Example**:
+```bash
+curl https://eventschedule.com/api/schedules \
+  -H "X-API-Key: es_abc123..."
+```
+
+**Success response** (200):
+```json
+{
+  "data": [
+    {
+      "id": "mK7pQ2",
+      "subdomain": "the-blue-note",
+      "url": "https://the-blue-note.eventschedule.com",
+      "type": "venue",
+      "name": "The Blue Note",
+      "email": "info@thebluenote.com",
+      "timezone": "America/New_York",
+      "created_at": "2026-02-16T12:00:00Z",
+      "groups": []
+    }
+  ],
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "last_page": 1,
+    "per_page": 100,
+    "to": 1,
+    "total": 1,
+    "path": "https://eventschedule.com/api/schedules"
+  }
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+
+---
+
+#### POST /schedules
+
+Create a new schedule.
+
+**Authentication**: Required
+
+**Request body**:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| name | string | Yes | Schedule name (max 255 chars) |
+| type | string | Yes | Schedule type: venue, talent, or curator |
+| email | string | No | Contact email (max 255 chars) |
+| description | string | No | Description (supports markdown) |
+| short_description | string | No | Short description (plain text, max 200 chars) |
+| timezone | string | No | IANA timezone identifier (e.g., "America/New_York") |
+| language_code | string | No | Language code: en, es, de, fr, it, pt, he, nl, ar, et, ru |
+| website | string | No | Website URL (max 255 chars) |
+| address1 | string | No | Street address, primarily for venue type (max 255 chars) |
+| city | string | No | City, primarily for venue type (max 255 chars) |
+| state | string | No | State or province, primarily for venue type (max 255 chars) |
+| postal_code | string | No | Postal/ZIP code, primarily for venue type (max 20 chars) |
+| country_code | string | No | Country code, primarily for venue type (max 10 chars) |
+
+**Example**:
+```bash
+curl -X POST https://eventschedule.com/api/schedules \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: es_abc123..." \
+  -d '{
+    "name": "The Blue Note",
+    "type": "venue",
+    "email": "info@thebluenote.com",
+    "timezone": "America/New_York"
+  }'
+```
+
+**Success response** (201):
+```json
+{
+  "data": {
+    "id": "mK7pQ2",
+    "subdomain": "the-blue-note",
+    "url": "https://the-blue-note.eventschedule.com",
+    "type": "venue",
+    "name": "The Blue Note",
+    "email": "info@thebluenote.com",
+    "timezone": "America/New_York",
+    "created_at": "2026-02-16T12:00:00Z",
+    "groups": []
+  }
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+- `422` - Validation error
+
+**Notes**:
+- The `subdomain` is automatically generated from the schedule name.
+- In hosted mode, new schedules receive a Pro trial period.
+
+---
+
+#### GET /schedules/{subdomain}
+
+Get details of a specific schedule.
+
+**Authentication**: Required (must be owner or admin)
+
+**Path parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| subdomain | string | The subdomain identifier of the schedule |
+
+**Example**:
+```bash
+curl https://eventschedule.com/api/schedules/the-blue-note \
+  -H "X-API-Key: es_abc123..."
+```
+
+**Success response** (200):
+```json
+{
+  "data": {
+    "id": "mK7pQ2",
+    "subdomain": "the-blue-note",
+    "url": "https://the-blue-note.eventschedule.com",
+    "type": "venue",
+    "name": "The Blue Note",
+    "email": "info@thebluenote.com",
+    "phone": null,
+    "website": null,
+    "description": null,
+    "short_description": null,
+    "timezone": "America/New_York",
+    "language_code": "en",
+    "created_at": "2026-02-16T12:00:00Z",
+    "address1": "131 W 3rd St",
+    "city": "New York",
+    "state": "NY",
+    "postal_code": "10012",
+    "country_code": "US",
+    "groups": []
+  }
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+- `404` - Schedule not found
+
+---
+
+#### PUT /schedules/{subdomain}
+
+Update an existing schedule. Only the fields provided will be updated.
+
+**Authentication**: Required (must be owner or admin)
+**Plan**: Pro required
+
+**Path parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| subdomain | string | The subdomain identifier of the schedule |
+
+**Request body**: Same fields as POST /schedules (except `type`, which cannot be changed). All fields are optional.
+
+**Example**:
+```bash
+curl -X PUT https://eventschedule.com/api/schedules/the-blue-note \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: es_abc123..." \
+  -d '{
+    "description": "New York City'\''s premier jazz club since 1981.",
+    "website": "https://thebluenote.com"
+  }'
+```
+
+**Success response** (200):
+```json
+{
+  "data": {
+    "id": "mK7pQ2",
+    "subdomain": "the-blue-note",
+    "url": "https://the-blue-note.eventschedule.com",
+    "type": "venue",
+    "name": "The Blue Note",
+    "description": "New York City's premier jazz club since 1981.",
+    "website": "https://thebluenote.com",
+    "...": "..."
+  }
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+- `403` - Not a Pro account
+- `404` - Schedule not found
+- `422` - Validation error
+
+---
+
+#### DELETE /schedules/{subdomain}
+
+Soft-delete a schedule. The schedule will no longer appear in listings or be accessible.
+
+**Authentication**: Required (owner only)
+
+**Path parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| subdomain | string | The subdomain identifier of the schedule |
+
+**Example**:
+```bash
+curl -X DELETE https://eventschedule.com/api/schedules/the-blue-note \
+  -H "X-API-Key: es_abc123..."
+```
+
+**Success response** (200):
+```json
+{
+  "data": {
+    "message": "Schedule deleted successfully"
+  }
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+- `403` - Only the schedule owner can delete it
+- `404` - Schedule not found
+
+---
+
+### Sub-schedule Endpoints
+
+Sub-schedules allow you to organize events into color-coded categories within a schedule (e.g., "Jazz", "Blues", "R&B" within a venue schedule).
+
+#### GET /schedules/{subdomain}/groups
+
+List all sub-schedules for a schedule.
+
+**Authentication**: Required (must be owner or admin)
+
+**Path parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| subdomain | string | The subdomain identifier of the parent schedule |
+
+**Example**:
+```bash
+curl https://eventschedule.com/api/schedules/the-blue-note/groups \
+  -H "X-API-Key: es_abc123..."
+```
+
+**Success response** (200):
+```json
+{
+  "data": [
+    {
+      "id": "gP5rT7",
+      "name": "Jazz",
+      "slug": "jazz",
+      "color": "#4E81FA"
+    },
+    {
+      "id": "gQ8sU2",
+      "name": "Blues",
+      "slug": "blues",
+      "color": "#E53E3E"
+    }
+  ]
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+- `404` - Schedule not found
+
+---
+
+#### POST /schedules/{subdomain}/groups
+
+Create a new sub-schedule within a schedule.
+
+**Authentication**: Required (must be owner or admin)
+**Plan**: Pro required
+
+**Path parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| subdomain | string | The subdomain identifier of the parent schedule |
+
+**Request body**:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| name | string | Yes | Sub-schedule name (max 255 chars) |
+| color | string | No | Color hex code (e.g., "#4E81FA", max 50 chars) |
+
+**Example**:
+```bash
+curl -X POST https://eventschedule.com/api/schedules/the-blue-note/groups \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: es_abc123..." \
+  -d '{
+    "name": "Jazz",
+    "color": "#4E81FA"
+  }'
+```
+
+**Success response** (201):
+```json
+{
+  "data": {
+    "id": "gP5rT7",
+    "name": "Jazz",
+    "slug": "jazz",
+    "color": "#4E81FA"
+  }
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+- `403` - Not a Pro account
+- `404` - Schedule not found
+- `422` - Validation error
+
+---
+
+#### PUT /schedules/{subdomain}/groups/{group_id}
+
+Update an existing sub-schedule. Only the fields provided will be updated.
+
+**Authentication**: Required (must be owner or admin)
+**Plan**: Pro required
+
+**Path parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| subdomain | string | The subdomain identifier of the parent schedule |
+| group_id | string | The encoded ID of the sub-schedule |
+
+**Request body**:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| name | string | No | Sub-schedule name (max 255 chars) |
+| color | string | No | Color hex code (max 50 chars) |
+
+**Example**:
+```bash
+curl -X PUT https://eventschedule.com/api/schedules/the-blue-note/groups/gP5rT7 \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: es_abc123..." \
+  -d '{
+    "color": "#2563EB"
+  }'
+```
+
+**Success response** (200):
+```json
+{
+  "data": {
+    "id": "gP5rT7",
+    "name": "Jazz",
+    "slug": "jazz",
+    "color": "#2563EB"
+  }
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+- `403` - Not a Pro account
+- `404` - Schedule or sub-schedule not found
+- `422` - Validation error
+
+---
+
+#### DELETE /schedules/{subdomain}/groups/{group_id}
+
+Permanently delete a sub-schedule.
+
+**Authentication**: Required (must be owner or admin)
+**Plan**: Pro required
+
+**Path parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| subdomain | string | The subdomain identifier of the parent schedule |
+| group_id | string | The encoded ID of the sub-schedule |
+
+**Example**:
+```bash
+curl -X DELETE https://eventschedule.com/api/schedules/the-blue-note/groups/gP5rT7 \
+  -H "X-API-Key: es_abc123..."
+```
+
+**Success response** (200):
+```json
+{
+  "data": {
+    "message": "Sub-schedule deleted successfully"
+  }
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+- `403` - Not a Pro account
+- `404` - Schedule or sub-schedule not found
+
+---
+
+### Event Endpoints
+
+#### GET /events
+
+List events owned by the authenticated user. Can be filtered by schedule and date range.
+
+**Authentication**: Required
+
+**Query parameters**:
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| subdomain | string | - | Filter events by schedule subdomain |
+| starts_after | date | - | Filter events starting on or after this date (Y-m-d) |
+| starts_before | date | - | Filter events starting on or before this date (Y-m-d) |
+| page | integer | 1 | Page number |
+| per_page | integer | 100 | Results per page (max 500) |
+
+**Example**:
+```bash
+curl "https://eventschedule.com/api/events?subdomain=the-blue-note&starts_after=2026-03-01" \
+  -H "X-API-Key: es_abc123..."
+```
+
+**Success response** (200):
+```json
+{
+  "data": [
+    {
+      "id": "vN4wR8",
+      "url": "https://the-blue-note.eventschedule.com/e/vN4wR8/jazz-night",
+      "name": "Jazz Night with Miles Davis Tribute",
+      "starts_at": "2026-03-15 20:00:00",
+      "duration": 3,
+      "category_id": 4,
+      "schedule_type": "single",
+      "tickets_enabled": true,
+      "tickets": [
+        {
+          "id": "tK2mP5",
+          "type": "General Admission",
+          "price": 25.00,
+          "quantity": 100,
+          "description": null
+        }
+      ],
+      "members": {},
+      "event_parts": [],
+      "created_at": "2026-02-16T12:05:00Z",
+      "updated_at": "2026-02-16T12:05:00Z"
+    }
+  ],
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "last_page": 1,
+    "per_page": 100,
+    "to": 1,
+    "total": 1,
+    "path": "https://eventschedule.com/api/events"
+  }
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+
+---
+
+#### GET /events/{id}
+
+Get details of a specific event.
+
+**Authentication**: Required (must own the event or be owner/admin on an associated schedule)
+
+**Path parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | string | The encoded ID of the event |
+
+**Example**:
+```bash
+curl https://eventschedule.com/api/events/vN4wR8 \
+  -H "X-API-Key: es_abc123..."
+```
+
+**Success response** (200):
+```json
+{
+  "data": {
+    "id": "vN4wR8",
+    "url": "https://the-blue-note.eventschedule.com/e/vN4wR8/jazz-night-with-miles-davis-tribute",
+    "name": "Jazz Night with Miles Davis Tribute",
+    "short_description": "Classic jazz tribute night",
+    "description": "An evening of classic jazz featuring a world-class tribute to Miles Davis.",
+    "starts_at": "2026-03-15 20:00:00",
+    "duration": 3,
+    "category_id": 4,
+    "event_url": null,
+    "registration_url": null,
+    "venue_id": "mK7pQ2",
+    "flyer_image_url": null,
+    "schedule_type": "single",
+    "recurring_frequency": null,
+    "recurring_interval": null,
+    "days_of_week": null,
+    "recurring_end_type": null,
+    "recurring_end_value": null,
+    "tickets_enabled": true,
+    "tickets": [
+      {
+        "id": "tK2mP5",
+        "type": "General Admission",
+        "price": 25.00,
+        "quantity": 100,
+        "description": null
+      },
+      {
+        "id": "tL8nQ3",
+        "type": "VIP",
+        "price": 75.00,
+        "quantity": 20,
+        "description": "Front row seating with complimentary drinks"
+      }
+    ],
+    "members": {},
+    "event_parts": [],
+    "created_at": "2026-02-16T12:05:00Z",
+    "updated_at": "2026-02-16T12:05:00Z"
+  }
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+- `403` - Unauthorized to view this event
+- `404` - Event not found
+
+---
+
+#### POST /events/{subdomain}
+
+Create a new event under a schedule.
+
+**Authentication**: Required (must be owner or admin of the schedule)
+**Plan**: Pro required
+
+**Path parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| subdomain | string | The subdomain of the schedule to create the event under |
+
+**Request body**:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| name | string | Yes | Event name (max 255 chars) |
+| starts_at | string | Yes | Start date/time in UTC (Y-m-d H:i:s format) |
+| duration | number | No | Duration in hours (0 to 24) |
+| description | string | No | Full description, supports markdown (max 10000 chars) |
+| short_description | string | No | Brief description (max 500 chars) |
+| event_url | string | No | External URL for the event (max 255 chars) |
+| event_password | string | No | Password to protect the event page (max 255 chars) |
+| registration_url | string | No | External registration URL (max 255 chars) |
+| category_id | integer | No | Category ID from GET /categories |
+| category | string | No | Category name (alternative to category_id, max 255 chars) |
+| tickets_enabled | boolean | No | Enable ticket sales |
+| ticket_currency_code | string | No | 3-letter ISO currency code (e.g., "USD") |
+| payment_method | string | No | Payment method: stripe, invoiceninja, payment_url, or manual |
+| payment_instructions | string | No | Instructions for manual payment (max 5000 chars) |
+| schedule_type | string | No | "single" (default) or "recurring" |
+| recurring_frequency | string | No | Frequency when recurring: daily, weekly, every_n_weeks, monthly_date, monthly_weekday, yearly |
+| recurring_interval | integer | No | Interval for every_n_weeks (min 2) |
+| recurring_end_type | string | No | How recurrence ends: never, on_date, after_events |
+| recurring_end_value | string | No | End date (Y-m-d) or occurrence count |
+| days_of_week | string | No | 7-char string for weekly/every_n_weeks (e.g., "0101010") |
+| venue_id | string | No | Encoded ID of a venue schedule |
+| venue_name | string | No | Venue name to look up an existing venue schedule |
+| venue_address1 | string | No | Venue address, used with venue_name for lookup |
+| members | array | No | Array of {name, email} objects to associate talent schedules |
+| schedule | string | No | Sub-schedule slug to assign event to |
+| tickets | array | No | Array of ticket type objects (see below) |
+| event_parts | array | No | Array of event part objects (see below) |
+
+**Ticket object**:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| type | string | Yes | Ticket type name (e.g., "General Admission", max 255 chars) |
+| price | number | No | Ticket price (0 for free) |
+| quantity | integer | No | Available quantity (0 or omit for unlimited) |
+| description | string | No | Ticket description (max 1000 chars) |
+
+**Event part object**:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| name | string | Yes | Part name (max 255 chars) |
+| description | string | No | Part description (max 1000 chars) |
+| start_time | string | No | Start time for this part |
+| end_time | string | No | End time for this part |
+
+**Example**:
+```bash
+curl -X POST https://eventschedule.com/api/events/the-blue-note \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: es_abc123..." \
+  -d '{
+    "name": "Open Mic Night",
+    "starts_at": "2026-04-01 19:00:00",
+    "duration": 3,
+    "description": "Bring your talent to our weekly open mic!",
+    "category": "Concerts",
+    "schedule_type": "recurring",
+    "recurring_frequency": "weekly",
+    "days_of_week": "0000010",
+    "recurring_end_type": "never"
+  }'
+```
+
+**Success response** (201):
+```json
+{
+  "data": {
+    "id": "eW2xY6",
+    "url": "https://the-blue-note.eventschedule.com/e/eW2xY6/open-mic-night",
+    "name": "Open Mic Night",
+    "starts_at": "2026-04-01 19:00:00",
+    "duration": 3,
+    "schedule_type": "recurring",
+    "recurring_frequency": "weekly",
+    "days_of_week": "0000010",
+    "recurring_end_type": "never",
+    "recurring_end_value": null,
+    "tickets_enabled": false,
+    "members": {},
+    "event_parts": [],
+    "created_at": "2026-02-16T12:15:00Z",
+    "updated_at": "2026-02-16T12:15:00Z"
+  },
+  "meta": {
+    "message": "Event created successfully"
+  }
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+- `403` - Unauthorized or not a Pro account
+- `404` - Schedule not found
+- `422` - Validation error
+
+**Notes**:
+- For venue schedules, the venue is automatically set to the schedule itself.
+- For talent schedules, the authenticated user's schedule is automatically added as a member.
+- Use `category` (name) or `category_id` (numeric ID) to set the event category. If both are provided, `category_id` takes precedence.
+
+---
+
+#### PUT /events/{id}
+
+Update an existing event. Supports partial updates; only the fields provided will be changed. Existing tickets, event parts, and recurring configuration are preserved if not explicitly provided.
+
+**Authentication**: Required (must have permission to edit)
+**Plan**: Pro required
+
+**Path parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | string | The encoded ID of the event |
+
+**Request body**: Same fields as POST /events/{subdomain}. All fields are optional.
+
+**Example**:
+```bash
+curl -X PUT https://eventschedule.com/api/events/vN4wR8 \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: es_abc123..." \
+  -d '{
+    "name": "Jazz Night - Miles Davis Special",
+    "duration": 4
+  }'
+```
+
+**Success response** (200):
+```json
+{
+  "data": {
+    "id": "vN4wR8",
+    "name": "Jazz Night - Miles Davis Special",
+    "duration": 4,
+    "...": "..."
+  },
+  "meta": {
+    "message": "Event updated successfully"
+  }
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+- `403` - Unauthorized or not a Pro account
+- `404` - Event not found
+- `422` - Validation error
+
+---
+
+#### DELETE /events/{id}
+
+Permanently delete an event.
+
+**Authentication**: Required (must have permission to edit)
+
+**Path parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | string | The encoded ID of the event |
+
+**Example**:
+```bash
+curl -X DELETE https://eventschedule.com/api/events/vN4wR8 \
+  -H "X-API-Key: es_abc123..."
+```
+
+**Success response** (200):
+```json
+{
+  "data": {
+    "message": "Event deleted successfully"
+  }
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+- `403` - Unauthorized to delete this event
+- `404` - Event not found
+
+---
+
+#### POST /events/flyer/{event_id}
+
+Upload a flyer image for an event. Any existing flyer image will be replaced.
+
+**Authentication**: Required (must own the event)
+**Plan**: Pro required
+**Content-Type**: multipart/form-data
+
+**Path parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| event_id | string | The encoded ID of the event |
+
+**Request body**:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| flyer_image | file | Yes | The flyer image file to upload |
+
+**Example**:
+```bash
+curl -X POST https://eventschedule.com/api/events/flyer/vN4wR8 \
+  -H "X-API-Key: es_abc123..." \
+  -F "flyer_image=@/path/to/flyer.jpg"
+```
+
+**Success response** (200):
+```json
+{
+  "data": {
+    "id": "vN4wR8",
+    "flyer_image_url": "https://eventschedule.com/storage/flyers/abc123.jpg",
+    "...": "..."
+  },
+  "meta": {
+    "message": "Flyer uploaded successfully"
+  }
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+- `403` - Unauthorized or not a Pro account
+- `404` - Event not found
+
+---
+
+### Category Endpoints
+
+#### GET /categories
+
+List all available event categories.
+
+**Authentication**: Required
+
+**Example**:
+```bash
+curl https://eventschedule.com/api/categories \
+  -H "X-API-Key: es_abc123..."
+```
+
+**Success response** (200):
+```json
+{
+  "data": [
+    {"id": 1, "name": "Art & Culture"},
+    {"id": 2, "name": "Business Networking"},
+    {"id": 3, "name": "Community"},
+    {"id": 4, "name": "Concerts"},
+    {"id": 5, "name": "Education"},
+    {"id": 6, "name": "Food & Drink"},
+    {"id": 7, "name": "Health & Fitness"},
+    {"id": 8, "name": "Parties & Festivals"},
+    {"id": 9, "name": "Personal Growth"},
+    {"id": 10, "name": "Sports"},
+    {"id": 11, "name": "Spirituality"},
+    {"id": 12, "name": "Tech"}
+  ]
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+
+---
+
+### Sales Endpoints
+
+#### POST /sales
+
+Create a ticket sale for an event. The event must have tickets enabled and belong to a Pro schedule.
+
+**Authentication**: Required
+
+**Request body**:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| event_id | string | Yes | Encoded ID of the event |
+| name | string | Yes | Buyer name (max 255 chars) |
+| email | string | Yes | Buyer email (max 255 chars) |
+| tickets | object | Yes | Map of ticket identifier to quantity (see below) |
+| event_date | date | No | Specific date for recurring events (Y-m-d). Defaults to event start date. |
+
+The `tickets` field is an object where keys are either ticket type names (e.g., "General Admission") or encoded ticket IDs, and values are the quantity to purchase.
+
+**Example using ticket names**:
+```bash
+curl -X POST https://eventschedule.com/api/sales \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: es_abc123..." \
+  -d '{
+    "event_id": "vN4wR8",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "tickets": {
+      "General Admission": 2,
+      "VIP": 1
+    }
+  }'
+```
+
+**Example using ticket IDs**:
+```bash
+curl -X POST https://eventschedule.com/api/sales \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: es_abc123..." \
+  -d '{
+    "event_id": "vN4wR8",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "tickets": {
+      "tK2mP5": 2,
+      "tL8nQ3": 1
+    }
+  }'
+```
+
+**Example for recurring event (specific date)**:
+```bash
+curl -X POST https://eventschedule.com/api/sales \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: es_abc123..." \
+  -d '{
+    "event_id": "eW2xY6",
+    "name": "Jane Smith",
+    "email": "jane@example.com",
+    "tickets": {
+      "General Admission": 1
+    },
+    "event_date": "2026-04-10"
+  }'
+```
+
+**Success response** (201):
+```json
+{
+  "data": {
+    "id": "sA9bC1",
+    "event_id": "vN4wR8",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "event_date": "2026-03-15",
+    "status": "unpaid",
+    "payment_method": "stripe",
+    "payment_amount": 125.00,
+    "transaction_reference": null,
+    "secret": "abc123xyz789",
+    "tickets": [
+      {
+        "ticket_id": "tK2mP5",
+        "quantity": 2,
+        "price": 25.00,
+        "type": "General Admission"
+      },
+      {
+        "ticket_id": "tL8nQ3",
+        "quantity": 1,
+        "price": 75.00,
+        "type": "VIP"
+      }
+    ],
+    "total_quantity": 3,
+    "created_at": "2026-02-16T12:10:00Z",
+    "updated_at": "2026-02-16T12:10:00Z"
+  },
+  "meta": {
+    "message": "Sale created successfully"
+  }
+}
+```
+
+**Error responses**:
+- `401` - Missing or invalid API key
+- `403` - Unauthorized
+- `422` - Validation error or tickets not available
+
+**Notes**:
+- Sales for free tickets (total = $0) are automatically marked as "paid".
+- Sales for paid tickets are created with "unpaid" status and must be settled through the configured payment method.
+- The `secret` field is a unique key that can be used to access the ticket/QR code.
+
+---
+
+## Data Models
+
+### Schedule Object
+
+| Field | Type | Nullable | Description |
+|-------|------|----------|-------------|
+| id | string | No | Encoded schedule ID |
+| subdomain | string | No | Unique subdomain identifier |
+| url | string | No | Public URL of the schedule |
+| type | string | No | Schedule type: venue, talent, or curator |
+| name | string | No | Display name |
+| email | string | Yes | Contact email |
+| phone | string | Yes | Contact phone number |
+| website | string | Yes | Website URL |
+| description | string | Yes | Description (may contain markdown) |
+| short_description | string | Yes | Short description (plain text, max 200 chars) |
+| timezone | string | Yes | IANA timezone identifier |
+| language_code | string | Yes | Language code |
+| created_at | datetime | Yes | ISO 8601 creation timestamp |
+| address1 | string | Yes | Street address (venue type) |
+| city | string | Yes | City (venue type) |
+| state | string | Yes | State or province (venue type) |
+| postal_code | string | Yes | Postal/ZIP code (venue type) |
+| country_code | string | Yes | Country code (venue type) |
+| groups | array | No | Sub-schedules belonging to this schedule |
+
+### Event Object
+
+| Field | Type | Nullable | Description |
+|-------|------|----------|-------------|
+| id | string | No | Encoded event ID |
+| url | string | No | Public URL of the event |
+| name | string | No | Event name |
+| short_description | string | Yes | Brief event description |
+| description | string | Yes | Full description (may contain markdown) |
+| starts_at | datetime | No | Start date/time in UTC (Y-m-d H:i:s) |
+| duration | number | Yes | Duration in hours |
+| category_id | integer | Yes | Category ID |
+| event_url | string | Yes | External URL |
+| registration_url | string | Yes | External registration URL |
+| venue_id | string | Yes | Encoded ID of associated venue schedule |
+| flyer_image_url | string | Yes | URL of the flyer image |
+| schedule_type | string | No | "single" or "recurring" |
+| recurring_frequency | string | Yes | Recurrence frequency (recurring events only) |
+| recurring_interval | integer | Yes | Interval for every_n_weeks |
+| days_of_week | string | Yes | 7-char day pattern (recurring events only) |
+| recurring_end_type | string | Yes | How recurrence ends |
+| recurring_end_value | string | Yes | End date or occurrence count |
+| tickets_enabled | boolean | No | Whether ticket sales are enabled |
+| tickets | array | No | Ticket types (when tickets enabled) |
+| members | object | No | Map of member schedule IDs to member details |
+| event_parts | array | No | Event sub-sections/segments |
+| created_at | datetime | Yes | ISO 8601 creation timestamp |
+| updated_at | datetime | Yes | ISO 8601 last update timestamp |
+
+### Ticket Object
+
+| Field | Type | Nullable | Description |
+|-------|------|----------|-------------|
+| id | string | No | Encoded ticket ID |
+| type | string | No | Ticket type name |
+| price | number | No | Ticket price |
+| quantity | integer | Yes | Available quantity (null = unlimited) |
+| description | string | Yes | Ticket description |
+
+### EventPart Object
+
+| Field | Type | Nullable | Description |
+|-------|------|----------|-------------|
+| id | string | No | Encoded part ID |
+| name | string | No | Part name |
+| description | string | Yes | Part description |
+| start_time | string | Yes | Start time |
+| end_time | string | Yes | End time |
+
+### Sale Object
+
+| Field | Type | Nullable | Description |
+|-------|------|----------|-------------|
+| id | string | No | Encoded sale ID |
+| event_id | string | No | Encoded event ID |
+| name | string | No | Buyer name |
+| email | string | No | Buyer email |
+| event_date | date | No | Date of the event occurrence |
+| status | string | No | Payment status: "unpaid" or "paid" |
+| payment_method | string | Yes | Payment method used |
+| payment_amount | number | No | Total payment amount |
+| transaction_reference | string | Yes | External transaction reference |
+| secret | string | No | Secret key for ticket access (owner only) |
+| tickets | array | No | Tickets in this sale (ticket_id, quantity, price, type) |
+| total_quantity | integer | No | Total tickets in sale |
+| created_at | datetime | Yes | ISO 8601 creation timestamp |
+| updated_at | datetime | Yes | ISO 8601 last update timestamp |
+
+### Sub-schedule (Group) Object
+
+| Field | Type | Nullable | Description |
+|-------|------|----------|-------------|
+| id | string | No | Encoded sub-schedule ID |
+| name | string | No | Sub-schedule name |
+| slug | string | No | URL-friendly slug |
+| color | string | Yes | Color hex code |
+
+### Category Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | integer | Category ID |
+| name | string | Category name |
+
+### Pagination Object
+
+Included in `meta` for paginated responses.
+
+| Field | Type | Nullable | Description |
+|-------|------|----------|-------------|
+| current_page | integer | No | Current page number |
+| from | integer | Yes | First item number on this page |
+| last_page | integer | No | Last page number |
+| per_page | integer | No | Items per page |
+| to | integer | Yes | Last item number on this page |
+| total | integer | No | Total number of items |
+| path | string | No | Base URL for pagination |
+
+### Error Object
+
+| Field | Type | Nullable | Description |
+|-------|------|----------|-------------|
+| error | string | No | Error message |
+| errors | object | Yes | Field-level validation errors (field name to array of messages) |
+
+---
+
+## Rate Limits
+
+| Endpoint Type | Limit | Window |
+|--------------|-------|--------|
+| GET requests | 300 requests | Per minute |
+| POST/PUT/DELETE requests | 30 requests | Per minute |
+| Registration (POST /register) | 3 attempts | Per IP per hour |
+| Login (POST /login) | 5 attempts | Per IP per 15 minutes |
+| Verification codes (POST /register/send-code) | 5 codes | Per email per hour |
+
+When a rate limit is exceeded, the API returns a `429 Too Many Requests` response.
+
+---
+
+## Error Handling
+
+All errors follow a consistent format:
+
+### Simple error:
+```json
+{
+  "error": "Schedule not found"
+}
+```
+
+### Validation error with field details:
+```json
+{
+  "error": "The given data was invalid.",
+  "errors": {
+    "name": ["The name field is required."],
+    "email": ["The email has already been taken."],
+    "password": ["The password must be at least 8 characters."]
+  }
+}
+```
+
+### HTTP Status Codes
+
+| Code | Meaning |
+|------|---------|
+| 200 | Success |
+| 201 | Created (new resource) |
+| 400 | Bad request (e.g., feature not available in current mode) |
+| 401 | Missing or invalid API key |
+| 403 | Forbidden (insufficient permissions, not Pro, 2FA restriction) |
+| 404 | Resource not found |
+| 409 | Conflict (e.g., API key already exists) |
+| 422 | Validation error |
+| 429 | Rate limit exceeded |
+| 500 | Server error |
+
+---
+
+## Recurring Events
+
+Events can be configured to recur on a schedule. Set `schedule_type` to `"recurring"` and provide the recurrence configuration.
+
+### Frequency Types
+
+| Frequency | Description | Example |
+|-----------|-------------|---------|
+| daily | Every day | Daily standup meeting |
+| weekly | Every week on specific days | Every Tuesday and Thursday |
+| every_n_weeks | Every N weeks on specific days | Every 2 weeks on Monday |
+| monthly_date | Same date each month | 15th of every month |
+| monthly_weekday | Same weekday position each month | Third Thursday of every month |
+| yearly | Same date each year | Annual gala on June 1st |
+
+### days_of_week Format
+
+A 7-character string where each position represents a day of the week, starting with Sunday. `1` means the event recurs on that day, `0` means it does not.
+
+```
+Position: 0123456
+Days:     SMTWTFS
+
+Examples:
+"0100000" = Monday only
+"0101010" = Monday, Wednesday, Friday
+"0000001" = Saturday only
+"1000001" = Sunday and Saturday (weekends)
+"0111110" = Monday through Friday (weekdays)
+```
+
+Only used with `weekly` and `every_n_weeks` frequencies.
+
+### End Conditions
+
+| End Type | Description | recurring_end_value |
+|----------|-------------|---------------------|
+| never | Recurs indefinitely | Not used |
+| on_date | Stops after a specific date | Date in Y-m-d format (e.g., "2026-12-31") |
+| after_events | Stops after N occurrences | Number as string (e.g., "10") |
+
+### Example: Biweekly Event
+
+```bash
+curl -X POST https://eventschedule.com/api/events/the-blue-note \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: es_abc123..." \
+  -d '{
+    "name": "Biweekly Jazz Jam",
+    "starts_at": "2026-03-01 19:00:00",
+    "duration": 3,
+    "schedule_type": "recurring",
+    "recurring_frequency": "every_n_weeks",
+    "recurring_interval": 2,
+    "days_of_week": "0000010",
+    "recurring_end_type": "after_events",
+    "recurring_end_value": "12"
+  }'
+```
+
+### Ticket Sales for Recurring Events
+
+When selling tickets for a recurring event, use the `event_date` field in the sale to specify which occurrence the tickets are for:
+
+```bash
+curl -X POST https://eventschedule.com/api/sales \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: es_abc123..." \
+  -d '{
+    "event_id": "eW2xY6",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "tickets": {"General Admission": 2},
+    "event_date": "2026-03-15"
+  }'
+```
+
+---
+
+## Agent Workflows
+
+Event Schedule provides pre-defined workflows in the agents.json file for AI agents to follow. These are multi-step sequences that chain API calls together.
+
+### register_and_setup
+
+Register a new account, create a schedule, and add your first event.
+
+**Steps**:
+1. `send_verification_code` - Send email verification (hosted mode only, skip for selfhosted)
+2. `register` - Create account, receive API key
+3. `create_schedule` - Create a schedule using the API key from step 2
+4. `create_event` - Create the first event under the schedule from step 3
+
+### create_event_with_tickets
+
+Create an event with ticket types and optionally upload a flyer. Requires an existing schedule and API key.
+
+**Steps**:
+1. `create_event` - Create event with `tickets_enabled: true`, currency, payment method, and ticket array
+2. `upload_flyer` - Optionally upload a flyer image using the event ID from step 1
+
+### sell_tickets
+
+Find an event with tickets and create a sale for a buyer.
+
+**Steps**:
+1. `list_events` - List events filtered by subdomain to find one with tickets
+2. `create_sale` - Create a ticket sale using the event ID from step 1
+
+### manage_schedule
+
+List, view, update, or delete schedules.
+
+**Steps**:
+1. `list_schedules` - List all schedules owned/administered by the user
+2. `show_schedule` - View details of a specific schedule
+3. `update_schedule` - Update schedule fields
+4. `delete_schedule` - Permanently delete a schedule (owner only)
+
+---
+
+## Features
+
+### Ticketing
+
+Event Schedule provides a complete ticketing system with zero platform fees.
+
+- **Multiple ticket types**: Create different tiers (General Admission, VIP, etc.) with different prices and quantities.
+- **Unlimited or limited quantity**: Set a specific number of tickets available, or leave unlimited.
+- **Free tickets**: Set price to 0 for free events with RSVP tracking.
+- **QR code tickets**: Each sale generates a unique QR code that can be scanned at the door.
+- **Check-in**: Scan QR codes or manually check in attendees from the admin portal.
+- **Reservations**: Tickets can be held as "unpaid" and settled later.
+- **Payment methods**: Stripe (hosted via Stripe Connect, selfhosted via direct integration), Invoice Ninja (B2B invoicing), custom payment URL, or manual payment with instructions.
+- **Currency support**: Any ISO 4217 currency code.
+- **Per-occurrence sales**: For recurring events, tickets are sold per individual occurrence date.
+
+### Calendar Sync
+
+Sync events bidirectionally with external calendars.
+
+- **Google Calendar**: Full OAuth 2.0 integration with bidirectional sync. Changes in Event Schedule push to Google Calendar and vice versa via webhooks. Supports multiple calendars per schedule.
+- **CalDAV**: Connect to any CalDAV-compatible calendar server for sync.
+- **iCal feed**: Each schedule provides an iCal (.ics) feed URL that can be subscribed to from any calendar application.
+
+### Analytics
+
+Privacy-first analytics built into the platform.
+
+- **Page views**: Track views per event and per schedule.
+- **Device breakdown**: See what devices and browsers visitors use.
+- **Traffic sources**: Understand where visitors come from (referrers, direct, social).
+- **Conversion tracking**: For ticketed events, track the funnel from page view to ticket purchase.
+- **No cookies**: Analytics are collected without cookies, respecting visitor privacy.
+
+### Newsletters
+
+Built-in email newsletter system for engaging your audience.
+
+- **Drag-and-drop builder**: Visual email builder for creating newsletters.
+- **Templates**: Pre-built templates for event announcements and updates.
+- **Subscriber management**: Manage subscriber lists with import/export.
+- **Segments**: Target specific subscriber groups.
+- **A/B testing**: Test subject lines and content variations.
+- **Tracking**: Open rates, click rates, and engagement metrics.
+- **Automatic event digests**: Auto-generate newsletter content from upcoming events.
+
+### Event Graphics
+
+Automatically generate promotional images for events.
+
+- **Auto-generated posters**: Event details are rendered into shareable graphic images.
+- **Multiple layouts**: Choose from different graphic styles and layouts.
+- **Schedule-wide graphics**: Generate a single graphic showing all upcoming events for a schedule.
+- **Social media ready**: Graphics are sized for sharing on social media platforms.
+
+### Sub-schedules
+
+Organize events into color-coded categories within a schedule.
+
+- **Color coding**: Assign colors to sub-schedules for visual distinction on the calendar.
+- **Filtering**: Visitors can filter the schedule view by sub-schedule.
+- **Separate URLs**: Each sub-schedule has its own URL for direct access.
+- **API management**: Create, update, and delete sub-schedules via the API.
+
+### Custom Fields
+
+Add custom data fields to events and ticket purchases.
+
+- **Five field types**: Text, number, date, dropdown (select), and checkbox.
+- **Event fields**: Add custom metadata to events (e.g., age restriction, dress code).
+- **Attendee fields**: Collect custom information from ticket buyers (e.g., dietary preferences, t-shirt size).
+- **Required or optional**: Configure whether fields must be filled in.
+
+### Fan Videos and Comments
+
+Allow fans and attendees to contribute content to events.
+
+- **YouTube video submissions**: Fans can submit YouTube video URLs to events.
+- **Comments**: Attendees can leave comments on events.
+- **Approval workflow**: All submissions go through an approval queue before appearing publicly.
+- **Moderation**: Event owners can approve, reject, or remove submissions.
+
+### Embedding
+
+Embed your schedule on any website with a single line of code.
+
+- **iframe embed**: Copy a single `<iframe>` tag to embed your full schedule on any website.
+- **Responsive**: The embed automatically adjusts to the container width.
+- **Themed**: The embed respects light and dark mode settings.
+
+### AI Features
+
+AI-powered tools for event management (powered by Google Gemini).
+
+- **Event parsing**: Paste unstructured text or upload a flyer image, and AI extracts structured event data (name, date, time, description, etc.).
+- **Auto-translation**: Events are automatically translated to all 11 supported languages.
+- **Import**: Bulk import events from text descriptions.
+
+### Recurring Events
+
+Create events that repeat on a schedule with six frequency patterns.
+
+- **Six patterns**: Daily, weekly, every N weeks, monthly by date, monthly by weekday, yearly.
+- **Flexible days**: For weekly events, choose which days of the week.
+- **End conditions**: Recur forever, until a specific date, or for a set number of occurrences.
+- **Per-occurrence ticketing**: Sell tickets separately for each occurrence of a recurring event.
+- **Individual editing**: Each occurrence can be viewed and managed independently.
+
+### Team Collaboration
+
+Work together with multiple users on a schedule.
+
+- **Multiple admins**: Invite other users as administrators of your schedule.
+- **Role-based access**: Owners have full control, admins can manage events and settings.
+- **Activity across schedules**: Users can own or admin multiple schedules.
+
+---
+
+## Pricing
+
+### Free Plan
+
+All core features are available for free:
+- Unlimited events
+- Unlimited schedules
+- Calendar sync
+- Event graphics
+- Analytics
+- API read access (GET requests)
+- iCal feed
+- Embedding
+
+### Pro Plan
+
+$5/month or $50/year. New accounts receive the first year free.
+
+Pro adds:
+- API write operations (POST/PUT/DELETE)
+- Custom domain support
+- Remove Event Schedule branding
+- Newsletters
+- Custom fields
+- Priority support
+
+### Zero Platform Fees
+
+Event Schedule charges no percentage-based fees on ticket sales. You only pay the standard payment processor fees (e.g., Stripe's 2.9% + $0.30 per transaction). This applies to both hosted and selfhosted deployments.
+
+---
+
+## Integrations
+
+### Stripe
+
+- **Hosted mode**: Uses Stripe Connect. Event Schedule acts as the platform, schedule owners connect their Stripe accounts to receive payments directly.
+- **Selfhosted mode**: Direct Stripe integration using your own Stripe API keys configured in .env.
+- **Automatic settlement**: Payments are processed and settled automatically.
+
+### Invoice Ninja
+
+- For B2B and invoicing use cases.
+- Configure Invoice Ninja API credentials in schedule settings.
+- Sales create invoices in Invoice Ninja that can be sent to buyers.
+
+### Google Calendar
+
+- **OAuth 2.0**: Secure authorization flow for connecting Google accounts.
+- **Bidirectional sync**: Events created/updated/deleted in Event Schedule sync to Google Calendar and vice versa.
+- **Webhook support**: Real-time updates via Google Calendar push notifications.
+- **Multiple calendars**: Sync with specific Google Calendar calendars.
+
+### CalDAV
+
+- Connect to any CalDAV-compatible server (Nextcloud, Radicale, etc.).
+- Sync events between Event Schedule and your CalDAV calendar.
+
+### Google Gemini
+
+- Powers AI event parsing from text and images.
+- Powers automatic translation of events to all supported languages.
+- Requires `GEMINI_API_KEY` in environment configuration.
+
+---
+
+## Localization
+
+Event Schedule supports 11 languages:
+
+| Code | Language | Direction |
+|------|----------|-----------|
+| en | English | LTR |
+| ar | Arabic | RTL |
+| de | German | LTR |
+| es | Spanish | LTR |
+| et | Estonian | LTR |
+| fr | French | LTR |
+| he | Hebrew | RTL |
+| it | Italian | LTR |
+| nl | Dutch | LTR |
+| pt | Portuguese | LTR |
+| ru | Russian | LTR |
+
+- **RTL support**: Full right-to-left layout support for Arabic and Hebrew.
+- **Auto-translation**: When a Gemini API key is configured, events are automatically translated to all supported languages.
+- **Schedule language**: Each schedule can set its primary language, which determines the default display language.
+- **User language**: Each user can set their preferred language.
+- **First day of week**: Configurable per schedule (Sunday or Monday start).
+
+---
+
+## Selfhosted Deployment
+
+### Requirements
+
+- PHP 8.1 or higher
+- MySQL or PostgreSQL database
+- Composer (PHP dependency manager)
+- Node.js and npm (for building frontend assets)
+- Web server (Apache or Nginx)
+
+### Installation Methods
+
+1. **Softaculous**: One-click install available on hosting panels with Softaculous.
+2. **Docker**: Docker image available for containerized deployment.
+3. **Manual**: Clone the repository and configure manually.
+
+### Manual Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/eventschedule/eventschedule.git
+cd eventschedule
+
+# Install PHP dependencies
+composer install --no-dev
+
+# Install and build frontend
+npm install
+npm run build
+
+# Configure environment
+cp .env.example .env
+php artisan key:generate
+
+# Set up database
+php artisan migrate
+php artisan storage:link
+
+# Set permissions
+chmod -R 775 storage bootstrap/cache
+```
+
+### Key Environment Variables
+
+```env
+# Application
+APP_URL=https://yourdomain.com
+IS_HOSTED=false
+
+# Database
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_DATABASE=eventschedule
+DB_USERNAME=root
+DB_PASSWORD=secret
+
+# Stripe (for payments)
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_PUBLISHABLE_KEY=pk_live_...
+
+# Google Calendar (optional)
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+
+# AI Features (optional)
+GEMINI_API_KEY=...
+
+# Error reporting (optional)
+REPORT_ERRORS=false
+```
+
+### Cron Job
+
+A cron job is required for scheduled tasks (releasing expired ticket reservations, syncing calendars, etc.):
+
+```
+* * * * * cd /path/to/eventschedule && php artisan schedule:run >> /dev/null 2>&1
+```
+
+### Differences from Hosted Mode
+
+| Feature | Hosted | Selfhosted |
+|---------|--------|------------|
+| Routing | Subdomains (venue.eventschedule.com) | Path-based (yourdomain.com/venue) |
+| Registration | Email verification required | First user only, no verification |
+| Payments | Stripe Connect | Direct Stripe or Invoice Ninja |
+| Custom domains | Pro feature | N/A (you control the domain) |
+| Updates | Automatic | Manual (git pull, migrate, build) |
+
+---
+
+## Event Categories
+
+The following categories are available for classifying events:
+
+| ID | Name |
+|----|------|
+| 1 | Art & Culture |
+| 2 | Business Networking |
+| 3 | Community |
+| 4 | Concerts |
+| 5 | Education |
+| 6 | Food & Drink |
+| 7 | Health & Fitness |
+| 8 | Parties & Festivals |
+| 9 | Personal Growth |
+| 10 | Sports |
+| 11 | Spirituality |
+| 12 | Tech |
+
+Use `category_id` (numeric) or `category` (name string) when creating or updating events.
+
+---
+
+## Links
+
+- [OpenAPI Spec](https://eventschedule.com/api/openapi.json) - OpenAPI 3.0 specification for client generation
+- [agents.json](https://eventschedule.com/.well-known/agents.json) - Agent workflow definitions
+- [API Documentation](https://eventschedule.com/docs/developer/api) - Interactive API docs
+- [Features](https://eventschedule.com/features) - Full feature overview
+- [Pricing](https://eventschedule.com/pricing) - Plans and pricing details
+- [For AI Agents](https://eventschedule.com/for-ai-agents) - AI agent integration guide
+- [Documentation](https://eventschedule.com/docs) - User guides
+- [Selfhost Guide](https://eventschedule.com/docs/selfhost/installation) - Self-hosting instructions
+- [Open Source](https://eventschedule.com/open-source) - Source code and contributions
+- [Blog](https://eventschedule.com/blog) - Platform updates

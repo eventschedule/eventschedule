@@ -6,6 +6,7 @@ Event Schedule supports three schedule types: **venue** (physical locations like
 
 ## API Documentation
 
+- [llms-full.txt](https://eventschedule.com/llms-full.txt): Complete self-contained documentation for LLMs (no link-following needed)
 - [API Reference](https://eventschedule.com/docs/developer/api): Full API documentation with examples for all endpoints
 - [OpenAPI Spec](https://eventschedule.com/api/openapi.json): OpenAPI 3.0 specification for client generation and tool integration
 - [agents.json](https://eventschedule.com/.well-known/agents.json): Agent workflow definitions for multi-step API tasks

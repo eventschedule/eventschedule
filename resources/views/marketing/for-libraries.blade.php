@@ -665,6 +665,51 @@
         </div>
     </section>
 
+    <!-- Key Features -->
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-20 border-t border-gray-200 dark:border-white/5">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Key features</h2>
+            <div class="space-y-3">
+                <x-feature-link-card
+                    name="Embed Calendar"
+                    description="Add your schedule to any website with one snippet"
+                    :url="marketing_url('/features/embed-calendar')"
+                    icon-color="blue"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                        </svg>
+                    </x-slot:icon>
+                </x-feature-link-card>
+                <x-feature-link-card
+                    name="Recurring Events"
+                    description="Set events to repeat weekly on chosen days"
+                    :url="marketing_url('/features/recurring-events')"
+                    icon-color="lime"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-5 h-5 text-lime-600 dark:text-lime-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </x-slot:icon>
+                </x-feature-link-card>
+                <x-feature-link-card
+                    name="Newsletters"
+                    description="Send event updates directly to followers' inboxes"
+                    :url="marketing_url('/features/newsletters')"
+                    icon-color="green"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-feature-link-card>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="relative bg-gradient-to-br from-sky-600 to-blue-700 py-24 overflow-hidden">
         <div class="absolute inset-0 grid-overlay"></div>

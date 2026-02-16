@@ -158,6 +158,7 @@
                     <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 text-sm border border-gray-200 dark:border-white/10">{{ $tag }}</span>
                 @endforeach
                 <a href="/llms.txt" class="inline-flex items-center px-3 py-1 rounded-full bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-sm border border-cyan-200 dark:border-cyan-500/20 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition-colors">llms.txt</a>
+                <a href="/llms-full.txt" class="inline-flex items-center px-3 py-1 rounded-full bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-sm border border-cyan-200 dark:border-cyan-500/20 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition-colors">llms-full.txt</a>
                 <a href="/.well-known/agents.json" class="inline-flex items-center px-3 py-1 rounded-full bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-sm border border-cyan-200 dark:border-cyan-500/20 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition-colors">agents.json</a>
             </div>
         </div>
@@ -548,6 +549,51 @@
                         <div class="text-xs font-mono text-gray-500 dark:text-gray-400 leading-relaxed">curl -X POST /api/events \<br>&nbsp;&nbsp;-d '{"name": "AI Meetup"}'</div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Features -->
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-20 border-t border-gray-200 dark:border-white/5">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Key features</h2>
+            <div class="space-y-3">
+                <x-feature-link-card
+                    name="AI-Powered Import"
+                    description="Paste text or images to create events instantly"
+                    :url="marketing_url('/features/ai')"
+                    icon-color="blue"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-feature-link-card>
+                <x-feature-link-card
+                    name="Analytics"
+                    description="Track page views, devices, and traffic sources"
+                    :url="marketing_url('/features/analytics')"
+                    icon-color="emerald"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-feature-link-card>
+                <x-feature-link-card
+                    name="Embed Calendar"
+                    description="Add your schedule to any website with one snippet"
+                    :url="marketing_url('/features/embed-calendar')"
+                    icon-color="blue"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                        </svg>
+                    </x-slot:icon>
+                </x-feature-link-card>
             </div>
         </div>
     </section>

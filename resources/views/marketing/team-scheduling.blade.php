@@ -440,46 +440,80 @@
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/features/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-3xl border border-sky-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
-                    <div class="flex flex-col lg:flex-row gap-8 items-center">
-                        <!-- Text content -->
-                        <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Online Events</h3>
-                            <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Host virtual events with any streaming platform. Easy toggle between in-person and online, with the link on every ticket.</p>
-                            <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
-                                Learn more
-                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        <!-- Mini mockup: Toggle switch with streaming URL field -->
-                        <div class="flex-shrink-0">
-                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
-                                <!-- Toggle switch -->
-                                <div class="flex items-center justify-between mb-4">
-                                    <span class="text-gray-600 dark:text-gray-300 text-xs">Online Event</span>
-                                    <div class="w-10 h-5 bg-sky-500 rounded-full relative">
-                                        <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow"></div>
+                <a href="{{ marketing_url('/features/online-events') }}" class="group block">
+                    <div class="h-full bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-3xl border border-sky-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                        <div class="flex flex-col lg:flex-row gap-8 items-center">
+                            <!-- Text content -->
+                            <div class="flex-1 text-center lg:text-left">
+                                <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Online Events</h3>
+                                <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Host virtual events with any streaming platform. Easy toggle between in-person and online, with the link on every ticket.</p>
+                                <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                    Learn more
+                                    <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                    </svg>
+                                </span>
+                            </div>
+
+                            <!-- Mini mockup: Toggle switch with streaming URL field -->
+                            <div class="flex-shrink-0">
+                                <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48">
+                                    <!-- Toggle switch -->
+                                    <div class="flex items-center justify-between mb-4">
+                                        <span class="text-gray-600 dark:text-gray-300 text-xs">Online Event</span>
+                                        <div class="w-10 h-5 bg-sky-500 rounded-full relative">
+                                            <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow"></div>
+                                        </div>
                                     </div>
-                                </div>
-                                <!-- URL field -->
-                                <div>
-                                    <div class="text-[10px] text-gray-500 mb-1">Streaming URL</div>
-                                    <div class="bg-sky-500/20 rounded-lg px-2 py-1.5 text-sky-300 text-xs border border-sky-400/30 flex items-center gap-1.5">
-                                        <svg aria-hidden="true" class="w-3 h-3 text-sky-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
-                                        </svg>
-                                        <span class="truncate">zoom.us/j/123...</span>
+                                    <!-- URL field -->
+                                    <div>
+                                        <div class="text-[10px] text-gray-500 mb-1">Streaming URL</div>
+                                        <div class="bg-sky-500/20 rounded-lg px-2 py-1.5 text-sky-300 text-xs border border-sky-400/30 flex items-center gap-1.5">
+                                            <svg aria-hidden="true" class="w-3 h-3 text-sky-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
+                                            </svg>
+                                            <span class="truncate">zoom.us/j/123...</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </a>
+
+                <!-- Popular with -->
+                <div class="h-full bg-white dark:bg-white/5 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/20 mb-6">
+                        <svg aria-hidden="true" class="w-6 h-6 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Popular with</h3>
+                    <div class="space-y-3">
+                        <a href="{{ marketing_url('/for-venues') }}" class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 hover:border-sky-300 dark:hover:border-sky-500/30 transition-all group/link">
+                            <span class="text-gray-900 dark:text-white font-medium">Venues</span>
+                            <svg aria-hidden="true" class="w-4 h-4 text-gray-400 group-hover/link:text-sky-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                        <a href="{{ marketing_url('/for-theaters') }}" class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 hover:border-sky-300 dark:hover:border-sky-500/30 transition-all group/link">
+                            <span class="text-gray-900 dark:text-white font-medium">Theaters</span>
+                            <svg aria-hidden="true" class="w-4 h-4 text-gray-400 group-hover/link:text-sky-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                        <a href="{{ marketing_url('/for-curators') }}" class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 hover:border-sky-300 dark:hover:border-sky-500/30 transition-all group/link">
+                            <span class="text-gray-900 dark:text-white font-medium">Curators</span>
+                            <svg aria-hidden="true" class="w-4 h-4 text-gray-400 group-hover/link:text-sky-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
                 </div>
-            </a>
+
+            </div>
         </div>
     </section>
 
