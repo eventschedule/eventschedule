@@ -604,7 +604,7 @@ class EventController extends Controller
 
         AuditService::log(AuditService::EVENT_ACCEPT, $user->id, 'Event', $event->id, null, null, $role->name);
 
-        return redirect('/'.$subdomain.'/requests')
+        return redirect('/'.$subdomain.'/schedule')
             ->with('message', __('messages.request_accepted'));
     }
 
