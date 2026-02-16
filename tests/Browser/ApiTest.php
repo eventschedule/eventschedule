@@ -35,7 +35,7 @@ class ApiTest extends DuskTestCase
             $apiKey = $this->enableApi($browser);
 
             // Test API endpoints using cURL
-            $this->testApiEndpoints($apiKey);
+            $this->test_api_endpoints($apiKey);
         });
     }
 
@@ -47,16 +47,16 @@ class ApiTest extends DuskTestCase
         $baseUrl = config('app.url');
 
         // Test 1: Get schedules (should return user's schedules)
-        $this->testGetSchedules($baseUrl, $apiKey);
+        $this->test_get_schedules($baseUrl, $apiKey);
 
         // Test 2: Get events (should return user's events)
-        $this->testGetEvents($baseUrl, $apiKey);
+        $this->test_get_events($baseUrl, $apiKey);
 
         // Test 3: Create a new event via API
-        $this->testCreateEvent($baseUrl, $apiKey);
+        $this->test_create_event($baseUrl, $apiKey);
 
         // Test 4: Test authentication failure
-        $this->testAuthenticationFailure($baseUrl);
+        $this->test_authentication_failure($baseUrl);
     }
 
     /**
