@@ -12,10 +12,11 @@
     <x-slot name="breadcrumbTitle">Blog</x-slot>
     <x-slot name="keywords">event blog, event scheduling tips, ticketing news, event management insights, venue tips, performer advice</x-slot>
 
-    <x-slot name="headMeta">
-    @if($posts->currentPage() > 1 || request('tag') || $monthLabel)
-        <meta name="robots" content="noindex, follow">
+    @if($posts->currentPage() > 1 || $monthLabel)
+        <x-slot name="robots">noindex, follow</x-slot>
     @endif
+
+    <x-slot name="headMeta">
     @if($posts->currentPage() > 1)
         <link rel="prev" href="{{ $posts->previousPageUrl() }}">
     @endif
