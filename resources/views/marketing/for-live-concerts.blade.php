@@ -5,6 +5,27 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Live Concerts</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule for Live Concerts",
+        "description": "Stream live concerts to fans worldwide. Sell virtual tickets alongside venue tickets, email fans directly, and manage your streaming schedule. Zero platform fees.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Event Management",
+        "audience": {
+            "@type": "Audience",
+            "audienceType": "Live Concert Streamers"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section - Mesh Gradient -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Mesh gradient background -->

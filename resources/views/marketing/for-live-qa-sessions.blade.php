@@ -5,6 +5,27 @@
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Live Q&A Sessions</x-slot>
 
+    <x-slot name="structuredData">
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Event Schedule for Live Q&A Sessions",
+        "description": "Free live Q&A scheduling software with registration, ticketing, and email notifications. Works with Zoom, YouTube Live, and any platform. Zero platform fees.",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule",
+            "url": "{{ config('app.url') }}"
+        },
+        "serviceType": "Event Management",
+        "audience": {
+            "@type": "Audience",
+            "audienceType": "Q&A Session Hosts"
+        }
+    }
+    </script>
+    </x-slot>
+
     <!-- Hero Section - Mesh Gradient -->
     <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
         <!-- Mesh gradient background -->
