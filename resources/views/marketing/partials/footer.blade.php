@@ -141,11 +141,11 @@
                 <a href="{{ marketing_url('/') }}" class="flex items-center space-x-2">
                     <picture class="dark:hidden">
                         <source srcset="{{ url('images/dark_logo.webp') }}" type="image/webp">
-                        <img class="h-8 w-auto" src="{{ url('images/dark_logo.png') }}" alt="Event Schedule" width="163" height="32" />
+                        <img class="h-8 w-auto" src="{{ url('images/dark_logo.png') }}" alt="Event Schedule" width="163" height="32" loading="lazy" />
                     </picture>
                     <picture class="hidden dark:block">
                         <source srcset="{{ url('images/light_logo.webp') }}" type="image/webp">
-                        <img class="h-8 w-auto" src="{{ url('images/light_logo.png') }}" alt="Event Schedule" width="163" height="32" />
+                        <img class="h-8 w-auto" src="{{ url('images/light_logo.png') }}" alt="Event Schedule" width="163" height="32" loading="lazy" />
                     </picture>
                 </a>
                 <p class="text-sm text-gray-400 dark:text-gray-500">

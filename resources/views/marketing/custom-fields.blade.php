@@ -447,53 +447,87 @@
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/features/team-scheduling') }}" class="group block">
-                <div class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
-                    <div class="flex flex-col lg:flex-row gap-8 items-center">
-                        <!-- Text content -->
-                        <div class="flex-1 text-center lg:text-left">
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors">Team Scheduling</h3>
-                            <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Invite team members via email, assign roles, and collaborate on events together.</p>
-                            <span class="inline-flex items-center text-cyan-400 font-medium group-hover:gap-3 gap-2 transition-all">
-                                Learn more
-                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        <!-- Mini mockup: Team member avatars with role badges -->
-                        <div class="flex-shrink-0">
-                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48 space-y-2">
-                                <!-- Team member 1 -->
-                                <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
-                                    <div class="w-7 h-7 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center text-white text-[10px] font-semibold">JD</div>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="text-gray-900 dark:text-white text-xs font-medium truncate">John Doe</div>
+                <a href="{{ marketing_url('/features/team-scheduling') }}" class="group block">
+                    <div class="h-full bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                        <div class="flex flex-col lg:flex-row gap-8 items-center">
+                            <!-- Text content -->
+                            <div class="flex-1 text-center lg:text-left">
+                                <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors">Team Scheduling</h3>
+                                <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Invite team members via email, assign roles, and collaborate on events together.</p>
+                                <span class="inline-flex items-center text-cyan-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                    Learn more
+                                    <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                    </svg>
+                                </span>
+                            </div>
+
+                            <!-- Mini mockup: Team member avatars with role badges -->
+                            <div class="flex-shrink-0">
+                                <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-4 w-48 space-y-2">
+                                    <!-- Team member 1 -->
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-200 dark:bg-white/10">
+                                        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center text-white text-[10px] font-semibold">JD</div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-gray-900 dark:text-white text-xs font-medium truncate">John Doe</div>
+                                        </div>
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-[9px]">Owner</span>
                                     </div>
-                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-[9px]">Owner</span>
-                                </div>
-                                <!-- Team member 2 -->
-                                <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                                    <div class="w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center text-white text-[10px] font-semibold">AS</div>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="text-gray-600 dark:text-gray-300 text-xs font-medium truncate">Alice Smith</div>
+                                    <!-- Team member 2 -->
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
+                                        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center text-white text-[10px] font-semibold">AS</div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-gray-600 dark:text-gray-300 text-xs font-medium truncate">Alice Smith</div>
+                                        </div>
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-[9px]">Admin</span>
                                     </div>
-                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-[9px]">Admin</span>
-                                </div>
-                                <!-- Team member 3 -->
-                                <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                                    <div class="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center text-white text-[10px] font-semibold">BJ</div>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="text-gray-600 dark:text-gray-300 text-xs font-medium truncate">Bob Jones</div>
+                                    <!-- Team member 3 -->
+                                    <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
+                                        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center text-white text-[10px] font-semibold">BJ</div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-gray-600 dark:text-gray-300 text-xs font-medium truncate">Bob Jones</div>
+                                        </div>
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-[9px]">Follower</span>
                                     </div>
-                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-[9px]">Follower</span>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </a>
+
+                <!-- Popular with -->
+                <div class="h-full bg-white dark:bg-white/5 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/20 mb-6">
+                        <svg aria-hidden="true" class="w-6 h-6 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Popular with</h3>
+                    <div class="space-y-3">
+                        <a href="{{ marketing_url('/for-venues') }}" class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 hover:border-sky-300 dark:hover:border-sky-500/30 transition-all group/link">
+                            <span class="text-gray-900 dark:text-white font-medium">Venues</span>
+                            <svg aria-hidden="true" class="w-4 h-4 text-gray-400 group-hover/link:text-sky-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                        <a href="{{ marketing_url('/for-hotels-and-resorts') }}" class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 hover:border-sky-300 dark:hover:border-sky-500/30 transition-all group/link">
+                            <span class="text-gray-900 dark:text-white font-medium">Hotels & Resorts</span>
+                            <svg aria-hidden="true" class="w-4 h-4 text-gray-400 group-hover/link:text-sky-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                        <a href="{{ marketing_url('/for-fitness-and-yoga') }}" class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 hover:border-sky-300 dark:hover:border-sky-500/30 transition-all group/link">
+                            <span class="text-gray-900 dark:text-white font-medium">Fitness & Yoga</span>
+                            <svg aria-hidden="true" class="w-4 h-4 text-gray-400 group-hover/link:text-sky-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
                 </div>
-            </a>
+
+            </div>
         </div>
     </section>
 

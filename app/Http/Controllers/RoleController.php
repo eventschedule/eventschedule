@@ -141,12 +141,12 @@ class RoleController extends Controller
         // Clean up Google Calendar webhook before deleting role
         if ($role->google_webhook_id && $role->google_webhook_resource_id) {
             try {
-                $user = $role->users()->first();
-                if ($user && $user->google_token) {
+                $googleUser = $role->users()->first();
+                if ($googleUser && $googleUser->google_token) {
                     $googleCalendarService = app(\App\Services\GoogleCalendarService::class);
 
                     // Ensure user has valid token before deleting webhook
-                    if ($googleCalendarService->ensureValidToken($user)) {
+                    if ($googleCalendarService->ensureValidToken($googleUser)) {
                         $googleCalendarService->deleteWebhook($role->google_webhook_id, $role->google_webhook_resource_id);
                     }
                 }
