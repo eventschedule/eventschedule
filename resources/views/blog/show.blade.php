@@ -4,6 +4,7 @@
     @if($post->tags)
     <x-slot name="keywords">{{ implode(', ', $post->tags) }}, event scheduling, ticketing</x-slot>
     @endif
+    <x-slot name="breadcrumbTitle">{{ $post->title }}</x-slot>
     <x-slot name="ogType">article</x-slot>
     @if($post->featured_image_url)
     <x-slot name="socialImage">{{ $post->featured_image_url }}</x-slot>
@@ -51,34 +52,6 @@
         @if($post->tags)
         ,"keywords": "{{ implode(', ', $post->tags) }}"
         @endif
-    }
-    </script>
-
-    <!-- BreadcrumbList Structured Data -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "{{ config('app.url') }}"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "Blog",
-                "item": "{{ route('blog.index') }}"
-            },
-            {
-                "@type": "ListItem",
-                "position": 3,
-                "name": "{{ $post->title }}",
-                "item": "{{ url()->current() }}"
-            }
-        ]
     }
     </script>
 

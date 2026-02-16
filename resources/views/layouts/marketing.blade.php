@@ -169,6 +169,11 @@
         } elseif (str_ends_with($path, '-alternative')) {
             $breadcrumbs[] = ['name' => 'Compare', 'url' => url('/compare')];
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+        } elseif (str_starts_with($path, 'blog/')) {
+            $breadcrumbs[] = ['name' => 'Blog', 'url' => url('/blog')];
+            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+        } elseif ($path === 'blog') {
+            $breadcrumbs[] = ['name' => 'Blog', 'url' => url()->current()];
         } else {
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
         }
