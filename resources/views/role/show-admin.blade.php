@@ -100,6 +100,19 @@
 
     </form>
 
+    @php
+        $viewGuestParams = ['subdomain' => $role->subdomain];
+        if ($role->event_layout == 'calendar') {
+            if (now()->year != $year || now()->month != $month) {
+                $viewGuestParams['month'] = $month;
+            }
+            if (now()->year != $year) {
+                $viewGuestParams['year'] = $year;
+            }
+        }
+        $viewGuestUrl = route('role.view_guest', $viewGuestParams);
+    @endphp
+
     <div>
         <!--
         <div>
@@ -207,7 +220,7 @@
                     </svg>
                     {{ __('messages.edit_schedule') }}
                 </x-secondary-link>
-                <x-secondary-link href="{{ route('role.view_guest', (now()->year == $year && now()->month == $month) ? ['subdomain' => $role->subdomain] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'month' => $month] : ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month])) }}"
+                <x-secondary-link href="{{ $viewGuestUrl }}"
                     target="_blank"
                     class="{{ ! $role->email_verified_at ? 'w-full sm:w-auto opacity-50 pointer-events-none' : 'w-full sm:w-auto' }}"
                     :aria-disabled="! $role->email_verified_at ? 'true' : null">
@@ -241,7 +254,7 @@
                                         {{ __('messages.edit_schedule') }}
                                     </div>
                                 </a>
-                                <a href="{{ route('role.view_guest', (now()->year == $year && now()->month == $month) ? ['subdomain' => $role->subdomain] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'month' => $month] : ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month])) }}" target="_blank" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                                <a href="{{ $viewGuestUrl }}" target="_blank" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                     <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                         <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
                                     </svg>

@@ -199,9 +199,6 @@
                 @foreach(['OpenAI', 'Claude', 'LangChain', 'Custom Agents', 'REST'] as $tag)
                     <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 text-sm border border-gray-200 dark:border-white/10">{{ $tag }}</span>
                 @endforeach
-                <a href="/llms.txt" class="inline-flex items-center px-3 py-1 rounded-full bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-sm border border-cyan-200 dark:border-cyan-500/20 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition-colors">llms.txt</a>
-                <a href="/llms-full.txt" class="inline-flex items-center px-3 py-1 rounded-full bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-sm border border-cyan-200 dark:border-cyan-500/20 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition-colors">llms-full.txt</a>
-                <a href="/.well-known/agents.json" class="inline-flex items-center px-3 py-1 rounded-full bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-sm border border-cyan-200 dark:border-cyan-500/20 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition-colors">agents.json</a>
             </div>
         </div>
     </section>
@@ -455,68 +452,156 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-6">
                 {{-- llms.txt --}}
-                <a href="/llms.txt" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-950/50 dark:to-teal-950/50 border border-cyan-200 dark:border-cyan-800/50 p-6 hover:border-cyan-400 dark:hover:border-cyan-600 transition-colors">
-                    <div class="inline-flex items-center px-2.5 py-1 rounded-full bg-cyan-100 dark:bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 text-xs font-mono font-medium mb-4">llms.txt</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Quick overview</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Concise summary for initial discovery and routing. Helps agents decide whether this API is relevant to a task.</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-mono text-gray-400 dark:text-gray-500">/llms.txt</span>
-                        <span class="inline-flex items-center text-sm font-medium text-cyan-600 dark:text-cyan-400 group-hover:gap-2 gap-1 transition-all">
-                            View file
-                            <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </span>
+                <a href="/llms.txt" class="group flex flex-col md:flex-row overflow-hidden rounded-2xl bg-white dark:bg-[#0a0a0f] border border-cyan-200 dark:border-cyan-800/50 hover:border-cyan-400 dark:hover:border-cyan-500 hover:shadow-lg hover:shadow-cyan-500/10 hover:-translate-y-0.5 transition-all duration-200">
+                    {{-- Terminal preview --}}
+                    <div class="md:w-[280px] lg:w-[320px] flex-shrink-0 bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-950/40 dark:to-teal-950/40 p-5">
+                        <div class="rounded-lg bg-white dark:bg-[#0f0f14] border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm">
+                            <div class="flex items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
+                                <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                            </div>
+                            <div class="p-3 font-mono text-xs leading-relaxed">
+                                <div class="text-cyan-600 dark:text-cyan-400"># Event Schedule</div>
+                                <div class="text-gray-500 dark:text-gray-400">> Open-source platform for...</div>
+                                <div class="text-cyan-600 dark:text-cyan-400 mt-1">## API</div>
+                                <div class="text-gray-600 dark:text-gray-300">- Authentication: X-API-Key</div>
+                            </div>
+                        </div>
+                    </div>
+                    {{-- Details --}}
+                    <div class="flex-1 p-6 flex flex-col justify-center">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="text-xl font-bold font-mono text-gray-900 dark:text-white">llms.txt</h3>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 text-xs font-medium">TXT</span>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Concise summary for initial discovery and routing. Helps agents decide whether this API is relevant to a task before fetching full documentation.</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono text-gray-400 dark:text-gray-500">/llms.txt</span>
+                            <span class="inline-flex items-center text-sm font-medium text-cyan-600 dark:text-cyan-400 gap-1 group-hover:gap-2 transition-all">
+                                View file
+                                <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </span>
+                        </div>
                     </div>
                 </a>
 
                 {{-- llms-full.txt --}}
-                <a href="/llms-full.txt" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/50 dark:to-green-950/50 border border-emerald-200 dark:border-emerald-800/50 p-6 hover:border-emerald-400 dark:hover:border-emerald-600 transition-colors">
-                    <div class="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-mono font-medium mb-4">llms-full.txt</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Complete reference</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Self-contained docs with full API details. No link-following needed for agents to start working.</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-mono text-gray-400 dark:text-gray-500">/llms-full.txt</span>
-                        <span class="inline-flex items-center text-sm font-medium text-emerald-600 dark:text-emerald-400 group-hover:gap-2 gap-1 transition-all">
-                            View file
-                            <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </span>
+                <a href="/llms-full.txt" class="group flex flex-col md:flex-row overflow-hidden rounded-2xl bg-white dark:bg-[#0a0a0f] border border-emerald-200 dark:border-emerald-800/50 hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-0.5 transition-all duration-200">
+                    {{-- Terminal preview --}}
+                    <div class="md:w-[280px] lg:w-[320px] flex-shrink-0 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/40 dark:to-green-950/40 p-5">
+                        <div class="rounded-lg bg-white dark:bg-[#0f0f14] border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm">
+                            <div class="flex items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
+                                <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                            </div>
+                            <div class="p-3 font-mono text-xs leading-relaxed">
+                                <div class="text-emerald-600 dark:text-emerald-400"># Event Schedule - Full Docs</div>
+                                <div class="text-gray-500 dark:text-gray-400">> Complete API reference...</div>
+                                <div class="text-emerald-600 dark:text-emerald-400 mt-1">## Schedule Types</div>
+                                <div class="text-gray-600 dark:text-gray-300">- Venue | Talent | Curator</div>
+                            </div>
+                        </div>
+                    </div>
+                    {{-- Details --}}
+                    <div class="flex-1 p-6 flex flex-col justify-center">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="text-xl font-bold font-mono text-gray-900 dark:text-white">llms-full.txt</h3>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-medium">TXT</span>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Self-contained docs with full API details. No link-following needed for agents to start working - everything an LLM needs is in one file.</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono text-gray-400 dark:text-gray-500">/llms-full.txt</span>
+                            <span class="inline-flex items-center text-sm font-medium text-emerald-600 dark:text-emerald-400 gap-1 group-hover:gap-2 transition-all">
+                                View file
+                                <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </span>
+                        </div>
                     </div>
                 </a>
 
                 {{-- agents.json --}}
-                <a href="/.well-known/agents.json" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/50 dark:to-cyan-950/50 border border-teal-200 dark:border-teal-800/50 p-6 hover:border-teal-400 dark:hover:border-teal-600 transition-colors">
-                    <div class="inline-flex items-center px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300 text-xs font-mono font-medium mb-4">agents.json</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Agent workflows</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Pre-defined multi-step workflows for common tasks. Agents can execute sequences without custom logic.</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-mono text-gray-400 dark:text-gray-500">/.well-known/agents.json</span>
-                        <span class="inline-flex items-center text-sm font-medium text-teal-600 dark:text-teal-400 group-hover:gap-2 gap-1 transition-all">
-                            View file
-                            <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </span>
+                <a href="/.well-known/agents.json" class="group flex flex-col md:flex-row overflow-hidden rounded-2xl bg-white dark:bg-[#0a0a0f] border border-teal-200 dark:border-teal-800/50 hover:border-teal-400 dark:hover:border-teal-500 hover:shadow-lg hover:shadow-teal-500/10 hover:-translate-y-0.5 transition-all duration-200">
+                    {{-- Terminal preview --}}
+                    <div class="md:w-[280px] lg:w-[320px] flex-shrink-0 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/40 dark:to-cyan-950/40 p-5">
+                        <div class="rounded-lg bg-white dark:bg-[#0f0f14] border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm">
+                            <div class="flex items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
+                                <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                            </div>
+                            <div class="p-3 font-mono text-xs leading-relaxed">
+                                <div class="text-gray-600 dark:text-gray-300">{</div>
+                                <div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;<span class="text-teal-600 dark:text-teal-400">"name"</span>: <span class="text-amber-600 dark:text-amber-400">"Event Schedule API"</span>,</div>
+                                <div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;<span class="text-teal-600 dark:text-teal-400">"flows"</span>: [</div>
+                                <div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="text-teal-600 dark:text-teal-400">"name"</span>: <span class="text-amber-600 dark:text-amber-400">"register_and_setup"</span> }</div>
+                                <div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;]</div>
+                                <div class="text-gray-600 dark:text-gray-300">}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {{-- Details --}}
+                    <div class="flex-1 p-6 flex flex-col justify-center">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="text-xl font-bold font-mono text-gray-900 dark:text-white">agents.json</h3>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-teal-100 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300 text-xs font-medium">JSON</span>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Pre-defined multi-step workflows for common tasks. Agents can execute complete sequences like registration and event creation without custom logic.</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono text-gray-400 dark:text-gray-500">/.well-known/agents.json</span>
+                            <span class="inline-flex items-center text-sm font-medium text-teal-600 dark:text-teal-400 gap-1 group-hover:gap-2 transition-all">
+                                View file
+                                <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </span>
+                        </div>
                     </div>
                 </a>
 
                 {{-- openapi.json --}}
-                <a href="/api/openapi.json" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-950/50 dark:to-blue-950/50 border border-sky-200 dark:border-sky-800/50 p-6 hover:border-sky-400 dark:hover:border-sky-600 transition-colors">
-                    <div class="inline-flex items-center px-2.5 py-1 rounded-full bg-sky-100 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 text-xs font-mono font-medium mb-4">openapi.json</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">OpenAPI 3.0 spec</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Machine-readable specification for auto-generating client libraries and tool definitions.</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-mono text-gray-400 dark:text-gray-500">/api/openapi.json</span>
-                        <span class="inline-flex items-center text-sm font-medium text-sky-600 dark:text-sky-400 group-hover:gap-2 gap-1 transition-all">
-                            View file
-                            <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </span>
+                <a href="/api/openapi.json" class="group flex flex-col md:flex-row overflow-hidden rounded-2xl bg-white dark:bg-[#0a0a0f] border border-sky-200 dark:border-sky-800/50 hover:border-sky-400 dark:hover:border-sky-500 hover:shadow-lg hover:shadow-sky-500/10 hover:-translate-y-0.5 transition-all duration-200">
+                    {{-- Terminal preview --}}
+                    <div class="md:w-[280px] lg:w-[320px] flex-shrink-0 bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-950/40 dark:to-blue-950/40 p-5">
+                        <div class="rounded-lg bg-white dark:bg-[#0f0f14] border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm">
+                            <div class="flex items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
+                                <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                            </div>
+                            <div class="p-3 font-mono text-xs leading-relaxed">
+                                <div class="text-gray-600 dark:text-gray-300">{</div>
+                                <div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;<span class="text-sky-600 dark:text-sky-400">"openapi"</span>: <span class="text-amber-600 dark:text-amber-400">"3.0.3"</span>,</div>
+                                <div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;<span class="text-sky-600 dark:text-sky-400">"info"</span>: {</div>
+                                <div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-sky-600 dark:text-sky-400">"title"</span>: <span class="text-amber-600 dark:text-amber-400">"Event Schedule API"</span></div>
+                                <div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;}</div>
+                                <div class="text-gray-600 dark:text-gray-300">}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {{-- Details --}}
+                    <div class="flex-1 p-6 flex flex-col justify-center">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="text-xl font-bold font-mono text-gray-900 dark:text-white">openapi.json</h3>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 text-xs font-medium">JSON</span>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Machine-readable OpenAPI 3.0 specification for auto-generating client libraries and tool definitions in any language.</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono text-gray-400 dark:text-gray-500">/api/openapi.json</span>
+                            <span class="inline-flex items-center text-sm font-medium text-sky-600 dark:text-sky-400 gap-1 group-hover:gap-2 transition-all">
+                                View file
+                                <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </span>
+                        </div>
                     </div>
                 </a>
             </div>
@@ -633,25 +718,25 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="text-center">
+                <div class="flex flex-col text-center">
                     <div class="w-14 h-14 bg-gradient-to-br from-cyan-600 to-emerald-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-cyan-600/25">
                         1
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Get your API key</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">
-                        <a href="{{ route('sign_up') }}" class="text-cyan-600 dark:text-cyan-400 hover:underline font-medium">Sign up for free</a> and generate an API key from your account settings. Pro plan required for write operations.
+                    <p class="text-gray-500 dark:text-gray-400 text-sm flex-1">
+                        <a href="{{ route('sign_up') }}" class="text-cyan-600 dark:text-cyan-400 hover:underline font-medium">Sign up for free</a> and generate an API key from your account settings.
                     </p>
                     <div class="mt-4 bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3 text-left">
                         <div class="text-xs font-mono text-gray-500 dark:text-gray-400 leading-relaxed truncate">Authorization: Bearer YOUR_API_KEY</div>
                     </div>
                 </div>
 
-                <div class="text-center">
+                <div class="flex flex-col text-center">
                     <div class="w-14 h-14 bg-gradient-to-br from-cyan-600 to-emerald-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-cyan-600/25">
                         2
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Create a schedule</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">
+                    <p class="text-gray-500 dark:text-gray-400 text-sm flex-1">
                         POST to /api/schedules with a name and subdomain. Your schedule is live instantly.
                     </p>
                     <div class="mt-4 bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3 text-left">
@@ -659,13 +744,13 @@
                     </div>
                 </div>
 
-                <div class="text-center">
+                <div class="flex flex-col text-center">
                     <div class="w-14 h-14 bg-gradient-to-br from-cyan-600 to-emerald-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-cyan-600/25">
                         3
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Start managing events</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">
-                        Create events, set up tickets, and manage your schedule programmatically. Check the API docs for the full reference.
+                    <p class="text-gray-500 dark:text-gray-400 text-sm flex-1">
+                        Create events, set up tickets, and manage your schedule programmatically.
                     </p>
                     <div class="mt-4 bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3 text-left">
                         <div class="text-xs font-mono text-gray-500 dark:text-gray-400 leading-relaxed">curl -X POST /api/events \<br>&nbsp;&nbsp;-d '{"name": "AI Meetup"}'</div>
