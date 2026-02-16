@@ -977,7 +977,7 @@ return [
     'screen_capture_rendering' => 'Рендеринг снимков экрана',
     'enable_screen_capture' => 'Используйте снимок экрана для создания графики',
     'screen_capture_help' => 'Использует рендеринг на основе браузера для лучшей поддержки языка RTL.',
-    
+
     // Event graphic layout and options
     'layout_type' => 'Тип макета',
     'grid_layout' => 'Сетка',
@@ -996,7 +996,7 @@ return [
     'max_per_row' => 'Максимальное количество листовок в ряду',
     'no_limit' => 'Без ограничений',
     'max_per_row_help' => 'Ограничьте количество листовок в строке, переносите их в несколько строк',
-    
+
     // CalDAV Calendar Integration
     'caldav_calendar' => 'Календарь вызовов',
     'caldav_description' => 'Синхронизируйте события с календарями, совместимыми с CalDAV, такими как iCloud, Nextcloud, Fastmail и другими.',
@@ -1025,7 +1025,7 @@ return [
     'failed_to_disconnect' => 'Не удалось отключиться',
     'fill_all_fields' => 'Пожалуйста, заполните все обязательные поля.',
     'sync_complete' => 'Синхронизация завершена успешно.',
-    
+
     // General integration keys
     'integrations' => 'Интеграции',
     'connection_successful' => 'Соединение успешно',
@@ -1033,17 +1033,17 @@ return [
     'test_connection' => 'Тестовое соединение',
     'connect' => 'Соединять',
     'connected' => 'Подключено',
-    
+
     // Demo mode
     'demo_mode_settings_disabled' => 'Некоторые настройки отключены в демонстрационном режиме.',
     'demo_mode_restriction' => 'Это действие недоступно в демонстрационном режиме.',
     'saving_disabled_demo_mode' => 'Сохранение отключено в демо-режиме.',
-    
+
     // Text template
     'text_template' => 'Текстовый шаблон',
     'text_template_help' => 'Настройте текстовый формат для каждого события. Оставьте пустым по умолчанию.',
     'view_docs' => 'Посмотреть документы',
-    
+
     // Recurring events
     'recurring_events' => 'Повторяющиеся события',
     'exclude_recurring_events' => 'Исключить повторяющиеся события',
@@ -1051,15 +1051,15 @@ return [
     'monthly_same_date' => 'Ежемесячно (в тот же день)',
     'monthly_same_weekday' => 'Ежемесячно (в тот же день недели)',
     'repeat_every_n_weeks' => 'Повторяйте каждые N недель',
-    
+
     // Bot protection
     'turnstile_verification_failed' => 'Проверка не удалась. Пожалуйста, попробуйте еще раз.',
-    
+
     // Slug pattern
     'slug_pattern' => 'Шаблон URL-адреса события',
     'slug_pattern_help' => 'Настройте URL-адреса для новых событий. Пример: {event_name}-{date_dmy}. Оставьте пустым, чтобы использовать название события.',
     'show_available_variables' => 'Показать доступные переменные',
-    
+
     // Graphic settings tabs
     'automation' => 'Автоматизация',
 
@@ -1095,7 +1095,7 @@ return [
     'ai_prompt_example_19' => 'Определите материалы или расходные материалы, которые участники должны принести с собой.',
     'ai_prompt_example_20' => 'Извлеките подробную информацию о вечеринке или последующем событии.',
     'ai_prompt_custom_field_help' => 'Дополнительная инструкция для ИИ о том, как извлечь значение этого поля.',
-    
+
     // Admin portal
     'dashboard' => 'Панель управления',
     'users' => 'Пользователи',
@@ -1171,7 +1171,7 @@ return [
     'unsubscribed_message' => 'Вы успешно отписались от будущих писем.',
     'please_select_ticket' => 'Пожалуйста, выберите хотя бы один билет',
     'api_settings' => 'Настройки API',
-    
+
     // Blog
     'create_blog_post' => 'Создать публикацию в блоге',
     'create_blog_post_description' => 'Создайте новую публикацию в блоге, используя искусственный интеллект для создания контента.',
@@ -1234,7 +1234,7 @@ return [
     'news_tips_insights' => 'Новости, советы и идеи',
     'blog_hero_subtitle' => 'Ваш путеводитель по планированию мероприятий, продаже билетов и созданию процветающих сообществ.',
     'topics' => 'темы',
-    
+
     // Gemini setup guide
     'setup_required_gemini' => 'Требуется настройка: ключ Gemini API',
     'required' => 'Необходимый',
@@ -1247,7 +1247,7 @@ return [
     'restart_application' => 'Перезапустить приложение',
     'restart_application_description' => 'Перезапустите приложение, и эта функция будет включена автоматически.',
     'free_tier_available' => 'Доступен бесплатный уровень',
-    
+
     // Embed modal
     'close_modal' => 'Закрывать',
 
@@ -1255,7 +1255,7 @@ return [
     'powered_by_event_schedule' => 'На основе расписания событий',
     'view_notifications' => 'Просмотр уведомлений',
     'search_placeholder' => 'Поиск...',
-    
+
     // Misc AP/CP strings
     'placeholder_city' => 'Нью-Йорк',
     'drop_files_here' => 'Перетащите сюда файлы',
@@ -1265,7 +1265,7 @@ return [
     'error_testing_connection' => 'Ошибка при проверке соединения',
     'stripe' => 'Полоса',
     'database_already_initialized' => 'Эта база данных уже имеет существующую установку. Используйте другую базу данных или войдите в существующую установку.',
-    
+
     // UTM Attribution
     'utm_attribution' => 'UTM-атрибуция',
     'top_sources' => 'Лучшие источники',
@@ -1458,7 +1458,7 @@ return [
     'center' => 'Центр',
     'right' => 'Верно',
     'design' => 'Дизайн',
-    
+
     // Fan content
     'paste_youtube_url' => 'Вставьте URL-адрес YouTube...',
     'add_video' => 'Добавить видео',
@@ -1555,7 +1555,7 @@ return [
     'row_error' => 'Строка :row: :error',
     'import_validation_failed' => 'Пожалуйста, исправьте следующие ошибки:',
     'name_and_email_required' => 'В каждой строке должно быть указано имя и адрес электронной почты.',
-    
+
     // Editor toolbar
     'editor_bold' => 'Смелый',
     'editor_italic' => 'Курсив',
@@ -1567,7 +1567,7 @@ return [
     'editor_preview' => 'Переключить предварительный просмотр',
     'editor_guide' => 'Руководство по уценке',
     'why_create_account_title' => 'Зачем создавать учетную запись?',
-    
+
     // Why create account page
     'why_create_account_description' => 'Откройте для себя преимущества создания бесплатной учетной записи расписания мероприятий.',
     'why_create_account_hero_badge' => 'Бесплатный аккаунт',

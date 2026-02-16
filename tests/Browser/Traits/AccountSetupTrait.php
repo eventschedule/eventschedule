@@ -13,16 +13,16 @@ trait AccountSetupTrait
     {
         // Sign up
         $browser->visit('/sign_up')
-                ->waitFor('#name', 5)
-                ->type('name', $name)
-                ->type('email', $email)
-                ->type('password', $password)
-                ->check('terms')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SIGN UP')
-                ->waitForLocation('/events', 15)
-                ->assertPathIs('/events')
-                ->assertSee($name);
+            ->waitFor('#name', 5)
+            ->type('name', $name)
+            ->type('email', $email)
+            ->type('password', $password)
+            ->check('terms')
+            ->scrollIntoView('button[type="submit"]')
+            ->press('SIGN UP')
+            ->waitForLocation('/events', 15)
+            ->assertPathIs('/events')
+            ->assertSee($name);
     }
 
     /**
@@ -31,17 +31,17 @@ trait AccountSetupTrait
     protected function createTestVenue(Browser $browser, string $name = 'Venue', string $address = '123 Test St'): void
     {
         $browser->visit('/new/venue')
-                ->waitFor('#name', 5)
-                ->pause(500)
-                ->clear('name')
-                ->type('name', $name)
-                ->pause(1000)
-                ->click('a[data-section="section-address"]')
-                ->waitFor('#address1', 15)
-                ->type('address1', $address)
-                ->click('button[type="submit"]')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 15)
-                ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
+            ->waitFor('#name', 5)
+            ->pause(500)
+            ->clear('name')
+            ->type('name', $name)
+            ->pause(1000)
+            ->click('a[data-section="section-address"]')
+            ->waitFor('#address1', 15)
+            ->type('address1', $address)
+            ->click('button[type="submit"]')
+            ->waitForLocation('/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 15)
+            ->assertPathIs('/'.strtolower(str_replace(' ', '-', $name)).'/schedule');
     }
 
     /**
@@ -50,15 +50,15 @@ trait AccountSetupTrait
     protected function createTestTalent(Browser $browser, string $name = 'Talent'): void
     {
         $browser->visit('/new/talent')
-                ->waitFor('#name', 5)
-                ->pause(500)
-                ->clear('name')
-                ->type('name', $name)
-                ->pause(1000)
-                ->scrollIntoView('button[type="submit"]')
-                ->click('button[type="submit"]')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 15)
-                ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
+            ->waitFor('#name', 5)
+            ->pause(500)
+            ->clear('name')
+            ->type('name', $name)
+            ->pause(1000)
+            ->scrollIntoView('button[type="submit"]')
+            ->click('button[type="submit"]')
+            ->waitForLocation('/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 15)
+            ->assertPathIs('/'.strtolower(str_replace(' ', '-', $name)).'/schedule');
     }
 
     /**
@@ -67,19 +67,19 @@ trait AccountSetupTrait
     protected function createTestCurator(Browser $browser, string $name = 'Curator'): void
     {
         $browser->visit('/new/curator')
-                ->waitFor('#name', 5)
-                ->pause(500)
-                ->clear('name')
-                ->type('name', $name)
-                ->pause(1000)
-                ->click('a[data-section="section-settings"]')
-                ->pause(500)
-                ->click('button.settings-tab[data-tab="requests"]')
-                ->waitFor('#accept_requests', 5)
-                ->check('accept_requests')
-                ->click('button[type="submit"]')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 15)
-                ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
+            ->waitFor('#name', 5)
+            ->pause(500)
+            ->clear('name')
+            ->type('name', $name)
+            ->pause(1000)
+            ->click('a[data-section="section-settings"]')
+            ->pause(500)
+            ->click('button.settings-tab[data-tab="requests"]')
+            ->waitFor('#accept_requests', 5)
+            ->check('accept_requests')
+            ->click('button[type="submit"]')
+            ->waitForLocation('/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 15)
+            ->assertPathIs('/'.strtolower(str_replace(' ', '-', $name)).'/schedule');
     }
 
     /**
@@ -87,15 +87,15 @@ trait AccountSetupTrait
      */
     protected function createTestEventWithTickets(Browser $browser, string $talentName = 'Talent', string $venueName = 'Venue', string $eventName = 'Test Event'): void
     {
-        $browser->visit('/' . strtolower(str_replace(' ', '-', $talentName)) . '/add-event?date=' . date('Y-m-d', strtotime('+3 days')))
-                ->type('name', $eventName)
-                ->click('a[data-section="section-venue"]')
-                ->pause(1000)
-                ->select('#selected_venue')
-                ->click('a[data-section="section-tickets"]')
-                ->waitFor('#tickets_enabled', 5)
-                ->check('tickets_enabled')
-                ->pause(1000); // Wait for Vue to render the ticket tabs
+        $browser->visit('/'.strtolower(str_replace(' ', '-', $talentName)).'/add-event?date='.date('Y-m-d', strtotime('+3 days')))
+            ->type('name', $eventName)
+            ->click('a[data-section="section-venue"]')
+            ->pause(1000)
+            ->select('#selected_venue')
+            ->click('a[data-section="section-tickets"]')
+            ->waitFor('#tickets_enabled', 5)
+            ->check('tickets_enabled')
+            ->pause(1000); // Wait for Vue to render the ticket tabs
 
         // Use JavaScript to scroll the price input into view and ensure it's visible
         $browser->script("
@@ -106,11 +106,11 @@ trait AccountSetupTrait
         ");
 
         $browser->pause(300)
-                ->type('tickets[0][price]', '10')
-                ->type('tickets[0][quantity]', '50')
-                ->click('button[type="submit"]')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $talentName)) . '/schedule', 15)
-                ->assertSee($venueName);
+            ->type('tickets[0][price]', '10')
+            ->type('tickets[0][quantity]', '50')
+            ->click('button[type="submit"]')
+            ->waitForLocation('/'.strtolower(str_replace(' ', '-', $talentName)).'/schedule', 15)
+            ->assertSee($venueName);
     }
 
     /**
@@ -119,18 +119,18 @@ trait AccountSetupTrait
     protected function enableApi(Browser $browser): string
     {
         $browser->visit('/settings#section-api')
-                ->waitFor('#enable_api', 5)
-                ->scrollIntoView('#enable_api');
-        
+            ->waitFor('#enable_api', 5)
+            ->scrollIntoView('#enable_api');
+
         // Check if already enabled, if not enable it
         $isChecked = $browser->script("return document.getElementById('enable_api').checked;");
-        if (!$isChecked[0]) {
+        if (! $isChecked[0]) {
             // Use Dusk's check method instead of JavaScript for better reliability
             $browser->check('enable_api');
             // Wait a moment for any UI updates
             $browser->pause(500);
         }
-        
+
         // Find and click the submit button in the API settings form using JavaScript
         // This is more reliable when the button might not be immediately interactable via Dusk
         $browser->script("
@@ -141,10 +141,10 @@ trait AccountSetupTrait
                 submitButton.scrollIntoView({ block: 'center', behavior: 'instant' });
             }
         ");
-        
+
         // Wait a moment for scroll to complete, then click
         $browser->pause(300);
-        
+
         // Click the button using JavaScript to avoid interactability issues
         $browser->script("
             const checkbox = document.getElementById('enable_api');
@@ -154,12 +154,13 @@ trait AccountSetupTrait
                 submitButton.click();
             }
         ");
-        
+
         $browser->waitForText('API settings updated successfully', 5);
-        
+
         // Get the API key from the page - it should be visible after enabling
         $browser->waitFor('#api_key', 5);
         $apiKey = $browser->value('#api_key');
+
         return $apiKey;
     }
 
@@ -177,7 +178,7 @@ trait AccountSetupTrait
             ->waitForLocation('/login', 5)
             ->assertPathIs('/login');
         */
-        
+
         $browser->script("
             var form = document.createElement('form');
             form.method = 'POST';
@@ -195,4 +196,4 @@ trait AccountSetupTrait
         $browser->waitForLocation('/login', 5)
             ->assertPathIs('/login');
     }
-} 
+}

@@ -341,8 +341,8 @@ class EventRepo
         if ($isNewEvent) {
             $event->slug = SlugPatternUtils::generateSlug(
                 $currentRole?->slug_pattern,
-                $request->name,
-                $request->name_en,
+                $request->short_name ?: $request->name,
+                $request->short_name_en ?: $request->name_en,
                 $event,
                 $currentRole,
                 $venue  // Pass venue directly since relationship isn't loaded yet

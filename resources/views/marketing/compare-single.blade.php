@@ -9,16 +9,41 @@
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
-        "@type": ["WebPage", "ItemPage"],
-        "name": "Event Schedule vs {{ $name }}",
-        "description": "{{ $description }}",
-        "url": "{{ config('app.url') }}/{{ $slug }}",
-        "mainEntity": {
-            "@type": "SoftwareApplication",
-            "name": "Event Schedule",
-            "applicationCategory": "BusinessApplication",
-            "operatingSystem": ["Web", "Android", "iOS"]
-        }
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule",
+        "description": "Open-source event management platform for sharing events, selling tickets, and bringing communities together. Zero platform fees.",
+        "url": "{{ config('app.url') }}",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": ["Web", "Android", "iOS"],
+        "offers": [
+            {
+                "@type": "Offer",
+                "name": "Free",
+                "price": "0",
+                "priceCurrency": "USD",
+                "description": "Unlimited events, team collaboration, Google Calendar sync, newsletters, and fan engagement features.",
+                "availability": "https://schema.org/InStock"
+            },
+            {
+                "@type": "Offer",
+                "name": "Pro",
+                "price": "5.00",
+                "priceCurrency": "USD",
+                "description": "Everything in Free plus ticketing with QR check-ins, Stripe payments, remove branding, event graphics, and REST API.",
+                "availability": "https://schema.org/InStock"
+            }
+        ],
+        "featureList": [
+            "Zero platform fees on ticket sales",
+            "AI-powered event import",
+            "Two-way Google Calendar sync",
+            "Newsletter builder with A/B testing",
+            "QR code ticketing and check-in",
+            "Open source with selfhosting option",
+            "Embeddable calendar widget",
+            "Fan videos and comments",
+            "Team collaboration"
+        ]
     }
     </script>
     </x-slot>

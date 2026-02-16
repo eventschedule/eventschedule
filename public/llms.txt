@@ -2,7 +2,14 @@
 
 > Event Schedule is an open-source platform for sharing events, selling tickets, and bringing communities together. It provides a full REST API with OpenAPI 3.0 spec for programmatic event management.
 
-Event Schedule supports three schedule types: **venue** (physical locations like bars, theaters, galleries), **talent** (performers like musicians, DJs, comedians), and **curator** (event organizers and promoters). Authentication uses API key via `X-API-Key` header, obtained through registration or login. Read operations are free; write operations require a Pro plan. Rate limits: 300 GET requests per minute, 30 POST/PUT/DELETE requests per minute. Events auto-translate to 11 languages. The platform is available as hosted SaaS at eventschedule.com or selfhosted.
+Key details:
+
+- **Schedule types**: Venue (physical locations), Talent (performers), Curator (event organizers)
+- **Authentication**: API key via `X-API-Key` header, obtained through registration or login
+- **Plans**: Read operations (GET) are free but require a Pro schedule. Write operations (POST/PUT/DELETE) require a Pro plan.
+- **Rate limits**: 300 GET requests/min, 30 POST/PUT/DELETE requests/min
+- **Languages**: Auto-translation to 11 languages
+- **Deployment**: Hosted SaaS at eventschedule.com or selfhosted
 
 ## API Documentation
 
@@ -21,7 +28,7 @@ Event Schedule supports three schedule types: **venue** (physical locations like
 ## Platform Information
 
 - [Features](https://eventschedule.com/features): Full feature overview including ticketing, calendar sync, analytics, and more
-- [Pricing](https://eventschedule.com/pricing): Free for read operations, Pro plan for write operations, zero platform fees on tickets
+- [Pricing](https://eventschedule.com/pricing): Pro plan required for API access (first year free), zero platform fees on tickets
 - [For AI Agents](https://eventschedule.com/for-ai-agents): Overview of API capabilities for AI agents and developers
 - [Documentation](https://eventschedule.com/docs): User guides for schedules, events, tickets, and integrations
 
