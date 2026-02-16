@@ -1011,7 +1011,7 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        $event = $this->eventRepo->saveEvent($role, $request, null);
+        $event = $this->eventRepo->saveEvent($role, $request, null, false);
 
         if ($request->social_image) {
             $tempDir = storage_path('app/temp');
@@ -1053,7 +1053,7 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        $event = $this->eventRepo->saveEvent($role, $request, null);
+        $event = $this->eventRepo->saveEvent($role, $request, null, false);
 
         if ($request->social_image) {
             $tempDir = storage_path('app/temp');
