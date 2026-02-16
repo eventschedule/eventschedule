@@ -18,7 +18,7 @@
 
   <main>
     <div>
-      <div class="container mx-auto pt-3 md:pt-4 pb-6 md:pb-10 px-5 md:mt-0 relative z-10"
+      <div class="container mx-auto pt-3 md:pt-4 pb-3 md:pb-10 px-5 md:mt-0 relative z-10"
       >
         {{-- Mobile background wrapper - covers header and carousel only --}}
         @php
@@ -30,11 +30,11 @@
             }
         @endphp
         @if ($mobileBannerUrl)
-        <div class="relative -mt-10 pt-10 pb-5 md:m-0 md:p-0">
+        <div class="relative -mt-10 pt-10 md:m-0 md:p-0">
             <div class="absolute -top-40 -bottom-3 left-1/2 -translate-x-1/2 w-screen bg-cover bg-no-repeat bg-top md:hidden -z-10"
                  style="background-image: url('{{ $mobileBannerUrl }}');"></div>
         @endif
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl mb-0 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} transition-[max-width] duration-300 ease-in-out mx-auto"
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl mb-0 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} transition-[max-width] duration-300 ease-in-out mx-auto"
           data-view-width
           style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
         >
