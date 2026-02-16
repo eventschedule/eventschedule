@@ -25,7 +25,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 
 - **WP** - Marketing site (from WordPress acronym)
 - **AP** - Admin portal
-- **CP** - Guest portal / Client portal
+- **GP** - Guest portal / Client portal
 - **Role** (code) = **schedule** (UI) - The `Role` model represents a schedule. Always refer to it as "schedule" in text
 - **Group** (code) = **sub-schedule** (UI) - The `Group` model represents a sub-schedule. Always refer to it as "sub-schedule" in text
 

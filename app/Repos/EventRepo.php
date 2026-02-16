@@ -96,7 +96,7 @@ class EventRepo
             ->first();
     }
 
-    public function saveEvent($currentRole, $request, $event = null)
+    public function saveEvent($currentRole, $request, $event = null, $followNewRoles = true)
     {
         $user = $request->user();
         $venue = null;
@@ -147,7 +147,7 @@ class EventRepo
                     $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
                 }
 
-                if (! $matchingUser || $matchingUser->id != $user->id) {
+                if ($followNewRoles && (! $matchingUser || $matchingUser->id != $user->id)) {
                     $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
                 }
             } elseif ($venue && ! $venue->isClaimed()) {
@@ -207,7 +207,7 @@ class EventRepo
                         $matchingUser->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
                     }
 
-                    if (! $matchingUser || $matchingUser->id != $user->id) {
+                    if ($followNewRoles && (! $matchingUser || $matchingUser->id != $user->id)) {
                         $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
                     }
                 } else {
