@@ -39,19 +39,20 @@
                             {{ __('messages.schedule') }}
                         </div>
                     </div>
-                    <div class="-ms-px flex w-0 flex-1 cursor-pointer btn-confirm-navigate"
-                        data-confirm="{{ __('messages.are_you_sure') }}"
-                        data-href="{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'redirect_to' => 'schedule']) }}">
-                        <div
-                            class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-ee-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <form method="POST" action="{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}"
+                        class="form-confirm -ms-px flex w-0 flex-1"
+                        data-confirm="{{ __('messages.are_you_sure') }}">
+                        @csrf
+                        <input type="hidden" name="redirect_to" value="schedule">
+                        <button type="submit" class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-ee-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
                             <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor"
                                 aria-hidden="true">
                                 <path
                                     d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z" />
                             </svg>
                             {{ __('messages.decline') }}
-                        </div>
-                    </div>
+                        </button>
+                    </form>
                 </div>
             </div>
         </li>
@@ -69,10 +70,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    document.querySelectorAll('.btn-confirm-navigate').forEach(function(el) {
-        el.addEventListener('click', function() {
-            if (confirm(this.getAttribute('data-confirm'))) {
-                location.href = this.getAttribute('data-href');
+    document.querySelectorAll('.form-confirm').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            if (!confirm(this.getAttribute('data-confirm'))) {
+                e.preventDefault();
             }
         });
     });

@@ -313,6 +313,10 @@
     </script>
 
 
+    @if(!config('app.hosted') || config('app.is_nexus'))
+    <link rel="alternate" type="application/rss+xml" title="Event Schedule Blog" href="{{ route('blog.feed') }}">
+    @endif
+
     {{ $headMeta ?? '' }}
 
 </head>

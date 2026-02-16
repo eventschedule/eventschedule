@@ -102,7 +102,7 @@
               </div>
 
               {{-- Icons + Buttons together on same row (centered) --}}
-              <div class="flex flex-col items-center gap-3">
+              <div class="flex flex-row flex-wrap items-center justify-center gap-3">
                 {{-- Social icons --}}
                 @if($hasEmail || $hasWebsite || $hasSocial)
                 <div class="flex flex-row gap-3 items-center">

@@ -25,7 +25,7 @@
     <ul class="space-y-4 mb-8">
         @foreach($plan['features'] as $feature)
         <li class="flex items-start">
-            <svg class="w-5 h-5 mr-3 text-green-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg aria-hidden="true" class="w-5 h-5 mr-3 text-green-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
             <span class="text-gray-600 dark:text-gray-300">{{ $feature }}</span>

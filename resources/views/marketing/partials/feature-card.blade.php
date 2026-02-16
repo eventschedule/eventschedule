@@ -14,7 +14,7 @@
     <ul class="space-y-2">
         @foreach($feature['details'] as $detail)
         <li class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-            <svg class="w-4 h-4 mr-2 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg aria-hidden="true" class="w-4 h-4 mr-2 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
             {{ $detail }}

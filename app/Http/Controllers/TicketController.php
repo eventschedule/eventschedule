@@ -79,6 +79,12 @@ class TicketController extends Controller
     public function checkout(Request $request, $subdomain)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($request->event_id));
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        if (! $event->roles()->where('role_id', $role->id)->exists()) {
+            abort(403);
+        }
+
         $user = auth()->user();
 
         // Check if trying to buy tickets for a past recurring event occurrence
@@ -129,7 +135,6 @@ class TicketController extends Controller
 
             session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page']);
 
-            $role = Role::subdomain($subdomain)->firstOrFail();
             $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
         }
 
@@ -183,7 +188,7 @@ class TicketController extends Controller
                 $sale->name = $request->input('name');
                 $sale->email = $request->input('email');
                 $sale->event_date = $request->input('event_date');
-                $sale->subdomain = $request->input('subdomain');
+                $sale->subdomain = $subdomain;
                 $sale->event_id = $event->id;
                 $sale->user_id = $user ? $user->id : null;
                 $sale->secret = strtolower(Str::random(32));
@@ -299,7 +304,7 @@ class TicketController extends Controller
                         'name' => $saleTicket->ticket->type ? $saleTicket->ticket->type : __('messages.tickets'),
                         ...$saleTicket->ticket->description ? ['description' => $saleTicket->ticket->description] : [],
                     ],
-                    'unit_amount' => $saleTicket->ticket->price * 100,
+                    'unit_amount' => (int) round($saleTicket->ticket->price * 100),
                 ],
                 'quantity' => $saleTicket->quantity,
             ];

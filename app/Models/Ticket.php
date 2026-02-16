@@ -43,15 +43,13 @@ class Ticket extends Model
 
     public function updateSold($date, $quantity)
     {
-        if (! $this->sold) {
-            $this->sold = json_encode([]);
-        }
-
-        $sold = json_decode($this->sold, true);
-        $sold[$date] = $sold[$date] ?? 0;
-        $sold[$date] += $quantity;
-        $this->sold = json_encode($sold);
-        $this->save();
+        \DB::transaction(function () use ($date, $quantity) {
+            $ticket = Ticket::lockForUpdate()->find($this->id);
+            $sold = $ticket->sold ? json_decode($ticket->sold, true) : [];
+            $sold[$date] = ($sold[$date] ?? 0) + $quantity;
+            $ticket->sold = json_encode($sold);
+            $ticket->save();
+        });
     }
 
     public function toData($date = null)

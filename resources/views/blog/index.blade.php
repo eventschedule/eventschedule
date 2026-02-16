@@ -1,7 +1,27 @@
 <x-marketing-layout>
-    <x-slot name="title">Blog | Event Schedule</x-slot>
-    <x-slot name="description">Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.</x-slot>
+    @if(request('tag'))
+        <x-slot name="title">{{ request('tag') }} - Blog | Event Schedule</x-slot>
+        <x-slot name="description">Articles about {{ request('tag') }} on the Event Schedule blog.</x-slot>
+    @elseif($monthLabel)
+        <x-slot name="title">{{ $monthLabel }} - Blog | Event Schedule</x-slot>
+        <x-slot name="description">Event Schedule blog posts from {{ $monthLabel }}.</x-slot>
+    @else
+        <x-slot name="title">Blog | Event Schedule</x-slot>
+        <x-slot name="description">Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.</x-slot>
+    @endif
     <x-slot name="keywords">event blog, event scheduling tips, ticketing news, event management insights, venue tips, performer advice</x-slot>
+
+    <x-slot name="headMeta">
+    @if($posts->currentPage() > 1 || request('tag') || $monthLabel)
+        <meta name="robots" content="noindex, follow">
+    @endif
+    @if($posts->currentPage() > 1)
+        <link rel="prev" href="{{ $posts->previousPageUrl() }}">
+    @endif
+    @if($posts->hasMorePages())
+        <link rel="next" href="{{ $posts->nextPageUrl() }}">
+    @endif
+    </x-slot>
 
     <style {!! nonce_attr() !!}>
         @keyframes pulse-slow {
