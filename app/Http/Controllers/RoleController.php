@@ -863,7 +863,7 @@ class RoleController extends Controller
         $followers = $role->followers()->get();
         $followersWithRoles = [];
 
-        $events = [];
+        $events = collect();
         $unscheduled = [];
         $requests = [];
         $month = $request->month;
