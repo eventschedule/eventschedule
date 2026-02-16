@@ -85,7 +85,7 @@ class CuratorEventTest extends DuskTestCase
                 ->waitForText('Accept', 5)
                 ->click('.test-accept-event')
                 ->waitForLocation('/curator1/schedule', 5)
-                ->assertSee('Talent');
+                ->waitForText('Talent', 5);
 
             // Get the event from the database
             $event = \App\Models\Event::where('name', 'Talent')->latest()->first();
