@@ -70,7 +70,7 @@
                  class="w-full aspect-square object-cover"
                  fetchpriority="high"/>
           @else
-            <img src="{{ url('/images/favicon.png') }}"
+            <img src="{{ url('/images/logo.webp') }}"
                  alt="{{ config('app.name') }}"
                  class="w-full aspect-square object-contain bg-gray-50 dark:bg-gray-800 p-4"
                  fetchpriority="high"/>
