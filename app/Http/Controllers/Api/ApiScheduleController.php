@@ -279,7 +279,14 @@ class ApiScheduleController extends Controller
 
         AuditService::log(AuditService::SCHEDULE_DELETE, $user->id, 'Role', $role->id, null, null, $role->name);
 
-        Notification::route('mail', $emails)->notify(new DeletedRoleNotification($role, $user));
+        try {
+            Notification::route('mail', $emails)->notify(new DeletedRoleNotification($role, $user));
+        } catch (\Exception $e) {
+            \Log::warning('Failed to send deletion notification', [
+                'role_id' => $role->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         $role->is_deleted = true;
         $role->save();

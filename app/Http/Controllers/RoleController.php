@@ -182,7 +182,14 @@ class RoleController extends Controller
 
         $role->delete();
 
-        Notification::route('mail', $emails)->notify(new DeletedRoleNotification($role, $user));
+        try {
+            Notification::route('mail', $emails)->notify(new DeletedRoleNotification($role, $user));
+        } catch (\Exception $e) {
+            \Log::warning('Failed to send deletion notification', [
+                'role_id' => $role->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return redirect(route('home'))
             ->with('message', __('messages.deleted_schedule'));
