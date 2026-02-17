@@ -1200,13 +1200,8 @@
 
     {{-- Bottom sheet panel --}}
     <div class="fixed inset-x-0 bottom-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl max-h-[80vh] overflow-y-auto {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-        {{-- Handle bar --}}
-        <div class="flex justify-center py-3 sticky top-0 bg-white dark:bg-gray-800">
-            <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
-        </div>
-
         {{-- Header --}}
-        <div class="px-6 pb-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
+        <div class="px-6 pt-5 pb-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.filters') }}</h3>
             <button v-if="activeFilterCount > 0"
                     @click="clearFilters"

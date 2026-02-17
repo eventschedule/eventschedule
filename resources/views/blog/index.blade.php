@@ -39,14 +39,9 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .text-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
     </style>
 
+    <x-slot name="structuredData">
     <!-- Blog ItemList Structured Data -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -82,6 +77,7 @@
         @endif
     }
     </script>
+    </x-slot>
 
     <!-- Hero Section -->
     <section class="relative overflow-hidden bg-[#0a0a0f]">
