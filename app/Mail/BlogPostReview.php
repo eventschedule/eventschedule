@@ -43,7 +43,7 @@ class BlogPostReview extends Mailable
         $deleteUrl = URL::temporarySignedRoute(
             'blog.destroy.signed',
             now()->addDays(7),
-            ['blog_post' => $this->blogPost->id]
+            ['blogPost' => $this->blogPost->id]
         );
 
         $viewUrl = blog_url('/'.$this->blogPost->slug);
