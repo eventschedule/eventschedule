@@ -33,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'stripe/webhook',
             'invoiceninja/webhook/*',
             'test_database',
+            'nl/u/*',
         ]);
 
         // Sanitize user agent before session middleware processes it

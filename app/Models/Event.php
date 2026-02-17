@@ -797,9 +797,9 @@ class Event extends Model
         $str = $this->translatedName();
 
         if ($this->venue) {
-            $str .= ' at '.$this->venue->getDisplayName();
+            $str .= ' ' . __('messages.at') . ' '.$this->venue->getDisplayName();
         } elseif ($this->getEventUrlDomain()) {
-            $str .= ' at '.$this->getEventUrlDomain();
+            $str .= ' ' . __('messages.at') . ' '.$this->getEventUrlDomain();
         }
 
         $str .= ' | '.$this->localStartsAt(true, $date);

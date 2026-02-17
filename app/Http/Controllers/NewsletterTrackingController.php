@@ -13,14 +13,15 @@ class NewsletterTrackingController extends Controller
         $recipient = NewsletterRecipient::where('token', $token)->first();
 
         if ($recipient) {
+            $isFirstOpen = is_null($recipient->opened_at);
             $recipient->recordOpen();
 
             // Update denormalized count on newsletter
-            $newsletter = $recipient->newsletter;
-            if ($newsletter) {
-                $newsletter->update([
-                    'open_count' => $newsletter->recipients()->where('status', '!=', 'test')->where('open_count', '>', 0)->count(),
-                ]);
+            if ($isFirstOpen) {
+                $newsletter = $recipient->newsletter;
+                if ($newsletter) {
+                    $newsletter->increment('open_count');
+                }
             }
         }
 
@@ -56,6 +57,7 @@ class NewsletterTrackingController extends Controller
             return redirect($url, 302);
         }
 
+        $isFirstClick = is_null($recipient->clicked_at);
         $recipient->recordClick(
             $url,
             request()->ip(),
@@ -63,11 +65,11 @@ class NewsletterTrackingController extends Controller
         );
 
         // Update denormalized count on newsletter
-        $newsletter = $recipient->newsletter;
-        if ($newsletter) {
-            $newsletter->update([
-                'click_count' => $newsletter->recipients()->where('status', '!=', 'test')->where('click_count', '>', 0)->count(),
-            ]);
+        if ($isFirstClick) {
+            $newsletter = $recipient->newsletter;
+            if ($newsletter) {
+                $newsletter->increment('click_count');
+            }
         }
 
         return redirect($url, 302);

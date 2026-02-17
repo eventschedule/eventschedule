@@ -356,7 +356,7 @@
                     <path d="M12.0001 2C12.831 2 13.5708 2.36421 14.1793 2.92113C14.7849 3.47525 15.2966 4.24878 15.7104 5.16315C16.1267 6.08292 16.4501 7.15868 16.669 8.32612C16.8445 9.26194 16.9512 10.2485 16.9868 11.25H21.9724C21.5889 6.07745 17.2707 2 12.0001 2Z" />
                     <path d="M16.669 15.6739C16.4501 16.8413 16.1267 17.9171 15.7104 18.8368C15.2966 19.7512 14.7849 20.5247 14.1793 21.0789C13.5708 21.6358 12.831 22 12.0001 22C17.2707 22 21.5889 17.9226 21.9724 12.75H16.9868C16.9512 13.7515 16.8445 14.7381 16.669 15.6739Z" />
                   </svg>
-                  <x-link href="{{ $event->venue->website }}" target="_blank" class="text-sm text-gray-700 dark:text-gray-300">
+                  <x-link href="{{ $event->venue->website }}" target="_blank" :nofollow="true" class="text-sm text-gray-700 dark:text-gray-300">
                     {{ App\Utils\UrlUtils::clean($event->venue->website) }}
                   </x-link>
                 </div>
@@ -368,7 +368,7 @@
                 @foreach (json_decode($event->venue->social_links) as $link)
                   @if ($link)
                   <a
-                    href="{{ $link->url }}" target="_blank" rel="noopener noreferrer"
+                    href="{{ $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
                     class="w-10 h-10 rounded-full flex justify-center items-center bg-gray-100 dark:bg-gray-700 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
                     title="{{ App\Utils\UrlUtils::clean($link->url) }}"
                     >
@@ -636,7 +636,7 @@
             </span>
             @if ($event->venue && $event->venue->shortAddress())
             <span class="text-sm text-gray-500 dark:text-gray-400">
-              <x-link href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank">
+              <x-link href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank" :nofollow="true">
                 {{ $event->venue->shortAddress() }}
               </x-link>
             </span>
@@ -649,7 +649,7 @@
         <div style="font-family: sans-serif" class="relative inline-block text-left hidden sm:block self-start {{ $role->isRtl() ? 'rtl' : '' }}">
         @if ($event->canSellTickets($date) || $event->registration_url)
           @if (request()->get('tickets') !== 'true')
-            <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank"' : '' }}
+            <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank" rel="noopener noreferrer nofollow"' : '' }}
               @if ($event->payment_method === 'payment_url' && $event->user && $event->user->paymentUrlMobileOnly() && ! is_mobile())
                 class="payment-mobile-only-link"
                 data-mobile-msg="{{ __('messages.payment_url_mobile_only') }}"
@@ -1105,7 +1105,7 @@
   <div class="fixed bottom-0 inset-x-0 z-40 sm:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 shadow-lg" style="font-family: sans-serif; padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
     @if ($event->canSellTickets($date) || $event->registration_url)
       @if (request()->get('tickets') !== 'true')
-        <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank"' : '' }}
+        <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank" rel="noopener noreferrer nofollow"' : '' }}
           @if ($event->payment_method === 'payment_url' && $event->user && $event->user->paymentUrlMobileOnly() && ! is_mobile())
             class="payment-mobile-only-link"
             data-mobile-msg="{{ __('messages.payment_url_mobile_only') }}"

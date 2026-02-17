@@ -1,4 +1,4 @@
-@props(['href', 'target', 'hideIcon' => false])
+@props(['href', 'target', 'hideIcon' => false, 'nofollow' => false])
 
 @php
     $isExternal = ($target ?? $attributes->get('target')) === '_blank';
@@ -20,7 +20,7 @@
         target="{{ $target ?? $attributes->get('target') }}"
     @endif
     @if($isExternal)
-        rel="noopener noreferrer"
+        rel="noopener noreferrer{{ $nofollow ? ' nofollow' : '' }}"
     @endif
 >
     @if($hasDisplayClass)

@@ -177,6 +177,14 @@ document.addEventListener('DOMContentLoaded', function() {
         var reader = new FileReader();
 
         reader.onloadend = function () {
+            if (!reader.result) return;
+
+            // Show preview immediately
+            preview.src = reader.result;
+            preview.style.display = '';
+            if (clearBtn) clearBtn.style.display = 'inline-block';
+
+            // Check dimensions/size asynchronously (for warnings only)
             var img = new Image();
             img.onload = function() {
                 var width = this.width;
@@ -202,9 +210,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         warningElement.style.display = 'none';
                     }
                 }
-
-                preview.src = reader.result;
-                if (clearBtn) clearBtn.style.display = 'inline-block';
             };
             img.src = reader.result;
         };

@@ -539,6 +539,7 @@ class NewsletterController extends Controller
             ->firstOrFail();
 
         $recipients = $newsletter->recipients()
+            ->where('status', '!=', 'test')
             ->orderBy('opened_at', 'desc')
             ->paginate(50);
 
@@ -761,11 +762,29 @@ class NewsletterController extends Controller
             ->where('id', UrlUtils::decodeId($hash))
             ->firstOrFail();
 
+        if (! in_array($newsletter->status, ['draft', 'scheduled'])) {
+            return back()->with('error', __('messages.newsletter_already_sent'));
+        }
+
         if (! $newsletter->ab_test_id) {
             return back()->with('error', __('messages.no_ab_test'));
         }
 
         $abTest = $newsletter->abTest;
+
+        if (! $abTest) {
+            return back()->with('error', __('messages.no_ab_test'));
+        }
+
+        $updated = NewsletterAbTest::where('id', $abTest->id)
+            ->where('status', 'pending')
+            ->update(['status' => 'sending']);
+
+        if ($updated === 0) {
+            return back()->with('error', __('messages.ab_test_already_sent'));
+        }
+
+        $abTest->refresh();
         $variants = $abTest->newsletters;
 
         if ($variants->count() < 2) {
@@ -774,6 +793,11 @@ class NewsletterController extends Controller
 
         // Resolve full recipient list
         $allRecipients = $service->resolveRecipients($role, $newsletter->segment_ids ?? []);
+
+        if ($allRecipients->isEmpty()) {
+            return back()->with('error', __('messages.no_recipients'));
+        }
+
         $sampleSize = (int) ceil($allRecipients->count() * ($abTest->sample_percentage / 100));
         $sample = $allRecipients->random(min($sampleSize, $allRecipients->count()));
 
@@ -781,8 +805,6 @@ class NewsletterController extends Controller
         $halfSize = (int) ceil($sample->count() / 2);
         $sampleA = $sample->slice(0, $halfSize)->values();
         $sampleB = $sample->slice($halfSize)->values();
-
-        $abTest->update(['status' => 'sending']);
 
         // Send each variant to its sample
         foreach ([['newsletter' => $variants->where('ab_variant', 'A')->first(), 'recipients' => $sampleA],

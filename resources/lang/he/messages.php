@@ -3,6 +3,7 @@
 
 return [
     'home' => 'דף הבית',
+    'at' => 'ב',
     'venues' => 'מקומות',
     'event_deleted' => 'האירוע נמחק בהצלחה',
     'edit_event' => 'ערוך אירוע',
@@ -1374,6 +1375,7 @@ return [
     'ab_test_results' => 'תוצאות בדיקת A/B',
     'ab_test_sending' => 'בדיקת A/B נשלחת',
     'ab_test_needs_variants' => 'בדיקת A/B דורשת שתי גרסאות',
+    'ab_test_already_sent' => 'בדיקת A/B זו כבר נשלחה',
     'no_ab_test' => 'לא הוגדרה בדיקת A/B',
     'test_field' => 'שדה לבדיקה',
     'sample_percentage' => 'גודל מדגם (%)',
