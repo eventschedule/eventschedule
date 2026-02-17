@@ -138,7 +138,7 @@ class GroupsTest extends DuskTestCase
     /**
      * Test filtering functionality in guest view
      */
-    protected function test_guest_view_filtering(Browser $browser): void
+    protected function testGuestViewFiltering(Browser $browser): void
     {
         // Visit guest view - should show all events initially
         $browser->visit('/talent')
@@ -178,7 +178,7 @@ class GroupsTest extends DuskTestCase
     /**
      * Test API functionality for creating events with sub-schedules
      */
-    protected function test_api_group_functionality(Browser $browser): void
+    protected function testApiGroupFunctionality(Browser $browser): void
     {
         // Enable API for the user
         $apiKey = $this->enableApi($browser);
