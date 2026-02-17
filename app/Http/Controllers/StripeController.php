@@ -127,35 +127,41 @@ class StripeController extends Controller
                 if (! $sale && isset($paymentIntent->metadata->sale_id)) {
                     $saleId = UrlUtils::decodeId($paymentIntent->metadata->sale_id);
                     $sale = Sale::where('payment_method', 'stripe')->find($saleId);
-                    if ($sale) {
-                        $sale->transaction_reference = $paymentIntent->id;
-                    }
                 }
 
-                if ($sale && $sale->status !== 'paid') {
-                    $webhookAmount = $paymentIntent->amount / 100;
+                if ($sale) {
+                    // Use lockForUpdate to prevent race with the success redirect handler
+                    \DB::transaction(function () use ($sale, $paymentIntent) {
+                        $sale = Sale::lockForUpdate()->find($sale->id);
+                        if ($sale->status === 'paid') {
+                            return;
+                        }
 
-                    // Validate that the webhook amount matches the expected sale amount
-                    $expectedAmount = $sale->payment_amount;
-                    $amountDifference = abs($webhookAmount - $expectedAmount);
+                        $webhookAmount = $paymentIntent->amount / 100;
 
-                    // Allow small tolerance for floating point differences (e.g., 0.01)
-                    if ($amountDifference > 0.01) {
-                        \Log::warning('Payment amount mismatch in Stripe webhook', [
-                            'sale_id' => $sale->id,
-                            'expected_amount' => $expectedAmount,
-                            'webhook_amount' => $webhookAmount,
-                            'difference' => $amountDifference,
-                            'payment_intent_id' => $paymentIntent->id,
-                        ]);
-                    }
+                        // Validate that the webhook amount matches the expected sale amount
+                        $expectedAmount = $sale->payment_amount;
+                        $amountDifference = abs($webhookAmount - $expectedAmount);
 
-                    $sale->payment_amount = $webhookAmount;
-                    $sale->status = 'paid';
-                    $sale->save();
+                        // Allow small tolerance for floating point differences (e.g., 0.01)
+                        if ($amountDifference > 0.01) {
+                            \Log::warning('Payment amount mismatch in Stripe webhook', [
+                                'sale_id' => $sale->id,
+                                'expected_amount' => $expectedAmount,
+                                'webhook_amount' => $webhookAmount,
+                                'difference' => $amountDifference,
+                                'payment_intent_id' => $paymentIntent->id,
+                            ]);
+                        }
 
-                    AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
-                    UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
+                        $sale->payment_amount = $webhookAmount;
+                        $sale->status = 'paid';
+                        $sale->transaction_reference = $paymentIntent->id;
+                        $sale->save();
+
+                        AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
+                        UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
+                    });
                 }
                 break;
 
@@ -165,33 +171,41 @@ class StripeController extends Controller
                 if ($session->payment_status === 'paid' && isset($session->metadata->sale_id)) {
                     $saleId = UrlUtils::decodeId($session->metadata->sale_id);
                     $sale = Sale::find($saleId);
-                    if ($sale && $sale->status !== 'paid') {
-                        $webhookAmount = $session->amount_total / 100;
+                    if ($sale) {
+                        // Use lockForUpdate to prevent race with the success redirect handler
+                        \DB::transaction(function () use ($sale, $session) {
+                            $sale = Sale::lockForUpdate()->find($sale->id);
+                            if ($sale->status === 'paid') {
+                                return;
+                            }
 
-                        // Validate that the webhook amount matches the expected sale amount
-                        $expectedAmount = $sale->payment_amount;
-                        $amountDifference = abs($webhookAmount - $expectedAmount);
+                            $webhookAmount = $session->amount_total / 100;
 
-                        // Allow small tolerance for floating point differences (e.g., 0.01)
-                        if ($amountDifference > 0.01) {
-                            \Log::warning('Payment amount mismatch in Stripe checkout webhook', [
-                                'sale_id' => $sale->id,
-                                'expected_amount' => $expectedAmount,
-                                'webhook_amount' => $webhookAmount,
-                                'difference' => $amountDifference,
-                                'session_id' => $session->id,
-                            ]);
-                        }
+                            // Validate that the webhook amount matches the expected sale amount
+                            $expectedAmount = $sale->payment_amount;
+                            $amountDifference = abs($webhookAmount - $expectedAmount);
 
-                        $sale->payment_amount = $webhookAmount;
-                        $sale->status = 'paid';
-                        $sale->transaction_reference = $session->payment_intent;
-                        $sale->save();
+                            // Allow small tolerance for floating point differences (e.g., 0.01)
+                            if ($amountDifference > 0.01) {
+                                \Log::warning('Payment amount mismatch in Stripe checkout webhook', [
+                                    'sale_id' => $sale->id,
+                                    'expected_amount' => $expectedAmount,
+                                    'webhook_amount' => $webhookAmount,
+                                    'difference' => $amountDifference,
+                                    'session_id' => $session->id,
+                                ]);
+                            }
 
-                        UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
+                            $sale->payment_amount = $webhookAmount;
+                            $sale->status = 'paid';
+                            $sale->transaction_reference = $session->payment_intent;
+                            $sale->save();
 
-                        // Record sale in analytics
-                        AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+                            UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
+
+                            // Record sale in analytics
+                            AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+                        });
                     }
                 }
                 break;

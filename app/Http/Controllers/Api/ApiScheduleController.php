@@ -34,6 +34,10 @@ class ApiScheduleController extends Controller
             ->where('is_deleted', false)
             ->wherePro();
 
+        if ($request->has('subdomain')) {
+            $schedules->where('subdomain', $request->subdomain);
+        }
+
         if ($request->has('name')) {
             $name = str_replace(['%', '_'], ['\\%', '\\_'], $request->name);
             $schedules->where('name', 'like', '%'.$name.'%');

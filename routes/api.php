@@ -40,5 +40,9 @@ Route::middleware([ApiAuthentication::class])->group(function () {
     Route::get('/categories', [ApiEventController::class, 'categories']);
 
     // Sales
+    Route::get('/sales', [ApiSaleController::class, 'index']);
     Route::post('/sales', [ApiSaleController::class, 'store']);
+    Route::get('/sales/{id}', [ApiSaleController::class, 'show']);
+    Route::put('/sales/{id}', [ApiSaleController::class, 'update']);
+    Route::delete('/sales/{id}', [ApiSaleController::class, 'destroy']);
 });

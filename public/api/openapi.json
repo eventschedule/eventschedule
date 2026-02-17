@@ -365,6 +365,14 @@
         "description": "Returns a paginated list of schedules owned or administered by the authenticated user.",
         "parameters": [
           {
+            "name": "subdomain",
+            "in": "query",
+            "description": "Filter schedules by exact subdomain match",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "name",
             "in": "query",
             "description": "Filter schedules by name (partial match)",
@@ -1211,6 +1219,55 @@
             }
           },
           {
+            "name": "venue_id",
+            "in": "query",
+            "description": "Filter events by venue (encoded venue schedule ID)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category_id",
+            "in": "query",
+            "description": "Filter events by category ID",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter events by name (partial match)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "schedule_type",
+            "in": "query",
+            "description": "Filter by event type",
+            "schema": {
+              "type": "string",
+              "enum": ["single", "recurring"]
+            }
+          },
+          {
+            "name": "tickets_enabled",
+            "in": "query",
+            "description": "Filter by whether tickets are enabled",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "group_id",
+            "in": "query",
+            "description": "Filter events by sub-schedule (encoded sub-schedule ID)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "description": "Page number (default 1)",
@@ -1723,6 +1780,111 @@
       }
     },
     "/sales": {
+      "get": {
+        "operationId": "list_sales",
+        "tags": ["Sales"],
+        "summary": "List sales",
+        "description": "Returns a paginated list of sales for events the authenticated user owns or administers. Can be filtered by event, schedule, status, buyer email, and event date.",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "query",
+            "description": "Filter sales by event (encoded event ID)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subdomain",
+            "in": "query",
+            "description": "Filter sales by schedule subdomain",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter sales by status",
+            "schema": {
+              "type": "string",
+              "enum": ["unpaid", "paid", "cancelled", "refunded", "expired"]
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "description": "Filter sales by buyer email (exact match)",
+            "schema": {
+              "type": "string",
+              "format": "email"
+            }
+          },
+          {
+            "name": "event_date",
+            "in": "query",
+            "description": "Filter sales by event date (Y-m-d)",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (default 1)",
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of results per page (default 100, max 500)",
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "minimum": 1,
+              "maximum": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of sales",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Sale"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "operationId": "create_sale",
         "tags": ["Sales"],
@@ -1830,6 +1992,243 @@
           }
         }
       }
+    },
+    "/sales/{id}": {
+      "get": {
+        "operationId": "show_sale",
+        "tags": ["Sales"],
+        "summary": "Show a sale",
+        "description": "Returns details of a specific sale. The authenticated user must be able to edit the associated event.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the sale",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sale details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Sale"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized or not a Pro account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sale not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "update_sale",
+        "tags": ["Sales"],
+        "summary": "Update sale status",
+        "description": "Performs a status action on a sale. Available actions: mark_paid (unpaid -> paid), refund (paid -> refunded), cancel (unpaid or paid -> cancelled).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the sale",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["action"],
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": ["mark_paid", "refund", "cancel"],
+                    "description": "The action to perform on the sale"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sale updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Sale"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Sale updated successfully"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized or not a Pro account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sale not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Action cannot be performed on current sale status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_sale",
+        "tags": ["Sales"],
+        "summary": "Delete a sale",
+        "description": "Soft-deletes a sale, marking it as deleted. The sale will no longer appear in listings.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the sale",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sale deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Sale deleted successfully"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized or not a Pro account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sale not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1903,36 +2302,48 @@
             "nullable": true,
             "description": "Language code"
           },
+          "profile_image_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "URL of the schedule's profile image"
+          },
+          "address1": {
+            "type": "string",
+            "nullable": true,
+            "description": "Street address"
+          },
+          "city": {
+            "type": "string",
+            "nullable": true,
+            "description": "City"
+          },
+          "state": {
+            "type": "string",
+            "nullable": true,
+            "description": "State or province"
+          },
+          "postal_code": {
+            "type": "string",
+            "nullable": true,
+            "description": "Postal or ZIP code"
+          },
+          "country_code": {
+            "type": "string",
+            "nullable": true,
+            "description": "Country code"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
             "nullable": true,
             "description": "ISO 8601 creation timestamp"
           },
-          "address1": {
+          "updated_at": {
             "type": "string",
+            "format": "date-time",
             "nullable": true,
-            "description": "Street address (venue type only)"
-          },
-          "city": {
-            "type": "string",
-            "nullable": true,
-            "description": "City (venue type only)"
-          },
-          "state": {
-            "type": "string",
-            "nullable": true,
-            "description": "State or province (venue type only)"
-          },
-          "postal_code": {
-            "type": "string",
-            "nullable": true,
-            "description": "Postal or ZIP code (venue type only)"
-          },
-          "country_code": {
-            "type": "string",
-            "nullable": true,
-            "description": "Country code (venue type only)"
+            "description": "ISO 8601 last update timestamp"
           },
           "groups": {
             "type": "array",
@@ -1984,6 +2395,11 @@
             "nullable": true,
             "description": "Category ID from /categories"
           },
+          "category_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "Human-readable category name"
+          },
           "event_url": {
             "type": "string",
             "format": "uri",
@@ -2000,6 +2416,21 @@
             "type": "string",
             "nullable": true,
             "description": "Encoded ID of the associated venue schedule"
+          },
+          "venue_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "Name of the associated venue"
+          },
+          "venue_address1": {
+            "type": "string",
+            "nullable": true,
+            "description": "Street address of the associated venue"
+          },
+          "venue_subdomain": {
+            "type": "string",
+            "nullable": true,
+            "description": "Subdomain of the associated venue schedule"
           },
           "flyer_image_url": {
             "type": "string",
@@ -2044,6 +2475,23 @@
             "type": "boolean",
             "description": "Whether ticket sales are enabled for this event"
           },
+          "ticket_currency_code": {
+            "type": "string",
+            "nullable": true,
+            "description": "3-letter ISO currency code for tickets"
+          },
+          "payment_method": {
+            "type": "string",
+            "nullable": true,
+            "enum": ["stripe", "invoiceninja", "payment_url", "manual"],
+            "description": "Payment method for ticket sales"
+          },
+          "terms_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "URL to terms and conditions for ticket sales"
+          },
           "tickets": {
             "type": "array",
             "description": "Ticket types for this event (only present when tickets are enabled)",
@@ -2079,6 +2527,51 @@
             "description": "Sub-sections or segments of the event",
             "items": {
               "$ref": "#/components/schemas/EventPart"
+            }
+          },
+          "schedules": {
+            "type": "array",
+            "description": "Schedules associated with this event",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Encoded schedule ID"
+                },
+                "subdomain": {
+                  "type": "string",
+                  "description": "Schedule subdomain"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Schedule name"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": ["venue", "talent", "curator"],
+                  "description": "Schedule type"
+                },
+                "group": {
+                  "type": "object",
+                  "nullable": true,
+                  "description": "Sub-schedule assignment for this event on this schedule",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Encoded sub-schedule ID"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Sub-schedule name"
+                    },
+                    "slug": {
+                      "type": "string",
+                      "description": "Sub-schedule slug"
+                    }
+                  }
+                }
+              }
             }
           },
           "created_at": {
@@ -2397,6 +2890,16 @@
             "type": "string",
             "description": "Encoded event ID"
           },
+          "event_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "Name of the associated event"
+          },
+          "subdomain": {
+            "type": "string",
+            "nullable": true,
+            "description": "Subdomain of the schedule where the sale was made"
+          },
           "name": {
             "type": "string",
             "description": "Buyer name"
@@ -2413,7 +2916,7 @@
           },
           "status": {
             "type": "string",
-            "enum": ["unpaid", "paid"],
+            "enum": ["unpaid", "paid", "cancelled", "refunded", "expired"],
             "description": "Payment status"
           },
           "payment_method": {
@@ -2559,7 +3062,7 @@
     },
     {
       "name": "Sales",
-      "description": "Create ticket sales for events. Events must have tickets enabled and belong to a Pro schedule."
+      "description": "Manage ticket sales for events. Supports creating, listing, viewing, updating status (mark as paid, refund, cancel), and deleting sales. Events must have tickets enabled and belong to a Pro schedule."
     }
   ]
 }

@@ -709,15 +709,19 @@ class Role extends Model implements MustVerifyEmail
         $data->short_description = $this->short_description;
         $data->timezone = $this->timezone;
         $data->language_code = $this->language_code;
-        $data->created_at = $this->created_at ? $this->created_at->toIso8601String() : null;
 
-        if ($this->isVenue()) {
-            $data->address1 = $this->address1;
-            $data->city = $this->city;
-            $data->state = $this->state;
-            $data->postal_code = $this->postal_code;
-            $data->country_code = $this->country_code;
-        }
+        // Profile image URL
+        $rawProfileImage = $this->getAttributes()['profile_image_url'] ?? null;
+        $data->profile_image_url = $rawProfileImage ? $this->profile_image_url : null;
+
+        $data->address1 = $this->address1;
+        $data->city = $this->city;
+        $data->state = $this->state;
+        $data->postal_code = $this->postal_code;
+        $data->country_code = $this->country_code;
+
+        $data->created_at = $this->created_at ? $this->created_at->toIso8601String() : null;
+        $data->updated_at = $this->updated_at ? $this->updated_at->toIso8601String() : null;
 
         if ($this->relationLoaded('groups')) {
             $data->groups = $this->groups->map(function ($group) {
