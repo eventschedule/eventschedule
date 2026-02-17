@@ -326,11 +326,16 @@ class TicketController extends Controller
             $session = $stripe->checkout->sessions->create(
                 [
                     'line_items' => $lineItems,
-                    // 'payment_intent_data' => ['application_fee_amount' => 123],
                     'mode' => 'payment',
                     'customer_email' => $sale->email,
                     'metadata' => [
                         'customer_name' => $sale->name,
+                        'sale_id' => UrlUtils::encodeId($sale->id),
+                    ],
+                    'payment_intent_data' => [
+                        'metadata' => [
+                            'sale_id' => UrlUtils::encodeId($sale->id),
+                        ],
                     ],
                     'success_url' => route('checkout.success', $data).'?session_id={CHECKOUT_SESSION_ID}',
                     'cancel_url' => route('checkout.cancel', $data).'?secret='.$sale->secret,

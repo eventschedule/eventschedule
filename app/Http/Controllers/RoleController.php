@@ -2232,6 +2232,11 @@ class RoleController extends Controller
         $userId = UrlUtils::decodeId($hash);
         $user = User::findOrFail($userId);
 
+        // Verify the user is actually a member of this schedule
+        if (! $user->roles()->where('roles.id', $role->id)->exists()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
         Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
 
         return redirect()->back()->with('message', __('messages.invite_resent'));
@@ -2630,6 +2635,18 @@ class RoleController extends Controller
             return response()->json(['success' => false, 'message' => __('messages.talent_role_not_found')]);
         }
 
+        // Verify this talent is in one of the curator's accepted events
+        $sharedEvent = \DB::table('event_role as curator_er')
+            ->join('event_role as talent_er', 'curator_er.event_id', '=', 'talent_er.event_id')
+            ->where('curator_er.role_id', $role->id)
+            ->where('curator_er.is_accepted', true)
+            ->where('talent_er.role_id', $talentRole->id)
+            ->exists();
+
+        if (! $sharedEvent) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
         // Add the video to the talent role's YouTube links
         $existingLinks = $talentRole->youtube_links ? json_decode($talentRole->youtube_links, true) : [];
 
@@ -2679,6 +2696,18 @@ class RoleController extends Controller
 
         if (! $talentRole || ! $talentRole->isTalent()) {
             return response()->json(['success' => false, 'message' => __('messages.talent_role_not_found')]);
+        }
+
+        // Verify this talent is in one of the curator's accepted events
+        $sharedEvent = \DB::table('event_role as curator_er')
+            ->join('event_role as talent_er', 'curator_er.event_id', '=', 'talent_er.event_id')
+            ->where('curator_er.role_id', $role->id)
+            ->where('curator_er.is_accepted', true)
+            ->where('talent_er.role_id', $talentRole->id)
+            ->exists();
+
+        if (! $sharedEvent) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
         // Add the videos to the talent role's YouTube links
