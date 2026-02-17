@@ -546,7 +546,7 @@
                 </div>
             </div>
             <div v-else-if="!isLoadingEvents && {{ $tab != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
+                <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
                         {{ __('messages.no_scheduled_events') }}
                     </div>
@@ -1047,7 +1047,7 @@
 
             {{-- Empty State --}}
             <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="pb-4 text-center">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
+                <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
                         {{ __('messages.no_scheduled_events') }}
                     </div>
@@ -1182,7 +1182,7 @@
 
             {{-- Empty State --}}
             <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="pb-4 text-center">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
+                <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
                         {{ __('messages.no_scheduled_events') }}
                     </div>

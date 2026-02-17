@@ -10,7 +10,7 @@
         "@context": "https://schema.org",
         "@type": "TechArticle",
         "headline": "Availability Calendar Documentation - Event Schedule",
-        "description": "Learn how to mark your available and unavailable dates using Event Schedule availability calendar feature.",
+        "description": "Learn how to mark your available and unavailable dates using Event Schedule's availability calendar feature.",
         "author": {
             "@type": "Organization",
             "name": "Event Schedule"
@@ -101,11 +101,11 @@
                                 To mark dates as unavailable:
                             </p>
 
-                            <ul class="doc-list doc-list-numbered mb-6">
+                            <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Go to your schedule's admin panel and click the <strong>Availability</strong> tab</li>
                                 <li>Click on any date in the calendar to toggle it as unavailable. Your unavailable dates appear with a red overlay and an "Unavailable" label.</li>
                                 <li>Click <strong>Save</strong> to confirm your changes</li>
-                            </ul>
+                            </ol>
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 You can click the same date again to remove the unavailable marker and make yourself available on that date.

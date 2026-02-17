@@ -149,6 +149,22 @@
             },
             {
                 "@type": "Question",
+                "name": "Can I send newsletters to my followers?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Pro users can create and send branded newsletters to followers and ticket buyers using a drag-and-drop builder. Choose from pre-built templates, add event listings, images, and buttons, and track opens and clicks with built-in analytics."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Does Event Schedule have email marketing?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. The built-in newsletter feature includes audience segmentation, A/B testing, scheduled sends, and open/click tracking. You can target all followers, ticket buyers, specific sub-schedules, or a manual list of email addresses."
+                }
+            },
+            {
+                "@type": "Question",
                 "name": "Who can see my schedule?",
                 "acceptedAnswer": {
                     "@type": "Answer",
@@ -505,6 +521,44 @@
                 </div>
             </div>
 
+            <!-- Newsletters & Email -->
+            <div class="mb-16">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg shadow-rose-500/25">
+                        <svg aria-hidden="true" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Newsletters & Email</h2>
+                </div>
+
+                <div class="space-y-4">
+                    <div x-data="{ open: false }" class="faq-item bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
+                        <button @click="open = !open" class="w-full px-6 py-5 text-left flex items-center justify-between gap-4">
+                            <span class="font-semibold text-gray-900 dark:text-white">Can I send newsletters to my followers?</span>
+                            <svg aria-hidden="true" :class="{ 'rotate-180': open }" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" x-collapse class="px-6 pb-5">
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Pro users can create and send branded <a href="{{ marketing_url('/docs/newsletters') }}" class="text-blue-600 hover:text-blue-700 underline">newsletters</a> to followers and ticket buyers using a drag-and-drop builder. Choose from pre-built templates, add event listings, images, and buttons, and track opens and clicks with built-in analytics.</p>
+                        </div>
+                    </div>
+
+                    <div x-data="{ open: false }" class="faq-item bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
+                        <button @click="open = !open" class="w-full px-6 py-5 text-left flex items-center justify-between gap-4">
+                            <span class="font-semibold text-gray-900 dark:text-white">Does Event Schedule have email marketing?</span>
+                            <svg aria-hidden="true" :class="{ 'rotate-180': open }" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" x-collapse class="px-6 pb-5">
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. The built-in <a href="{{ marketing_url('/docs/newsletters') }}" class="text-blue-600 hover:text-blue-700 underline">newsletter feature</a> includes audience segmentation, A/B testing, scheduled sends, and open/click tracking. You can target all followers, ticket buyers, specific sub-schedules, or a manual list of email addresses.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Privacy & Security -->
             <div class="mb-16">
                 <div class="flex items-center gap-3 mb-8">
@@ -629,7 +683,7 @@
                 Still have questions?
             </h2>
             <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                We're here to help. Reach out and we'll get back to you as soon as possible.
+                We're here to help. Browse our <a href="{{ route('marketing.docs') }}" class="text-white underline hover:text-white/90">documentation</a> for detailed guides, or reach out and we'll get back to you as soon as possible.
             </p>
             <div class="flex flex-wrap justify-center gap-4">
                 <a href="mailto:contact@eventschedule.com" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
