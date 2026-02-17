@@ -2,7 +2,6 @@
     <x-slot name="title">Schedule Styling - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Schedule Styling</x-slot>
     <x-slot name="description">Customize your schedule's appearance with colors, fonts, backgrounds, and more. Make your schedule uniquely yours.</x-slot>
-    <x-slot name="keywords">schedule styling, customize schedule, event calendar design, custom branding, schedule colors, schedule fonts</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>

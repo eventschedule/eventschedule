@@ -2,7 +2,6 @@
     <x-slot name="title">Selling Tickets - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Selling Tickets</x-slot>
     <x-slot name="description">Learn how to set up and sell tickets for your events. Configure payment methods, create ticket types, and manage sales.</x-slot>
-    <x-slot name="keywords">sell tickets, event ticketing, ticket sales, stripe payments, QR code tickets, event management</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>

@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule vs Eventbrite, Luma, Ticket Tailor & Google Calendar | Comparison</x-slot>
     <x-slot name="description">Compare Event Schedule with Eventbrite, Luma, Ticket Tailor, and Google Calendar. See how our 0% platform fees, open source platform, and AI features stack up.</x-slot>
-    <x-slot name="keywords">event schedule comparison, eventbrite alternative, luma alternative, ticket tailor alternative, google calendar alternative, free event platform, no platform fees ticketing</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Compare</x-slot>
 

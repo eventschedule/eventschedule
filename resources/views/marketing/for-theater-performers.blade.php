@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Theater Performers | Share Show Runs & Sell Tickets</x-slot>
     <x-slot name="description">Share your theater productions with audiences everywhere. Email your fans directly - no social media algorithms. Sell tickets to your shows with zero platform fees.</x-slot>
-    <x-slot name="keywords">theater schedule, show run calendar, theater tickets, play performance schedule, acting schedule app, theater company calendar, stage production tickets, drama performance scheduling</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Theater Performers</x-slot>
 

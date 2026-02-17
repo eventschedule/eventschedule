@@ -2,7 +2,6 @@
     <x-slot name="title">{{ $post->meta_title }} | Event Schedule</x-slot>
     <x-slot name="description">{{ $post->meta_description }}</x-slot>
     @if($post->tags)
-    <x-slot name="keywords">{{ implode(', ', $post->tags) }}, event scheduling, ticketing</x-slot>
     @endif
     <x-slot name="breadcrumbTitle">{{ $post->title }}</x-slot>
     <x-slot name="ogType">article</x-slot>

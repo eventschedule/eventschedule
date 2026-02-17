@@ -10,7 +10,6 @@
         <x-slot name="description">Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.</x-slot>
     @endif
     <x-slot name="breadcrumbTitle">Blog</x-slot>
-    <x-slot name="keywords">event blog, event scheduling tips, ticketing news, event management insights, venue tips, performer advice</x-slot>
 
     @if($posts->currentPage() > 1 || $monthLabel)
         <x-slot name="robots">noindex, follow</x-slot>

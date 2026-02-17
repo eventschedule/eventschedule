@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Webinars | Host, Schedule & Manage Webinars</x-slot>
     <x-slot name="description">Host webinars with built-in registration, ticketing, email notifications, and streaming link integration. Works with Zoom, Google Meet, and any platform. Zero platform fees.</x-slot>
-    <x-slot name="keywords">webinar hosting, schedule webinars, webinar registration, webinar ticketing, online event management, webinar platform, host webinars, webinar scheduling tool</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Webinars</x-slot>
 

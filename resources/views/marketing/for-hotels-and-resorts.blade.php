@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Hotels & Resorts | Guest Activity Calendar</x-slot>
     <x-slot name="description">Elevate the guest experience with one calendar for every activity. Pool parties, wine tastings, live entertainment, and more. Keep guests engaged and delighted. Free forever.</x-slot>
-    <x-slot name="keywords">hotel event management, resort activity calendar, guest experience platform, hotel entertainment schedule, resort event planning, hotel guest activities, resort programming software, hotel activity management</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Hotels & Resorts</x-slot>
 

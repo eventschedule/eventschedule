@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Google Calendar Sync - Event Schedule</x-slot>
     <x-slot name="description">Real-time two-way sync with Google Calendar. OAuth authentication, webhook updates, and multi-calendar support for smooth event management.</x-slot>
-    <x-slot name="keywords">Google Calendar sync, calendar integration, two-way sync, OAuth, calendar webhook, automatic sync, real-time sync</x-slot>
     <x-slot name="breadcrumbTitle">Google Calendar</x-slot>
     <x-slot name="socialImage">social/integrations.png</x-slot>
 

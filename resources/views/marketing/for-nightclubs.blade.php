@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Nightclubs | DJ Lineup & Event Calendar Software</x-slot>
     <x-slot name="description">Fill your club with DJ lineups and themed nights. Email your crowd directly - no algorithm. Sell tickets, accept DJ bookings. Free forever.</x-slot>
-    <x-slot name="keywords">nightclub event calendar, club DJ lineup software, nightclub booking system, club event management, DJ scheduling software, nightclub newsletter, club promotion, nightclub ticketing</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Nightclubs</x-slot>
 

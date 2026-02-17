@@ -2,7 +2,6 @@
     <x-slot name="title">Sharing Your Schedule - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Sharing Your Schedule</x-slot>
     <x-slot name="description">Learn how to share your Event Schedule with the world. Embed on your website, share on social media, and grow your audience.</x-slot>
-    <x-slot name="keywords">share schedule, embed calendar, widget, social media sharing, iCal feed, RSS feed</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>

@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Bars & Pubs | Fill Your Event Calendar</x-slot>
     <x-slot name="description">Fill your bar's calendar with great events. Email your regulars directly - no algorithm. Sell tickets, accept booking requests. Free forever.</x-slot>
-    <x-slot name="keywords">bar event calendar, pub events, bar booking system, craft beer bar events, wine bar calendar, sports bar events, bar newsletter, bar email marketing, trivia night software</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Bars</x-slot>
 

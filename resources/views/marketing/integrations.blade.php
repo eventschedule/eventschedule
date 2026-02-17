@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Integrations | Google Calendar, Stripe & More - Event Schedule</x-slot>
     <x-slot name="description">Connect Event Schedule with Google Calendar, CalDAV, Stripe, and Invoice Ninja for a streamlined event management experience.</x-slot>
-    <x-slot name="keywords">event schedule integrations, Google Calendar sync, CalDAV sync, Stripe payments, Invoice Ninja, calendar integration, payment processing</x-slot>
     <x-slot name="socialImage">social/integrations.png</x-slot>
     <x-slot name="breadcrumbTitle">Integrations</x-slot>
 

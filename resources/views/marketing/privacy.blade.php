@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Privacy Policy - Event Schedule</x-slot>
     <x-slot name="description">Privacy Policy for Event Schedule - how we collect, use, and protect your data.</x-slot>
-    <x-slot name="keywords">event schedule privacy, data protection, GDPR compliance, Google Calendar privacy, data security</x-slot>
     <x-slot name="breadcrumbTitle">Privacy Policy</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
 

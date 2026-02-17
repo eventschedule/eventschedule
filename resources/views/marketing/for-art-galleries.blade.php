@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Art Galleries & Studios | Exhibition Calendar & Ticketing</x-slot>
     <x-slot name="description">Fill your gallery with collectors. Announce exhibitions, sell tickets to opening nights, and email your collectors directly. Free forever.</x-slot>
-    <x-slot name="keywords">art gallery event calendar, exhibition management software, gallery opening tickets, art show calendar, artist studio events, gallery newsletter, art walk software, virtual gallery tours</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Art Galleries</x-slot>
 

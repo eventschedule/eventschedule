@@ -2,7 +2,6 @@
     <x-slot name="title">Newsletters Documentation - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Newsletters</x-slot>
     <x-slot name="description">Learn how to create, design, and send newsletters to your followers and ticket buyers with Event Schedule's built-in newsletter builder.</x-slot>
-    <x-slot name="keywords">newsletters, email marketing, event announcements, newsletter builder, email campaigns, event schedule</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>

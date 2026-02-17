@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Libraries | Program Calendar</x-slot>
     <x-slot name="description">From story time to author readings. One calendar for all your library programs. Keep patrons engaged and informed. Email your community directly. Free forever.</x-slot>
-    <x-slot name="keywords">library event software, library program calendar, library event management, story time scheduling, author reading events, book club management, library patron communication, library programming software</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Libraries</x-slot>
 
