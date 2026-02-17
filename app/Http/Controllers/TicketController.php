@@ -146,7 +146,7 @@ class TicketController extends Controller
                 foreach ($request->tickets as $ticketId => $quantity) {
                     if ($quantity > 0) {
                         // Lock the ticket row to prevent concurrent modifications
-                        $ticketModel = $event->tickets()->lockForUpdate()->findOrFail(UrlUtils::decodeId($ticketId));
+                        $ticketModel = $event->tickets()->lockForUpdate()->find(UrlUtils::decodeId($ticketId));
 
                         if (! $ticketModel) {
                             throw new \Exception(__('messages.ticket_not_found'));
@@ -553,7 +553,7 @@ class TicketController extends Controller
     public function scanned($eventId, $secret)
     {
         $user = auth()->user();
-        $event = Event::findOrFail(UrlUtils::decodeId($eventId));
+        $event = Event::find(UrlUtils::decodeId($eventId));
 
         if (! $event) {
             return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
@@ -738,6 +738,16 @@ class TicketController extends Controller
 
             // Get the venue role if available, otherwise get the first role
             $role = $event->venue ?: $event->roles->first();
+
+            if (! $role) {
+                \Log::warning('No schedule found for ticket email', [
+                    'sale_id' => $sale->id,
+                    'event_id' => $event->id,
+                ]);
+
+                return;
+            }
+
             $emailService = new EmailService;
             $emailService->sendTicketEmail($sale, $role);
         } catch (\Exception $e) {
@@ -771,6 +781,11 @@ class TicketController extends Controller
 
             // Get the venue role if available, otherwise get the first role
             $role = $event->venue ?: $event->roles->first();
+
+            if (! $role) {
+                return response()->json(['error' => __('messages.error')], 400);
+            }
+
             $emailService = new EmailService;
 
             $result = $emailService->sendTicketEmail($sale, $role, queue: false);

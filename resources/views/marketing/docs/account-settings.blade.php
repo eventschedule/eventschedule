@@ -268,4 +268,41 @@
     </section>
 
     @include('marketing.docs.partials.scripts')
+
+    <!-- HowTo Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Configure Your Account Settings",
+        "description": "Manage your profile, payment methods, API access, and connected services in Event Schedule.",
+        "totalTime": "PT10M",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "name": "Access Account Settings",
+                "text": "Navigate to Settings from the main navigation to access your account configuration.",
+                "url": "{{ url(route('marketing.docs.account_settings')) }}#profile"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Update Profile Information",
+                "text": "Configure your name, email, timezone, language, and profile image.",
+                "url": "{{ url(route('marketing.docs.account_settings')) }}#profile"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Configure Payment Methods",
+                "text": "Connect Stripe, Invoice Ninja, or set a custom payment URL to start selling tickets.",
+                "url": "{{ url(route('marketing.docs.account_settings')) }}#payments"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Connect Google Services",
+                "text": "Link your Google account and enable Google Calendar sync for bidirectional event synchronization.",
+                "url": "{{ url(route('marketing.docs.account_settings')) }}#google"
+            }
+        ]
+    }
+    </script>
 </x-marketing-layout>

@@ -56,9 +56,7 @@ class FollowerTest extends DuskTestCase
             // -----------------------------------------------
             $browser->script('window.confirm = function() { return true; }');
 
-            $browser->click('.btn-confirm-navigate')
-                ->pause(1000)
-                ->waitForLocation('/following', 15)
+            $browser->clickAndWaitForReload('.btn-confirm-navigate', 15)
                 ->assertDontSee('Other Schedule');
         });
     }
