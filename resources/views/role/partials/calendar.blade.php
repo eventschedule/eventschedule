@@ -115,6 +115,7 @@
                 'uniqueKey' => \App\Utils\UrlUtils::encodeId($event->id),
                 'submit_video_url' => isset($role) ? route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : null,
                 'submit_comment_url' => isset($role) ? route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : null,
+                'custom_field_values' => $event->custom_field_values ?? [],
             ];
         };
 
@@ -153,6 +154,20 @@
                 'name' => $group->translatedName(),
                 'color' => $group->color,
             ];
+        }
+    }
+
+    // Prepare dropdown custom fields for Vue filters
+    $dropdownCustomFields = [];
+    if (isset($role) && $role->event_custom_fields) {
+        foreach ($role->getEventCustomFields() as $key => $field) {
+            if (($field['type'] ?? '') === 'dropdown' && !empty($field['options'])) {
+                $dropdownCustomFields[] = [
+                    'key' => (string) $key,
+                    'name' => (app()->getLocale() === 'en' && !empty($field['name_en'])) ? $field['name_en'] : $field['name'],
+                    'options' => array_values(array_filter(array_map('trim', explode(',', $field['options'])))),
+                ];
+            }
         }
     }
 
@@ -1251,6 +1266,24 @@
             </select>
         </div>
 
+        {{-- Custom Field Filters --}}
+        <template v-for="field in dropdownCustomFields" :key="field.key">
+            <div v-if="(availableCustomFieldOptions[field.key] || []).length > 1"
+                 class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    @{{ field.name }}
+                </label>
+                <select v-model="selectedCustomFields[field.key]" style="font-family: sans-serif"
+                        class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
+                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
+                    <option value="">@{{ field.name }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
+                    <option v-for="opt in availableCustomFieldOptions[field.key]" :key="opt" :value="opt">
+                        @{{ opt }} (@{{ (eventCountByCustomField[field.key] || {})[opt] || 0 }})
+                    </option>
+                </select>
+            </div>
+        </template>
+
         {{-- Price Filter --}}
         <div v-if="hasFreeEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <div @click="showFreeOnly = !showFreeOnly" class="flex items-center justify-between cursor-pointer">
@@ -1347,6 +1380,24 @@
                     </option>
                 </select>
             </div>
+
+            {{-- Custom Field Filters --}}
+            <template v-for="field in dropdownCustomFields" :key="field.key">
+                <div v-if="(availableCustomFieldOptions[field.key] || []).length > 1"
+                     class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        @{{ field.name }}
+                    </label>
+                    <select v-model="selectedCustomFields[field.key]" style="font-family: sans-serif"
+                            class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
+                                   bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
+                        <option value="">@{{ field.name }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
+                        <option v-for="opt in availableCustomFieldOptions[field.key]" :key="opt" :value="opt">
+                            @{{ opt }} (@{{ (eventCountByCustomField[field.key] || {})[opt] || 0 }})
+                        </option>
+                    </select>
+                </div>
+            </template>
 
             {{-- Price Filter --}}
             <div v-if="hasFreeEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
@@ -1453,12 +1504,14 @@ const calendarApp = createApp({
             playingVideo: null,
             openCommentForm: {},
             isLoadingEvents: {{ request()->graphic ? 'false' : 'true' }},
-            uniqueCategoryIds: @json($uniqueCategoryIds ?? [])
+            uniqueCategoryIds: @json($uniqueCategoryIds ?? []),
+            dropdownCustomFields: @json($dropdownCustomFields ?? []),
+            selectedCustomFields: @json(collect($dropdownCustomFields ?? [])->pluck('key')->mapWithKeys(fn($k) => [$k => '']))
         }
     },
     computed: {
         hasDesktopFilters() {
-            return this.groups.length > 1 || this.availableCategories.length > 1 || this.hasOnlineEvents || this.uniqueVenues.length > 1 || this.hasFreeEvents;
+            return this.groups.length > 1 || this.availableCategories.length > 1 || this.hasOnlineEvents || this.uniqueVenues.length > 1 || this.hasFreeEvents || this.dropdownCustomFields.length > 0;
         },
         dynamicFilterCount() {
             let count = 0;
@@ -1467,6 +1520,9 @@ const calendarApp = createApp({
             if (this.hasOnlineEvents) count++;
             if (this.uniqueVenues.length > 1) count++;
             if (this.hasFreeEvents) count++;
+            this.dropdownCustomFields.forEach(field => {
+                if ((this.availableCustomFieldOptions[field.key] || []).length > 1) count++;
+            });
             return count;
         },
         activeFilterCount() {
@@ -1476,6 +1532,7 @@ const calendarApp = createApp({
             if (this.showOnlineOnly) count++;
             if (this.selectedVenue) count++;
             if (this.showFreeOnly) count++;
+            Object.values(this.selectedCustomFields).forEach(v => { if (v) count++; });
             return count;
         },
         selectedGroupName() {
@@ -1494,6 +1551,9 @@ const calendarApp = createApp({
                 if (this.showOnlineOnly && !e.is_online) return false;
                 if (this.selectedVenue && e.venue_subdomain !== this.selectedVenue) return false;
                 if (this.showFreeOnly && !e.is_free) return false;
+                for (const [k, v] of Object.entries(this.selectedCustomFields)) {
+                    if (v && (e.custom_field_values || {})[k] !== v) return false;
+                }
                 return true;
             });
 
@@ -1507,7 +1567,7 @@ const calendarApp = createApp({
             return counts;
         },
         eventCountByCategory() {
-            // Filter by group, online status, venue, and price
+            // Filter by group, online status, venue, price, and custom fields
             const filteredEvents = this.futureEvents.filter(event => {
                 if (this.selectedGroup) {
                     const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
@@ -1520,6 +1580,9 @@ const calendarApp = createApp({
                 }
                 if (this.selectedVenue && event.venue_subdomain !== this.selectedVenue) return false;
                 if (this.showFreeOnly && !event.is_free) return false;
+                for (const [k, v] of Object.entries(this.selectedCustomFields)) {
+                    if (v && (event.custom_field_values || {})[k] !== v) return false;
+                }
                 return true;
             });
             const counts = { '': filteredEvents.length };
@@ -1554,6 +1617,9 @@ const calendarApp = createApp({
                 }
                 if (this.showFreeOnly && !event.is_free) {
                     return false;
+                }
+                for (const [key, value] of Object.entries(this.selectedCustomFields)) {
+                    if (value && (event.custom_field_values || {})[key] !== value) return false;
                 }
                 return true;
             });
@@ -1604,7 +1670,7 @@ const calendarApp = createApp({
             return this.futureEvents.some(e => e.is_online);
         },
         eventCountByVenue() {
-            // Filter by group, category, online, price first
+            // Filter by group, category, online, price, and custom fields first
             const baseEvents = this.futureEvents.filter(event => {
                 if (this.selectedGroup) {
                     const selectedGroupObj = this.groups.find(g => g.slug === this.selectedGroup);
@@ -1613,6 +1679,9 @@ const calendarApp = createApp({
                 if (this.selectedCategory && event.category_id != this.selectedCategory) return false;
                 if (this.showOnlineOnly && !event.is_online) return false;
                 if (this.showFreeOnly && !event.is_free) return false;
+                for (const [k, v] of Object.entries(this.selectedCustomFields)) {
+                    if (v && (event.custom_field_values || {})[k] !== v) return false;
+                }
                 return true;
             });
 
@@ -1621,6 +1690,43 @@ const calendarApp = createApp({
                 counts[v.subdomain] = baseEvents.filter(e => e.venue_subdomain === v.subdomain).length;
             });
             return counts;
+        },
+        availableCustomFieldOptions() {
+            const result = {};
+            this.dropdownCustomFields.forEach(field => {
+                const values = new Set();
+                this.futureEvents.forEach(event => {
+                    const val = (event.custom_field_values || {})[field.key];
+                    if (val) values.add(val);
+                });
+                result[field.key] = Array.from(values).sort((a, b) => a.localeCompare(b));
+            });
+            return result;
+        },
+        eventCountByCustomField() {
+            const result = {};
+            this.dropdownCustomFields.forEach(field => {
+                const baseEvents = this.futureEvents.filter(e => {
+                    if (this.selectedGroup) {
+                        const selectedGroupObj = this.groups.find(g => g.slug === this.selectedGroup);
+                        if (selectedGroupObj && e.group_id !== selectedGroupObj.id) return false;
+                    }
+                    if (this.selectedCategory && e.category_id != this.selectedCategory) return false;
+                    if (this.showOnlineOnly && !e.is_online) return false;
+                    if (this.selectedVenue && e.venue_subdomain !== this.selectedVenue) return false;
+                    if (this.showFreeOnly && !e.is_free) return false;
+                    for (const [k, v] of Object.entries(this.selectedCustomFields)) {
+                        if (k !== field.key && v && (e.custom_field_values || {})[k] !== v) return false;
+                    }
+                    return true;
+                });
+                const counts = { '': baseEvents.length };
+                (this.availableCustomFieldOptions[field.key] || []).forEach(opt => {
+                    counts[opt] = baseEvents.filter(e => (e.custom_field_values || {})[field.key] === opt).length;
+                });
+                result[field.key] = counts;
+            });
+            return result;
         },
         mobileEventsList() {
             // Create a mobile-friendly events list that includes all upcoming occurrences
@@ -2148,6 +2254,7 @@ const calendarApp = createApp({
             this.showOnlineOnly = false;
             this.selectedVenue = '';
             this.showFreeOnly = false;
+            this.selectedCustomFields = {};
         },
         getEventsForDate(dateStr) {
             // Use the pre-calculated events map from the backend
@@ -2178,6 +2285,9 @@ const calendarApp = createApp({
             }
             if (this.showFreeOnly && !event.is_free) {
                 return false;
+            }
+            for (const [key, value] of Object.entries(this.selectedCustomFields)) {
+                if (value && (event.custom_field_values || {})[key] !== value) return false;
             }
             return true;
         },
