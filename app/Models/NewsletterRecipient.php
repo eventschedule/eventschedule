@@ -44,22 +44,24 @@ class NewsletterRecipient extends Model
         return $this->hasMany(NewsletterClick::class);
     }
 
-    public function recordOpen(): void
+    public function recordOpen(): bool
     {
         $this->increment('open_count');
 
-        if (! $this->opened_at) {
-            $this->update(['opened_at' => now()]);
-        }
+        $updated = self::where('id', $this->id)
+            ->whereNull('opened_at')
+            ->update(['opened_at' => now()]);
+
+        return $updated > 0;
     }
 
-    public function recordClick(string $url, ?string $ipAddress = null, ?string $userAgent = null): void
+    public function recordClick(string $url, ?string $ipAddress = null, ?string $userAgent = null): bool
     {
         $this->increment('click_count');
 
-        if (! $this->clicked_at) {
-            $this->update(['clicked_at' => now()]);
-        }
+        $updated = self::where('id', $this->id)
+            ->whereNull('clicked_at')
+            ->update(['clicked_at' => now()]);
 
         $this->clicks()->create([
             'url' => $url,
@@ -67,5 +69,7 @@ class NewsletterRecipient extends Model
             'ip_address' => $ipAddress,
             'user_agent' => $userAgent ? substr($userAgent, 0, 500) : null,
         ]);
+
+        return $updated > 0;
     }
 }

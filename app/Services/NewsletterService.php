@@ -289,17 +289,14 @@ class NewsletterService
     public function getUpcomingEvents(Role $role, ?array $eventIds = null): Collection
     {
         if ($eventIds) {
-            $events = collect();
-            foreach ($eventIds as $eventId) {
-                $event = $role->events()
-                    ->where('events.id', $eventId)
-                    ->first();
-                if ($event) {
-                    $events->push($event);
-                }
-            }
+            $events = $role->events()
+                ->whereIn('events.id', $eventIds)
+                ->get();
 
-            return $events;
+            return collect($eventIds)
+                ->map(fn ($id) => $events->firstWhere('id', $id))
+                ->filter()
+                ->values();
         }
 
         return $role->events()
@@ -330,12 +327,13 @@ class NewsletterService
         $abTest->update([
             'winner_variant' => $winner,
             'winner_selected_at' => now(),
-            'status' => 'completed',
         ]);
 
         // Send winner to remaining recipients
         $winnerNewsletter = $winner === 'A' ? $variantA : $variantB;
         $this->sendToRemainingRecipients($abTest, $winnerNewsletter);
+
+        $abTest->update(['status' => 'completed']);
     }
 
     protected function calculateVariantScore(Newsletter $newsletter, string $criteria): float
@@ -353,6 +351,15 @@ class NewsletterService
 
     protected function sendToRemainingRecipients(\App\Models\NewsletterAbTest $abTest, Newsletter $winnerNewsletter): void
     {
+        // Check for existing remainder newsletter from a prior attempt
+        $remainderNewsletter = Newsletter::where('ab_test_id', $abTest->id)
+            ->whereNull('ab_variant')
+            ->first();
+
+        if ($remainderNewsletter && $remainderNewsletter->status === 'sent') {
+            return;
+        }
+
         // Get all emails already sent in the A/B test
         $sentEmails = NewsletterRecipient::whereIn('newsletter_id', $abTest->newsletters->pluck('id'))
             ->pluck('email')
@@ -363,17 +370,30 @@ class NewsletterService
         $allRecipients = $this->resolveRecipients($winnerNewsletter->role, $winnerNewsletter->segment_ids ?? []);
         $remaining = $allRecipients->filter(fn ($r) => ! in_array($r->email, $sentEmails));
 
+        if (! $remainderNewsletter) {
+            if ($remaining->isEmpty()) {
+                return;
+            }
+
+            $remainderNewsletter = $winnerNewsletter->replicate();
+            $remainderNewsletter->ab_test_id = $abTest->id;
+            $remainderNewsletter->ab_variant = null;
+            $remainderNewsletter->status = 'sending';
+            $remainderNewsletter->send_token = Str::random(64);
+            $remainderNewsletter->save();
+        }
+
+        // Exclude recipients already created on the remainder newsletter
+        $existingRemainderEmails = NewsletterRecipient::where('newsletter_id', $remainderNewsletter->id)
+            ->pluck('email')
+            ->map(fn ($e) => strtolower($e))
+            ->toArray();
+
+        $remaining = $remaining->filter(fn ($r) => ! in_array($r->email, $existingRemainderEmails));
+
         if ($remaining->isEmpty()) {
             return;
         }
-
-        // Create a new newsletter for the remaining send
-        $remainderNewsletter = $winnerNewsletter->replicate();
-        $remainderNewsletter->ab_test_id = $abTest->id;
-        $remainderNewsletter->ab_variant = null;
-        $remainderNewsletter->status = 'sending';
-        $remainderNewsletter->send_token = Str::random(64);
-        $remainderNewsletter->save();
 
         $recipientIds = [];
         foreach ($remaining as $recipient) {

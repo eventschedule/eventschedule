@@ -41,6 +41,7 @@ class EvaluateAbTestWinner implements ShouldQueue
                 'ab_test_id' => $this->abTestId,
                 'error' => $e->getMessage(),
             ]);
+            throw $e;
         }
     }
 }
