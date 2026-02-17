@@ -311,8 +311,8 @@
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Enter specific email addresses. Useful for targeted sends to a curated list of recipients.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Group</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Send to ticket buyers from a specific event group. Perfect for category-specific promotions.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sub-schedule</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Send to ticket buyers from a specific sub-schedule. Perfect for category-specific promotions.</p>
                                 </div>
                             </div>
                         </section>
@@ -499,7 +499,7 @@
             {
                 "@type": "HowToStep",
                 "name": "Select Recipients",
-                "text": "Choose a segment for your newsletter: all followers, ticket buyers, a specific event group, or a manual list of email addresses.",
+                "text": "Choose a segment for your newsletter: all followers, ticket buyers, a specific sub-schedule, or a manual list of email addresses.",
                 "url": "{{ url(route('marketing.docs.newsletters')) }}#recipients"
             },
             {

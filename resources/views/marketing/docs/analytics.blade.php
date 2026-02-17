@@ -10,7 +10,7 @@
         "@context": "https://schema.org",
         "@type": "TechArticle",
         "headline": "Analytics Documentation - Event Schedule",
-        "description": "Learn how to track views, devices, traffic sources, and conversions with Event Schedule built-in analytics dashboard.",
+        "description": "Learn how to track views, devices, traffic sources, and conversions with Event Schedule's built-in analytics dashboard.",
         "author": {
             "@type": "Organization",
             "name": "Event Schedule"

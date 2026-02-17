@@ -250,6 +250,28 @@
         </div>
     </section>
 
+    <!-- FAQ Link -->
+    <section class="bg-white dark:bg-[#0a0a0f] pt-8 pb-0">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <a href="{{ route('marketing.faq') }}" class="block group">
+                <div class="rounded-xl border border-gray-200 dark:border-white/10 p-5 bg-gray-50 dark:bg-white/5 hover:border-blue-500/30 transition-colors flex items-center gap-4">
+                    <div class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-500/20 flex-shrink-0">
+                        <svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900 dark:text-white">Frequently Asked Questions</h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Quick answers to common questions about Event Schedule.</p>
+                    </div>
+                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 ml-auto group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+            </a>
+        </div>
+    </section>
+
     <!-- Selfhost & Developer Sections -->
     <section class="bg-white dark:bg-[#0a0a0f] py-16">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -566,4 +566,41 @@ https://example.com/event/summer-concert</code></pre>
     </section>
 
     @include('marketing.docs.partials.scripts')
+
+    <!-- HowTo Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Generate Event Graphics with Event Schedule",
+        "description": "Learn how to use the Event Graphics feature to generate shareable images and text for your upcoming events.",
+        "totalTime": "PT5M",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "name": "Access Event Graphics",
+                "text": "Open your schedule's admin panel and navigate to the Event Graphics section to start generating shareable content.",
+                "url": "{{ url(route('marketing.docs.event_graphics')) }}#overview"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Customize the Text Template",
+                "text": "Edit the text template using variables like {event_name}, {date_dmy}, {time}, and {venue} to control how event details are formatted.",
+                "url": "{{ url(route('marketing.docs.event_graphics')) }}#text-template"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Generate Graphics",
+                "text": "Generate a visual collage of your upcoming events along with formatted text ready for copying and sharing.",
+                "url": "{{ url(route('marketing.docs.event_graphics')) }}#quick-reference"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Share on Social Media",
+                "text": "Copy the generated image and text to share on Instagram, Facebook, Twitter, WhatsApp, Telegram, or include in newsletters.",
+                "url": "{{ url(route('marketing.docs.event_graphics')) }}#overview"
+            }
+        ]
+    }
+    </script>
 </x-marketing-layout>
