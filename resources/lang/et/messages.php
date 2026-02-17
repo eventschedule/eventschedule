@@ -1649,4 +1649,5 @@ return [
     'admin_confirm_password' => 'Turvalisuse huvides kinnitage oma parool, et pääseda haldusliidesesse.',
     'admin_session_changed' => 'Teie seansi andmed muutusid. Palun kinnitage oma parool uuesti.',
     'admin_password_required' => 'Enne haldusliidesesse pääsemist peate määrama parooli.',
+    'view_schedule_for' => 'Vaata ürituste kava: :name',
 ];

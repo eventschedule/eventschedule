@@ -99,27 +99,41 @@
         <div>
             <x-input-label :value="__('messages.square_profile_image')" />
             <input id="profile_image" name="profile_image" type="file" class="hidden"
-                accept="image/png, image/jpeg" />
-            <div class="mt-1 flex items-center gap-3">
-                <button type="button" id="profile_image_choose"
-                    class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
-                    <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    {{ __('messages.choose_file') }}
-                </button>
-                <span id="profile_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
-                <button type="button" id="profile_image_clear"
-                    class="text-gray-400 hover:text-red-500 p-1" style="display: none;">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                accept="image/png, image/jpeg" data-file-trigger="profile_image" data-filename-target="profile_image_filename" data-preview-target="profile_image_preview" />
+            <div id="profile_image_choose" style="{{ $user->profile_image_url ? 'display:none' : '' }}">
+                <div class="mt-1 flex items-center gap-3">
+                    <button type="button" data-trigger-file-input="profile_image"
+                        class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                        <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        {{ __('messages.choose_file') }}
+                    </button>
+                    <span id="profile_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                </div>
+                <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
+                <p id="profile_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;"></p>
+            </div>
+
+            <div id="profile_image_preview_clear" class="relative inline-block pt-3" style="display: none;">
+                <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px;" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                <button type="button" data-clear-file-input="profile_image" data-clear-preview="profile_image_preview" data-clear-filename="profile_image_filename" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+
+            @if ($user->profile_image_url)
+            <div id="profile_image_existing" class="relative inline-block mt-4 pt-1" data-show-on-delete="profile_image_choose">
+                <img src="{{ $user->profile_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                <button type="button"
+                    data-delete-image-url="{{ route('profile.delete_image') }}"
+                    data-delete-image-token="{{ csrf_token() }}"
+                    data-delete-image-parent="true"
+                    style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
+                    class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
-            <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
-
-            @if ($user->profile_image_url)
-            <img src="{{ $user->profile_image_url }}" style="max-height:120px" class="pt-3" />
             @endif
         </div>
 
@@ -144,38 +158,157 @@
 
 <script {!! nonce_attr() !!}>
 document.addEventListener('DOMContentLoaded', function() {
-    // Profile image file input change handler
-    var profileImageInput = document.getElementById('profile_image');
-    if (profileImageInput) {
-        profileImageInput.addEventListener('change', function() {
-            document.getElementById('profile_image_filename').textContent = this.files[0]?.name || '';
-            document.getElementById('profile_image_clear').style.display = this.files[0] ? 'inline' : 'none';
+    function previewImage(input, previewId) {
+        var preview = document.getElementById(previewId);
+        var clearBtn = document.getElementById(previewId + '_clear');
+        var warningElement = document.getElementById('profile_image_size_warning');
+
+        if (!input || !input.files || !input.files[0]) {
+            if (preview) preview.src = '';
+            if (clearBtn) clearBtn.style.display = 'none';
+            if (warningElement) {
+                warningElement.textContent = '';
+                warningElement.style.display = 'none';
+            }
+            return;
+        }
+
+        var file = input.files[0];
+        var reader = new FileReader();
+
+        reader.onloadend = function () {
+            var img = new Image();
+            img.onload = function() {
+                var width = this.width;
+                var height = this.height;
+                var fileSize = file.size / 1024 / 1024;
+                var warningMessage = '';
+
+                if (fileSize > 2.5) {
+                    warningMessage += @json(__('messages.image_size_warning'), JSON_UNESCAPED_UNICODE);
+                }
+
+                if (width !== height) {
+                    if (warningMessage) warningMessage += ' ';
+                    warningMessage += @json(__('messages.image_not_square'), JSON_UNESCAPED_UNICODE);
+                }
+
+                if (warningElement) {
+                    if (warningMessage) {
+                        warningElement.textContent = warningMessage;
+                        warningElement.style.display = 'block';
+                    } else {
+                        warningElement.textContent = '';
+                        warningElement.style.display = 'none';
+                    }
+                }
+
+                preview.src = reader.result;
+                if (clearBtn) clearBtn.style.display = 'inline-block';
+            };
+            img.src = reader.result;
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    function clearProfileFileInput(inputId, previewId, filenameId) {
+        var input = document.getElementById(inputId);
+        if (input) input.value = '';
+        var preview = document.getElementById(previewId);
+        var clearBtn = document.getElementById(previewId + '_clear');
+        var filenameSpan = document.getElementById(filenameId);
+        var warningElement = document.getElementById('profile_image_size_warning');
+        if (preview) {
+            preview.src = '';
+            preview.style.display = 'none';
+        }
+        if (clearBtn) clearBtn.style.display = 'none';
+        if (filenameSpan) filenameSpan.textContent = '';
+        if (warningElement) {
+            warningElement.textContent = '';
+            warningElement.style.display = 'none';
+        }
+    }
+
+    function deleteProfileImage(url, token, element) {
+        if (!confirm(@json(__('messages.are_you_sure'), JSON_UNESCAPED_UNICODE))) {
+            return;
+        }
+
+        fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json'
+            }
+        }).then(function(response) {
+            if (response.ok) {
+                if (element) {
+                    var showTarget = element.dataset.showOnDelete;
+                    element.remove();
+                    if (showTarget) {
+                        var target = document.getElementById(showTarget);
+                        if (target) target.style.display = '';
+                    }
+                } else {
+                    location.reload();
+                }
+            } else {
+                alert(@json(__('messages.failed_to_delete_image'), JSON_UNESCAPED_UNICODE));
+            }
         });
     }
 
-    // Choose file button
-    var chooseBtn = document.getElementById('profile_image_choose');
-    if (chooseBtn) {
-        chooseBtn.addEventListener('click', function() {
-            document.getElementById('profile_image').click();
-        });
-    }
+    // Delegated click handler
+    document.addEventListener('click', function(e) {
+        // Trigger file input buttons
+        var triggerBtn = e.target.closest('[data-trigger-file-input]');
+        if (triggerBtn) {
+            var fileInput = document.getElementById(triggerBtn.dataset.triggerFileInput);
+            if (fileInput) fileInput.click();
+            return;
+        }
 
-    // Clear file button
-    var clearBtn = document.getElementById('profile_image_clear');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
-            document.getElementById('profile_image').value = '';
-            document.getElementById('profile_image_filename').textContent = '';
-            this.style.display = 'none';
-        });
-    }
+        // Clear file input buttons
+        var clearBtn = e.target.closest('[data-clear-file-input]');
+        if (clearBtn) {
+            clearProfileFileInput(clearBtn.dataset.clearFileInput, clearBtn.dataset.clearPreview, clearBtn.dataset.clearFilename);
+            return;
+        }
 
-    // Alert buttons for demo mode
-    document.querySelectorAll('[data-alert]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            alert(this.dataset.alert);
-        });
+        // Delete image buttons
+        var deleteBtn = e.target.closest('[data-delete-image-url]');
+        if (deleteBtn) {
+            deleteProfileImage(deleteBtn.dataset.deleteImageUrl, deleteBtn.dataset.deleteImageToken, deleteBtn.parentElement);
+            return;
+        }
+
+        // Alert buttons for demo mode
+        var alertBtn = e.target.closest('[data-alert]');
+        if (alertBtn) {
+            alert(alertBtn.dataset.alert);
+            return;
+        }
+    });
+
+    // File input change handler (delegated)
+    document.addEventListener('change', function(e) {
+        var el = e.target.closest('[data-file-trigger]');
+        if (!el) return;
+
+        var filenameTarget = el.dataset.filenameTarget;
+        if (filenameTarget) {
+            var filenameEl = document.getElementById(filenameTarget);
+            if (filenameEl) {
+                filenameEl.textContent = el.files[0] ? el.files[0].name : '';
+            }
+        }
+
+        var previewTarget = el.dataset.previewTarget;
+        if (previewTarget) {
+            previewImage(el, previewTarget);
+        }
     });
 });
 </script>

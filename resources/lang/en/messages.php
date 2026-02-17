@@ -1652,4 +1652,5 @@ return [
     'admin_confirm_password' => 'For security, please confirm your password to access the admin area.',
     'admin_session_changed' => 'Your session details changed. Please confirm your password again.',
     'admin_password_required' => 'You must set a password before accessing the admin area.',
+    'view_schedule_for' => 'View the event schedule for :name',
 ];

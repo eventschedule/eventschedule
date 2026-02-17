@@ -146,6 +146,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/settings', [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/settings/payments', [ProfileController::class, 'updatePayments'])->name('profile.update_payments');
     Route::delete('/settings', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::delete('/settings/profile-image', [ProfileController::class, 'deleteImage'])->name('profile.delete_image');
 
     Route::get('/stripe/link', [StripeController::class, 'link'])->name('stripe.link');
     Route::post('/stripe/unlink', [StripeController::class, 'unlink'])->name('stripe.unlink');

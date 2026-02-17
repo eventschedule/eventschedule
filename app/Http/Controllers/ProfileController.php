@@ -216,6 +216,31 @@ class ProfileController extends Controller
         return Redirect::to('/');
     }
 
+    public function deleteImage(Request $request)
+    {
+        if (is_demo_mode()) {
+            return response()->json(['error' => __('messages.demo_mode_restriction')], 403);
+        }
+
+        $user = $request->user();
+
+        if ($user->profile_image_url) {
+            $rawPath = $user->getAttributes()['profile_image_url'];
+            if (! str_starts_with($rawPath, 'http')) {
+                $path = $rawPath;
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/'.$path;
+                }
+                Storage::delete($path);
+            }
+
+            $user->profile_image_url = null;
+            $user->save();
+        }
+
+        return response()->json(['message' => __('messages.deleted_image')]);
+    }
+
     public function updatePayments(Request $request): RedirectResponse
     {
         // Demo mode: prevent payment settings changes

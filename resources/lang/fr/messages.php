@@ -1634,4 +1634,5 @@ return [
     'admin_confirm_password' => 'Pour des raisons de sécurité, veuillez confirmer votre mot de passe pour accéder à la zone d\'administration.',
     'admin_session_changed' => 'Les détails de votre session ont changé. Veuillez confirmer votre mot de passe à nouveau.',
     'admin_password_required' => 'Vous devez définir un mot de passe avant d\'accéder à la zone d\'administration.',
+    'view_schedule_for' => 'Voir le calendrier des événements de :name',
 ];
