@@ -232,11 +232,14 @@
             {{-- Change to Free Plan (legacy) --}}
             @if (!$subscription && $role->plan_type == 'pro' && $role->isPro() && !is_demo_mode())
             <div>
-                <a href="{{ route('role.change_plan', ['subdomain' => $role->subdomain, 'plan_type' => 'free']) }}"
-                    data-confirm="{{ __('messages.are_you_sure') }}"
-                    class="link-confirm text-sm text-red-600 dark:text-red-400 hover:text-red-500 font-medium">
-                    {{ __('messages.change_to_free_plan') }}
-                </a>
+                <form method="POST" action="{{ route('role.change_plan', ['subdomain' => $role->subdomain, 'plan_type' => 'free']) }}"
+                    onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                    @csrf
+                    <button type="submit"
+                        class="text-sm text-red-600 dark:text-red-400 hover:text-red-500 font-medium">
+                        {{ __('messages.change_to_free_plan') }}
+                    </button>
+                </form>
             </div>
             @endif
         </div>
@@ -246,14 +249,6 @@
 
 <script {!! nonce_attr() !!}>
 document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.form-confirm').forEach(function(form) {
-        form.addEventListener('submit', function(e) {
-            if (!confirm(this.getAttribute('data-confirm'))) {
-                e.preventDefault();
-            }
-        });
-    });
-
     document.querySelectorAll('.link-confirm').forEach(function(link) {
         link.addEventListener('click', function(e) {
             if (!confirm(this.getAttribute('data-confirm'))) {

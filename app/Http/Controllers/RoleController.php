@@ -2361,7 +2361,11 @@ class RoleController extends Controller
 
     public function changePlan($subdomain, $plan_type)
     {
-        if (is_demo_mode() && $plan_type === 'free') {
+        if ($plan_type !== 'free') {
+            abort(422);
+        }
+
+        if (is_demo_mode()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 

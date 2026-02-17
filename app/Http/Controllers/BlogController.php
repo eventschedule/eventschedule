@@ -89,7 +89,7 @@ class BlogController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $request->validate([
+        $data = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'excerpt' => 'nullable|string|max:500',
@@ -101,8 +101,6 @@ class BlogController extends Controller
             'author_name' => 'nullable|string|max:255',
             'is_published' => 'boolean',
         ]);
-
-        $data = $request->all();
 
         // Handle tags
         if ($request->has('tags')) {
@@ -198,7 +196,7 @@ class BlogController extends Controller
 
         $blogPost = BlogPost::findOrFail(UrlUtils::decodeId($blogPostId));
 
-        $request->validate([
+        $data = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'excerpt' => 'nullable|string|max:500',
@@ -210,8 +208,6 @@ class BlogController extends Controller
             'author_name' => 'nullable|string|max:255',
             'is_published' => 'boolean',
         ]);
-
-        $data = $request->all();
 
         // Handle tags
         if ($request->has('tags')) {
